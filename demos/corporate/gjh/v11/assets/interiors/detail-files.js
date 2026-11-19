@@ -38,7 +38,7 @@ export const roomDetails = {
   },
   "S08": {
     "file": "s08-skippy-details.glb",
-    "bytes": 46692,
+    "bytes": 71800,
     "roomDetail": true
   },
   "S09": {

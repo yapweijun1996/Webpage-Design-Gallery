@@ -1,6 +1,6 @@
 # S06 · Flying Wheel
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -44,3 +44,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 ## Runtime acceptance
 
 The actual entry and browse path passed. Sign visibility and source-matched packets remain proposed.
+
+## Catalogue exhibit
+
+The loom has a small air-dried noodle plaque and a separate catalogue story. The story identifies the 70 g Ban Mee entry and distinguishes Shanghai LaMian. The loom illustrates the drying category. Exact packet geometry and retail artwork remain pending.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action displayed the referenced catalogue link. [Runtime Chrome views](exhibit-runtime.webp)

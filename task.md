@@ -22,7 +22,8 @@ Shipped on 2026-11-19 (main c06ed9ad): automatic festival theme, single sticky s
 - [x] Verify the MILI cookline comparison on published build `f161060cbd89bbc0` with desktop and touch-emulated routes. [S02](docs/goh-joo-hin/02-mili/README.md)
 - [x] Verify the GOGO cart and open centre aisle on published build `077553e3b1a6c526`. [S03](docs/goh-joo-hin/03-gogo/README.md)
 - [x] Verify the Borsch Med patch folio and Lingzhi story on published build `8e4599e605ef0138`. [S04](docs/goh-joo-hin/04-borsch-med/README.md)
-- [ ] Verify the Pien Tze Huang carton exhibit on the published build.
+- [x] Verify the Pien Tze Huang single-carton exhibit and rear aisle on published build `c59b32c3eb100103`. [S05](docs/goh-joo-hin/05-pien-tze-huang/README.md)
+- [ ] Verify the three S06–S08 catalogue exhibits on the published build.
 - [ ] Verify the subsequent shop changes in runtime order.
 
 ### V11 loader motion

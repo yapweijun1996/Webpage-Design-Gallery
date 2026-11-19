@@ -37,7 +37,7 @@ The built-in image generator made the interior proposal and unlabelled product s
 
 ## Runtime acceptance
 
-The existing corridor and cabinet remain in place. Desktop and 390 px touch-emulated Chrome entered the shop, opened the story from the front of the counter and continued to the rear via the right aisle. The story links to the manufacturer, separates the 3 g unit from the eShop’s 10-piece listing and opens with a static image. The desktop run also verified the Chinese and Malay story titles. [Runtime Chrome captures](carton-runtime.webp)
+The existing corridor and cabinet remain in place. On published build `c59b32c3eb100103`, desktop and 390 px touch-emulated Chrome entered the shop, opened the story from the front of the counter and continued to the rear via the right aisle. The story links to the manufacturer, separates the 3 g unit from the eShop’s 10-piece listing and opens with a static image. The desktop run also verified the Chinese and Malay story titles. [Runtime Chrome captures](carton-runtime.webp) · [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44551195994)
 
 ## Manufacturer image and carton formats
 

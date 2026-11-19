@@ -256,723 +256,47 @@ var pzhExhibit = {
   }
 };
 
-// demos/corporate/gjh/v11/assets/atrium-layout.js
-var point = (x, z) => Object.freeze({ x, z });
-var lounge = (id, x) => Object.freeze({
-  id,
-  x,
-  z: 24,
-  seats: Object.freeze([point(x - 1.7, 24.5), point(x + 1.7, 24.5)]),
-  table: point(x, 24.5),
-  planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
-});
-var atriumLayout = Object.freeze({
-  arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
-  garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
-  lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
-  upperSeats: Object.freeze([
-    Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
-    Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
-    Object.freeze({ x: -3, z: 6, facing: -1, finish: "upholstered" })
-  ]),
-  event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
-});
-
-// demos/corporate/gjh/v11/assets/spatial.js
-var FLOOR = Object.freeze({ minX: -15.2, maxX: 15.2, minZ: -11.2, maxZ: 18.2 });
-var MAP = Object.freeze({ minX: -15, maxX: 15, minZ: -11, maxZ: 18, width: 300, height: 290, storeWidth: 72, storeHeight: 110, storeTop: 20 });
-var SOURCE = [
-  {
-    id: "newmoon",
-    number: "01",
-    label: "New Moon",
-    floor: "ground",
-    available: true,
-    bounds: { minX: -15, maxX: -5, minZ: -10.5, maxZ: 0 },
-    arrival: { x: -10, z: 2.4 },
-    contentRef: "newmoon-title"
+// demos/corporate/gjh/v11/assets/west-food-exhibits.js
+var westFoodExhibits = {
+  "wheel-noodle-story": {
+    brand: "Flying Wheel",
+    tagline: "Air-dried Ban Mee",
+    kind: "Noodle exhibit",
+    image: "assets/brands/S06-flying-wheel.webp",
+    alt: "Official Flying Wheel brand mark",
+    story: "The Goh Joo Hin catalogue includes Flying Wheel Air-Dried Singapore Ban Mee in 70 g packs and lists Shanghai LaMian separately. The loom illustrates the noodle-drying category.",
+    source: "https://www.gjheshop.com/brand/flying-wheel/",
+    sourceLabel: "View the official Flying Wheel catalogue",
+    action: "brand-story"
   },
-  {
-    id: "mili",
-    number: "02",
-    label: "MILI",
-    floor: "ground",
-    available: true,
-    bounds: { minX: -5, maxX: 5, minZ: -10.5, maxZ: 0 },
-    arrival: { x: 0, z: 2.4 },
-    contentRef: "mili-title"
+  "gulong-tin-story": {
+    brand: "Gu Long",
+    tagline: "Two stewed pork tins",
+    kind: "Tin exhibit",
+    image: "assets/brands/S07-gu-long.webp",
+    alt: "Official Gu Long brand mark",
+    story: "The Goh Joo Hin catalogue lists Gu Long Stewed Pork Chops and Stewed Pork under separate entries. Both listed tins contain 256 g. The pyramid illustrates the canned-food range.",
+    source: "https://www.gjheshop.com/brand/gulong/",
+    sourceLabel: "View the official Gu Long catalogue",
+    action: "brand-story"
   },
-  {
-    id: "gogo",
-    number: "03",
-    label: "GOGO",
-    floor: "ground",
-    available: true,
-    bounds: { minX: 5, maxX: 15, minZ: -10.5, maxZ: 0 },
-    arrival: { x: 10, z: 2.4 },
-    contentRef: "gogo-title"
+  "skippy-jar-story": {
+    brand: "SKIPPY",
+    tagline: "Creamy and Chunky jars",
+    kind: "Jar exhibit",
+    image: "assets/brands/S08-skippy.webp",
+    alt: "Official SKIPPY brand mark",
+    story: "Goh Joo Hin lists Creamy and Chunky as separate 500 g jars. Both product pages give the same nominal dimensions of 73 × 73 × 124 mm and provide front and rear pack photographs.",
+    source: "https://www.gjheshop.com/brand/skippy/",
+    sourceLabel: "View the official SKIPPY catalogue",
+    action: "brand-story"
   }
-];
-function createSpatialRegistry(source, floor = FLOOR) {
-  if (!Array.isArray(source) || source.length !== 3 || !floor || !["minX", "maxX", "minZ", "maxZ"].every((k) => Number.isFinite(floor[k])) || floor.minX >= floor.maxX || floor.minZ >= floor.maxZ)
-    throw new TypeError("Invalid spatial source or floor");
-  const ids = new Set, numbers = new Set, refs = new Set;
-  const stores = source.map((item) => {
-    if (!item || typeof item.id !== "string" || !/^[a-z][a-z0-9-]*$/.test(item.id) || ids.has(item.id) || typeof item.number !== "string" || !/^\d{2}$/.test(item.number) || numbers.has(item.number) || typeof item.label !== "string" || !item.label.trim() || item.floor !== "ground" || typeof item.available !== "boolean" || typeof item.contentRef !== "string" || !/^[a-z][a-z0-9-]*$/.test(item.contentRef) || refs.has(item.contentRef))
-      throw new TypeError("Invalid or duplicate store identity");
-    const { bounds: b, arrival: a } = item;
-    if (!b || !a || !["minX", "maxX", "minZ", "maxZ"].every((k) => Number.isFinite(b[k])) || !Number.isFinite(a.x) || !Number.isFinite(a.z) || b.maxX - b.minX !== 10 || b.minZ !== -10.5 || b.maxZ !== 0 || b.minX < floor.minX || b.maxX > floor.maxX || b.minZ < floor.minZ || b.maxZ > floor.maxZ || Math.abs(a.x - (b.minX + b.maxX) / 2) > 2 || a.z <= b.maxZ + 0.3 || a.x < floor.minX + 0.3 || a.x > floor.maxX - 0.3 || a.z > floor.maxZ - 0.3)
-      throw new TypeError("Invalid store bounds or arrival");
-    ids.add(item.id);
-    numbers.add(item.number);
-    refs.add(item.contentRef);
-    return Object.freeze({ ...item, bounds: Object.freeze({ ...b }), arrival: Object.freeze({ ...a }) });
-  });
-  for (let i = 1;i < stores.length; i++) {
-    const prev = stores[i - 1].bounds, next = stores[i].bounds;
-    if (prev.maxX !== next.minX || prev.minZ !== next.minZ || prev.maxZ !== next.maxZ)
-      throw new TypeError("Inconsistent store geometry");
-  }
-  const byId = new Map(stores.map((store) => [store.id, store]));
-  return Object.freeze({
-    stores: Object.freeze(stores),
-    get: (id) => byId.get(id) || null,
-    arrival(id) {
-      const store = byId.get(id);
-      return store?.available ? store.arrival : null;
-    }
-  });
-}
-var spatial = createSpatialRegistry(SOURCE);
-var courtyardArrival = Object.freeze({ x: -2, z: 12 });
-function storeCenterX(store) {
-  return (store.bounds.minX + store.bounds.maxX) / 2;
-}
-
-// demos/corporate/gjh/v11/assets/lift-layout.js
-var freeze = (value) => {
-  if (value && typeof value === "object") {
-    Object.values(value).forEach(freeze);
-    Object.freeze(value);
-  }
-  return value;
 };
-var liftLayout = freeze({
-  x: -3,
-  z: 10,
-  upper: 7.2,
-  shaft: { minX: -5, maxX: -1, minZ: 8, maxZ: 12 },
-  slab: { minX: -9, maxX: 3, minZ: 4, maxZ: 16 },
-  roofOpening: { minX: -16, maxX: 10, minZ: -3, maxZ: 23 },
-  cabin: { width: 3.2, depth: 3.2 },
-  threshold: { minX: -5, maxX: -4.6, minZ: 9, maxZ: 11 },
-  exit: { x: -6.4, z: 10 },
-  radius: 1.15,
-  directory: { x: -5, z: 45 },
-  desk: { x: 25, z: 45 },
-  showcase: { x: -7, z: 18 },
-  facilities: { ...restroomParcel, status: "open" }
-});
-function cutRectangle(rect, hole) {
-  const x0 = Math.max(rect.minX, hole.minX), x1 = Math.min(rect.maxX, hole.maxX);
-  const z0 = Math.max(rect.minZ, hole.minZ), z1 = Math.min(rect.maxZ, hole.maxZ);
-  if (x0 >= x1 || z0 >= z1)
-    return [{ ...rect }];
-  return [
-    { minX: rect.minX, maxX: x0, minZ: rect.minZ, maxZ: rect.maxZ },
-    { minX: x1, maxX: rect.maxX, minZ: rect.minZ, maxZ: rect.maxZ },
-    { minX: x0, maxX: x1, minZ: rect.minZ, maxZ: z0 },
-    { minX: x0, maxX: x1, minZ: z1, maxZ: rect.maxZ }
-  ].filter((r) => r.maxX > r.minX && r.maxZ > r.minZ);
-}
-function showcaseProducts(items, expanded) {
-  if (!expanded)
-    return items;
-  return items.map((item) => ({ ...item, position: [
-    liftLayout.showcase.x + item.position[0] + 7,
-    item.position[1],
-    liftLayout.showcase.z + item.position[2] - 2.2
-  ] }));
-}
-
-// demos/corporate/gjh/v11/assets/expanded-layout.js
-var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
-  number: String(number).padStart(2, "0"),
-  side,
-  minX,
-  maxX,
-  minZ,
-  maxZ,
-  available: true
-});
-var expandedLayout = Object.freeze({
-  bounds: Object.freeze({ minX: -25, maxX: 45, minZ: -12, maxZ: 48 }),
-  entrance: Object.freeze({ x: 10, z: 45 }),
-  courtyardArrival: Object.freeze({ x: 10, z: 12 }),
-  lift: Object.freeze({ x: liftLayout.x, z: liftLayout.z, upper: liftLayout.upper }),
-  directory: liftLayout.directory,
-  serviceDesk: liftLayout.desk,
-  showcase: liftLayout.showcase,
-  atrium: Object.freeze({ x: 10, z: 12 }),
-  slots: Object.freeze([
-    ...Array.from({ length: 5 }, (_, i) => slot(i + 1, "north", -15 + i * 10, -5 + i * 10, -12, 0)),
-    ...Array.from({ length: 6 }, (_, i) => slot(i + 6, "west", -25, -15, i * 8, (i + 1) * 8)),
-    ...Array.from({ length: 6 }, (_, i) => slot(i + 12, "east", 35, 45, i * 8, (i + 1) * 8))
-  ]),
-  loop: Object.freeze([
-    Object.freeze({ x: -12, z: 3 }),
-    Object.freeze({ x: 32, z: 3 }),
-    Object.freeze({ x: 32, z: 39 }),
-    Object.freeze({ x: -12, z: 39 })
-  ])
-});
-var plannedSpaces = Object.freeze(expandedLayout.slots.slice(3).map((slot2) => Object.freeze({
-  id: `planned-space-${slot2.number}`,
-  number: slot2.number,
-  side: slot2.side,
-  status: "open",
-  available: slot2.available
-})));
-function shopEntrance(slot2) {
-  const normalX = slot2.side === "west" ? 1 : slot2.side === "east" ? -1 : 0;
-  const normalZ = slot2.side === "north" ? 1 : 0;
-  return {
-    x: normalX > 0 ? slot2.maxX : normalX < 0 ? slot2.minX : (slot2.minX + slot2.maxX) / 2,
-    z: normalZ ? slot2.maxZ : (slot2.minZ + slot2.maxZ) / 2,
-    normalX,
-    normalZ,
-    alongX: normalZ,
-    alongZ: -normalX,
-    yaw: Math.atan2(normalX, normalZ)
-  };
-}
-var shopArrivals = new Map(plannedSpaces.map((store) => {
-  const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
-  return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
-}));
-
-// demos/corporate/gjh/v11/assets/surface-decals.js
-var decalClearance = 0.003;
-function decalHeight(surface, offset = decalClearance) {
-  return surface + offset;
-}
-function decalMaterial(material, units = -2) {
-  material.polygonOffset = true;
-  material.polygonOffsetFactor = -1;
-  material.polygonOffsetUnits = units;
-  if (material.transparent)
-    material.depthWrite = false;
-  return material;
-}
-function placeDecal(mesh, order = -2) {
-  mesh.renderOrder = order;
-  return mesh;
-}
-
-// demos/corporate/gjh/v11/assets/window-studios.js
-var cream = 15984077;
-var pearl = 16774111;
-var brass = 13279579;
-var oak = 11633494;
-var walnut = 6701359;
-var sage = 7767146;
-var charcoal = 2961458;
-var silver = 12895165;
-var white = 16250089;
-var shopIslandZ = -0.63;
-var pzhCartonX = 0.54;
-var pzhCartonStandingZ = shopIslandZ + 1.36;
-var shopLamp = 16770727;
-var finishes = {
-  4: [14864301, 10976642, 15785927],
-  5: [6898732, 9132600, 14927772],
-  6: [11700828, 12950889, 15390136],
-  7: [7745318, 9325877, 11897700],
-  8: [15656137, 2177385, 16050643],
-  9: [2570313, 1913422, 4673626],
-  10: [11322284, 7507064, 15919055],
-  11: [7684666, 8929852, 14996662],
-  12: [15329754, 11650471, 15526360],
-  13: [6703151, 3552823, 11444103],
-  14: [14929845, 13415316, 15656151],
-  15: [6309172, 6899253, 10255969],
-  16: [15856094, 11649071, 15855583],
-  17: [11175012, 4406329, 14468520]
+var westFoodFocalExhibits = {
+  S06: { id: "wheel-noodle-story", caption: "AIR-DRIED NOODLES", panel: [-0.1, 2.9, -0.33] },
+  S07: { id: "gulong-tin-story", caption: "STEWED PORK TINS", panel: [-0.55, 0.56, 0.04] },
+  S08: { id: "skippy-jar-story", caption: "CREAMY + CHUNKY", panel: [-0.58, 0.82, -0.194] }
 };
-function buildWindowStudio(n, t, width, depth, floorColour) {
-  const { box, column, disc, bar, arch, ring, ellipse, tapered, block, opaqueWall = box } = t;
-  const [wall, base, floor] = finishes[n];
-  const back = -depth / 2 + 0.38, front = depth / 2 - 0.18, side = width / 2 - 0.23, span = front - back, mid = (front + back) / 2;
-  const replace = t.replaceDisplay ?? ((build) => build());
-  const cabinet = (x, z, w, h, d, body, cap) => {
-    block(x, (h + 0.26) / 2, z, w + 0.09, h + 0.26, d + 0.09);
-    box(x, 0.12, z, w - 0.1, 0.23, d - 0.1, brass);
-    box(x, 0.18 + h / 2, z, w, h, d, body);
-    box(x, 0.21 + h, z, w + 0.09, 0.095, d + 0.09, cap);
-  };
-  function ovalCounter(x, z, width2, depth2, height, color) {
-    const radius = depth2 / 2, straight = width2 - depth2;
-    block(x, height / 2 + 0.07, z, width2 + 0.06, height + 0.12, depth2 + 0.06);
-    for (const [y, h, r, finish] of [[0.16, 0.18, radius * 0.95, brass], [height / 2 + 0.13, height - 0.16, radius, color], [height + 0.075, 0.1, radius + 0.025, cream]]) {
-      box(x, y, z, straight, h, 2 * r, finish);
-      for (const end of [-1, 1])
-        column(x + end * straight / 2, y, z, r, h, finish);
-    }
-    return height + 0.125;
-  }
-  function blossomVase(x, y, z, petal) {
-    tapered(x, y + 0.17, z, 0.15, 0.2, 0.32, cream);
-    for (let i = 0;i < 7; i++) {
-      const angle = i * 2.4, dx = Math.cos(angle) * (0.2 + 0.03 * (i % 3)), dz = Math.sin(angle) * 0.17, top = y + 0.66 + i % 3 * 0.12;
-      bar(x, y + 0.26, z, x + dx, top, z + dz, 0.018, walnut);
-      for (let j = 0;j < 3; j++)
-        ellipse(x + dx + (j - 1) * 0.054, top - 0.04 * Math.abs(j - 1), z + dz, 0.066, 0.06, 0.059, petal, angle, 0);
-    }
-  }
-  function can(x, y, z, c, r = 0.105, h = 0.24) {
-    column(x, y + h / 2, z, r, h, c);
-    column(x, y + h + 0.015, z, r * 1.02, 0.03, brass);
-  }
-  function provisionDisplay(x, z, kind2) {
-    const checker = kind2 === "jar", c = checker ? 2506352 : base;
-    cabinet(x, z, 1.45, 0.49, 0.81, c, cream);
-    if (checker) {
-      for (let row = 0;row < 2; row++)
-        for (let j = 0;j < 6; j++)
-          if ((j + row) % 2)
-            box(x + (j - 2.5) * 0.22, 0.33 + row * 0.22, z + 0.416, 0.215, 0.215, 0.023, white);
-    }
-    for (let tier = 0;tier < 3; tier++) {
-      const count = 4 - tier, h = 0.79 + tier * 0.235;
-      for (let i = 0;i < count; i++) {
-        const px = x + (i - (count - 1) / 2) * 0.249;
-        if (kind2 === "pack")
-          box(px, h + 0.11, z, 0.222, 0.22, 0.21, i % 2 ? cream : oak);
-        else
-          can(px, h, z, i % 3 ? c : 13017455, 0.114, 0.2);
-      }
-    }
-  }
-  function shellFan(x, y, z, size) {
-    for (let i = -5;i <= 5; i++) {
-      const angle = i * 0.178, height = size * (1 - 0.19 * Math.abs(i) / 5);
-      const radius = 0.49 * height;
-      ellipse(x + Math.sin(angle) * radius, y + Math.cos(angle) * radius, z - 0.035 * Math.abs(i), 0.16 * size, height * 0.53, 0.095 * size, i % 2 ? 15457224 : pearl, 0, -angle);
-    }
-  }
-  const packColours = {
-    4: [7753864, 9021786, 15445064],
-    5: [10893613, 13015899, 7358266],
-    6: [14464359, 9859914, 15257228],
-    7: [11284525, 13606480, 4810836],
-    8: [2646168, 13598801, 4421548],
-    9: [2510729, 14724931, 4681111],
-    10: [5868930, 13547671, 8038302],
-    11: [11354433, 5864021, 14196343],
-    12: [8564121, 9476794, 13074816],
-    16: [11124537, 3571824, 5661285],
-    17: [7238254, 12156505, 5924463]
-  }[n];
-  const packColour = (index, fallback) => packColours?.[index % 3] ?? fallback;
-  function packageRow(x, y, z, count, step, kind2, c) {
-    for (let j = 0;j < count; j++) {
-      const px = x + (j - (count - 1) / 2) * step;
-      if (kind2 === "tin")
-        can(px, y, z, packColour(j, c));
-      else {
-        const h = kind2 === "pack" ? 0.31 : 0.24;
-        box(px, y + h / 2, z, 0.18, h, 0.13, packColour(j, c));
-        box(px, y + h * 0.43, z + 0.071, 0.14, 0.035, 0.018, j % 3 === 0 ? c : cream);
-      }
-    }
-  }
-  function shelf(x, z, w, kind2 = "tin", c = base, arched = false) {
-    block(x, 1.62, z + 0.2, w, 3.18, 0.57);
-    const frame = n >= 12 ? silver : brass;
-    box(x, 1.62, z, w, 3.18, 0.12, wall);
-    for (const s of [-1, 1])
-      box(x + s * (w / 2 - 0.045), 1.62, z + 0.21, 0.065, 3.16, 0.48, frame);
-    if (arched)
-      arch(x, 1.88, z + 0.17, w * 0.46, 0.66, 0.07, frame);
-    for (const h of [0.61, 1.34, 2.07, 2.8]) {
-      box(x, h, z + 0.23, w, 0.085, 0.5, oak);
-      box(x, h - 0.04, decalHeight(z + 0.48) - 0.0175, w - 0.05, 0.035, 0.035, shopLamp);
-      const featured = n === 4 && x === 0 || h === 2.07 && x < 0 && [5, 6, 7, 8, 10, 11, 12, 17].includes(n);
-      if (!featured)
-        packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind2, c);
-    }
-  }
-  function sideShelf(s, c = oak, kind2 = "tin") {
-    const x = s * (side - 0.29);
-    block(x - s * 0.18, 1.59, mid, 0.5, 3.13, span - 0.7);
-    box(x, 1.58, mid, 0.15, 3.02, span - 0.7, wall);
-    for (let row = 0;row < 4; row++) {
-      const y = 0.55 + row * 0.66;
-      box(x - s * 0.18, y, mid, 0.49, 0.095, span - 0.82, c);
-      box(x - s * 0.42, y - 0.035, mid, 0.025, 0.025, span - 0.9, shopLamp);
-      for (let i = 0;i < 9; i++) {
-        const z = back + 0.81 + i * (span - 1.66) / 8;
-        if (n === 4 && s === 1 && row === 2 && i === 3) {
-          for (const offset of [-0.084, 0.084]) {
-            box(x - 0.19, y + 0.194, z + offset, 0.14, 0.29, 0.147, pearl);
-            box(x - 0.264, y + 0.19, z + offset, 0.009, 0.083, 0.128, base);
-          }
-        } else if (kind2 === "tin")
-          can(x - s * 0.19, y + 0.05, z, packColour(i + row, base), 0.1, 0.21);
-        else
-          box(x - s * 0.19, y + 0.19, z, 0.14, 0.28, 0.2, packColour(i + row, base));
-      }
-    }
-    for (const z of [back + 0.4, mid, front - 0.41])
-      box(x - s * 0.26, 1.61, z, 0.08, 3.15, 0.07, brass);
-  }
-  function pendant(x, z, y, r, c = brass) {
-    column(x, (4.09 + y) / 2, z, 0.022, 4.09 - y, brass);
-    tapered(x, y, z, r * 0.46, r, 0.27, c);
-    column(x, y - 0.137, z, r * 0.89, 0.035, shopLamp);
-  }
-  function plant(x, z, h) {
-    const y = 0.46;
-    block(x, 0.35, z, 0.49, 0.65, 0.49);
-    tapered(x, y / 2 + 0.09, z, 0.23, 0.17, y, cream);
-    for (let k = 0;k < 6; k++) {
-      const a = k * 2.39, r = 0.26 + k % 2 * 0.09, dx = Math.cos(a) * r, dz = Math.sin(a) * r, top = h - k % 3 * 0.18;
-      bar(x, y, z, x + dx, top, z + dz, 0.026, 5466692);
-      ellipse(x + dx, top, z + dz, 0.12, 0.29, 0.08, k % 2 ? 6586443 : 9544543, a, dx);
-    }
-  }
-  function circleIsland(x, z, r, h, c) {
-    block(x, (h + 0.3) / 2, z, r * 2.06, h + 0.3, r * 2.06);
-    column(x, 0.16, z, r * 0.89, 0.18, brass);
-    column(x, 0.22 + h / 2, z, r, h, c);
-    column(x, 0.25 + h, z, r * 1.03, 0.1, cream);
-    return h + 0.31;
-  }
-  function ringLight(x, z, r, y) {
-    ring(x, y, z, r, 0.036, shopLamp);
-    for (const off of [-0.68, 0.68])
-      column(x + off * r, (4.11 + y) / 2, z, 0.012, 4.11 - y, brass);
-  }
-  function sofa(x, z, c) {
-    block(x, 0.39, z, 1.66, 0.78, 0.8);
-    box(x, 0.35, z, 1.6, 0.34, 0.77, c);
-    box(x, 0.59, z - 0.32, 1.61, 0.47, 0.19, c);
-    for (const k of [-1, 1])
-      box(x + k * 0.75, 0.52, z, 0.16, 0.32, 0.71, c);
-  }
-  block(0, 2.12, back, side * 2, 4.18, 0.13);
-  block(0, 4.19, mid, side * 2, 0.18, span);
-  for (const s of [-1, 1])
-    block(s * side, 2.1, mid, 0.13, 4.13, span);
-  block(0, 0.041, mid, side * 2, 0.08, span);
-  box(0, 0.041, mid, side * 2, 0.08, span, floorColour ?? floor, -2);
-  opaqueWall(0, 2.12, back, side * 2, 4.18, 0.13, wall);
-  box(0, 4.19, mid, side * 2, 0.18, span, cream, -3);
-  const pilasterSide = shopEntrance(expandedLayout.slots[n - 1]).normalX;
-  const { inset, depth: pierDepth } = atriumLayout.arcadePilaster;
-  const pilasterBack = depth / 2 - inset - pierDepth / 2;
-  for (const s of [-1, 1]) {
-    box(s * (side - 0.2), 4.082, mid, 0.4, 0.064, span, pearl, -3);
-    const wallEnd = s === pilasterSide ? pilasterBack : front;
-    opaqueWall(s * side, 2.1, (back + wallEnd) / 2, 0.13, 4.13, wallEnd - back, wall);
-    box(s * (side - 0.31), 4.05, mid, 0.065, 0.046, span - 0.6, shopLamp);
-    box(s * (side - 0.2), 0.19, mid, 0.15, 0.21, span, base);
-  }
-  for (const z of [back + 0.38, front - 0.46])
-    box(0, 4.04, z, width - 0.9, 0.045, 0.08, shopLamp);
-  for (const x of [-side * 0.64, 0, side * 0.64])
-    for (const z of [back + 1.3, mid + 0.25, front - 1.13])
-      column(x, 4.076, z, 0.078, 0.045, shopLamp);
-  if (n < 13 && n !== 10) {
-    if (n !== 5)
-      sideShelf(-1, oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
-    sideShelf(1, n === 5 ? walnut : oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
-  }
-  box(0, 3.69, back + 0.46, 3.68, 0.47, 0.27, brass);
-  const exitZ = front - 0.04;
-  box(0, 3.78, exitZ, 0.67, 0.29, 0.07, 1662791);
-  for (const x of [-0.165, 0.165])
-    box(x, 3.78, exitZ - 0.044, 0.026, 0.207, 0.016, pearl);
-  box(0, 3.885, exitZ - 0.044, 0.35, 0.022, 0.016, pearl);
-  disc(0.045, 3.826, exitZ - 0.06, 0.03, 0.018, pearl);
-  bar(0.02, 3.794, exitZ - 0.059, -0.015, 3.74, exitZ - 0.059, 0.034, pearl);
-  bar(-0.008, 3.75, exitZ - 0.06, 0.045, 3.7, exitZ - 0.06, 0.024, pearl);
-  bar(-0.008, 3.75, exitZ - 0.06, -0.074, 3.717, exitZ - 0.06, 0.024, pearl);
-  const rear = back + 0.26, island = shopIslandZ;
-  const windowX = -side + 1.1, windowZ = front - 0.94;
-  if ([6, 7, 8, 9, 11].includes(n))
-    provisionDisplay(windowX, windowZ, n === 6 ? "pack" : n === 8 ? "jar" : "tin");
-  switch (n) {
-    case 4: {
-      for (let i = -1;i <= 1; i++)
-        shelf(i * 1.86, rear, 1.75, "pack", sage);
-      replace(() => {
-        const cx = -0.58, top = ovalCounter(cx, island, 2.85, 1.27, 1.16, 12949405);
-        for (let i = -6;i <= 6; i++)
-          box(cx + i * 0.115, 0.68, island + 0.64, 0.028, 0.91, 0.035, 13409948);
-        for (const end of [-1, 1])
-          for (let k = 0;k <= 8; k++) {
-            const a = k * Math.PI / 8;
-            column(cx + end * (0.79 + 0.63 * Math.sin(a)), 0.68, island + 0.63 * Math.cos(a), 0.018, 0.91, 13409948);
-          }
-        for (const x of [-1.17, -0.78])
-          can(x, top, island + 0.18, white, 0.1, 0.24);
-        blossomVase(-0.29, top, island - 0.2, 14000289);
-        for (const x of [-1.5, 0.38]) {
-          column(x, top + 0.21, island + 0.04, 0.032, 0.42, brass);
-          ellipse(x, top + 0.43, island + 0.04, 0.22, 0.17, 0.22, pearl, 0, 0);
-        }
-      }, sage);
-      pendant(-0.9, island, 3.26, 0.3, white);
-      plant(side - 0.96, front - 0.74, 1.6);
-      break;
-    }
-    case 5: {
-      for (let s = -1;s <= 1; s++)
-        shelf(s * 2.1, rear, 1.88, "tin", 13741441);
-      const wallX = -side + 0.25, nicheZ = mid + 0.46;
-      block(wallX + 0.14, 1.52, mid, 0.56, 3.02, span - 0.66);
-      box(wallX, 1.54, mid, 0.32, 2.98, span - 0.66, walnut);
-      const columns = Math.floor((span - 0.8) / 0.63), pitch = (span - 0.8) / columns;
-      for (let i = 0;i < columns; i++)
-        for (let j = 0;j < 5; j++) {
-          const z = back + 0.5 + (i + 0.5) * pitch, y = 0.47 + j * 0.48;
-          if (Math.abs(z - nicheZ) < 1.12 && y > 0.7)
-            continue;
-          box(wallX + 0.175, y, z, 0.08, 0.445, pitch - 0.035, 9132600);
-          ellipse(wallX + 0.237, y, z, 0.035, 0.046, 0.075, brass, 0, 0);
-        }
-      ellipse(wallX + 0.22, 1.95, nicheZ, 0.045, 1.07, 1.07, brass, 0, 0);
-      ellipse(wallX + 0.27, 1.95, nicheZ, 0.048, 1, 1, 4928551, 0, 0);
-      for (const y of [1.43, 2.14]) {
-        box(wallX + 0.37, y, nicheZ, 0.34, 0.06, 1.65, oak);
-        for (const dz of [-0.35, 0.34]) {
-          ellipse(wallX + 0.42, y + 0.19, nicheZ + dz, 0.14, 0.17, 0.15, pearl, 0, 0);
-          tapered(wallX + 0.42, y + 0.37, nicheZ + dz, 0.098, 0.08, 0.13, pearl);
-        }
-      }
-      cabinet(0, island, 2.5, 0.99, 1.24, walnut, oak);
-      blossomVase(-0.98, 1.2475, island - 0.14, 9873258);
-      box(pzhCartonX, 1.365, island + 0.27, 0.28, 0.234, 0.151, 12202795);
-      box(pzhCartonX, 1.471, island + 0.27, 0.278, 0.022, 0.15, 11893055);
-      box(pzhCartonX, 1.371, island + 0.349, 0.235, 0.063, 0.007, 14264925);
-      break;
-    }
-    case 6: {
-      for (const x of [-2.04, 2.04])
-        shelf(x, rear, 1.7, "pack", 13344615);
-      arch(0, 0.3, rear + 0.18, 1.07, 1.41, 0.15, cream);
-      for (const h of [0.75, 1.45]) {
-        box(0, h, rear + 0.26, 2.13, 0.07, 0.4, oak);
-        for (const x of [-0.69, -0.2, 0.51])
-          tapered(x, h + 0.17, rear + 0.25, 0.16, 0.09, 0.28, pearl);
-      }
-      replace(() => {
-        cabinet(-0.36, island, 2.78, 0.92, 1.26, oak, cream);
-        for (const offset of [-0.84, -0.28, 0.28, 0.84]) {
-          const centre = -0.36 + offset;
-          for (let j = -3;j <= 3; j++) {
-            const h = 0.77 + j % 2 * 0.07 + (offset > 0 ? 0.08 : 0);
-            box(centre + j * 0.043, 3.03 - h / 2, island - 0.15, 0.029, h, 0.04, j % 2 ? 14859126 : 15454102);
-          }
-        }
-        box(-0.36, 3.08, island - 0.15, 2.53, 0.076, 0.11, brass);
-        for (const x of [-1.43, 0.71])
-          bar(x, 3.08, island - 0.15, x, 3.96, island - 0.15, 0.031, brass);
-      }, oak);
-      for (let z = back + 0.8;z < front; z += 1.36)
-        box(0, 3.96, z, side * 2, 0.12, 0.15, oak);
-      break;
-    }
-    case 7: {
-      for (let i = -1;i <= 1; i++)
-        shelf(i * 1.93, rear, 1.79, "tin", 10962482, true);
-      for (const x of [-1, 1])
-        pendant(x, mid + 1.2, 2.91, 0.34, brass);
-      for (const dx of [-1.85, 0, 1.85])
-        box(dx, 4.015, mid, 0.075, 0.12, span - 0.6, walnut);
-      for (let z = back + 0.83;z < front; z += 1.82)
-        box(0, 4.01, z, side * 2 - 0.45, 0.14, 0.12, walnut);
-      for (const [r, y, count] of [[0.72, 3.43, 20], [0.45, 3.17, 14]]) {
-        ringLight(-2.07, mid - 0.88, r * 0.78, y);
-        for (let j = 0;j < count; j++) {
-          const a = j * Math.PI * 2 / count;
-          tapered(-2.07 + r * 0.78 * Math.cos(a), y - 0.111, mid - 0.88 + r * 0.78 * Math.sin(a), 0.05, 0.028, 0.21, j % 3 ? pearl : shopLamp);
-        }
-      }
-      replace(() => {
-        const top = circleIsland(0, island, 1.14, 0.82, walnut);
-        column(0, top + 0.13, island, 0.72, 0.26, brass);
-        for (let level = 0;level < 3; level++)
-          for (let j = 0;j < 5 - level; j++)
-            can((j - (4 - level) / 2) * 0.24, top + 0.27 + level * 0.269, island, 11159096);
-      }, base);
-      break;
-    }
-    case 8: {
-      for (const x of [-1.96, 1.96])
-        shelf(x, rear, 1.54, "tin", 4615323, true);
-      disc(0, 1.92, rear + 0.13, 1.08, 0.11, base);
-      box(0, 1.17, rear + 0.132, 2.16, 1.5, 0.11, base);
-      arch(0, 0.42, rear + 0.223, 1.08, 1.5, 0.072, brass);
-      for (const [x, y, rx, ry] of [[-0.32, 1.84, 0.39, 0.29], [0.06, 2.01, 0.23, 0.143], [0.38, 2.17, 0.32, 0.22]])
-        ellipse(x, y, rear + 0.25, rx, ry, 0.11, 14197583, 0, 0.37);
-      for (const [x, y] of [[-0.43, 1.8], [-0.22, 1.89], [0.29, 2.13], [0.47, 2.21]]) {
-        bar(x - 0.052, y - 0.07, rear + 0.352, x + 0.052, y + 0.07, rear + 0.352, 0.018, 12094281);
-        bar(x + 0.06, y - 0.05, rear + 0.352, x - 0.06, y + 0.05, rear + 0.352, 0.017, 12094281);
-      }
-      replace(() => {
-        const top = circleIsland(0, island, 1.08, 0.85, base);
-        for (let i = 0;i < 32; i++) {
-          const a = i * Math.PI / 16;
-          column(1.07 * Math.cos(a), 0.66, island + 1.07 * Math.sin(a), 0.035, 0.78, 4682138);
-        }
-        for (let i = -2;i <= 2; i++)
-          can(i * 0.28, top, island, 13805164, 0.12, 0.33);
-      }, base);
-      for (const x of [-1.83, 1.83])
-        pendant(x, mid + 0.2, 3.1, 0.45, cream);
-      break;
-    }
-    case 9: {
-      disc(0, 1.63, rear + 0.06, 1.58, 0.13, 14395189);
-      box(0, 0.98, rear + 0.062, 3.16, 1.31, 0.13, 14395189);
-      for (let k = 0;k < 3; k++) {
-        const w = 2.48 - 0.43 * k;
-        box(0, 0.85 + k * 0.52, rear + 0.36, w, 0.08, 0.43, brass);
-      }
-      const cx = -0.48;
-      replace(() => {
-        ovalCounter(cx, island, 2.58, 1.13, 1.01, base);
-        for (let j = -5;j <= 5; j++)
-          box(cx + j * 0.143, 0.62, island + 0.563, 0.025, 0.74, 0.027, 4281451);
-      }, base);
-      for (const z of [mid + 0.35, mid - 2.65]) {
-        column(2.3, 3.54, z, 0.025, 1.04, brass);
-        for (const [y, r] of [[3.16, 0.52], [3.04, 0.35], [2.95, 0.19]]) {
-          tapered(2.3, y, z, r * 0.62, r, 0.1, brass);
-          column(2.3, y - 0.054, z, r * 0.89, 0.025, shopLamp);
-        }
-      }
-      plant(side - 1.15, rear + 1.31, 1.78);
-      break;
-    }
-    case 10:
-      for (const s of [-1, 1]) {
-        const x = s * (side - 1), z = front - 1.5;
-        shellFan(x, 0.62, z, 1.97);
-        shellFan(x + s * 0.31, 0.56, z + 0.29, 1);
-        circleIsland(x, z + 0.05, 0.65, 0.53, base);
-        shelf(s * 2.1, rear, 1.58, "tin", sage, true);
-      }
-      replace(() => circleIsland(0, island, 1.2, 0.79, base), base);
-      for (let i = 0;i < 4; i++)
-        pendant(2.15 + 0.29 * Math.sin(i * 2.4), mid - 0.66 + i * 0.38, 3.13 + i * 0.12, 0.13, pearl);
-      break;
-    case 11:
-      for (let i = -1;i <= 1; i++)
-        shelf(i * 1.83, rear, 1.73, "tin", 9059902);
-      replace(() => {
-        block(0, 0.58, island, 2.74, 1.16, 1.24);
-        for (const x of [-1.21, 1.21])
-          for (const dz of [-0.46, 0.46])
-            box(x, 0.6, island + dz, 0.14, 1.05, 0.14, walnut);
-        box(0, 1.08, island, 2.74, 0.17, 1.24, oak);
-        for (const x of [-0.75, 0, 0.75]) {
-          box(x, 0.39, island, 0.64, 0.46, 0.62, oak);
-          for (let j = -1;j <= 1; j++)
-            ellipse(x + j * 0.17, 1.27, island, 0.1, 0.12, 0.1, j % 2 ? sage : 11230529, 0, 0);
-        }
-      }, base);
-      pendant(-0.69, mid, 3, 0.38, base);
-      pendant(0.69, mid, 3, 0.38, base);
-      break;
-    case 12:
-      for (const x of [-2.2, 2.2])
-        shelf(x, rear, 1.43, "pack", base, true);
-      replace(() => {
-        circleIsland(0, island, 1.1, 0.72, white);
-        packageRow(0.1, 1.18, island + 0.11, 4, 0.23, "pack", base);
-      }, base);
-      for (const x of [-side + 0.88, side - 0.88])
-        plant(x, front - 0.87, 1.64);
-      ringLight(0, mid, 1.38, 3.76);
-      break;
-    case 13:
-      for (let i = -15;i <= 15; i++)
-        box(i * 0.185, 1.95, rear, 0.085, 3.67, 0.12, i % 3 ? walnut : oak);
-      replace(() => {
-        sofa(-1.46, island, 10786692);
-        sofa(0.44, mid - 1.66, 7891807);
-      }, charcoal);
-      circleIsland(0.68, island + 0.48, 0.39, 0.32, walnut);
-      for (const x of [-2.5, 2.5]) {
-        block(x, 1.09, rear + 0.58, 0.46, 1.99, 0.5);
-        box(x, 1.09, rear + 0.58, 0.43, 1.99, 0.44, charcoal);
-        for (const y of [0.72, 1.41])
-          disc(x, y, rear + 0.826, 0.135, 0.036, silver);
-      }
-      ringLight(0, mid + 0.06, 1.12, 3.69);
-      plant(-side + 0.7, front - 0.85, 1.53);
-      for (const s of [-1, 1]) {
-        cabinet(s * (side - 0.65), mid, 0.65, 0.72, 2.8, walnut, base);
-        for (let i = 0;i < 3; i++)
-          box(s * (side - 0.72), 1.19, mid + (i - 1) * 0.92, 0.28, 0.48, 0.3, charcoal);
-      }
-      break;
-    case 14:
-      for (const x of [-1.36, 1.36])
-        arch(x, 0.21, rear + 0.11, 1.13, 1.98, 0.12, shopLamp);
-      sofa(-0.86, mid, cream);
-      circleIsland(0.71, island, 0.52, 0.37, oak);
-      ringLight(0, mid, 1.38, 3.72);
-      for (const x of [-side + 0.61, -side + 1.3]) {
-        block(x, 1.24, mid + 1, 0.62, 2.23, 0.66);
-        box(x, 1.24, mid + 1, 0.61, 2.23, 0.64, silver);
-        box(x, 1.44, mid + 1.34, 0.49, 0.035, 0.04, charcoal);
-      }
-      plant(-side + 0.81, front - 0.85, 1.61);
-      break;
-    case 15:
-      for (let i = -5;i <= 5; i++)
-        box(i * 0.58, 4.04, mid, 0.23, 0.065, span - 0.28, 13283214);
-      replace(() => cabinet(-1.05, mid - 0.59, 1.78, 0.9, 1.11, walnut, oak), walnut);
-      block(1.1, 0.65, mid - 0.9, 1.64, 1.29, 0.92);
-      block(1.1, 0.34, mid + 0.16, 1.01, 0.7, 0.5);
-      for (const x of [0.46, 1.73])
-        box(x, 0.51, mid - 0.87, 0.13, 0.84, 0.13, charcoal);
-      box(1.1, 1.1, mid - 0.93, 1.63, 0.36, 0.72, charcoal);
-      for (let i = 0;i < 19; i++)
-        box(0.38 + i * 0.08, 1.2, mid - 0.51, 0.074, 0.05, 0.25, pearl);
-      box(1.1, 0.61, mid + 0.16, 0.99, 0.16, 0.49, charcoal);
-      for (const x of [0.74, 1.46])
-        box(x, 0.33, mid + 0.16, 0.08, 0.48, 0.36, walnut);
-      pendant(-1.36, mid - 1.3, 2.94, 0.26, brass);
-      break;
-    case 16:
-      replace(() => cabinet(-1.62, island, 1.48, 0.78, 0.98, base, white), base);
-      cabinet(1.62, island + 0.32, 1.48, 0.78, 0.98, base, white);
-      sideShelf(-1, silver, "pack");
-      ringLight(0, mid, 1.14, 3.69);
-      plant(side - 0.71, front - 1.08, 1.47);
-      break;
-    case 17:
-      for (const x of [-side + 0.71, side - 0.71])
-        shelf(x, rear + 0.24, 0.99, "pack", charcoal);
-      {
-        const top = circleIsland(0, island, 1.12, 0.85, base);
-        for (const x of [-0.54, 0, 0.54]) {
-          box(x, top + 0.04, island, 0.25, 0.09, 0.22, charcoal);
-          box(x, top + 0.25, island - 0.02, 0.15, 0.38, 0.077, charcoal);
-          box(x, top + 0.3, island + 0.024, 0.105, 0.12, 0.012, 12308936);
-        }
-      }
-      ringLight(0, mid, 1.24, 3.56);
-      ringLight(0, mid, 0.72, 3.75);
-      plant(-side + 0.82, front - 0.8, 1.42);
-      break;
-  }
-}
 
 // demos/corporate/gjh/v11/assets/merge-static-geometries.js
 function mergeStaticGeometries(T, geometries) {
@@ -1474,19 +798,37 @@ function heritagePanel(photo) {
   return panel;
 }
 
+// demos/corporate/gjh/v11/assets/surface-decals.js
+var decalClearance = 0.003;
+function decalHeight(surface, offset = decalClearance) {
+  return surface + offset;
+}
+function decalMaterial(material, units = -2) {
+  material.polygonOffset = true;
+  material.polygonOffsetFactor = -1;
+  material.polygonOffsetUnits = units;
+  if (material.transparent)
+    material.depthWrite = false;
+  return material;
+}
+function placeDecal(mesh, order = -2) {
+  mesh.renderOrder = order;
+  return mesh;
+}
+
 // demos/corporate/gjh/v11/assets/shop-visibility.js
 function createShopVisibility(T) {
   const walls = new Map;
   const eye = new T.Vector3;
   const inset = 0.015;
-  function addWall(slot2, x, y, z, width, height, depth) {
-    if (!walls.has(slot2))
-      walls.set(slot2, []);
+  function addWall(slot, x, y, z, width, height, depth) {
+    if (!walls.has(slot))
+      walls.set(slot, []);
     const across = width < depth ? "x" : "z";
     const along = across === "x" ? "z" : "x";
     const centre = { x, y, z };
     const halfSpan = (along === "x" ? width : depth) / 2;
-    walls.get(slot2).push({
+    walls.get(slot).push({
       across,
       along,
       plane: centre[across],
@@ -1515,8 +857,8 @@ function createShopVisibility(T) {
     setEye(position) {
       eye.copy(position);
     },
-    occluded(slot2, bounds) {
-      const room = walls.get(slot2);
+    occluded(slot, bounds) {
+      const room = walls.get(slot);
       if (!room)
         return false;
       for (const wall of room)
@@ -1615,6 +957,28 @@ async function loadStaticAsset(T, definition, baseURL) {
   }
   return record;
 }
+
+// demos/corporate/gjh/v11/assets/atrium-layout.js
+var point = (x, z) => Object.freeze({ x, z });
+var lounge = (id, x) => Object.freeze({
+  id,
+  x,
+  z: 24,
+  seats: Object.freeze([point(x - 1.7, 24.5), point(x + 1.7, 24.5)]),
+  table: point(x, 24.5),
+  planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
+});
+var atriumLayout = Object.freeze({
+  arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
+  garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
+  lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
+  upperSeats: Object.freeze([
+    Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
+    Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
+    Object.freeze({ x: -3, z: 6, facing: -1, finish: "upholstered" })
+  ]),
+  event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
+});
 
 // demos/corporate/gjh/v11/assets/public-architecture.js
 function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false, setCanopyMaterial, artworkTier = () => "low" }) {
@@ -2068,6 +1432,123 @@ function worldInteriorBox(store, box) {
 
 // demos/corporate/gjh/v11/assets/interiors/mili-seats.js
 var miliSeats = [[-2.55, 0, -0.8], [3.4, 0, -1.97]];
+
+// demos/corporate/gjh/v11/assets/lift-layout.js
+var freeze = (value) => {
+  if (value && typeof value === "object") {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+};
+var liftLayout = freeze({
+  x: -3,
+  z: 10,
+  upper: 7.2,
+  shaft: { minX: -5, maxX: -1, minZ: 8, maxZ: 12 },
+  slab: { minX: -9, maxX: 3, minZ: 4, maxZ: 16 },
+  roofOpening: { minX: -16, maxX: 10, minZ: -3, maxZ: 23 },
+  cabin: { width: 3.2, depth: 3.2 },
+  threshold: { minX: -5, maxX: -4.6, minZ: 9, maxZ: 11 },
+  exit: { x: -6.4, z: 10 },
+  radius: 1.15,
+  directory: { x: -5, z: 45 },
+  desk: { x: 25, z: 45 },
+  showcase: { x: -7, z: 18 },
+  facilities: { ...restroomParcel, status: "open" }
+});
+function cutRectangle(rect, hole) {
+  const x0 = Math.max(rect.minX, hole.minX), x1 = Math.min(rect.maxX, hole.maxX);
+  const z0 = Math.max(rect.minZ, hole.minZ), z1 = Math.min(rect.maxZ, hole.maxZ);
+  if (x0 >= x1 || z0 >= z1)
+    return [{ ...rect }];
+  return [
+    { minX: rect.minX, maxX: x0, minZ: rect.minZ, maxZ: rect.maxZ },
+    { minX: x1, maxX: rect.maxX, minZ: rect.minZ, maxZ: rect.maxZ },
+    { minX: x0, maxX: x1, minZ: rect.minZ, maxZ: z0 },
+    { minX: x0, maxX: x1, minZ: z1, maxZ: rect.maxZ }
+  ].filter((r) => r.maxX > r.minX && r.maxZ > r.minZ);
+}
+function showcaseProducts(items, expanded) {
+  if (!expanded)
+    return items;
+  return items.map((item) => ({ ...item, position: [
+    liftLayout.showcase.x + item.position[0] + 7,
+    item.position[1],
+    liftLayout.showcase.z + item.position[2] - 2.2
+  ] }));
+}
+
+// demos/corporate/gjh/v11/assets/spatial.js
+var FLOOR = Object.freeze({ minX: -15.2, maxX: 15.2, minZ: -11.2, maxZ: 18.2 });
+var MAP = Object.freeze({ minX: -15, maxX: 15, minZ: -11, maxZ: 18, width: 300, height: 290, storeWidth: 72, storeHeight: 110, storeTop: 20 });
+var SOURCE = [
+  {
+    id: "newmoon",
+    number: "01",
+    label: "New Moon",
+    floor: "ground",
+    available: true,
+    bounds: { minX: -15, maxX: -5, minZ: -10.5, maxZ: 0 },
+    arrival: { x: -10, z: 2.4 },
+    contentRef: "newmoon-title"
+  },
+  {
+    id: "mili",
+    number: "02",
+    label: "MILI",
+    floor: "ground",
+    available: true,
+    bounds: { minX: -5, maxX: 5, minZ: -10.5, maxZ: 0 },
+    arrival: { x: 0, z: 2.4 },
+    contentRef: "mili-title"
+  },
+  {
+    id: "gogo",
+    number: "03",
+    label: "GOGO",
+    floor: "ground",
+    available: true,
+    bounds: { minX: 5, maxX: 15, minZ: -10.5, maxZ: 0 },
+    arrival: { x: 10, z: 2.4 },
+    contentRef: "gogo-title"
+  }
+];
+function createSpatialRegistry(source, floor = FLOOR) {
+  if (!Array.isArray(source) || source.length !== 3 || !floor || !["minX", "maxX", "minZ", "maxZ"].every((k) => Number.isFinite(floor[k])) || floor.minX >= floor.maxX || floor.minZ >= floor.maxZ)
+    throw new TypeError("Invalid spatial source or floor");
+  const ids = new Set, numbers = new Set, refs = new Set;
+  const stores = source.map((item) => {
+    if (!item || typeof item.id !== "string" || !/^[a-z][a-z0-9-]*$/.test(item.id) || ids.has(item.id) || typeof item.number !== "string" || !/^\d{2}$/.test(item.number) || numbers.has(item.number) || typeof item.label !== "string" || !item.label.trim() || item.floor !== "ground" || typeof item.available !== "boolean" || typeof item.contentRef !== "string" || !/^[a-z][a-z0-9-]*$/.test(item.contentRef) || refs.has(item.contentRef))
+      throw new TypeError("Invalid or duplicate store identity");
+    const { bounds: b, arrival: a } = item;
+    if (!b || !a || !["minX", "maxX", "minZ", "maxZ"].every((k) => Number.isFinite(b[k])) || !Number.isFinite(a.x) || !Number.isFinite(a.z) || b.maxX - b.minX !== 10 || b.minZ !== -10.5 || b.maxZ !== 0 || b.minX < floor.minX || b.maxX > floor.maxX || b.minZ < floor.minZ || b.maxZ > floor.maxZ || Math.abs(a.x - (b.minX + b.maxX) / 2) > 2 || a.z <= b.maxZ + 0.3 || a.x < floor.minX + 0.3 || a.x > floor.maxX - 0.3 || a.z > floor.maxZ - 0.3)
+      throw new TypeError("Invalid store bounds or arrival");
+    ids.add(item.id);
+    numbers.add(item.number);
+    refs.add(item.contentRef);
+    return Object.freeze({ ...item, bounds: Object.freeze({ ...b }), arrival: Object.freeze({ ...a }) });
+  });
+  for (let i = 1;i < stores.length; i++) {
+    const prev = stores[i - 1].bounds, next = stores[i].bounds;
+    if (prev.maxX !== next.minX || prev.minZ !== next.minZ || prev.maxZ !== next.maxZ)
+      throw new TypeError("Inconsistent store geometry");
+  }
+  const byId = new Map(stores.map((store) => [store.id, store]));
+  return Object.freeze({
+    stores: Object.freeze(stores),
+    get: (id) => byId.get(id) || null,
+    arrival(id) {
+      const store = byId.get(id);
+      return store?.available ? store.arrival : null;
+    }
+  });
+}
+var spatial = createSpatialRegistry(SOURCE);
+var courtyardArrival = Object.freeze({ x: -2, z: 12 });
+function storeCenterX(store) {
+  return (store.bounds.minX + store.bounds.maxX) / 2;
+}
 
 // demos/corporate/gjh/v11/assets/interior-pilot-registry.js
 var INTERIOR_PILOT = Object.freeze({
@@ -2755,6 +2236,62 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
 // demos/corporate/gjh/v11/assets/upper-level.js
 import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
 
+// demos/corporate/gjh/v11/assets/expanded-layout.js
+var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
+  number: String(number).padStart(2, "0"),
+  side,
+  minX,
+  maxX,
+  minZ,
+  maxZ,
+  available: true
+});
+var expandedLayout = Object.freeze({
+  bounds: Object.freeze({ minX: -25, maxX: 45, minZ: -12, maxZ: 48 }),
+  entrance: Object.freeze({ x: 10, z: 45 }),
+  courtyardArrival: Object.freeze({ x: 10, z: 12 }),
+  lift: Object.freeze({ x: liftLayout.x, z: liftLayout.z, upper: liftLayout.upper }),
+  directory: liftLayout.directory,
+  serviceDesk: liftLayout.desk,
+  showcase: liftLayout.showcase,
+  atrium: Object.freeze({ x: 10, z: 12 }),
+  slots: Object.freeze([
+    ...Array.from({ length: 5 }, (_, i) => slot(i + 1, "north", -15 + i * 10, -5 + i * 10, -12, 0)),
+    ...Array.from({ length: 6 }, (_, i) => slot(i + 6, "west", -25, -15, i * 8, (i + 1) * 8)),
+    ...Array.from({ length: 6 }, (_, i) => slot(i + 12, "east", 35, 45, i * 8, (i + 1) * 8))
+  ]),
+  loop: Object.freeze([
+    Object.freeze({ x: -12, z: 3 }),
+    Object.freeze({ x: 32, z: 3 }),
+    Object.freeze({ x: 32, z: 39 }),
+    Object.freeze({ x: -12, z: 39 })
+  ])
+});
+var plannedSpaces = Object.freeze(expandedLayout.slots.slice(3).map((slot2) => Object.freeze({
+  id: `planned-space-${slot2.number}`,
+  number: slot2.number,
+  side: slot2.side,
+  status: "open",
+  available: slot2.available
+})));
+function shopEntrance(slot2) {
+  const normalX = slot2.side === "west" ? 1 : slot2.side === "east" ? -1 : 0;
+  const normalZ = slot2.side === "north" ? 1 : 0;
+  return {
+    x: normalX > 0 ? slot2.maxX : normalX < 0 ? slot2.minX : (slot2.minX + slot2.maxX) / 2,
+    z: normalZ ? slot2.maxZ : (slot2.minZ + slot2.maxZ) / 2,
+    normalX,
+    normalZ,
+    alongX: normalZ,
+    alongZ: -normalX,
+    yaw: Math.atan2(normalX, normalZ)
+  };
+}
+var shopArrivals = new Map(plannedSpaces.map((store) => {
+  const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
+  return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
+}));
+
 // demos/corporate/gjh/v11/assets/signage/atlas-layout.js
 var slotCapacity = 24;
 var atlasSize = 2048;
@@ -3382,7 +2919,7 @@ function paintUpperAtlas(T, mark, tier) {
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = atlasPx;
   const ctx = canvas.getContext("2d");
-  const { green, brass: brass2, cream: cream2 } = swatch;
+  const { green, brass, cream } = swatch;
   ctx.fillStyle = green;
   ctx.fillRect(0, 0, atlasPx, atlasPx);
   function inCell(cell, draw) {
@@ -3396,19 +2933,19 @@ function paintUpperAtlas(T, mark, tier) {
     extrudeArtworkGutter(ctx, cell, 1);
   }
   inCell(cells.directory, (w, h) => {
-    ctx.strokeStyle = brass2;
+    ctx.strokeStyle = brass;
     ctx.strokeRect(1.5, 1.5, w - 3, h - 3);
     ctx.fillStyle = swatch.gold;
     ctx.font = "bold 11px Arial";
     ctx.fillText("DIRECTORY", 9, 16);
-    ctx.fillStyle = cream2;
+    ctx.fillStyle = cream;
     ctx.font = "bold 21px Georgia";
     ctx.fillText("Upper Level", 9, 39);
-    ctx.fillStyle = brass2;
+    ctx.fillStyle = brass;
     ctx.fillRect(9, 46, w - 18, 1);
     categories.forEach((name, i) => {
       const y = 66 + i * 23;
-      ctx.fillStyle = cream2;
+      ctx.fillStyle = cream;
       ctx.font = "bold 17px Arial";
       ctx.fillText(name, 9, y, 118);
       ctx.save();
@@ -3428,21 +2965,21 @@ function paintUpperAtlas(T, mark, tier) {
   });
   inCell(cells.mark, (w, h) => {
     ctx.textAlign = "center";
-    ctx.fillStyle = cream2;
+    ctx.fillStyle = cream;
     if (mark) {
       ctx.drawImage(mark, 4, 3, 85, 38);
     } else {
       ctx.font = "bold 32px Georgia";
       ctx.fillText("GJH", w / 2, 35);
     }
-    ctx.fillStyle = cream2;
+    ctx.fillStyle = cream;
     ctx.font = "bold 15px Georgia";
     ctx.fillText("Virtual Mall", w / 2, h - 7);
   });
   cells.signs.forEach((cell, i) => inCell(cell, (w, h) => {
     ctx.fillStyle = i % 2 ? "#49372e" : green;
     ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = cream2;
+    ctx.fillStyle = cream;
     ctx.textAlign = "center";
     ctx.font = "bold 14px Georgia";
     ctx.fillText(categories[i], w / 2, 14, w - 4);
@@ -3602,7 +3139,7 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     solids.push(geo);
   }
   const block = (color, ...args) => tint2(unit, matrix(...args), color);
-  const brass2 = (...args) => gold.push(matrix(...args));
+  const brass = (...args) => gold.push(matrix(...args));
   const led = (...args) => emit.push(unit.clone().applyMatrix4(matrix(...args)));
   function print(cell, ...args) {
     const g = plane.clone().applyMatrix4(matrix(...args)), uv = g.attributes.uv;
@@ -3613,13 +3150,13 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   }
   function guard(x2, z2, w, d) {
     const alongX = w > d, length = Math.max(w, d);
-    brass2(x2, 1.158, z2, alongX ? w : 0.11, 0.052, alongX ? 0.11 : d);
+    brass(x2, 1.158, z2, alongX ? w : 0.11, 0.052, alongX ? 0.11 : d);
     led(x2, 0.115, z2, alongX ? w : 0.142, 0.033, alongX ? 0.142 : d);
     print(cells.filament, x2, 0.133, z2, alongX ? w : 0.075, alongX ? 0.075 : d, 1, 0, -Math.PI / 2);
     const bays = Math.ceil(length / 1.95);
     for (let i = 0;i < bays; i++) {
       const along = (i + 0.5) * length / bays - length / 2;
-      brass2(x2 + (alongX ? along : 0), 0.56, z2 + (alongX ? 0 : along), 0.045, 1.12, 0.045);
+      brass(x2 + (alongX ? along : 0), 0.56, z2 + (alongX ? 0 : along), 0.045, 1.12, 0.045);
     }
     lightWash(x2, floor + 0.018, z2, alongX ? w : 0.64, alongX ? 0.64 : d, 0, -Math.PI / 2);
   }
@@ -3682,7 +3219,7 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     for (let i = -2;i <= 2; i++)
       block(i % 2 ? 11104068 : 12158290, x2, centre, z2 + i * spacing, width2, thickness, slatDepth);
     for (const dx of [-0.78, 0.78])
-      brass2(x2 + dx, 0.22, z2, 0.08, 0.44, 0.5);
+      brass(x2 + dx, 0.22, z2, 0.08, 0.44, 0.5);
     return benchProfile(width2, centre + thickness / 2, 4 * spacing + slatDepth);
   }
   const [benchX, benchY, benchZ] = [1.52, 1.1, 1.55];
@@ -3695,12 +3232,12 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   }
   furniture("table", table, 0.78, 0.81, 0.92, (x2, z2) => {
     block(12159064, x2, 0.64, z2, 0.86, 0.09, 0.55);
-    brass2(x2, 0.33, z2, 0.12, 0.62, 0.12);
+    brass(x2, 0.33, z2, 0.12, 0.62, 0.12);
     block(6113592, x2, 0.06, z2, 0.55, 0.08, 0.37);
   });
   furniture("lamp", lamp, 1, 1, 1, (x2, z2) => {
     tint2(crop, matrix(x2, 0.05, z2, 1, 1, 1), 10058055);
-    brass2(x2, 0.79, z2, 0.045, 1.5, 0.045);
+    brass(x2, 0.79, z2, 0.045, 1.5, 0.045);
     block(16309669, x2, 1.58, z2, 0.51, 0.35, 0.51);
   });
   crop.dispose();
@@ -3711,16 +3248,16 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   block(1785393, east + 0.1, 1.29, cz, 0.14, 1.72, 3.05);
   collider(east + 0.1, floor + 1.29, cz, 0.14, 1.72, 3.05);
   for (const dz of [-1.52, 1.52])
-    brass2(east + 0.1, 1.08, cz + dz, 0.09, 2.16, 0.06);
+    brass(east + 0.1, 1.08, cz + dz, 0.09, 2.16, 0.06);
   for (const y of [0.43, 2.14])
-    brass2(east + 0.025, y, cz, 0.035, 0.032, 3.09);
+    brass(east + 0.025, y, cz, 0.035, 0.032, 3.09);
   print(cells.mark, east + 0.025, 1.32, cz, 2.06, 1.48, 1, -Math.PI / 2);
   const { x, z, width, height } = directory;
   block(6901045, x, 1.43, z, width + 0.1, height + 0.15, 0.15);
   print(cells.directory, x, 1.43, z - 0.083, width, height, 1, Math.PI);
   for (const dx of [-width / 2 - 0.045, width / 2 + 0.045])
     led(x + dx, 1.43, z - 0.087, 0.031, height + 0.08, 0.031);
-  brass2(x, 0.23, z, 1.25, 0.46, 0.13);
+  brass(x, 0.23, z, 1.25, 0.46, 0.13);
   collider(x, floor + 1.31, z, width + 0.1, 2.62, 0.17);
   const front = liftLayout.roofOpening.maxX, start = liftLayout.roofOpening.minZ, end = liftLayout.roofOpening.maxZ;
   const span = (end - start) / 4, mid = (start + end) / 2;
@@ -3728,13 +3265,13 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   block(12365460, front - 0.67, 1.39, mid, 1.78, 0.15, end - start + 0.12);
   const lip = front - 1.53;
   glass.push(plane.clone().applyMatrix4(matrix(lip, 1.92, mid, end - start, 0.96, 1, -Math.PI / 2)));
-  brass2(lip, 2.42, mid, 0.076, 0.055, end - start);
+  brass(lip, 2.42, mid, 0.076, 0.055, end - start);
   led(lip, 1.37, mid, 0.075, 0.027, end - start);
   for (let j = 0;j <= 12; j++)
-    brass2(lip, 1.93, start + (end - start) * j / 12, 0.045, 0.99, 0.045);
+    brass(lip, 1.93, start + (end - start) * j / 12, 0.045, 0.99, 0.045);
   block(2639163, front + 0.16, 2.98, mid, 0.3, 3.3, end - start + 0.12);
   for (const y of [1.44, 4.61])
-    brass2(front - 0.09, y, mid, 0.2, 0.085, end - start + 0.18);
+    brass(front - 0.09, y, mid, 0.2, 0.085, end - start + 0.18);
   const { minX, maxX, minZ, maxZ, farRise } = galleryVoid;
   const run = maxX - minX, riseAngle = Math.atan2(farRise, run);
   const slope = Math.hypot(run, farRise), cx = (minX + maxX) / 2;
@@ -3755,18 +3292,18 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
       gold.push(bridgeMatrix(1.13, edge, slope + 0.1, 0.056, 0.09));
     }
     glass.push(plane.clone().applyMatrix4(matrix(minX, 0.55, walkway, 1.06, 1.1, 1, -Math.PI / 2)));
-    brass2(minX, 1.13, walkway, 0.09, 0.056, 1.09);
+    brass(minX, 1.13, walkway, 0.09, 0.056, 1.09);
     collider(minX, floor + 0.55, walkway, 0.1, 1.13, 1.09);
     emit.push(unit.clone().applyMatrix4(bridgeMatrix(0.1, z2, slope + 0.1, 0.038, 0.1)));
     for (const t of [0.25, 0.5, 0.75])
-      brass2(minX + run * t, farRise * t + 0.55, z2, 0.043, 1.1, 0.043);
+      brass(minX + run * t, farRise * t + 0.55, z2, 0.043, 1.1, 0.043);
   }
   collider(front - 0.67, floor + 1.39, mid, 1.78, 0.15, end - start + 0.12);
   collider(lip, floor + farRise + 0.48, mid, 0.1, 1.02, end - start);
   collider(front + 0.1, floor + 2.98, mid, 0.19, 3.3, end - start);
   for (const endZ of [start, end]) {
     glass.push(plane.clone().applyMatrix4(matrix(front - 0.67, 1.94, endZ, 1.78, 1.01, 1)));
-    brass2(front - 0.67, 2.46, endZ, 1.78, 0.055, 0.075);
+    brass(front - 0.67, 2.46, endZ, 1.78, 0.055, 0.075);
     collider(front - 0.67, floor + 1.94, endZ, 1.78, 1.03, 0.1);
   }
   for (let i = 0;i < 4; i++) {
@@ -3774,12 +3311,12 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     if (i === 0 || i === 3) {
       block(6574396, front + 0.19, -0.51, c, 0.26, 2.91, span + 0.04);
       print(cells.windows[i], front + 0.05, -0.49, c, span - 0.28, 2.6, 1, -Math.PI / 2);
-      brass2(front + 0.02, -0.49, c, 0.075, 2.65, 0.075);
+      brass(front + 0.02, -0.49, c, 0.075, 2.65, 0.075);
     }
     print(cells.windows[i], front - 0.015, 2.66, c, span - 0.32, 2.32, 1, -Math.PI / 2);
     print(cells.signs[i], front - 0.1, 4.2, c, span * 0.74, 0.6, 1, -Math.PI / 2);
     for (const dz of [-span / 2 + 0.05, 0])
-      brass2(front - 0.055, 2.66, c + dz, 0.09, 2.36, 0.075);
+      brass(front - 0.055, 2.66, c + dz, 0.09, 2.36, 0.075);
     led(front - 0.11, 3.84, c, 0.1, 0.048, span - 0.23);
     block(5980466, front - 0.24, 1.67, c, 0.44, 0.34, span - 0.36);
     for (const side of [-1, 1]) {
@@ -5314,7 +4851,7 @@ function nearFaceMaterial(T, texture, pulse) {
   };
   return material;
 }
-function modelRelief(T, sign, module, mask, finishes2) {
+function modelRelief(T, sign, module, mask, finishes) {
   const meshes = [], bounds = new T.Box3;
   module.traverse((node) => {
     if (!node.isMesh)
@@ -5339,8 +4876,8 @@ function modelRelief(T, sign, module, mask, finishes2) {
     geometry.scale(scale, scale, Math.min(scale, 0.04 / (size.z || 1)));
     geometry.translate((x - 0.5) * config.size.width, mount.y + (0.5 - y) * config.size.height, mount.z + 0.002);
     const count = geometry.attributes.position.count;
-    const index = finishes2.indexOf(material);
-    const finish2 = index < 0 ? finishes2.push(material) : index + 1;
+    const index = finishes.indexOf(material);
+    const finish2 = index < 0 ? finishes.push(material) : index + 1;
     geometry.setAttribute("signSolid", new T.Uint8BufferAttribute(new Uint8Array(count).fill(finish2), 1));
     geometry.setAttribute("uv", new T.Float32BufferAttribute(new Float32Array(count * 2), 2));
     if (!geometry.attributes.normal)
@@ -5356,7 +4893,7 @@ function modelRelief(T, sign, module, mask, finishes2) {
     remaining.fill(0, j * n + Math.floor(x0 + (x1 - x0) * u), j * n + Math.ceil(x0 + (x1 - x0) * (u + w)));
   return { geometry: merged, remaining };
 }
-function reliefMaterial(T, texture, finishes2) {
+function reliefMaterial(T, texture, finishes) {
   const mat = new T.MeshStandardMaterial({
     map: texture,
     color: 5919044,
@@ -5367,14 +4904,14 @@ function reliefMaterial(T, texture, finishes2) {
     metalness: 0.24,
     toneMapped: false
   });
-  if (!finishes2.length)
+  if (!finishes.length)
     return mat;
-  mat.customProgramCacheKey = () => "sign-relief-" + finishes2.length;
+  mat.customProgramCacheKey = () => "sign-relief-" + finishes.length;
   mat.onBeforeCompile = (shader) => {
-    const count = finishes2.length;
-    shader.uniforms.solidBase = { value: finishes2.map((m) => m.color) };
-    shader.uniforms.solidEmission = { value: finishes2.map((m) => m.emissive.clone().multiplyScalar(m.emissiveIntensity)) };
-    shader.uniforms.solidPbr = { value: finishes2.map((m) => new T.Vector2(m.metalness, m.roughness)) };
+    const count = finishes.length;
+    shader.uniforms.solidBase = { value: finishes.map((m) => m.color) };
+    shader.uniforms.solidEmission = { value: finishes.map((m) => m.emissive.clone().multiplyScalar(m.emissiveIntensity)) };
+    shader.uniforms.solidPbr = { value: finishes.map((m) => new T.Vector2(m.metalness, m.roughness)) };
     shader.vertexShader = `attribute float signSolid; varying float vSolid;
 ` + shader.vertexShader;
     shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
@@ -5391,12 +4928,12 @@ if(solid>=0) totalEmissiveRadiance=solidEmission[solid];`);
   return mat;
 }
 function* buildRelief(T, signs, tiles, modules, texture, detailed) {
-  const pieces = [], ranges = [], source = [], finishes2 = [];
+  const pieces = [], ranges = [], source = [], finishes = [];
   let offset = 0;
   for (const sign of signs) {
     const { mask, cells: cells2 } = tiles.get(sign.config.id);
     const imported = mask.markBounds && modules.get(sign.config.logoModule);
-    const model = imported && modelRelief(T, sign, imported, mask, finishes2);
+    const model = imported && modelRelief(T, sign, imported, mask, finishes);
     const lettering = detailed && letterGeometry(T, model ? { ...mask, ink: model.remaining } : mask, sign.config, sign.mount, cells2.fascia);
     if (lettering)
       lettering.setAttribute("signSolid", new T.Uint8BufferAttribute(lettering.attributes.position.count, 1));
@@ -5424,7 +4961,7 @@ function* buildRelief(T, signs, tiles, modules, texture, detailed) {
   index.setUsage(T.DynamicDrawUsage);
   geo.setIndex(index);
   geo.setDrawRange(0, 0);
-  const mat = reliefMaterial(T, texture, finishes2);
+  const mat = reliefMaterial(T, texture, finishes);
   const mesh = new T.Mesh(geo, mat);
   mesh.frustumCulled = false;
   mesh.name = "Near sign letter relief";
@@ -5761,6 +5298,511 @@ function addExpandedStorefronts(T, layout, scene, signs) {
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
 import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
+
+// demos/corporate/gjh/v11/assets/window-studios.js
+var cream = 15984077;
+var pearl = 16774111;
+var brass = 13279579;
+var oak = 11633494;
+var walnut = 6701359;
+var sage = 7767146;
+var charcoal = 2961458;
+var silver = 12895165;
+var white = 16250089;
+var shopIslandZ = -0.63;
+var pzhCartonX = 0.54;
+var pzhCartonStandingZ = shopIslandZ + 1.36;
+var shopLamp = 16770727;
+var finishes = {
+  4: [14864301, 10976642, 15785927],
+  5: [6898732, 9132600, 14927772],
+  6: [11700828, 12950889, 15390136],
+  7: [7745318, 9325877, 11897700],
+  8: [15656137, 2177385, 16050643],
+  9: [2570313, 1913422, 4673626],
+  10: [11322284, 7507064, 15919055],
+  11: [7684666, 8929852, 14996662],
+  12: [15329754, 11650471, 15526360],
+  13: [6703151, 3552823, 11444103],
+  14: [14929845, 13415316, 15656151],
+  15: [6309172, 6899253, 10255969],
+  16: [15856094, 11649071, 15855583],
+  17: [11175012, 4406329, 14468520]
+};
+function buildWindowStudio(n, t, width, depth, floorColour) {
+  const { box, column, disc, bar, arch, ring, ellipse, tapered, block, opaqueWall = box } = t;
+  const [wall, base, floor] = finishes[n];
+  const back = -depth / 2 + 0.38, front = depth / 2 - 0.18, side = width / 2 - 0.23, span = front - back, mid = (front + back) / 2;
+  const replace = t.replaceDisplay ?? ((build) => build());
+  const cabinet = (x, z, w, h, d, body, cap) => {
+    block(x, (h + 0.26) / 2, z, w + 0.09, h + 0.26, d + 0.09);
+    box(x, 0.12, z, w - 0.1, 0.23, d - 0.1, brass);
+    box(x, 0.18 + h / 2, z, w, h, d, body);
+    box(x, 0.21 + h, z, w + 0.09, 0.095, d + 0.09, cap);
+  };
+  function ovalCounter(x, z, width2, depth2, height, color) {
+    const radius = depth2 / 2, straight = width2 - depth2;
+    block(x, height / 2 + 0.07, z, width2 + 0.06, height + 0.12, depth2 + 0.06);
+    for (const [y, h, r, finish2] of [[0.16, 0.18, radius * 0.95, brass], [height / 2 + 0.13, height - 0.16, radius, color], [height + 0.075, 0.1, radius + 0.025, cream]]) {
+      box(x, y, z, straight, h, 2 * r, finish2);
+      for (const end of [-1, 1])
+        column(x + end * straight / 2, y, z, r, h, finish2);
+    }
+    return height + 0.125;
+  }
+  function blossomVase(x, y, z, petal) {
+    tapered(x, y + 0.17, z, 0.15, 0.2, 0.32, cream);
+    for (let i = 0;i < 7; i++) {
+      const angle = i * 2.4, dx = Math.cos(angle) * (0.2 + 0.03 * (i % 3)), dz = Math.sin(angle) * 0.17, top = y + 0.66 + i % 3 * 0.12;
+      bar(x, y + 0.26, z, x + dx, top, z + dz, 0.018, walnut);
+      for (let j = 0;j < 3; j++)
+        ellipse(x + dx + (j - 1) * 0.054, top - 0.04 * Math.abs(j - 1), z + dz, 0.066, 0.06, 0.059, petal, angle, 0);
+    }
+  }
+  function can(x, y, z, c, r = 0.105, h = 0.24) {
+    column(x, y + h / 2, z, r, h, c);
+    column(x, y + h + 0.015, z, r * 1.02, 0.03, brass);
+  }
+  function provisionDisplay(x, z, kind2) {
+    const checker = kind2 === "jar", c = checker ? 2506352 : base;
+    cabinet(x, z, 1.45, 0.49, 0.81, c, cream);
+    if (checker) {
+      for (let row = 0;row < 2; row++)
+        for (let j = 0;j < 6; j++)
+          if ((j + row) % 2)
+            box(x + (j - 2.5) * 0.22, 0.33 + row * 0.22, z + 0.416, 0.215, 0.215, 0.023, white);
+    }
+    for (let tier = 0;tier < 3; tier++) {
+      const count = 4 - tier, h = 0.79 + tier * 0.235;
+      for (let i = 0;i < count; i++) {
+        const px = x + (i - (count - 1) / 2) * 0.249;
+        if (kind2 === "pack")
+          box(px, h + 0.11, z, 0.222, 0.22, 0.21, i % 2 ? cream : oak);
+        else
+          can(px, h, z, i % 3 ? c : 13017455, 0.114, 0.2);
+      }
+    }
+  }
+  function shellFan(x, y, z, size) {
+    for (let i = -5;i <= 5; i++) {
+      const angle = i * 0.178, height = size * (1 - 0.19 * Math.abs(i) / 5);
+      const radius = 0.49 * height;
+      ellipse(x + Math.sin(angle) * radius, y + Math.cos(angle) * radius, z - 0.035 * Math.abs(i), 0.16 * size, height * 0.53, 0.095 * size, i % 2 ? 15457224 : pearl, 0, -angle);
+    }
+  }
+  const packColours = {
+    4: [7753864, 9021786, 15445064],
+    5: [10893613, 13015899, 7358266],
+    6: [14464359, 9859914, 15257228],
+    7: [11284525, 13606480, 4810836],
+    8: [2646168, 13598801, 4421548],
+    9: [2510729, 14724931, 4681111],
+    10: [5868930, 13547671, 8038302],
+    11: [11354433, 5864021, 14196343],
+    12: [8564121, 9476794, 13074816],
+    16: [11124537, 3571824, 5661285],
+    17: [7238254, 12156505, 5924463]
+  }[n];
+  const packColour = (index, fallback) => packColours?.[index % 3] ?? fallback;
+  function packageRow(x, y, z, count, step, kind2, c) {
+    for (let j = 0;j < count; j++) {
+      const px = x + (j - (count - 1) / 2) * step;
+      if (kind2 === "tin")
+        can(px, y, z, packColour(j, c));
+      else {
+        const h = kind2 === "pack" ? 0.31 : 0.24;
+        box(px, y + h / 2, z, 0.18, h, 0.13, packColour(j, c));
+        box(px, y + h * 0.43, z + 0.071, 0.14, 0.035, 0.018, j % 3 === 0 ? c : cream);
+      }
+    }
+  }
+  function shelf(x, z, w, kind2 = "tin", c = base, arched = false) {
+    block(x, 1.62, z + 0.2, w, 3.18, 0.57);
+    const frame = n >= 12 ? silver : brass;
+    box(x, 1.62, z, w, 3.18, 0.12, wall);
+    for (const s of [-1, 1])
+      box(x + s * (w / 2 - 0.045), 1.62, z + 0.21, 0.065, 3.16, 0.48, frame);
+    if (arched)
+      arch(x, 1.88, z + 0.17, w * 0.46, 0.66, 0.07, frame);
+    for (const h of [0.61, 1.34, 2.07, 2.8]) {
+      box(x, h, z + 0.23, w, 0.085, 0.5, oak);
+      box(x, h - 0.04, decalHeight(z + 0.48) - 0.0175, w - 0.05, 0.035, 0.035, shopLamp);
+      const featured = n === 4 && x === 0 || h === 2.07 && x < 0 && [5, 6, 7, 8, 10, 11, 12, 17].includes(n);
+      if (!featured)
+        packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind2, c);
+    }
+  }
+  function sideShelf(s, c = oak, kind2 = "tin") {
+    const x = s * (side - 0.29);
+    block(x - s * 0.18, 1.59, mid, 0.5, 3.13, span - 0.7);
+    box(x, 1.58, mid, 0.15, 3.02, span - 0.7, wall);
+    for (let row = 0;row < 4; row++) {
+      const y = 0.55 + row * 0.66;
+      box(x - s * 0.18, y, mid, 0.49, 0.095, span - 0.82, c);
+      box(x - s * 0.42, y - 0.035, mid, 0.025, 0.025, span - 0.9, shopLamp);
+      for (let i = 0;i < 9; i++) {
+        const z = back + 0.81 + i * (span - 1.66) / 8;
+        if (n === 4 && s === 1 && row === 2 && i === 3) {
+          for (const offset of [-0.084, 0.084]) {
+            box(x - 0.19, y + 0.194, z + offset, 0.14, 0.29, 0.147, pearl);
+            box(x - 0.264, y + 0.19, z + offset, 0.009, 0.083, 0.128, base);
+          }
+        } else if (kind2 === "tin")
+          can(x - s * 0.19, y + 0.05, z, packColour(i + row, base), 0.1, 0.21);
+        else
+          box(x - s * 0.19, y + 0.19, z, 0.14, 0.28, 0.2, packColour(i + row, base));
+      }
+    }
+    for (const z of [back + 0.4, mid, front - 0.41])
+      box(x - s * 0.26, 1.61, z, 0.08, 3.15, 0.07, brass);
+  }
+  function pendant(x, z, y, r, c = brass) {
+    column(x, (4.09 + y) / 2, z, 0.022, 4.09 - y, brass);
+    tapered(x, y, z, r * 0.46, r, 0.27, c);
+    column(x, y - 0.137, z, r * 0.89, 0.035, shopLamp);
+  }
+  function plant(x, z, h) {
+    const y = 0.46;
+    block(x, 0.35, z, 0.49, 0.65, 0.49);
+    tapered(x, y / 2 + 0.09, z, 0.23, 0.17, y, cream);
+    for (let k = 0;k < 6; k++) {
+      const a = k * 2.39, r = 0.26 + k % 2 * 0.09, dx = Math.cos(a) * r, dz = Math.sin(a) * r, top = h - k % 3 * 0.18;
+      bar(x, y, z, x + dx, top, z + dz, 0.026, 5466692);
+      ellipse(x + dx, top, z + dz, 0.12, 0.29, 0.08, k % 2 ? 6586443 : 9544543, a, dx);
+    }
+  }
+  function circleIsland(x, z, r, h, c) {
+    block(x, (h + 0.3) / 2, z, r * 2.06, h + 0.3, r * 2.06);
+    column(x, 0.16, z, r * 0.89, 0.18, brass);
+    column(x, 0.22 + h / 2, z, r, h, c);
+    column(x, 0.25 + h, z, r * 1.03, 0.1, cream);
+    return h + 0.31;
+  }
+  function ringLight(x, z, r, y) {
+    ring(x, y, z, r, 0.036, shopLamp);
+    for (const off of [-0.68, 0.68])
+      column(x + off * r, (4.11 + y) / 2, z, 0.012, 4.11 - y, brass);
+  }
+  function sofa(x, z, c) {
+    block(x, 0.39, z, 1.66, 0.78, 0.8);
+    box(x, 0.35, z, 1.6, 0.34, 0.77, c);
+    box(x, 0.59, z - 0.32, 1.61, 0.47, 0.19, c);
+    for (const k of [-1, 1])
+      box(x + k * 0.75, 0.52, z, 0.16, 0.32, 0.71, c);
+  }
+  block(0, 2.12, back, side * 2, 4.18, 0.13);
+  block(0, 4.19, mid, side * 2, 0.18, span);
+  for (const s of [-1, 1])
+    block(s * side, 2.1, mid, 0.13, 4.13, span);
+  block(0, 0.041, mid, side * 2, 0.08, span);
+  box(0, 0.041, mid, side * 2, 0.08, span, floorColour ?? floor, -2);
+  opaqueWall(0, 2.12, back, side * 2, 4.18, 0.13, wall);
+  box(0, 4.19, mid, side * 2, 0.18, span, cream, -3);
+  const pilasterSide = shopEntrance(expandedLayout.slots[n - 1]).normalX;
+  const { inset, depth: pierDepth } = atriumLayout.arcadePilaster;
+  const pilasterBack = depth / 2 - inset - pierDepth / 2;
+  for (const s of [-1, 1]) {
+    box(s * (side - 0.2), 4.082, mid, 0.4, 0.064, span, pearl, -3);
+    const wallEnd = s === pilasterSide ? pilasterBack : front;
+    opaqueWall(s * side, 2.1, (back + wallEnd) / 2, 0.13, 4.13, wallEnd - back, wall);
+    box(s * (side - 0.31), 4.05, mid, 0.065, 0.046, span - 0.6, shopLamp);
+    box(s * (side - 0.2), 0.19, mid, 0.15, 0.21, span, base);
+  }
+  for (const z of [back + 0.38, front - 0.46])
+    box(0, 4.04, z, width - 0.9, 0.045, 0.08, shopLamp);
+  for (const x of [-side * 0.64, 0, side * 0.64])
+    for (const z of [back + 1.3, mid + 0.25, front - 1.13])
+      column(x, 4.076, z, 0.078, 0.045, shopLamp);
+  if (n < 13 && n !== 10) {
+    if (n !== 5)
+      sideShelf(-1, oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
+    sideShelf(1, n === 5 ? walnut : oak, n === 4 || n === 6 || n === 12 ? "pack" : "tin");
+  }
+  box(0, 3.69, back + 0.46, 3.68, 0.47, 0.27, brass);
+  const exitZ = front - 0.04;
+  box(0, 3.78, exitZ, 0.67, 0.29, 0.07, 1662791);
+  for (const x of [-0.165, 0.165])
+    box(x, 3.78, exitZ - 0.044, 0.026, 0.207, 0.016, pearl);
+  box(0, 3.885, exitZ - 0.044, 0.35, 0.022, 0.016, pearl);
+  disc(0.045, 3.826, exitZ - 0.06, 0.03, 0.018, pearl);
+  bar(0.02, 3.794, exitZ - 0.059, -0.015, 3.74, exitZ - 0.059, 0.034, pearl);
+  bar(-0.008, 3.75, exitZ - 0.06, 0.045, 3.7, exitZ - 0.06, 0.024, pearl);
+  bar(-0.008, 3.75, exitZ - 0.06, -0.074, 3.717, exitZ - 0.06, 0.024, pearl);
+  const rear = back + 0.26, island = shopIslandZ;
+  const windowX = -side + 1.1, windowZ = front - 0.94;
+  if ([6, 7, 8, 9, 11].includes(n))
+    provisionDisplay(windowX, windowZ, n === 6 ? "pack" : n === 8 ? "jar" : "tin");
+  switch (n) {
+    case 4: {
+      for (let i = -1;i <= 1; i++)
+        shelf(i * 1.86, rear, 1.75, "pack", sage);
+      replace(() => {
+        const cx = -0.58, top = ovalCounter(cx, island, 2.85, 1.27, 1.16, 12949405);
+        for (let i = -6;i <= 6; i++)
+          box(cx + i * 0.115, 0.68, island + 0.64, 0.028, 0.91, 0.035, 13409948);
+        for (const end of [-1, 1])
+          for (let k = 0;k <= 8; k++) {
+            const a = k * Math.PI / 8;
+            column(cx + end * (0.79 + 0.63 * Math.sin(a)), 0.68, island + 0.63 * Math.cos(a), 0.018, 0.91, 13409948);
+          }
+        for (const x of [-1.17, -0.78])
+          can(x, top, island + 0.18, white, 0.1, 0.24);
+        blossomVase(-0.29, top, island - 0.2, 14000289);
+        for (const x of [-1.5, 0.38]) {
+          column(x, top + 0.21, island + 0.04, 0.032, 0.42, brass);
+          ellipse(x, top + 0.43, island + 0.04, 0.22, 0.17, 0.22, pearl, 0, 0);
+        }
+      }, sage);
+      pendant(-0.9, island, 3.26, 0.3, white);
+      plant(side - 0.96, front - 0.74, 1.6);
+      break;
+    }
+    case 5: {
+      for (let s = -1;s <= 1; s++)
+        shelf(s * 2.1, rear, 1.88, "tin", 13741441);
+      const wallX = -side + 0.25, nicheZ = mid + 0.46;
+      block(wallX + 0.14, 1.52, mid, 0.56, 3.02, span - 0.66);
+      box(wallX, 1.54, mid, 0.32, 2.98, span - 0.66, walnut);
+      const columns = Math.floor((span - 0.8) / 0.63), pitch = (span - 0.8) / columns;
+      for (let i = 0;i < columns; i++)
+        for (let j = 0;j < 5; j++) {
+          const z = back + 0.5 + (i + 0.5) * pitch, y = 0.47 + j * 0.48;
+          if (Math.abs(z - nicheZ) < 1.12 && y > 0.7)
+            continue;
+          box(wallX + 0.175, y, z, 0.08, 0.445, pitch - 0.035, 9132600);
+          ellipse(wallX + 0.237, y, z, 0.035, 0.046, 0.075, brass, 0, 0);
+        }
+      ellipse(wallX + 0.22, 1.95, nicheZ, 0.045, 1.07, 1.07, brass, 0, 0);
+      ellipse(wallX + 0.27, 1.95, nicheZ, 0.048, 1, 1, 4928551, 0, 0);
+      for (const y of [1.43, 2.14]) {
+        box(wallX + 0.37, y, nicheZ, 0.34, 0.06, 1.65, oak);
+        for (const dz of [-0.35, 0.34]) {
+          ellipse(wallX + 0.42, y + 0.19, nicheZ + dz, 0.14, 0.17, 0.15, pearl, 0, 0);
+          tapered(wallX + 0.42, y + 0.37, nicheZ + dz, 0.098, 0.08, 0.13, pearl);
+        }
+      }
+      cabinet(0, island, 2.5, 0.99, 1.24, walnut, oak);
+      blossomVase(-0.98, 1.2475, island - 0.14, 9873258);
+      box(pzhCartonX, 1.365, island + 0.27, 0.28, 0.234, 0.151, 12202795);
+      box(pzhCartonX, 1.471, island + 0.27, 0.278, 0.022, 0.15, 11893055);
+      box(pzhCartonX, 1.371, island + 0.349, 0.235, 0.063, 0.007, 14264925);
+      break;
+    }
+    case 6: {
+      for (const x of [-2.04, 2.04])
+        shelf(x, rear, 1.7, "pack", 13344615);
+      arch(0, 0.3, rear + 0.18, 1.07, 1.41, 0.15, cream);
+      for (const h of [0.75, 1.45]) {
+        box(0, h, rear + 0.26, 2.13, 0.07, 0.4, oak);
+        for (const x of [-0.69, -0.2, 0.51])
+          tapered(x, h + 0.17, rear + 0.25, 0.16, 0.09, 0.28, pearl);
+      }
+      replace(() => {
+        cabinet(-0.36, island, 2.78, 0.92, 1.26, oak, cream);
+        for (const offset of [-0.84, -0.28, 0.28, 0.84]) {
+          const centre = -0.36 + offset;
+          for (let j = -3;j <= 3; j++) {
+            const h = 0.77 + j % 2 * 0.07 + (offset > 0 ? 0.08 : 0);
+            box(centre + j * 0.043, 3.03 - h / 2, island - 0.15, 0.029, h, 0.04, j % 2 ? 14859126 : 15454102);
+          }
+        }
+        box(-0.36, 3.08, island - 0.15, 2.53, 0.076, 0.11, brass);
+        for (const x of [-1.43, 0.71])
+          bar(x, 3.08, island - 0.15, x, 3.96, island - 0.15, 0.031, brass);
+      }, oak);
+      for (let z = back + 0.8;z < front; z += 1.36)
+        box(0, 3.96, z, side * 2, 0.12, 0.15, oak);
+      break;
+    }
+    case 7: {
+      for (let i = -1;i <= 1; i++)
+        shelf(i * 1.93, rear, 1.79, "tin", 10962482, true);
+      for (const x of [-1, 1])
+        pendant(x, mid + 1.2, 2.91, 0.34, brass);
+      for (const dx of [-1.85, 0, 1.85])
+        box(dx, 4.015, mid, 0.075, 0.12, span - 0.6, walnut);
+      for (let z = back + 0.83;z < front; z += 1.82)
+        box(0, 4.01, z, side * 2 - 0.45, 0.14, 0.12, walnut);
+      for (const [r, y, count] of [[0.72, 3.43, 20], [0.45, 3.17, 14]]) {
+        ringLight(-2.07, mid - 0.88, r * 0.78, y);
+        for (let j = 0;j < count; j++) {
+          const a = j * Math.PI * 2 / count;
+          tapered(-2.07 + r * 0.78 * Math.cos(a), y - 0.111, mid - 0.88 + r * 0.78 * Math.sin(a), 0.05, 0.028, 0.21, j % 3 ? pearl : shopLamp);
+        }
+      }
+      replace(() => {
+        const top = circleIsland(0, island, 1.14, 0.82, walnut);
+        column(0, top + 0.13, island, 0.72, 0.26, brass);
+        for (let level = 0;level < 3; level++)
+          for (let j = 0;j < 5 - level; j++)
+            can((j - (4 - level) / 2) * 0.24, top + 0.27 + level * 0.269, island, 11159096);
+      }, base);
+      break;
+    }
+    case 8: {
+      for (const x of [-1.96, 1.96])
+        shelf(x, rear, 1.54, "tin", 4615323, true);
+      disc(0, 1.92, rear + 0.13, 1.08, 0.11, base);
+      box(0, 1.17, rear + 0.132, 2.16, 1.5, 0.11, base);
+      arch(0, 0.42, rear + 0.223, 1.08, 1.5, 0.072, brass);
+      for (const [x, y, rx, ry] of [[-0.32, 1.84, 0.39, 0.29], [0.06, 2.01, 0.23, 0.143], [0.38, 2.17, 0.32, 0.22]])
+        ellipse(x, y, rear + 0.25, rx, ry, 0.11, 14197583, 0, 0.37);
+      for (const [x, y] of [[-0.43, 1.8], [-0.22, 1.89], [0.29, 2.13], [0.47, 2.21]]) {
+        bar(x - 0.052, y - 0.07, rear + 0.352, x + 0.052, y + 0.07, rear + 0.352, 0.018, 12094281);
+        bar(x + 0.06, y - 0.05, rear + 0.352, x - 0.06, y + 0.05, rear + 0.352, 0.017, 12094281);
+      }
+      replace(() => {
+        const top = circleIsland(0, island, 1.08, 0.85, base);
+        for (let i = 0;i < 32; i++) {
+          const a = i * Math.PI / 16;
+          column(1.07 * Math.cos(a), 0.66, island + 1.07 * Math.sin(a), 0.035, 0.78, 4682138);
+        }
+        for (let i = -2;i <= 2; i++)
+          can(i * 0.28, top, island, 13805164, 0.12, 0.33);
+      }, base);
+      for (const x of [-1.83, 1.83])
+        pendant(x, mid + 0.2, 3.1, 0.45, cream);
+      break;
+    }
+    case 9: {
+      disc(0, 1.63, rear + 0.06, 1.58, 0.13, 14395189);
+      box(0, 0.98, rear + 0.062, 3.16, 1.31, 0.13, 14395189);
+      for (let k = 0;k < 3; k++) {
+        const w = 2.48 - 0.43 * k;
+        box(0, 0.85 + k * 0.52, rear + 0.36, w, 0.08, 0.43, brass);
+      }
+      const cx = -0.48;
+      replace(() => {
+        ovalCounter(cx, island, 2.58, 1.13, 1.01, base);
+        for (let j = -5;j <= 5; j++)
+          box(cx + j * 0.143, 0.62, island + 0.563, 0.025, 0.74, 0.027, 4281451);
+      }, base);
+      for (const z of [mid + 0.35, mid - 2.65]) {
+        column(2.3, 3.54, z, 0.025, 1.04, brass);
+        for (const [y, r] of [[3.16, 0.52], [3.04, 0.35], [2.95, 0.19]]) {
+          tapered(2.3, y, z, r * 0.62, r, 0.1, brass);
+          column(2.3, y - 0.054, z, r * 0.89, 0.025, shopLamp);
+        }
+      }
+      plant(side - 1.15, rear + 1.31, 1.78);
+      break;
+    }
+    case 10:
+      for (const s of [-1, 1]) {
+        const x = s * (side - 1), z = front - 1.5;
+        shellFan(x, 0.62, z, 1.97);
+        shellFan(x + s * 0.31, 0.56, z + 0.29, 1);
+        circleIsland(x, z + 0.05, 0.65, 0.53, base);
+        shelf(s * 2.1, rear, 1.58, "tin", sage, true);
+      }
+      replace(() => circleIsland(0, island, 1.2, 0.79, base), base);
+      for (let i = 0;i < 4; i++)
+        pendant(2.15 + 0.29 * Math.sin(i * 2.4), mid - 0.66 + i * 0.38, 3.13 + i * 0.12, 0.13, pearl);
+      break;
+    case 11:
+      for (let i = -1;i <= 1; i++)
+        shelf(i * 1.83, rear, 1.73, "tin", 9059902);
+      replace(() => {
+        block(0, 0.58, island, 2.74, 1.16, 1.24);
+        for (const x of [-1.21, 1.21])
+          for (const dz of [-0.46, 0.46])
+            box(x, 0.6, island + dz, 0.14, 1.05, 0.14, walnut);
+        box(0, 1.08, island, 2.74, 0.17, 1.24, oak);
+        for (const x of [-0.75, 0, 0.75]) {
+          box(x, 0.39, island, 0.64, 0.46, 0.62, oak);
+          for (let j = -1;j <= 1; j++)
+            ellipse(x + j * 0.17, 1.27, island, 0.1, 0.12, 0.1, j % 2 ? sage : 11230529, 0, 0);
+        }
+      }, base);
+      pendant(-0.69, mid, 3, 0.38, base);
+      pendant(0.69, mid, 3, 0.38, base);
+      break;
+    case 12:
+      for (const x of [-2.2, 2.2])
+        shelf(x, rear, 1.43, "pack", base, true);
+      replace(() => {
+        circleIsland(0, island, 1.1, 0.72, white);
+        packageRow(0.1, 1.18, island + 0.11, 4, 0.23, "pack", base);
+      }, base);
+      for (const x of [-side + 0.88, side - 0.88])
+        plant(x, front - 0.87, 1.64);
+      ringLight(0, mid, 1.38, 3.76);
+      break;
+    case 13:
+      for (let i = -15;i <= 15; i++)
+        box(i * 0.185, 1.95, rear, 0.085, 3.67, 0.12, i % 3 ? walnut : oak);
+      replace(() => {
+        sofa(-1.46, island, 10786692);
+        sofa(0.44, mid - 1.66, 7891807);
+      }, charcoal);
+      circleIsland(0.68, island + 0.48, 0.39, 0.32, walnut);
+      for (const x of [-2.5, 2.5]) {
+        block(x, 1.09, rear + 0.58, 0.46, 1.99, 0.5);
+        box(x, 1.09, rear + 0.58, 0.43, 1.99, 0.44, charcoal);
+        for (const y of [0.72, 1.41])
+          disc(x, y, rear + 0.826, 0.135, 0.036, silver);
+      }
+      ringLight(0, mid + 0.06, 1.12, 3.69);
+      plant(-side + 0.7, front - 0.85, 1.53);
+      for (const s of [-1, 1]) {
+        cabinet(s * (side - 0.65), mid, 0.65, 0.72, 2.8, walnut, base);
+        for (let i = 0;i < 3; i++)
+          box(s * (side - 0.72), 1.19, mid + (i - 1) * 0.92, 0.28, 0.48, 0.3, charcoal);
+      }
+      break;
+    case 14:
+      for (const x of [-1.36, 1.36])
+        arch(x, 0.21, rear + 0.11, 1.13, 1.98, 0.12, shopLamp);
+      sofa(-0.86, mid, cream);
+      circleIsland(0.71, island, 0.52, 0.37, oak);
+      ringLight(0, mid, 1.38, 3.72);
+      for (const x of [-side + 0.61, -side + 1.3]) {
+        block(x, 1.24, mid + 1, 0.62, 2.23, 0.66);
+        box(x, 1.24, mid + 1, 0.61, 2.23, 0.64, silver);
+        box(x, 1.44, mid + 1.34, 0.49, 0.035, 0.04, charcoal);
+      }
+      plant(-side + 0.81, front - 0.85, 1.61);
+      break;
+    case 15:
+      for (let i = -5;i <= 5; i++)
+        box(i * 0.58, 4.04, mid, 0.23, 0.065, span - 0.28, 13283214);
+      replace(() => cabinet(-1.05, mid - 0.59, 1.78, 0.9, 1.11, walnut, oak), walnut);
+      block(1.1, 0.65, mid - 0.9, 1.64, 1.29, 0.92);
+      block(1.1, 0.34, mid + 0.16, 1.01, 0.7, 0.5);
+      for (const x of [0.46, 1.73])
+        box(x, 0.51, mid - 0.87, 0.13, 0.84, 0.13, charcoal);
+      box(1.1, 1.1, mid - 0.93, 1.63, 0.36, 0.72, charcoal);
+      for (let i = 0;i < 19; i++)
+        box(0.38 + i * 0.08, 1.2, mid - 0.51, 0.074, 0.05, 0.25, pearl);
+      box(1.1, 0.61, mid + 0.16, 0.99, 0.16, 0.49, charcoal);
+      for (const x of [0.74, 1.46])
+        box(x, 0.33, mid + 0.16, 0.08, 0.48, 0.36, walnut);
+      pendant(-1.36, mid - 1.3, 2.94, 0.26, brass);
+      break;
+    case 16:
+      replace(() => cabinet(-1.62, island, 1.48, 0.78, 0.98, base, white), base);
+      cabinet(1.62, island + 0.32, 1.48, 0.78, 0.98, base, white);
+      sideShelf(-1, silver, "pack");
+      ringLight(0, mid, 1.14, 3.69);
+      plant(side - 0.71, front - 1.08, 1.47);
+      break;
+    case 17:
+      for (const x of [-side + 0.71, side - 0.71])
+        shelf(x, rear + 0.24, 0.99, "pack", charcoal);
+      {
+        const top = circleIsland(0, island, 1.12, 0.85, base);
+        for (const x of [-0.54, 0, 0.54]) {
+          box(x, top + 0.04, island, 0.25, 0.09, 0.22, charcoal);
+          box(x, top + 0.25, island - 0.02, 0.15, 0.38, 0.077, charcoal);
+          box(x, top + 0.3, island + 0.024, 0.105, 0.12, 0.012, 12308936);
+        }
+      }
+      ringLight(0, mid, 1.24, 3.56);
+      ringLight(0, mid, 0.72, 3.75);
+      plant(-side + 0.82, front - 0.8, 1.42);
+      break;
+  }
+}
 
 // demos/corporate/gjh/v11/assets/shop-anchor-details-last.js
 var brass2 = 13215085;
@@ -6856,7 +6898,7 @@ var roomDetails = {
   },
   S08: {
     file: "s08-skippy-details.glb",
-    bytes: 46692,
+    bytes: 71800,
     roomDetail: true
   },
   S09: {
@@ -8902,6 +8944,13 @@ metalnessFactor=vSurface.y;`);
         } else if (id === "S05") {
           const [x, , z] = worldInteriorPoint(store2, [pzhCartonX, 0, pzhCartonStandingZ]);
           interactables.push({ id: "pzh-carton-story", x, z, radius: 1 });
+        } else if (westFoodFocalExhibits[id]) {
+          const exhibit = westFoodFocalExhibits[id];
+          const [standingX, standingZ] = store2.anchor.standing;
+          const [x, , z] = worldInteriorPoint(store2, [standingX, 0, standingZ]);
+          const plaque = sign(exhibit.caption, ...worldInteriorPoint(store2, exhibit.panel), 1.02, 0.15, true, 65);
+          plaque.rotation.y = store2.frame.yaw_world_deg * Math.PI / 180;
+          interactables.push({ id: exhibit.id, x, z, radius: 1 });
         }
         for (const footprint of store2.colliders) {
           const { center: [x, , z], size: [w, , d], yaw } = worldInteriorBox(store2, footprint);
@@ -9090,7 +9139,7 @@ metalnessFactor=vSurface.y;`);
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
     let upperWarmStatus = null, landingLights;
     let brandWallPromise = null;
-    return { signage, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit } : {}, getPreloadedModels() {
+    return { signage, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...westFoodExhibits } : {}, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;

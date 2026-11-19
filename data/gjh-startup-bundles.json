@@ -38,7 +38,7 @@
     "demos/corporate/gjh/v11/assets/interiors/baked-layout.js": "9e5d8198dc2e11ff1499df8aaf613c450ca3c37356c09cfd0b72533c893bc2fb",
     "demos/corporate/gjh/v11/assets/interiors/config.js": "ae83db579ee90f3e996038c524bff9b457f381ccd628a6a13a28ab3488afc75a",
     "demos/corporate/gjh/v11/assets/interiors/decoration.js": "7ff4b5ca9736af48725b68adbd73828936cf4919c76861934a033d57dc2b7837",
-    "demos/corporate/gjh/v11/assets/interiors/detail-files.js": "0f0daeee5a74bb9abd1269c55591f2647c3490951c21830e626eb7dcf1de1790",
+    "demos/corporate/gjh/v11/assets/interiors/detail-files.js": "bab093c59a86afa5be53795e3866b149326e546df3cbf48fd0e56611a5701e94",
     "demos/corporate/gjh/v11/assets/interiors/layout.js": "f0125bb6b19fd940250ddb5bf269ecf2167435cd7a609351e7b93c595da8cd1c",
     "demos/corporate/gjh/v11/assets/interiors/mili-seats.js": "3f4669987acae20b8ad4c5ef1da73f9614e41d9e1aad340984e63062e9680726",
     "demos/corporate/gjh/v11/assets/interiors/models.js": "0a27dbbd010ce43cbdb3c69b3185cdb36d53e3ed6fbaeabe88cb0bcb51363167",
@@ -98,13 +98,14 @@
     "demos/corporate/gjh/v11/assets/visitor-v2-contact.js": "93a63517fa6e067bd29dae5d33e852a14569f44426d3dca8a0c4d88926ccca4b",
     "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "06f77543852578d8d3e11de82e8d0e6b9e063b32ac37e5655d986d3229da165d",
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "4e8a3bd91ab8d507f8fed9e6b0ed8b8d0e2686ac9130a5f757a231c6bacdff2d",
+    "demos/corporate/gjh/v11/assets/west-food-exhibits.js": "e26a9e7c34fec9f11514a0088799abd866816ce695c7a47a32b47697b64dbcb3",
     "demos/corporate/gjh/v11/assets/window-studios.js": "67a9048d9a1a9992e36fa601e2b5e33708bcb9d60064c7d8f85982637ca07dbb",
-    "demos/corporate/gjh/v11/assets/world.js": "2861edefda45f46c043a3dee744a9d87967bdd1da5f2c70abf26e911db287e62",
+    "demos/corporate/gjh/v11/assets/world.js": "5d77ca25f4aa035cfd5c09e058597d065b29e6d4647fb04dc5d239cbe81da7b9",
     "demos/corporate/gjh/v11/script.js": "1f20f0970a970ced5b96373ae88b2efe2f05eb1d33ad13c75d8a9606e339f821"
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "f4ef599f6a780971c75acd431cab4a455a4751f579540964d7d662fd07b30382",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "110817c9e2e513d12ce03897da4ee553b02d208e26dc6a05b353d43cf104b9ab",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "a432599b88c7de0101352a38e4d40018ef77fa145a3be27bd6ec8d7566cb1255",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "690235d9d813785d9b63c86fe872c8fdd79dbc4e4e99e7794a0c3755603a5fa1",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "3e0c6cfaf1bbd5eb78e5361af0e4204ed158af51701f6763669ee2db3754784f"
   }
