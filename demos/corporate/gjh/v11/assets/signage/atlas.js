@@ -243,6 +243,12 @@ export async function bakeAtlas(configs,assetBase) {
       const face=canvas(w,h), painter=face.getContext('2d');
       finish(painter,w,h,c);
       const {mask,relief,markBounds}=lockup(painter,w,h,c,logo,neutral,kind==='blade');
+      if (c.faceGlaze) {
+        painter.globalAlpha = c.faceGlaze.opacity;
+        painter.fillStyle = c.faceGlaze.colour;
+        painter.fillRect(0,0,w,h);
+        painter.globalAlpha = 1;
+      }
       draw(ctx,face,r);
       if(kind==='fascia'){
         // Alpha stores the near-field emissive mask in the existing RGBA texture.

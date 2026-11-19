@@ -235,6 +235,8 @@ test('bundled world starts and submits an expanded Low and Detailed frame with b
     assert.ok(renderer.info.render.calls>0);
     assert.equal(world.scene.getObjectByName(floorName).visible,true);
     assert.ok(dapple.visible);
+    assert.equal(dapple.material.blending,T.AdditiveBlending);
+    assert.equal(dapple.material.toneMapped,world.contact.toneMapped);
     assert.equal(dapple.material.type,world.contact.type);
     assert.equal(dapple.material.customProgramCacheKey(),world.contact.customProgramCacheKey());
     assert.equal(dapple.material.map.colorSpace,T.SRGBColorSpace);

@@ -97,12 +97,13 @@ export function createMallBakedLighting(T, scene, {floors, ceilings, contact, ph
   return {prepare,setTier};
 }
 
-// The atlas blends pale sun and cool penumbra into the stone at low alpha.
-// Keep the same shader layout as the contact decal.
+// The atlas adds sunlit panes and leaves their mottled shadows clear.
+// Blending is render state, so this still uses the contact decal program.
 export function createSkylightDapple(T, scene, {panels, projection, contact, prepareModel,
   load = url => new T.TextureLoader().loadAsync(url)
 }) {
   const material = contact.clone();
+  material.blending = T.AdditiveBlending;
   const mesh = createLayer(T,panels,material,false,projection);
   mesh.name = 'Atrium skylight tree shadow';
   mesh.renderOrder = -2;
@@ -135,7 +136,7 @@ export function createSkylightDapple(T, scene, {panels, projection, contact, pre
   function update(tier, reducedMotion, now = performance.now()) {
     if (!map) return;
     const drift = (tier === 'balanced' || tier === 'detailed') && !reducedMotion ? now : 0;
-    map.offset.set(.028*Math.sin(drift/53000), .020*Math.sin(drift/50000));
+    map.offset.set(.008*Math.sin(drift/67000), .006*Math.sin(drift/59000));
   }
   return {prepare,update};
 }

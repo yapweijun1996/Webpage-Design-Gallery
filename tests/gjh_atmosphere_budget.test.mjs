@@ -72,7 +72,7 @@ test('surface atmosphere batches Low coves and desktop washes separately and dis
     return {roughness:floor.roughness, emission:fixture.material.emissiveIntensity, opacity:wash.material.opacity};
   });
   const [low, balanced, detailed, recovered] = observed;
-  assert.deepEqual(low,{roughness:.39,emission:1.2,opacity:.58});
+  assert.deepEqual(low,{roughness:.39,emission:1.2,opacity:.86});
   assert.deepEqual(recovered,low);
   assert.ok(detailed.roughness < balanced.roughness && balanced.roughness < low.roughness);
   assert.ok(detailed.emission > balanced.emission && balanced.emission > low.emission);

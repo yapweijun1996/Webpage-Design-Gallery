@@ -53,11 +53,11 @@ class LightingScoreTest(unittest.TestCase):
         with Image.open(path) as image:
             self.assertEqual(score.outside_limits(score.measure(image)), [])
 
-    def test_skylight_projection_has_bounded_warm_sun_and_cool_shade(self):
+    def test_skylight_projection_has_soft_warm_panes_and_tree_shadows(self):
         with Image.open(dapple.OUTPUT) as image:
             self.assertEqual(image.tobytes(), dapple.build().tobytes())
             alpha = image.getchannel('A')
-            self.assertLessEqual(alpha.getextrema()[1], 61)
+            self.assertEqual(alpha.getextrema(), (0, dapple.MAX_ALPHA))
             gutter = 18
             for box in ((0, 0, image.width, gutter),
                         (0, image.height - gutter, image.width, image.height),
@@ -66,5 +66,10 @@ class LightingScoreTest(unittest.TestCase):
                 self.assertIsNone(alpha.crop(box).getbbox())
             pixels = getattr(image, 'get_flattened_data', image.getdata)()
             visible = {(r, g, b) for r, g, b, a in pixels if a >= 24}
-            self.assertIn(dapple.SUN, visible)
-            self.assertIn(dapple.PENUMBRA, visible)
+            self.assertEqual(visible, {dapple.SUN})
+            # At the atlas midpoint there is bright sun on both sides of a mullion.
+            row = image.height // 2
+            mullion = image.width // 2
+            self.assertLessEqual(alpha.getpixel((mullion,row)), 6)
+            self.assertGreater(alpha.getpixel((mullion-18,row)), 10)
+            self.assertGreater(alpha.getpixel((mullion+18,row)), 10)

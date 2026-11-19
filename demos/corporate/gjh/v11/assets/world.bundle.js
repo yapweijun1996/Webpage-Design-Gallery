@@ -1145,6 +1145,7 @@ var lounge = (id, x) => Object.freeze({
   planters: Object.freeze([point(x - 2.35, 27), point(x + 2.35, 27)])
 });
 var atriumLayout = Object.freeze({
+  anchorPierXs: Object.freeze([-14.9, -5, 5, 14.9]),
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
@@ -1196,6 +1197,10 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
   for (const x of [1.87, 18.13]) {
     box("ivory", x, 5.08, 33.3, 0.46, 0.45, 29);
     box("brass", x, 4.86, 33.3, 0.47, 0.075, 29);
+    box("glow", x, 4.815, 33.3, 0.055, 0.036, 28.8);
+    for (const z of [21.7, 27.5, 33.3, 39.1, 44.9]) {
+      lightWash?.(x, 4.79, z, 1.1, 6.3, 0, Math.PI / 2, true);
+    }
     const inward = x < 10 ? 1 : -1;
     const turn = inward * Math.PI / 2;
     const piers = [19.05, 24.8, 30.55, 36.3, 42.05, 47.55];
@@ -1214,7 +1219,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       }
     }
   }
-  materials.paving = new T.MeshStandardMaterial({ color: 12168607, roughness: 0.37, metalness: 0.03 });
+  materials.paving = new T.MeshStandardMaterial({ color: 13483950, roughness: 0.34, metalness: 0.09 });
   const pavingURL = new URL("concourse-limestone.webp", import.meta.url);
   new T.TextureLoader().load(pavingURL.href, (map) => {
     map.colorSpace = T.SRGBColorSpace;
@@ -1253,8 +1258,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     map.anisotropy = 4;
     materials.courtStone.map = map;
   }
-  materials.courtStone.color.set(12763574);
-  materials.courtStone.metalness = 0.03;
+  materials.courtStone.color.set(13224896);
+  materials.courtStone.metalness = 0.07;
   materials.courtStone.roughness = 0.33;
   box("courtStone", 10, -0.006, 33, 6.05, 0.009, 29.6);
   for (const x of [6.95, 13.05]) {
@@ -1271,7 +1276,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       box(timber, front + inside * 0.7, soffitY, z, 1.55, soffitHeight, 7.96);
       box("ivory", front + inside * 1.47, 6.02, z, 0.16, 0.52, 8);
       box("glow", front + inside * 1.38, 5.77, z, 0.06, 0.035, 7.75);
-      lightWash?.(front + inside * 1.3, 5.791, z, 0.75, 7.8, 0, Math.PI / 2, true);
+      lightWash?.(front + inside * 1.3, 5.791, z, 0.92, 7.8, 0, Math.PI / 2, true);
+      lightWash?.(front + inside * 1.555, 5.92, z, 7.8, 0.77, inside * Math.PI / 2, 0, true);
       for (const dz of [-2.45, 2.45]) {
         box("brass", front + inside * 0.77, 5.78, z + dz, 0.31, 0.06, 0.31);
         box("glow", front + inside * 0.77, 5.737, z + dz, 0.21, 0.04, 0.21);
@@ -1422,7 +1428,7 @@ totalEmissiveRadiance *= vColor;`);
   for (const lounge2 of atriumLayout.lounges) {
     const planter = lounge2.planters[lounge2.id === "west" ? 1 : 0];
     tree(planter.x, planter.z, 4.2);
-    lightPool(planter.x, 0.091, planter.z, 2.2, 2.2);
+    lightPool(planter.x, 0.023, planter.z, 2.2, 2.2);
   }
   for (const z of [8.37, 11.63])
     box("oak", -4.99, 5.27, z, 0.3, 3.14, 0.37);
@@ -1441,6 +1447,7 @@ totalEmissiveRadiance *= vColor;`);
       }
     }
     tree(x, z, 4.55);
+    lightPool(x, 0.023, z, 2.8, 2.8);
   }
   for (let bay = 0;bay < 5; bay++) {
     for (const north of [true, false]) {
@@ -2872,9 +2879,9 @@ var presets = Object.freeze({
 // demos/corporate/gjh/v11/assets/signage/config.js
 var store = (preset2, options = {}) => ({ preset: preset2, ...options });
 var stores = Object.freeze({
-  S01: store("t1-classic", { relief: true, logoModule: "sign_logo3d_new_moon", logoRegion: [6 / 675, 5 / 139, 96 / 675, 129 / 139] }),
+  S01: store("t1-classic", { relief: true, palette: { fascia: "#3d483f" }, faceGlaze: { colour: "#7d786d", opacity: 0.14 }, logoModule: "sign_logo3d_new_moon", logoRegion: [6 / 675, 5 / 139, 96 / 675, 129 / 139] }),
   S02: store("t3-cafe", { relief: true, fasciaInkHeight: 0.88 }),
-  S03: store("t8-kids", { letterInk: "dark" }),
+  S03: store("t8-kids", { letterInk: "dark", faceGlaze: { colour: "#000000", opacity: 0.15 }, palette: { fascia: "#ccbaa5" } }),
   S04: store("t6-beauty", { carrier: true, caption: true, letterInk: "pale", inkRegion: [0, 0, 1, 0.64] }),
   S05: store("heritage-red", { caption: true, captionLogoWidth: 0.14 }),
   S06: store("t5-book", { carrier: true, letterInk: "all", inkRegion: [0.45, 0, 0.55, 1] }),
@@ -2956,6 +2963,9 @@ function resolveConfig(id, settings, bay, kit, receipts) {
     size,
     palette: { ...preset2.palette, fascia, accent, ...settings.palette }
   };
+  const glaze = config.faceGlaze;
+  if (glaze && (!/^#[0-9a-f]{6}$/i.test(glaze.colour) || !Number.isFinite(glaze.opacity) || glaze.opacity < 0 || glaze.opacity > 0.25))
+    throw Error(id + " invalid face glaze");
   if (!(config.captionLogoWidth >= 0.12 && config.captionLogoWidth <= 0.3))
     throw Error(id + " invalid caption logo width");
   if (!(config.fasciaInkHeight >= 0.5 && config.fasciaInkHeight <= 0.92))
@@ -4752,6 +4762,12 @@ async function bakeAtlas(configs, assetBase) {
       const face = canvas(w, h), painter = face.getContext("2d");
       finish(painter, w, h, c);
       const { mask, relief, markBounds } = lockup(painter, w, h, c, logo, neutral, kind2 === "blade");
+      if (c.faceGlaze) {
+        painter.globalAlpha = c.faceGlaze.opacity;
+        painter.fillStyle = c.faceGlaze.colour;
+        painter.fillRect(0, 0, w, h);
+        painter.globalAlpha = 1;
+      }
       draw(ctx, face, r);
       if (kind2 === "fascia") {
         const pixels = ctx.getImageData(r.x, r.y, r.w, h), aux = canvas(r.w, h), auxCtx = aux.getContext("2d");
@@ -5411,7 +5427,7 @@ function addExpandedStorefronts(T, layout, scene, signs) {
   const batches = {
     frame: { material: new T.MeshStandardMaterial({ color: 1059362, roughness: 0.29, metalness: 0.16 }), matrices: [] },
     brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.78, roughness: 0.28 }), matrices: [] },
-    accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], slots: [] },
+    accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], colours: [] },
     glass: { material: new T.MeshBasicMaterial({
       color: 12179920,
       transparent: true,
@@ -5425,7 +5441,7 @@ function addExpandedStorefronts(T, layout, scene, signs) {
     const number = Number(bay.number);
     const { x, z, alongX: cos, normalX: sin, yaw: angle } = shopEntrance(bay);
     const width = (bay.side === "north" ? bay.maxX - bay.minX : bay.maxZ - bay.minZ) - 0.6;
-    const box = (kind2, along, y, depth, w, h, d, leaf = 0) => {
+    const box = (kind2, along, y, depth, w, h, d, leaf = 0, colour) => {
       transform.position.set(x + along * cos + depth * sin, y, z - along * sin + depth * cos);
       transform.rotation.set(0, angle, 0);
       transform.scale.set(w, h, d);
@@ -5437,7 +5453,7 @@ function addExpandedStorefronts(T, layout, scene, signs) {
         slidingParts.get(bay.number).push({ kind: kind2, index: batches[kind2].matrices.length - 1, dx: leaf * cos, dz: -leaf * sin });
       }
       if (kind2 === "accent")
-        batches.accent.slots.push(bay.number);
+        batches.accent.colours.push(colour ?? signs.get("S" + bay.number).palette.accent);
     };
     if (number <= 3) {
       box("accent", 0, 5.55, 0.32, width, 0.14, 0.24);
@@ -5456,7 +5472,7 @@ function addExpandedStorefronts(T, layout, scene, signs) {
     box("brass", 0, 3.94, 0.22, 2.65, 0.055, 0.08);
     for (const side of [-1, 1]) {
       box("glass", side * windowCenter, 2.17, 0, windowWidth, 3.35, 0.06);
-      box("frame", side * windowCenter, 0.25, 0.07, windowWidth, 0.5, 0.22);
+      box(number === 14 ? "accent" : "frame", side * windowCenter, 0.25, 0.07, windowWidth, 0.5, 0.22, 0, 9601130);
       box("brass", side * windowCenter, 0.51, 0.2, windowWidth, 0.045, 0.05);
       box("frame", side * (width / 2 - 0.07), 2.02, 0.08, 0.14, 4.04, 0.24);
       box("frame", side * 1.3, 2.02, 0.08, 0.12, 4.04, 0.24);
@@ -5475,11 +5491,9 @@ function addExpandedStorefronts(T, layout, scene, signs) {
       continue;
     const mesh = new T.InstancedMesh(geometry, batch.material, batch.matrices.length);
     batch.matrices.forEach((matrix, index) => mesh.setMatrixAt(index, matrix));
-    if (batch.slots) {
+    if (batch.colours) {
       const color = new T.Color;
-      batch.slots.forEach((slot2, index) => {
-        mesh.setColorAt(index, color.set(signs.get("S" + slot2).palette.accent));
-      });
+      batch.colours.forEach((tint2, index) => mesh.setColorAt(index, color.set(tint2)));
       mesh.instanceColor.needsUpdate = true;
     }
     mesh.name = `Expanded storefront ${kind2}`;
@@ -7857,9 +7871,9 @@ function addFeatureKiosk({ x, z, box, cylinder, sign }) {
 
 // demos/corporate/gjh/v11/assets/mall-atmosphere.js
 var SURFACES = {
-  low: { roughness: 1, emission: 1, washOpacity: 0.58 },
-  balanced: { roughness: 0.91, emission: 1.04, washOpacity: 0.61 },
-  detailed: { roughness: 0.82, emission: 1.1, washOpacity: 0.65 }
+  low: { roughness: 1, emission: 1, washOpacity: 0.86 },
+  balanced: { roughness: 0.91, emission: 1.04, washOpacity: 0.9 },
+  detailed: { roughness: 0.85, emission: 1.1, washOpacity: 0.94 }
 };
 function createMallSurfaceAtmosphere(T, scene, { plane, poolMaterial, washes, floors, fixtures, vault }) {
   const washMaterial = poolMaterial.clone();
@@ -8017,6 +8031,7 @@ function createSkylightDapple(T, scene, {
   load: load2 = (url) => new T.TextureLoader().loadAsync(url)
 }) {
   const material = contact.clone();
+  material.blending = T.AdditiveBlending;
   const mesh = createLayer(T, panels, material, false, projection);
   mesh.name = "Atrium skylight tree shadow";
   mesh.renderOrder = -2;
@@ -8051,7 +8066,7 @@ function createSkylightDapple(T, scene, {
     if (!map)
       return;
     const drift = (tier === "balanced" || tier === "detailed") && !reducedMotion ? now : 0;
-    map.offset.set(0.028 * Math.sin(drift / 53000), 0.02 * Math.sin(drift / 50000));
+    map.offset.set(0.008 * Math.sin(drift / 67000), 0.006 * Math.sin(drift / 59000));
   }
   return { prepare, update };
 }
@@ -8117,8 +8132,8 @@ var EVERYDAY = Object.freeze({
   id: "everyday",
   label: "Everyday",
   materials: Object.freeze({
-    floorTextured: 13089194,
-    floorFlat: 11970970,
+    floorTextured: 13681073,
+    floorFlat: 13155242,
     ceiling: 7892580,
     ceilingGlow: 9995892,
     ceilingGlowIntensity: 0.12,
@@ -8429,7 +8444,10 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       cylinder("brass", x, y, z, 0.62, 0.12);
       cylinder("glow", x, y - 0.08, z, 0.54, 0.035);
       cylinder("dark", x, y + 0.08, z, 0.42, 0.065);
-      lightPool(x, 0.052, z, 4.6, 4.6);
+      if (expanded && activeShopSlot === null)
+        lightWash(x, 0.054, z, 3.1, 3.1, 0, -Math.PI / 2, true);
+      else
+        lightPool(x, 0.052, z, 4.6, 4.6);
     }, shopBackdrop = function(zone) {
       const panel = document.createElement("canvas");
       panel.width = 1024;
@@ -8670,7 +8688,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         clearTimeout(timer);
       }
       applyMallThemeToWorld(EVERYDAY, { expanded, materials: materials2, ambient, key, fog: scene.fog });
-      materials2.shellFloor.roughness = 0.37;
+      materials2.shellFloor.roughness = 0.34;
       materials2.brass.roughness = 0.28;
       materials2.brass.metalness = 0.78;
       materials2.green.roughness = 0.29;
@@ -8948,13 +8966,13 @@ metalnessFactor=vSurface.y;`);
         for (const planter of lounge2.planters) {
           box("green", planter.x, 0.3, planter.z, 0.7, 0.6, 0.7, true);
           const aisle = Math.sign(atriumLayout.garden.x - planter.x);
-          lightWash(planter.x + aisle * 0.354, 0.23, planter.z, 0.58, 0.45, aisle * Math.PI / 2, 0, true);
+          lightWash(planter.x + aisle * 0.354, 0.21, planter.z, 0.72, 0.52, aisle * Math.PI / 2, 0, true);
           box("wood", planter.x, 0.61, planter.z, 0.6, 0.025, 0.6);
           for (let i = 0;i < 9; i++) {
             const a = i * Math.PI * 2 / 9;
             solid("sphere", i % 2 ? "leaf" : "foliage", planter.x + Math.sin(a) * 0.12, 0.8, planter.z + Math.cos(a) * 0.12, 0.08, 0.27, 0.05, a, 0.72, "YXZ");
           }
-          lightPool(planter.x, 0.024, planter.z, 2.2, 2.2);
+          lightWash(planter.x, 0.025, planter.z, 1.55, 1.55, 0, -Math.PI / 2, true);
         }
         for (const z of [22, 26]) {
           box("glow", lounge2.x, 8.34, z, 4, 0.035, 0.065);
@@ -9017,7 +9035,7 @@ metalnessFactor=vSurface.y;`);
       const lightNewMoon = expanded && zone === "newmoon";
       const wall = expanded ? lightNewMoon ? "newMoonWall" : "cream" : zone === "mili" ? "cream" : "green";
       if (lightNewMoon)
-        materials2.newMoonWall = mat(14802128);
+        materials2.newMoonWall = mat(15131871);
       if (expanded) {
         const floor = `${zone}Floor`;
         finishForRole.set(floor, "shopFloor");
@@ -9422,12 +9440,29 @@ metalnessFactor=vSurface.y;`);
       };
       signage = await addShopSignAtlas(T, expandedLayout, scene);
       const slide = addExpandedStorefronts(T, expandedLayout, scene, signage.configs);
+      for (const x of atriumLayout.anchorPierXs) {
+        box("green", x, 2.83, 0.27, 0.29, 5.66, 0.24);
+        box("brass", x, 0.15, 0.31, 0.35, 0.24, 0.27);
+        box("brass", x, 5.63, 0.29, 0.36, 0.065, 0.27);
+        lightWash(x, 0.22, 0.449, 0.66, 0.58, 0, 0, true);
+      }
+      for (const store2 of spatial.stores) {
+        const x = storeCenterX(store2);
+        box("glow", x, 5.595, 0.416, 9.67, 0.035, 0.06);
+        for (const dx of [-3.2, 0, 3.2]) {
+          lightWash(x + dx, 5.41, 0.3, 3.85, 0.74, 0, 0, true);
+        }
+      }
       for (const bay of expandedLayout.slots) {
         const { x, z, normalX, normalZ, yaw } = shopEntrance(bay);
         const frontage = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
         const offset = 2.15;
         lightWash(x + normalX * offset, 0.029, z + normalZ * offset, frontage * 0.78, 4.2, yaw, -Math.PI / 2);
         lightWash(x - normalX * 0.28, 3.88, z - normalZ * 0.28, frontage * 0.72, 0.55, yaw, Math.PI / 2, true);
+        if (bay.number === "14") {
+          lightWash(x + normalX * 0.23, 2.21, z, frontage * 0.95, 3.6, yaw, 0, true);
+          lightWash(x + normalX * 0.24, 1.55, z + 2.35, 2.65, 2.4, yaw, 0, true);
+        }
       }
       for (const bay of expandedLayout.slots.slice(3)) {
         const { x, z, alongX, alongZ, normalX, normalZ } = shopEntrance(bay);
@@ -9493,10 +9528,14 @@ metalnessFactor=vSurface.y;`);
         solid("torus", "glow", 10, 8.05, 20, radius2, radius2, 0.8, 0, -Math.PI / 2);
       lightPool(10, 0.053, 20, 8, 8);
       restrooms = buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, materials: materials2, doors, interactables });
-      for (const x of [-12, 32])
+      for (const x of [-12, 32]) {
         box("brass", x, 0.024, 21, 0.035, 0.008, 36);
-      for (const z of [3, 39])
+        lightWash(x, 0.029, 21, 0.028, 36, 0, -Math.PI / 2, true);
+      }
+      for (const z of [3, 39]) {
         box("brass", 10, 0.024, z, 44, 0.008, 0.035);
+        lightWash(10, 0.029, z, 44, 0.028, 0, -Math.PI / 2, true);
+      }
       activeDeck = true;
       box("green", -3, liftLayout.upper + 1.23, 15.78, 9.4, 2.46, 0.16, true);
       for (const y of [0.08, 2.4])
