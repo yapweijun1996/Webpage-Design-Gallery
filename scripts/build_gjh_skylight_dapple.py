@@ -1,4 +1,4 @@
-"""Build the tiled, edge-faded 512 px projection for the GJH atrium tree shadow."""
+"""Build the tiled, edge-faded 512 px projection for GJH atrium daylight."""
 
 import argparse
 import math
@@ -9,6 +9,10 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 
 SIZE = 512
+TILES = 4
+SUN = (255, 242, 219)
+PENUMBRA = (75, 85, 98)
+MAX_ALPHA = 61
 OUTPUT = (Path(__file__).resolve().parents[1]
           / 'demos/corporate/gjh/v11/assets/mall-skylight-dapple-512.png')
 
@@ -23,23 +27,22 @@ def build():
         center_x, center_y = [randomizer.uniform(0, SIZE) for _ in range(2)]
         for _ in range(randomizer.randint(18, 42)):
             angle = randomizer.uniform(0, math.tau)
-            distance = randomizer.uniform(0, 44)
+            distance = randomizer.uniform(0, 37)
             x = (center_x + math.cos(angle) * distance) % SIZE + margin
             y = (center_y + math.sin(angle) * distance) % SIZE + margin
-            length = randomizer.uniform(6, 21)
-            width = randomizer.uniform(3, 10)
-            alpha = randomizer.randint(75, 170)
+            length = randomizer.uniform(5, 16)
+            width = randomizer.uniform(3, 9)
             for dx in (-SIZE, 0, SIZE):
                 for dy in (-SIZE, 0, SIZE):
                     draw.ellipse((round(x + dx - length), round(y + dy - width),
-                                  round(x + dx + length), round(y + dy + width)), fill=alpha)
-    mask = mask.filter(ImageFilter.GaussianBlur(4.8))
+                                  round(x + dx + length), round(y + dy + width)), fill=255)
+    mask = mask.filter(ImageFilter.GaussianBlur(6.5))
     tile = mask.crop((margin, margin, margin + SIZE, margin + SIZE))
     tiled = Image.new('L', (SIZE, SIZE))
-    for row in range(2):
-        top, bottom = row * SIZE // 2, (row + 1) * SIZE // 2
-        for column in range(3):
-            left, right = column * SIZE // 3, (column + 1) * SIZE // 3
+    for row in range(TILES):
+        top, bottom = row * SIZE // TILES, (row + 1) * SIZE // TILES
+        for column in range(TILES):
+            left, right = column * SIZE // TILES, (column + 1) * SIZE // TILES
             tiled.paste(tile.resize((right-left, bottom-top), Image.Resampling.LANCZOS), (left, top))
 
     def edge_fade(pixel):
@@ -50,9 +53,15 @@ def build():
 
     fade = [edge_fade(pixel) for pixel in range(SIZE)]
     envelope = Image.frombytes('L', (SIZE, SIZE), bytes(round(255*x*y) for y in fade for x in fade))
-    image = Image.new('RGBA', (SIZE, SIZE))
-    image.putalpha(ImageChops.multiply(tiled, envelope))
-    return image
+    # Keep the floor unchanged at the midpoint and bound the source-over alpha
+    # at both ends. Feather the alpha only so the fade keeps the patch colour.
+    sunlight = Image.new('RGBA', (SIZE, SIZE), SUN)
+    sunlight.putalpha(ImageChops.multiply(
+        tiled.point(lambda value: round(MAX_ALPHA * max(0, 1 - value / 95))), envelope))
+    shade = Image.new('RGBA', (SIZE, SIZE), PENUMBRA)
+    shade.putalpha(ImageChops.multiply(
+        tiled.point(lambda value: round(MAX_ALPHA * max(0, (value - 95) / 160))), envelope))
+    return Image.alpha_composite(sunlight, shade)
 
 
 if __name__ == '__main__':

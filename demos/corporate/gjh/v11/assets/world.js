@@ -120,7 +120,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }catch{/* Retain usable solid finishes on module/canvas failure. */}
     finally{clearTimeout(timer);}
     applyMallThemeToWorld(EVERYDAY, {expanded, materials, ambient, key, fog:scene.fog});
-    materials.shellFloor.roughness = .36;
+    materials.shellFloor.roughness = .37;
     materials.brass.roughness = .28;
     materials.brass.metalness = .78;
     materials.green.roughness = .29;
@@ -292,8 +292,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   // One soft light texture and one instance batch serve every floor and wall wash.
   const poolCanvas = document.createElement('canvas'); poolCanvas.width = poolCanvas.height = 64;
   const poolContext = poolCanvas.getContext('2d'), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);
-  poolGradient.addColorStop(0, expanded ? 'rgba(255,220,173,.37)' : 'rgba(255,226,171,.3)');
-  poolGradient.addColorStop(.35, expanded ? 'rgba(255,222,178,.16)' : 'rgba(255,226,171,.15)');
+  poolGradient.addColorStop(0, expanded ? 'rgba(255,231,200,.18)' : 'rgba(255,226,171,.3)');
+  poolGradient.addColorStop(.35, expanded ? 'rgba(255,234,206,.09)' : 'rgba(255,226,171,.15)');
   poolGradient.addColorStop(1, 'rgba(255,226,171,0)');
   poolContext.fillStyle = poolGradient; poolContext.fillRect(0, 0, 64, 64);
   const poolTexture = new T.CanvasTexture(poolCanvas); poolTexture.colorSpace = T.SRGBColorSpace;
@@ -565,7 +565,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     const zone = store.id, x = storeCenterX(store);
     const lightNewMoon = expanded && zone === 'newmoon';
     const wall = expanded ? (lightNewMoon ? 'newMoonWall' : 'cream') : (zone === 'mili' ? 'cream' : 'green');
-    if (lightNewMoon) materials.newMoonWall = mat(0xd7cbb9);
+    if (lightNewMoon) materials.newMoonWall = mat(0xe1dcd0);
     if (expanded) {
       const floor = `${zone}Floor`;
       finishForRole.set(floor,'shopFloor');
@@ -987,8 +987,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         (r.minX+r.maxX)/2,8.32,(r.minZ+r.maxZ)/2,
         Math.max(.42,r.maxX-r.minX),Math.max(.42,r.maxZ-r.minZ),0,Math.PI/2,true
       );
-      for(const r of panels)lightPool((r.minX+r.maxX)/2,.052,(r.minZ+r.maxZ)/2,
-        width>depth?r.maxX-r.minX:4.5,width>depth?4.5:r.maxZ-r.minZ);
       const washWidth=width>depth ? width : 2.4, washDepth=width>depth ? 2.4 : depth;
       const bounds={minX:x-washWidth/2,maxX:x+washWidth/2,minZ:z-washDepth/2,maxZ:z+washDepth/2};
       const washes=expandedLift ? cutRectangle(bounds,liftLayout.roofOpening) : [bounds];

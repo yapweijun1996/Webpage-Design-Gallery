@@ -14,7 +14,7 @@ except ImportError:
 
 METRICS = ('mean', 'std', 'p5', 'p95', 'R/B', 'sat', 'dark')
 CONCEPT = (.42, .214, .099, .789, 1.57, .411, .26)
-LIMITS = ((.34, .50), (.20, 1), (0, .12), (0, .85), (1.45, 1.70), (.34, 1), (.18, .32))
+LIMITS = ((.34, .50), (.20, 1), (0, .12), (0, .85), (1.45, 1.70), (.38, .45), (.18, .32))
 
 
 def percentile(sorted_values, fraction):

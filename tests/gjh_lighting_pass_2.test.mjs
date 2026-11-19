@@ -237,6 +237,7 @@ test('bundled world starts and submits an expanded Low and Detailed frame with b
     assert.ok(dapple.visible);
     assert.equal(dapple.material.type,world.contact.type);
     assert.equal(dapple.material.customProgramCacheKey(),world.contact.customProgramCacheKey());
+    assert.equal(dapple.material.map.colorSpace,T.SRGBColorSpace);
     assert.equal(dapple.material.map.wrapS,T.RepeatWrapping);
     assert.equal(dapple.material.map.generateMipmaps,false);
     assert.equal(world.scene.getObjectByName(ceilingName).visible,tier!=='low');

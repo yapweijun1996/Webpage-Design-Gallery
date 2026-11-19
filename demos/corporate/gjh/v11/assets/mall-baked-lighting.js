@@ -97,13 +97,12 @@ export function createMallBakedLighting(T, scene, {floors, ceilings, contact, ph
   return {prepare,setTier};
 }
 
-// Black source-over is a destination multiply by (1 - alpha). Reuse the
-// contact decal's shader layout and keep the mesh out of all shadow passes.
+// The atlas blends pale sun and cool penumbra into the stone at low alpha.
+// Keep the same shader layout as the contact decal.
 export function createSkylightDapple(T, scene, {panels, projection, contact, prepareModel,
   load = url => new T.TextureLoader().loadAsync(url)
 }) {
   const material = contact.clone();
-  material.opacity = .78;
   const mesh = createLayer(T,panels,material,false,projection);
   mesh.name = 'Atrium skylight tree shadow';
   mesh.renderOrder = -2;
@@ -112,6 +111,7 @@ export function createSkylightDapple(T, scene, {panels, projection, contact, pre
   function prepare() {
     request ??= Promise.resolve().then(async () => {
       const texture = await load(new URL('mall-skylight-dapple-512.png',import.meta.url).href);
+      texture.colorSpace = T.SRGBColorSpace;
       texture.wrapS = texture.wrapT = T.RepeatWrapping;
       texture.generateMipmaps = false;
       texture.minFilter = T.LinearFilter;

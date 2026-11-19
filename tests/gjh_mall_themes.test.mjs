@@ -10,6 +10,23 @@ import {atriumLayout} from '../demos/corporate/gjh/v11/assets/atrium-layout.js';
 const other=Object.freeze({id:'test-theme',label:'Test theme'});
 const memory=()=>{const m=new Map();return {getItem:k=>m.get(k)||null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)};};
 const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
+test('expanded themes keep ivory floor albedo above the ceiling and soften the warm key', () => {
+ const channels = hex => [hex >> 16, (hex >> 8) & 255, hex & 255];
+ const luma = hex => {
+   const [r, g, b] = channels(hex);
+   return (.2126*r + .7152*g + .0722*b)/255;
+ };
+ for (const {materials, lighting} of MALL_THEMES) {
+   for (const floor of [materials.floorTextured, materials.floorFlat]) {
+     const [r, g, b] = channels(floor);
+     assert.ok(r >= g && g >= b && r-b <= 31, 'keep the floor tint close to neutral');
+     assert.ok(luma(floor) >= .65 && luma(floor)-luma(materials.ceiling) >= .19);
+   }
+   const [r, g, b] = channels(lighting.key);
+   assert.ok(r > g && g > b && b >= 144, 'retain warmth without suppressing blue');
+   assert.ok(lighting.keyIntensity >= 1.6 && lighting.keyIntensity <= 1.75);
+ }
+});
 test('automatic and only the reviewed themes are available and invalid stored IDs are safe',async()=>{
  const store=memory();store.setItem(THEME_STORAGE_KEY,'unknown');const c=createMallThemeCoordinator({storage:store});
  assert.deepEqual(c.options(),[{id:'automatic',label:'Automatic (follows the calendar)'},{id:'everyday',label:'Everyday'},{id:'lunar-new-year',label:'Lunar New Year'},{id:'christmas',label:'Christmas'},{id:'deepavali',label:'Deepavali'}]);assert.equal(c.state().preference,'automatic');assert.match(c.state().message,/unavailable/);

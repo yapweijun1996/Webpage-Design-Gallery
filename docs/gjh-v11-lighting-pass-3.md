@@ -65,3 +65,23 @@ Headed Chrome and the Metal backend were blocked by the local sandbox. A single-
 The four Pass 3 atrium rows met all seven tone targets. The New Moon, MILI and GOGO lettering was readable in the desktop crops. New Moon still carries more dark pixels than the concept. MILI and GOGO retained bright areas around their signboards and artwork. GOGO's source artwork and sign contrast were preserved.
 
 The initial software samples peaked at 94,752 triangles and 51 draws on Low, 109,532 and 58 on Balanced, and 109,532 and 58 on the initial Detailed path. Matched Balanced samples from the base revision and Pass 3 linked 77 programs each before deferred uploads settled. The loaded dapple texture was still queued for warm-up in the software spot checks. Enabling its mesh for the projection diagnostic verified the feathered fade and measured one additional draw (38 total, 38,140 triangles) with 77 linked programs. The no-browser smoke test verifies load and upload failure handling, the shared shader layout, motion tiers and lift clearance. The hardware program count after all resources settle, cold entry with zero frames at or above 50 ms, and the full Low 220k/70, Balanced 300k/90 and Detailed 420k/110 lap gates require hardware measurements.
+
+## Ivory floor follow-up
+
+The public slab and limestone finish use ivory tints, with a light sage runner and the existing brass inlay. Muted green frames and piers, darker vault and soffit timber, and lower ceiling emission carry the architectural shadows. A less amber key, neutral bounce and softer warm fixture pools preserve the contrast around the storefronts. New Moon's interior walls reflect more fill.
+
+The skylight decal now tiles four by four with separate warm sun and cool penumbra colours. Both use source-over blending with alpha capped at 24%. Their brightness relative to the surrounding floor limits the change in floor luminance. The UV drift, transparent gutter and lift opening remain in the projection.
+
+Score the five Balanced 1440 × 900 frames from `docs/lighting_shots.py`. The scorer checks saturation in the 0.38–0.45 range. Inspect the walking surface separately from the full-frame score to verify the 0.55–0.65 floor luminance target.
+
+The sandbox blocked headed Chrome. Chromium with SwiftShader replayed the five poses at Balanced 1440 × 900 against local assets. These initial-frame scores precede deferred texture uploads. Walking-floor crops `(150,680,570,820)`, `(225,770,1215,860)`, and `(900,690,1250,820)` averaged 0.566–0.651 across the five poses. Chrome with Metal still needs verification.
+
+| Pose | Mean | Std | P5 | P95 | R/B | Sat | Dark share | Outside target |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| Atrium | 0.454 | 0.215 | 0.068 | 0.699 | 1.481 | 0.410 | 0.242 | None |
+| New Moon | 0.423 | 0.241 | 0.034 | 0.736 | 1.499 | 0.450 | 0.287 | None |
+| MILI | 0.448 | 0.231 | 0.039 | 0.734 | 1.534 | 0.436 | 0.240 | None |
+| GOGO | 0.494 | 0.253 | 0.037 | 0.848 | 1.502 | 0.415 | 0.231 | None |
+| Planned space 14 (LG) | 0.412 | 0.259 | 0.021 | 0.824 | 1.397 | 0.393 | 0.343 | R/B, dark share |
+
+A separate atrium diagnostic applied the paving, dapple, and baked-light atlases directly to the software frame. All seven scores remained inside tolerance, with a whole-frame mean of 0.433 and floor crops of 0.544–0.563. That capture verifies the appearance of the layers together under software rendering.

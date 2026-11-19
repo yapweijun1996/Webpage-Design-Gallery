@@ -9,9 +9,9 @@ import {decalMaterial} from './surface-decals.js';
 export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight=false, setCanopyMaterial, artworkTier=()=> 'low'}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
-  materials.vaultOak.color.set(0x9c846b);
-  materials.vaultOak.emissive.set(0xa17e5a);
-  materials.vaultOak.emissiveIntensity=.14;
+  materials.vaultOak.color.set(0x736558);
+  materials.vaultOak.emissive.set(0x87796a);
+  materials.vaultOak.emissiveIntensity=.11;
   const tau = 2 * Math.PI;
 
   // The masonry above each arch is a silhouette with a real opening. Reuse
@@ -72,9 +72,8 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     }
   }
 
-  // The continuous court uses staggered fossil limestone slabs. A primed
-  // 512px original tile keeps mineral veining out of the frame loop.
-  materials.paving=new T.MeshStandardMaterial({color:0xa99d8f,roughness:.36,metalness:.07});
+  // The court uses a softly veined ivory stone tile with staggered joints.
+  materials.paving=new T.MeshStandardMaterial({color:0xb9ad9f,roughness:.37,metalness:.03});
   const pavingURL=new URL('concourse-limestone.webp',import.meta.url);
   new T.TextureLoader().load(pavingURL.href,map=>{
     map.colorSpace=T.SRGBColorSpace;map.wrapS=map.wrapT=T.RepeatWrapping;
@@ -83,15 +82,15 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   },undefined,()=>{});
   box('paving',10,-.013,24,49.85,.002,47.85);
 
-  // A green terrazzo runner with multiscale aggregate, set into the marble.
+  // A light sage terrazzo runner with fine aggregate, set into the marble.
   const canvas = document.createElement('canvas');
   canvas.width=canvas.height=384;
   const ctx=canvas.getContext('2d');
   let seed=68421;
   const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
   if(ctx) {
-    ctx.fillStyle='#abbab2';ctx.fillRect(0,0,384,384);
-    const chips=['#e1e3d4','#7f9489','#d6d6b9','#a1b4a5','#637f76'];
+    ctx.fillStyle='#d7ded5';ctx.fillRect(0,0,384,384);
+    const chips=['#e8e9df','#b5c2b8','#dad8c8','#c5cfc4','#a7b7ad'];
     for(let i=0;i<12500;i++){
       const x=random()*384,y=random()*384,sz=.45+random()**3*2.15;
       ctx.fillStyle=chips[i%chips.length];ctx.beginPath();ctx.moveTo(x,y);
@@ -101,7 +100,8 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     map.wrapS=map.wrapT=T.RepeatWrapping;map.repeat.set(4,15);map.anisotropy=4;
     materials.courtStone.map=map;
   }
-  materials.courtStone.color.set(0x4f6657);
+  materials.courtStone.color.set(0xc2c1b6);
+  materials.courtStone.metalness = .03;
   materials.courtStone.roughness = .33;
   box('courtStone',10,-.006,33,6.05,.009,29.6);
   for(const x of [6.95,13.05]){
@@ -118,7 +118,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     const inside=-side;
     for(let i=0;i<6;i++){
       const z=i*8+4;
-      box('oak',front+inside*.7,soffitY,z,1.55,soffitHeight,7.96);
+      box(timber,front+inside*.7,soffitY,z,1.55,soffitHeight,7.96);
       box('ivory',front+inside*1.47,6.02,z,.16,.52,8);
       box('glow',front+inside*1.38,5.77,z,.06,.035,7.75);
       lightWash?.(front+inside*1.30,5.791,z,.75,7.8,0,Math.PI/2,true);

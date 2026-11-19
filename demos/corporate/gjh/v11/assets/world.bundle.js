@@ -1160,9 +1160,9 @@ var atriumLayout = Object.freeze({
 function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false, setCanopyMaterial, artworkTier = () => "low" }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
-  materials.vaultOak.color.set(10257515);
-  materials.vaultOak.emissive.set(10583642);
-  materials.vaultOak.emissiveIntensity = 0.14;
+  materials.vaultOak.color.set(7562584);
+  materials.vaultOak.emissive.set(8878442);
+  materials.vaultOak.emissiveIntensity = 0.11;
   const tau = 2 * Math.PI;
   const spandrel = new T.Shape;
   spandrel.moveTo(-1, 0);
@@ -1214,7 +1214,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       }
     }
   }
-  materials.paving = new T.MeshStandardMaterial({ color: 11115919, roughness: 0.36, metalness: 0.07 });
+  materials.paving = new T.MeshStandardMaterial({ color: 12168607, roughness: 0.37, metalness: 0.03 });
   const pavingURL = new URL("concourse-limestone.webp", import.meta.url);
   new T.TextureLoader().load(pavingURL.href, (map) => {
     map.colorSpace = T.SRGBColorSpace;
@@ -1233,9 +1233,9 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     return seed / 4294967296;
   };
   if (ctx) {
-    ctx.fillStyle = "#abbab2";
+    ctx.fillStyle = "#d7ded5";
     ctx.fillRect(0, 0, 384, 384);
-    const chips = ["#e1e3d4", "#7f9489", "#d6d6b9", "#a1b4a5", "#637f76"];
+    const chips = ["#e8e9df", "#b5c2b8", "#dad8c8", "#c5cfc4", "#a7b7ad"];
     for (let i = 0;i < 12500; i++) {
       const x = random() * 384, y = random() * 384, sz = 0.45 + random() ** 3 * 2.15;
       ctx.fillStyle = chips[i % chips.length];
@@ -1253,7 +1253,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     map.anisotropy = 4;
     materials.courtStone.map = map;
   }
-  materials.courtStone.color.set(5203543);
+  materials.courtStone.color.set(12763574);
+  materials.courtStone.metalness = 0.03;
   materials.courtStone.roughness = 0.33;
   box("courtStone", 10, -0.006, 33, 6.05, 0.009, 29.6);
   for (const x of [6.95, 13.05]) {
@@ -1267,7 +1268,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     const inside = -side;
     for (let i = 0;i < 6; i++) {
       const z = i * 8 + 4;
-      box("oak", front + inside * 0.7, soffitY, z, 1.55, soffitHeight, 7.96);
+      box(timber, front + inside * 0.7, soffitY, z, 1.55, soffitHeight, 7.96);
       box("ivory", front + inside * 1.47, 6.02, z, 0.16, 0.52, 8);
       box("glow", front + inside * 1.38, 5.77, z, 0.06, 0.035, 7.75);
       lightWash?.(front + inside * 1.3, 5.791, z, 0.75, 7.8, 0, Math.PI / 2, true);
@@ -5408,7 +5409,7 @@ async function addShopSignAtlas(T, layout, scene) {
 function addExpandedStorefronts(T, layout, scene, signs) {
   const geometry = new T.BoxGeometry(1, 1, 1);
   const batches = {
-    frame: { material: new T.MeshStandardMaterial({ color: 1060645, roughness: 0.29, metalness: 0.16 }), matrices: [] },
+    frame: { material: new T.MeshStandardMaterial({ color: 1059362, roughness: 0.29, metalness: 0.16 }), matrices: [] },
     brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.78, roughness: 0.28 }), matrices: [] },
     accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], slots: [] },
     glass: { material: new T.MeshBasicMaterial({
@@ -8016,7 +8017,6 @@ function createSkylightDapple(T, scene, {
   load: load2 = (url) => new T.TextureLoader().loadAsync(url)
 }) {
   const material = contact.clone();
-  material.opacity = 0.78;
   const mesh = createLayer(T, panels, material, false, projection);
   mesh.name = "Atrium skylight tree shadow";
   mesh.renderOrder = -2;
@@ -8025,6 +8025,7 @@ function createSkylightDapple(T, scene, {
   function prepare() {
     request ??= Promise.resolve().then(async () => {
       const texture = await load2(new URL("mall-skylight-dapple-512.png", import.meta.url).href);
+      texture.colorSpace = T.SRGBColorSpace;
       texture.wrapS = texture.wrapT = T.RepeatWrapping;
       texture.generateMipmaps = false;
       texture.minFilter = T.LinearFilter;
@@ -8116,13 +8117,13 @@ var EVERYDAY = Object.freeze({
   id: "everyday",
   label: "Everyday",
   materials: Object.freeze({
-    floorTextured: 11246990,
-    floorFlat: 10523522,
-    ceiling: 9469026,
-    ceilingGlow: 11240283,
-    ceilingGlowIntensity: 0.16,
+    floorTextured: 13089194,
+    floorFlat: 11970970,
+    ceiling: 7892580,
+    ceilingGlow: 9995892,
+    ceilingGlowIntensity: 0.12,
     wall: 8616301,
-    green: 1060133,
+    green: 1059106,
     ivory: 11773070,
     brass: 11901794,
     wood: 7033149,
@@ -8141,7 +8142,7 @@ var EVERYDAY = Object.freeze({
     liftGate: 11901794,
     liftGlassOpacity: 0.24
   }),
-  lighting: Object.freeze({ sky: 16115670, ground: 6508868, ambient: 0.48, key: 16760716, keyIntensity: 1.82, fog: 6705467, exposure: 0.72 }),
+  lighting: Object.freeze({ sky: 15986406, ground: 7564388, ambient: 0.48, key: 16762772, keyIntensity: 1.72, fog: 6707789, exposure: 0.72 }),
   decorationRefs: Object.freeze([])
 });
 var LUNAR_NEW_YEAR = Object.freeze({
@@ -8149,8 +8150,8 @@ var LUNAR_NEW_YEAR = Object.freeze({
   label: "Lunar New Year",
   materials: Object.freeze({
     ...EVERYDAY.materials,
-    ceiling: 10847069,
-    ceilingGlow: 12817515,
+    ceiling: 9073503,
+    ceilingGlow: 11242353,
     wall: 10451544,
     green: 8133922,
     ivory: 12953735,
@@ -8163,7 +8164,7 @@ var LUNAR_NEW_YEAR = Object.freeze({
     liftGreen: 7938087,
     liftGate: 6955042
   }),
-  lighting: Object.freeze({ ...EVERYDAY.lighting, sky: 16179662, ground: 7229760, ambient: 0.46, key: 16759683, keyIntensity: 1.76, fog: 7360570, exposure: 0.7 }),
+  lighting: Object.freeze({ ...EVERYDAY.lighting, sky: 16181724, ground: 7826016, ambient: 0.46, key: 16761488, keyIntensity: 1.68, fog: 7364688, exposure: 0.7 }),
   decorationRefs: Object.freeze(["lunar-new-year"])
 });
 var CHRISTMAS = Object.freeze({
@@ -8171,8 +8172,8 @@ var CHRISTMAS = Object.freeze({
   label: "Christmas",
   materials: Object.freeze({
     ...EVERYDAY.materials,
-    ceiling: 10256995,
-    ceilingGlow: 13084538,
+    ceiling: 8418407,
+    ceilingGlow: 10983552,
     wall: 9666924,
     green: 1525304,
     ivory: 12627347,
@@ -8185,7 +8186,7 @@ var CHRISTMAS = Object.freeze({
     liftGreen: 2181179,
     liftGate: 3430474
   }),
-  lighting: Object.freeze({ ...EVERYDAY.lighting, sky: 15853530, ground: 6443590, ambient: 0.5, key: 16760975, keyIntensity: 1.78, fog: 6706754, exposure: 0.72 }),
+  lighting: Object.freeze({ ...EVERYDAY.lighting, sky: 15855336, ground: 7433060, ambient: 0.5, key: 16763285, keyIntensity: 1.7, fog: 6708561, exposure: 0.72 }),
   decorationRefs: Object.freeze(["christmas"])
 });
 var DEEPAVALI = Object.freeze({
@@ -8193,8 +8194,8 @@ var DEEPAVALI = Object.freeze({
   label: "Deepavali",
   materials: Object.freeze({
     ...EVERYDAY.materials,
-    ceiling: 10520430,
-    ceilingGlow: 13212546,
+    ceiling: 8942694,
+    ceilingGlow: 11308667,
     wall: 10585195,
     green: 6170716,
     ivory: 13151116,
@@ -8207,7 +8208,7 @@ var DEEPAVALI = Object.freeze({
     liftGreen: 6171744,
     liftGate: 5321300
   }),
-  lighting: Object.freeze({ ...EVERYDAY.lighting, sky: 16179920, ground: 6966849, ambient: 0.45, key: 16759167, keyIntensity: 1.8, fog: 7163200, exposure: 0.71 }),
+  lighting: Object.freeze({ ...EVERYDAY.lighting, sky: 16181982, ground: 7628638, ambient: 0.45, key: 16761488, keyIntensity: 1.72, fog: 7166545, exposure: 0.71 }),
   decorationRefs: Object.freeze(["deepavali"])
 });
 var MALL_THEMES = Object.freeze([EVERYDAY, LUNAR_NEW_YEAR, CHRISTMAS, DEEPAVALI]);
@@ -8669,7 +8670,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         clearTimeout(timer);
       }
       applyMallThemeToWorld(EVERYDAY, { expanded, materials: materials2, ambient, key, fog: scene.fog });
-      materials2.shellFloor.roughness = 0.36;
+      materials2.shellFloor.roughness = 0.37;
       materials2.brass.roughness = 0.28;
       materials2.brass.metalness = 0.78;
       materials2.green.roughness = 0.29;
@@ -8799,8 +8800,8 @@ metalnessFactor=vSurface.y;`);
     const poolCanvas = document.createElement("canvas");
     poolCanvas.width = poolCanvas.height = 64;
     const poolContext = poolCanvas.getContext("2d"), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);
-    poolGradient.addColorStop(0, expanded ? "rgba(255,220,173,.37)" : "rgba(255,226,171,.3)");
-    poolGradient.addColorStop(0.35, expanded ? "rgba(255,222,178,.16)" : "rgba(255,226,171,.15)");
+    poolGradient.addColorStop(0, expanded ? "rgba(255,231,200,.18)" : "rgba(255,226,171,.3)");
+    poolGradient.addColorStop(0.35, expanded ? "rgba(255,234,206,.09)" : "rgba(255,226,171,.15)");
     poolGradient.addColorStop(1, "rgba(255,226,171,0)");
     poolContext.fillStyle = poolGradient;
     poolContext.fillRect(0, 0, 64, 64);
@@ -9016,7 +9017,7 @@ metalnessFactor=vSurface.y;`);
       const lightNewMoon = expanded && zone === "newmoon";
       const wall = expanded ? lightNewMoon ? "newMoonWall" : "cream" : zone === "mili" ? "cream" : "green";
       if (lightNewMoon)
-        materials2.newMoonWall = mat(14142393);
+        materials2.newMoonWall = mat(14802128);
       if (expanded) {
         const floor = `${zone}Floor`;
         finishForRole.set(floor, "shopFloor");
@@ -9413,8 +9414,6 @@ metalnessFactor=vSurface.y;`);
         const panels = ceilingBox("glow", x, 8.34, z, width, 0.035, depth, liftLayout.roofOpening);
         for (const r of panels)
           lightWash((r.minX + r.maxX) / 2, 8.32, (r.minZ + r.maxZ) / 2, Math.max(0.42, r.maxX - r.minX), Math.max(0.42, r.maxZ - r.minZ), 0, Math.PI / 2, true);
-        for (const r of panels)
-          lightPool((r.minX + r.maxX) / 2, 0.052, (r.minZ + r.maxZ) / 2, width > depth ? r.maxX - r.minX : 4.5, width > depth ? 4.5 : r.maxZ - r.minZ);
         const washWidth = width > depth ? width : 2.4, washDepth = width > depth ? 2.4 : depth;
         const bounds = { minX: x - washWidth / 2, maxX: x + washWidth / 2, minZ: z - washDepth / 2, maxZ: z + washDepth / 2 };
         const washes = expandedLift ? cutRectangle(bounds, liftLayout.roofOpening) : [bounds];

@@ -60,8 +60,8 @@ test('three PMREMs are retained, swapped by zone without rebaking, and released 
   assert.ok(captured.every(({target,sigma}) => sigma === .04 &&
     target.texture.mapping === T.CubeUVReflectionMapping && target.height === 1024));
   const route = [
-    [10,1,12,0,.64], [28,1,12,1,.58], [20,1,-2,2,.94],
-    [20,8,-2,0,.64], [10,1,41,1,.58], [20,1,-2,2,.94]
+    [10,1,12,0,.52], [28,1,12,1,.58], [20,1,-2,2,.94],
+    [20,8,-2,0,.52], [10,1,41,1,.58], [20,1,-2,2,.94]
   ];
   for (const [x,y,z,index,intensity] of route) {
     atmosphere.update({x,y,z});

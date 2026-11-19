@@ -68,9 +68,9 @@ export function createMallSurfaceAtmosphere(T, scene, {plane, poolMaterial, wash
 }
 
 const STUDIO_LIGHTING = {
-  atrium: {walls:0x726861, panels:0xf7dfc5, ceiling:0xd1c9b9, width:7, intensity:.64},
-  corridor: {walls:0x66594f, panels:0xf5d7b7, ceiling:0xd7b995, width:5, intensity:.58},
-  shop: {walls:0x9e876d, panels:0xffe9d2, ceiling:0xffead3, width:3, intensity:.94}
+  atrium: {walls:0x726861, panels:0xf7e0c5, ceiling:0xd1c8b9, width:7, intensity:.52},
+  corridor: {walls:0x66615b, panels:0xf5e6d4, ceiling:0xd7cbbb, width:5, intensity:.58},
+  shop: {walls:0x9e9184, panels:0xffefe0, ceiling:0xffefe1, width:3, intensity:.94}
 };
 
 const CLASSIC_STUDIO_LIGHTING = {
@@ -182,8 +182,8 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       }
     }
     if (focus && nearest === focus) strength = Math.min(1,strength+fadeIn);
-    lights[0].intensity = (focus?.mood && expanded ? 38 : 26) * strength;
-    lights[1].intensity = (focus?.mood && expanded ? 24 : 18) * strength;
+    lights[0].intensity = (focus?.mood && expanded ? 32 : 26) * strength;
+    lights[1].intensity = (focus?.mood && expanded ? 20 : 18) * strength;
   }
 
   const accentSet = new Set(lights);

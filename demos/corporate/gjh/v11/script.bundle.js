@@ -3246,9 +3246,9 @@ function allowMallLightWash(deviceClass, context) {
   return /GeForce|Quadro|NVIDIA RTX|Radeon RX (?!Vega |[0-9]+M Graphics)/i.test(adapter ?? "");
 }
 var STUDIO_LIGHTING = {
-  atrium: { walls: 7497825, panels: 16244677, ceiling: 13748665, width: 7, intensity: 0.64 },
-  corridor: { walls: 6707535, panels: 16111543, ceiling: 14137749, width: 5, intensity: 0.58 },
-  shop: { walls: 10389357, panels: 16771538, ceiling: 16771795, width: 3, intensity: 0.94 }
+  atrium: { walls: 7497825, panels: 16244933, ceiling: 13748409, width: 7, intensity: 0.52 },
+  corridor: { walls: 6709595, panels: 16115412, ceiling: 14142395, width: 5, intensity: 0.58 },
+  shop: { walls: 10391940, panels: 16773088, ceiling: 16773089, width: 3, intensity: 0.94 }
 };
 var CLASSIC_STUDIO_LIGHTING = {
   atrium: { walls: 11969420, panels: 16772825, ceiling: 16774631, width: 8, intensity: 1 },
@@ -3369,8 +3369,8 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     }
     if (focus && nearest === focus)
       strength = Math.min(1, strength + fadeIn);
-    lights[0].intensity = (focus?.mood && expanded ? 38 : 26) * strength;
-    lights[1].intensity = (focus?.mood && expanded ? 24 : 18) * strength;
+    lights[0].intensity = (focus?.mood && expanded ? 32 : 26) * strength;
+    lights[1].intensity = (focus?.mood && expanded ? 20 : 18) * strength;
   }
   const accentSet = new Set(lights);
   function lightVariants(sceneLights) {

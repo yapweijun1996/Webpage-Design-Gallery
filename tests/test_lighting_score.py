@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from PIL import Image
 
+from scripts import build_gjh_skylight_dapple as dapple
 from scripts import lighting_score as score
 
 
@@ -28,8 +29,9 @@ class LightingScoreTest(unittest.TestCase):
 
     def test_thresholds_and_folder_report(self):
         self.assertEqual(score.outside_limits(score.CONCEPT), [])
-        self.assertEqual(score.outside_limits((.34, .20, .12, .85, 1.70, .34, .18)), [])
+        self.assertEqual(score.outside_limits((.34, .20, .12, .85, 1.70, .38, .18)), [])
         self.assertEqual(score.outside_limits((.51, .19, .13, .86, 1.44, .33, .33)), list(score.METRICS))
+        self.assertEqual(score.outside_limits((.42, .21, .10, .79, 1.57, .451, .26)), ['sat'])
         with tempfile.TemporaryDirectory() as directory, contextlib.redirect_stdout(io.StringIO()) as out:
             Image.new('RGB', (4, 2), 'white').save(Path(directory) / 'white.png')
             (Path(directory) / 'metrics.json').write_text('{}')
@@ -50,3 +52,19 @@ class LightingScoreTest(unittest.TestCase):
         path = Path(__file__).resolve().parents[1] / 'docs/references/gjh-mall-modern-premium-concept.png'
         with Image.open(path) as image:
             self.assertEqual(score.outside_limits(score.measure(image)), [])
+
+    def test_skylight_projection_has_bounded_warm_sun_and_cool_shade(self):
+        with Image.open(dapple.OUTPUT) as image:
+            self.assertEqual(image.tobytes(), dapple.build().tobytes())
+            alpha = image.getchannel('A')
+            self.assertLessEqual(alpha.getextrema()[1], 61)
+            gutter = 18
+            for box in ((0, 0, image.width, gutter),
+                        (0, image.height - gutter, image.width, image.height),
+                        (0, 0, gutter, image.height),
+                        (image.width - gutter, 0, image.width, image.height)):
+                self.assertIsNone(alpha.crop(box).getbbox())
+            pixels = getattr(image, 'get_flattened_data', image.getdata)()
+            visible = {(r, g, b) for r, g, b, a in pixels if a >= 24}
+            self.assertIn(dapple.SUN, visible)
+            self.assertIn(dapple.PENUMBRA, visible)
