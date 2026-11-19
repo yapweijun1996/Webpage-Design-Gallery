@@ -94,7 +94,7 @@ test('tier selection resolves only delivered files, with Balanced used for missi
   }
 });
 
-test('every tier fits its programme budget using parsed GLBs and the actual merged room meshes', async t => {
+function mockInteriorDownloads(t) {
   const realFetch = globalThis.fetch;
   t.mock.method(globalThis,'fetch',async (input,options) => {
     const url = new URL(input.url ?? input);
@@ -110,6 +110,10 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     return {width:png.readUInt32BE(16),height:png.readUInt32BE(20)};
   };
   t.after(()=>{ delete globalThis.self; delete globalThis.createImageBitmap; });
+}
+
+test('every tier fits its programme budget using parsed GLBs and the actual merged room meshes', async t => {
+  mockInteriorDownloads(t);
   const load = createInteriorModelLoader(T,assets,new GLTFLoader());
   const models = new Map(), signal = new AbortController().signal;
   for (const receipt of manifest.assets) {
@@ -307,6 +311,42 @@ function runBuild(work, onSlice = () => {}) {
   }
   return step.value;
 }
+
+test('installed interior instance bounds contain every instance across all 17 stores', async t => {
+  mockInteriorDownloads(t);
+  const scene = new T.Scene();
+  const runtime = createInteriorKit(T,scene,{assetBase:assets,registerCollider() {}});
+  t.after(() => runtime.dispose());
+  const installed = runtime.prepare('balanced', () => ({
+    build:work => runBuild(work), prepare:async () => {}, runFrame:() => 0, dispose() {}
+  }));
+  for (let frame=0; frame<500 && !runtime.activeTier; frame++) {
+    runtime.runFrame();
+    await new Promise(resolve => setImmediate(resolve));
+  }
+  assert.equal(runtime.activeTier,'balanced');
+  assert.equal((await installed).shops,stores.length);
+  const matrix = new T.Matrix4(), sphere = new T.Sphere();
+  let instances = 0;
+  for (const [index,group] of runtime.groups.entries()) {
+    let shopInstances = 0;
+    group.traverse(mesh => {
+      if (!mesh.isInstancedMesh) return;
+      const bounds = mesh.boundingSphere, context = `${group.name} / ${mesh.name}`;
+      assert(Number.isFinite(bounds?.radius) && bounds.radius >= 0,context);
+      for (let i=0; i<mesh.count; i++) {
+        mesh.getMatrixAt(i,matrix);
+        sphere.copy(mesh.geometry.boundingSphere).applyMatrix4(matrix);
+        assert(bounds.center.distanceTo(sphere.center)+sphere.radius <= bounds.radius+1e-6,`${context}, instance ${i}`);
+      }
+      shopInstances += mesh.count;
+    });
+    const receipt = manifest.round2.details.find(detail => detail.store === stores[index].id);
+    assert.equal(shopInstances,receipt.instances,group.name);
+    instances += shopInstances;
+  }
+  assert(instances > 0);
+});
 
 test('warm registration installs all rooms, reprioritizes remaining work and commits tier changes together', async () => {
   const scene = new T.Scene(), requests = [], pending = [], colliders = [];

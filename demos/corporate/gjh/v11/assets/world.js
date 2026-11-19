@@ -1013,8 +1013,9 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     const bay = shopBays.get(slot);
     const x = (bay.minX + bay.maxX) / 2;
     const priority = () => uploadVisitor ? Math.abs(uploadVisitor.x - x) - 60 : -60;
-    // LOD controllers can continue updating visibility while the layer gate is closed.
-    void prepareModel(meshes, {hide:true, late:false, priority}).catch(() => {});
+    // These meshes already belong to the live shops. Early entry can reach
+    // them before the background warm-up finishes, so keep their render layers.
+    void prepareModel(meshes, {late:false, priority}).catch(() => {});
   }
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
