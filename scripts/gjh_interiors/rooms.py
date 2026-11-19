@@ -123,6 +123,14 @@ def borsch(r,_):
         x=-2.25+i*1.95
         r.ring(x,3.97,-1.6,.55,.21,.055,"c5dc77",PRINT,True)
     placard(r,2.7,2.13,-4.97,.94,"765285")
+    # Unprinted carton, pouch and sticker sheet on the original folio ledge.
+    r.box(-.89,1.283,-.23,.20,.26,.075,"dbc9a3")
+    r.box(-.89,1.301,-.187,.17,.053,.009,"7b9457")
+    r.box(-.59,1.202,-.205,.16,.115,.023,"b88e7d")
+    r.box(-.59,1.232,-.191,.16,.013,.007,"eee1bf")
+    r.box(-.36,1.168,-.22,.14,.022,.12,"fff5d4")
+    for x in (-.398,-.36,-.322):
+        r.lathe(x,1.180,-.218,.013,.004,((1,0),(1,1)),["c88b5c"],8)
 
 
 def herbal(r,profiles):
@@ -212,6 +220,12 @@ def skippy(r,_):
     for x in (-2.54,2.54):
         r.ring(x,3.91,.72,.53,.53,.059,"efb94f",PRINT,True)
     r.tag(-3.02,1.045,-1.26,.26)
+    # Both 500 g listings use the same 73 × 73 × 124 mm envelope.
+    body=((.85,0),(.98,.065),(1,.24),(1,.72),(.92,.82),(.87,.86))
+    lid=((.9,.842),(1,.876),(1,1))
+    for x,fill in [(-2.25,"b87d44"),(-2.06,"c58a4b")]:
+        r.lathe(x,2.113,-3.98,.0365,.124,body,[fill],10)
+        r.lathe(x,2.113,-3.98,.0365,.124,lid,["2f8188"],10)
 
 
 def spam(r,_):

@@ -1,6 +1,6 @@
 # S04 · Borsch Med
 
-**Status: concept packet for review.** The drawings locate the fixtures. The linked catalog images and brand research define the product identity. Final artwork and runtime acceptance are tracked separately.
+**Status: the two catalogue stops are implemented.** The four concept views describe the wider room proposal. The installed product forms are unprinted studies.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -16,9 +16,9 @@ Turn the pale space into a quiet product library. Use warm bone plaster, brushed
 
 | Element | Placement and interaction |
 | --- | --- |
-| Main display | Fan-fold patch folio counter, local XYZ (-0.48, 0.081, -0.63), yaw 7°. Keep it aimed into the left part of the view; leave room for a future pack view beside the display rather than putting a new pedestal in the route. |
+| Main display | Fan-fold patch folio counter, local XYZ (-0.48, 0.081, -0.63), yaw 7°. Keep it aimed into the left part of the view; keep the carton, pouch and sticker study on the existing ledge. |
 | Visitor route | Threshold local XZ (0, 6). Keep the tested right aisle beside the folio open from the entry through to the rear cabinets. |
-| Fixtures and use points | Shallow wall stock rails and the service shelf stay off the walking route. Proposed product inspect points are on the aisle side, pending SKU integration. |
+| Fixtures and use points | Shallow wall stock rails and the service shelf stay off the walking route. The Lingzhi story opens from the right aisle near the cabinet. |
 
 World origin (20, 0, -6), yaw 0°. Dimensions are authored metres. The [floor plan](floor-plan.webp) shows programme footprints and the [inventory](model-inventory.md) resolves fixture coordinates and upstream assets.
 
@@ -26,8 +26,8 @@ World origin (20, 0, -6), yaw 0°. Dimensions are authored metres. The [floor pl
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| Borsch Med Mosquito Repellent Patch, 18 patches | Open folio and an adjacent flush shelf socket | Unlabelled carton, sachet and sticker study. Existing folio and generic patch cards can be reused. Exact retail surfaces remain pending. |
-| Lingzhi Cracked Spores Powder Capsule 200 mg × 60 twin pack | Rear product library shelf | A separate branded carton or twin-pack model is pending measured source views. Keep the two categories visually distinct. |
+| Borsch Med Mosquito Repellent Patch, 18 patches | Open folio and an adjacent flush shelf socket | Installed unprinted carton, pouch and sticker study. Exact retail surfaces remain pending. |
+| Lingzhi Cracked Spores Powder Capsule 200 mg × 60 twin pack | Right product library shelf | Two neutral cartons distinguish the shelf bay. The verified pack photographs remain in the separate catalogue listing. |
 
 Official photography is linked in the research brief. The proposal presents the products without treatment, dosing or performance claims.
 
@@ -37,7 +37,7 @@ The built-in image generator made the interior proposal and unlabelled product s
 
 ## Runtime acceptance
 
-Keep the verified right navigation and installed exhibit geometry. The premium layout is a design proposal. SKU interaction anchors remain pending.
+On published build `8e4599e605ef0138`, desktop and 390 px touch-emulated Chrome followed the entrance route, opened the patch story in front of the folio and reached the separate Lingzhi story via the right aisle. Each action linked to its own official catalogue entry and used the static story image. The desktop run also checked the patch card’s Simplified Chinese and Malay titles. [Runtime Chrome captures](folio-runtime.webp) · [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44550489149)
 
 ## Catalog images by display
 

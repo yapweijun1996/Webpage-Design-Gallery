@@ -1,6 +1,9 @@
 import {buildRestrooms} from './restrooms.js';
 import {miliExhibit} from './mili-exhibit.js';
 import {gogoExhibit} from './gogo-exhibit.js';
+import {borschExhibit} from './borsch-exhibit.js';
+import {pzhExhibit} from './pzh-exhibit.js';
+import {westFoodExhibits, westFoodFocalExhibits} from './west-food-exhibits.js';
 import {createDoorwayOccupancy} from './doorway-occupancy.js';
 import {createGlassBatch, createInstanceVisibility, createPackedDraw, createProjectedBatch} from './packed-draw.js';
 import {filterWallArtwork, setupArtworkTexture} from './artwork-textures.js';
@@ -21,8 +24,9 @@ import {atriumLayout} from './atrium-layout.js';
 import {addShopSignAtlas} from './shop-signs.js';
 import {addExpandedStorefronts} from './expanded-storefronts.js';
 import {createExpandedInteriors} from './expanded-interiors.js';
+import {pzhCartonX, pzhCartonStandingZ} from './window-studios.js';
 import {createInteriorKit} from './interiors/runtime.js';
-import {interiorFloorColour,interiorStores,worldInteriorBox} from './interiors/config.js';
+import {interiorFloorColour,interiorStores,worldInteriorBox,worldInteriorPoint} from './interiors/config.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {releaseStartupAssetPack} from './startup-asset-pack.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
@@ -1033,6 +1037,25 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     // public contact batch. Keep them hidden until their room is installed.
     for (const [id,store] of Object.entries(interiorStores)) {
       activeShopSlot = Number(id.slice(1));
+      if (id === 'S04') {
+        for (const [storyId, [x, z]] of [
+          ['borsch-patch-story', store.anchor.standing],
+          ['borsch-lingzhi-story', store.lingzhiStanding]
+        ]) {
+          const [wx,,wz] = worldInteriorPoint(store,[x,0,z]);
+          interactables.push({id:storyId,x:wx,z:wz,radius:1.0});
+        }
+      } else if (id === 'S05') {
+        const [x,,z] = worldInteriorPoint(store,[pzhCartonX,0,pzhCartonStandingZ]);
+        interactables.push({id:'pzh-carton-story',x,z,radius:1.0});
+      } else if (westFoodFocalExhibits[id]) {
+        const exhibit = westFoodFocalExhibits[id];
+        const [standingX,standingZ] = store.anchor.standing;
+        const [x,,z] = worldInteriorPoint(store,[standingX,0,standingZ]);
+        const plaque = sign(exhibit.caption,...worldInteriorPoint(store,exhibit.panel),1.02,.15,true,65);
+        plaque.rotation.y = store.frame.yaw_world_deg*Math.PI/180;
+        interactables.push({id:exhibit.id,x,z,radius:1.0});
+      }
       for (const footprint of store.colliders) {
         const {center:[x,,z],size:[w,,d],yaw} = worldInteriorBox(store,footprint);
         const y = store.frame.world_origin_m[1] + store.floor.position_m[1] + .024;
@@ -1338,7 +1361,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     });
     return brandWallPromise;
   }
-  return {signage, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  return {signage, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...westFoodExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};

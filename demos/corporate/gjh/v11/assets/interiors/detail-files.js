@@ -18,7 +18,7 @@ export const roomDetails = {
   },
   "S04": {
     "file": "s04-borsch-details.glb",
-    "bytes": 24124,
+    "bytes": 34500,
     "roomDetail": true
   },
   "S05": {
@@ -38,7 +38,7 @@ export const roomDetails = {
   },
   "S08": {
     "file": "s08-skippy-details.glb",
-    "bytes": 46692,
+    "bytes": 71800,
     "roomDetail": true
   },
   "S09": {

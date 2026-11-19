@@ -3117,9 +3117,9 @@
       {
         "store": "S04",
         "file": "s04-borsch-details.glb",
-        "bytes": 24124,
-        "sha256": "832dd9f7c7c2699f992b2a2a07c884adae92a5b08f16f914486f104534e1b34f",
-        "triangles": 1566,
+        "bytes": 34500,
+        "sha256": "71d76edaa1474d650580ca987f6744b3bcd5c8172f5abe122a1b2a534e6f3515",
+        "triangles": 1710,
         "draws": 3,
         "instances": 20,
         "motion": [],
@@ -3195,9 +3195,9 @@
       {
         "store": "S08",
         "file": "s08-skippy-details.glb",
-        "bytes": 46692,
-        "sha256": "210332d16146666f4495c26ec2ef3793d72e3146a32eb40744439f40e175cf4e",
-        "triangles": 760,
+        "bytes": 71800,
+        "sha256": "0413f92d049919f63e6319ad05421d64c271f8ea4f3c43813cabfc8ce79d559a",
+        "triangles": 1104,
         "draws": 4,
         "instances": 4,
         "motion": [
