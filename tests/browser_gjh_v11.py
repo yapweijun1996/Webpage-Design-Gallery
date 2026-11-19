@@ -565,7 +565,7 @@ def upper_deck_gallery(page):
     seated = drive(page, 1600)
     assert seated['seated'] and seated['seatId'] == seat['id'] and seated['seatPhase'] == 'seated', seated
     assert abs(seated['y'] - 7.2) < .1, seated
-    assert page.locator('#inspect').inner_text() == 'Stand up'
+    assert page.locator('#inspect').get_attribute('aria-label') == 'Stand up from bench'
     page.locator('#inspect').click()
     stood = drive(page, 1200)
     assert not stood['seated'] and stood['seatPhase'] == 'idle', stood
