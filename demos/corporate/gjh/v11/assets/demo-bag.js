@@ -28,12 +28,20 @@ export function createBagStore(ids, storage = null) {
   return {snapshot, change, add, remove(id) { if (allowed.has(id)) { quantities.delete(id); publish(); } }, clear() { quantities.clear(); publish(); }, subscribe(listener) { listeners.add(listener); listener(snapshot()); return () => listeners.delete(listener); }};
 }
 
+let demoBag;
 export function setupDemoBag() {
+  if (demoBag) return demoBag;
   const records = new Map([...document.querySelectorAll('[data-product]')].map(card => [card.dataset.product, {name:card.dataset.productName, image:card.dataset.productImage}]));
   let storage = null; try { storage = sessionStorage; } catch { /* Memory-only fallback. */ }
   const store = createBagStore(records.keys(), storage);
   const dialog = document.querySelector('#bag-dialog'), open = document.querySelector('#bag-open'), close = document.querySelector('#bag-close'), items = document.querySelector('#bag-items'), empty = document.querySelector('#bag-empty'), clear = document.querySelector('#bag-clear'), add = document.querySelector('#product-add'), note = document.querySelector('#product-bag-status'), status = document.querySelector('#bag-status');
   const bagIcon=icon('shopping-bag',{size:18});
+  const bagLabel = document.createElement('span'), bagCount = document.createElement('span');
+  bagLabel.className = 'hud-nav-label';
+  bagLabel.textContent = 'Bag';
+  bagCount.className = 'hud-bag-count';
+  bagCount.setAttribute('aria-hidden', 'true');
+  open.replaceChildren(bagIcon, bagLabel, bagCount);
   const collect=document.querySelector('#product-collect');
   let current = null, collectListener=null, canCollect=()=>false;
   let returnFocus = open;
@@ -44,7 +52,9 @@ export function setupDemoBag() {
   function render(value) {
     const active = document.activeElement, focusKey = active?.dataset.bagFocus;
     const total = Object.values(value).reduce((a,b)=>a+b,0);
-    open.textContent = `Bag (${total})`; open.prepend(bagIcon); open.setAttribute('aria-label',`Open inventory bag, ${total} collected items`); open.title = 'Inventory Bag — items collected in the mall, not purchases';
+    bagCount.textContent = String(total);
+    open.setAttribute('aria-label',`Open inventory bag, ${total} collected items`);
+    open.title = 'Inventory Bag — items collected in the mall, not purchases';
     items.replaceChildren(); empty.hidden = total > 0; clear.hidden = total === 0;
     for (const [id,quantity] of Object.entries(value)) {
       const record=records.get(id), row=document.createElement('li'), image=document.createElement('img'), name=document.createElement('h3'), controls=document.createElement('div'), count=document.createElement('output');
@@ -77,5 +87,6 @@ export function setupDemoBag() {
     }
     return false;
   }
-  return {change:store.change, snapshot:store.snapshot, addHeldProduct, closeTo(target){returnFocus=target;dialog.close();}, configureCollect(test,listener){canCollect=test;collectListener=listener;}, subscribe:store.subscribe, get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
+  demoBag = {change:store.change, snapshot:store.snapshot, addHeldProduct, closeTo(target){returnFocus=target;dialog.close();}, configureCollect(test,listener){canCollect=test;collectListener=listener;}, subscribe:store.subscribe, get open(){return dialog.open;}, select(id){current=records.has(id)?id:null;document.querySelector('#product-bag-actions').hidden=!current;render(store.snapshot());}};
+  return demoBag;
 }

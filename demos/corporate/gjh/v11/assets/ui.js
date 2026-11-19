@@ -282,22 +282,6 @@ export function createUI(expanded = false) {
   const dialog = document.getElementById('product-dialog');
   const newMoonPreview = setupNewMoonPreview();
   const bag = setupDemoBag();
-  const bagButton = document.getElementById('bag-open');
-  const bagLabel = document.createElement('span'), bagCount = document.createElement('span');
-  bagLabel.className = 'hud-nav-label';
-  bagLabel.textContent = 'Bag';
-  bagCount.className = 'hud-bag-count';
-  bagCount.setAttribute('aria-hidden', 'true');
-  function projectBagCount(items) {
-    const count = Object.values(items).reduce((sum, count) => sum + count, 0);
-    setHudText(bagCount, String(count));
-    // The bag owner replaces its label on quantity changes and when a product opens.
-    if (bagCount.parentNode !== bagButton) {
-      for (const node of [...bagButton.childNodes]) if (node.nodeType === Node.TEXT_NODE) node.remove();
-      bagButton.append(bagLabel, bagCount);
-    }
-  }
-  bag.subscribe(projectBagCount);
   const bagDialog = document.getElementById('bag-dialog');
   const listTitle = document.getElementById('list-title');
   const contextNavigation = createContextNavigation({
@@ -811,7 +795,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     addHeldProductToBag:bag.addHeldProduct,
     productName,
     projectMode(mode) {
-      contextNavigation.update({mode, available, destination: showing3D ? 'home' : 'shops',
+      contextNavigation.update({mode: showing3D || bag.open ? mode : null, available, destination: showing3D ? 'home' : 'shops',
         host: bag.open ? document.getElementById('context-navigation-bag') : undefined});
     },
     onModeState(listener) { modeListener = listener; },

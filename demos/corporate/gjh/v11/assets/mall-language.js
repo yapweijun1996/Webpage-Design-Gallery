@@ -457,10 +457,12 @@ const observer = new MutationObserver(records => {
   }
 });
 const selectors = document.querySelectorAll('[data-mall-language]');
+const headerCode = document.getElementById('site-language-code');
 function setLanguage(code) {
   observer.disconnect();
   language = ['zh-Hans','ms'].includes(code) ? code : 'en';
   document.documentElement.lang = language;
+  headerCode.textContent = language === 'zh-Hans' ? '中' : language.toUpperCase();
   for (const select of selectors) select.value = language;
   visit(document.documentElement);
   if (language !== 'en') observer.observe(document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:attributes});
