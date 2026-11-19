@@ -21,11 +21,11 @@ Avatar anisotropy is 2× on phones and 4× on tablets/desktops subject to hardwa
 
 Keep the tier's present AA policy pending a matched live test. Record the GL sample count on the default framebuffer and the base render target's samples on Detailed. At matched drawing-buffer sizes, compare direct output and Detailed compositing while walking and rotating past the same hair outline. On a measurement build compare 2× MSAA on the base target or FXAA independently. Test 100%, 80% and 60% render scale. Judge temporal shimmer in motion and skin/atlas softening in the native crops. Record GPU time and p95/p99 without recording; retain a change only if it improves the silhouette within the device targets.
 
-## Offline C4 candidate
+## Round 2 player portrait
 
-The bake runs on the CPU and never initializes Blender or Metal. It reads the SHA-256-pinned 4K source, simplifies geometry with UV error weighting, groups connected indexed charts and assigns 1.5× linear texel density to upper-head charts relative to body charts. The 2K atlas includes four pixels of gutter. It retains the runtime rig and all clips, including the added sit. The command checks joint order, inverse bind matrices, triangle count and Khronos validation before creating a new output file.
+Desktop and tablet sessions starting on Balanced or Detailed load `assets/gjh-tripo-visitor-2k.glb`. Low and phone sessions use the 1K near mesh. The texture choice lasts for the session so changing quality while walking never initiates a 2K upload. A missing 2K download falls back to the 1K rig. Both near meshes use the existing 512² far LOD. The 2K map replaces the 1K allocation (+16 MiB including RGBA8 mips) and uses the GPU's maximum anisotropy, linear magnification, trilinear minification and implicit zero mip bias. Eyes and glasses share this opaque map. The loader drives the existing sliced model queue and waits for its GPU fence before the first visible draw. A per-material uniform adds neutral fill in proportion to the head's lighting deficit, retaining the existing rim and shared shader program.
 
-The dry run used the source identified in `gjh-tripo-visitor-source.json`, Three 0.187.0's MeshoptSimplifier, Pillow 13.0.0 and the Blender-3D-Gallery checkout's gltf-validator. Supply an unused output pathname. For a desktop comparison use a disposable copy of the demo and its normal generator workflow.
+The CPU bake verifies the 4K source hash and bind matrices, keeps the runtime clips, and simplifies the geometry while preserving UV seams. Permissive simplification in the earlier candidate introduced wrong-colour triangles across atlas charts. The head charts receive sqrt(3) times the linear sampling density of the body charts, relative to their density in the source. Four-pixel source-colour gutters separate charts.
 
 ```sh
 export NODE_PATH="/path/to/Blender-3D-Gallery/node_modules"
@@ -34,11 +34,21 @@ node scripts/bake_tripo_candidate.mjs /path/to/motion-BRgAS3uq.glb /tmp/portrait
   "$NODE_PATH/three/examples/jsm/libs/meshopt_simplifier.module.js"
 ```
 
-| Player asset | Near triangles | Base colour with RGBA8 mip chain | Plus resident 512² far texture |
-| --- | ---: | ---: | ---: |
-| Shipped 1K (all tiers) | 11,764 | 5.33 MiB | 6.67 MiB |
-| Desktop 2K candidate | 13,997 | 21.33 MiB | 22.67 MiB |
+Supply an unused output path. The shipped file has 13,997 triangles, 3,484,156 bytes and SHA-256 `c18ad275c1c255e02cd6d0bd5750f796ab9945f982f3ec68487209c6a3b81ff9`. Khronos validation reported zero errors and one existing skinned-mesh warning.
 
-These estimates exclude CPU decode buffers, driver alignment, and transient uploads. The dry run produced a 5,241,684-byte GLB with zero Khronos errors and the existing non-root skinned-mesh warning. The larger download and additional 16 MiB of GPU texture storage require device measurement before adoption. Inspect chart seams, hairline, hands, sit/stand and held-object alignment across LOD switches. Keep the phone on the shipped 1K.
+### Measurements
+
+In matching 500×500 front-view software renders, with bilinear sampling, no shadows and opaque geometry, the 1K near mesh showed the same dark hair and forehead streaks as the owner screenshots. Interior pixels at least 0.035 model units deeper than three of their four immediate neighbours fell from 1,299 to 4 (4K source 5). This isolates cracks in the old simplified mesh. The fixed brow, hair and glasses retained the source colours.
+
+`python scripts/avatar_sharpness.py BEFORE.png AFTER.png` measures the supplied 600×600 Detailed close-up framing. Use the same pose, viewport and exposure for a texture comparison. The four-neighbour Laplacian uses display-referred luma; skin luminance averages linearized sRGB over fixed forehead, nose and cheek samples. Override rectangles with `--face` and repeatable `--skin` for other framings.
+
+| Pair | Facial variance ratio | Mean linear skin luminance |
+| --- | ---: | ---: |
+| Owner's headed Chrome captures, old → main before Round 2 | 0.61× | 0.695 → 0.315 |
+| Unchanged offline lighting, 1K → shipped 2K | 0.59× | 0.673 → 0.683 |
+
+[Offline 1K portrait](gjh-v11-references/player-face-1k-offline.png) · [Offline 2K portrait](gjh-v11-references/player-face-2k-offline.png)
+
+The offline comparison uses face rectangle `110,222,389,400` and skin rectangle `225,180,264,204`. Against the original 4K mesh rendered with the same camera and sampling, face-region RGB PSNR improves from 19.50 to 25.28 dB. Geometry cracks add high-frequency energy to the old mesh, and the full-face Laplacian ratio remains below 1.6×. Offline lighting does not exercise the runtime fill. A new headed Chrome capture, program trace and uninstrumented early-entry frame timings remain outstanding.
 
 Run cold early entry on all three tiers (zero frames ≥50 ms), compare program counts before/after LOD transitions and NPC admission, then run unrecorded phone/tablet/PC laps including the atrium. Target 30/60/60 FPS and compare GPU time, drawing buffer and upload spikes. Verify peak triangles/draws within 220k/70, 300k/90 and 420k/110 respectively. Repeat after ten minutes on the real devices.

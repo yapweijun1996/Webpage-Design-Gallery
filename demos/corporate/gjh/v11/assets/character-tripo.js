@@ -8,7 +8,6 @@ import {createVisitorLOD} from './visitor-v2-lod.js';
 import {createSeatContact} from './seat-contact.js';
 
 const model = 'gjh-tripo-visitor';
-const asset = `assets/${model}.glb`;
 const movementKeys = ['idle', 'walk', 'run'];
 const emotes = ['wave', 'nod', 'jump', 'dance'];
 const clipNames = Object.freeze({idle: 'idle', walk: 'walk', run: 'sprint',
@@ -70,8 +69,18 @@ function createSitClip(T, source, hips, placement) {
   return clip;
 }
 
-export async function createCharacterTripo(T, createLocomotionContinuity, prepareModel) {
-  const gltf = await loadVisitorGLTF(new URL(`./${model}.glb`, import.meta.url));
+export async function createCharacterTripo(T, createLocomotionContinuity, prepareModel, portrait) {
+  let nearModel = portrait ? model + '-2k' : model;
+  let gltf;
+  try {
+    gltf = await loadVisitorGLTF(new URL(`./${nearModel}.glb`, import.meta.url));
+  } catch (error) {
+    if (!portrait) throw error;
+    portrait = null;
+    nearModel = model;
+    gltf = await loadVisitorGLTF(new URL(`./${model}.glb`, import.meta.url));
+  }
+  const asset = `assets/${nearModel}.glb`;
   const avatar = gltf.scene;
   let mesh, meshCount = 0, mixer, lod;
   try {
@@ -79,7 +88,18 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     if (meshCount !== 1 || !mesh.isSkinnedMesh || Array.isArray(mesh.material) || !mesh.material.map) {
       throw new Error('Expected one textured Tripo skin');
     }
-    prepareTripoMaterial(mesh.material);
+    const prepareMaterial = material => {
+      prepareTripoMaterial(material);
+      if (portrait) material.userData.portraitLift = .55;
+    };
+    prepareMaterial(mesh.material);
+    if (portrait) {
+      // Eyes and glasses are painted into the one opaque base-colour map.
+      mesh.material.map.magFilter = T.LinearFilter;
+      mesh.material.map.minFilter = T.LinearMipmapLinearFilter;
+      mesh.material.map.anisotropy = Math.max(1, portrait.anisotropy);
+      mesh.material.map.needsUpdate = true;
+    }
     const hips = mesh.skeleton.bones.find(bone => /^mixamorig:?Hips$/.test(bone.name));
     if (!hips) throw new Error('Tripo hips missing');
     const clips = mapTripoClips(T, gltf.animations, hips);
@@ -92,6 +112,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     visual.add(placement);
     placement.add(avatar);
     mesh.castShadow = mesh.receiveShadow = true;
+    if (portrait) await portrait.preload(mesh);
     // A skinned mesh caches its first animated bounding sphere. A fixed player
     // mesh can jump outside that sphere, so use the existing camera occlusion.
     mesh.frustumCulled = false;
@@ -123,7 +144,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     const eyeHand = createFirstPersonHand(T, visual, undefined, prepareModel);
     const transfer = createProductTransfer(T, avatar, wrist, visual, grip, eyeHand);
     lod = createVisitorLOD(T, placement, {
-      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareMaterial: prepareTripoMaterial, prepareModel
+      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareMaterial, prepareModel
     });
 
     const resolveLocomotion = createLocomotionContinuity();

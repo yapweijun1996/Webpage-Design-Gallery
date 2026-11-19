@@ -961,7 +961,30 @@ async function initialize() {
     shadowVariants: warmShadows,
     ...options
   });
-  const {createPlayer} = await import('./assets/player.js'); player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,world.cameraObstacles,expanded,prepareAvatar);
+  // Select once at startup. Quality changes during walking must never upload a portrait atlas.
+  const portraitProfile = quality.resolve(innerWidth);
+  const portrait = quality.deviceClass !== 'phone' && portraitProfile.tier !== 'low' ? {
+    anisotropy:renderer.capabilities.getMaxAnisotropy(),
+    async preload(mesh) {
+      // The regular animation loop starts after the first visible draw. Drive its
+      // uploader under the overlay and wait for the GPU fence, including on early entry.
+      let frame;
+      function pump() {
+        modelWarmup.runFrame(true);
+        frame = requestAnimationFrame(pump);
+      }
+      frame = requestAnimationFrame(pump);
+      try {
+        await prepareAvatar(mesh, {fence:true, late:false, priority:() => -Infinity,
+          shadowVariants:() => portraitProfile.shadows, linear:() => expanded && portraitProfile.shadows});
+      } finally {
+        cancelAnimationFrame(frame);
+      }
+    }
+  } : null;
+  const {createPlayer} = await import('./assets/player.js');
+  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,
+    world.cameraObstacles, expanded, prepareAvatar, portrait);
   if (player.npcSource) await installNpcs(T, R, prepareAvatar, player.npcSource);
   else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareAvatar));
   const {createDOMProjection} = await import('./assets/dom-projection.js');

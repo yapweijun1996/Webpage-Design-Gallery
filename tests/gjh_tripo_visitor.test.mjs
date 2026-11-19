@@ -20,8 +20,9 @@ function sourceClips() {
 
 const tripoAssets = new URL('../demos/corporate/gjh/v11/assets/', import.meta.url);
 
-async function withVisitorAssets(run, factory = createCharacterTripo) {
+async function withVisitorAssets(run, factory = createCharacterTripo, portrait) {
   const files = factory === createCharacterV2 ? ['gjh-mall-visitor-v2.glb', 'gjh-mall-visitor-v2-lod1.glb'] : ['gjh-tripo-visitor.glb', 'gjh-tripo-visitor-lod1.glb'];
+  if (portrait) files.push('gjh-tripo-visitor-2k.glb');
   files.push('visitor-carry-hand.glb');
   const data = new Map(await Promise.all(files.map(async file => [file, await readFile(new URL(file, tripoAssets))])));
   const globals = {
@@ -41,7 +42,7 @@ async function withVisitorAssets(run, factory = createCharacterTripo) {
   Object.assign(globalThis, globals);
   let character;
   try {
-    character = await factory(T, createLocomotionContinuity);
+    character = await factory(T, createLocomotionContinuity, undefined, portrait);
     await run(character, data);
   } finally {
     character?.dispose?.();
@@ -94,6 +95,23 @@ test('Tripo entrance framing clears the idle visitor at desktop and portrait siz
       assert.ok(corridor.y > maxY && corridor.y < 1, 'the walkway centre projects above the visitor');
     }
   });
+});
+
+test('desktop portrait prepares the near mesh before exposing its rig', async () => {
+  let prepared;
+  await withVisitorAssets(async character => {
+    assert.equal(character.state.asset, 'assets/gjh-tripo-visitor-2k.glb');
+    const mesh = character.visual.getObjectByProperty('isSkinnedMesh', true);
+    assert.equal(mesh, prepared);
+    assert.equal(mesh.geometry.index.count / 3, 13997);
+    assert.equal(mesh.material.map.anisotropy, 16);
+    assert.equal(mesh.material.map.minFilter, T.LinearMipmapLinearFilter);
+    assert.equal(mesh.material.map.magFilter, T.LinearFilter);
+    assert.ok(character.state.clips.sit);
+    const shader = { ...T.ShaderLib.standard, uniforms:{} };
+    mesh.material.onBeforeCompile(shader);
+    assert.ok(shader.uniforms.avatarLift.value > 0);
+  }, createCharacterTripo, {anisotropy:16, async preload(mesh) { prepared = mesh; }});
 });
 
 test('visitor v2 keeps its existing expanded and classic camera settings', () => {

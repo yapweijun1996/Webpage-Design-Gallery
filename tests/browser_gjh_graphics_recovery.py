@@ -397,7 +397,7 @@ def run():
                 row('trusted-held-touch-through-native-recovery',stopped=stopped,afterLive=after_live,afterStep=after_step,
                     perAxisXZBoundMetres=1e-5,angles='exact');c.close()
                 # Delayed source responses exercise real initialization awaits, not synthetic ready state.
-                for asset,width,height in [('vendor/three.module.min.js',390,844),('assets/world.bundle.js',390,844),('assets/gjh-tripo-visitor.glb',390,844),('assets/world.bundle.js',1440,900)]:
+                for asset,width,height in [('vendor/three.module.min.js',390,844),('assets/world.bundle.js',390,844),('assets/gjh-tripo-visitor{,-2k}.glb',390,844),('assets/world.bundle.js',1440,900)]:
                     c,page=context(browser,width,height);pending=[]
                     page.route('**/'+asset,lambda route:pending.append(route));page.goto(mall_entry_url(url),wait_until='domcontentloaded')
                     page.wait_for_function('window.__mall !== undefined')
@@ -446,7 +446,7 @@ def run():
                     start_error=len(errors)
                     if failure=='no-wasm':page.route('**/rapier.mjs',lambda r:r.abort())
                     if failure=='asset':
-                        page.route('**/gjh-tripo-visitor.glb',lambda r:r.abort())
+                        page.route('**/gjh-tripo-visitor{,-2k}.glb',lambda r:r.abort())
                         page.route('**/gjh-mall-visitor-v2.glb',lambda r:r.abort())
                     if failure=='wasm-during-loss':
                         pending=[];page.route('**/rapier.mjs',lambda r:pending.append(r));page.goto(mall_entry_url(url))

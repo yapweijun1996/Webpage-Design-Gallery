@@ -40,7 +40,7 @@ def run():
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 if block_tripo:
-                    page.route('**/gjh-tripo-visitor.glb', lambda route: route.abort())
+                    page.route('**/gjh-tripo-visitor{,-2k}.glb', lambda route: route.abort())
                 page.goto(mall_entry_url(base + query))
                 page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                 assert page.evaluate('window.__sceneReady === true')

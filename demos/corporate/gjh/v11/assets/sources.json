@@ -421,6 +421,7 @@
     "id": "gjh-tripo-visitor",
     "name": "Studio Gerak Chibi Tripo",
     "localPath": "assets/gjh-tripo-visitor.glb",
+    "portraitPath": "assets/gjh-tripo-visitor-2k.glb",
     "lod1Path": "assets/gjh-tripo-visitor-lod1.glb",
     "sourcePage": "https://yapweijun1996.github.io/Blender-3D-Gallery/?page=tripo-motion",
     "provenance": "assets/gjh-tripo-visitor-source.json",

@@ -32,7 +32,8 @@ def bake(directory):
         # All source corners are in glTF image space (origin at the top left).
         left, top = math.floor(min(u)*4096), math.floor(min(v)*4096)
         right, bottom = math.ceil(max(u)*4096), math.ceil(max(v)*4096)
-        weight = 1.5 if sum(positions[i][1] for i in vertices)/len(vertices) > .55 else 1
+        # Three times the texel area implies sqrt(3) times the linear density.
+        weight = math.sqrt(3) if sum(positions[i][1] for i in vertices)/len(vertices) > .55 else 1
         charts.append((left, top, max(1, right-left), max(1, bottom-top), weight, vertices))
     charts.sort(key=lambda chart: -chart[3]*chart[4])
     size, pad = 2048, 4

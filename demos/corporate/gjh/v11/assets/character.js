@@ -28,11 +28,11 @@ export async function createSelectedVisitor(selection, {tripo, v2, v1}) {
   }
 }
 
-export function createCharacter(T, prepareModel) {
+export function createCharacter(T, prepareModel, portrait) {
   return createSelectedVisitor(new URLSearchParams(location.search).get('visitor'), {
     async tripo() {
       const {createCharacterTripo} = await import('./character-tripo.js');
-      return createCharacterTripo(T, createLocomotionContinuity, prepareModel);
+      return createCharacterTripo(T, createLocomotionContinuity, prepareModel, portrait);
     },
     async v2() {
       const {createCharacterV2} = await import('./character-v2.js');

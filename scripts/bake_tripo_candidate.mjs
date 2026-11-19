@@ -62,8 +62,9 @@ assert.equal(sourceBind.length, runtimeBind.length);
 assert.ok(sourceBind.every((value, i) => Math.abs(value-runtimeBind[i]) < 1e-4), 'Incompatible bind poses');
 const position = floats(raw.views[0]), uv = floats(raw.views[2]);
 const original = new Uint16Array(Uint8Array.from(raw.views[5]).buffer);
+// Preserve UV seams. Permissive collapses interpolate between unrelated atlas islands.
 const [reduced] = MeshoptSimplifier.simplifyWithAttributes(original, position, 3, uv, 2,
-  [.1, .1], null, 14000*3, 1, ['Permissive']);
+  [1, 1], null, 13998*3, 1, []);
 assert.ok(reduced.length <= 42000 && reduced.length > 11764*3);
 const vertexIds = [...new Set(reduced)];
 const remap = new Map(vertexIds.map((id, i) => [id, i]));

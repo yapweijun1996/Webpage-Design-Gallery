@@ -18,13 +18,14 @@ function portraitFill(shader) {
 }
 
 function shadeAvatar(shader) {
+  shader.uniforms.avatarLift = {value:this.userData?.portraitLift ?? 0};
   // Both authored Tripo atlases cover a single material. Use bind-space coordinates
   // (both rigs are ~1 unit tall) so the zones follow the skin through every pose.
   shader.vertexShader = shader.vertexShader
     .replace('#include <common>', '#include <common>\nvarying vec3 vAvatarRest;')
     .replace('#include <begin_vertex>', '#include <begin_vertex>\nvAvatarRest = position;');
   shader.fragmentShader = shader.fragmentShader
-    .replace('#include <common>', '#include <common>\nvarying vec3 vAvatarRest;')
+    .replace('#include <common>', '#include <common>\nvarying vec3 vAvatarRest;\nuniform float avatarLift;')
     .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
       float headZone = smoothstep(0.51, 0.59, vAvatarRest.y);
       float handZone = smoothstep(0.29, 0.34, abs(vAvatarRest.x));
@@ -33,6 +34,10 @@ function shadeAvatar(shader) {
       float hair = headZone * (1.0 - smoothstep(0.06, 0.18, max(diffuseColor.r, max(diffuseColor.g, diffuseColor.b))));
       roughnessFactor = mix(mix(roughnessFactor, 0.62, skin), 0.43, hair);`);
   portraitFill(shader);
+  shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', `const vec3 avatarLuma = vec3(0.2126, 0.7152, 0.0722);
+      float avatarIllumination = dot(outgoingLight, avatarLuma) / max(dot(diffuseColor.rgb, avatarLuma), 0.01);
+      outgoingLight += diffuseColor.rgb * avatarLift * headZone * (1.0 - smoothstep(0.35, 1.35, avatarIllumination));
+      #include <opaque_fragment>`);
 }
 
 function configureAvatar(material, deviceClass, compile, key) {

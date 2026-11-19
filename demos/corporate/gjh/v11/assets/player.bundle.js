@@ -176,11 +176,11 @@ async function createSelectedVisitor(selection, { tripo, v2, v1 }) {
     return v2();
   }
 }
-function createCharacter(T, prepareModel) {
+function createCharacter(T, prepareModel, portrait) {
   return createSelectedVisitor(new URLSearchParams(location.search).get("visitor"), {
     async tripo() {
       const { createCharacterTripo } = await import("./character-tripo.js");
-      return createCharacterTripo(T, createLocomotionContinuity, prepareModel);
+      return createCharacterTripo(T, createLocomotionContinuity, prepareModel, portrait);
     },
     async v2() {
       const { createCharacterV2 } = await import("./character-v2.bundle.js");
@@ -923,8 +923,8 @@ function playerCameraFraming(model, expanded, width, height) {
     lookAhead: tripo ? 1.7 : 0
   };
 }
-async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel) {
-  const character = await createCharacter(T, prepareModel);
+async function createPlayer(T, R, physics, scene, canvas, contactMaterial, contactPlane, seats = [], cameraObstacles = [], expanded = false, prepareModel, portrait) {
+  const character = await createCharacter(T, prepareModel, portrait);
   const model = character.state.model;
   const visual = character.visual;
   scene.add(visual);

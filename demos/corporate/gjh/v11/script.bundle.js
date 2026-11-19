@@ -7162,8 +7162,31 @@ async function initialize() {
     shadowVariants: warmShadows,
     ...options
   });
+  const portraitProfile = quality.resolve(innerWidth);
+  const portrait = quality.deviceClass !== "phone" && portraitProfile.tier !== "low" ? {
+    anisotropy: renderer.capabilities.getMaxAnisotropy(),
+    async preload(mesh) {
+      let frame2;
+      function pump() {
+        modelWarmup.runFrame(true);
+        frame2 = requestAnimationFrame(pump);
+      }
+      frame2 = requestAnimationFrame(pump);
+      try {
+        await prepareAvatar(mesh, {
+          fence: true,
+          late: false,
+          priority: () => -Infinity,
+          shadowVariants: () => portraitProfile.shadows,
+          linear: () => expanded && portraitProfile.shadows
+        });
+      } finally {
+        cancelAnimationFrame(frame2);
+      }
+    }
+  } : null;
   const { createPlayer } = await import("./assets/player.bundle.js");
-  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar);
+  player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar, portrait);
   if (player.npcSource)
     await installNpcs(T, R, prepareAvatar, player.npcSource);
   else if (player.state.character.model === "gjh-tripo-visitor")

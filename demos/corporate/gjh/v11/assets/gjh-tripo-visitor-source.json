@@ -17,7 +17,8 @@
   ],
   "runtime_exports": {
     "lod0": "gjh-tripo-visitor.glb",
+    "lod0_portrait": "gjh-tripo-visitor-2k.glb",
     "lod1": "gjh-tripo-visitor-lod1.glb"
   },
-  "release_note": "The 5.4 MB raw GLB is a development stand-in only. Publish the two optimized exports at the runtime paths and rebuild the gallery."
+  "release_note": "The 5.4 MB raw GLB is a development stand-in only. Publish the optimized exports at the runtime paths and rebuild the gallery."
 }
