@@ -6,4 +6,7 @@
   if (!['light', 'dark', 'system'].includes(choice)) choice = 'system';
   document.documentElement.dataset.themeChoice = choice;
   document.documentElement.dataset.theme = choice === 'system' ? (media.matches ? 'dark' : 'light') : choice;
+  let palette = 'terracotta';
+  try { palette = localStorage.getItem('wdg.palette') || palette; } catch { /* Session-only preference. */ }
+  document.documentElement.dataset.palette = palette;
 })();

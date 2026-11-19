@@ -1,5 +1,6 @@
 const root = new URL('../', import.meta.url);
 const supported = ['en', 'zh-Hans', 'ms'];
+const palettes = ['terracotta', 'ocean', 'forest', 'plum', 'amber', 'rose', 'teal', 'indigo'];
 const attributes = ['aria-label', 'title', 'alt', 'placeholder'];
 const originals = new WeakMap();
 let bundles = {};
@@ -78,6 +79,19 @@ function appearance(choice) {
   document.documentElement.dataset.theme = choice === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : choice;
   const theme = document.querySelector('#theme-select');
   if (theme) theme.value = choice;
+  const toggle = document.querySelector('#theme-toggle');
+  if (toggle) {
+    const label = document.documentElement.dataset.theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+    toggle.setAttribute('aria-label', label);
+    toggle.setAttribute('title', label);
+  }
+  document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.querySelector('.site-header')).backgroundColor;
+}
+function applyPalette(choice) {
+  if (!palettes.includes(choice)) choice = 'terracotta';
+  document.documentElement.dataset.palette = choice;
+  const select = document.querySelector('#palette-select');
+  if (select) select.value = choice;
   document.querySelector('meta[name="theme-color"]').content = getComputedStyle(document.querySelector('.site-header')).backgroundColor;
 }
 function setLanguage(value) {
@@ -93,6 +107,18 @@ async function init() {
   document.querySelector('#theme-select').addEventListener('change', (event) => {
     const saved = storage.set('theme', event.target.value);
     appearance(event.target.value);
+    document.querySelector('#preferences-status').textContent = saved ? 'Preferences saved.' : 'Preferences apply to this tab. Storage is unavailable.';
+  });
+  applyPalette(document.documentElement.dataset.palette);
+  document.querySelector('#palette-select').addEventListener('change', (event) => {
+    const saved = storage.set('palette', event.target.value);
+    applyPalette(event.target.value);
+    document.querySelector('#preferences-status').textContent = saved ? 'Preferences saved.' : 'Preferences apply to this tab. Storage is unavailable.';
+  });
+  document.querySelector('#theme-toggle').addEventListener('click', () => {
+    const choice = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    const saved = storage.set('theme', choice);
+    appearance(choice);
     document.querySelector('#preferences-status').textContent = saved ? 'Preferences saved.' : 'Preferences apply to this tab. Storage is unavailable.';
   });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => appearance(document.documentElement.dataset.themeChoice));
@@ -140,9 +166,12 @@ async function init() {
   });
   window.addEventListener('storage', (event) => {
     if (event.key === 'wdg.theme') appearance(event.newValue);
+    if (event.key === 'wdg.palette') applyPalette(event.newValue);
     if (event.key === 'wdg.language') setLanguage(bundles[event.newValue] ? event.newValue : 'en');
   });
   controls.hidden = false;
+  document.querySelector('.language-control').hidden = false;
+  document.querySelector('#theme-toggle').hidden = false;
   document.documentElement.dataset.preferencesReady = 'true';
 }
 init();

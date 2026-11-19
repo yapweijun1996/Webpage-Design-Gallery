@@ -67,6 +67,13 @@ def validate_contrast(tokens):
               ("color-focus", "color-surface", 3)]
     pairs += [(f"color-{status}", f"color-{status}-surface", 4.5)
               for status in ("success", "warning", "error")]
+    # Gallery colour palettes swap the editorial accent and wash in both themes.
+    for name in [key[len("palette-gallery-"):-len("-accent")] for key in tokens if key.startswith("palette-gallery-") and key.endswith("-accent") and "-night-" not in key]:
+        base = f"palette-gallery-{name}"
+        for background in ("palette-editorial-paper", f"{base}-wash", "palette-white"):
+            pairs.append((f"{base}-accent", background, 4.5))
+        for background in ("palette-night-paper", f"{base}-night-wash", "palette-night-page"):
+            pairs.append((f"{base}-night-accent", background, 4.5))
     for foreground, background, minimum in pairs:
         actual = contrast_ratio(resolve_token(foreground, tokens), resolve_token(background, tokens))
         if actual < minimum:

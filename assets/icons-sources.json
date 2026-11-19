@@ -23,6 +23,26 @@
     {
       "id": "info",
       "source": "SVG-Icon-Studio/icons/catalog/info.svg"
+    },
+    {
+      "id": "globe",
+      "source": "Original Gallery header icon drawn in design-system/icons.json (24px grid, 1.5 stroke)"
+    },
+    {
+      "id": "sun",
+      "source": "Original Gallery header icon drawn in design-system/icons.json (24px grid, 1.5 stroke)"
+    },
+    {
+      "id": "moon",
+      "source": "Original Gallery header icon drawn in design-system/icons.json (24px grid, 1.5 stroke)"
+    },
+    {
+      "id": "palette",
+      "source": "Original Gallery header icon drawn in design-system/icons.json (24px grid, 1.5 stroke)"
+    },
+    {
+      "id": "sliders",
+      "source": "Original Gallery header icon drawn in design-system/icons.json (24px grid, 1.5 stroke)"
     }
   ]
 }
