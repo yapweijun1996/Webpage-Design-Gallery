@@ -1,6 +1,6 @@
 # S15 · Casio
 
-**Status: concept packet for review.** The player baseline records the installed fixtures. Product and lighting changes shown in the studies are proposals.
+**Status: the catalogue story is implemented.** The four concept views show the broader room proposal.
 
 [First-party brand research and product photo sources](brand-research.md)
 
@@ -44,3 +44,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 ## Runtime acceptance
 
 Chrome touch and desktop evidence support the right route. Instrument audio, matching models and Sit remain proposed.
+
+## Catalogue exhibit
+
+The recital grand remains the room's architectural anchor. The adjacent station now has a simplified 61-key keyboard form in the published CT-S1BK dimensions. The story compares the portable keyboard with the three-pedal GP-510BP cabinet form and links to Casio Music Singapore.
+
+Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action opened the reference and displayed the source link. [Runtime Chrome views](exhibit-runtime.webp)

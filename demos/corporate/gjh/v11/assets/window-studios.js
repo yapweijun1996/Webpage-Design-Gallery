@@ -404,19 +404,46 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       block(1.10,.34,mid+.16,1.01,.70,.50);
       for(const x of [.46,1.73])box(x,.51,mid-.87,.13,.84,.13,charcoal);
       box(1.1,1.1,mid-.93,1.63,.36,.72,charcoal);
-      for(let i=0;i<19;i++)box(.38+i*.08,1.2,mid-.51,.074,.05,.25,pearl);
+      // Unprinted 930 × 258 × 83 mm portable-keyboard study on the teaching stand.
+      const keyboardZ = mid-.69;
+      box(1.10,1.3215,keyboardZ,.930,.083,.258,charcoal);
+      for (let key=0;key<36;key++) {
+        const keyX = 1.10 + (key-17.5)*.0233;
+        box(keyX,1.366,keyboardZ+.071,.0213,.006,.104,pearl);
+        if (key<35 && [0,1,3,4,5].includes(key%7)) {
+          box(keyX+.01165,1.374,keyboardZ+.038,.012,.020,.066,0x1d2424);
+        }
+      }
       box(1.10,.61,mid+.16,.99,.16,.49,charcoal);
       for(const x of [.74,1.46])box(x,.33,mid+.16,.08,.48,.36,walnut);
       pendant(-1.36,mid-1.3,2.94,.26,brass);break;
     case 16: // GP: white modular product wall, lime base cabinets and stepped demonstration tables.
       replace(() => cabinet(-1.62,island,1.48,.78,.98,base,white),base);
       cabinet(1.62,island+.32,1.48,.78,.98,base,white);
+      box(1.06,1.045,island+.54,.30,.015,.22,0x627452);
+      // Separate unprinted AA and eTag forms at their published sizes.
+      column(.978,1.078,island+.52,.00725,.0505,0x88a62a);
+      column(1.13,1.057,island+.63,.016,.0083,pearl);
       sideShelf(-1,silver,'pack');ringLight(0,mid,1.14,3.69);plant(side-.71,front-1.08,1.47);break;
     case 17: // Gigaset: nested signal arcs, a dark round island and illuminated phone docks.
       for(const x of [-side+.71,side-.71])shelf(x,rear+.24,.99,'pack',charcoal);
-      {const top=circleIsland(0,island,1.12,.85,base);for(const x of [-.54,0,.54]){
-        box(x,top+.04,island,.25,.09,.22,charcoal);box(x,top+.25,island-.02,.15,.38,.077,charcoal);box(x,top+.30,island+.024,.105,.12,.012,0xbbd1c8);
-      }}
+      {
+        const top = circleIsland(0,island,1.12,.85,base);
+        const handsets = [
+          {x:-.32, width:.048, height:.159, depth:.030, screen:0xe8a75e, baseWidth:.082},
+          {x:.32, width:.055, height:.172, depth:.034, screen:0x6688b1, baseWidth:.151}
+        ];
+        for (const {x,width,height,depth,screen,baseWidth} of handsets) {
+          const front = island+depth/2;
+          box(x,top+.013,island,baseWidth,.027,.088,charcoal);
+          box(x,top+.026+height/2,island,width,height,depth,0x353d3d);
+          box(x,top+.026+height*.72,front+.001,width*.69,height*.235,.002,screen);
+          for (let row=0;row<4;row++) for (const col of [-1,0,1]) {
+            box(x+col*width*.223,top+.045+row*height*.075,front+.002,width*.15,.006,.004,0x798784);
+          }
+        }
+        for (const dx of [.04,.059]) box(.32+dx,top+.029,island+.014,.013,.006,.013,0x78847d);
+      }
       ringLight(0,mid,1.24,3.56);ringLight(0,mid,.72,3.75);plant(-side+.82,front-.8,1.42);break;
   }
 }

@@ -25,7 +25,8 @@ Shipped on 2026-11-19 (main c06ed9ad): automatic festival theme, single sticky s
 - [x] Verify the Pien Tze Huang single-carton exhibit and rear aisle on published build `c59b32c3eb100103`. [S05](docs/goh-joo-hin/05-pien-tze-huang/README.md)
 - [x] Verify the three S06–S08 catalogue exhibits on published build `46a37ab996fabb31`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44552309398)
 - [x] Verify the three S09–S11 exhibits on published build `45dfc89d1e194c56`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44553308701)
-- [ ] Verify the S12–S14 exhibits on the published build.
+- [x] Verify the S12–S14 exhibits on published build `ba278cec19153b4e`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44554504937)
+- [ ] Verify the S15–S17 exhibits on the published build.
 - [ ] Verify the subsequent shop changes in runtime order.
 
 ### V11 loader motion

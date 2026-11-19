@@ -73,6 +73,39 @@ export const shopCatalogueExhibits = {
     source:"https://www.lg.com/sg/tvs-soundbars/oled-evo/oled55c5psa/",
     sourceLabel:"View LG’s OLED55C5PSA reference",
     action:"brand-story"
+  },
+  "casio-keyboard-story": {
+    brand:"Casio",
+    tagline:"Two digital keyboard formats",
+    kind:"Instrument exhibit",
+    image:"assets/brands/S15-casio.webp",
+    alt:"Official Casio brand mark",
+    story:"Casio documents the 61-key CT-S1BK portable keyboard and the cabinet-form GP-510BP digital hybrid with three pedals. The open-lid grand on the stage is a recital fixture.",
+    source:"https://casiomusic.sg/products/ct-s1",
+    sourceLabel:"View the Casio Music Singapore keyboard",
+    action:"brand-story"
+  },
+  "gp-power-story": {
+    brand:"GP Batteries",
+    tagline:"AA cells and a tracker",
+    kind:"Power exhibit",
+    image:"assets/brands/S16-gp.webp",
+    alt:"Official GP Batteries brand mark",
+    story:"GP lists the Ultra+ Alkaline AA at 1.5 V and 14.5 × 50.5 mm. GP Malaysia documents an eTag tracker with a replaceable CR2032 coin cell. These examples use different battery formats.",
+    source:"https://international.gpbatteries.com/products/gp-ultra-plus-alkaline-aa",
+    sourceLabel:"View the GP Ultra+ AA specifications",
+    action:"brand-story"
+  },
+  "gigaset-phone-story": {
+    brand:"Gigaset",
+    tagline:"Handsets and their bases",
+    kind:"Telephone exhibit",
+    image:"assets/brands/S17-gigaset.webp",
+    alt:"Official Gigaset brand mark",
+    story:"Gigaset documents an A170 handset with a compact cradle. The COMFORT 550A has a 2.2-inch colour display and a larger answering-machine base. The two references serve different tabletop layouts.",
+    source:"https://www.gigaset.com/en_en/gigaset-a170/",
+    sourceLabel:"View Gigaset’s A170 reference",
+    action:"brand-story"
   }
 };
 
@@ -85,5 +118,8 @@ export const shopCatalogueFocals = {
   S11:{id:'hormel-chili-story',caption:'CHILI TIN EXHIBIT',panel:[-.56,.80,-.472]},
   S12:{id:"zeria-pack-story",caption:"BOTTLE AND CARTON",panel:[-0.52,1.08,-0.639]},
   S13:{id:"sony-audio-story",caption:"PERSONAL AUDIO",panel:[-0.64,1.32,-0.59]},
-  S14:{id:"lg-oled-story",caption:"55-INCH OLED REFERENCE",panel:[2.34,2.19,-3.865]}
+  S14:{id:"lg-oled-story",caption:"55-INCH OLED REFERENCE",panel:[2.34,2.19,-3.865]},
+  S15:{id:"casio-keyboard-story",caption:"DIGITAL KEYBOARD FORMATS",panel:[1.1,1.09,-0.443]},
+  S16:{id:"gp-power-story",caption:"AA POWER AND TRACKERS",panel:[1.62,0.94,0.235]},
+  S17:{id:"gigaset-phone-story",caption:"HANDSETS AND BASES",panel:[-0.55,1.68,-2.28]}
 };

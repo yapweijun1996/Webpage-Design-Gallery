@@ -424,6 +424,39 @@ var shopCatalogueExhibits = {
     source: "https://www.lg.com/sg/tvs-soundbars/oled-evo/oled55c5psa/",
     sourceLabel: "View LG’s OLED55C5PSA reference",
     action: "brand-story"
+  },
+  "casio-keyboard-story": {
+    brand: "Casio",
+    tagline: "Two digital keyboard formats",
+    kind: "Instrument exhibit",
+    image: "assets/brands/S15-casio.webp",
+    alt: "Official Casio brand mark",
+    story: "Casio documents the 61-key CT-S1BK portable keyboard and the cabinet-form GP-510BP digital hybrid with three pedals. The open-lid grand on the stage is a recital fixture.",
+    source: "https://casiomusic.sg/products/ct-s1",
+    sourceLabel: "View the Casio Music Singapore keyboard",
+    action: "brand-story"
+  },
+  "gp-power-story": {
+    brand: "GP Batteries",
+    tagline: "AA cells and a tracker",
+    kind: "Power exhibit",
+    image: "assets/brands/S16-gp.webp",
+    alt: "Official GP Batteries brand mark",
+    story: "GP lists the Ultra+ Alkaline AA at 1.5 V and 14.5 × 50.5 mm. GP Malaysia documents an eTag tracker with a replaceable CR2032 coin cell. These examples use different battery formats.",
+    source: "https://international.gpbatteries.com/products/gp-ultra-plus-alkaline-aa",
+    sourceLabel: "View the GP Ultra+ AA specifications",
+    action: "brand-story"
+  },
+  "gigaset-phone-story": {
+    brand: "Gigaset",
+    tagline: "Handsets and their bases",
+    kind: "Telephone exhibit",
+    image: "assets/brands/S17-gigaset.webp",
+    alt: "Official Gigaset brand mark",
+    story: "Gigaset documents an A170 handset with a compact cradle. The COMFORT 550A has a 2.2-inch colour display and a larger answering-machine base. The two references serve different tabletop layouts.",
+    source: "https://www.gigaset.com/en_en/gigaset-a170/",
+    sourceLabel: "View Gigaset’s A170 reference",
+    action: "brand-story"
   }
 };
 var shopCatalogueFocals = {
@@ -435,7 +468,10 @@ var shopCatalogueFocals = {
   S11: { id: "hormel-chili-story", caption: "CHILI TIN EXHIBIT", panel: [-0.56, 0.8, -0.472] },
   S12: { id: "zeria-pack-story", caption: "BOTTLE AND CARTON", panel: [-0.52, 1.08, -0.639] },
   S13: { id: "sony-audio-story", caption: "PERSONAL AUDIO", panel: [-0.64, 1.32, -0.59] },
-  S14: { id: "lg-oled-story", caption: "55-INCH OLED REFERENCE", panel: [2.34, 2.19, -3.865] }
+  S14: { id: "lg-oled-story", caption: "55-INCH OLED REFERENCE", panel: [2.34, 2.19, -3.865] },
+  S15: { id: "casio-keyboard-story", caption: "DIGITAL KEYBOARD FORMATS", panel: [1.1, 1.09, -0.443] },
+  S16: { id: "gp-power-story", caption: "AA POWER AND TRACKERS", panel: [1.62, 0.94, 0.235] },
+  S17: { id: "gigaset-phone-story", caption: "HANDSETS AND BASES", panel: [-0.55, 1.68, -2.28] }
 };
 
 // demos/corporate/gjh/v11/assets/merge-static-geometries.js
@@ -5927,8 +5963,15 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       for (const x of [0.46, 1.73])
         box(x, 0.51, mid - 0.87, 0.13, 0.84, 0.13, charcoal);
       box(1.1, 1.1, mid - 0.93, 1.63, 0.36, 0.72, charcoal);
-      for (let i = 0;i < 19; i++)
-        box(0.38 + i * 0.08, 1.2, mid - 0.51, 0.074, 0.05, 0.25, pearl);
+      const keyboardZ = mid - 0.69;
+      box(1.1, 1.3215, keyboardZ, 0.93, 0.083, 0.258, charcoal);
+      for (let key = 0;key < 36; key++) {
+        const keyX = 1.1 + (key - 17.5) * 0.0233;
+        box(keyX, 1.366, keyboardZ + 0.071, 0.0213, 0.006, 0.104, pearl);
+        if (key < 35 && [0, 1, 3, 4, 5].includes(key % 7)) {
+          box(keyX + 0.01165, 1.374, keyboardZ + 0.038, 0.012, 0.02, 0.066, 1909796);
+        }
+      }
       box(1.1, 0.61, mid + 0.16, 0.99, 0.16, 0.49, charcoal);
       for (const x of [0.74, 1.46])
         box(x, 0.33, mid + 0.16, 0.08, 0.48, 0.36, walnut);
@@ -5937,6 +5980,9 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
     case 16:
       replace(() => cabinet(-1.62, island, 1.48, 0.78, 0.98, base, white), base);
       cabinet(1.62, island + 0.32, 1.48, 0.78, 0.98, base, white);
+      box(1.06, 1.045, island + 0.54, 0.3, 0.015, 0.22, 6452306);
+      column(0.978, 1.078, island + 0.52, 0.00725, 0.0505, 8955434);
+      column(1.13, 1.057, island + 0.63, 0.016, 0.0083, pearl);
       sideShelf(-1, silver, "pack");
       ringLight(0, mid, 1.14, 3.69);
       plant(side - 0.71, front - 1.08, 1.47);
@@ -5946,11 +5992,22 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
         shelf(x, rear + 0.24, 0.99, "pack", charcoal);
       {
         const top = circleIsland(0, island, 1.12, 0.85, base);
-        for (const x of [-0.54, 0, 0.54]) {
-          box(x, top + 0.04, island, 0.25, 0.09, 0.22, charcoal);
-          box(x, top + 0.25, island - 0.02, 0.15, 0.38, 0.077, charcoal);
-          box(x, top + 0.3, island + 0.024, 0.105, 0.12, 0.012, 12308936);
+        const handsets = [
+          { x: -0.32, width: 0.048, height: 0.159, depth: 0.03, screen: 15247198, baseWidth: 0.082 },
+          { x: 0.32, width: 0.055, height: 0.172, depth: 0.034, screen: 6719665, baseWidth: 0.151 }
+        ];
+        for (const { x, width: width2, height, depth: depth2, screen, baseWidth } of handsets) {
+          const front2 = island + depth2 / 2;
+          box(x, top + 0.013, island, baseWidth, 0.027, 0.088, charcoal);
+          box(x, top + 0.026 + height / 2, island, width2, height, depth2, 3489085);
+          box(x, top + 0.026 + height * 0.72, front2 + 0.001, width2 * 0.69, height * 0.235, 0.002, screen);
+          for (let row = 0;row < 4; row++)
+            for (const col of [-1, 0, 1]) {
+              box(x + col * width2 * 0.223, top + 0.045 + row * height * 0.075, front2 + 0.002, width2 * 0.15, 0.006, 0.004, 7964548);
+            }
         }
+        for (const dx of [0.04, 0.059])
+          box(0.32 + dx, top + 0.029, island + 0.014, 0.013, 0.006, 0.013, 7898237);
       }
       ringLight(0, mid, 1.24, 3.56);
       ringLight(0, mid, 0.72, 3.75);

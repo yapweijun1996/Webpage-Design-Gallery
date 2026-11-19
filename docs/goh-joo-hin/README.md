@@ -22,9 +22,9 @@ The 17 shops here are the V11 game’s authored roster. Some represent house bra
 | S12 | [Zeria](12-zeria/brand-research.md) · [Product library and concept](12-zeria/README.md) |
 | S13 | [Sony](13-sony/brand-research.md) · [Personal audio exhibit and concept](13-sony/README.md) |
 | S14 | [LG](14-lg/brand-research.md) · [OLED exhibit and concept](14-lg/README.md) |
-| S15 | [Casio](15-casio/brand-research.md) · [Concept packet](15-casio/README.md) |
-| S16 | [GP Batteries](16-gp-batteries/brand-research.md) · [Concept packet](16-gp-batteries/README.md) |
-| S17 | [Gigaset](17-gigaset/brand-research.md) · [Concept packet](17-gigaset/README.md) |
+| S15 | [Casio](15-casio/brand-research.md) · [Keyboard exhibit and concept](15-casio/README.md) |
+| S16 | [GP Batteries](16-gp-batteries/brand-research.md) · [Power exhibit and concept](16-gp-batteries/README.md) |
+| S17 | [Gigaset](17-gigaset/brand-research.md) · [Handset exhibit and concept](17-gigaset/README.md) |
 
 ## Evidence standard
 
