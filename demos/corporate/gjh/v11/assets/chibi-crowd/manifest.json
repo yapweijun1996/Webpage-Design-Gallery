@@ -6,7 +6,7 @@
     "checkoutHead": "12cd121f65ffa0cf9661cc211196f46e45033ee6",
     "snapshot": "Copied from the local Blender 3D Gallery working tree on 2026-11-19. The HEAD alone may not identify these revisions. SHA-256 pins the exact bytes.",
     "license": "Tripo output licence for redistribution is unspecified. The owner requested local integration into the GJH v11 demo. No redistribution rights are inferred.",
-    "review": "docs/chibi-dressup-progress.md"
+    "review": "docs/chibi-dressup-progress.md: NPC wardrobe verified with the motion gate on eleven clips (T-shirt keeps up to 21 vertices at 1.4 mm); independent render review PASS WITH NOTES"
   },
   "modules": [
     {
@@ -26,11 +26,92 @@
       "id": "hair-bob",
       "file": "hair-bob.glb",
       "status": "verified",
-      "bytes": 227404,
-      "sha256": "32cadfa94be111706295032933e823529364047484f2cd78b71c7919abfd811d",
-      "source": "models/chibi-dressup/modules/hair-bob.glb",
+      "bytes": 131420,
+      "sha256": "4cfb8f049af1648fc8ccd321802c3e85878faf96fd2ff69a02fd48ea3c0d7574",
+      "source": "output/v11-handoff/npc-lod/npc-hair-bob.glb",
       "slot": "hair",
-      "authoringSource": "output/modular-chibi-parts/hair-fit-astra/round2/hair_bob_v2.glb",
+      "authoringSource": "models/chibi-dressup/modules/hair-bob.glb (NPC decimation, 512 px texture)",
+      "bodyIds": [
+        "neutral-body"
+      ]
+    },
+    {
+      "id": "hair-spiky",
+      "file": "hair-spiky.glb",
+      "status": "verified",
+      "bytes": 431492,
+      "sha256": "24e4d00b71ba29158fd799e98d0033eec1ed9a3c76071d5b2f16a89b333c9dac",
+      "source": "output/v11-handoff/npc-lod/npc-hair-spiky.glb",
+      "slot": "hair",
+      "authoringSource": "models/chibi-dressup/modules/hair-spiky.glb (NPC decimation, 512 px texture)",
+      "bodyIds": [
+        "neutral-body"
+      ]
+    },
+    {
+      "id": "hair-sidepart",
+      "file": "hair-sidepart.glb",
+      "status": "verified",
+      "bytes": 100368,
+      "sha256": "ad872583dea7a1f4f461c58089249ff1dc879d19ea526e715c0ddb126e559a61",
+      "source": "output/v11-handoff/npc-lod/npc-hair-sidepart.glb",
+      "slot": "hair",
+      "authoringSource": "models/chibi-dressup/modules/hair-sidepart.glb (NPC decimation, 512 px texture)",
+      "bodyIds": [
+        "neutral-body"
+      ]
+    },
+    {
+      "id": "top-tshirt",
+      "file": "top-tshirt.glb",
+      "status": "verified",
+      "bytes": 429024,
+      "sha256": "0a0966efe5cc6cee12d62849505e03e3a4345f4a8ccfbf2e322b147b5c1318ee",
+      "source": "output/v11-handoff/npc-lod/npc-top-tshirt.glb",
+      "slot": "top",
+      "authoringSource": "models/chibi-dressup/modules/top-tshirt.glb (NPC decimation, 512 px texture)",
+      "bodyIds": [
+        "neutral-body"
+      ]
+    },
+    {
+      "id": "top-dress",
+      "file": "top-dress.glb",
+      "status": "verified",
+      "bytes": 521632,
+      "sha256": "162a95ad2b948cba5545b6beb2543a5f64a7a251e2f3083435db070218ee7373",
+      "source": "output/v11-handoff/npc-lod/npc-top-dress.glb",
+      "slot": "top",
+      "authoringSource": "models/chibi-dressup/modules/top-dress.glb (NPC decimation, 512 px texture)",
+      "bodyIds": [
+        "neutral-body"
+      ],
+      "excludesSlots": [
+        "bottom"
+      ]
+    },
+    {
+      "id": "bottom-jeans",
+      "file": "bottom-jeans.glb",
+      "status": "verified",
+      "bytes": 382204,
+      "sha256": "13a0d1a0763ebce1fb829fd7aa93fe5bd6003c62b91a7dffcf76c33e161e4acc",
+      "source": "output/v11-handoff/npc-lod/npc-bottom-jeans.glb",
+      "slot": "bottom",
+      "authoringSource": "models/chibi-dressup/modules/bottom-jeans.glb (NPC decimation, 512 px texture)",
+      "bodyIds": [
+        "neutral-body"
+      ]
+    },
+    {
+      "id": "shoes-sneakers",
+      "file": "shoes-sneakers.glb",
+      "status": "verified",
+      "bytes": 86108,
+      "sha256": "751830307eb2fb8ca7f6797184a8196979590275389135b00d0d393585f11d29",
+      "source": "output/v11-handoff/npc-lod/npc-shoes-sneakers.glb",
+      "slot": "shoes",
+      "authoringSource": "models/chibi-dressup/modules/shoes-sneakers.glb (NPC decimation, 512 px texture)",
       "bodyIds": [
         "neutral-body"
       ]
@@ -41,10 +122,10 @@
       "id": "motion-clips",
       "file": "motion-clips.glb",
       "status": "verified",
-      "bytes": 333260,
-      "sha256": "33522ae4856a46b8a43e394a3debec0dfdbff9106a82e06af8471c891de0e320",
+      "bytes": 383416,
+      "sha256": "c4e92ac1ac57209b801cfdb6635f96972d76459282bcd646f271192e5f83e75e",
       "source": "models/chibi-dressup/motion-clips.glb",
-      "authoringSource": "models/tripo-chibi-motion/motion.glb via models/chibi-dressup/extract-motion.mjs"
+      "authoringSource": "output/modular-chibi-parts/body-fix/motion_fixed.glb via scripts/strip-motion-glb.py (Blender-3D-Gallery)"
     },
     "gestures": {
       "id": "hand-gestures",

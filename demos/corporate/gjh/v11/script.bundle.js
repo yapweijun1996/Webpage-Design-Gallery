@@ -517,17 +517,45 @@ function createFrameTrace(renderer) {
     };
     next = (next + 1) % capacity;
   }
-  for (const method of ["compile", "render", "initTexture", "initRenderTarget"]) {
-    const original = renderer[method];
-    renderer[method] = function(...args) {
+  function wrap(owner, method, label, describe) {
+    const original = owner[method];
+    owner[method] = function(...args) {
       const before = start();
       try {
         return original.apply(this, args);
       } finally {
-        const subject = args[0];
-        end(`renderer.${method}`, before, subject?.name || subject?.image?.src || subject?.type);
+        end(label, before, describe?.(args));
       }
     };
+  }
+  let shadowMap;
+  function watchShadowMap() {
+    if (shadowMap === renderer.shadowMap)
+      return;
+    shadowMap = renderer.shadowMap;
+    wrap(shadowMap, "render", "shadowMap.render", ([, scene]) => scene.name || scene.type);
+  }
+  for (const method of ["compile", "render", "initTexture", "initRenderTarget"]) {
+    wrap(renderer, method, `renderer.${method}`, ([subject, camera]) => {
+      const name = subject?.name || subject?.image?.src || subject?.type;
+      if (method !== "render")
+        return name;
+      const target = renderer.getRenderTarget();
+      return `${name} layer=${camera.layers.mask} target=${target ? target.texture.name || "offscreen" : "screen"}`;
+    });
+  }
+  watchShadowMap();
+  const gl = renderer.getContext();
+  for (const method of [
+    "getProgramInfoLog",
+    "getShaderInfoLog",
+    "getProgramParameter",
+    "texStorage2D",
+    "texImage2D",
+    "texSubImage2D",
+    "generateMipmap"
+  ]) {
+    wrap(gl, method, `gl.${method}`, method === "getProgramParameter" ? ([, parameter]) => parameter : undefined);
   }
   function* steps(label, work) {
     try {
@@ -543,7 +571,7 @@ function createFrameTrace(renderer) {
       work.return();
     }
   }
-  return { start, end, steps, report: () => events.length < capacity ? events.slice() : [...events.slice(next), ...events.slice(0, next)] };
+  return { start, end, steps, watchShadowMap, report: () => events.length < capacity ? events.slice() : [...events.slice(next), ...events.slice(0, next)] };
 }
 
 // assets/onboarding/components.js
@@ -4208,11 +4236,17 @@ function* prepareScene({
       renderer.autoClear = true;
       renderer.sortObjects = false;
       if (compile) {
+        const linked = [];
         for (const material of renderer.compile(staging, probe)) {
-          for (const program of renderer.properties.get(material).programs.values())
-            programs.add(program);
+          for (const program of renderer.properties.get(material).programs.values()) {
+            if (!programs.has(program)) {
+              programs.add(program);
+              linked.push(program);
+            }
+          }
         }
         report.programs = programs.size;
+        return linked;
       } else
         renderer.render(staging, probe);
     } finally {
@@ -4308,7 +4342,13 @@ function* prepareScene({
     report.lightVariants = Math.max(report.lightVariants, variants.size);
     for (const { active, output, candidates, passShadows } of variants.values()) {
       for (let i = 0;i < candidates.length; i += batchSize) {
-        submit(candidates.slice(i, i + batchSize), active, output, true, false, passShadows);
+        const linking = submit(candidates.slice(i, i + batchSize), active, output, true, false, passShadows);
+        if (parallel && linking.length) {
+          yield false;
+          for (const program of linking)
+            while (!program.isReady())
+              yield false;
+        }
         yield;
       }
     }
@@ -4317,10 +4357,6 @@ function* prepareScene({
       report.textures++;
       yield;
     }
-    if (parallel)
-      for (const program of programs)
-        while (!program.isReady())
-          yield false;
     if (shadows) {
       const active = probeLights(poses[0]).filter((light) => light.layers.isEnabled(0));
       const casters = meshes.filter((mesh) => mesh.castShadow);
@@ -6025,6 +6061,7 @@ function validateRestoration() {
     const gl = renderer.getContext();
     if (gl.isContextLost())
       return;
+    frameTrace?.watchShadowMap();
     try {
       atmosphere?.restoreEnvironment();
     } catch {}
@@ -6111,7 +6148,9 @@ async function initialize() {
   three = T;
   await waitForContext(context);
   renderer = new T.WebGLRenderer({ canvas, context, antialias: true });
-  if (new URLSearchParams(location.search).get("traceWarm") === "1")
+  const diagnostics = new URLSearchParams(location.search);
+  renderer.debug.checkShaderErrors = diagnostics.get("debugShaders") === "1";
+  if (diagnostics.get("traceWarm") === "1")
     frameTrace = createFrameTrace(renderer);
   renderer.outputColorSpace = T.SRGBColorSpace;
   renderer.toneMapping = T.ACESFilmicToneMapping;
