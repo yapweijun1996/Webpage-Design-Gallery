@@ -21,6 +21,7 @@ function pixels(token) {
 
 const headerControls = '.is-3d .site-header :is(.header-location,.header-map,.bag-open,.view-toggle)';
 const cornerControls = '#mall-tools>summary,#hud-objectives>summary,.hud-rail :is(button,summary),#hud-more-actions';
+const cornerChips = '#mall-tools>summary,#hud-objectives>summary';
 const chrome = '.is-3d :is(.site-header button,#mall-tools>summary,#hud-objectives>summary)';
 
 test('compact header and corner chips paint at 36px inside 44px or larger touch targets', () => {
@@ -31,8 +32,7 @@ test('compact header and corner chips paint at 36px inside 44px or larger touch 
   assert.equal(target - 2 * pixels(insetToken), 36);
   assert.match(rule(headerControls), /min-height:var\(--size-control\);min-width:var\(--size-control\)/);
   assert.match(rule(cornerControls), /min-height:var\(--size-control\)/);
-  assert.match(rule('#mall-tools>summary'), /width:var\(--size-control\)/);
-  assert.match(rule('#mall-tools>summary,#hud-objectives>summary'), /width:max-content/);
+  assert.match(rule(cornerChips), /width:max-content/);
   assert.match(rule(chrome), /border:0;border-radius:0;background:transparent/);
   const face = rule(`${chrome}::before`);
   assert.match(face, /inset:var\(--hud-chrome-inset\)/);
@@ -107,12 +107,27 @@ test('a closed map has no layout box at any viewport', () => {
   assert.ok(rule('.mall-overlay .mall-map:not([open])').includes('display:none'));
 });
 
-test('location name can truncate in its own track without squeezing the dot or map button', () => {
-  assert.ok(rule('.is-3d .site-header .header-location').includes('grid-template-columns:auto minmax(0,1fr) auto'));
+test('the location chip keeps the dot, ellipsized name, and chevron on one centered row', () => {
+  assert.match(rule(headerControls), /display:inline-flex;align-items:center/);
+  const location = rule('.is-3d .site-header .header-location');
+  assert.match(location, /flex-flow:row nowrap/);
+  assert.match(location, /flex:0 1 auto;max-width:16rem/);
+  assert.match(rule('.is-3d #location-map>:not(#location-name)'), /flex:none/);
   const name = rule('.site-header #location-name');
-  assert.ok(name.includes('overflow:hidden') && name.includes('text-overflow:ellipsis') && name.includes('white-space:nowrap'));
-  assert.ok(css.includes('grid-template-columns:auto minmax(0,1fr)}'));
-  assert.match(rule('.is-3d #location-map>[data-icon]'), /display:none/);
+  assert.match(name, /min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap/);
+  assert.match(rule(headerControls), /flex:0 0 auto/);
+  assert.doesNotMatch(css, /\.is-3d #location-map>[^{}]+\{[^}]*display:none/);
+});
+
+test('the Tools icon and label fit on one row without sharing a grid cell', () => {
+  assert.match(rule(cornerControls), /display:flex;align-items:center;justify-content:center/);
+  assert.match(rule(cornerChips), /width:max-content;.*gap:var\(--space-2\);/s);
+  assert.match(rule(cornerChips), /padding-inline:var\(--space-3\);white-space:nowrap/);
+  for (const [, selector, declarations] of css.matchAll(/([^{}]+)\{([^{}]+)\}/g)) {
+    if (selector.includes('#mall-tools>summary')) {
+      assert.doesNotMatch(declarations, /display:grid|grid-area:|(?:^|;)width:var\(--size-control\)/);
+    }
+  }
 });
 
 test('interaction and held-product cards share a padded flex row with nonwrapping actions', () => {
@@ -138,7 +153,7 @@ test('the HUD centers its icons and resting joystick knob independently of badge
   assert.match(rule('.is-3d :is(.site-header button,#mall-tools>summary) svg'), /display:block;margin:0/);
   assert.match(rule('.is-3d .hud-bag-count'), /position:absolute/);
   assert.match(rule('#hud-more-actions'), center);
-  assert.match(rule('body.is-3d .mall-overlay :is(#inspect,#run-toggle,#mall-tools>summary,.hud-pickup-action)'), center);
+  assert.match(rule('body.is-3d .mall-overlay :is(#inspect,#run-toggle,.hud-pickup-action)'), center);
   assert.match(rule('.is-3d .touch-controls .joystick'), center);
   assert.match(rule('.is-3d .touch-controls .joystick-thumb'), /position:static/);
   assert.doesNotMatch(read('../demos/corporate/gjh/v11/index.html'), /joystick-label/);
@@ -146,5 +161,5 @@ test('the HUD centers its icons and resting joystick knob independently of badge
 
 test('the objective summary reserves room for all three progress dots', () => {
   assert.ok(rule('.hud-objective-dots').includes('flex:none'));
-  assert.ok(rule('#hud-objectives>summary').includes('white-space:nowrap'));
+  assert.ok(rule(cornerChips).includes('white-space:nowrap'));
 });
