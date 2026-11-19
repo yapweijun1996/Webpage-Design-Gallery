@@ -7,6 +7,74 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/tram-layout.js
+function roundedLoop(west, north, east, south, radius = 2) {
+  let x = 10, z = south, heading = -Math.PI / 2, length = 0;
+  const segments = [];
+  function append(span, curvature = 0) {
+    const segment = { start: length, span, x, z, heading, curvature };
+    segments.push(segment);
+    ({ x, z, heading } = pose(segment, span));
+    length += span;
+  }
+  function pose(segment, d) {
+    const { x: x2, z: z2, heading: heading2, curvature: k } = segment;
+    const angle = heading2 + k * d;
+    return {
+      x: x2 + (k ? (Math.cos(heading2) - Math.cos(angle)) / k : d * Math.sin(angle)),
+      z: z2 + (k ? (Math.sin(angle) - Math.sin(heading2)) / k : d * Math.cos(angle)),
+      heading: angle
+    };
+  }
+  const corner = () => append(Math.PI * radius / 2, -1 / radius);
+  append(10 - west - radius);
+  corner();
+  append(south - north - 2 * radius);
+  corner();
+  append(east - west - 2 * radius);
+  corner();
+  append(south - north - 2 * radius);
+  corner();
+  append(east - radius - 10);
+  return { length, sample(distance) {
+    const d = (distance % length + length) % length;
+    const segment = segments.find((s) => d < s.start + s.span) ?? segments[0];
+    return pose(segment, d - segment.start);
+  } };
+}
+var tramEnvelopes = {
+  car: { width: 1.4, length: 3, bottom: 0.06, top: 1.1 },
+  passenger: { width: 0.6, length: 0.6, bottom: 0.5, top: 1.65 },
+  camera: { width: 0.5, length: 0.5, bottom: 2.15, top: 2.65 }
+};
+var tramStations = {
+  entry: { x: 10, z: 40.5 },
+  east: { x: 33.5, z: 22 },
+  upper: { x: -13.5, z: 10, y: 7.2 }
+};
+var tramRoute = roundedLoop(tramStations.upper.x, 2.25, tramStations.east.x, tramStations.entry.z);
+function addTramDebug(T, scene, now = () => performance.now()) {
+  const points = [];
+  for (let d = 0;d < tramRoute.length; d += 0.25) {
+    const { x, z } = tramRoute.sample(d);
+    points.push(new T.Vector3(x, 0.06, z));
+  }
+  const line = new T.LineLoop(new T.BufferGeometry().setFromPoints(points), new T.LineBasicMaterial({ color: 16749884 }));
+  const { width, length, top, bottom } = tramEnvelopes.car;
+  const car = new T.Mesh(new T.BoxGeometry(width, top - bottom, length), new T.MeshBasicMaterial({ color: 9475224 }));
+  line.name = "Tram debug route";
+  car.name = "Tram debug car";
+  const start = now();
+  function update() {
+    const { x, z, heading } = tramRoute.sample((now() - start) * 0.0015);
+    car.position.set(x, (top + bottom) / 2, z);
+    car.rotation.y = heading;
+  }
+  update();
+  scene.add(line, car);
+  return update;
+}
+
 // demos/corporate/gjh/v11/assets/doorway-occupancy.js
 function createDoorwayOccupancy(R, physics, center, halfExtents, leaves) {
   const shape = new R.Cuboid(...halfExtents);
@@ -8133,6 +8201,8 @@ metalnessFactor=vSurface.y;`);
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
+      if (new URLSearchParams(location.search).get("tram") === "debug")
+        shopLodUpdates.push(addTramDebug(T, scene));
       shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, artworkTier, daylightSkylight: expandedLift, setCanopyMaterial: (material) => {
         finishMaterials.canopy = material;
       } }));

@@ -1,3 +1,4 @@
+import {addTramDebug} from './tram-layout.js';
 import {buildRestrooms} from './restrooms.js';
 import {miliExhibit} from './mili-exhibit.js';
 import {gogoExhibit} from './gogo-exhibit.js';
@@ -342,6 +343,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         solid('box', 'green', x, .007, z, .26, .004, .26, Math.PI / 4);
       }
     }
+    if (new URLSearchParams(location.search).get('tram') === 'debug') shopLodUpdates.push(addTramDebug(T, scene));
     shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, artworkTier, daylightSkylight:expandedLift, setCanopyMaterial: material => { finishMaterials.canopy = material; }}));
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
