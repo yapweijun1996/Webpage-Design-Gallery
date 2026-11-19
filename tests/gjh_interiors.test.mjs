@@ -141,7 +141,8 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     const doc = JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
     assert.deepEqual(doc.images.map(img=>img.uri),[manifest.round2.atlas.file]);
     assert(!doc.animations && !doc.cameras && !doc.extensionsUsed?.includes('KHR_lights_punctual'));
-    const model = await load(asset,signal);
+    let slices = 0;
+    const model = await load(asset,signal,work=>runBuild(work,()=>slices++));
     let instances = 0;
     model.traverse(mesh => {
       if (!mesh.isMesh) return;
@@ -161,6 +162,7 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     if (['S03','S08','S16','S17'].includes(receipt.store)) assert(modes.pulse);
     const measured = counts(model);
     assert.deepEqual(measured,{triangles:receipt.triangles,calls:receipt.draws});
+    assert(slices >= measured.calls, receipt.file);
     assert(measured.calls<=4);
     modules.set(receipt.store,measured);
     disposeInteriorModel(model);
@@ -296,6 +298,16 @@ test('the rotated collider matches the Rapier cuboid', async t => {
   physics.free();
 });
 
+function runBuild(work, onSlice = () => {}) {
+  const iterator = work();
+  let step = iterator.next();
+  while (!step.done) {
+    onSlice();
+    step = iterator.next();
+  }
+  return step.value;
+}
+
 test('warm registration installs all rooms, reprioritizes remaining work and commits tier changes together', async () => {
   const scene = new T.Scene(), requests = [], pending = [], colliders = [];
   const modelsByFile = new Map();
@@ -314,6 +326,7 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
     }
   });
   const createInstaller = () => ({
+    build:work=>runBuild(work),
     prepare: (roots,options) => new Promise(resolve => pending.push({roots,options,resolve})),
     runFrame: () => 0,
     dispose() {}
@@ -429,26 +442,32 @@ test('warm registration installs all rooms, reprioritizes remaining work and com
   runtime.dispose();
 });
 
-test('registration waits for the shared upload, all lighting variants and the GPU fence', async t => {
+test('registration warms the animated detail material for every lighting variant before showing it', async t => {
   const scene = new T.Scene(), accent = new T.PointLight(), fixed = new T.DirectionalLight();
   fixed.castShadow = true;
   scene.add(accent,fixed);
   const compiled = new Set();
-  let target = null, uploadRelease, firstFence = false, deleted = 0;
+  const scroll = new T.Texture();
+  const emitter = new T.MeshStandardMaterial({map:scroll,emissiveMap:scroll,emissive:0xffffff});
+  const detailFile = roomDetails.S13.file;
+  let target = null, uploadRelease, linked = false, firstFence = false, submitted = 0, deleted = 0;
   const gl = {
     SYNC_GPU_COMMANDS_COMPLETE:1, TIMEOUT_EXPIRED:2, CONDITION_SATISFIED:3, WAIT_FAILED:4,
     isContextLost:()=>false, flush() {},
-    fenceSync:()=>({}), clientWaitSync:()=>firstFence ? 3 : 2, deleteSync() { deleted++; }
+    fenceSync() { submitted++; return {}; },
+    clientWaitSync:()=>firstFence ? 3 : 2, deleteSync() { deleted++; }
   };
   const renderer = {
-    shadowMap:{enabled:false}, extensions:{has:()=>false}, getContext:()=>gl,
+    shadowMap:{enabled:false}, extensions:{has:()=>true}, getContext:()=>gl,
+    properties:{get:()=>({currentProgram:{isReady:()=>linked}})},
     getRenderTarget:()=>target, getActiveCubeFace:()=>0, getActiveMipmapLevel:()=>0,
     setRenderTarget(value) { target = value; },
     compile(geometry, camera, lighting) {
-      if (geometry.children.some(root=>root.name.startsWith('S09 '))) {
-        compiled.add([Boolean(target),this.shadowMap.enabled,lighting.children.length].join('/'));
-      }
-      return new Set();
+      const root = geometry.children.find(model=>model.userData.roomMotion);
+      if (!root) return new Set();
+      assert.equal(root.children[0].material,emitter);
+      compiled.add([Boolean(target),this.shadowMap.enabled,lighting.children.length].join('/'));
+      return new Set([emitter]);
     }
   };
   const runtime = createInteriorKit(T,scene,{
@@ -456,17 +475,22 @@ test('registration waits for the shared upload, all lighting variants and the GP
     prepareModel(roots,{linear,late}) {
       assert(linear());
       assert.equal(late,false);
-      if (roots.some(root=>root.name.startsWith('S09 '))) return new Promise(resolve=>{ uploadRelease = resolve; });
+      if (roots.some(root=>root.userData.roomMotion?.scroll === scroll)) {
+        return new Promise(resolve=>{ uploadRelease = resolve; });
+      }
       return Promise.resolve();
     },
-    async loadModel() {
+    async loadModel({file}, signal, build) {
+      assert.equal(typeof build,'function');
       const model = new T.Group();
-      model.add(new T.Mesh(new T.BoxGeometry(),new T.MeshStandardMaterial()));
+      const animated = file === detailFile;
+      model.add(new T.Mesh(new T.BoxGeometry(),animated ? emitter : new T.MeshStandardMaterial()));
+      if (animated) model.userData.roomMotion = {scroll};
       return model;
     }
   });
   t.after(()=>runtime.dispose());
-  const [x,y,z] = interiorStores.S09.frame.world_origin_m;
+  const [x,y,z] = interiorStores.S13.frame.world_origin_m;
   runtime.update({x,y,z});
   const done = registerInteriorWarmup(runtime,{T,renderer,scene,tier:'detailed',lights:{accents:[accent],limit:1}});
   const frame = async () => { runtime.runFrame(); await new Promise(resolve=>setImmediate(resolve)); };
@@ -474,11 +498,16 @@ test('registration waits for the shared upload, all lighting variants and the GP
   assert.deepEqual([...compiled].sort(),['false/false/1','false/false/2','true/true/1','true/true/2']);
   assert.equal(target,null);
   assert.equal(renderer.shadowMap.enabled,false);
-  const room = scene.children.find(group=>group.name.startsWith('S09 '));
+  const room = scene.children.find(group=>group.name.startsWith('S13 '));
   assert.equal(room.visible,false);
 
   uploadRelease();
   for (let i=0; i<4; i++) await frame();
+  assert.equal(submitted,0);
+  assert.equal(room.visible,false);
+  linked = true;
+  for (let i=0; i<4; i++) await frame();
+  assert(submitted > 0);
   assert.equal(room.visible,false);
   firstFence = true;
   for (let i=0; i<150; i++) await frame();
@@ -500,7 +529,7 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   });
   t.after(()=>interiors.dispose());
   // Control the upload completion independently of the scene and sign sweep.
-  interiors.prepare('low',()=>({prepare:async()=>{}, runFrame:()=>0, dispose(){}}),{deferActivation:true});
+  interiors.prepare('low',()=>({build:work=>runBuild(work), prepare:async()=>{}, runFrame:()=>0, dispose(){}}),{deferActivation:true});
   const signage = {
     *prepareTier(tier) {
       while (blockedSigns === tier) yield false;
@@ -534,18 +563,19 @@ test('a timed-out warm stage continues nearest-first and publishes later tiers w
   low.runFrame();
   assert.equal(report.reason,'timeout');
   move(interiorStores.S17);
-  const resumed = work('low');
+  assert.equal(report.background,'running');
   for (let i=0; i<16; i++) await frame();
   assert.equal(files[2],interiorStores.S17.files.low.file);
   assert.equal(interiors.report().preinstalled.shops,16);
-  for (let i=0; i<30; i++) assert.equal(resumed.next().done,false);
+  low.runFrame();
   assert.deepEqual(visits,[]);
   failFile = null;
   now += 15000;
   await frame();
   assert.equal(interiors.report().preinstalled.shops,17);
   assert.equal(files.filter(file=>file===interiorStores.S02.files.low.file).length,1);
-  assert.equal(resumed.next().done,true);
+  low.runFrame();
+  assert.equal(report.background,'complete');
   assert.deepEqual(visits,[['low','low','low']]);
 
   blockedSigns = 'balanced';

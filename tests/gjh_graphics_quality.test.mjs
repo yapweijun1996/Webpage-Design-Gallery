@@ -167,7 +167,7 @@ test('manual preferences and recovered mode never adapt or rewrite storage', () 
     assert.equal(quality.state.tier,'balanced'); assert.equal(callbacks,0); assert.equal(writes,0);
     for(let now=20000;now<28000;now+=1000/30) quality.sample(now,true,true);
     assert.equal(quality.state.tier,'low'); assert.equal(saved,'auto'); assert.equal(writes,0); assert.equal(callbacks,1);
-    assert.match(status.textContent,/Auto: Low.*skips drawing distant shelf stock/);
+    assert.match(status.textContent,/Auto: Low.*shows fewer ambient visitors/);
     select.value='detailed'; listener(); assert.equal(saved,'detailed'); assert.equal(writes,1);
     assert.match(status.textContent,/Detailed/);
     for(let now=28000;now<68000;now+=1000/30) quality.sample(now,true,true);

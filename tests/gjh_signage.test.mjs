@@ -7,6 +7,7 @@ import {stores,resolveConfig,contrast,selectSignLod} from '../demos/corporate/gj
 import {presets} from '../demos/corporate/gjh/v11/assets/signage/presets.js';
 import {atlasSize,atlasCells} from '../demos/corporate/gjh/v11/assets/signage/atlas-layout.js';
 import {createShopSign,letterGeometry} from '../demos/corporate/gjh/v11/assets/signage/builder.js';
+import {createProgressiveAtlas} from '../demos/corporate/gjh/v11/assets/signage/atlas.js';
 import {createSignageSystem} from '../demos/corporate/gjh/v11/assets/signage/runtime.js';
 import {buildHardware,buildEndTrim} from '../demos/corporate/gjh/v11/assets/signage/hardware.js';
 import {loadModules,modelFiles} from '../demos/corporate/gjh/v11/assets/signage/models.js';
@@ -224,4 +225,56 @@ test('cold Low, tier recovery during loading, authored crescent and café ends u
   assert.ok(scene.getObjectByName('Near sign letter relief').geometry.drawRange.count>0);
   await update('low');assert.equal(scene.children.length,1);
   await update('balanced');assert.deepEqual(requests.sort(),[...modelFiles].sort());
+});
+
+test('the full atlas uses bounded mip-first copies and restores CanvasTexture row orientation', t => {
+  const width = 2048, sheet = {width,height:width};
+  let top;
+  globalThis.document = {createElement: () => ({
+    getContext: () => ({
+      clearRect() {},
+      drawImage(image,x,y) { assert.equal(image,sheet); assert.equal(x,0); top = y; },
+      getImageData(x,y,w,h) {
+        const data = new Uint8ClampedArray(w*h*4);
+        for (let row=0; row<h; row++) data.fill((top+row)%256,row*w*4,(row+1)*w*4);
+        return {data};
+      }
+    })
+  })};
+  t.after(()=>{delete globalThis.document;});
+  const {texture,upload} = createProgressiveAtlas(T,sheet);
+  const copies = [];
+  let allocations = 0;
+  const renderer = {
+    initTexture(target) {
+      allocations++;
+      assert.equal(target,texture);
+      assert.equal(target.source.dataReady,false);
+      assert.equal(target.mipmaps.length,12);
+      assert(target.mipmaps.every(mip=>mip.data===null));
+    },
+    copyTextureToTexture(source,target,region,offset,level) {
+      assert.equal(target,texture);
+      assert.equal(region,null);
+      const {width,height,data} = source.image;
+      assert(data.byteLength <= 128*1024);
+      copies.push({width,height,level,offset:offset.toArray(),first:data[0],last:data.at(-1)});
+    }
+  };
+  const cancelled=upload(renderer);
+  cancelled.next();
+  assert.equal(copies.length,0);
+  cancelled.next();
+  cancelled.return();
+  assert.equal(copies[0].level,11);
+  texture.dispose();
+  copies.length = 0;
+  for (const _ of upload(renderer)) { /* Run every scheduled step. */ }
+  assert.equal(allocations,2);
+  assert.deepEqual(copies[0],{width:1,height:1,level:11,offset:[0,0],first:0,last:0});
+  const base = copies.filter(copy=>copy.level===0);
+  assert.equal(base.length,128);
+  assert.deepEqual(base[0],{width:2048,height:16,level:0,offset:[0,0],first:255,last:240});
+  assert.deepEqual(base.at(-1),{width:2048,height:16,level:0,offset:[0,2032],first:15,last:0});
+  assert(upload(renderer).next().done);
 });

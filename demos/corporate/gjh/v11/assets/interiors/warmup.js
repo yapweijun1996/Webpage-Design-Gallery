@@ -11,7 +11,7 @@ export function registerInteriorWarmup(interiors, {T,renderer,scene,lights,tier}
 }
 
 function createInstaller(T, renderer, scene, {accents,limit}) {
-  const queue = createUploadScheduler({budgetMs:2});
+  const queue = createUploadScheduler({budgetMs:2,maxSteps:12});
   const staging = new T.Scene(), lighting = new T.Scene(), camera = new T.PerspectiveCamera();
   const target = new T.WebGLRenderTarget(1,1);
   const accentSet = new Set(accents);
@@ -45,6 +45,22 @@ function createInstaller(T, renderer, scene, {accents,limit}) {
     }
   }
 
+  async function build(makeWork, options) {
+    let value;
+    await queue.enqueue(function* () {
+      const work = makeWork();
+      let done = false;
+      try {
+        while (!done) yield () => {
+          const step = work.next();
+          done = step.done;
+          if (done) value = step.value;
+        };
+      } finally { work.return(); }
+    }, {...options,late:false});
+    return value;
+  }
+
   async function prepare(roots, {tier,priority,signal,prepareModel}) {
     const linear = () => tier === 'detailed';
     const options = {priority,signal,late:false};
@@ -53,8 +69,9 @@ function createInstaller(T, renderer, scene, {accents,limit}) {
       queue.enqueue(function* () {
         const programs = new Set();
         for (const output of linear() ? [false,true] : [false]) {
-          for (let count=0; count<=variable.length; count++)
-            yield () => compile(roots,count,output,programs);
+          for (let count=0; count<=variable.length; count++) {
+            for (const root of roots) yield () => compile([root],count,output,programs);
+          }
         }
         for (const program of programs) while (!program.isReady()) yield () => false;
       }, options)
@@ -83,8 +100,8 @@ function createInstaller(T, renderer, scene, {accents,limit}) {
   }
 
   return {
-    prepare,
-    runFrame() { return queue.runFrame(!renderer.getContext().isContextLost()); },
+    build, prepare,
+    runFrame(remaining) { return queue.runFrame(!renderer.getContext().isContextLost(), remaining); },
     dispose() { queue.dispose(); target.dispose(); }
   };
 }

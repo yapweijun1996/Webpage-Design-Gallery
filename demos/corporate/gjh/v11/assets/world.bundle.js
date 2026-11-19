@@ -110,11 +110,17 @@ var atriumLayout = Object.freeze({
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
+  facilitiesBlock: Object.freeze({ x: 25, z: 10, width: 6, depth: 4, height: 3 }),
+  upperSeats: Object.freeze([
+    Object.freeze({ x: -6.1, z: 8.8, facing: 1, finish: "oak" }),
+    Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
+    Object.freeze({ x: -3, z: 6, facing: -1, finish: "upholstered" })
+  ]),
   event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
 });
 
 // demos/corporate/gjh/v11/assets/public-architecture.js
-function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds }) {
+function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
   materials.vaultOak.color.set(12886652);
@@ -248,7 +254,8 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     const a = (i / 12 - 0.5) * Math.PI, x = -3 + 13.15 * Math.sin(a), y = 13.1 + 3.9 * Math.cos(a);
     box("green", x, y, 10.1, 0.07, 0.09, 26.1);
   }
-  arch(-3, 10.1, 13.14, 13.18, 3.91, 26.05, 0.036, "glass", 0.14);
+  if (!daylightSkylight)
+    arch(-3, 10.1, 13.14, 13.18, 3.91, 26.05, 0.036, "glass", 0.14);
   for (const z of [-2.75, 22.85]) {
     box("ivory", -3, 10.68, z, 26.2, 0.45, 0.58);
     box("oak", -3, 10.38, z, 26.2, 0.15, 0.63);
@@ -883,614 +890,8 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
   ] };
 }
 
-// demos/corporate/gjh/v11/assets/deck-railings.js
+// demos/corporate/gjh/v11/assets/upper-level.js
 import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
-function batchOpaqueRailings(T, primitives) {
-  const buckets = new Map, result = [], replaced = new Set;
-  for (const primitive of primitives) {
-    const { geometry, material } = primitive;
-    if (material.transparent || material.opacity < 1 || material.alphaTest > 0) {
-      result.push(primitive);
-      continue;
-    }
-    const signature = Object.entries(geometry.attributes).map(([name, attr]) => `${name}:${attr.itemSize}:${attr.normalized}:${attr.array.constructor.name}`).sort().join("|");
-    if (!buckets.has(material))
-      buckets.set(material, new Map);
-    const groups = buckets.get(material);
-    if (!groups.has(signature))
-      groups.set(signature, []);
-    groups.get(signature).push(primitive);
-  }
-  for (const [material, groups] of buckets)
-    for (const bucket of groups.values()) {
-      if (bucket.length === 1) {
-        result.push(bucket[0]);
-        continue;
-      }
-      const parts = bucket.map(({ geometry: geometry2, matrix }) => {
-        const part = geometry2.index ? geometry2.toNonIndexed() : geometry2.clone();
-        part.applyMatrix4(matrix);
-        return part;
-      });
-      const geometry = mergeGeometries2(parts);
-      parts.forEach((part) => part.dispose());
-      if (!geometry) {
-        result.push(...bucket);
-        continue;
-      }
-      geometry.computeBoundingSphere();
-      result.push({ geometry, material, matrix: new T.Matrix4 });
-      bucket.forEach((item) => replaced.add(item.geometry));
-    }
-  const retained = new Set(result.map((item) => item.geometry));
-  for (const geometry of replaced)
-    if (!retained.has(geometry))
-      geometry.dispose();
-  return result;
-}
-var sources = Object.freeze({
-  bay1m: Object.freeze({ asset_id: "ASSET_MallGlass1m", file: "mall-glass-railing-1m.glb", sha256: "556cfc03f38a0cb0c21a125a318c5dc251976e18598f3d15f3e0979dc2dfd49d", dimensions_m: [1.1599999964237213, 1.1209999322891235, 0.1599999964237213], bounds_min: [-0.5799999982118607, 0, -0.07999999821186066], bounds_max: [0.5799999982118607, 1.1209999322891235, 0.07999999821186066] }),
-  bay: Object.freeze({ asset_id: "ASSET_MallGlass2m", file: "mall-glass-railing-2m.glb", sha256: "037b734e7285961e93a75184f7aab28f4a20498fbac5639ed2cd0fab0958c6c5", dimensions_m: [2.1599999964237213, 1.1209999322891235, 0.1599999964237213], bounds_min: [-1.0799999982118607, 0, -0.07999999821186066], bounds_max: [1.0799999982118607, 1.1209999322891235, 0.07999999821186066] }),
-  post: Object.freeze({ asset_id: "ASSET_MallGlassPost", file: "mall-glass-railing-post.glb", sha256: "4104d29b95e1e8b82c1e4db8a4e00437aaf60e01c7e8e0b503fcd7c17586dd69", dimensions_m: [0.1599999964237213, 1.1200000047683716, 0.1599999964237213], bounds_min: [-0.07999999821186066, 0, -0.07999999821186066], bounds_max: [0.07999999821186066, 1.1200000047683716, 0.07999999821186066] })
-});
-async function createDeckRailings(T) {
-  const records = {};
-  const spacing = { bay1m: 1, bay: 2, post: 0 };
-  await Promise.all(Object.entries(sources).map(async ([kind, definition]) => {
-    const rootExtras = { units: "metres", origin: "floor centre", centre_spacing_m: spacing[kind] };
-    records[kind] = await loadStaticAsset(T, { ...definition, rootExtras }, import.meta.url);
-    records[kind].sourcePrimitiveCount = records[kind].primitives.length;
-    if (records[kind].status === "loaded")
-      records[kind].primitives = batchOpaqueRailings(T, records[kind].primitives);
-  }));
-  const placements = { bay1m: [], bay: [], post: [] };
-  return {
-    place(kind, x, z, yaw = 0) {
-      if (!records[kind]?.status || records[kind].status !== "loaded")
-        return false;
-      placements[kind].push({ x, z, yaw });
-      return true;
-    },
-    finish(scene) {
-      for (const [kind, record] of Object.entries(records))
-        for (const primitive of record.primitives) {
-          const instances = placements[kind];
-          if (!instances.length)
-            continue;
-          const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, instances.length);
-          const position = new T.Vector3, rotation = new T.Quaternion, scale = new T.Vector3(1, 1, 1), matrix = new T.Matrix4;
-          instances.forEach(({ x, z, yaw }, index) => {
-            position.set(x, 7.2, z);
-            rotation.setFromAxisAngle(new T.Vector3(0, 1, 0), yaw);
-            matrix.compose(position, rotation, scale).multiply(primitive.matrix);
-            mesh.setMatrixAt(index, matrix);
-          });
-          mesh.castShadow = mesh.receiveShadow = true;
-          mesh.computeBoundingSphere();
-          mesh.userData.deckLod = true;
-          scene.add(mesh);
-        }
-      return Object.freeze(Object.fromEntries(Object.entries(records).map(([kind, record]) => [kind, Object.freeze({ status: record.status, reason: record.reason, instances: placements[kind].length, primitives: record.sourcePrimitiveCount })])));
-    }
-  };
-}
-
-// demos/corporate/gjh/v11/assets/interior-pilot-registry.js
-var INTERIOR_PILOT = Object.freeze({
-  bench: {
-    asset_id: "GJH-PUB-002",
-    kind: "bench",
-    version: "1.0.0",
-    file: "GJH_PUB_002.glb",
-    sha256: "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
-    bytes: 233176,
-    dimensions_m: [
-      2.58,
-      1.3175,
-      0.922
-    ],
-    authoring_dimensions_wdh_m: [
-      2.58,
-      0.922,
-      1.3175
-    ],
-    reuse_decision: "reuse",
-    source: "gjh-mall-furniture/sources/gjh-lounge-bench.blend",
-    source_sha256: "925f75d253188eed591a48f20b1daa0329abb492799ab9ba91b61a4c57bf6ee0",
-    capabilities: [
-      "SIT"
-    ],
-    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_002.blend",
-    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
-    uv_policy: "No textures or baking; UV0/UV1 not required.",
-    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
-  },
-  planter: {
-    asset_id: "GJH-PUB-008",
-    kind: "planter",
-    version: "1.0.0",
-    file: "GJH_PUB_008.glb",
-    sha256: "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
-    bytes: 119732,
-    dimensions_m: [
-      1.230091,
-      2.347567,
-      1.191551
-    ],
-    authoring_dimensions_wdh_m: [
-      1.230091,
-      1.191551,
-      2.347567
-    ],
-    reuse_decision: "reuse",
-    source: "gjh-mall-furniture/sources/gjh-areca-planter.blend",
-    source_sha256: "79522ae07850e010abcbda93aff1e0c9d1afe22b4311d982673abb04e4805b2a",
-    capabilities: [],
-    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_008.blend",
-    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
-    uv_policy: "No textures or baking; UV0/UV1 not required.",
-    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
-  },
-  kiosk: {
-    asset_id: "GJH-PUB-017",
-    kind: "kiosk",
-    version: "1.0.0",
-    file: "GJH_PUB_017.glb",
-    sha256: "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
-    bytes: 181376,
-    dimensions_m: [
-      0.96,
-      2.05,
-      0.68
-    ],
-    authoring_dimensions_wdh_m: [
-      0.96,
-      0.68,
-      2.05
-    ],
-    reuse_decision: "adapt",
-    source: "mall-essentials/sources/mall-directory-kiosk.blend",
-    source_sha256: "b7a0e9ebb766e12b51d3115823f6dbd7b431312b475c35452d3b9338b699df0e",
-    capabilities: [
-      "USE"
-    ],
-    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_017.blend",
-    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
-    uv_policy: "No textures or baking; UV0/UV1 not required.",
-    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
-  },
-  shelf: {
-    asset_id: "GJH-DSP-001",
-    kind: "shelf",
-    version: "1.0.0",
-    file: "GJH_DSP_001.glb",
-    sha256: "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
-    bytes: 228924,
-    dimensions_m: [
-      1.52,
-      1.96,
-      0.58
-    ],
-    authoring_dimensions_wdh_m: [
-      1.52,
-      0.58,
-      1.96
-    ],
-    reuse_decision: "reuse",
-    source: "mall-essentials/sources/mall-display-shelf.blend",
-    source_sha256: "18ae5c2311b81356b529af04724fa627efd6b2eee2597ec10c58f7f828dacbea",
-    capabilities: [
-      "INSPECT"
-    ],
-    editable_source: "models/gjh-interior-pilot/sources/GJH_DSP_001.blend",
-    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
-    uv_policy: "No textures or baking; UV0/UV1 not required.",
-    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
-  },
-  storeSign: {
-    asset_id: "GJH-STF-008",
-    kind: "storeSign",
-    version: "1.0.0",
-    file: "GJH_STF_008.glb",
-    sha256: "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
-    bytes: 21912,
-    dimensions_m: [
-      2.52,
-      1.21,
-      0.213
-    ],
-    authoring_dimensions_wdh_m: [
-      2.52,
-      0.213,
-      1.21
-    ],
-    reuse_decision: "new",
-    source: "Original geometry in models/gjh-interior-pilot/build.py",
-    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
-    capabilities: [],
-    editable_source: "models/gjh-interior-pilot/sources/GJH_STF_008.blend",
-    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
-    uv_policy: "No textures or baking; UV0/UV1 not required.",
-    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
-  },
-  wallLight: {
-    asset_id: "GJH-LGT-009",
-    kind: "wallLight",
-    version: "1.0.0",
-    file: "GJH_LGT_009.glb",
-    sha256: "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
-    bytes: 22804,
-    dimensions_m: [
-      0.32,
-      1,
-      0.255
-    ],
-    authoring_dimensions_wdh_m: [
-      0.32,
-      0.255,
-      1
-    ],
-    reuse_decision: "new",
-    source: "Original geometry in models/gjh-interior-pilot/build.py",
-    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
-    capabilities: [],
-    editable_source: "models/gjh-interior-pilot/sources/GJH_LGT_009.blend",
-    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
-    uv_policy: "No textures or baking; UV0/UV1 not required.",
-    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
-  },
-  coffeeTable: {
-    asset_id: "GJH-PUB-005",
-    kind: "coffeeTable",
-    version: "1.0.0",
-    file: "GJH_PUB_005.glb",
-    sha256: "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
-    bytes: 160536,
-    dimensions_m: [
-      1.61,
-      0.875,
-      1.61
-    ],
-    authoring_dimensions_wdh_m: [
-      1.61,
-      1.61,
-      0.875
-    ],
-    reuse_decision: "new",
-    source: "Original geometry in models/gjh-interior-pilot/build.py",
-    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
-    capabilities: [],
-    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_005.blend",
-    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
-    uv_policy: "No textures or baking; UV0/UV1 not required.",
-    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
-  },
-  plinth: {
-    asset_id: "GJH-VER-017",
-    kind: "plinth",
-    version: "1.0.0",
-    file: "GJH_VER_017.glb",
-    sha256: "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
-    bytes: 129236,
-    dimensions_m: [
-      4.5,
-      0.6525,
-      4.5
-    ],
-    authoring_dimensions_wdh_m: [
-      4.5,
-      4.5,
-      0.6525
-    ],
-    reuse_decision: "new",
-    source: "Original geometry in models/gjh-interior-pilot/build.py",
-    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
-    capabilities: [],
-    editable_source: "models/gjh-interior-pilot/sources/GJH_VER_017.blend",
-    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
-    uv_policy: "No textures or baking; UV0/UV1 not required.",
-    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
-    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
-  }
-});
-
-// demos/corporate/gjh/v11/assets/furnishings.js
-var pilotSources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== "shelf")));
-var shopSources = Object.freeze({
-  barStool: {
-    asset_id: "ASSET_MallBarStool",
-    file: "gogo-bar-stool.glb",
-    sha256: "c4546f8de005aef723c7fd2a175e0b6544b26277792c985eb85d8ffe2aa4b3b3",
-    dimensions_m: [0.48, 1.04, 0.48],
-    rootExtras: { units: "metres" }
-  },
-  teaCup: {
-    asset_id: "ASSET_KopitiamSaucerAndCup",
-    file: "kopitiam-saucer-and-cup.glb",
-    sha256: "61dfd3673a88072c1d152d3dde91f3e1fcc09579b6ac70090ead8b319769f7d7",
-    dimensions_m: [0.156, 0.088, 0.156],
-    rootExtras: { units: "metres" }
-  },
-  teaKettle: {
-    asset_id: "ASSET_KopitiamKettle",
-    file: "kopitiam-kettle.glb",
-    sha256: "fef5f8192497110031216cbcdfe143b5dba6ba9362a9613154beb46259db953a",
-    dimensions_m: [0.4041, 0.36, 0.27],
-    rootExtras: { units: "metres" }
-  },
-  pantryRack: {
-    asset_id: "ASSET_CondimentBottleJarSet",
-    file: "condiment-bottle-jar-set.glb",
-    sha256: "5e1eac9c16e1c38057ba0363d5f38d95bf78a79113743df126316f64df56008c",
-    dimensions_m: [0.9, 1.1, 0.35],
-    rootExtras: { units: "metres" }
-  },
-  coffeeMachine: {
-    asset_id: "ASSET_CoffeeMachine",
-    file: "coffee-machine.glb",
-    sha256: "155666679065cdec42f9b1f831bcc7b67959487a6f518e36f5d06925d90d2022",
-    dimensions_m: [0.481056, 0.5045, 0.58],
-    rootExtras: { units: "metres" }
-  }
-});
-function batchFurniture(T, primitives) {
-  const parts = primitives.map((primitive) => {
-    const source = primitive.geometry;
-    const geometry = source.index ? source.toNonIndexed() : source.clone();
-    geometry.applyMatrix4(primitive.matrix);
-    const vertexColour = primitive.material.vertexColors && geometry.getAttribute("color");
-    for (const name of Object.keys(geometry.attributes))
-      if (name !== "position" && name !== "normal")
-        geometry.deleteAttribute(name);
-    const count = geometry.attributes.position.count, colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
-    for (let i = 0;i < count; i++) {
-      colour[i * 3] = material.color.r * (vertexColour ? vertexColour.getX(i) : 1);
-      colour[i * 3 + 1] = material.color.g * (vertexColour ? vertexColour.getY(i) : 1);
-      colour[i * 3 + 2] = material.color.b * (vertexColour ? vertexColour.getZ(i) : 1);
-      surface.set([material.roughness, material.metalness], i * 2);
-    }
-    geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
-    geometry.setAttribute("obSurface", new T.BufferAttribute(surface, 2));
-    return geometry;
-  });
-  const mesh = opaqueBatch(T, parts, false);
-  for (const geometry of new Set(primitives.map((primitive) => primitive.geometry)))
-    geometry.dispose();
-  for (const material of new Set(primitives.map((primitive) => primitive.material)))
-    material.dispose();
-  return [{ geometry: mesh.geometry, material: mesh.material, matrix: new T.Matrix4 }];
-}
-async function createFurnishings(T, shadows, expanded = false) {
-  const sources2 = expanded ? { ...pilotSources, ...shopSources } : pilotSources;
-  const records = {};
-  const pendingByShop = new Map, detailQueue = [];
-  let detailLoading = false, detailScheduled = false;
-  const group = new T.Group;
-  group.name = "Blender furnishings";
-  let registerMesh, prepareModel;
-  async function load2(kind) {
-    const definition = sources2[kind], record = records[kind];
-    record.status = "loading";
-    Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
-    record.sourcePrimitiveCount = record.primitives.length;
-    if (record.status === "loaded" && (["bench", "planter", "coffeeTable", "storeSign", "wallLight"].includes(kind) || Object.hasOwn(shopSources, kind))) {
-      const opaque = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() === 0);
-      const emissive = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() !== 0);
-      if (opaque.length > 1)
-        record.primitives = [...batchFurniture(T, opaque), ...emissive];
-    }
-  }
-  await Promise.all(Object.keys(sources2).map((kind) => {
-    records[kind] = { status: "pending", reason: null, primitives: [], placements: [], sourcePrimitiveCount: 0 };
-    if (!Object.hasOwn(shopSources, kind) || kind === "barStool")
-      return load2(kind);
-  }));
-  function mount(kind, prewarm) {
-    const record = records[kind];
-    const placementsBySlot = new Map, meshes = [];
-    for (const placement of record.placements) {
-      if (!placementsBySlot.has(placement.shopSlot))
-        placementsBySlot.set(placement.shopSlot, []);
-      placementsBySlot.get(placement.shopSlot).push(placement);
-    }
-    for (const primitive of record.primitives) {
-      for (const [shopSlot, placements] of placementsBySlot) {
-        const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
-        mesh.name = `${kind} primitive`;
-        placements.forEach((placement, index) => mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(placement.transform, primitive.matrix)));
-        mesh.castShadow = shadows && !["wallLight", "storeSign"].includes(kind);
-        mesh.receiveShadow = true;
-        mesh.computeBoundingSphere();
-        if (shopSlot === -1)
-          mesh.userData.deckLod = true;
-        else if (shopSlot !== null)
-          mesh.userData.shopSlot = shopSlot;
-        meshes.push(mesh);
-      }
-    }
-    const attach = () => {
-      for (const mesh of meshes) {
-        if (mesh.userData.shopSlot !== undefined)
-          registerMesh(mesh);
-        group.add(mesh);
-      }
-    };
-    if (prewarm && meshes.length) {
-      const staging = new T.Group().add(...meshes);
-      return prewarm(staging).then(attach);
-    }
-    attach();
-  }
-  function scheduleDetails() {
-    if (detailLoading || detailScheduled)
-      return;
-    if (!detailQueue.length && pendingByShop.size) {
-      const [slot, kinds] = pendingByShop.entries().next().value;
-      pendingByShop.delete(slot);
-      detailQueue.push(...kinds);
-    }
-    if (!detailQueue.length)
-      return;
-    detailScheduled = true;
-    const run = () => {
-      detailScheduled = false;
-      if (document.hidden)
-        return;
-      const kind = detailQueue.shift();
-      if (!kind)
-        return;
-      detailLoading = true;
-      load2(kind).then(async () => {
-        if (records[kind].status !== "loaded")
-          return;
-        records[kind].status = "loading";
-        await mount(kind, prepareModel);
-        records[kind].status = "loaded";
-      }).catch((error) => {
-        records[kind].status = "fallback";
-        records[kind].reason = "unavailable";
-        console.warn("Furniture preload failed", error);
-      }).finally(() => {
-        detailLoading = false;
-        scheduleDetails();
-      });
-    };
-    if ("requestIdleCallback" in window)
-      window.requestIdleCallback(run, { timeout: 1500 });
-    else
-      window.setTimeout(run, 100);
-  }
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden)
-      scheduleDetails();
-  });
-  return {
-    place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
-      const record = records[kind];
-      const transform = new T.Matrix4().compose(new T.Vector3(x, baseY, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), yaw ?? (facing < 0 ? Math.PI : 0)), new T.Vector3(1, height, 1));
-      record.placements.push({ transform, shopSlot });
-      return record.status === "loaded" || record.status === "pending";
-    },
-    loadShopDetails(shopSlot) {
-      const kinds = pendingByShop.get(shopSlot);
-      if (!kinds)
-        return;
-      pendingByShop.delete(shopSlot);
-      detailQueue.unshift(...kinds);
-      scheduleDetails();
-    },
-    finish(scene, onShopLodMesh = () => {}, prewarm) {
-      registerMesh = onShopLodMesh;
-      prepareModel = prewarm;
-      const state = {};
-      for (const [kind, record] of Object.entries(records)) {
-        if (record.status === "pending") {
-          const slot = record.placements[0]?.shopSlot;
-          if (slot != null) {
-            if (!pendingByShop.has(slot))
-              pendingByShop.set(slot, []);
-            pendingByShop.get(slot).push(kind);
-          }
-        } else
-          mount(kind);
-        state[kind] = Object.freeze({
-          assetId: sources2[kind].asset_id,
-          identity: sources2[kind].sha256,
-          dimensions: sources2[kind].dimensions_m,
-          instances: record.placements.length,
-          get status() {
-            return record.status;
-          },
-          get reason() {
-            return record.reason;
-          },
-          get primitives() {
-            return record.sourcePrimitiveCount;
-          }
-        });
-      }
-      scene.add(group);
-      scheduleDetails();
-      return Object.freeze(state);
-    }
-  };
-}
-
-// demos/corporate/gjh/v11/assets/interior-shell-registry.js
-var freeze2 = (value) => {
-  if (value && typeof value === "object") {
-    Object.values(value).forEach(freeze2);
-    Object.freeze(value);
-  }
-  return value;
-};
-var SHELL_LAYOUT = freeze2({ schema_version: 1, coordinates: "Three.js metres, Y up, front +Z; Blender conversion (x,-z,y).", inventory_sha256: "5e8c9bb69679d731df6f0f52eadae132bc53b8bfb9b57d1a76f0abe2b0d61c42", palette: { jade: { color: 2181182, roughness: 0.24, metalness: 0.22 }, jadeAlt: { color: 2378818, roughness: 0.28, metalness: 0.18 }, courtStone: { color: 4810331, roughness: 0.32, metalness: 0.16 }, green: { color: 1391664, roughness: 0.72, metalness: 0 }, dark: { color: 796963, roughness: 0.72, metalness: 0 }, ivory: { color: 14931639, roughness: 0.72, metalness: 0 }, brass: { color: 11901794, roughness: 0.31, metalness: 0.68 } }, assets: { wall: { asset_id: "GJH-ARC-001", source_dimensions_wdh_m: [4, 0.2, 3.6], target_dimensions_wdh_m: [4, 0.3, 6.6], bounds_min: [-2, 0, -0.15], bounds_max: [2, 6.6, 0.15], components: [{ name: "Wall panel", material: "green", position: [0, 3.3, 0], size: [4, 6.6, 0.28], bevel_m: 0.003 }, { name: "Dark plinth", material: "dark", position: [0, 0.08, 0], size: [4, 0.16, 0.3], bevel_m: 0.003 }, { name: "Brass datum", material: "brass", position: [0, 0.175, 0], size: [4, 0.025, 0.3], bevel_m: 0.003 }], placements: [[-15, 0, -9, -1.5707963267948966], [-15, 0, -5, -1.5707963267948966], [-15, 0, -1, -1.5707963267948966], [-15, 0, 3, -1.5707963267948966], [-15, 0, 7, -1.5707963267948966], [-15, 0, 11, -1.5707963267948966], [-15, 0, 15, -1.5707963267948966], [15, 0, -9, 1.5707963267948966], [15, 0, -5, 1.5707963267948966], [15, 0, -1, 1.5707963267948966], [15, 0, 3, 1.5707963267948966], [15, 0, 7, 1.5707963267948966], [15, 0, 11, 1.5707963267948966], [15, 0, 15, 1.5707963267948966], [-13, 0, 18, 0], [-9, 0, 18, 0], [-5, 0, 18, 0], [-1, 0, 18, 0], [3, 0, 18, 0], [7, 0, 18, 0], [11, 0, 18, 0]], priority: "P0", capabilities: [], sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 0.15], back: [0, 0, -0.15] }, collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, min: [-2, 0, -0.15], max: [2, 6.6, 0.15] } }, corridor: { asset_id: "GJH-COR-001", source_dimensions_wdh_m: [4, 4, 0.2], target_dimensions_wdh_m: [4, 4, 0.2], bounds_min: [-2, 0, -2], bounds_max: [2, 0.2, 2], components: [{ name: "Structural visual base", material: "jadeAlt", position: [0, 0.08, 0], size: [4, 0.16, 4], bevel_m: 0.003 }, { name: "Stone tile -1 -1", material: "jade", position: [-1, 0.18, -1], size: [1.99, 0.04, 1.99], bevel_m: 0.003 }, { name: "Stone tile -1 1", material: "jadeAlt", position: [-1, 0.18, 1], size: [1.99, 0.04, 1.99], bevel_m: 0.003 }, { name: "Stone tile 1 -1", material: "jadeAlt", position: [1, 0.18, -1], size: [1.99, 0.04, 1.99], bevel_m: 0.003 }, { name: "Stone tile 1 1", material: "jade", position: [1, 0.18, 1], size: [1.99, 0.04, 1.99], bevel_m: 0.003 }], placements: [[-13, -0.185, 2, 0], [-13, -0.185, 6, 0], [-13, -0.185, 10, 0], [-13, -0.185, 14, 0], [-9, -0.185, 2, 0], [-9, -0.185, 6, 0], [-9, -0.185, 10, 0], [-9, -0.185, 14, 0], [-5, -0.185, 2, 0], [-5, -0.185, 6, 0], [-5, -0.185, 10, 0], [-5, -0.185, 14, 0], [-1, -0.185, 2, 0], [-1, -0.185, 6, 0], [-1, -0.185, 10, 0], [-1, -0.185, 14, 0], [3, -0.185, 2, 0], [3, -0.185, 6, 0], [3, -0.185, 10, 0], [3, -0.185, 14, 0], [7, -0.185, 2, 0], [7, -0.185, 6, 0], [7, -0.185, 10, 0], [7, -0.185, 14, 0], [11, -0.185, 2, 0], [11, -0.185, 6, 0], [11, -0.185, 10, 0], [11, -0.185, 14, 0]], priority: "P0", capabilities: [], sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 2], back: [0, 0, -2] }, collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, min: [-2, 0, -2], max: [2, 0.165, 2] } }, ceiling: { asset_id: "GJH-CEI-001", source_dimensions_wdh_m: [4, 4, 0.25], target_dimensions_wdh_m: [4, 4, 0.3], bounds_min: [-2, 0, -2], bounds_max: [2, 0.3, 2], components: [{ name: "Ivory ceiling panel", material: "ivory", position: [0, 0.156, 0], size: [4, 0.288, 4], bevel_m: 0.003 }, { name: "Brass edge long", material: "brass", position: [0, 0.006, -1.991], size: [4, 0.012, 0.018], bevel_m: 0.003 }, { name: "Brass edge long", material: "brass", position: [0, 0.006, 1.991], size: [4, 0.012, 0.018], bevel_m: 0.003 }, { name: "Brass edge short", material: "brass", position: [-1.991, 0.006, 0], size: [0.018, 0.012, 3.964], bevel_m: 0.003 }, { name: "Brass edge short", material: "brass", position: [1.991, 0.006, 0], size: [0.018, 0.012, 3.964], bevel_m: 0.003 }], placements: [[-13, 6.35, 2, 0], [-13, 6.35, 6, 0], [-13, 6.35, 10, 0], [-13, 6.35, 14, 0], [13, 6.35, 2, 0], [13, 6.35, 6, 0], [13, 6.35, 10, 0], [13, 6.35, 14, 0]], priority: "P0", capabilities: [], sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 2], back: [0, 0, -2] }, collision_proxy: { owner: "none; existing ceiling is visual-only", visual_export: false } }, frontage: { asset_id: "GJH-STF-002", source_dimensions_wdh_m: [8, 0.5, 3.6], target_dimensions_wdh_m: [9.8, 0.59, 5.475], bounds_min: [-4.9, 0, -0.25], bounds_max: [4.9, 5.475, 0.34], components: [{ name: "Stone pier left", material: "courtStone", position: [-3.55, 2.6, 0], size: [2.4, 5.2, 0.35], bevel_m: 0.003 }, { name: "Stone pier right", material: "courtStone", position: [3.55, 2.6, 0], size: [2.4, 5.2, 0.35], bevel_m: 0.003 }, { name: "Dark lintel", material: "dark", position: [0, 4.7, 0], size: [9.7, 1.55, 0.5], bevel_m: 0.003 }, { name: "Brass lintel datum", material: "brass", position: [0, 5.45, 0.3], size: [9.8, 0.045, 0.08], bevel_m: 0.003 }], placements: [[-10, 0, 0, 0], [0, 0, 0, 0], [10, 0, 0, 0]], priority: "P0", capabilities: [], sockets: { floor: [0, 0, 0], left: [-4.9, 0, 0], right: [4.9, 0, 0], front: [0, 0, 0.34], back: [0, 0, -0.25] }, collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, local_records: [{ component: "Stone pier left" }, { component: "Stone pier right" }, { component: "Dark lintel" }], policy: "Three solid cuboids leave the doorway aperture open; visual bounds are not a collision box." } } }, aggregate_colliders: [{ name: "foundation", position: [0, -0.22, 3.5], size: [30.4, 0.4, 29.4] }, { name: "outer-side--1", position: [-15, 3.3, 3.5], size: [0.3, 6.6, 29] }, { name: "outer-side-1", position: [15, 3.3, 3.5], size: [0.3, 6.6, 29] }, { name: "outer-arrival", position: [0, 3.3, 18], size: [30, 6.6, 0.3] }, { name: "portal-0-Stone pier left", position: [-13.55, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-0-Stone pier right", position: [-6.45, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-0-Dark lintel", position: [-10, 4.7, 0], size: [9.7, 1.55, 0.5] }, { name: "portal-1-Stone pier left", position: [-3.55, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-1-Stone pier right", position: [3.55, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-1-Dark lintel", position: [0, 4.7, 0], size: [9.7, 1.55, 0.5] }, { name: "portal-2-Stone pier left", position: [6.45, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-2-Stone pier right", position: [13.55, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-2-Dark lintel", position: [10, 4.7, 0], size: [9.7, 1.55, 0.5] }], caps: [{ name: "Wall side remainder", material: "green", position: [-15, 3.3, 17.5], size: [0.3, 6.6, 1], bevel_m: 0.003 }, { name: "Wall side remainder", material: "green", position: [15, 3.3, 17.5], size: [0.3, 6.6, 1], bevel_m: 0.003 }, { name: "Wall arrival remainder", material: "green", position: [14, 3.3, 18], size: [2, 6.6, 0.3], bevel_m: 0.003 }, { name: "Roof outer rear remainder", material: "ivory", position: [-13, 6.5, 17], size: [4, 0.3, 2], bevel_m: 0.003 }, { name: "Roof outer rear remainder", material: "ivory", position: [13, 6.5, 17], size: [4, 0.3, 2], bevel_m: 0.003 }], roof_v2: [{ name: "Roof inner side", material: "ivory", position: [-6.2, 6.5, 9], size: [9.6, 0.3, 18], bevel_m: 0.003 }, { name: "Roof inner side", material: "ivory", position: [6.2, 6.5, 9], size: [9.6, 0.3, 18], bevel_m: 0.003 }, { name: "Roof shaft front", material: "ivory", position: [0, 6.5, 7.25], size: [2.8, 0.3, 14.5], bevel_m: 0.003 }, { name: "Roof shaft rear", material: "ivory", position: [0, 6.5, 17.75], size: [2.8, 0.3, 0.5], bevel_m: 0.003 }], roof_v1: [{ name: "Roof continuous centre", material: "ivory", position: [0, 6.5, 9], size: [22, 0.3, 18], bevel_m: 0.003 }], foundation_visual: { name: "Foundation", material: "dark", position: [0, -0.22, 3.5], size: [30.4, 0.4, 29.4], bevel_m: 0.003 }, retained_tiles: [[-14, -0.005, 17], [-12, -0.005, 17], [-10, -0.005, 17], [-8, -0.005, 17], [-6, -0.005, 17], [-4, -0.005, 17], [-2, -0.005, 17], [0, -0.005, 17], [2, -0.005, 17], [4, -0.005, 17], [6, -0.005, 17], [8, -0.005, 17], [10, -0.005, 17], [12, -0.005, 17], [14, -0.005, 1], [14, -0.005, 3], [14, -0.005, 5], [14, -0.005, 7], [14, -0.005, 9], [14, -0.005, 11], [14, -0.005, 13], [14, -0.005, 15], [14, -0.005, 17]] });
-var INTERIOR_SHELL = freeze2({ wall: { asset_id: "GJH-ARC-001", priority: "P0", source_dimensions_wdh_m: [4, 0.2, 3.6], target_dimensions_wdh_m: [4, 0.3, 6.6], bounds_min: [-2, 0, -0.15], bounds_max: [2, 6.6, 0.15], collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, min: [-2, 0, -0.15], max: [2, 6.6, 0.15] }, sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 0.15], back: [0, 0, -0.15] }, capabilities: [], kind: "wall", version: "1.0.0", file: "GJH_ARC_001.glb", sha256: "e5145b12a4bcca1f3d4badc3e6c0285fbd0a65c07f0ddb9c8f3a636e7b1f7197", bytes: 8076, dimensions_m: [4, 6.6, 0.3], editable_source: "models/gjh-interior-shell/sources/GJH_ARC_001.blend", editable_source_sha256: "160629d6b54667303e8e20c7f327b9efb691df96df6834900741903dbef3ea8a", layout_sha256: "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63", build_sha256: "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8", rights: "Original project geometry and texture-free materials; no third-party artwork.", lod_policy: "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.", uv_policy: "No textures or baking; UV0/UV1 not required.", collision_owner: "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider." }, corridor: { asset_id: "GJH-COR-001", priority: "P0", source_dimensions_wdh_m: [4, 4, 0.2], target_dimensions_wdh_m: [4, 4, 0.2], bounds_min: [-2, 0, -2], bounds_max: [2, 0.2, 2], collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, min: [-2, 0, -2], max: [2, 0.165, 2] }, sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 2], back: [0, 0, -2] }, capabilities: [], kind: "corridor", version: "1.0.0", file: "GJH_COR_001.glb", sha256: "ef48863a88cad561c016abc12d4649b6c85db86a872b3c04802d56667e2295a3", bytes: 10504, dimensions_m: [4, 0.2, 4], editable_source: "models/gjh-interior-shell/sources/GJH_COR_001.blend", editable_source_sha256: "9287236d50da46957c30b5541145bc0a8ab8476b4aec282edc167fd6aa683823", layout_sha256: "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63", build_sha256: "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8", rights: "Original project geometry and texture-free materials; no third-party artwork.", lod_policy: "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.", uv_policy: "No textures or baking; UV0/UV1 not required.", collision_owner: "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider." }, ceiling: { asset_id: "GJH-CEI-001", priority: "P0", source_dimensions_wdh_m: [4, 4, 0.25], target_dimensions_wdh_m: [4, 4, 0.3], bounds_min: [-2, 0, -2], bounds_max: [2, 0.3, 2], collision_proxy: { owner: "none; existing ceiling is visual-only", visual_export: false }, sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 2], back: [0, 0, -2] }, capabilities: [], kind: "ceiling", version: "1.0.0", file: "GJH_CEI_001.glb", sha256: "5596575c578ba6b18fe87763b245ff428bb0a0ab7c200e36925817fbcf36e40e", bytes: 11512, dimensions_m: [4, 0.3, 4], editable_source: "models/gjh-interior-shell/sources/GJH_CEI_001.blend", editable_source_sha256: "c603fe16d3e13cf023e13cb69f6cc95e7efad0b18afe7eb4bfd56c9520f635a2", layout_sha256: "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63", build_sha256: "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8", rights: "Original project geometry and texture-free materials; no third-party artwork.", lod_policy: "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.", uv_policy: "No textures or baking; UV0/UV1 not required.", collision_owner: "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider." }, frontage: { asset_id: "GJH-STF-002", priority: "P0", source_dimensions_wdh_m: [8, 0.5, 3.6], target_dimensions_wdh_m: [9.8, 0.59, 5.475], bounds_min: [-4.9, 0, -0.25], bounds_max: [4.9, 5.475, 0.34], collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, local_records: [{ component: "Stone pier left" }, { component: "Stone pier right" }, { component: "Dark lintel" }], policy: "Three solid cuboids leave the doorway aperture open; visual bounds are not a collision box." }, sockets: { floor: [0, 0, 0], left: [-4.9, 0, 0], right: [4.9, 0, 0], front: [0, 0, 0.34], back: [0, 0, -0.25] }, capabilities: [], kind: "frontage", version: "1.0.0", file: "GJH_STF_002.glb", sha256: "edc1d834199ea409831f6ec203b4450505734dbf20dfee10082d790d846f0b82", bytes: 10800, dimensions_m: [9.8, 5.475, 0.59], editable_source: "models/gjh-interior-shell/sources/GJH_STF_002.blend", editable_source_sha256: "b8405f87cda83cec9939aeba9e1c7092cf77c1a66208231ebb1df0b03fba97e7", layout_sha256: "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63", build_sha256: "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8", rights: "Original project geometry and texture-free materials; no third-party artwork.", lod_policy: "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.", uv_policy: "No textures or baking; UV0/UV1 not required.", collision_owner: "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider." } });
-
-// demos/corporate/gjh/v11/assets/shell.js
-async function createShell(T) {
-  const records = Object.fromEntries(await Promise.all(Object.entries(INTERIOR_SHELL).map(async ([kind, definition]) => [kind, await loadStaticAsset(T, definition, import.meta.url)])));
-  return {
-    finish(scene, solid) {
-      const opaque = [], state = {};
-      for (const [kind, record] of Object.entries(records)) {
-        const definition = SHELL_LAYOUT.assets[kind];
-        for (const [x, y, z, angle] of definition.placements) {
-          const placement = new T.Matrix4().compose(new T.Vector3(x, y, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1));
-          if (record.status === "loaded") {
-            for (const primitive of record.primitives) {
-              const matrix = new T.Matrix4().multiplyMatrices(placement, primitive.matrix);
-              const geometry = primitive.geometry.clone().applyMatrix4(matrix), count = geometry.attributes.position.count;
-              const colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
-              for (let i = 0;i < count; i++) {
-                colour.set([material.color.r, material.color.g, material.color.b], i * 3);
-                surface.set([material.roughness, material.metalness], i * 2);
-              }
-              geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
-              geometry.setAttribute("obSurface", new T.BufferAttribute(surface, 2));
-              opaque.push(geometry);
-            }
-          } else {
-            for (const component of definition.components) {
-              const point2 = new T.Vector3(...component.position).applyMatrix4(placement);
-              solid("box", component.material, point2.x, point2.y, point2.z, ...component.size, angle);
-            }
-          }
-        }
-        const geometries = new Set, materials = new Set;
-        record.primitives.forEach((p) => {
-          geometries.add(p.geometry);
-          materials.add(p.material);
-        });
-        geometries.forEach((g) => g.dispose());
-        materials.forEach((m) => m.dispose());
-        state[kind] = Object.freeze({
-          assetId: definition.asset_id,
-          identity: INTERIOR_SHELL[kind].sha256,
-          status: record.status,
-          reason: record.reason,
-          instances: definition.placements.length,
-          primitives: record.primitives.length,
-          boundsMin: definition.bounds_min,
-          boundsMax: definition.bounds_max
-        });
-      }
-      const mesh = opaqueBatch(T, opaque, true);
-      if (mesh) {
-        mesh.name = "Native P0 shell";
-        scene.add(mesh);
-      }
-      return Object.freeze(state);
-    }
-  };
-}
 
 // demos/corporate/gjh/v11/assets/spatial.js
 var FLOOR = Object.freeze({ minX: -15.2, maxX: 15.2, minZ: -11.2, maxZ: 18.2 });
@@ -1618,34 +1019,6 @@ var shopArrivals = new Map(plannedSpaces.map((store) => {
   const entrance = shopEntrance(expandedLayout.slots[Number(store.number) - 1]);
   return [store.id, Object.freeze({ x: entrance.x + 2.4 * entrance.normalX, z: entrance.z + 2.4 * entrance.normalZ, yaw: entrance.yaw })];
 }));
-
-// demos/corporate/gjh/v11/assets/gallery-east-shops.js
-var eastShopPlacements = {
-  12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.081, 2.92], yaw: 0.11, scale: 1.14 }],
-  13: [{ file: "gallery-assets/headphone-display-stand.glb", position: [-2.45, 0.081, 3.05], yaw: 0.18, scale: 1.2 }],
-  14: [{ file: "gallery-assets/refrigerator.glb", position: [-2.48, 0.081, 2.58], yaw: 0.08, scale: 1.03 }],
-  15: [{ file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.081, 2.47], yaw: 0.22, scale: 0.93 }],
-  16: [{ file: "gallery-assets/shelf-electronics-display.glb", position: [-2.13, 0.081, 2.81], yaw: 0.12, scale: 0.96 }],
-  17: [{ file: "gallery-assets/lounge-sofa-bench.glb", position: [-2.22, 0.081, 2.22], yaw: 1.5, scale: 0.86 }]
-};
-
-// demos/corporate/gjh/v11/assets/gallery-west-shops.js
-var fixture = (name, x, y, z, yaw = 0, scale = 1) => ({
-  file: `gallery-assets/${name}.glb`,
-  position: [x, y, z],
-  yaw,
-  scale
-});
-var westShopPlacements = {
-  4: [fixture("mosquito-patch-pack", -3.97, 1.081, -1.8, 0, 0.7)],
-  5: [fixture("medicine-health-box-set", -2.21, 0.081, 4.84, 0.12)],
-  6: [fixture("instant-noodle-pack-display", -2.43, 0.081, 4.57, 0.035)],
-  7: [fixture("stacked-can-pyramid", -1.56, 0.081, 2.65, -0.07, 0.88)],
-  8: [fixture("peanut-butter-jar-stand", -2.52, 0.081, 4.57, 0.015)],
-  9: [fixture("shelf-food-aisle", -2.49, 0.081, 4.57, 0.015)],
-  10: [fixture("abalone-gift-box-display", -2.99, 1.081, -1.8, 0, 0.6)],
-  11: [fixture("food-display-cabinet", -1.61, 0.081, 2.74, -0.12)]
-};
 
 // demos/corporate/gjh/v11/assets/signage/atlas-layout.js
 var slotCapacity = 24;
@@ -2150,6 +1523,1150 @@ function selectSignLod(tier, distance, inFrustum, cutoff) {
   return distance <= cutoff && ["balanced", "detailed"].includes(tier) ? tier : "baked";
 }
 
+// demos/corporate/gjh/v11/assets/signage/builder.js
+var bladeSocket = Object.freeze({ inset: 0.24, drop: 0.78, reach: 0.94, height: 0.69, thickness: 0.043 });
+function uvRect(r, size = atlasSize) {
+  return [
+    (r.x + 0.5) / size,
+    1 - (r.y + r.h - 0.5) / size,
+    (r.x + r.w - 0.5) / size,
+    1 - (r.y + 0.5) / size
+  ];
+}
+function createShopSign(T, config, bay) {
+  const group = new T.Group, entrance = shopEntrance(bay), anchor = Number(bay.number) <= 3;
+  group.name = "Store sign " + config.id;
+  group.position.set(entrance.x, 0, entrance.z);
+  group.rotation.y = entrance.yaw;
+  const cells = atlasCells(Number(bay.number) - 1);
+  const { width, height, depth } = config.size, band = fasciaBand(bay);
+  const z = (anchor ? 0.44 : 0.23) + depth, y = (band.top + band.bottom) / 2;
+  const bladeX = -width / 2 + bladeSocket.inset, bladeY = y - bladeSocket.drop, bladeDepth = bladeSocket.reach;
+  const positions = [], uvs = [], indices = [];
+  function panel(x, y2, z2, w, h, yaw, cell) {
+    const start = positions.length / 3, cs = Math.cos(yaw), sn = Math.sin(yaw);
+    for (const [u, v] of [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]])
+      positions.push(x + w * u * cs, y2 + h * v, z2 - w * u * sn);
+    const [l, b, r, t] = uvRect(cell);
+    uvs.push(l, b, r, b, r, t, l, t);
+    indices.push(start, start + 1, start + 2, start, start + 2, start + 3);
+  }
+  panel(0, y, z, width, height, 0, cells.fascia);
+  if (config.blade) {
+    for (const side of [-1, 1])
+      panel(bladeX + side * (bladeSocket.thickness / 2 + 0.001), bladeY, z + bladeDepth / 2, bladeDepth - 0.05, bladeSocket.height - 0.045, side * Math.PI / 2, cells.blade);
+  }
+  panel(width / 2 - 0.32, 3.7, z, 0.6, 0.2, 0, plateRect(cells.blade));
+  const span = bayWidth(bay);
+  if (config.poster) {
+    if (anchor) {
+      panel(-span * 0.359, 2.15, 0.24, 1.52, 1.32, 0, cells.poster);
+    } else {
+      panel(-span / 2 + 0.98, bay.posterHeight ?? 2.46, -0.09, 1.24, 1.08, 0, cells.poster);
+      const heroX = bay.side === "north" ? 3 : 2.55;
+      panel(heroX - 0.61, 0.42, -0.44, 0.68, 0.51, 0, cells.poster);
+    }
+  }
+  if (!anchor) {
+    const roomDepth = bay.side === "north" ? bay.maxZ - bay.minZ : bay.maxX - bay.minX;
+    panel(0, 3.69, -roomDepth + 0.98, 3.63, 0.415, 0, cells.fascia);
+  }
+  const geometry = new T.BufferGeometry;
+  geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  group.add(new T.Mesh(geometry, config.faceMaterial));
+  group.userData.mount = { y, z, depth, bladeX, bladeY, bladeDepth };
+  group.updateMatrixWorld();
+  return group;
+}
+function letterGeometry(T, mask, config, mount, cell) {
+  const { width: n, height: m, ink } = mask;
+  if (!ink.some(Boolean))
+    return null;
+  const p = [], uv = [], idx = [], [left, bottom, right, top] = uvRect(cell);
+  function quad(points) {
+    const start = p.length / 3;
+    for (const [x, y, d] of points) {
+      p.push((x / n - 0.5) * config.size.width, mount.y + (0.5 - y / m) * config.size.height, mount.z + d);
+      uv.push(left + (right - left) * x / n, top + (bottom - top) * y / m);
+    }
+    idx.push(start, start + 1, start + 2, start, start + 2, start + 3);
+  }
+  const bevel = 0.018, base = 0.001;
+  function wall(x, y, ex, ey) {
+    quad([[x, y, base], [ex, ey, base], [ex, ey, bevel], [x, y, bevel]]);
+  }
+  function run(y, condition, handle) {
+    for (let x = 0;x < n; ) {
+      if (!condition(x)) {
+        x++;
+        continue;
+      }
+      const start = x++;
+      while (x < n && condition(x))
+        x++;
+      handle(start, x, y);
+    }
+  }
+  for (let y = 0;y < m; y++) {
+    const row = y * n;
+    run(y, (x) => ink[row + x], (a, b) => {
+      quad([[a, y + 1, bevel], [b, y + 1, bevel], [b, y, bevel], [a, y, bevel]]);
+      wall(a, y, a, y + 1);
+      wall(b, y + 1, b, y);
+    });
+    run(y, (x) => ink[row + x] && !ink[row - n + x], (a, b) => wall(b, y, a, y));
+    run(y, (x) => ink[row + x] && !ink[row + n + x], (a, b) => wall(a, y + 1, b, y + 1));
+  }
+  const g = new T.BufferGeometry;
+  g.setAttribute("position", new T.Float32BufferAttribute(p, 3));
+  g.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
+// demos/corporate/gjh/v11/assets/upper-level-atlas.js
+var atlasPx = 256;
+var categories = ["Fashion", "Lifestyle", "Tech & Games", "Food & Drinks"];
+var cells = {
+  directory: { x: 2, y: 2, w: 155, h: 146 },
+  mark: { x: 161, y: 2, w: 93, h: 67 },
+  signs: categories.map((_, i) => ({ x: 161, y: 73 + i * 22, w: 93, h: 19 })),
+  rug: { x: 2, y: 153, w: 49, h: 100 },
+  windows: categories.map((_, i) => ({ x: 60 + i % 2 * 98, y: 165 + Math.floor(i / 2) * 46, w: 94, h: 42 })),
+  sky: { x: 54, y: 164, w: 3, h: 89 },
+  filament: { x: 88, y: 151, w: 8, h: 6 },
+  louvres: { x: 100, y: 151, w: 55, h: 11 }
+};
+function paintUpperAtlas(T, mark) {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = atlasPx;
+  const ctx = canvas.getContext("2d");
+  const { green, brass, cream } = swatch;
+  ctx.fillStyle = green;
+  ctx.fillRect(0, 0, atlasPx, atlasPx);
+  function inCell(cell, draw) {
+    ctx.save();
+    ctx.translate(cell.x, cell.y);
+    ctx.beginPath();
+    ctx.rect(0, 0, cell.w, cell.h);
+    ctx.clip();
+    draw(cell.w, cell.h);
+    ctx.restore();
+  }
+  inCell(cells.directory, (w, h) => {
+    ctx.strokeStyle = brass;
+    ctx.strokeRect(1.5, 1.5, w - 3, h - 3);
+    ctx.fillStyle = swatch.gold;
+    ctx.font = "bold 11px Arial";
+    ctx.fillText("DIRECTORY", 9, 16);
+    ctx.fillStyle = cream;
+    ctx.font = "bold 21px Georgia";
+    ctx.fillText("Upper Level", 9, 39);
+    ctx.fillStyle = brass;
+    ctx.fillRect(9, 46, w - 18, 1);
+    categories.forEach((name, i) => {
+      const y = 66 + i * 23;
+      ctx.fillStyle = cream;
+      ctx.font = "bold 17px Arial";
+      ctx.fillText(name, 9, y, 118);
+      ctx.save();
+      ctx.translate(140, y - 6);
+      ctx.rotate([-0.76, -0.52, 0, 0.64][i]);
+      ctx.strokeStyle = swatch.gold;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 6);
+      ctx.lineTo(0, -6);
+      ctx.moveTo(-5, -1);
+      ctx.lineTo(0, -6);
+      ctx.lineTo(5, -1);
+      ctx.stroke();
+      ctx.restore();
+    });
+  });
+  inCell(cells.mark, (w, h) => {
+    ctx.textAlign = "center";
+    ctx.fillStyle = cream;
+    if (mark) {
+      ctx.drawImage(mark, 4, 3, 85, 38);
+    } else {
+      ctx.font = "bold 32px Georgia";
+      ctx.fillText("GJH", w / 2, 35);
+    }
+    ctx.fillStyle = cream;
+    ctx.font = "bold 15px Georgia";
+    ctx.fillText("Virtual Mall", w / 2, h - 7);
+  });
+  cells.signs.forEach((cell, i) => inCell(cell, (w, h) => {
+    ctx.fillStyle = i % 2 ? "#49372e" : green;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = cream;
+    ctx.textAlign = "center";
+    ctx.font = "bold 14px Georgia";
+    ctx.fillText(categories[i], w / 2, 14, w - 4);
+  }));
+  cells.windows.forEach((cell, i) => inCell(cell, (w, h) => {
+    const glow = ctx.createLinearGradient(0, 0, 0, h);
+    for (const [stop, c] of [[0, "#fff0be"], [0.28, "#e7b782"], [0.82, "#a77755"], [1, "#604737"]])
+      glow.addColorStop(stop, c);
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, w, h);
+    for (let x = 2;x < w; x += 11) {
+      ctx.fillStyle = "#966d4938";
+      ctx.fillRect(x, 0, 1, h);
+    }
+    const rect = (c, x, y, b, d) => {
+      ctx.fillStyle = c;
+      ctx.fillRect(x, y, b, d);
+    };
+    const poly = (color, points) => {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      points.forEach(([x, y], j) => j ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+      ctx.closePath();
+      ctx.fill();
+    };
+    for (const x of [15, 46, 77])
+      poly("#fff4c13a", [[x, 2], [x + 13, 28], [x - 13, 28]]);
+    if (i === 0) {
+      rect("#654d36", 8, 10, 76, 1);
+      for (let j = 0;j < 6; j++) {
+        const x = 15 + j * 12;
+        poly(["#577464", "#ad6550", "#e5cdaa"][j % 3], [[x, 10], [x + 5, 12], [x + 7, 17], [x + 4, 18], [x + 5, 31], [x - 4, 31], [x - 3, 18], [x - 6, 17], [x - 4, 12]]);
+      }
+    } else if (i === 2) {
+      for (let j = 0;j < 3; j++) {
+        const x = 8 + j * 28;
+        rect("#3a3d39", x, 13, 21, 14);
+        rect("#6f9497", x + 1, 14, 19, 11);
+        poly("#b1c0a7", [[x + 1, 23], [x + 8, 17], [x + 13, 21], [x + 20, 15], [x + 20, 24]]);
+        rect("#504b3c", x + 9, 27, 3, 3);
+        rect("#504b3c", x + 5, 30, 11, 1);
+      }
+    } else {
+      for (const shelf of [18, 33]) {
+        rect("#72523b", 6, shelf, 81, 2);
+        for (let j = 0;j < 6; j++) {
+          const x = 11 + j * 13, h2 = 5 + (j * 7 + shelf) % 6;
+          rect(i === 1 ? "#57765c" : ["#954f38", "#e0c18c", "#646f51"][j % 3], x, shelf - h2, 6, h2);
+          rect(i === 1 ? "#708355" : "#b99964", x + 1, shelf - h2 - 2, 4, 2);
+        }
+      }
+    }
+    poly("#fff8d923", [[4, 0], [14, 0], [36, h], [31, h]]);
+  }));
+  inCell(cells.rug, (w, h) => {
+    ctx.fillStyle = "#c6b598";
+    ctx.fillRect(0, 0, w, h);
+    for (let i = 2;i < 7; i += 2) {
+      ctx.strokeStyle = i === 4 ? "#d5c8ad" : "#74684e";
+      ctx.strokeRect(i + 0.5, i + 0.5, w - 2 * i - 1, h - 2 * i - 1);
+    }
+    for (let y = 10;y < h - 8; y += 9)
+      for (let x = 10 + y % 2 * 4;x < w - 7; x += 9) {
+        ctx.strokeStyle = "#998970";
+        ctx.beginPath();
+        ctx.moveTo(x - 2, y);
+        ctx.lineTo(x, y - 2);
+        ctx.lineTo(x + 2, y);
+        ctx.lineTo(x, y + 2);
+        ctx.closePath();
+        ctx.stroke();
+      }
+  });
+  inCell(cells.sky, (w, h) => {
+    const sky = ctx.createLinearGradient(0, 0, 0, h);
+    for (const [stop, c] of [[0, "#67a5c6"], [0.42, "#a6d4e2"], [0.78, "#edf2de"], [1, "#ffe4c2"]])
+      sky.addColorStop(stop, c);
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, w, h);
+  });
+  inCell(cells.louvres, (w, h) => {
+    ctx.fillStyle = "#5e6353";
+    ctx.fillRect(0, 0, w, h);
+    for (let x = 0;x < w; x += 4) {
+      ctx.fillStyle = "#857c60";
+      ctx.fillRect(x, 0, 1, h);
+      ctx.fillStyle = "#434d42";
+      ctx.fillRect(x + 1, 0, 1, h);
+    }
+    ctx.fillStyle = "#a68d64";
+    ctx.fillRect(0, 0, w, 1);
+  });
+  inCell(cells.filament, (w, h) => {
+    ctx.fillStyle = "#ffedba";
+    ctx.fillRect(0, 0, w, h);
+  });
+  const map = new T.CanvasTexture(canvas);
+  map.colorSpace = T.SRGBColorSpace;
+  map.anisotropy = 4;
+  return map;
+}
+
+// demos/corporate/gjh/v11/assets/upper-level.js
+var models = {
+  bench: { id: "GJH_NEW_bench_oak", dimensions_m: [1.4, 0.45, 0.42], sha256: "064fb57f222a95e9327e2fa9ea9e111a2020dbcfc02590c6d6060a54e7570bd9" },
+  lamp: { id: "GJH_NEW_lamp_floor", dimensions_m: [0.6, 1.7, 0.6], sha256: "5cb040bd1982017acc97b2d96cb80963516be67814c92cab49d816539c1581f2" },
+  table: { id: "GJH_NEW_table_display", dimensions_m: [1.1, 0.85, 0.6], sha256: "30234aa8ff7d21761920ee1527f374076ded2ae2d296f6499edea2e2759d4ba9" }
+};
+var deckPlanters = [[-8.1, 12.8], [2.1, 12.8], [-8.1, 9.2], [2.1, 9.2]];
+var lamp = [-1.38, 5.75];
+var table = [-4.79, 6.05];
+var directory = { x: -2.96, z: 14.35, yaw: -Math.PI / 2, width: 2.46, height: 2.56 };
+var galleryVoid = Object.freeze({
+  minX: liftLayout.slab.maxX,
+  maxX: liftLayout.roofOpening.maxX - 1.53,
+  minZ: liftLayout.slab.minZ,
+  maxZ: liftLayout.slab.maxZ,
+  farRise: 1.46
+});
+function thresholdReturns() {
+  const { minX, maxX, minZ, maxZ } = liftLayout.threshold;
+  return [minZ, maxZ].map((z) => ({ x: (minX + maxX) / 2, z, width: maxX - minX, depth: 0.055 }));
+}
+async function loadUpperLevel(T) {
+  const mark = new Image;
+  mark.src = new URL("./gjh-loader-mark.svg", import.meta.url).href;
+  const [logo, ...records] = await Promise.all([
+    mark.decode().then(() => mark, () => null),
+    ...Object.values(models).map(({ id, ...receipt }) => loadStaticAsset(T, {
+      ...receipt,
+      asset_id: id,
+      file: "gallery-assets/upper-level/" + id + ".glb"
+    }, import.meta.url))
+  ]);
+  return { map: paintUpperAtlas(T, logo), models: Object.fromEntries(Object.keys(models).map((key, i) => [key, records[i]])) };
+}
+function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash }) {
+  const group = new T.Group;
+  group.name = "Premium Open Atrium";
+  group.userData.deckLod = true;
+  const floor = liftLayout.upper, gold = [], emit = [], solids = [], prints = [], glass = [];
+  const unit = new T.BoxGeometry, plane = new T.PlaneGeometry, transform = new T.Object3D;
+  function matrix(x2, y, z2, w, h, d, yaw2 = 0, pitch = 0) {
+    transform.position.set(x2, floor + y, z2);
+    transform.rotation.set(pitch, yaw2, 0, "YXZ");
+    transform.scale.set(w, h, d);
+    transform.updateMatrix();
+    return transform.matrix.clone();
+  }
+  function tint2(source, world, colour) {
+    const geo = source.index ? source.toNonIndexed() : source.clone();
+    geo.applyMatrix4(world);
+    for (const key of Object.keys(geo.attributes))
+      if (key !== "position" && key !== "normal")
+        geo.deleteAttribute(key);
+    const rgb = new T.Color(colour), values = new Float32Array(geo.attributes.position.count * 3);
+    for (let i = 0;i < values.length; i += 3)
+      rgb.toArray(values, i);
+    geo.setAttribute("color", new T.BufferAttribute(values, 3));
+    solids.push(geo);
+  }
+  const block = (color, ...args) => tint2(unit, matrix(...args), color);
+  const brass = (...args) => gold.push(matrix(...args));
+  const led = (...args) => emit.push(unit.clone().applyMatrix4(matrix(...args)));
+  function print(cell, ...args) {
+    const g = plane.clone().applyMatrix4(matrix(...args)), uv = g.attributes.uv;
+    const [l, b, r, t] = uvRect(cell, atlasPx);
+    for (let i = 0;i < uv.count; i++)
+      uv.setXY(i, uv.getX(i) ? r : l, uv.getY(i) ? t : b);
+    prints.push(g);
+  }
+  function guard(x2, z2, w, d) {
+    const alongX = w > d, length = Math.max(w, d);
+    brass(x2, 1.158, z2, alongX ? w : 0.11, 0.052, alongX ? 0.11 : d);
+    led(x2, 0.115, z2, alongX ? w : 0.142, 0.033, alongX ? 0.142 : d);
+    print(cells.filament, x2, 0.133, z2, alongX ? w : 0.075, alongX ? 0.075 : d, 1, 0, -Math.PI / 2);
+    const bays = Math.ceil(length / 1.95);
+    for (let i = 0;i < bays; i++) {
+      const along = (i + 0.5) * length / bays - length / 2;
+      brass(x2 + (alongX ? along : 0), 0.56, z2 + (alongX ? 0 : along), 0.045, 1.12, 0.045);
+    }
+    lightWash(x2, floor + 0.018, z2, alongX ? w : 0.64, alongX ? 0.64 : d, 0, -Math.PI / 2);
+  }
+  function frame(rect, door) {
+    const { minX: minX2, maxX: maxX2, minZ: minZ2, maxZ: maxZ2 } = rect, cx2 = (minX2 + maxX2) / 2, cz2 = (minZ2 + maxZ2) / 2;
+    for (const z2 of [minZ2, maxZ2])
+      guard(cx2, z2, maxX2 - minX2, 0.1);
+    guard(maxX2, cz2, 0.1, maxZ2 - minZ2);
+    if (!door)
+      guard(minX2, cz2, 0.1, maxZ2 - minZ2);
+    else
+      for (const [a, b] of [[minZ2, door.minZ], [door.maxZ, maxZ2]])
+        guard(minX2, (a + b) / 2, 0.1, b - a);
+  }
+  frame(liftLayout.slab);
+  frame(liftLayout.shaft, liftLayout.threshold);
+  for (const { x: x2, z: z2, width: width2, depth } of thresholdReturns()) {
+    guard(x2, z2, width2, depth);
+    collider(x2, floor + 0.55, z2, width2, 1.1, depth);
+    glass.push(plane.clone().applyMatrix4(matrix(x2, 0.55, z2, width2, 1.1, 1)));
+  }
+  const tile = 1.5, tones = [14405306, 14602686, 14208185, 14471613];
+  for (const area of cutRectangle(liftLayout.slab, liftLayout.shaft)) {
+    for (let col = 0;col < 8; col++)
+      for (let row = 0;row < 8; row++) {
+        const x2 = liftLayout.slab.minX + col * tile, z2 = liftLayout.slab.minZ + row * tile;
+        const a = Math.max(area.minX, x2 + 0.009), b = Math.min(area.maxX, x2 + tile - 0.009);
+        const c = Math.max(area.minZ, z2 + 0.009), d = Math.min(area.maxZ, z2 + tile - 0.009);
+        if (a < b && c < d)
+          tint2(plane, matrix((a + b) / 2, 0.008, (c + d) / 2, b - a, d - c, 1, 0, -Math.PI / 2), tones[(col * 3 + row * 7) % 4]);
+      }
+  }
+  print(cells.rug, -3.05, 0.022, 6.27, 4.87, 2.23, 1, 0, -Math.PI / 2);
+  const crop = new T.CylinderGeometry(0.36, 0.32, 0.053, 16);
+  for (const [x2, z2] of deckPlanters) {
+    const ring = new T.RingGeometry(0.408, 0.447, 24);
+    emit.push(ring.applyMatrix4(matrix(x2, 0.031, z2, 1, 1, 1, 0, -Math.PI / 2)));
+    lightWash(x2, floor + 0.019, z2, 1.72, 1.72, 0, -Math.PI / 2);
+  }
+  const furnitureOffset = 0.024;
+  function furniture(kind, [x2, z2], sx, sy, sz, fallback) {
+    const record = loadedModels[kind];
+    if (!record?.primitives.length) {
+      fallback?.(x2, z2);
+      return false;
+    }
+    const pose = matrix(x2, furnitureOffset, z2, sx, sy, sz);
+    for (const p of record.primitives)
+      tint2(p.geometry, pose.clone().multiply(p.matrix), p.material.color);
+    for (const geo of new Set(record.primitives.map((p) => p.geometry)))
+      geo.dispose();
+    for (const mat of new Set(record.primitives.map((p) => p.material)))
+      mat.dispose();
+    return true;
+  }
+  const seatProfiles = new Map;
+  const benchProfile = (width2, top, depth, seatCentre = 0) => ({ size: [width2, top, depth], top, front: -depth / 2, seatCentre });
+  function slats(x2, z2) {
+    const width2 = 2.12, centre = 0.46, thickness = 0.09, slatDepth = 0.103, spacing = 0.12;
+    for (let i = -2;i <= 2; i++)
+      block(i % 2 ? 11104068 : 12158290, x2, centre, z2 + i * spacing, width2, thickness, slatDepth);
+    for (const dx of [-0.78, 0.78])
+      brass(x2 + dx, 0.22, z2, 0.08, 0.44, 0.5);
+    return benchProfile(width2, centre + thickness / 2, 4 * spacing + slatDepth);
+  }
+  const [benchX, benchY, benchZ] = [1.52, 1.1, 1.55];
+  for (const { finish, x: x2, z: z2 } of atriumLayout.upperSeats) {
+    if (finish === "oak" && furniture("bench", [x2, z2], benchX, benchY, benchZ)) {
+      const [width2, height2, depth] = models.bench.dimensions_m;
+      seatProfiles.set(finish, benchProfile(width2 * benchX, furnitureOffset + height2 * benchY, depth * benchZ, -0.04));
+    } else if (finish === "oak" || finish === "slats")
+      seatProfiles.set(finish, slats(x2, z2));
+  }
+  furniture("table", table, 0.78, 0.81, 0.92, (x2, z2) => {
+    block(12159064, x2, 0.64, z2, 0.86, 0.09, 0.55);
+    brass(x2, 0.33, z2, 0.12, 0.62, 0.12);
+    block(6113592, x2, 0.06, z2, 0.55, 0.08, 0.37);
+  });
+  furniture("lamp", lamp, 1, 1, 1, (x2, z2) => {
+    tint2(crop, matrix(x2, 0.05, z2, 1, 1, 1), 10058055);
+    brass(x2, 0.79, z2, 0.045, 1.5, 0.045);
+    block(16309669, x2, 1.58, z2, 0.51, 0.35, 0.51);
+  });
+  crop.dispose();
+  led(lamp[0], 1.44, lamp[1], 0.32, 0.025, 0.32);
+  collider(table[0], floor + 0.33, table[1], 0.86, 0.66, 0.55);
+  collider(lamp[0], floor + 0.17, lamp[1], 0.48, 0.34, 0.48);
+  const east = liftLayout.shaft.maxX, cz = liftLayout.z;
+  block(1785393, east + 0.1, 1.29, cz, 0.14, 1.72, 3.05);
+  collider(east + 0.1, floor + 1.29, cz, 0.14, 1.72, 3.05);
+  for (const dz of [-1.52, 1.52])
+    brass(east + 0.1, 1.08, cz + dz, 0.09, 2.16, 0.06);
+  for (const y of [0.43, 2.14])
+    brass(east + 0.025, y, cz, 0.035, 0.032, 3.09);
+  print(cells.mark, east + 0.025, 1.32, cz, 2.06, 1.48, 1, -Math.PI / 2);
+  const { x, z, yaw, width, height } = directory;
+  block(6901045, x, 1.43, z, width + 0.1, height + 0.15, 0.15, yaw);
+  print(cells.directory, x - 0.083, 1.43, z, width, height, 1, yaw);
+  for (const dz of [-width / 2 - 0.045, width / 2 + 0.045])
+    led(x - 0.087, 1.43, z + dz, 0.031, height + 0.08, 0.031);
+  brass(x, 0.23, z, 0.13, 0.46, 1.25);
+  collider(x, floor + 1.31, z, 0.17, 2.62, width + 0.1);
+  const front = liftLayout.roofOpening.maxX, start = liftLayout.roofOpening.minZ, end = liftLayout.roofOpening.maxZ;
+  const span = (end - start) / 4, mid = (start + end) / 2;
+  block(12627340, front + 0.12, 1.17, mid, 0.42, 0.56, end - start + 0.14);
+  block(12365460, front - 0.67, 1.39, mid, 1.78, 0.15, end - start + 0.12);
+  const lip = front - 1.53;
+  glass.push(plane.clone().applyMatrix4(matrix(lip, 1.92, mid, end - start, 0.96, 1, -Math.PI / 2)));
+  brass(lip, 2.42, mid, 0.076, 0.055, end - start);
+  led(lip, 1.37, mid, 0.075, 0.027, end - start);
+  for (let j = 0;j <= 12; j++)
+    brass(lip, 1.93, start + (end - start) * j / 12, 0.045, 0.99, 0.045);
+  block(2639163, front + 0.16, 2.98, mid, 0.3, 3.3, end - start + 0.12);
+  for (const y of [1.44, 4.61])
+    brass(front - 0.09, y, mid, 0.2, 0.085, end - start + 0.18);
+  const { minX, maxX, minZ, maxZ, farRise } = galleryVoid;
+  const run = maxX - minX, riseAngle = Math.atan2(farRise, run);
+  const slope = Math.hypot(run, farRise), cx = (minX + maxX) / 2;
+  const rotation = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), riseAngle);
+  function bridgeMatrix(y, z2, w, h, d) {
+    return new T.Matrix4().compose(new T.Vector3(cx, floor + farRise / 2 + y, z2), rotation, new T.Vector3(w, h, d));
+  }
+  function bridgeCollider(y, z2, w, h, d) {
+    collider(cx, floor + farRise / 2 + y, z2, w, h, d)?.setRotation(rotation);
+  }
+  for (const [z2, side] of [[minZ, -1], [maxZ, 1]]) {
+    const walkway = z2 + side * 0.52;
+    tint2(unit, bridgeMatrix(-0.075, walkway, slope + 0.1, 0.15, 1.05), 12823688);
+    bridgeCollider(-0.075, walkway, slope + 0.1, 0.15, 1.05);
+    for (const edge of [z2, z2 + side * 1.05]) {
+      glass.push(plane.clone().applyMatrix4(bridgeMatrix(0.55, edge, slope + 0.08, 1.1, 1)));
+      bridgeCollider(0.55, edge, slope + 0.1, 1.13, 0.1);
+      gold.push(bridgeMatrix(1.13, edge, slope + 0.1, 0.056, 0.09));
+    }
+    glass.push(plane.clone().applyMatrix4(matrix(minX, 0.55, walkway, 1.06, 1.1, 1, -Math.PI / 2)));
+    brass(minX, 1.13, walkway, 0.09, 0.056, 1.09);
+    collider(minX, floor + 0.55, walkway, 0.1, 1.13, 1.09);
+    emit.push(unit.clone().applyMatrix4(bridgeMatrix(0.1, z2, slope + 0.1, 0.038, 0.1)));
+    for (const t of [0.25, 0.5, 0.75])
+      brass(minX + run * t, farRise * t + 0.55, z2, 0.043, 1.1, 0.043);
+  }
+  collider(front - 0.67, floor + 1.39, mid, 1.78, 0.15, end - start + 0.12);
+  collider(lip, floor + farRise + 0.48, mid, 0.1, 1.02, end - start);
+  collider(front + 0.1, floor + 2.98, mid, 0.19, 3.3, end - start);
+  for (const endZ of [start, end]) {
+    glass.push(plane.clone().applyMatrix4(matrix(front - 0.67, 1.94, endZ, 1.78, 1.01, 1)));
+    brass(front - 0.67, 2.46, endZ, 1.78, 0.055, 0.075);
+    collider(front - 0.67, floor + 1.94, endZ, 1.78, 1.03, 0.1);
+  }
+  for (let i = 0;i < 4; i++) {
+    const c = start + (i + 0.5) * span;
+    if (i === 0 || i === 3) {
+      block(6574396, front + 0.19, -0.51, c, 0.26, 2.91, span + 0.04);
+      print(cells.windows[i], front + 0.05, -0.49, c, span - 0.28, 2.6, 1, -Math.PI / 2);
+      brass(front + 0.02, -0.49, c, 0.075, 2.65, 0.075);
+    }
+    print(cells.windows[i], front - 0.015, 2.66, c, span - 0.32, 2.32, 1, -Math.PI / 2);
+    print(cells.signs[i], front - 0.1, 4.2, c, span * 0.74, 0.6, 1, -Math.PI / 2);
+    for (const dz of [-span / 2 + 0.05, 0])
+      brass(front - 0.055, 2.66, c + dz, 0.09, 2.36, 0.075);
+    led(front - 0.11, 3.84, c, 0.1, 0.048, span - 0.23);
+    block(5980466, front - 0.24, 1.67, c, 0.44, 0.34, span - 0.36);
+    for (const side of [-1, 1]) {
+      const p = c + side * 1.38;
+      block(12029281, front - 0.18, 2.18, p, 0.32, 0.095, 1.72);
+    }
+  }
+  const service = atriumLayout.facilitiesBlock, cap = service.height - floor + 0.014;
+  print(cells.louvres, service.x, cap, service.z, service.width + 0.02, service.depth + 0.02, 1, 0, -Math.PI / 2);
+  for (const side of [-1, 1]) {
+    print(cells.louvres, service.x + side * (service.width / 2 + 0.012), cap - service.height / 2, service.z, service.depth, service.height, 1, side * Math.PI / 2);
+    print(cells.louvres, service.x, cap - service.height / 2, service.z + side * (service.depth / 2 + 0.012), service.width, service.height, 1, side > 0 ? 0 : Math.PI);
+  }
+  const radius = 66, segments = 12;
+  for (let i = 0;i < segments; i++) {
+    const a = 2 * Math.PI * i / segments;
+    print(cells.sky, liftLayout.x + radius * Math.sin(a), 23, liftLayout.z + radius * Math.cos(a), 2 * radius * Math.tan(Math.PI / segments) + 0.04, 60, 1, a + Math.PI);
+  }
+  print(cells.sky, liftLayout.x, 52.95, liftLayout.z, 2.05 * radius, 2.05 * radius, 1, 0, Math.PI / 2);
+  function merged(name, parts, material, parent) {
+    const g = mergeGeometries2(parts);
+    parts.forEach((part) => part.dispose());
+    parts.length = 0;
+    const mesh = new T.Mesh(g, material);
+    mesh.name = name;
+    parent.add(mesh);
+    return mesh;
+  }
+  merged("Lounge, stone paving and shop arcade", solids, new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.67 }), group);
+  const ink = new T.MeshBasicMaterial({ map, toneMapped: false, fog: false });
+  merged("Directory, mall mark and display graphics", prints, ink, group);
+  function boxes(name, poses, mat) {
+    const mesh = new T.InstancedMesh(unit, mat, poses.length);
+    poses.forEach((m, i) => mesh.setMatrixAt(i, m));
+    mesh.name = name;
+    mesh.computeBoundingSphere();
+    group.add(mesh);
+  }
+  boxes("Champagne handrails and posts", gold, new T.MeshStandardMaterial({ color: 13478768, metalness: 0.52, roughness: 0.34 }));
+  merged("Amber LED channels", emit, new T.MeshStandardMaterial({ color: 4269832, emissive: 16757582, emissiveIntensity: 1.14, toneMapped: false }), group);
+  print(cells.mark, liftLayout.cabin.width / 2 - 0.107, 1.26 - floor, 0, 2.12, 1.52, 1, -Math.PI / 2);
+  const cabinMark = new T.Mesh(prints.pop(), ink);
+  cabinMark.name = "GJH cabin face";
+  cabinMark.userData.deckLod = true;
+  plane.dispose();
+  const panes = new T.Group;
+  panes.name = "Atrium skylight and threshold glass";
+  const positions = [], uvs = [], indices = [];
+  for (let i = 0;i <= 24; i++) {
+    const a = (i / 24 - 0.5) * Math.PI, px = -3 + 13.18 * Math.sin(a), py = 13.14 + 3.91 * Math.cos(a);
+    positions.push(px, py, -2.94, px, py, 23.13);
+    uvs.push(i / 24, 0, i / 24, 1);
+    const j = 2 * i;
+    if (i < 24)
+      indices.push(j, j + 2, j + 1, j + 1, j + 2, j + 3);
+  }
+  const roof = new T.BufferGeometry;
+  roof.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
+  roof.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2));
+  roof.setIndex(indices);
+  roof.computeVertexNormals();
+  glass.push(roof);
+  const glazing = new T.MeshStandardMaterial({
+    color: 14610417,
+    emissive: 11787234,
+    emissiveIntensity: 0.22,
+    transparent: true,
+    opacity: 0.14,
+    depthWrite: false,
+    roughness: 0.22,
+    side: T.DoubleSide,
+    forceSinglePass: true
+  });
+  merged("Daylight glass", glass, glazing, panes);
+  return { group, panes, cabinMark, seatProfiles };
+}
+
+// demos/corporate/gjh/v11/assets/interior-pilot-registry.js
+var INTERIOR_PILOT = Object.freeze({
+  bench: {
+    asset_id: "GJH-PUB-002",
+    kind: "bench",
+    version: "1.0.0",
+    file: "GJH_PUB_002.glb",
+    sha256: "023a3c66e5e3811195ed099dbc206a3722849f88c03aef62f985e219f8057a9a",
+    bytes: 233176,
+    dimensions_m: [
+      2.58,
+      1.3175,
+      0.922
+    ],
+    authoring_dimensions_wdh_m: [
+      2.58,
+      0.922,
+      1.3175
+    ],
+    reuse_decision: "reuse",
+    source: "gjh-mall-furniture/sources/gjh-lounge-bench.blend",
+    source_sha256: "925f75d253188eed591a48f20b1daa0329abb492799ab9ba91b61a4c57bf6ee0",
+    capabilities: [
+      "SIT"
+    ],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_002.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  planter: {
+    asset_id: "GJH-PUB-008",
+    kind: "planter",
+    version: "1.0.0",
+    file: "GJH_PUB_008.glb",
+    sha256: "b27054406ae0b7a3230ea125fdba75bb259fc734a90cda2839af84941ea8b844",
+    bytes: 119732,
+    dimensions_m: [
+      1.230091,
+      2.347567,
+      1.191551
+    ],
+    authoring_dimensions_wdh_m: [
+      1.230091,
+      1.191551,
+      2.347567
+    ],
+    reuse_decision: "reuse",
+    source: "gjh-mall-furniture/sources/gjh-areca-planter.blend",
+    source_sha256: "79522ae07850e010abcbda93aff1e0c9d1afe22b4311d982673abb04e4805b2a",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_008.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  kiosk: {
+    asset_id: "GJH-PUB-017",
+    kind: "kiosk",
+    version: "1.0.0",
+    file: "GJH_PUB_017.glb",
+    sha256: "0faa4c9d4e9fe068a406db07ff957d4849777dc0bd057aa767fcc2606115971b",
+    bytes: 181376,
+    dimensions_m: [
+      0.96,
+      2.05,
+      0.68
+    ],
+    authoring_dimensions_wdh_m: [
+      0.96,
+      0.68,
+      2.05
+    ],
+    reuse_decision: "adapt",
+    source: "mall-essentials/sources/mall-directory-kiosk.blend",
+    source_sha256: "b7a0e9ebb766e12b51d3115823f6dbd7b431312b475c35452d3b9338b699df0e",
+    capabilities: [
+      "USE"
+    ],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_017.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  shelf: {
+    asset_id: "GJH-DSP-001",
+    kind: "shelf",
+    version: "1.0.0",
+    file: "GJH_DSP_001.glb",
+    sha256: "15e9c8e50e43e0c12125e4549909abb871b97baedab240984b0529a75d2c8152",
+    bytes: 228924,
+    dimensions_m: [
+      1.52,
+      1.96,
+      0.58
+    ],
+    authoring_dimensions_wdh_m: [
+      1.52,
+      0.58,
+      1.96
+    ],
+    reuse_decision: "reuse",
+    source: "mall-essentials/sources/mall-display-shelf.blend",
+    source_sha256: "18ae5c2311b81356b529af04724fa627efd6b2eee2597ec10c58f7f828dacbea",
+    capabilities: [
+      "INSPECT"
+    ],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_DSP_001.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  storeSign: {
+    asset_id: "GJH-STF-008",
+    kind: "storeSign",
+    version: "1.0.0",
+    file: "GJH_STF_008.glb",
+    sha256: "b788eab19c846b46c755322febe400fc56035c73b57f119deb997eedffab74f0",
+    bytes: 21912,
+    dimensions_m: [
+      2.52,
+      1.21,
+      0.213
+    ],
+    authoring_dimensions_wdh_m: [
+      2.52,
+      0.213,
+      1.21
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_STF_008.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  wallLight: {
+    asset_id: "GJH-LGT-009",
+    kind: "wallLight",
+    version: "1.0.0",
+    file: "GJH_LGT_009.glb",
+    sha256: "df810074cfea157e8302e4a76031f77bba98a490f0972ba5582e8fb6871314c3",
+    bytes: 22804,
+    dimensions_m: [
+      0.32,
+      1,
+      0.255
+    ],
+    authoring_dimensions_wdh_m: [
+      0.32,
+      0.255,
+      1
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_LGT_009.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  coffeeTable: {
+    asset_id: "GJH-PUB-005",
+    kind: "coffeeTable",
+    version: "1.0.0",
+    file: "GJH_PUB_005.glb",
+    sha256: "335c60324fd4bdd59b19e7c44a45541e4346f6b60386a05ef648f29423ce2d9b",
+    bytes: 160536,
+    dimensions_m: [
+      1.61,
+      0.875,
+      1.61
+    ],
+    authoring_dimensions_wdh_m: [
+      1.61,
+      1.61,
+      0.875
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_PUB_005.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  },
+  plinth: {
+    asset_id: "GJH-VER-017",
+    kind: "plinth",
+    version: "1.0.0",
+    file: "GJH_VER_017.glb",
+    sha256: "713306501e5ebb6c4685dc2c7f36f725c930912620232c708f32922078f562db",
+    bytes: 129236,
+    dimensions_m: [
+      4.5,
+      0.6525,
+      4.5
+    ],
+    authoring_dimensions_wdh_m: [
+      4.5,
+      4.5,
+      0.6525
+    ],
+    reuse_decision: "new",
+    source: "Original geometry in models/gjh-interior-pilot/build.py",
+    source_sha256: "0528ce551c33c6f7ea5dc4e0bcb5bdf97ea60da0feb26f42ffee2cbc55754792",
+    capabilities: [],
+    editable_source: "models/gjh-interior-pilot/sources/GJH_VER_017.blend",
+    lod_policy: "Single native-scale static mesh instanced per primitive; reviewed simple/instance-only exemption. No distance LOD claim.",
+    uv_policy: "No textures or baking; UV0/UV1 not required.",
+    collision_owner: "V11 app-owned Rapier proxies; no visual collision nodes exported.",
+    rights: "Original owner-project assets/adaptations; project reuse authorized; no new third-party artwork or textures."
+  }
+});
+
+// demos/corporate/gjh/v11/assets/furnishings.js
+var pilotSources = Object.freeze(Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== "shelf")));
+var shopSources = Object.freeze({
+  barStool: {
+    asset_id: "ASSET_MallBarStool",
+    file: "gogo-bar-stool.glb",
+    sha256: "c4546f8de005aef723c7fd2a175e0b6544b26277792c985eb85d8ffe2aa4b3b3",
+    dimensions_m: [0.48, 1.04, 0.48],
+    rootExtras: { units: "metres" }
+  },
+  teaCup: {
+    asset_id: "ASSET_KopitiamSaucerAndCup",
+    file: "kopitiam-saucer-and-cup.glb",
+    sha256: "61dfd3673a88072c1d152d3dde91f3e1fcc09579b6ac70090ead8b319769f7d7",
+    dimensions_m: [0.156, 0.088, 0.156],
+    rootExtras: { units: "metres" }
+  },
+  teaKettle: {
+    asset_id: "ASSET_KopitiamKettle",
+    file: "kopitiam-kettle.glb",
+    sha256: "fef5f8192497110031216cbcdfe143b5dba6ba9362a9613154beb46259db953a",
+    dimensions_m: [0.4041, 0.36, 0.27],
+    rootExtras: { units: "metres" }
+  },
+  pantryRack: {
+    asset_id: "ASSET_CondimentBottleJarSet",
+    file: "condiment-bottle-jar-set.glb",
+    sha256: "5e1eac9c16e1c38057ba0363d5f38d95bf78a79113743df126316f64df56008c",
+    dimensions_m: [0.9, 1.1, 0.35],
+    rootExtras: { units: "metres" }
+  },
+  coffeeMachine: {
+    asset_id: "ASSET_CoffeeMachine",
+    file: "coffee-machine.glb",
+    sha256: "155666679065cdec42f9b1f831bcc7b67959487a6f518e36f5d06925d90d2022",
+    dimensions_m: [0.481056, 0.5045, 0.58],
+    rootExtras: { units: "metres" }
+  }
+});
+function batchFurniture(T, primitives) {
+  const parts = primitives.map((primitive) => {
+    const source = primitive.geometry;
+    const geometry = source.index ? source.toNonIndexed() : source.clone();
+    geometry.applyMatrix4(primitive.matrix);
+    const vertexColour = primitive.material.vertexColors && geometry.getAttribute("color");
+    for (const name of Object.keys(geometry.attributes))
+      if (name !== "position" && name !== "normal")
+        geometry.deleteAttribute(name);
+    const count = geometry.attributes.position.count, colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
+    for (let i = 0;i < count; i++) {
+      colour[i * 3] = material.color.r * (vertexColour ? vertexColour.getX(i) : 1);
+      colour[i * 3 + 1] = material.color.g * (vertexColour ? vertexColour.getY(i) : 1);
+      colour[i * 3 + 2] = material.color.b * (vertexColour ? vertexColour.getZ(i) : 1);
+      surface.set([material.roughness, material.metalness], i * 2);
+    }
+    geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
+    geometry.setAttribute("obSurface", new T.BufferAttribute(surface, 2));
+    return geometry;
+  });
+  const mesh = opaqueBatch(T, parts, false);
+  for (const geometry of new Set(primitives.map((primitive) => primitive.geometry)))
+    geometry.dispose();
+  for (const material of new Set(primitives.map((primitive) => primitive.material)))
+    material.dispose();
+  return [{ geometry: mesh.geometry, material: mesh.material, matrix: new T.Matrix4 }];
+}
+async function createFurnishings(T, shadows, expanded = false) {
+  const sources = expanded ? { ...pilotSources, ...shopSources } : pilotSources;
+  const records = {};
+  const pendingByShop = new Map, detailQueue = [];
+  let detailLoading = false, detailScheduled = false;
+  const group = new T.Group;
+  group.name = "Blender furnishings";
+  let registerMesh, prepareModel;
+  async function load2(kind) {
+    const definition = sources[kind], record = records[kind];
+    record.status = "loading";
+    Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
+    record.sourcePrimitiveCount = record.primitives.length;
+    if (record.status === "loaded" && (["bench", "planter", "coffeeTable", "storeSign", "wallLight"].includes(kind) || Object.hasOwn(shopSources, kind))) {
+      const opaque = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() === 0);
+      const emissive = record.primitives.filter((primitive) => primitive.material.emissive?.getHex() !== 0);
+      if (opaque.length > 1)
+        record.primitives = [...batchFurniture(T, opaque), ...emissive];
+    }
+  }
+  await Promise.all(Object.keys(sources).map((kind) => {
+    records[kind] = { status: "pending", reason: null, primitives: [], placements: [], sourcePrimitiveCount: 0 };
+    if (!Object.hasOwn(shopSources, kind) || kind === "barStool")
+      return load2(kind);
+  }));
+  function mount(kind, prewarm) {
+    const record = records[kind];
+    const placementsBySlot = new Map, meshes = [];
+    for (const placement of record.placements) {
+      if (!placementsBySlot.has(placement.shopSlot))
+        placementsBySlot.set(placement.shopSlot, []);
+      placementsBySlot.get(placement.shopSlot).push(placement);
+    }
+    for (const primitive of record.primitives) {
+      for (const [shopSlot, placements] of placementsBySlot) {
+        const mesh = new T.InstancedMesh(primitive.geometry, primitive.material, placements.length);
+        mesh.name = `${kind} primitive`;
+        placements.forEach((placement, index) => mesh.setMatrixAt(index, new T.Matrix4().multiplyMatrices(placement.transform, primitive.matrix)));
+        mesh.castShadow = shadows && !["wallLight", "storeSign"].includes(kind);
+        mesh.receiveShadow = true;
+        mesh.computeBoundingSphere();
+        if (shopSlot === -1)
+          mesh.userData.deckLod = true;
+        else if (shopSlot !== null)
+          mesh.userData.shopSlot = shopSlot;
+        meshes.push(mesh);
+      }
+    }
+    const attach = () => {
+      for (const mesh of meshes) {
+        if (mesh.userData.shopSlot !== undefined)
+          registerMesh(mesh);
+        group.add(mesh);
+      }
+    };
+    if (prewarm && meshes.length) {
+      const staging = new T.Group().add(...meshes);
+      return prewarm(staging).then(attach);
+    }
+    attach();
+  }
+  function scheduleDetails() {
+    if (detailLoading || detailScheduled)
+      return;
+    if (!detailQueue.length && pendingByShop.size) {
+      const [slot2, kinds] = pendingByShop.entries().next().value;
+      pendingByShop.delete(slot2);
+      detailQueue.push(...kinds);
+    }
+    if (!detailQueue.length)
+      return;
+    detailScheduled = true;
+    const run = () => {
+      detailScheduled = false;
+      if (document.hidden)
+        return;
+      const kind = detailQueue.shift();
+      if (!kind)
+        return;
+      detailLoading = true;
+      load2(kind).then(async () => {
+        if (records[kind].status !== "loaded")
+          return;
+        records[kind].status = "loading";
+        await mount(kind, prepareModel);
+        records[kind].status = "loaded";
+      }).catch((error) => {
+        records[kind].status = "fallback";
+        records[kind].reason = "unavailable";
+        console.warn("Furniture preload failed", error);
+      }).finally(() => {
+        detailLoading = false;
+        scheduleDetails();
+      });
+    };
+    if ("requestIdleCallback" in window)
+      window.requestIdleCallback(run, { timeout: 1500 });
+    else
+      window.setTimeout(run, 100);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden)
+      scheduleDetails();
+  });
+  return {
+    place(kind, x, z, height = 1, facing = 1, baseY = 0, yaw = null, shopSlot = null) {
+      const record = records[kind];
+      const transform = new T.Matrix4().compose(new T.Vector3(x, baseY, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), yaw ?? (facing < 0 ? Math.PI : 0)), new T.Vector3(1, height, 1));
+      record.placements.push({ transform, shopSlot });
+      return record.status === "loaded" || record.status === "pending";
+    },
+    loadShopDetails(shopSlot) {
+      const kinds = pendingByShop.get(shopSlot);
+      if (!kinds)
+        return;
+      pendingByShop.delete(shopSlot);
+      detailQueue.unshift(...kinds);
+      scheduleDetails();
+    },
+    finish(scene, onShopLodMesh = () => {}, prewarm) {
+      registerMesh = onShopLodMesh;
+      prepareModel = prewarm;
+      const state = {};
+      for (const [kind, record] of Object.entries(records)) {
+        if (record.status === "pending") {
+          const slot2 = record.placements[0]?.shopSlot;
+          if (slot2 != null) {
+            if (!pendingByShop.has(slot2))
+              pendingByShop.set(slot2, []);
+            pendingByShop.get(slot2).push(kind);
+          }
+        } else
+          mount(kind);
+        state[kind] = Object.freeze({
+          assetId: sources[kind].asset_id,
+          identity: sources[kind].sha256,
+          dimensions: sources[kind].dimensions_m,
+          instances: record.placements.length,
+          get status() {
+            return record.status;
+          },
+          get reason() {
+            return record.reason;
+          },
+          get primitives() {
+            return record.sourcePrimitiveCount;
+          }
+        });
+      }
+      scene.add(group);
+      scheduleDetails();
+      return Object.freeze(state);
+    }
+  };
+}
+
+// demos/corporate/gjh/v11/assets/interior-shell-registry.js
+var freeze2 = (value) => {
+  if (value && typeof value === "object") {
+    Object.values(value).forEach(freeze2);
+    Object.freeze(value);
+  }
+  return value;
+};
+var SHELL_LAYOUT = freeze2({ schema_version: 1, coordinates: "Three.js metres, Y up, front +Z; Blender conversion (x,-z,y).", inventory_sha256: "5e8c9bb69679d731df6f0f52eadae132bc53b8bfb9b57d1a76f0abe2b0d61c42", palette: { jade: { color: 2181182, roughness: 0.24, metalness: 0.22 }, jadeAlt: { color: 2378818, roughness: 0.28, metalness: 0.18 }, courtStone: { color: 4810331, roughness: 0.32, metalness: 0.16 }, green: { color: 1391664, roughness: 0.72, metalness: 0 }, dark: { color: 796963, roughness: 0.72, metalness: 0 }, ivory: { color: 14931639, roughness: 0.72, metalness: 0 }, brass: { color: 11901794, roughness: 0.31, metalness: 0.68 } }, assets: { wall: { asset_id: "GJH-ARC-001", source_dimensions_wdh_m: [4, 0.2, 3.6], target_dimensions_wdh_m: [4, 0.3, 6.6], bounds_min: [-2, 0, -0.15], bounds_max: [2, 6.6, 0.15], components: [{ name: "Wall panel", material: "green", position: [0, 3.3, 0], size: [4, 6.6, 0.28], bevel_m: 0.003 }, { name: "Dark plinth", material: "dark", position: [0, 0.08, 0], size: [4, 0.16, 0.3], bevel_m: 0.003 }, { name: "Brass datum", material: "brass", position: [0, 0.175, 0], size: [4, 0.025, 0.3], bevel_m: 0.003 }], placements: [[-15, 0, -9, -1.5707963267948966], [-15, 0, -5, -1.5707963267948966], [-15, 0, -1, -1.5707963267948966], [-15, 0, 3, -1.5707963267948966], [-15, 0, 7, -1.5707963267948966], [-15, 0, 11, -1.5707963267948966], [-15, 0, 15, -1.5707963267948966], [15, 0, -9, 1.5707963267948966], [15, 0, -5, 1.5707963267948966], [15, 0, -1, 1.5707963267948966], [15, 0, 3, 1.5707963267948966], [15, 0, 7, 1.5707963267948966], [15, 0, 11, 1.5707963267948966], [15, 0, 15, 1.5707963267948966], [-13, 0, 18, 0], [-9, 0, 18, 0], [-5, 0, 18, 0], [-1, 0, 18, 0], [3, 0, 18, 0], [7, 0, 18, 0], [11, 0, 18, 0]], priority: "P0", capabilities: [], sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 0.15], back: [0, 0, -0.15] }, collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, min: [-2, 0, -0.15], max: [2, 6.6, 0.15] } }, corridor: { asset_id: "GJH-COR-001", source_dimensions_wdh_m: [4, 4, 0.2], target_dimensions_wdh_m: [4, 4, 0.2], bounds_min: [-2, 0, -2], bounds_max: [2, 0.2, 2], components: [{ name: "Structural visual base", material: "jadeAlt", position: [0, 0.08, 0], size: [4, 0.16, 4], bevel_m: 0.003 }, { name: "Stone tile -1 -1", material: "jade", position: [-1, 0.18, -1], size: [1.99, 0.04, 1.99], bevel_m: 0.003 }, { name: "Stone tile -1 1", material: "jadeAlt", position: [-1, 0.18, 1], size: [1.99, 0.04, 1.99], bevel_m: 0.003 }, { name: "Stone tile 1 -1", material: "jadeAlt", position: [1, 0.18, -1], size: [1.99, 0.04, 1.99], bevel_m: 0.003 }, { name: "Stone tile 1 1", material: "jade", position: [1, 0.18, 1], size: [1.99, 0.04, 1.99], bevel_m: 0.003 }], placements: [[-13, -0.185, 2, 0], [-13, -0.185, 6, 0], [-13, -0.185, 10, 0], [-13, -0.185, 14, 0], [-9, -0.185, 2, 0], [-9, -0.185, 6, 0], [-9, -0.185, 10, 0], [-9, -0.185, 14, 0], [-5, -0.185, 2, 0], [-5, -0.185, 6, 0], [-5, -0.185, 10, 0], [-5, -0.185, 14, 0], [-1, -0.185, 2, 0], [-1, -0.185, 6, 0], [-1, -0.185, 10, 0], [-1, -0.185, 14, 0], [3, -0.185, 2, 0], [3, -0.185, 6, 0], [3, -0.185, 10, 0], [3, -0.185, 14, 0], [7, -0.185, 2, 0], [7, -0.185, 6, 0], [7, -0.185, 10, 0], [7, -0.185, 14, 0], [11, -0.185, 2, 0], [11, -0.185, 6, 0], [11, -0.185, 10, 0], [11, -0.185, 14, 0]], priority: "P0", capabilities: [], sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 2], back: [0, 0, -2] }, collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, min: [-2, 0, -2], max: [2, 0.165, 2] } }, ceiling: { asset_id: "GJH-CEI-001", source_dimensions_wdh_m: [4, 4, 0.25], target_dimensions_wdh_m: [4, 4, 0.3], bounds_min: [-2, 0, -2], bounds_max: [2, 0.3, 2], components: [{ name: "Ivory ceiling panel", material: "ivory", position: [0, 0.156, 0], size: [4, 0.288, 4], bevel_m: 0.003 }, { name: "Brass edge long", material: "brass", position: [0, 0.006, -1.991], size: [4, 0.012, 0.018], bevel_m: 0.003 }, { name: "Brass edge long", material: "brass", position: [0, 0.006, 1.991], size: [4, 0.012, 0.018], bevel_m: 0.003 }, { name: "Brass edge short", material: "brass", position: [-1.991, 0.006, 0], size: [0.018, 0.012, 3.964], bevel_m: 0.003 }, { name: "Brass edge short", material: "brass", position: [1.991, 0.006, 0], size: [0.018, 0.012, 3.964], bevel_m: 0.003 }], placements: [[-13, 6.35, 2, 0], [-13, 6.35, 6, 0], [-13, 6.35, 10, 0], [-13, 6.35, 14, 0], [13, 6.35, 2, 0], [13, 6.35, 6, 0], [13, 6.35, 10, 0], [13, 6.35, 14, 0]], priority: "P0", capabilities: [], sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 2], back: [0, 0, -2] }, collision_proxy: { owner: "none; existing ceiling is visual-only", visual_export: false } }, frontage: { asset_id: "GJH-STF-002", source_dimensions_wdh_m: [8, 0.5, 3.6], target_dimensions_wdh_m: [9.8, 0.59, 5.475], bounds_min: [-4.9, 0, -0.25], bounds_max: [4.9, 5.475, 0.34], components: [{ name: "Stone pier left", material: "courtStone", position: [-3.55, 2.6, 0], size: [2.4, 5.2, 0.35], bevel_m: 0.003 }, { name: "Stone pier right", material: "courtStone", position: [3.55, 2.6, 0], size: [2.4, 5.2, 0.35], bevel_m: 0.003 }, { name: "Dark lintel", material: "dark", position: [0, 4.7, 0], size: [9.7, 1.55, 0.5], bevel_m: 0.003 }, { name: "Brass lintel datum", material: "brass", position: [0, 5.45, 0.3], size: [9.8, 0.045, 0.08], bevel_m: 0.003 }], placements: [[-10, 0, 0, 0], [0, 0, 0, 0], [10, 0, 0, 0]], priority: "P0", capabilities: [], sockets: { floor: [0, 0, 0], left: [-4.9, 0, 0], right: [4.9, 0, 0], front: [0, 0, 0.34], back: [0, 0, -0.25] }, collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, local_records: [{ component: "Stone pier left" }, { component: "Stone pier right" }, { component: "Dark lintel" }], policy: "Three solid cuboids leave the doorway aperture open; visual bounds are not a collision box." } } }, aggregate_colliders: [{ name: "foundation", position: [0, -0.22, 3.5], size: [30.4, 0.4, 29.4] }, { name: "outer-side--1", position: [-15, 3.3, 3.5], size: [0.3, 6.6, 29] }, { name: "outer-side-1", position: [15, 3.3, 3.5], size: [0.3, 6.6, 29] }, { name: "outer-arrival", position: [0, 3.3, 18], size: [30, 6.6, 0.3] }, { name: "portal-0-Stone pier left", position: [-13.55, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-0-Stone pier right", position: [-6.45, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-0-Dark lintel", position: [-10, 4.7, 0], size: [9.7, 1.55, 0.5] }, { name: "portal-1-Stone pier left", position: [-3.55, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-1-Stone pier right", position: [3.55, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-1-Dark lintel", position: [0, 4.7, 0], size: [9.7, 1.55, 0.5] }, { name: "portal-2-Stone pier left", position: [6.45, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-2-Stone pier right", position: [13.55, 2.6, 0], size: [2.4, 5.2, 0.35] }, { name: "portal-2-Dark lintel", position: [10, 4.7, 0], size: [9.7, 1.55, 0.5] }], caps: [{ name: "Wall side remainder", material: "green", position: [-15, 3.3, 17.5], size: [0.3, 6.6, 1], bevel_m: 0.003 }, { name: "Wall side remainder", material: "green", position: [15, 3.3, 17.5], size: [0.3, 6.6, 1], bevel_m: 0.003 }, { name: "Wall arrival remainder", material: "green", position: [14, 3.3, 18], size: [2, 6.6, 0.3], bevel_m: 0.003 }, { name: "Roof outer rear remainder", material: "ivory", position: [-13, 6.5, 17], size: [4, 0.3, 2], bevel_m: 0.003 }, { name: "Roof outer rear remainder", material: "ivory", position: [13, 6.5, 17], size: [4, 0.3, 2], bevel_m: 0.003 }], roof_v2: [{ name: "Roof inner side", material: "ivory", position: [-6.2, 6.5, 9], size: [9.6, 0.3, 18], bevel_m: 0.003 }, { name: "Roof inner side", material: "ivory", position: [6.2, 6.5, 9], size: [9.6, 0.3, 18], bevel_m: 0.003 }, { name: "Roof shaft front", material: "ivory", position: [0, 6.5, 7.25], size: [2.8, 0.3, 14.5], bevel_m: 0.003 }, { name: "Roof shaft rear", material: "ivory", position: [0, 6.5, 17.75], size: [2.8, 0.3, 0.5], bevel_m: 0.003 }], roof_v1: [{ name: "Roof continuous centre", material: "ivory", position: [0, 6.5, 9], size: [22, 0.3, 18], bevel_m: 0.003 }], foundation_visual: { name: "Foundation", material: "dark", position: [0, -0.22, 3.5], size: [30.4, 0.4, 29.4], bevel_m: 0.003 }, retained_tiles: [[-14, -0.005, 17], [-12, -0.005, 17], [-10, -0.005, 17], [-8, -0.005, 17], [-6, -0.005, 17], [-4, -0.005, 17], [-2, -0.005, 17], [0, -0.005, 17], [2, -0.005, 17], [4, -0.005, 17], [6, -0.005, 17], [8, -0.005, 17], [10, -0.005, 17], [12, -0.005, 17], [14, -0.005, 1], [14, -0.005, 3], [14, -0.005, 5], [14, -0.005, 7], [14, -0.005, 9], [14, -0.005, 11], [14, -0.005, 13], [14, -0.005, 15], [14, -0.005, 17]] });
+var INTERIOR_SHELL = freeze2({ wall: { asset_id: "GJH-ARC-001", priority: "P0", source_dimensions_wdh_m: [4, 0.2, 3.6], target_dimensions_wdh_m: [4, 0.3, 6.6], bounds_min: [-2, 0, -0.15], bounds_max: [2, 6.6, 0.15], collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, min: [-2, 0, -0.15], max: [2, 6.6, 0.15] }, sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 0.15], back: [0, 0, -0.15] }, capabilities: [], kind: "wall", version: "1.0.0", file: "GJH_ARC_001.glb", sha256: "e5145b12a4bcca1f3d4badc3e6c0285fbd0a65c07f0ddb9c8f3a636e7b1f7197", bytes: 8076, dimensions_m: [4, 6.6, 0.3], editable_source: "models/gjh-interior-shell/sources/GJH_ARC_001.blend", editable_source_sha256: "160629d6b54667303e8e20c7f327b9efb691df96df6834900741903dbef3ea8a", layout_sha256: "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63", build_sha256: "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8", rights: "Original project geometry and texture-free materials; no third-party artwork.", lod_policy: "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.", uv_policy: "No textures or baking; UV0/UV1 not required.", collision_owner: "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider." }, corridor: { asset_id: "GJH-COR-001", priority: "P0", source_dimensions_wdh_m: [4, 4, 0.2], target_dimensions_wdh_m: [4, 4, 0.2], bounds_min: [-2, 0, -2], bounds_max: [2, 0.2, 2], collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, min: [-2, 0, -2], max: [2, 0.165, 2] }, sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 2], back: [0, 0, -2] }, capabilities: [], kind: "corridor", version: "1.0.0", file: "GJH_COR_001.glb", sha256: "ef48863a88cad561c016abc12d4649b6c85db86a872b3c04802d56667e2295a3", bytes: 10504, dimensions_m: [4, 0.2, 4], editable_source: "models/gjh-interior-shell/sources/GJH_COR_001.blend", editable_source_sha256: "9287236d50da46957c30b5541145bc0a8ab8476b4aec282edc167fd6aa683823", layout_sha256: "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63", build_sha256: "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8", rights: "Original project geometry and texture-free materials; no third-party artwork.", lod_policy: "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.", uv_policy: "No textures or baking; UV0/UV1 not required.", collision_owner: "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider." }, ceiling: { asset_id: "GJH-CEI-001", priority: "P0", source_dimensions_wdh_m: [4, 4, 0.25], target_dimensions_wdh_m: [4, 4, 0.3], bounds_min: [-2, 0, -2], bounds_max: [2, 0.3, 2], collision_proxy: { owner: "none; existing ceiling is visual-only", visual_export: false }, sockets: { floor: [0, 0, 0], left: [-2, 0, 0], right: [2, 0, 0], front: [0, 0, 2], back: [0, 0, -2] }, capabilities: [], kind: "ceiling", version: "1.0.0", file: "GJH_CEI_001.glb", sha256: "5596575c578ba6b18fe87763b245ff428bb0a0ab7c200e36925817fbcf36e40e", bytes: 11512, dimensions_m: [4, 0.3, 4], editable_source: "models/gjh-interior-shell/sources/GJH_CEI_001.blend", editable_source_sha256: "c603fe16d3e13cf023e13cb69f6cc95e7efad0b18afe7eb4bfd56c9520f635a2", layout_sha256: "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63", build_sha256: "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8", rights: "Original project geometry and texture-free materials; no third-party artwork.", lod_policy: "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.", uv_policy: "No textures or baking; UV0/UV1 not required.", collision_owner: "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider." }, frontage: { asset_id: "GJH-STF-002", priority: "P0", source_dimensions_wdh_m: [8, 0.5, 3.6], target_dimensions_wdh_m: [9.8, 0.59, 5.475], bounds_min: [-4.9, 0, -0.25], bounds_max: [4.9, 5.475, 0.34], collision_proxy: { owner: "world aggregate Rapier blocks", visual_export: false, local_records: [{ component: "Stone pier left" }, { component: "Stone pier right" }, { component: "Dark lintel" }], policy: "Three solid cuboids leave the doorway aperture open; visual bounds are not a collision box." }, sockets: { floor: [0, 0, 0], left: [-4.9, 0, 0], right: [4.9, 0, 0], front: [0, 0, 0.34], back: [0, 0, -0.25] }, capabilities: [], kind: "frontage", version: "1.0.0", file: "GJH_STF_002.glb", sha256: "edc1d834199ea409831f6ec203b4450505734dbf20dfee10082d790d846f0b82", bytes: 10800, dimensions_m: [9.8, 5.475, 0.59], editable_source: "models/gjh-interior-shell/sources/GJH_STF_002.blend", editable_source_sha256: "b8405f87cda83cec9939aeba9e1c7092cf77c1a66208231ebb1df0b03fba97e7", layout_sha256: "b61805ffd7b94d6304e6178cf19a12a24a30595cc85b4b3472cd16b98d0e4c63", build_sha256: "e3cd74f11dda9c41e7b6794a0696b5f11d16553628879db263f9b6921c5105f8", rights: "Original project geometry and texture-free materials; no third-party artwork.", lod_policy: "Simple architectural instance-only exception; <=700 native triangles. No distance LOD or D5 acceptance.", uv_policy: "No textures or baking; UV0/UV1 not required.", collision_owner: "Existing V11 aggregate Rapier definitions; authoring proxy is not an extra live collider." } });
+
+// demos/corporate/gjh/v11/assets/shell.js
+async function createShell(T) {
+  const records = Object.fromEntries(await Promise.all(Object.entries(INTERIOR_SHELL).map(async ([kind, definition]) => [kind, await loadStaticAsset(T, definition, import.meta.url)])));
+  return {
+    finish(scene, solid) {
+      const opaque = [], state = {};
+      for (const [kind, record] of Object.entries(records)) {
+        const definition = SHELL_LAYOUT.assets[kind];
+        for (const [x, y, z, angle] of definition.placements) {
+          const placement = new T.Matrix4().compose(new T.Vector3(x, y, z), new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 1, 0), angle), new T.Vector3(1, 1, 1));
+          if (record.status === "loaded") {
+            for (const primitive of record.primitives) {
+              const matrix = new T.Matrix4().multiplyMatrices(placement, primitive.matrix);
+              const geometry = primitive.geometry.clone().applyMatrix4(matrix), count = geometry.attributes.position.count;
+              const colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
+              for (let i = 0;i < count; i++) {
+                colour.set([material.color.r, material.color.g, material.color.b], i * 3);
+                surface.set([material.roughness, material.metalness], i * 2);
+              }
+              geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
+              geometry.setAttribute("obSurface", new T.BufferAttribute(surface, 2));
+              opaque.push(geometry);
+            }
+          } else {
+            for (const component of definition.components) {
+              const point2 = new T.Vector3(...component.position).applyMatrix4(placement);
+              solid("box", component.material, point2.x, point2.y, point2.z, ...component.size, angle);
+            }
+          }
+        }
+        const geometries = new Set, materials2 = new Set;
+        record.primitives.forEach((p) => {
+          geometries.add(p.geometry);
+          materials2.add(p.material);
+        });
+        geometries.forEach((g) => g.dispose());
+        materials2.forEach((m) => m.dispose());
+        state[kind] = Object.freeze({
+          assetId: definition.asset_id,
+          identity: INTERIOR_SHELL[kind].sha256,
+          status: record.status,
+          reason: record.reason,
+          instances: definition.placements.length,
+          primitives: record.primitives.length,
+          boundsMin: definition.bounds_min,
+          boundsMax: definition.bounds_max
+        });
+      }
+      const mesh = opaqueBatch(T, opaque, true);
+      if (mesh) {
+        mesh.name = "Native P0 shell";
+        scene.add(mesh);
+      }
+      return Object.freeze(state);
+    }
+  };
+}
+
+// demos/corporate/gjh/v11/assets/gallery-east-shops.js
+var eastShopPlacements = {
+  12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.081, 2.92], yaw: 0.11, scale: 1.14 }],
+  13: [{ file: "gallery-assets/headphone-display-stand.glb", position: [-2.45, 0.081, 3.05], yaw: 0.18, scale: 1.2 }],
+  14: [{ file: "gallery-assets/refrigerator.glb", position: [-2.48, 0.081, 2.58], yaw: 0.08, scale: 1.03 }],
+  15: [{ file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.081, 2.47], yaw: 0.22, scale: 0.93 }],
+  16: [{ file: "gallery-assets/shelf-electronics-display.glb", position: [-2.13, 0.081, 2.81], yaw: 0.12, scale: 0.96 }],
+  17: [{ file: "gallery-assets/lounge-sofa-bench.glb", position: [-2.22, 0.081, 2.22], yaw: 1.5, scale: 0.86 }]
+};
+
+// demos/corporate/gjh/v11/assets/gallery-west-shops.js
+var fixture = (name, x, y, z, yaw = 0, scale = 1) => ({
+  file: `gallery-assets/${name}.glb`,
+  position: [x, y, z],
+  yaw,
+  scale
+});
+var westShopPlacements = {
+  4: [fixture("mosquito-patch-pack", -3.97, 1.081, -1.8, 0, 0.7)],
+  5: [fixture("medicine-health-box-set", -2.21, 0.081, 4.84, 0.12)],
+  6: [fixture("instant-noodle-pack-display", -2.43, 0.081, 4.57, 0.035)],
+  7: [fixture("stacked-can-pyramid", -1.56, 0.081, 2.65, -0.07, 0.88)],
+  8: [fixture("peanut-butter-jar-stand", -2.52, 0.081, 4.57, 0.015)],
+  9: [fixture("shelf-food-aisle", -2.49, 0.081, 4.57, 0.015)],
+  10: [fixture("abalone-gift-box-display", -2.99, 1.081, -1.8, 0, 0.6)],
+  11: [fixture("food-display-cabinet", -1.61, 0.081, 2.74, -0.12)]
+};
+
 // demos/corporate/gjh/v11/assets/icons.js
 var registry = Object.freeze({
   "arrow-down": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2604,10 +3121,10 @@ async function bakeAtlas(configs, assetBase) {
       c.logoFile ? image(new URL(c.id === "S01" ? "new-moon-logo.svg" : "brands/" + c.logoFile, assetBase)) : null,
       c.poster ? image(new URL("brand-kit/" + c.poster + "-hero.webp", assetBase)) : null
     ]);
-    const logo = src && trimLogo(src), cells = atlasCells(Number(c.id.slice(1)) - 1);
+    const logo = src && trimLogo(src), cells2 = atlasCells(Number(c.id.slice(1)) - 1);
     const masks = {};
     for (const kind of ["fascia", "blade"]) {
-      const r = cells[kind], h = r.h, w = kind === "blade" ? r.w : Math.round(h * c.size.width / c.size.height);
+      const r = cells2[kind], h = r.h, w = kind === "blade" ? r.w : Math.round(h * c.size.width / c.size.height);
       const face = canvas(w, h), painter = face.getContext("2d");
       finish(painter, w, h, c);
       const { mask, relief, markBounds } = lockup(painter, w, h, c, logo, neutral, kind === "blade");
@@ -2628,123 +3145,68 @@ async function bakeAtlas(configs, assetBase) {
         masks.ink = Uint8Array.from({ length: mw * mh }, (_, i) => rgba[4 * i + 3] > 127 ? 1 : 0);
       }
     }
-    paintPoster(ctx, c, poster, cells.poster);
-    tiles.set(c.id, { cells, mask: masks });
+    paintPoster(ctx, c, poster, cells2.poster);
+    tiles.set(c.id, { cells: cells2, mask: masks });
   }));
   const lowSheet = canvas(lowAtlasSize, lowAtlasSize), low = lowSheet.getContext("2d");
   low.imageSmoothingQuality = "high";
   low.drawImage(sheet, 0, 0, lowAtlasSize, lowAtlasSize);
   return { sheet, lowSheet, tiles };
 }
+function createProgressiveAtlas(T, sheet) {
+  const size = sheet.width;
+  const texture = new T.DataTexture(null, size, size);
+  texture.colorSpace = T.SRGBColorSpace;
+  texture.minFilter = T.LinearMipmapLinearFilter;
+  texture.magFilter = T.LinearFilter;
+  texture.anisotropy = 2;
+  const levels = texture.mipmaps;
+  for (let width = size;width >= 1; width /= 2)
+    levels.push({ width, height: width, data: null });
+  texture.source.dataReady = false;
+  texture.needsUpdate = true;
+  let ready = false;
+  texture.addEventListener("dispose", () => {
+    ready = false;
+  });
+  function* upload(renderer) {
+    if (ready)
+      return;
+    const strip = canvas(1, 1);
+    const reader = strip.getContext("2d", { willReadFrequently: true });
+    const source = new T.DataTexture;
+    const offset = new T.Vector2;
+    renderer.initTexture(texture);
+    yield;
+    for (let level = levels.length - 1;level >= 0; level--) {
+      const { width } = levels[level], scale = size / width;
+      const rowBytes = width * 4, rows = Math.min(width, Math.floor(131072 / rowBytes));
+      strip.width = width;
+      strip.height = rows;
+      reader.imageSmoothingQuality = "high";
+      const flipped = new Uint8Array(rowBytes * rows);
+      for (let y = 0;y < width; y += rows) {
+        const top = size - (y + rows) * scale;
+        reader.clearRect(0, 0, width, rows);
+        reader.drawImage(sheet, 0, top, size, rows * scale, 0, 0, width, rows);
+        const pixels = reader.getImageData(0, 0, width, rows).data;
+        for (let row = 0;row < rows; row++) {
+          const first = row * rowBytes;
+          flipped.set(pixels.subarray(first, first + rowBytes), (rows - row - 1) * rowBytes);
+        }
+        source.image = { data: flipped, width, height: rows };
+        renderer.copyTextureToTexture(source, texture, null, offset.set(0, y), level);
+        yield;
+      }
+    }
+    ready = true;
+  }
+  return { texture, upload };
+}
 
 // demos/corporate/gjh/v11/assets/shop-sign-vendor.js
 import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
 import { GLTFLoader as GLTFLoader3 } from "../vendor/GLTFLoader.js";
-
-// demos/corporate/gjh/v11/assets/signage/builder.js
-var bladeSocket = Object.freeze({ inset: 0.24, drop: 0.78, reach: 0.94, height: 0.69, thickness: 0.043 });
-function uvRect(r) {
-  return [
-    (r.x + 0.5) / atlasSize,
-    1 - (r.y + r.h - 0.5) / atlasSize,
-    (r.x + r.w - 0.5) / atlasSize,
-    1 - (r.y + 0.5) / atlasSize
-  ];
-}
-function createShopSign(T, config, bay) {
-  const group = new T.Group, entrance = shopEntrance(bay), anchor = Number(bay.number) <= 3;
-  group.name = "Store sign " + config.id;
-  group.position.set(entrance.x, 0, entrance.z);
-  group.rotation.y = entrance.yaw;
-  const cells = atlasCells(Number(bay.number) - 1);
-  const { width, height, depth } = config.size, band = fasciaBand(bay);
-  const z = (anchor ? 0.44 : 0.23) + depth, y = (band.top + band.bottom) / 2;
-  const bladeX = -width / 2 + bladeSocket.inset, bladeY = y - bladeSocket.drop, bladeDepth = bladeSocket.reach;
-  const positions = [], uvs = [], indices = [];
-  function panel(x, y2, z2, w, h, yaw, cell) {
-    const start = positions.length / 3, cs = Math.cos(yaw), sn = Math.sin(yaw);
-    for (const [u, v] of [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]])
-      positions.push(x + w * u * cs, y2 + h * v, z2 - w * u * sn);
-    const [l, b, r, t] = uvRect(cell);
-    uvs.push(l, b, r, b, r, t, l, t);
-    indices.push(start, start + 1, start + 2, start, start + 2, start + 3);
-  }
-  panel(0, y, z, width, height, 0, cells.fascia);
-  if (config.blade) {
-    for (const side of [-1, 1])
-      panel(bladeX + side * (bladeSocket.thickness / 2 + 0.001), bladeY, z + bladeDepth / 2, bladeDepth - 0.05, bladeSocket.height - 0.045, side * Math.PI / 2, cells.blade);
-  }
-  panel(width / 2 - 0.32, 3.7, z, 0.6, 0.2, 0, plateRect(cells.blade));
-  const span = bayWidth(bay);
-  if (config.poster) {
-    if (anchor) {
-      panel(-span * 0.359, 2.15, 0.24, 1.52, 1.32, 0, cells.poster);
-    } else {
-      panel(-span / 2 + 0.98, bay.posterHeight ?? 2.46, -0.09, 1.24, 1.08, 0, cells.poster);
-      const heroX = bay.side === "north" ? 3 : 2.55;
-      panel(heroX - 0.61, 0.42, -0.44, 0.68, 0.51, 0, cells.poster);
-    }
-  }
-  if (!anchor) {
-    const roomDepth = bay.side === "north" ? bay.maxZ - bay.minZ : bay.maxX - bay.minX;
-    panel(0, 3.69, -roomDepth + 0.98, 3.63, 0.415, 0, cells.fascia);
-  }
-  const geometry = new T.BufferGeometry;
-  geometry.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
-  geometry.setAttribute("uv", new T.Float32BufferAttribute(uvs, 2));
-  geometry.setIndex(indices);
-  geometry.computeVertexNormals();
-  group.add(new T.Mesh(geometry, config.faceMaterial));
-  group.userData.mount = { y, z, depth, bladeX, bladeY, bladeDepth };
-  group.updateMatrixWorld();
-  return group;
-}
-function letterGeometry(T, mask, config, mount, cell) {
-  const { width: n, height: m, ink } = mask;
-  if (!ink.some(Boolean))
-    return null;
-  const p = [], uv = [], idx = [], [left, bottom, right, top] = uvRect(cell);
-  function quad(points) {
-    const start = p.length / 3;
-    for (const [x, y, d] of points) {
-      p.push((x / n - 0.5) * config.size.width, mount.y + (0.5 - y / m) * config.size.height, mount.z + d);
-      uv.push(left + (right - left) * x / n, top + (bottom - top) * y / m);
-    }
-    idx.push(start, start + 1, start + 2, start, start + 2, start + 3);
-  }
-  const bevel = 0.018, base = 0.001;
-  function wall(x, y, ex, ey) {
-    quad([[x, y, base], [ex, ey, base], [ex, ey, bevel], [x, y, bevel]]);
-  }
-  function run(y, condition, handle) {
-    for (let x = 0;x < n; ) {
-      if (!condition(x)) {
-        x++;
-        continue;
-      }
-      const start = x++;
-      while (x < n && condition(x))
-        x++;
-      handle(start, x, y);
-    }
-  }
-  for (let y = 0;y < m; y++) {
-    const row = y * n;
-    run(y, (x) => ink[row + x], (a, b) => {
-      quad([[a, y + 1, bevel], [b, y + 1, bevel], [b, y, bevel], [a, y, bevel]]);
-      wall(a, y, a, y + 1);
-      wall(b, y + 1, b, y);
-    });
-    run(y, (x) => ink[row + x] && !ink[row - n + x], (a, b) => wall(b, y, a, y));
-    run(y, (x) => ink[row + x] && !ink[row + n + x], (a, b) => wall(a, y + 1, b, y + 1));
-  }
-  const g = new T.BufferGeometry;
-  g.setAttribute("position", new T.Float32BufferAttribute(p, 3));
-  g.setAttribute("uv", new T.Float32BufferAttribute(uv, 2));
-  g.setIndex(idx);
-  g.computeVertexNormals();
-  return g;
-}
 
 // demos/corporate/gjh/v11/assets/signage/hardware.js
 var baseW = 7;
@@ -2753,7 +3215,7 @@ var { cornerMetres: corner, railWidthMetres: rail, backplateDepthMetres: plateDe
 var sizes = new Map(manifest_default.assets.map((asset) => [asset.name, asset.sizeMetres]));
 function buildBatch(T, modules, capacity, name, assemble) {
   const vertices = [], normals = [], colors = [], pbr = [], emission = [], anchors = [];
-  const cube = new T.BoxGeometry, lamp = new T.CylinderGeometry(0.5, 0.5, 1, 10);
+  const cube = new T.BoxGeometry, lamp2 = new T.CylinderGeometry(0.5, 0.5, 1, 10);
   const leaf = new T.OctahedronGeometry(0.5);
   function part(id, centre, target, anchor, stretch, finish2, { roll = 0, yaw = 0, flag = 0, fallback = cube } = {}) {
     const pieces = [], bounds = new T.Box3;
@@ -2795,9 +3257,9 @@ function buildBatch(T, modules, capacity, name, assemble) {
         piece.g.dispose();
     }
   }
-  assemble(part, { lamp, leaf });
+  assemble(part, { lamp: lamp2, leaf });
   cube.dispose();
-  lamp.dispose();
+  lamp2.dispose();
   leaf.dispose();
   const g = new T.BufferGeometry;
   for (const [attribute, values] of Object.entries({ position: vertices, normal: normals, color: colors, signAnchor: anchors, signFinish: pbr, signEmission: emission }))
@@ -2841,7 +3303,7 @@ totalEmissiveRadiance += vSignEmission;`);
   } };
 }
 function buildHardware(T, modules, detailed, capacity) {
-  const batch = buildBatch(T, modules, capacity, "Instanced sign hardware", (part, { lamp }) => {
+  const batch = buildBatch(T, modules, capacity, "Instanced sign hardware", (part, { lamp: lamp2 }) => {
     const back = -plateDepth - 0.001, trimDepth = sizes.get("sign_frame_corner")[2];
     const z = back + trimDepth / 2;
     part("sign_backplate", [0, 0, back + plateDepth / 2], [baseW, baseH, plateDepth], [0, 0], "xy", "lacquer_fascia");
@@ -2861,7 +3323,7 @@ function buildHardware(T, modules, detailed, capacity) {
     const light = sizes.get("sign_downlight");
     if (detailed)
       for (const a of [-0.33, 0, 0.33])
-        part("sign_downlight", [a * baseW, (baseH - light[1]) / 2, light[2] / 2], light, [a, 0.5], "", "emissive_letter", { fallback: lamp });
+        part("sign_downlight", [a * baseW, (baseH - light[1]) / 2, light[2] / 2], light, [a, 0.5], "", "emissive_letter", { fallback: lamp2 });
   });
   return { ...batch, set(index, { config, hardwareMatrix }) {
     batch.setInstance(index, hardwareMatrix, config.size.width - baseW, config.size.height - baseH, config.blade, false);
@@ -3051,10 +3513,10 @@ function* buildRelief(T, signs, tiles, modules, texture, detailed) {
   const pieces = [], ranges = [], source = [], finishes = [];
   let offset = 0;
   for (const sign of signs) {
-    const { mask, cells } = tiles.get(sign.config.id);
+    const { mask, cells: cells2 } = tiles.get(sign.config.id);
     const imported = mask.markBounds && modules.get(sign.config.logoModule);
     const model = imported && modelRelief(T, sign, imported, mask, finishes);
-    const lettering = detailed && letterGeometry(T, model ? { ...mask, ink: model.remaining } : mask, sign.config, sign.mount, cells.fascia);
+    const lettering = detailed && letterGeometry(T, model ? { ...mask, ink: model.remaining } : mask, sign.config, sign.mount, cells2.fascia);
     if (lettering)
       lettering.setAttribute("signSolid", new T.Uint8BufferAttribute(lettering.attributes.position.count, 1));
     const start = source.length;
@@ -3111,7 +3573,7 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     texture.anisotropy = 2;
     return texture;
   }
-  const lowTexture = atlas(bake.lowSheet), fullTexture = atlas(bake.sheet);
+  const lowTexture = atlas(bake.lowSheet), fullAtlas = createProgressiveAtlas(T, bake.sheet);
   const flat = new T.MeshBasicMaterial({ map: lowTexture, toneMapped: false });
   const pieces = [], signs = [];
   configs.forEach((config, index) => {
@@ -3179,7 +3641,7 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     signature = -1;
     scene.add(...stage.meshes);
   }
-  function* prepareTier(tier) {
+  function* prepareTier(tier, renderer) {
     if (tier !== "balanced" && tier !== "detailed")
       tier = "low";
     if (tier === active.tier)
@@ -3193,13 +3655,15 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     });
     while (!modules)
       yield false;
-    const texture = fullTexture, face = new T.Mesh(faces.geometry, nearFaceMaterial(T, texture, pulse));
+    const texture = fullAtlas.texture, face = new T.Mesh(faces.geometry, nearFaceMaterial(T, texture, pulse));
     face.name = faces.name;
     face.layers.mask = faces.layers.mask;
     measure(face);
     const stage = { tier, faces: face, meshes: [face] };
     let complete = false;
     try {
+      if (renderer)
+        yield* fullAtlas.upload(renderer);
       const detailed = tier === "detailed";
       stage.hardware = buildHardware(T, modules, detailed, signs.length);
       signs.forEach((sign, i) => stage.hardware.set(i, sign));
@@ -3280,7 +3744,7 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
       relief?.select(near);
     },
     report() {
-      const atlasPx = active.faces.material.map.image.width;
+      const atlasPx2 = active.faces.material.map.image.width;
       return {
         modelsLoaded: modules?.size ?? 0,
         signs: signs.length,
@@ -3288,8 +3752,8 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
         triangles: tris,
         phoneProof: phoneProof(active.tier),
         previousTextureMB: atlasMiB(atlasSize),
-        atlasPx,
-        textureMB: atlasMiB(atlasPx),
+        atlasPx: atlasPx2,
+        textureMB: atlasMiB(atlasPx2),
         tier: active.tier
       };
     }
@@ -4723,13 +5187,13 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
   };
   const studioParts = new Map;
   const shops = [], collisionBoxes = [];
-  const models = new Map, loadedScenes = new Map, gltfLoader = new GLTFLoader4;
+  const models2 = new Map, loadedScenes = new Map, gltfLoader = new GLTFLoader4;
   const modelStates = new Map(slots.flatMap((slot2) => {
     const number = Number(slot2.number);
     return [...(displayFiles[number] || []).map((file) => `./${file}.glb`), ...galleryPlacements[number].map(({ file }) => `./${file}`)];
   }).map((name) => [name, "pending"]));
   function loadModel(name) {
-    if (!models.has(name)) {
+    if (!models2.has(name)) {
       modelStates.set(name, "loading");
       const url = new URL(name, import.meta.url), controller = new AbortController;
       let timer, abandoned = false;
@@ -4757,7 +5221,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
           reject(new Error("Model load timed out"));
         }, 8000);
       });
-      models.set(name, Promise.race([load2(), deadline2]).then((scene2) => {
+      models2.set(name, Promise.race([load2(), deadline2]).then((scene2) => {
         modelStates.set(name, "loaded");
         loadedScenes.set(name, scene2);
         return scene2;
@@ -4766,7 +5230,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
         throw error;
       }).finally(() => clearTimeout(timer)));
     }
-    return models.get(name);
+    return models2.get(name);
   }
   const ivory2 = 15656145, green = 5402203, gold = 13018731;
   const creamStone = (n) => n === 13 || n === 15 || n === 17 ? 5589055 : 15062715;
@@ -5229,7 +5693,7 @@ function interiorMaterials(T) {
     glow: new T.MeshBasicMaterial({ vertexColors: true, toneMapped: false })
   };
 }
-function buildInteriorDecoration(T, store2, materials2, detail = 0) {
+function* prepareInteriorDecoration(T, store2, materials2, detail = 0) {
   const [dominant, secondary, pale, accent] = store2.palette.map(({ hex }) => new T.Color(hex));
   const warm = kelvinColour(T, store2.accent_kelvin);
   const opaque = [], glow = [];
@@ -5422,8 +5886,10 @@ function buildInteriorDecoration(T, store2, materials2, detail = 0) {
     }
   }
   for (const prop of store2.props) {
-    for (const position of prop.instance_positions_m ?? [prop.position_m])
+    for (const position of prop.instance_positions_m ?? [prop.position_m]) {
       fixture2(prop, position);
+      yield;
+    }
   }
   if (detail) {
     origin = [0, 0, 0];
@@ -5537,9 +6003,9 @@ var roomDetails = {
 };
 
 // demos/corporate/gjh/v11/assets/interiors/models.js
-function mergeInteriorAnchor(T, scene) {
+function* mergeInteriorAnchor(T, scene) {
   scene.updateMatrixWorld(true);
-  const batches = new Map;
+  const batches = new Map, anchor = new T.Group;
   scene.traverse((mesh) => {
     if (!mesh.isMesh)
       return;
@@ -5547,27 +6013,42 @@ function mergeInteriorAnchor(T, scene) {
       batches.set(mesh.material, []);
     batches.get(mesh.material).push(mesh);
   });
-  const anchor = new T.Group;
-  for (const [material, meshes] of batches) {
-    const parts = meshes.map((mesh) => mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
-    const geometry = mergeGeometries3(parts);
-    for (const part of parts)
-      part.dispose();
-    if (!geometry) {
-      for (const mesh of meshes) {
-        const copy = new T.Mesh(mesh.geometry, material);
-        mesh.matrixWorld.decompose(copy.position, copy.quaternion, copy.scale);
-        anchor.add(copy);
+  let complete = false;
+  try {
+    for (const [material, meshes] of batches) {
+      const parts = [];
+      try {
+        for (const mesh of meshes) {
+          parts.push(mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
+          yield;
+        }
+        const geometry = mergeGeometries3(parts);
+        if (geometry) {
+          anchor.add(new T.Mesh(geometry, material));
+          for (const mesh of meshes)
+            mesh.geometry.dispose();
+        } else {
+          for (const mesh of meshes) {
+            const copy = new T.Mesh(mesh.geometry, material);
+            mesh.matrixWorld.decompose(copy.position, copy.quaternion, copy.scale);
+            anchor.add(copy);
+          }
+        }
+      } finally {
+        for (const part of parts)
+          part.dispose();
       }
-    } else {
-      anchor.add(new T.Mesh(geometry, material));
-      for (const mesh of meshes)
-        mesh.geometry.dispose();
+      yield;
     }
+    if (!anchor.children.length)
+      throw new Error("Empty interior fixture");
+    complete = true;
+    return anchor;
+  } finally {
+    if (!complete)
+      for (const mesh of anchor.children)
+        mesh.geometry.dispose();
   }
-  if (!anchor.children.length)
-    throw new Error("Empty interior fixture");
-  return anchor;
 }
 async function readMember(assetBase2, asset, signal) {
   const url = new URL("interiors/" + asset.file, assetBase2);
@@ -5628,15 +6109,14 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
       return atlas;
     }
   }));
-  async function load2(asset, signal) {
-    const buffer = await readMember(assetBase2, asset, signal);
-    const { scene } = await loader.parseAsync(buffer, new URL("interiors/", assetBase2).href);
-    if (!asset.roomDetail)
-      return mergeInteriorAnchor(T, scene);
+  function* prepareDetail(scene) {
     const motion = { scroll: null, pulse: null };
+    const meshes = [];
     scene.traverse((mesh) => {
-      if (!mesh.isMesh)
-        return;
+      if (mesh.isMesh)
+        meshes.push(mesh);
+    });
+    for (const mesh of meshes) {
       const m = mesh.material;
       if (!lifetime.signal.aborted && (m.name === "Enamel" || m.name === "Printed opal")) {
         const reusable = shared.get(m.name);
@@ -5655,9 +6135,30 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3) {
         motion.scroll.userData.roomAtlasView = true;
         m.map = m.emissiveMap = motion.scroll;
       }
-    });
+      yield;
+    }
     scene.userData.roomMotion = motion.scroll || motion.pulse ? motion : null;
     return scene;
+  }
+  async function load2(asset, signal, build) {
+    const buffer = await readMember(assetBase2, asset, signal);
+    const { scene } = await loader.parseAsync(buffer, new URL("interiors/", assetBase2).href);
+    try {
+      if (signal?.aborted)
+        throw new DOMException("Interior asset cancelled", "AbortError");
+      const work = () => asset.roomDetail ? prepareDetail(scene) : mergeInteriorAnchor(T, scene);
+      if (build)
+        return await build(work);
+      const iterator = work();
+      let step;
+      do {
+        step = iterator.next();
+      } while (!step.done);
+      return step.value;
+    } catch (error) {
+      disposeInteriorModel(scene);
+      throw error;
+    }
   }
   load2.dispose = () => {
     lifetime.abort();
@@ -5725,10 +6226,13 @@ function createInteriorKit(T, scene, {
   const report = emptyInteriorReport("low"), renderedShops = new Set;
   let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
   let lastUpdate;
-  function measure(root, id) {
+  function* measure(root, id) {
+    const meshes = [];
     root.traverse((mesh) => {
-      if (!mesh.isMesh)
-        return;
+      if (mesh.isMesh)
+        meshes.push(mesh);
+    });
+    for (const mesh of meshes) {
       if (mesh.isInstancedMesh)
         mesh.computeBoundingSphere();
       else
@@ -5745,10 +6249,11 @@ function createInteriorKit(T, scene, {
         report.triangles += renderer.info.render.triangles - triangles;
         renderedShops.add(id);
       };
-    });
+      yield;
+    }
   }
-  function decoration(store2, detail) {
-    const base = buildInteriorDecoration(T, store2, materials2, detail);
+  function* decoration(store2, detail) {
+    const base = yield* prepareInteriorDecoration(T, store2, materials2, detail);
     if (detail || store2.id !== "S01" || !packshot)
       return base;
     const photo = new T.MeshBasicMaterial({ map: packshot, toneMapped: false });
@@ -5812,7 +6317,7 @@ function createInteriorKit(T, scene, {
     const controller = new AbortController, started = now();
     const waiting = shops.filter((shop) => !shop.ready.has(tier));
     report.preinstalled = { shops: shops.length - waiting.length, ms: 0 };
-    const job = { tier, controller, started, waiting, remaining: waiting.length, retryAt: Infinity, deferActivation };
+    const job = { tier, controller, started, waiting, remaining: waiting.length, inflight: 0, retryAt: Infinity, deferActivation };
     job.done = new Promise((resolve) => {
       job.resolve = resolve;
     });
@@ -5827,6 +6332,7 @@ function createInteriorKit(T, scene, {
     const { tier, controller: { signal } } = job;
     const asset = interiorAsset(shop.store, tier), detail = interiorTiers.indexOf(tier);
     const priority = () => shop.distance - 200;
+    const build = (work) => installer.build(work, { priority, signal });
     const required = [asset, roomDetails[shop.store.id]];
     const freshModels = new Map, freshLayers = [];
     try {
@@ -5835,7 +6341,7 @@ function createInteriorKit(T, scene, {
           if (shop.models.has(member.file))
             continue;
           try {
-            const model = await loadModel(member, signal);
+            const model = await loadModel(member, signal, build);
             freshModels.set(member.file, model);
             model.name = `${shop.store.id} ${member.file}`;
             if (!member.roomDetail) {
@@ -5849,13 +6355,20 @@ function createInteriorKit(T, scene, {
       } finally {
         decoding = false;
       }
-      for (let i = shop.layers.length;i <= detail; i++)
-        freshLayers.push(decoration(shop.store, i));
+      await build(function* () {
+        for (let i = shop.layers.length;i <= detail; i++) {
+          const layer = yield* decoration(shop.store, i);
+          freshLayers.push(layer);
+          yield* measure(layer, shop.store.id);
+        }
+        for (const model of freshModels.values())
+          yield* measure(model, shop.store.id);
+      });
+      if (signal.aborted)
+        return;
       const fresh = [...freshLayers, ...freshModels.values()];
-      for (const root of fresh)
-        measure(root, shop.store.id);
-      const models = required.map((member) => freshModels.get(member.file) ?? shop.models.get(member.file)).filter(Boolean);
-      const roots = [...shop.layers.slice(0, detail + 1), ...freshLayers, ...models];
+      const models2 = required.map((member) => freshModels.get(member.file) ?? shop.models.get(member.file)).filter(Boolean);
+      const roots = [...shop.layers.slice(0, detail + 1), ...freshLayers, ...models2];
       await installer.prepare(roots, { tier, priority, signal, prepareModel });
       if (signal.aborted)
         return;
@@ -5876,7 +6389,7 @@ function createInteriorKit(T, scene, {
       }
       freshModels.clear();
       freshLayers.length = 0;
-      if (models.length === required.length) {
+      if (models2.length === required.length) {
         shop.ready.set(tier, roots);
         report.preinstalled.shops++;
       }
@@ -5893,6 +6406,7 @@ function createInteriorKit(T, scene, {
           if (mesh.material?.map === packshot && packshot)
             mesh.material.dispose();
         });
+      job.inflight--;
       if (!signal.aborted) {
         job.remaining--;
         report.preinstalled.ms = Math.round(now() - job.started);
@@ -5930,8 +6444,8 @@ function createInteriorKit(T, scene, {
           shop.motion.pulse.emissiveIntensity = 1 + 0.32 * Math.sin(shop.phase * 2.1);
       }
     },
-    runFrame() {
-      if (!request || disposed)
+    runFrame(remaining = 2) {
+      if (!request || disposed || remaining <= 0)
         return 0;
       if (now() >= request.retryAt) {
         request.waiting = shops.filter((shop) => !shop.ready.has(request.tier));
@@ -5939,16 +6453,17 @@ function createInteriorKit(T, scene, {
         request.retryAt = Infinity;
       }
       const { waiting } = request;
-      if (!decoding && waiting.length) {
+      if (!decoding && waiting.length && request.inflight < 2) {
         let nearest = 0;
         for (let i = 1;i < waiting.length; i++)
           if (waiting[i].distance < waiting[nearest].distance)
             nearest = i;
         const [shop] = waiting.splice(nearest, 1);
         decoding = true;
+        request.inflight++;
         stage(shop, request);
       }
-      return installer.runFrame();
+      return installer.runFrame(remaining);
     },
     get activeTier() {
       return activeTier;
@@ -6068,15 +6583,16 @@ function createSeatPlacements(expanded) {
     add(store2.id, x + 3, -6.8, -1);
   }
   if (expanded) {
-    add("deck", -6.1, 8.8, 1, "Upper deck bench 1", liftLayout.upper);
-    add("deck", 0.1, 8.8, 1, "Upper deck bench 2", liftLayout.upper);
-    add("deck", -3, 6, -1, "Upper deck bench 3", liftLayout.upper);
+    for (const [i, seat] of atriumLayout.upperSeats.entries()) {
+      add("deck", seat.x, seat.z, seat.facing, `Upper deck bench ${i + 1}`, liftLayout.upper);
+      placements.at(-1).finish = seat.finish;
+    }
   }
   return placements;
 }
 function createSeatAnchor(placement, collider, profile2 = loungeBench, scale = benchScale, footY = placement.floor) {
   const { id, name, x, z, floor, exit, pose, clearance, accessible } = placement;
-  const centre = (profile2.flatFront + profile2.backrestFront) / 2;
+  const centre = profile2.seatCentre ?? (profile2.flatFront + profile2.backrestFront) / 2;
   const anchor = { x, y: floor + profile2.top * scale, z: z + centre * pose.facing };
   const [width, height, depth] = profile2.size;
   const bounds = {
@@ -6436,7 +6952,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       if (surfaceAtmosphere.setTier(tier) && mappedPaving)
         mappedPaving.roughness = materials2.paving.roughness;
       uploadVisitor = visitor;
-      productDisplay?.updateShopLods(visitor, tier);
+      productDisplay?.updateShopLods(visitor);
       interiorKit.update(visitor);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
       for (const mesh of shopLodMeshes) {
@@ -6461,6 +6977,33 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         mesh.visible = deckVisible;
       for (const update of shopLodUpdates)
         update(visitor);
+    }, prepareUpperLevel = function() {
+      if (!upperLevel)
+        return;
+      const { group, panes, cabinMark } = upperLevel;
+      const cabin = scene.getObjectByName("Expanded physical lift cabin");
+      if (cabinMark.parent !== cabin)
+        cabin?.add(cabinMark);
+      if (!warmModel)
+        return;
+      landingLights ??= new T.Scene;
+      landingLights.children = [ambient, key, fill];
+      landingLights.fog = scene.fog;
+      landingLights.environment = scene.environment;
+      landingLights.environmentIntensity = scene.environmentIntensity;
+      if (upperWarmStatus === "pending")
+        return;
+      upperWarmStatus = "pending";
+      warmModel([group, panes, cabinMark], landingLights, {
+        late: false,
+        priority: () => -100,
+        linear: () => false
+      }).then(() => {
+        upperWarmStatus = "ready";
+      }, (error) => {
+        upperWarmStatus = "interrupted";
+        console.warn("Upper level GPU warmup interrupted", error);
+      });
     }, ensureBrandWall = function() {
       if (!expanded)
         return Promise.reject(new Error("Brand wall is only available in the expanded mall"));
@@ -6472,9 +7015,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         });
       return brandWallPromise;
     };
-    const [furnishings, shell, deckRailings] = await Promise.all([createFurnishings(T, true, expanded), expanded ? null : createShell(T), expanded ? createDeckRailings(T) : null]);
     let shellState = null;
     const expandedLift = expanded && new URLSearchParams(location.search).get("visitor") !== "v1";
+    const [furnishings, shell, upperAssets] = await Promise.all([createFurnishings(T, true, expanded), expanded ? null : createShell(T), expandedLift ? loadUpperLevel(T) : null]);
     const ceilingObstacles = [], shopObstacles = [];
     const seats = [], seatPlacements = createSeatPlacements(expanded);
     const scene = new T.Scene;
@@ -6590,7 +7133,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         sample.dispose();
       }
     }
-    let activeShopSlot = null, activeDeck = false, railingState = null, interiorModels = null, productDisplay = null;
+    let activeShopSlot = null, activeDeck = false, upperLevel = null, interiorModels = null, productDisplay = null;
     const tagShopLod = (mesh) => {
       if (expanded && activeShopSlot !== null) {
         mesh.userData.shopSlot = activeShopSlot;
@@ -6658,7 +7201,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
           solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
         }
       }
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds }));
+      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight: expandedLift }));
     } else {
       for (const proxy of SHELL_LAYOUT.aggregate_colliders)
         collider(...proxy.position, ...proxy.size);
@@ -6767,12 +7310,12 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         }
         for (const placement of seatPlacements.filter((item) => item.group === "atrium" && item.name.startsWith(lounge2.id === "west" ? "West" : "East")))
           bench(placement);
-        const table = lounge2.table;
-        cylinder("brass", table.x, 0.27, table.z, 0.055, 0.5);
-        cylinder("oak", table.x, 0.53, table.z, 0.29, 0.06);
-        cylinder("brass", table.x, 0.04, table.z, 0.2, 0.05);
-        collider(table.x, 0.28, table.z, 0.58, 0.56, 0.58);
-        shadow(table.x, table.z, 1, 1);
+        const table2 = lounge2.table;
+        cylinder("brass", table2.x, 0.27, table2.z, 0.055, 0.5);
+        cylinder("oak", table2.x, 0.53, table2.z, 0.29, 0.06);
+        cylinder("brass", table2.x, 0.04, table2.z, 0.2, 0.05);
+        collider(table2.x, 0.28, table2.z, 0.58, 0.56, 0.58);
+        shadow(table2.x, table2.z, 1, 1);
         for (const planter of lounge2.planters) {
           box("pot", planter.x, 0.3, planter.z, 0.7, 0.6, 0.7, true);
           box("wood", planter.x, 0.61, planter.z, 0.6, 0.025, 0.6);
@@ -6827,17 +7370,17 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
     }
     let createCollectProp = () => null, reserveProduct = () => null, staticProductCount = 0;
     let worldProductAssets = Object.freeze({ status: "not-loaded" }), shelves = [];
-    const directory = expanded ? liftLayout.directory : { x: -5.3, z: 10.4 };
-    if (expanded || !furnishings.place("kiosk", directory.x, directory.z, 1, -1)) {
-      box("jade", directory.x, 1.22, directory.z, 0.94, 1.6, 0.22);
-      box("brass", directory.x, 0.08, directory.z, 0.96, 0.16, 0.68);
-      box("dark", directory.x, 1.3, directory.z + 0.13, 0.78, 1.25, 0.035);
+    const directory2 = expanded ? liftLayout.directory : { x: -5.3, z: 10.4 };
+    if (expanded || !furnishings.place("kiosk", directory2.x, directory2.z, 1, -1)) {
+      box("jade", directory2.x, 1.22, directory2.z, 0.94, 1.6, 0.22);
+      box("brass", directory2.x, 0.08, directory2.z, 0.96, 0.16, 0.68);
+      box("dark", directory2.x, 1.3, directory2.z + 0.13, 0.78, 1.25, 0.035);
       if (expanded)
-        sign("DIRECTORY", directory.x, 1.55, directory.z + 0.16, 0.7, 0.16, false, 90);
+        sign("DIRECTORY", directory2.x, 1.55, directory2.z + 0.16, 0.7, 0.16, false, 90);
     }
-    collider(directory.x, 1.025, directory.z, 0.96, 2.05, 0.68);
-    shadow(directory.x, directory.z, 1.2, 0.9);
-    interactables.push({ id: "mall-directory", ...directory, radius: 2.8 });
+    collider(directory2.x, 1.025, directory2.z, 0.96, 2.05, 0.68);
+    shadow(directory2.x, directory2.z, 1.2, 0.9);
+    interactables.push({ id: "mall-directory", ...directory2, radius: 2.8 });
     for (const store2 of spatial.stores) {
       const zone = store2.id, x = storeCenterX(store2);
       const wall = expanded ? zone === "newmoon" ? "wood" : "cream" : zone === "mili" ? "cream" : "green";
@@ -7240,7 +7783,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       for (const radius of [2.2, 3.2])
         solid("torus", "glow", 10, 8.05, 20, radius, radius, 0.8, 0, -Math.PI / 2);
       lightPool(10, 0.053, 20, 8, 8);
-      box("ivory", 25, 1.5, 10, 6, 3, 4, true);
+      const reserved = atriumLayout.facilitiesBlock;
+      box("ivory", reserved.x, reserved.height / 2, reserved.z, reserved.width, reserved.height, reserved.depth, true);
       const facility = sign("FUTURE FACILITIES", 28.07, 2, 10, 2.5, 0.35, true, 60);
       facility.rotation.y = Math.PI / 2;
       for (const x of [-12, 32])
@@ -7248,21 +7792,18 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       for (const z of [3, 39])
         box("brass", 10, 0.024, z, 44, 0.008, 0.035);
       activeDeck = true;
-      box("green", -3, liftLayout.upper + 2.1, 14.48, 9.4, 4.2, 0.16, true);
-      box("brass", -3, liftLayout.upper + 4.12, 14.36, 9.55, 0.055, 0.045);
-      box("brass", -3, liftLayout.upper + 0.08, 14.36, 9.55, 0.055, 0.045);
-      for (const x of [-7.72, 1.72]) {
-        box("brass", x, liftLayout.upper + 2.1, 14.36, 0.055, 4.05, 0.045);
-        box("glow", x + (x < 0 ? 0.04 : -0.04), liftLayout.upper + 2.1, 14.32, 0.035, 3.7, 0.025);
+      box("green", -3, liftLayout.upper + 1.23, 15.78, 9.4, 2.46, 0.16, true);
+      for (const y of [0.08, 2.4])
+        box("brass", -3, liftLayout.upper + y, 15.68, 9.48, 0.047, 0.04);
+      if (upperAssets) {
+        upperLevel = buildUpperLevel(T, upperAssets, { collider, lightWash });
+        scene.add(upperLevel.group, upperLevel.panes);
       }
-      box("glow", -3, liftLayout.upper + 4.02, 14.32, 8.9, 0.035, 0.025);
-      lightPool(-3, liftLayout.upper + 0.035, 13.35, 8.8, 2.8);
-      activeDeck = false;
-      activeDeck = true;
       const deckBench = (placement) => {
         const { x, z, facing } = placement;
-        const modelPlaced = furnishings.place("bench", x, z, benchScale, facing, liftLayout.upper, placement.pose.angle, -1);
-        if (!modelPlaced) {
+        const slattedProfile = upperLevel?.seatProfiles.get(placement.finish);
+        const modelPlaced = !slattedProfile && furnishings.place("bench", x, z, benchScale, facing, liftLayout.upper, placement.pose.angle, -1);
+        if (!slattedProfile && !modelPlaced) {
           const { top, front } = deckBenchFallback;
           box("wood", x, liftLayout.upper + 0.24, z, 2.3, 0.32, 0.72);
           box("seat", x, liftLayout.upper + top - 0.09, z, 2.34, 0.18, -2 * front);
@@ -7271,11 +7812,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         }
         const seatCollider = collider(x, liftLayout.upper + 0.26, z, placement.clearance.colliderWidth, 0.5, placement.clearance.colliderDepth);
         if (placement.accessible !== false)
-          seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : deckBenchFallback, modelPlaced ? benchScale : 1));
+          seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : slattedProfile || deckBenchFallback, modelPlaced ? benchScale : 1));
       };
       for (const placement of seatPlacements.filter((item) => item.group === "deck"))
         deckBench(placement);
-      for (const [x, z] of [[-8.1, 12.8], [2.1, 12.8], [-8.1, 9.2], [2.1, 9.2]]) {
+      for (const [x, z] of deckPlanters) {
         if (!furnishings.place("planter", x, z, 0.68, 1, liftLayout.upper, null, -1)) {
           box("pot", x, liftLayout.upper + 0.24, z, 0.68, 0.48, 0.68, true);
           box("wood", x, liftLayout.upper + 0.49, z, 0.58, 0.025, 0.58);
@@ -7284,21 +7825,6 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
         }
         collider(x, liftLayout.upper + 0.25, z, 0.68, 0.5, 0.68);
       }
-      for (const x of [-8, -6, -4, -2])
-        deckRailings.place("bay", x, 16);
-      for (const x of [-0.5, 0.5, 1.5, 2.5])
-        deckRailings.place("bay1m", x, 16);
-      for (const z of [5, 7, 9, 11]) {
-        deckRailings.place("bay", -9, z, Math.PI / 2);
-        deckRailings.place("bay", 3, z, Math.PI / 2);
-      }
-      for (const z of [12.5, 13.5, 14.5, 15.5]) {
-        deckRailings.place("bay1m", -9, z, Math.PI / 2);
-        deckRailings.place("bay1m", 3, z, Math.PI / 2);
-      }
-      for (const [x, z] of [[-9, 4], [3, 4], [-9, 16], [3, 16]])
-        deckRailings.place("post", x, z);
-      railingState = deckRailings?.finish(scene) || null;
       activeDeck = false;
       const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials2.shellFloor.map, prepareModel);
       interiorModels = interiors;
@@ -7395,13 +7921,16 @@ async function createWorld(T, R, physics, expanded = false, warmModel) {
       prepareModel(meshes, { hide: true, late: false, priority }).catch(() => {});
     }
     const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
+    let upperWarmStatus = null, landingLights;
     let brandWallPromise = null;
     return { signage, interiors: interiorKit, getPreloadedModels() {
       return interiorModels?.getPreloadedModels() || [];
     }, get modelPreload() {
       const preload = interiorModels?.preloadState;
       return preload ? { ...preload, sceneModels: Object.fromEntries(["Gallery lift directory standee", "Gallery atrium chandelier"].map((name) => [name, scene.getObjectByName(name)?.userData.sourceStatus || "pending"])) } : null;
-    }, scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, furnishings: furnishingState, deckRailings: railingState, productAssets: Object.freeze(worldProductAssets) };
+    }, scene, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus() {
+      return upperWarmStatus;
+    }, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets) };
   } finally {
     releaseStartupAssetPack();
   }

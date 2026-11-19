@@ -1,33 +1,44 @@
 import {roomAtlas} from './detail-files.js';
 import {GLTFLoader, mergeGeometries} from '../shop-sign-vendor.js';
 
-export function mergeInteriorAnchor(T, scene) {
+function* mergeInteriorAnchor(T, scene) {
   scene.updateMatrixWorld(true);
-  const batches = new Map();
+  const batches = new Map(), anchor = new T.Group();
   scene.traverse(mesh => {
     if (!mesh.isMesh) return;
     if (!batches.has(mesh.material)) batches.set(mesh.material,[]);
     batches.get(mesh.material).push(mesh);
   });
-  const anchor = new T.Group();
-  for (const [material,meshes] of batches) {
-    const parts = meshes.map(mesh => mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
-    const geometry = mergeGeometries(parts);
-    for (const part of parts) part.dispose();
-    if (!geometry) {
-      // A different primitive format can still use the authored static mesh.
-      for (const mesh of meshes) {
-        const copy = new T.Mesh(mesh.geometry,material);
-        mesh.matrixWorld.decompose(copy.position,copy.quaternion,copy.scale);
-        anchor.add(copy);
-      }
-    } else {
-      anchor.add(new T.Mesh(geometry,material));
-      for (const mesh of meshes) mesh.geometry.dispose();
+  let complete = false;
+  try {
+    for (const [material,meshes] of batches) {
+      const parts = [];
+      try {
+        for (const mesh of meshes) {
+          parts.push(mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
+          yield;
+        }
+        const geometry = mergeGeometries(parts);
+        if (geometry) {
+          anchor.add(new T.Mesh(geometry,material));
+          for (const mesh of meshes) mesh.geometry.dispose();
+        } else {
+          // Retain the authored transforms for incompatible primitive formats.
+          for (const mesh of meshes) {
+            const copy = new T.Mesh(mesh.geometry,material);
+            mesh.matrixWorld.decompose(copy.position,copy.quaternion,copy.scale);
+            anchor.add(copy);
+          }
+        }
+      } finally { for (const part of parts) part.dispose(); }
+      yield;
     }
+    if (!anchor.children.length) throw new Error('Empty interior fixture');
+    complete = true;
+    return anchor;
+  } finally {
+    if (!complete) for (const mesh of anchor.children) mesh.geometry.dispose();
   }
-  if (!anchor.children.length) throw new Error('Empty interior fixture');
-  return anchor;
 }
 
 // Use the same bounded request for a fixture and for the shared print sheet.
@@ -79,14 +90,12 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
       return atlas;
     }
   }));
-  async function load(asset, signal) {
-    const buffer = await readMember(assetBase,asset,signal);
-    const {scene} = await loader.parseAsync(buffer,new URL('interiors/',assetBase).href);
-    if (!asset.roomDetail) return mergeInteriorAnchor(T,scene);
+  function* prepareDetail(scene) {
     // Blender already batched each finish. Preserve the stock instance matrices.
     const motion = {scroll:null,pulse:null};
-    scene.traverse(mesh => {
-      if (!mesh.isMesh) return;
+    const meshes = [];
+    scene.traverse(mesh => { if (mesh.isMesh) meshes.push(mesh); });
+    for (const mesh of meshes) {
       const m = mesh.material;
       if (!lifetime.signal.aborted && (m.name === 'Enamel' || m.name === 'Printed opal')) {
         const reusable = shared.get(m.name);
@@ -104,10 +113,29 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
         motion.scroll.userData.roomAtlasView = true;
         m.map = m.emissiveMap = motion.scroll;
       }
-    });
+      yield;
+    }
     scene.userData.roomMotion = motion.scroll || motion.pulse ? motion : null;
     return scene;
   }
+
+  async function load(asset, signal, build) {
+    const buffer = await readMember(assetBase,asset,signal);
+    const {scene} = await loader.parseAsync(buffer,new URL('interiors/',assetBase).href);
+    try {
+      if (signal?.aborted) throw new DOMException('Interior asset cancelled','AbortError');
+      const work = () => asset.roomDetail ? prepareDetail(scene) : mergeInteriorAnchor(T,scene);
+      if (build) return await build(work);
+      const iterator = work();
+      let step;
+      do { step = iterator.next(); } while (!step.done);
+      return step.value;
+    } catch (error) {
+      disposeInteriorModel(scene);
+      throw error;
+    }
+  }
+
   load.dispose = () => {
     lifetime.abort();
     for (const material of shared.values()) material.dispose();

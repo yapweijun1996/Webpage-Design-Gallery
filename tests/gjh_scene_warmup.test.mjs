@@ -36,24 +36,31 @@ test('slices yield to paint at the budget and resume after visibility returns', 
   assert.equal(report.ms, 27);
 });
 
-test('six-second watchdog releases a stalled driver even without another foreground RAF', () => {
+test('six-second watchdog releases the loader while the stalled driver continues in the background', () => {
   const time = clock(), report = createWarmReport();
-  let polls = 0, cleaned = 0, finished = 0;
-  function* work() { try { while (true) { polls++; yield false; } } finally { cleaned++; } }
-  const runner = createWarmRunner(work(), report, {...time, budgetMs:10, lost:() => false, onFinish:() => finished++});
+  let polls = 0, cleaned = 0, finished = 0, released = 0, ready = false;
+  function* work() { try { while (!ready) { polls++; yield false; } } finally { cleaned++; } }
+  const runner = createWarmRunner(work(), report, {...time, budgetMs:10, lost:() => false,
+    onRelease:() => released++, onFinish:() => finished++});
   runner.runFrame();
   time.advance(5000);
   runner.visibility(true);
   time.advance(8000);
   runner.visibility(false);
   time.advance(999);
-  assert.equal(finished, 0);
+  assert.equal(released, 0);
   time.advance(1);
+  assert.equal(runner.blocking, false);
   runner.runFrame();
-  assert.deepEqual([report.ms, report.skipped, report.reason, polls, cleaned, finished], [6000, true, 'timeout', 1, 1, 1]);
+  assert.deepEqual([report.ms, report.reason, report.background, polls, cleaned, released, finished],
+    [6000, 'timeout', 'running', 2, 0, 1, 0]);
+  ready = true;
+  runner.runFrame();
+  assert.deepEqual([report.reason, report.background, cleaned, released, finished],
+    ['timeout', 'complete', 1, 1, 1]);
 });
 
-test('Enter now and directory dismissal cancel pending steps and keep the real frame prerequisite', () => {
+test('Enter now and directory dismissal retain the iterator and respect the shared background budget', () => {
   for (const reason of ['enter-now', 'directory']) {
     const loader = createLoaderState();
     loader.enterNow();
@@ -61,14 +68,31 @@ test('Enter now and directory dismissal cancel pending steps and keep the real f
     for (const stage of ['physics', 'scene', 'models', 'frame']) loader.complete(stage);
     const time = clock(), report = createWarmReport();
     let work = 0;
-    function* steps() { while (true) { work++; yield false; } }
+    function* steps() {
+      work++;
+      yield false;
+      while (work < 8) { work++; time.advance(2); yield; }
+    }
     const runner = createWarmRunner(steps(), report, {...time, budgetMs:12, signal:loader.skipSignal,
-      lost:() => false, onFinish:() => loader.complete('warm')});
+      lost:() => false, onRelease:() => loader.complete('warm', true), onFinish:() => {}});
     runner.runFrame();
     if (reason === 'directory') loader.dismiss(); else loader.enterNow();
-    runner.runFrame();
+    assert.deepEqual([loader.snapshot().ready, report.reason, report.background, work], [true, reason, 'running', 1]);
+    runner.runFrame(0);
+    assert.equal(work, 1);
+    runner.runFrame(9);
+    assert.equal(work, 3);
+    runner.runFrame(2);
+    assert.equal(work, 4);
+    runner.visibility(true);
     time.advance(9000);
-    assert.deepEqual([loader.snapshot().ready, report.reason, report.skipped, work], [true, reason, true, 1]);
+    runner.runFrame();
+    assert.equal(work, 4);
+    runner.visibility(false);
+    runner.runFrame();
+    runner.runFrame();
+    runner.runFrame();
+    assert.deepEqual([report.reason, report.skipped, report.background, work], [reason, true, 'complete', 8]);
   }
 });
 
@@ -151,6 +175,7 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
       if (staging.children.includes(instances)) {
         assert.equal(instances.children.length, 0);
         assert.equal(instances.count, 1);
+        assert.ok(instances.geometry.groups.every(group => group.count <= 6));
         assert.equal(b.visible, true);
       }
       draws.push({objects:staging.children.slice(), pose:probe.position.toArray(), linear:Boolean(target), depth:renderer.shadowMap.needsUpdate, shadows:renderer.shadowMap.enabled});
@@ -168,6 +193,7 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
     assert.equal(instances.layers.mask, 0);
     assert.deepEqual(instances.children, [child]);
     assert.equal(instances.count, 3);
+    assert.deepEqual(instances.geometry.drawRange, {start:0,count:Infinity});
     assert.equal(child.parent, instances);
     assert.equal(renderer.autoClear, false);
     assert.deepEqual(renderer.shadowMap, {autoUpdate:true, needsUpdate:true, enabled:false});
@@ -274,4 +300,18 @@ test('shadow and light policy warm detached tier meshes before the fence, even f
   assert.equal(staged.parent,null);
   f.restored();
   f.signal();assert.equal(f.work.next().done,true);
+});
+
+test('Detailed warms the direct fallback with shadows off as well as its final passes', () => {
+  const f = sceneFixture(true,false,true,false,{
+    shadows:true, lightVariants:lights=>[lights]
+  });
+  f.link();
+  while (!f.fence) f.work.next();
+  assert.ok(f.draws.some(draw=>!draw.linear && !draw.shadows && draw.objects.includes(f.instances)));
+  assert.ok(f.draws.some(draw=>!draw.linear && draw.shadows && draw.objects.includes(f.instances)));
+  assert.ok(f.draws.some(draw=>draw.linear && draw.shadows && draw.objects.includes(f.instances)));
+  f.signal();
+  assert.equal(f.work.next().done,true);
+  f.restored();
 });

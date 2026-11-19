@@ -1,4 +1,4 @@
-import {meshTextures} from './model-warmup.js';
+import {limitWarmGeometry, meshTextures} from './model-warmup.js';
 import {registerInteriorWarmup} from './interiors/warmup.js';
 import {spatial, courtyardArrival} from './spatial.js';
 import {expandedLayout, shopEntrance} from './expanded-layout.js';
@@ -36,7 +36,7 @@ export function createTierQueue(enqueue) {
 // Registration is eager so even an already-dismissed loader starts the room
 // queue. Closing the sweep releases its sign stage and leaves room RAFs running.
 export function prepareTier({T, renderer, world, player, expanded, elevator, atmosphere,
-  modelWarmup, width, height, screenPixel, applyProfile}, profile, report) {
+  modelWarmup, width, height, screenPixel, applyProfile, startup=false}, profile, report) {
   const {scene, signage, interiors} = world;
   const {tier, shadows} = profile;
   let interiorsReady = false, interiorError;
@@ -47,7 +47,15 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
   function* sweep() {
     let stage;
     try {
-      if (signage) stage = yield* signage.prepareTier(tier);
+      const directPrepared = new WeakSet(), directPrograms = new Set();
+      if (startup && ((expanded && shadows) || (signage && signage.getTier() !== tier))) {
+        yield* prepareScene({T, renderer, scene, camera:player.camera, expanded, elevator,
+          shadows:false, detailed:false, screenPixel, extra:modelWarmup.pendingMeshes(),
+          exclude:interiors?.groups, prepared:directPrepared, programs:directPrograms,
+          updateLights:atmosphere.update, lightVariants:atmosphere.lightVariants,
+          initTexture:modelWarmup.initTexture, alternatesFor:modelWarmup.alternatesFor}, report);
+      }
+      if (signage) stage = yield* signage.prepareTier(tier, renderer);
       const replacing = stage && stage.meshes !== signage.activeMeshes();
       // The room installer fences the exact selected layers and lighting. A
       // scene traversal would also warm cached rooms from inactive tiers.
@@ -56,7 +64,7 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
       const detailed = expanded && shadows;
       if (detailed) yield* atmosphere.preparePost(Math.floor(width*profile.pixelRatio),
         Math.floor(height*profile.pixelRatio),screenPixel);
-      const prepared = new WeakSet(), programs = new Set();
+      const prepared = shadows ? new WeakSet() : directPrepared, programs = directPrograms;
       const {camera,state} = player, direction = camera.getWorldDirection(new T.Vector3());
       const chase = tier === 'low' ? null : {
         distance:Math.hypot(camera.position.x-state.x,camera.position.z-state.z),
@@ -89,23 +97,38 @@ export function prepareTier({T, renderer, world, player, expanded, elevator, atm
 // The mall's RAF drives the iterator. A separate timer also bounds a driver
 // fence that never signals or a foreground window that stops receiving frames.
 export function createWarmRunner(work, report, {
-  budgetMs, onFinish, lost, signal, now = () => performance.now(),
+  budgetMs, onRelease = () => {}, onFinish, lost, signal, now = () => performance.now(),
   setTimer = setTimeout, clearTimer = clearTimeout
 }) {
-  let started = now(), elapsed = 0, timer, finished = false;
+  let started = now(), elapsed = 0, timer, finished = false, blocking = true;
   const duration = () => elapsed + (started === null ? 0 : now() - started);
-  function stop(reason) {
-    if (finished) return;
-    finished = true;
+  function release(reason) {
+    if (!blocking) return;
+    blocking = false;
     clearTimer(timer);
     signal?.removeEventListener('abort', skip);
     report.ms = Math.round(duration());
     report.reason = reason;
     report.skipped = reason !== 'complete';
-    try { work.return(); } finally { onFinish(report); }
+    onRelease(report);
   }
-  function arm() { timer = setTimer(() => stop(lost() ? 'context-loss' : 'timeout'), 6000 - elapsed); }
-  function skip() { stop(signal.reason); }
+  function stop(reason) {
+    if (finished) return;
+    finished = true;
+    if (!blocking) report.background = reason;
+    try { work.return(); } finally {
+      release(reason);
+      onFinish(report);
+    }
+  }
+  function background(reason) {
+    report.background = 'running';
+    release(reason);
+  }
+  function arm() {
+    timer = setTimer(() => lost() ? stop('context-loss') : background('timeout'), 6000 - elapsed);
+  }
+  function skip() { background(signal.reason); }
   if (signal?.aborted) skip();
   else {
     arm();
@@ -113,6 +136,7 @@ export function createWarmRunner(work, report, {
   }
   return {
     stop,
+    get blocking() { return blocking; },
     visibility(hidden) {
       if (finished || hidden === (started === null)) return;
       if (hidden) {
@@ -121,20 +145,24 @@ export function createWarmRunner(work, report, {
         clearTimer(timer);
       } else {
         started = now();
-        arm();
+        if (blocking) arm();
       }
     },
-    runFrame() {
+    runFrame(remaining = 4) {
       if (finished || started === null) return;
       const sliceStart = now();
+      const budget = blocking ? budgetMs : Math.min(4, remaining);
       try {
-        do {
+        while (now() - sliceStart < budget) {
           if (lost()) return stop('context-loss');
-          if (duration() >= 6000) return stop('timeout');
+          if (blocking && duration() >= 6000) return background('timeout');
           const step = work.next();
-          if (step.done) return stop(duration() >= 6000 ? 'timeout' : 'complete');
+          if (step.done) {
+            if (blocking && duration() >= 6000) background('timeout');
+            return stop('complete');
+          }
           if (step.value === false) return; // Poll parallel link / GPU completion next frame.
-        } while (now() - sliceStart < budgetMs);
+        }
       } catch (error) {
         console.warn('Mall detail preparation interrupted', error);
         stop('error');
@@ -203,11 +231,6 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
     yield;
   }
   if (!meshes.length) return;
-  for (const texture of textures) {
-    initTexture(texture);
-    report.textures++;
-    yield;
-  }
 
   const gl = renderer.getContext(), parallel = renderer.extensions.has('KHR_parallel_shader_compile');
   const target = detailed ? new T.WebGLRenderTarget(1, 1) : null;
@@ -227,11 +250,11 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
     }
   }
 
-  function submit(batch, activeLights, output, compile, depth=false, fullView=false) {
+  function submit(batch, activeLights, output, compile, depth=false, passShadows=shadows) {
     const objects = [...activeLights, ...batch];
     const saved = objects.map(node => [node.visible, node.frustumCulled, node.layers.mask, node.children]);
     const instanceCounts = new Map();
-    const hiddenMaterials = new Set(), drawRanges = new Map();
+    const hiddenMaterials = new Set(), restoreGeometry = new Map();
     const previous = renderer.getRenderTarget(), face = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
     const scissorTest = renderer.getScissorTest(), autoClear = renderer.autoClear, sortObjects=renderer.sortObjects;
     const shadowMap = renderer.shadowMap;
@@ -250,15 +273,10 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       }
       for (const mesh of batch) {
         const geometry = mesh.geometry;
-        if (!compile && !fullView && geometry && !drawRanges.has(geometry)) {
-          // Even a hidden LOD with an empty draw range needs a real draw.
-          // Preserve access to every group on multi-material geometry.
-          const {start,count} = geometry.drawRange;
-          drawRanges.set(geometry, [start,count]);
-          geometry.setDrawRange(0, geometry.groups.length ? Infinity : 6);
+        if (!compile && geometry && !restoreGeometry.has(geometry)) {
+          restoreGeometry.set(geometry, limitWarmGeometry(geometry, Array.isArray(mesh.material)));
         }
-        if (!compile && !fullView && mesh.isInstancedMesh) {
-          // Upload the full instance buffer while submitting one placement.
+        if (!compile && mesh.isInstancedMesh) {
           instanceCounts.set(mesh, mesh.count);
           mesh.count = Math.min(1, mesh.instanceMatrix.count);
         }
@@ -274,7 +292,7 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
         renderer.setScissor(0, 0, size, size);
         renderer.setScissorTest(true);
       }
-      if (shadows !== undefined) shadowMap.enabled = shadows;
+      shadowMap.enabled = passShadows;
       shadowMap.autoUpdate = shadowMap.needsUpdate = depth;
       renderer.autoClear = true;
       renderer.sortObjects = false; // Never cache bounds at the temporary instance count.
@@ -292,10 +310,10 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       });
       for (const material of hiddenMaterials) material.visible = false;
       for (const [mesh, count] of instanceCounts) mesh.count = count;
-      for (const [geometry,range] of drawRanges) geometry.setDrawRange(...range);
+      for (const restore of restoreGeometry.values()) restore();
       renderer.autoClear = autoClear;
       renderer.sortObjects = sortObjects;
-      if (shadows !== undefined) shadowMap.enabled = shadowEnabled;
+      shadowMap.enabled = shadowEnabled;
       shadowMap.autoUpdate = shadowAuto;
       shadowMap.needsUpdate = shadowNeeds;
       Object.assign(info, {calls, triangles, points, lines});
@@ -314,19 +332,20 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
   }
   const visits=[];
   const glow=detailed ? meshes.filter(mesh=>mesh.layers.isEnabled(1)) : [];
-  const batchSize=12;
-  function addPass(pose, active, output, candidates, layer='main', probeVisit=false) {
+  const npcMeshes=meshes.filter(mesh=>mesh.layers.isEnabled(2));
+  const batchSize=4;
+  function addPass(pose, active, output, candidates, layer='main', probeVisit=false, passShadows=shadows) {
     if(!candidates.length)return;
-    const key=layer+variantKey(active,output);
+    const key=layer+passShadows+variantKey(active,output);
     const fresh=!variants.has(key);
-    const pass={pose,active,output,candidates,fresh};
+    const pass={pose,active,output,candidates,fresh,passShadows};
     if(fresh)variants.set(key,pass);
     if(fresh || probeVisit)visits.push(pass);
   }
   function addPose(pose,onlyNew=false) {
     const active=probeLights(pose), main=active.filter(light=>light.layers.isEnabled(0));
     const output=detailed && pose.y===0 ? target : null;
-    if(onlyNew && variants.has('main'+variantKey(main,output)))return;
+    if(onlyNew && variants.has('main'+shadows+variantKey(main,output)))return;
     addPass(pose,main,output,meshes,'main',true);
     if(output)addPass(pose,active.filter(light=>light.layers.isEnabled(1)),target,glow,'glow');
     visits.push({endPose:true});
@@ -348,9 +367,12 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
         const main=active.filter(light=>light.layers.isEnabled(0));
         for(const output of detailed ? [target,null] : [null]) {
           addPass(poses[0],main,output,meshes);
+          if (detailed && !output) addPass(poses[0],main,output,meshes,'main',false,false);
           const npcLights=active.filter(light=>light.layers.isEnabled(2));
-          if(variantKey(npcLights,output)!==variantKey(main,output))
-            addPass(poses[0],npcLights,output,meshes.filter(mesh=>mesh.layers.isEnabled(2)),'npc');
+          if (variantKey(npcLights,output)!==variantKey(main,output)) {
+            addPass(poses[0],npcLights,output,npcMeshes,'npc');
+            if (detailed && !output) addPass(poses[0],npcLights,output,npcMeshes,'npc',false,false);
+          }
         }
         if(detailed)addPass(poses[0],active.filter(light=>light.layers.isEnabled(1)),target,glow,'glow');
       }
@@ -366,11 +388,16 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
     }
     report.lightVariants=Math.max(report.lightVariants,variants.size);
     // Submit all independent links before waiting on the driver once.
-    for(const {active,output,candidates} of variants.values()){
+    for(const {active,output,candidates,passShadows} of variants.values()){
       for(let i=0;i<candidates.length;i+=batchSize){
-        submit(candidates.slice(i,i+batchSize),active,output,true);
+        submit(candidates.slice(i,i+batchSize),active,output,true,false,passShadows);
         yield;
       }
+    }
+    for (const texture of textures) {
+      initTexture(texture);
+      report.textures++;
+      yield;
     }
     if(parallel)for(const program of programs)while(!program.isReady())yield false;
     if(shadows){
@@ -382,26 +409,25 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
         const batch=casters.slice(i,i+6);
         submit(batch,active,detailed?target:null,false,true);
         report.shadowCasters+=batch.length;
-        yield;
+        yield false;
       }
     }
     let completedPoses=0;
     for(const visit of visits){
       if(visit.endPose){report.probes=Math.max(report.probes,++completedPoses);continue;}
-      const {pose,active,output,fresh,candidates}=visit;
+      const {pose,active,output,fresh,candidates,passShadows}=visit;
       position(pose);
       let batch=[];
-      const fullView=Boolean(pose.chase);
       for(const mesh of candidates){
         if(fresh || !mesh.frustumCulled || (mesh.isSprite?frustum.intersectsSprite(mesh):frustum.intersectsObject(mesh)))batch.push(mesh);
         if(batch.length===batchSize){
-          submit(batch,active,output,false,false,fullView);
+          submit(batch,active,output,false,false,passShadows);
           batch=[];
-          yield;
-          if(!fresh && !fullView)break;
+          yield false;
+          if(!fresh)break;
         }
       }
-      if(batch.length){submit(batch,active,output,false,false,fullView);yield;}
+      if(batch.length){submit(batch,active,output,false,false,passShadows);yield false;}
     }
     // rAF and renderer.render only establish CPU submission. Wait without
     // blocking the UI for commands already queued on the actual WebGL2 driver.
