@@ -23,31 +23,31 @@ function point(shop, xyz, yaw = 0) {
   return worldInteriorBox(shop, {center:xyz, yaw}).center;
 }
 
+export function createShopInteractionTarget(slot, shop, item) {
+  const [x, y, z] = point(shop,[item.xyz[0],item.xyz[1] + item.size[1]/2,item.xyz[2]]);
+  const [sx, floor, sz] = point(shop,[item.standing[0],shop.frame.floor_surface_y_m,item.standing[1]]);
+  const zone = shopsBySlot[slot] ?? slot;
+  const seat = item.action.includes('sit');
+  const productId = zone === 'newmoon' ? item.targetId : undefined;
+  const name = item.a11y.en;
+  const action = productId ? {
+    effect:'drawer', label:'Open drawer', progress:'Opening drawer…', done:'Drawer open.'
+  } : concreteActions[item.id];
+  const seated = action?.seated;
+  return {id:item.id, kind:'shop', x, y, z, floor, standing:{x:sx,z:sz},
+    radius:Math.min(item.reachDistance,.9),
+    availability:({zone:currentZone,travelling,player}) =>
+      zone === currentZone && !travelling && !player?.pushing && !player?.productApproaching &&
+      (player?.character?.physicalProduct?.phase ?? 'empty') === 'empty' &&
+      (!player?.seated || (seated && player.seatPhase === 'seated' && player.seatId?.startsWith('newmoon-tasting-stool-'))),
+    shopAction:{zone, slot, item, name, seat, seated, productId,
+      label: seat ? 'Sit' : 'View', done:`Viewed: ${name}`, duration:action ? .85 : 0, ...action}};
+}
+
 export async function buildShopInteractionTargets(slots = Object.keys(interiorStores)) {
   const layouts = await Promise.all(slots.map(loadInteriorActions));
-  return slots.flatMap((slot, index) => {
-    const shop = interiorStores[slot];
-    return layouts[index].map(item => {
-      const [x, y, z] = point(shop,[item.xyz[0],item.xyz[1] + item.size[1]/2,item.xyz[2]]);
-      const [sx, floor, sz] = point(shop,[item.standing[0],shop.frame.floor_surface_y_m,item.standing[1]]);
-      const zone = shopsBySlot[slot] ?? slot;
-      const seat = item.action.includes('sit');
-      const productId = zone === 'newmoon' ? item.targetId : undefined;
-      const name = item.a11y.en;
-      const action = productId ? {
-        effect:'drawer', label:'Open drawer', progress:'Opening drawer…', done:'Drawer open.'
-      } : concreteActions[item.id];
-      const seated = action?.seated;
-      return {id:item.id, kind:'shop', x, y, z, floor, standing:{x:sx,z:sz},
-        radius:Math.min(item.reachDistance,.9),
-        availability:({zone:currentZone,travelling,player}) =>
-          zone === currentZone && !travelling && !player?.pushing && !player?.productApproaching &&
-          (player?.character?.physicalProduct?.phase ?? 'empty') === 'empty' &&
-          (!player?.seated || (seated && player.seatPhase === 'seated' && player.seatId?.startsWith('newmoon-tasting-stool-'))),
-        shopAction:{zone, slot, item, name, seat, seated, productId,
-          label: seat ? 'Sit' : 'View', done:`Viewed: ${name}`, duration:action ? .85 : 0, ...action}};
-    });
-  });
+  return slots.flatMap((slot, index) =>
+    layouts[index].map(item => createShopInteractionTarget(slot,interiorStores[slot],item)));
 }
 
 export async function installShopInteractions(T, scene, registry, announce) {

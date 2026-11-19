@@ -1,5 +1,15 @@
 import {isInFrontOfSeat} from './seat-placements.js';
 
+function distanceToInteraction(item, position, context) {
+  const floor = typeof item.floor === 'number' ? item.floor : item.y;
+  if (Math.abs((position.y ?? 0) - floor) > .5 || !item.availability(context, item)) return Infinity;
+  if (item.seat && !isInFrontOfSeat(item.seat, position)) return Infinity;
+  const point = item.standing ?? item.anchor;
+  const distance = item.shopAction?.seated && context.player?.seated ? 0 :
+    Math.hypot(position.x - point.x, position.z - point.z);
+  return distance < item.radius ? distance : Infinity;
+}
+
 export function createInteractionState({announce = () => {}, present = () => {}} = {}) {
   const states = new Map();
   const idle = Object.freeze({phase: 'idle', message: ''});
@@ -90,30 +100,35 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
     return actions.get(kind)?.get(id) || null;
   }
   function nearest(position, context = {}) {
-    let best = null, priority = Infinity, distance = Infinity;
+    let best = null, distance = Infinity;
     selectionContext = context;
     const shopEntries = context.travelling ? null : shops?.byZone.get(context.zone);
     candidates.length = 0;
     function consider(source) {
       const item = normalize(source);
-      const floor = typeof item.floor === 'number' ? item.floor : item.y;
-      if (Math.abs((position.y ?? 0) - floor) > .5 || !item.availability(context, item)) return;
-      if (item.seat && !isInFrontOfSeat(item.seat, position)) return;
-      const point = item.standing ?? item.anchor;
-      const d = item.shopAction?.seated && context.player?.seated ? 0 :
-        Math.hypot(position.x - point.x, position.z - point.z);
-      if (d >= item.radius) return;
-      if (shopEntries && (!context.player?.seated || item.shopAction?.seated)) candidates.push({item, distance:d});
-      // Native displays and seats stay the primary choice when in range.
-      // Drawers augment their own shelf through the same nearby-action cycle.
-      const rank = item.shopAction?.seated && context.player?.seated ? -1 :
-        !item.shopAction ? 0 : item.shopAction.effect ? 1 : 2;
-      if (!item.shopAction?.productId && (rank < priority || (rank === priority && d < distance))) {
-        best = item; priority = rank; distance = d;
+      const d = distanceToInteraction(item, position, context);
+      if (d === Infinity) return;
+      if (shopEntries && (!context.player?.seated || item.shopAction?.seated)) {
+        // Native actions and playable props break distance ties before exhibits.
+        const rank = !item.shopAction ? 0 : item.shopAction.effect ? 1 : 2;
+        candidates.push({item, distance:d, rank});
+      }
+      if (d < distance) {
+        best = item;
+        distance = d;
       }
     }
     if (!context.travelling) for (const source of entries) consider(source);
     if (shopEntries) for (const source of shopEntries) consider(source);
+    if (candidates.length) {
+      candidates.sort((a,b) => a.distance - b.distance || a.rank - b.rank);
+      const primary = candidates[0];
+      // Keep the original shelf prompt first when its drawer is closest.
+      const shelf = primary.item.shopAction?.productId &&
+        candidates.findIndex(({item}) => item.id === primary.item.shopAction.productId);
+      if (shelf > 0) candidates.unshift(...candidates.splice(shelf,1));
+      ({item:best, distance} = candidates[0]);
+    }
     const chosen = cycled && candidates.find(candidate => candidate.item === cycled);
     if (!chosen) cycled = null;
     selected = chosen?.item ?? best;
@@ -129,8 +144,7 @@ export function createInteractionRegistry(entries, describe = () => ({})) {
     return true;
   }
   function canCycle() {
-    return candidates.some(({item}) => item.shopAction) &&
-      (candidates.length > 1 || candidates[0]?.item !== selected);
+    return candidates.length > 1 && candidates.some(({item}) => item.shopAction);
   }
   function dispatch(item, context = selectionContext) {
     if (!item || (item.availability && !item.availability(context, item))) return false;

@@ -5188,6 +5188,16 @@ function isInFrontOfSeat(seat, { x, z }) {
 }
 
 // demos/corporate/gjh/v11/assets/interaction-registry.js
+function distanceToInteraction(item, position, context) {
+  const floor = typeof item.floor === "number" ? item.floor : item.y;
+  if (Math.abs((position.y ?? 0) - floor) > 0.5 || !item.availability(context, item))
+    return Infinity;
+  if (item.seat && !isInFrontOfSeat(item.seat, position))
+    return Infinity;
+  const point2 = item.standing ?? item.anchor;
+  const distance = item.shopAction?.seated && context.player?.seated ? 0 : Math.hypot(position.x - point2.x, position.z - point2.z);
+  return distance < item.radius ? distance : Infinity;
+}
 function createInteractionState({ announce = () => {}, present = () => {} } = {}) {
   const states = new Map;
   const idle = Object.freeze({ phase: "idle", message: "" });
@@ -5297,27 +5307,21 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     return actions2.get(kind)?.get(id) || null;
   }
   function nearest(position, context = {}) {
-    let best = null, priority = Infinity, distance = Infinity;
+    let best = null, distance = Infinity;
     selectionContext = context;
     const shopEntries = context.travelling ? null : shops?.byZone.get(context.zone);
     candidates.length = 0;
     function consider(source) {
       const item = normalize(source);
-      const floor = typeof item.floor === "number" ? item.floor : item.y;
-      if (Math.abs((position.y ?? 0) - floor) > 0.5 || !item.availability(context, item))
+      const d = distanceToInteraction(item, position, context);
+      if (d === Infinity)
         return;
-      if (item.seat && !isInFrontOfSeat(item.seat, position))
-        return;
-      const point2 = item.standing ?? item.anchor;
-      const d = item.shopAction?.seated && context.player?.seated ? 0 : Math.hypot(position.x - point2.x, position.z - point2.z);
-      if (d >= item.radius)
-        return;
-      if (shopEntries && (!context.player?.seated || item.shopAction?.seated))
-        candidates.push({ item, distance: d });
-      const rank = item.shopAction?.seated && context.player?.seated ? -1 : !item.shopAction ? 0 : item.shopAction.effect ? 1 : 2;
-      if (!item.shopAction?.productId && (rank < priority || rank === priority && d < distance)) {
+      if (shopEntries && (!context.player?.seated || item.shopAction?.seated)) {
+        const rank = !item.shopAction ? 0 : item.shopAction.effect ? 1 : 2;
+        candidates.push({ item, distance: d, rank });
+      }
+      if (d < distance) {
         best = item;
-        priority = rank;
         distance = d;
       }
     }
@@ -5327,6 +5331,14 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     if (shopEntries)
       for (const source of shopEntries)
         consider(source);
+    if (candidates.length) {
+      candidates.sort((a, b) => a.distance - b.distance || a.rank - b.rank);
+      const primary = candidates[0];
+      const shelf = primary.item.shopAction?.productId && candidates.findIndex(({ item }) => item.id === primary.item.shopAction.productId);
+      if (shelf > 0)
+        candidates.unshift(...candidates.splice(shelf, 1));
+      ({ item: best, distance } = candidates[0]);
+    }
     const chosen = cycled && candidates.find((candidate) => candidate.item === cycled);
     if (!chosen)
       cycled = null;
@@ -5343,7 +5355,7 @@ function createInteractionRegistry(entries, describe = () => ({})) {
     return true;
   }
   function canCycle() {
-    return candidates.some(({ item }) => item.shopAction) && (candidates.length > 1 || candidates[0]?.item !== selected);
+    return candidates.length > 1 && candidates.some(({ item }) => item.shopAction);
   }
   function dispatch(item, context = selectionContext) {
     if (!item || item.availability && !item.availability(context, item))

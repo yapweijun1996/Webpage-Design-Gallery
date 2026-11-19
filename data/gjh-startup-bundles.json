@@ -31,7 +31,7 @@
     "demos/corporate/gjh/v11/assets/graphics-quality.js": "aa61a1f7792a7cd92b5142e0f01f9ee374c4f555b4f6c21d60fa27cec9635150",
     "demos/corporate/gjh/v11/assets/hud-coordinator.js": "fd507d6893122dc4b9247678db57fadd016e32d60de12e682de1c97fb19b2132",
     "demos/corporate/gjh/v11/assets/icons.js": "be9bbf0e92cd420c9d27cc5848210a19a7930cc52ffb9bff709161a0eceea19b",
-    "demos/corporate/gjh/v11/assets/interaction-registry.js": "af48833789ea06a592b2467a743925e000d4db7c85f0573d7a0b7604caac265d",
+    "demos/corporate/gjh/v11/assets/interaction-registry.js": "4789fe9fbf3f4960c27a1b9886bd9b98d2c231baf2a85a204771f833e5e579c3",
     "demos/corporate/gjh/v11/assets/interior-additions-registry.js": "86c57e5c57254cfb0f3d902d0cf7112d1325c0af57e53ca67d505153ea50dc0e",
     "demos/corporate/gjh/v11/assets/interior-pilot-registry.js": "8adca76dbae3d40bf28c6a040ca5f1039c005794522ef113a97dff93d259b8c6",
     "demos/corporate/gjh/v11/assets/interior-shell-registry.js": "f73ae9237c5ebc37256fcadcebf057b61d45df0e4e6b38f95102a8562ce47b4c",
@@ -108,7 +108,7 @@
     "demos/corporate/gjh/v11/script.js": "80620e7d75a8f710e44be619f684d8c8cdabb14ed13230fed0297c4674a90098"
   },
   "outputs": {
-    "demos/corporate/gjh/v11/script.bundle.js": "79c962f6f90ddd32f6acc3af417fda91cf6802430c1ea59e558ae95fe8f0a008",
+    "demos/corporate/gjh/v11/script.bundle.js": "cd7b3eac37dee9796ec48eae52c6f75a18b4b0b68e4e72d6d083b6a9245f0e6c",
     "demos/corporate/gjh/v11/assets/world.bundle.js": "f0523b8b5caf023de7b119d2c930d7ba6efcc825294fc0b26d4cdc251acae90f",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "690235d9d813785d9b63c86fe872c8fdd79dbc4e4e99e7794a0c3755603a5fa1",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "3e0c6cfaf1bbd5eb78e5361af0e4204ed158af51701f6763669ee2db3754784f"
