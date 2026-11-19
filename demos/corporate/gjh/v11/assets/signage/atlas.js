@@ -265,3 +265,54 @@ export async function bakeAtlas(configs,assetBase) {
   low.drawImage(sheet,0,0,lowAtlasSize,lowAtlasSize);
   return {sheet,lowSheet,tiles};
 }
+
+// Reserve the mip chain without sending any canvas pixels to the driver. Each
+// subsequent copy uses at most 128 KiB, with the same UVs as the Low atlas.
+export function createProgressiveAtlas(T, sheet) {
+  const size = sheet.width;
+  const texture = new T.DataTexture(null, size, size);
+  texture.colorSpace = T.SRGBColorSpace;
+  texture.minFilter = T.LinearMipmapLinearFilter;
+  texture.magFilter = T.LinearFilter;
+  texture.anisotropy = 2;
+  const levels = texture.mipmaps;
+  for (let width=size; width>=1; width/=2) levels.push({width,height:width,data:null});
+  texture.source.dataReady = false;
+  texture.needsUpdate = true;
+  let ready = false;
+  texture.addEventListener('dispose', () => { ready = false; });
+
+  function* upload(renderer) {
+    if (ready) return;
+    const strip = canvas(1,1);
+    const reader = strip.getContext('2d', {willReadFrequently:true});
+    const source = new T.DataTexture();
+    const offset = new T.Vector2();
+    renderer.initTexture(texture);
+    yield;
+    for (let level=levels.length-1; level>=0; level--) {
+      const {width} = levels[level], scale = size/width;
+      const rowBytes = width*4, rows = Math.min(width, Math.floor(131072/rowBytes));
+      strip.width = width;
+      strip.height = rows;
+      reader.imageSmoothingQuality = 'high';
+      const flipped = new Uint8Array(rowBytes*rows);
+      for (let y=0; y<width; y+=rows) {
+        // Read rows from the bottom to match CanvasTexture's default flipY.
+        const top = size-(y+rows)*scale;
+        reader.clearRect(0,0,width,rows);
+        reader.drawImage(sheet,0,top,size,rows*scale,0,0,width,rows);
+        const pixels = reader.getImageData(0,0,width,rows).data;
+        for (let row=0; row<rows; row++) {
+          const first = row*rowBytes;
+          flipped.set(pixels.subarray(first,first+rowBytes),(rows-row-1)*rowBytes);
+        }
+        source.image = {data:flipped,width,height:rows};
+        renderer.copyTextureToTexture(source,texture,null,offset.set(0,y),level);
+        yield;
+      }
+    }
+    ready = true;
+  }
+  return {texture, upload};
+}

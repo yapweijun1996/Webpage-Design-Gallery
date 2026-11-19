@@ -121,7 +121,7 @@ export function createGraphicsQuality(onChange) {
   function apply(next) {
     profile=next;
     const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-    status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'} ${profile.tier === 'low' ? 'Uses lower resolution, shows fewer ambient visitors, and skips drawing distant shelf stock in the expanded mall.' : 'Resolution follows the screen within a fixed limit.'} Downloads and products stay the same.`;
+    status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'} ${profile.tier === 'low' ? 'Uses lower resolution and shows fewer ambient visitors.' : 'Resolution follows the screen within a fixed limit.'} Downloads and products stay the same.`;
     return profile;
   }
   return {

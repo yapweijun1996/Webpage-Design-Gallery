@@ -25,11 +25,11 @@ export function createUploadScheduler({now = () => performance.now(), budgetMs =
     });
   }
 
-  function runFrame(canRun) {
+  function runFrame(canRun, remaining = budgetMs) {
     if (!canRun || !jobs.length) return 0;
     const start = now();
     let steps = 0;
-    while (jobs.length && steps < maxSteps && now() - start < budgetMs) {
+    while (jobs.length && steps < maxSteps && now() - start < Math.min(budgetMs, remaining)) {
       let job = jobs[0], priority = job.priority();
       for (let i = 1; i < jobs.length; i++) {
         const candidate = jobs[i];
@@ -83,6 +83,19 @@ export function meshTextures(mesh, shadows=false) {
   return textures;
 }
 
+// A minimal draw exercises the real bindings without resubmitting hidden stock.
+export function limitWarmGeometry(geometry, grouped) {
+  const {start, count} = geometry.drawRange, groups = geometry.groups;
+  if (grouped && groups.length) {
+    geometry.groups = groups.map(group => ({...group, count:Math.min(6, group.count)}));
+    geometry.setDrawRange(0, Infinity);
+  } else geometry.setDrawRange(0, 6);
+  return () => {
+    geometry.groups = groups;
+    geometry.setDrawRange(start, count);
+  };
+}
+
 export function createModelWarmup(T, renderer) {
   const scheduler = createUploadScheduler();
   let initialized = new WeakMap();
@@ -107,7 +120,7 @@ export function createModelWarmup(T, renderer) {
     const previousTarget = renderer.getRenderTarget();
     const activeFace = renderer.getActiveCubeFace(), activeMip = renderer.getActiveMipmapLevel();
     const scissorTest = renderer.getScissorTest();
-    const {autoClear, toneMapping} = renderer, autoReset = renderer.info.autoReset;
+    const {autoClear, toneMapping, sortObjects} = renderer, autoReset = renderer.info.autoReset;
     const shadows = renderer.shadowMap, {autoUpdate, needsUpdate} = shadows;
     const {calls, triangles, points, lines} = renderer.info.render;
     renderer.getScissor(scissor);
@@ -123,10 +136,11 @@ export function createModelWarmup(T, renderer) {
       mesh.layers.mask = mask;
       mesh.visible = true;
       mesh.frustumCulled = false;
-      if (mesh.isInstancedMesh) mesh.count = Math.min(1, count);
+      if (mesh.isInstancedMesh) mesh.count = Math.min(1, mesh.instanceMatrix.count);
       camera.layers.mask = mask & 1 ? 1 : mask;
       mesh.updateWorldMatrix(true, false);
       renderer.autoClear = false;
+      renderer.sortObjects = false;
       renderer.info.autoReset = false;
       shadows.autoUpdate = shadows.needsUpdate = false;
       renderer.setRenderTarget(linear ? target : null);
@@ -145,6 +159,7 @@ export function createModelWarmup(T, renderer) {
       if (mesh.isInstancedMesh) mesh.count = count;
       staging.children = [];
       renderer.autoClear = autoClear;
+      renderer.sortObjects = sortObjects;
       renderer.toneMapping = toneMapping;
       renderer.info.autoReset = autoReset;
       // Keep Three's frame counter monotonic for its internal upload caches.
@@ -169,7 +184,12 @@ export function createModelWarmup(T, renderer) {
       return false;
     };
     while (programs?.some(program => !program.isReady())) yield () => false;
-    yield () => withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera));
+    yield () => {
+      const restore = limitWarmGeometry(mesh.geometry, Array.isArray(mesh.material));
+      try { withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera)); }
+      finally { restore(); }
+      return false;
+    };
   }
 
   function prepare(root, scene, {hide = false, linear = () => false, alternates = [], includeInSceneSweep = true, ...options} = {}) {
@@ -230,7 +250,7 @@ export function createModelWarmup(T, renderer) {
     get arrivalRevision(){return arrivalRevision;},
     pendingMeshes:()=>Array.from(pendingBatches).flatMap(batch=>batch.map(entry=>entry.mesh)),
     report:scheduler.report,
-    runFrame(canRun) { return scheduler.runFrame(canRun && !renderer.getContext().isContextLost()); },
+    runFrame(canRun, remaining) { return scheduler.runFrame(canRun && !renderer.getContext().isContextLost(), remaining); },
     invalidate() { initialized = new WeakMap(); scheduler.invalidate(); },
     dispose() { scheduler.dispose(); target.dispose(); }};
 }

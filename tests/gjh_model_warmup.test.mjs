@@ -48,6 +48,7 @@ test('model warm-up stages the exact renderable and restores the renderer after 
       assert.equal(mesh.visible, true);
       assert.equal(mesh.frustumCulled, false);
       assert.equal(mesh.children.length, 0);
+      assert.equal(mesh.geometry.drawRange.count, 6);
       assert.equal(renderer.autoClear, false);
       assert.equal(renderer.shadowMap.autoUpdate, false);
       renderer.toneMapping = T.NoToneMapping;
@@ -81,6 +82,7 @@ test('model warm-up stages the exact renderable and restores the renderer after 
   assert.equal(mesh.visible, false);
   assert.equal(mesh.frustumCulled, true);
   assert.equal(mesh.count, 6);
+  assert.equal(mesh.geometry.drawRange.count, Infinity);
   assert.equal(mesh.layers.mask, 1);
   assert.deepEqual(mesh.children, [child]);
   assert.equal(light.parent, scene);

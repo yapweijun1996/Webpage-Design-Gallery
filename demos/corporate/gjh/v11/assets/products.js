@@ -225,7 +225,7 @@ export async function addProducts(T, scene, textures, brass,showcase=[],displayS
     interactables.push({id: `new-moon-${sku}-front`, x, z: -8.3, radius: 1.9});
   });
   return {displayedProducts:showcase.length,
-    updateShopLods(visitor, tier) { for (const lod of displayLods) lod.update(visitor, tier); },
+    updateShopLods(visitor) { for (const lod of displayLods) lod.update(visitor); },
     setShadows(enabled) { if (shadowMesh) shadowMesh.visible = enabled; }, shelfPositions:shelfXs, shelves, reserveProduct(id) {
     const entry = stock.get(id);
     if (!entry || entry.reserved) return null;

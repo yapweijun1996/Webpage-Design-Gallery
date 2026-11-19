@@ -2815,7 +2815,7 @@ function createGraphicsQuality(onChange) {
   function apply(next) {
     profile = next;
     const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-    status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Uses lower resolution, shows fewer ambient visitors, and skips drawing distant shelf stock in the expanded mall." : "Resolution follows the screen within a fixed limit."} Downloads and products stay the same.`;
+    status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."} ${profile.tier === "low" ? "Uses lower resolution and shows fewer ambient visitors." : "Resolution follows the screen within a fixed limit."} Downloads and products stay the same.`;
     return profile;
   }
   return {
@@ -3264,12 +3264,12 @@ function createUploadScheduler({ now = () => performance.now(), budgetMs = 4, ma
       signal?.addEventListener("abort", job.cancel, { once: true });
     });
   }
-  function runFrame(canRun) {
+  function runFrame(canRun, remaining = budgetMs) {
     if (!canRun || !jobs.length)
       return 0;
     const start = now();
     let steps = 0;
-    while (jobs.length && steps < maxSteps && now() - start < budgetMs) {
+    while (jobs.length && steps < maxSteps && now() - start < Math.min(budgetMs, remaining)) {
       let job = jobs[0], priority = job.priority();
       for (let i = 1;i < jobs.length; i++) {
         const candidate = jobs[i];
@@ -3344,6 +3344,18 @@ function meshTextures(mesh, shadows = false) {
     textures.push(mesh.morphTexture);
   return textures;
 }
+function limitWarmGeometry(geometry, grouped) {
+  const { start, count } = geometry.drawRange, groups = geometry.groups;
+  if (grouped && groups.length) {
+    geometry.groups = groups.map((group) => ({ ...group, count: Math.min(6, group.count) }));
+    geometry.setDrawRange(0, Infinity);
+  } else
+    geometry.setDrawRange(0, 6);
+  return () => {
+    geometry.groups = groups;
+    geometry.setDrawRange(start, count);
+  };
+}
 function createModelWarmup(T, renderer) {
   const scheduler = createUploadScheduler();
   let initialized = new WeakMap;
@@ -3367,7 +3379,7 @@ function createModelWarmup(T, renderer) {
     const previousTarget = renderer.getRenderTarget();
     const activeFace = renderer.getActiveCubeFace(), activeMip = renderer.getActiveMipmapLevel();
     const scissorTest = renderer.getScissorTest();
-    const { autoClear, toneMapping } = renderer, autoReset = renderer.info.autoReset;
+    const { autoClear, toneMapping, sortObjects } = renderer, autoReset = renderer.info.autoReset;
     const shadows = renderer.shadowMap, { autoUpdate, needsUpdate } = shadows;
     const { calls, triangles, points, lines } = renderer.info.render;
     renderer.getScissor(scissor);
@@ -3382,10 +3394,11 @@ function createModelWarmup(T, renderer) {
       mesh.visible = true;
       mesh.frustumCulled = false;
       if (mesh.isInstancedMesh)
-        mesh.count = Math.min(1, count);
+        mesh.count = Math.min(1, mesh.instanceMatrix.count);
       camera.layers.mask = mask & 1 ? 1 : mask;
       mesh.updateWorldMatrix(true, false);
       renderer.autoClear = false;
+      renderer.sortObjects = false;
       renderer.info.autoReset = false;
       shadows.autoUpdate = shadows.needsUpdate = false;
       renderer.setRenderTarget(linear ? target : null);
@@ -3403,6 +3416,7 @@ function createModelWarmup(T, renderer) {
         mesh.count = count;
       staging.children = [];
       renderer.autoClear = autoClear;
+      renderer.sortObjects = sortObjects;
       renderer.toneMapping = toneMapping;
       renderer.info.autoReset = autoReset;
       Object.assign(renderer.info.render, { calls, triangles, points, lines });
@@ -3424,7 +3438,15 @@ function createModelWarmup(T, renderer) {
     };
     while (programs?.some((program) => !program.isReady()))
       yield () => false;
-    yield () => withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera));
+    yield () => {
+      const restore = limitWarmGeometry(mesh.geometry, Array.isArray(mesh.material));
+      try {
+        withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera));
+      } finally {
+        restore();
+      }
+      return false;
+    };
   }
   function prepare(root, scene, { hide = false, linear = () => false, alternates = [], includeInSceneSweep = true, ...options } = {}) {
     const meshes = [];
@@ -3496,8 +3518,8 @@ function createModelWarmup(T, renderer) {
     },
     pendingMeshes: () => Array.from(pendingBatches).flatMap((batch) => batch.map((entry) => entry.mesh)),
     report: scheduler.report,
-    runFrame(canRun) {
-      return scheduler.runFrame(canRun && !renderer.getContext().isContextLost());
+    runFrame(canRun, remaining) {
+      return scheduler.runFrame(canRun && !renderer.getContext().isContextLost(), remaining);
     },
     invalidate() {
       initialized = new WeakMap;
@@ -3524,7 +3546,7 @@ function registerInteriorWarmup(interiors, { T, renderer, scene, lights, tier },
   return interiors?.prepare(tier, () => createInstaller(T, renderer, scene, lights), options) ?? Promise.resolve();
 }
 function createInstaller(T, renderer, scene, { accents, limit }) {
-  const queue = createUploadScheduler({ budgetMs: 2 });
+  const queue = createUploadScheduler({ budgetMs: 2, maxSteps: 12 });
   const staging = new T.Scene, lighting = new T.Scene, camera = new T.PerspectiveCamera;
   const target = new T.WebGLRenderTarget(1, 1);
   const accentSet = new Set(accents);
@@ -3555,6 +3577,25 @@ function createInstaller(T, renderer, scene, { accents, limit }) {
       renderer.setRenderTarget(previous, face, mip);
     }
   }
+  async function build(makeWork, options) {
+    let value;
+    await queue.enqueue(function* () {
+      const work = makeWork();
+      let done = false;
+      try {
+        while (!done)
+          yield () => {
+            const step = work.next();
+            done = step.done;
+            if (done)
+              value = step.value;
+          };
+      } finally {
+        work.return();
+      }
+    }, { ...options, late: false });
+    return value;
+  }
   async function prepare(roots, { tier, priority, signal, prepareModel }) {
     const linear = () => tier === "detailed";
     const options = { priority, signal, late: false };
@@ -3563,8 +3604,10 @@ function createInstaller(T, renderer, scene, { accents, limit }) {
       queue.enqueue(function* () {
         const programs = new Set;
         for (const output of linear() ? [false, true] : [false]) {
-          for (let count = 0;count <= variable.length; count++)
-            yield () => compile(roots, count, output, programs);
+          for (let count = 0;count <= variable.length; count++) {
+            for (const root of roots)
+              yield () => compile([root], count, output, programs);
+          }
         }
         for (const program of programs)
           while (!program.isReady())
@@ -3601,9 +3644,10 @@ function createInstaller(T, renderer, scene, { accents, limit }) {
     }
   }
   return {
+    build,
     prepare,
-    runFrame() {
-      return queue.runFrame(!renderer.getContext().isContextLost());
+    runFrame(remaining) {
+      return queue.runFrame(!renderer.getContext().isContextLost(), remaining);
     },
     dispose() {
       queue.dispose();
@@ -3654,7 +3698,8 @@ function prepareTier({
   width,
   height,
   screenPixel,
-  applyProfile
+  applyProfile,
+  startup = false
 }, profile, report) {
   const { scene, signage, interiors } = world;
   const { tier, shadows } = profile;
@@ -3668,8 +3713,30 @@ function prepareTier({
   function* sweep() {
     let stage;
     try {
+      const directPrepared = new WeakSet, directPrograms = new Set;
+      if (startup && (expanded && shadows || signage && signage.getTier() !== tier)) {
+        yield* prepareScene({
+          T,
+          renderer,
+          scene,
+          camera: player.camera,
+          expanded,
+          elevator,
+          shadows: false,
+          detailed: false,
+          screenPixel,
+          extra: modelWarmup.pendingMeshes(),
+          exclude: interiors?.groups,
+          prepared: directPrepared,
+          programs: directPrograms,
+          updateLights: atmosphere.update,
+          lightVariants: atmosphere.lightVariants,
+          initTexture: modelWarmup.initTexture,
+          alternatesFor: modelWarmup.alternatesFor
+        }, report);
+      }
       if (signage)
-        stage = yield* signage.prepareTier(tier);
+        stage = yield* signage.prepareTier(tier, renderer);
       const replacing = stage && stage.meshes !== signage.activeMeshes();
       const exclude = [...interiors?.groups ?? []];
       if (replacing)
@@ -3677,7 +3744,7 @@ function prepareTier({
       const detailed = expanded && shadows;
       if (detailed)
         yield* atmosphere.preparePost(Math.floor(width * profile.pixelRatio), Math.floor(height * profile.pixelRatio), screenPixel);
-      const prepared = new WeakSet, programs = new Set;
+      const prepared = shadows ? new WeakSet : directPrepared, programs = directPrograms;
       const { camera, state } = player, direction = camera.getWorldDirection(new T.Vector3);
       const chase = tier === "low" ? null : {
         distance: Math.hypot(camera.position.x - state.x, camera.position.z - state.z),
@@ -3729,6 +3796,7 @@ function prepareTier({
 }
 function createWarmRunner(work, report, {
   budgetMs,
+  onRelease = () => {},
   onFinish,
   lost,
   signal,
@@ -3736,28 +3804,41 @@ function createWarmRunner(work, report, {
   setTimer = setTimeout,
   clearTimer = clearTimeout
 }) {
-  let started = now(), elapsed = 0, timer, finished = false;
+  let started = now(), elapsed = 0, timer, finished = false, blocking = true;
   const duration = () => elapsed + (started === null ? 0 : now() - started);
-  function stop(reason) {
-    if (finished)
+  function release(reason) {
+    if (!blocking)
       return;
-    finished = true;
+    blocking = false;
     clearTimer(timer);
     signal?.removeEventListener("abort", skip);
     report.ms = Math.round(duration());
     report.reason = reason;
     report.skipped = reason !== "complete";
+    onRelease(report);
+  }
+  function stop(reason) {
+    if (finished)
+      return;
+    finished = true;
+    if (!blocking)
+      report.background = reason;
     try {
       work.return();
     } finally {
+      release(reason);
       onFinish(report);
     }
   }
+  function background(reason) {
+    report.background = "running";
+    release(reason);
+  }
   function arm() {
-    timer = setTimer(() => stop(lost() ? "context-loss" : "timeout"), 6000 - elapsed);
+    timer = setTimer(() => lost() ? stop("context-loss") : background("timeout"), 6000 - elapsed);
   }
   function skip() {
-    stop(signal.reason);
+    background(signal.reason);
   }
   if (signal?.aborted)
     skip();
@@ -3767,6 +3848,9 @@ function createWarmRunner(work, report, {
   }
   return {
     stop,
+    get blocking() {
+      return blocking;
+    },
     visibility(hidden) {
       if (finished || hidden === (started === null))
         return;
@@ -3776,25 +3860,30 @@ function createWarmRunner(work, report, {
         clearTimer(timer);
       } else {
         started = now();
-        arm();
+        if (blocking)
+          arm();
       }
     },
-    runFrame() {
+    runFrame(remaining = 4) {
       if (finished || started === null)
         return;
       const sliceStart = now();
+      const budget = blocking ? budgetMs : Math.min(4, remaining);
       try {
-        do {
+        while (now() - sliceStart < budget) {
           if (lost())
             return stop("context-loss");
-          if (duration() >= 6000)
-            return stop("timeout");
+          if (blocking && duration() >= 6000)
+            return background("timeout");
           const step = work.next();
-          if (step.done)
-            return stop(duration() >= 6000 ? "timeout" : "complete");
+          if (step.done) {
+            if (blocking && duration() >= 6000)
+              background("timeout");
+            return stop("complete");
+          }
           if (step.value === false)
             return;
-        } while (now() - sliceStart < budgetMs);
+        }
       } catch (error) {
         console.warn("Mall detail preparation interrupted", error);
         stop("error");
@@ -3883,11 +3972,6 @@ function* prepareScene({
   }
   if (!meshes.length)
     return;
-  for (const texture of textures) {
-    initTexture(texture);
-    report.textures++;
-    yield;
-  }
   const gl = renderer.getContext(), parallel = renderer.extensions.has("KHR_parallel_shader_compile");
   const target = detailed ? new T.WebGLRenderTarget(1, 1) : null;
   const viewport = new T.Vector4, scissor = new T.Vector4;
@@ -3909,11 +3993,11 @@ function* prepareScene({
       });
     }
   }
-  function submit(batch, activeLights, output, compile, depth = false, fullView = false) {
+  function submit(batch, activeLights, output, compile, depth = false, passShadows = shadows) {
     const objects = [...activeLights, ...batch];
     const saved = objects.map((node) => [node.visible, node.frustumCulled, node.layers.mask, node.children]);
     const instanceCounts = new Map;
-    const hiddenMaterials = new Set, drawRanges = new Map;
+    const hiddenMaterials = new Set, restoreGeometry = new Map;
     const previous = renderer.getRenderTarget(), face = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
     const scissorTest = renderer.getScissorTest(), autoClear = renderer.autoClear, sortObjects = renderer.sortObjects;
     const shadowMap = renderer.shadowMap;
@@ -3931,12 +4015,10 @@ function* prepareScene({
       }
       for (const mesh of batch) {
         const geometry = mesh.geometry;
-        if (!compile && !fullView && geometry && !drawRanges.has(geometry)) {
-          const { start, count } = geometry.drawRange;
-          drawRanges.set(geometry, [start, count]);
-          geometry.setDrawRange(0, geometry.groups.length ? Infinity : 6);
+        if (!compile && geometry && !restoreGeometry.has(geometry)) {
+          restoreGeometry.set(geometry, limitWarmGeometry(geometry, Array.isArray(mesh.material)));
         }
-        if (!compile && !fullView && mesh.isInstancedMesh) {
+        if (!compile && mesh.isInstancedMesh) {
           instanceCounts.set(mesh, mesh.count);
           mesh.count = Math.min(1, mesh.instanceMatrix.count);
         }
@@ -3955,8 +4037,7 @@ function* prepareScene({
         renderer.setScissor(0, 0, size, size);
         renderer.setScissorTest(true);
       }
-      if (shadows !== undefined)
-        shadowMap.enabled = shadows;
+      shadowMap.enabled = passShadows;
       shadowMap.autoUpdate = shadowMap.needsUpdate = depth;
       renderer.autoClear = true;
       renderer.sortObjects = false;
@@ -3977,12 +4058,11 @@ function* prepareScene({
         material.visible = false;
       for (const [mesh, count] of instanceCounts)
         mesh.count = count;
-      for (const [geometry, range] of drawRanges)
-        geometry.setDrawRange(...range);
+      for (const restore of restoreGeometry.values())
+        restore();
       renderer.autoClear = autoClear;
       renderer.sortObjects = sortObjects;
-      if (shadows !== undefined)
-        shadowMap.enabled = shadowEnabled;
+      shadowMap.enabled = shadowEnabled;
       shadowMap.autoUpdate = shadowAuto;
       shadowMap.needsUpdate = shadowNeeds;
       Object.assign(info, { calls, triangles, points, lines });
@@ -3997,13 +4077,14 @@ function* prepareScene({
   }
   const visits = [];
   const glow = detailed ? meshes.filter((mesh) => mesh.layers.isEnabled(1)) : [];
-  const batchSize = 12;
-  function addPass(pose, active, output, candidates, layer = "main", probeVisit = false) {
+  const npcMeshes = meshes.filter((mesh) => mesh.layers.isEnabled(2));
+  const batchSize = 4;
+  function addPass(pose, active, output, candidates, layer = "main", probeVisit = false, passShadows = shadows) {
     if (!candidates.length)
       return;
-    const key = layer + variantKey(active, output);
+    const key = layer + passShadows + variantKey(active, output);
     const fresh = !variants.has(key);
-    const pass = { pose, active, output, candidates, fresh };
+    const pass = { pose, active, output, candidates, fresh, passShadows };
     if (fresh)
       variants.set(key, pass);
     if (fresh || probeVisit)
@@ -4012,7 +4093,7 @@ function* prepareScene({
   function addPose(pose, onlyNew = false) {
     const active = probeLights(pose), main = active.filter((light) => light.layers.isEnabled(0));
     const output = detailed && pose.y === 0 ? target : null;
-    if (onlyNew && variants.has("main" + variantKey(main, output)))
+    if (onlyNew && variants.has("main" + shadows + variantKey(main, output)))
       return;
     addPass(pose, main, output, meshes, "main", true);
     if (output)
@@ -4036,9 +4117,14 @@ function* prepareScene({
         const main = active.filter((light) => light.layers.isEnabled(0));
         for (const output of detailed ? [target, null] : [null]) {
           addPass(poses[0], main, output, meshes);
+          if (detailed && !output)
+            addPass(poses[0], main, output, meshes, "main", false, false);
           const npcLights = active.filter((light) => light.layers.isEnabled(2));
-          if (variantKey(npcLights, output) !== variantKey(main, output))
-            addPass(poses[0], npcLights, output, meshes.filter((mesh) => mesh.layers.isEnabled(2)), "npc");
+          if (variantKey(npcLights, output) !== variantKey(main, output)) {
+            addPass(poses[0], npcLights, output, npcMeshes, "npc");
+            if (detailed && !output)
+              addPass(poses[0], npcLights, output, npcMeshes, "npc", false, false);
+          }
         }
         if (detailed)
           addPass(poses[0], active.filter((light) => light.layers.isEnabled(1)), target, glow, "glow");
@@ -4054,11 +4140,16 @@ function* prepareScene({
       }
     }
     report.lightVariants = Math.max(report.lightVariants, variants.size);
-    for (const { active, output, candidates } of variants.values()) {
+    for (const { active, output, candidates, passShadows } of variants.values()) {
       for (let i = 0;i < candidates.length; i += batchSize) {
-        submit(candidates.slice(i, i + batchSize), active, output, true);
+        submit(candidates.slice(i, i + batchSize), active, output, true, false, passShadows);
         yield;
       }
+    }
+    for (const texture of textures) {
+      initTexture(texture);
+      report.textures++;
+      yield;
     }
     if (parallel)
       for (const program of programs)
@@ -4071,7 +4162,7 @@ function* prepareScene({
         const batch = casters.slice(i, i + 6);
         submit(batch, active, detailed ? target : null, false, true);
         report.shadowCasters += batch.length;
-        yield;
+        yield false;
       }
     }
     let completedPoses = 0;
@@ -4080,24 +4171,23 @@ function* prepareScene({
         report.probes = Math.max(report.probes, ++completedPoses);
         continue;
       }
-      const { pose, active, output, fresh, candidates } = visit;
+      const { pose, active, output, fresh, candidates, passShadows } = visit;
       position(pose);
       let batch = [];
-      const fullView = Boolean(pose.chase);
       for (const mesh of candidates) {
         if (fresh || !mesh.frustumCulled || (mesh.isSprite ? frustum.intersectsSprite(mesh) : frustum.intersectsObject(mesh)))
           batch.push(mesh);
         if (batch.length === batchSize) {
-          submit(batch, active, output, false, false, fullView);
+          submit(batch, active, output, false, false, passShadows);
           batch = [];
-          yield;
-          if (!fresh && !fullView)
+          yield false;
+          if (!fresh)
             break;
         }
       }
       if (batch.length) {
-        submit(batch, active, output, false, false, fullView);
-        yield;
+        submit(batch, active, output, false, false, passShadows);
+        yield false;
       }
     }
     fence = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
@@ -4823,7 +4913,9 @@ var modelWarmup;
 var tierQueue;
 var requestedProfile;
 var warmRunner = null;
+var warmKey;
 var warmReport = createWarmReport();
+var sceneWarmFirst = true;
 var productControl = null;
 var shelfFocus = null;
 var guidance = null;
@@ -4901,6 +4993,7 @@ var performanceMonitor = createPerformanceMonitor();
 performanceMonitor.setEnabled(true);
 var measuringFrames = false;
 var lastMetricsUpdate = -Infinity;
+var maxFrameUploadMs = 0;
 function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
@@ -4910,7 +5003,7 @@ function performanceReport() {
     timeOrigin: performance.timeOrigin,
     version: document.querySelector("[data-mall-version]")?.textContent.trim() || null,
     layout: expanded ? "expanded" : "classic",
-    uploads: modelWarmup?.report() ?? { lateAdditions: 0, maxFrameUploadMs: 0, pendingUploads: 0 },
+    uploads: { ...modelWarmup?.report() ?? { lateAdditions: 0, pendingUploads: 0 }, maxFrameUploadMs },
     warm: { ...warmReport, upperLevel: world?.upperWarmStatus ?? null },
     viewport: { width: viewportWidth, height: viewportHeight, pixelRatio: renderer?.getPixelRatio() },
     graphics: { tier: quality.state?.tier, contextLosses: losses, restorations: validations }
@@ -5308,7 +5401,7 @@ function updateModelPreload(now) {
       window.mallLoader?.prepare(node.textContent);
   }
 }
-function tierWork(profile, report) {
+function tierWork(profile, report, startup = false) {
   const screenPixel = () => !startupOverlay.hidden || !manual && !modes.paused() ? 1 : 0;
   return prepareTier({
     T: three,
@@ -5322,20 +5415,29 @@ function tierWork(profile, report) {
     width: renderWidth,
     height: renderHeight,
     screenPixel,
-    applyProfile
+    applyProfile,
+    startup
   }, profile, report);
+}
+function tierKey(profile) {
+  return [profile.tier, profile.shadows, profile.pixelRatio, profile.preference, renderWidth, renderHeight].join("/");
 }
 function scheduleTier() {
   const profile = requestedProfile, active = quality.state;
   if (!profile || !ready || contextLost || pageEnded)
     return;
+  const key = tierKey(profile);
+  if (warmRunner) {
+    if (warmRunner.blocking || warmKey === key)
+      return;
+    warmRunner.stop("superseded");
+  }
   if (profile.tier === active.tier && profile.shadows === active.shadows && (!world.signage || world.signage.getTier() === profile.tier) && (!world.interiors || world.interiors.activeTier === profile.tier)) {
     tierQueue.cancel();
     world.interiors?.setTier(profile.tier);
     applyProfile(profile);
     return;
   }
-  const key = [profile.tier, profile.shadows, profile.pixelRatio, profile.preference, renderWidth, renderHeight].join("/");
   tierQueue.request(key, () => tierWork(profile, createWarmReport())).catch((error) => {
     console.warn("Mall graphics tier preparation interrupted", error);
   });
@@ -5356,29 +5458,31 @@ function advanceStartupWarm() {
     const { tier } = requestedProfile;
     warmReport = createWarmReport();
     warmReport.reason = "running";
-    const runner = createWarmRunner(tierWork(requestedProfile, warmReport), warmReport, {
+    warmKey = tierKey(requestedProfile);
+    warmRunner = createWarmRunner(tierWork(requestedProfile, warmReport, true), warmReport, {
       budgetMs: tier === "low" ? 8 : tier === "balanced" ? 10 : 12,
       signal: loader.skipSignal,
       lost: () => renderer.getContext().isContextLost(),
+      onRelease(result) {
+        if (result.reason !== "context-loss" && !pageEnded && !fatal) {
+          loader.complete("warm", result.skipped || result.ms >= 5750);
+        }
+      },
       onFinish(result) {
         warmRunner = null;
-        if (result.reason !== "context-loss" && !pageEnded && !fatal) {
-          loader.complete("warm");
-          if (loader.ready)
-            scheduleTier();
-        }
+        if ((result.reason === "complete" || result.background === "complete") && loader.ready)
+          scheduleTier();
       }
     });
-    if (loader.skipSignal.aborted)
-      return false;
-    warmRunner = runner;
   }
+  if (!warmRunner.blocking)
+    return false;
   warmRunner.runFrame();
-  if (warmRunner)
-    warmModels(player.state);
+  if (warmRunner?.blocking)
+    warmModels(player.state, false);
   return true;
 }
-function warmModels(pose) {
+function warmModels(pose, background = true) {
   if (!pose || document.hidden || contextLost || restorePending || pageEnded)
     return 0;
   const { physicalProduct, collection } = pose.character;
@@ -5387,9 +5491,20 @@ function warmModels(pose) {
   if (!stableSeat || !stableProduct || pose.elevatorTravel || pose.productApproaching || collection.active)
     return 0;
   const started = performance.now();
-  world.interiors?.runFrame();
-  modelWarmup.runFrame(true);
-  return performance.now() - started;
+  const remaining = () => Math.max(0, 4 - (performance.now() - started));
+  const runner = background && warmRunner;
+  const sceneFirst = runner && sceneWarmFirst;
+  if (runner)
+    sceneWarmFirst = !sceneWarmFirst;
+  if (sceneFirst)
+    runner.runFrame(Math.min(2, remaining()));
+  world.interiors?.runFrame(remaining());
+  modelWarmup.runFrame(true, remaining());
+  if (runner && !sceneFirst)
+    runner.runFrame(remaining());
+  const elapsed = performance.now() - started;
+  maxFrameUploadMs = Math.max(maxFrameUploadMs, elapsed);
+  return elapsed;
 }
 function animate(now) {
   frame = 0;
@@ -5466,7 +5581,7 @@ function animate(now) {
     warmModels(player.state);
   }
   const movement = player.state.animation;
-  quality.sample(now, advancing && !tierQueue?.pending && preloadSettled && document.getElementById("app-loader").hidden && !windowBlurred && document.hasFocus() && !contextLost && !interrupted && ["explore", "cart"].includes(modes.current()), ["walk", "run"].includes(movement));
+  quality.sample(now, advancing && !warmRunner && !tierQueue?.pending && preloadSettled && document.getElementById("app-loader").hidden && !windowBlurred && document.hasFocus() && !contextLost && !interrupted && ["explore", "cart"].includes(modes.current()), ["walk", "run"].includes(movement));
   frame = requestAnimationFrame(animate);
 }
 function resume() {

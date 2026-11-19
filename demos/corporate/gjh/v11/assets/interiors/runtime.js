@@ -1,5 +1,5 @@
 import {interiorAsset,interiorStores,interiorTiers,radians,worldInteriorBox} from './config.js';
-import {buildInteriorDecoration,interiorMaterials} from './decoration.js';
+import {prepareInteriorDecoration,interiorMaterials} from './decoration.js';
 import {createInteriorModelLoader,disposeInteriorModel} from './models.js';
 
 import {roomDetails} from './detail-files.js';
@@ -17,9 +17,10 @@ export function createInteriorKit(T, scene, {
 
   let lastUpdate;
 
-  function measure(root, id) {
-    root.traverse(mesh => {
-      if (!mesh.isMesh) return;
+  function* measure(root, id) {
+    const meshes = [];
+    root.traverse(mesh => { if (mesh.isMesh) meshes.push(mesh); });
+    for (const mesh of meshes) {
       if (mesh.isInstancedMesh) mesh.computeBoundingSphere();
       else mesh.geometry.computeBoundingSphere();
       let calls, triangles;
@@ -32,11 +33,12 @@ export function createInteriorKit(T, scene, {
         report.triangles += renderer.info.render.triangles-triangles;
         renderedShops.add(id);
       };
-    });
+      yield;
+    }
   }
 
-  function decoration(store, detail) {
-    const base = buildInteriorDecoration(T,store,materials,detail);
+  function* decoration(store, detail) {
+    const base = yield* prepareInteriorDecoration(T,store,materials,detail);
     if (detail || store.id !== 'S01' || !packshot) return base;
     const photo = new T.MeshBasicMaterial({map:packshot,toneMapped:false});
     const panel = (width,x,y,z,yaw = 0) => {
@@ -98,7 +100,7 @@ export function createInteriorKit(T, scene, {
     const controller = new AbortController(), started = now();
     const waiting = shops.filter(shop => !shop.ready.has(tier));
     report.preinstalled = {shops:shops.length-waiting.length,ms:0};
-    const job = {tier,controller,started,waiting,remaining:waiting.length,retryAt:Infinity,deferActivation};
+    const job = {tier,controller,started,waiting,remaining:waiting.length,inflight:0,retryAt:Infinity,deferActivation};
     job.done = new Promise(resolve => { job.resolve = resolve; });
     request = job;
     finish(job);
@@ -113,6 +115,7 @@ export function createInteriorKit(T, scene, {
     const {tier,controller:{signal}} = job;
     const asset = interiorAsset(shop.store,tier), detail = interiorTiers.indexOf(tier);
     const priority = () => shop.distance-200;
+    const build = work => installer.build(work, {priority,signal});
     const required = [asset,roomDetails[shop.store.id]];
     const freshModels = new Map(), freshLayers = [];
     try {
@@ -120,7 +123,7 @@ export function createInteriorKit(T, scene, {
         for (const member of required) {
           if (shop.models.has(member.file)) continue;
           try {
-            const model = await loadModel(member,signal);
+            const model = await loadModel(member,signal,build);
             freshModels.set(member.file,model);
             model.name = `${shop.store.id} ${member.file}`;
             if (!member.roomDetail) {
@@ -135,9 +138,16 @@ export function createInteriorKit(T, scene, {
       } finally {
         decoding = false;
       }
-      for (let i=shop.layers.length; i<=detail; i++) freshLayers.push(decoration(shop.store,i));
+      await build(function* () {
+        for (let i=shop.layers.length; i<=detail; i++) {
+          const layer = yield* decoration(shop.store,i);
+          freshLayers.push(layer);
+          yield* measure(layer,shop.store.id);
+        }
+        for (const model of freshModels.values()) yield* measure(model,shop.store.id);
+      });
+      if (signal.aborted) return;
       const fresh = [...freshLayers,...freshModels.values()];
-      for (const root of fresh) measure(root,shop.store.id);
       const models = required.map(member => freshModels.get(member.file) ?? shop.models.get(member.file)).filter(Boolean);
       const roots = [...shop.layers.slice(0,detail+1),...freshLayers,...models];
       await installer.prepare(roots, {tier,priority,signal,prepareModel});
@@ -172,6 +182,7 @@ export function createInteriorKit(T, scene, {
         mesh.geometry?.dispose();
         if (mesh.material?.map === packshot && packshot) mesh.material.dispose();
       });
+      job.inflight--;
       if (!signal.aborted) {
         job.remaining--;
         report.preinstalled.ms = Math.round(now()-job.started);
@@ -206,22 +217,23 @@ export function createInteriorKit(T, scene, {
         if (shop.motion.pulse) shop.motion.pulse.emissiveIntensity = 1+.32*Math.sin(shop.phase*2.1);
       }
     },
-    runFrame() {
-      if (!request || disposed) return 0;
+    runFrame(remaining = 2) {
+      if (!request || disposed || remaining <= 0) return 0;
       if (now() >= request.retryAt) {
         request.waiting = shops.filter(shop => !shop.ready.has(request.tier));
         request.remaining = request.waiting.length;
         request.retryAt = Infinity;
       }
       const {waiting} = request;
-      if (!decoding && waiting.length) {
+      if (!decoding && waiting.length && request.inflight < 2) {
         let nearest = 0;
         for (let i=1; i<waiting.length; i++) if (waiting[i].distance < waiting[nearest].distance) nearest = i;
         const [shop] = waiting.splice(nearest,1);
         decoding = true;
+        request.inflight++;
         void stage(shop,request);
       }
-      return installer.runFrame();
+      return installer.runFrame(remaining);
     },
     get activeTier() { return activeTier; },
     beginFrame() {

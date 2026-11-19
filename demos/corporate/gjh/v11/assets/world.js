@@ -979,7 +979,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel) {
     // The render loop and context recovery both supply the resolved tier here.
     if (surfaceAtmosphere.setTier(tier) && mappedPaving) mappedPaving.roughness = materials.paving.roughness;
     uploadVisitor = visitor;
-    productDisplay?.updateShopLods(visitor, tier);
+    productDisplay?.updateShopLods(visitor);
     interiorKit.update(visitor);
     const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=12;
     for(const mesh of shopLodMeshes){
