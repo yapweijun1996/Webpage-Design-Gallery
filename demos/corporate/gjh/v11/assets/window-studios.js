@@ -254,10 +254,6 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       }
       cabinet(0,island,2.5,.99,1.24,walnut,oak);
       blossomVase(-.98,1.2475,island-.14,0x96a76a);
-      // A single unprinted study carton sits on the current counter.
-      box(pzhCartonX,1.365,island+.27,.28,.234,.151,0xba332b);
-      box(pzhCartonX,1.471,island+.27,.278,.022,.15,0xb5793f);
-      box(pzhCartonX,1.371,island+.349,.235,.063,.007,0xd9aa5d);
       break;
     }
     case 6: { // A timber drying rack above the service counter and a curved rear display niche.

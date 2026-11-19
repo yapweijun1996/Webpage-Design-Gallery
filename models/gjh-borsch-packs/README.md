@@ -1,0 +1,8 @@
+# Borsch Med S04 packaging form studies
+
+Open [borsch-packs.blend](borsch-packs.blend) to edit the separate unprinted parts. [generate.py](generate.py) builds them from the same metric profiles used by the [room source](../../scripts/gjh_interiors/borsch_packs.py). The [installed GLB](../../demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb) places the patch set in the existing folio and the Lingzhi pair on the right wall.
+
+- **Mosquito Repellent Patch, 18 patches.** The carton has an open hanging slot. A separate sealed pouch and a backing sheet with six raised rounded-square patches in two columns and three rows follow the photographed construction. The 136 × 246 × 23 mm carton, 110 × 174 × 12 mm pouch and 104 × 120 mm sheet are staging estimates. GJH's listing envelope does not resolve part dimensions. [Official packaging gallery](https://www.gjheshop.com/product/borsch-med-mosquito-repellent-patch-18-patches/)
+- **Lingzhi Cracked Spores Powder Capsule 200 mg × 60.** GJH lists the individual carton at 73 × 54 × 104 mm and the pair at 150 × 54 × 104 mm, in width × depth × height order. The study uses two separate cartons with a 4 mm gap across the display. [Single carton](https://www.gjheshop.com/product/borsch-med-100-lingzhi-cracked-spores-powder-capsule-200mg-x-60-capsules/) · [Twin pack](https://www.gjheshop.com/product/borsch-med-100-lingzhi-cracked-spores-powder-capsule-200mg-x-60-capsules-twin-pack/)
+
+Physical part measurements and the current print editions remain open. The models use original unprinted colours. The gallery photographs remain source references.

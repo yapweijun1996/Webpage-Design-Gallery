@@ -26,10 +26,10 @@ World origin (20, 0, -6), yaw 0°. Dimensions are authored metres. The [floor pl
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| Borsch Med Mosquito Repellent Patch, 18 patches | Open folio and an adjacent flush shelf socket | Installed unprinted carton, pouch and sticker study. Exact retail surfaces remain pending. |
-| Lingzhi Cracked Spores Powder Capsule 200 mg × 60 twin pack | Right product library shelf | Two neutral cartons distinguish the shelf bay. The verified pack photographs remain in the separate catalogue listing. |
+| Borsch Med Mosquito Repellent Patch, 18 patches | Open folio and an adjacent flush shelf socket | Unprinted carton with a through-hanger, sealed pouch and six rounded-square patches on a 2 × 3 backing sheet. Physical dimensions and retail surfaces remain pending. |
+| Lingzhi Cracked Spores Powder Capsule 200 mg × 60 twin pack | Right product library shelf | Two unprinted cartons use the catalogue's single-box dimensions and twin-pack envelope. The pack photographs remain in the separate catalogue listing. |
 
-Official photography is linked in the research brief. The proposal presents the products without treatment, dosing or performance claims.
+The [editable packaging studies](../../../models/gjh-borsch-packs/README.md) link the official references and describe the dimensional evidence. The proposal presents the products without treatment, dosing or performance claims.
 
 [Interior angle](interior-concept.webp) · [Top-down floor plan](floor-plan.webp) · [Model inventory](model-inventory.md) · [Product model reference](product-model-reference.webp)
 
