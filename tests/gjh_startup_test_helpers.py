@@ -1,5 +1,12 @@
 """Route and fault fixtures for the production mall startup tests."""
 
+from datetime import datetime, timezone
+
+
+def set_off_season_date(page):
+    """Keep manual-theme tests independent of today's automatic theme."""
+    page.clock.set_fixed_time(datetime(2027, 4, 1, 12, tzinfo=timezone.utc))
+
 
 def mall_entry_url(url, fragment="experience"):
     """Resolve a test entry after its query is built, retaining explicit deep links."""

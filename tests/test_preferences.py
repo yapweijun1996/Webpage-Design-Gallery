@@ -54,7 +54,7 @@ class PreferencesTests(unittest.TestCase):
 
 
     def test_invalid_packs_fail_before_publication(self):
-        for kind in ('missing', 'placeholder', 'array'):
+        for kind in ('missing', 'placeholder', 'array', 'mall theme placeholder'):
             with self.subTest(kind=kind), tempfile.TemporaryDirectory() as temporary:
                 folder = Path(temporary) / 'locales'
                 shutil.copytree(ROOT / 'locales', folder)
@@ -64,6 +64,8 @@ class PreferencesTests(unittest.TestCase):
                     del pack['messages']['Theme']
                 elif kind == 'placeholder':
                     pack['patterns']['Update to {release}'] = 'Kemas kini'
+                elif kind == 'mall theme placeholder':
+                    pack['mallTheme']['Automatic: {festival} ({date}, {when})'] = 'Automatik: {festival}'
                 else:
                     pack['messages'] = []
                 path.write_text(json.dumps(pack))
