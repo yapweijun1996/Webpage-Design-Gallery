@@ -115,6 +115,14 @@ test('Detailed filters glow at quarter resolution and reserves the final draw fo
     getClearAlpha:() => alpha,
     setClearColor(next,opacity) { colour.set(next); alpha = opacity; },
     clear() {},
+    initRenderTarget() {},
+    compile() {},
+    getScissor: box => box,
+    getScissorTest: () => false,
+    setScissor() {},
+    setScissorTest() {},
+    properties:{get:()=>({})},
+    extensions:{has:()=>false},
     render(rendered, activeCamera) {
       targets.push(target);
       passes.push([rendered.name,activeCamera.layers.mask,target?.width,target?.height,this.shadowMap.autoUpdate]);
@@ -130,6 +138,8 @@ test('Detailed filters glow at quarter resolution and reserves the final draw fo
     assert.equal(triangles,8);
     return 0;
   }};
+  for (const _ of atmosphere.preparePost(width,height,()=>1)) {}
+  passes.length = targets.length = 0;
   atmosphere.render(camera,true,npcs,budget);
   assert.deepEqual(passes,[
     ['',2,480,223,false], ['Mall glow filter',1,480,223,false],
@@ -147,6 +157,9 @@ test('Detailed filters glow at quarter resolution and reserves the final draw fo
   const shadowSize = light.shadow.mapSize.toArray();
   for (const [w, h] of [[1152,535], [1920,892]]) {
     width = w; height = h;
+    assert.equal(atmosphere.postPrepared(w,h),false);
+    assert.deepEqual([base.width,base.height],passes[2].slice(2,4));
+    for (const _ of atmosphere.preparePost(w,h,()=>1)) {}
     passes.length = targets.length = 0;
     atmosphere.render(camera,true,npcs,budget);
     assert.deepEqual(targets,[glow,blurredGlow,base,null]);
@@ -171,6 +184,8 @@ test('visitor shadows share their depth buffer and fit inside NPC admission', ()
     setRenderTarget(next) { current = next; },
     getDrawingBufferSize:size => size.set(800,600),
     getClearColor:colour => colour.set(0), getClearAlpha:() => 1, setClearColor() {},
+    initRenderTarget() {}, compile() {}, getScissor: box => box, getScissorTest: () => false, setScissor() {}, setScissorTest() {},
+    properties:{get:()=>({})}, extensions:{has:()=>false},
     render(rendered,activeCamera) {
       passes.push([current,activeCamera.layers.mask,this.autoClear]);
       info.render.calls++;
@@ -197,6 +212,8 @@ test('visitor shadows share their depth buffer and fit inside NPC admission', ()
     visit({x:2,z:3},0,0);
     visit({x:4,z:-2},.5,8);
   }};
+  for (const _ of atmosphere.preparePost(800,600,()=>1)) {}
+  passes.length = 0;
   atmosphere.render(camera,true,npcs,{calls:110,triangles:420000});
   assert.equal(passes[2][0],passes[3][0]);
   assert.equal(passes[3][1],4);

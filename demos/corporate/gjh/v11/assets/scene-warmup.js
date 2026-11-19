@@ -1,4 +1,4 @@
-import {limitWarmGeometry, meshTextures} from './model-warmup.js';
+import {captureShadowMaterials, limitWarmGeometry, meshTextures, withShadowMaterials} from './model-warmup.js';
 import {registerInteriorWarmup} from './interiors/warmup.js';
 import {spatial, courtyardArrival} from './spatial.js';
 import {expandedLayout, shopEntrance} from './expanded-layout.js';
@@ -285,7 +285,7 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
     }
   }
 
-  function submit(batch, activeLights, output, compile, depth=false, passShadows=shadows) {
+  function submit(batch, activeLights, output, compile, depth=false, passShadows=shadows, depthMaterials) {
     const objects = [...activeLights, ...batch];
     const saved = objects.map(node => [node.visible, node.frustumCulled, node.layers.mask, node.children]);
     const instanceCounts = new Map();
@@ -333,7 +333,9 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       renderer.sortObjects = false; // Never cache bounds at the temporary instance count.
       if (compile) {
         const linked = [];
-        for (const material of renderer.compile(staging, probe)) {
+        const compileBatch = () => renderer.compile(staging, probe);
+        const materials = depthMaterials ? withShadowMaterials(batch[0],depthMaterials,staging,compileBatch) : compileBatch();
+        for (const material of materials) {
           // A shared material can have instanced, skinned and two-sided variants.
           for (const program of renderer.properties.get(material).programs.values()) {
             if (!programs.has(program)) {
@@ -429,34 +431,62 @@ export function* prepareScene({T, renderer, scene, camera, expanded, elevator, d
       }
     }
     report.lightVariants=Math.max(report.lightVariants,variants.size);
+    for (const texture of textures) {
+      const uploaded = initTexture(texture,artworkTier);
+      report.textures++;
+      yield uploaded && (shadows || texture.userData?.artworkMipmaps === 'generate') ? false : undefined;
+    }
     // A live draw shares ANGLE's command stream with the staging renderer.
     // Drain each link batch before adding more work to that stream.
     for(const {active,output,candidates,passShadows} of variants.values()){
-      for(let i=0;i<candidates.length;i+=batchSize){
-        const linking = submit(candidates.slice(i,i+batchSize),active,output,true,false,passShadows);
+      const linkSize = shadows ? 1 : batchSize;
+      for(let i=0;i<candidates.length;i+=linkSize){
+        const linking = submit(candidates.slice(i,i+linkSize),active,output,true,false,passShadows);
         if (parallel && linking.length) {
           yield false;
           for (const program of linking) while (!program.isReady()) yield false;
         }
-        yield;
+        yield shadows && linking.length ? false : undefined;
       }
     }
-    for (const texture of textures) {
-      const uploaded = initTexture(texture,artworkTier);
-      report.textures++;
-      yield uploaded && texture.userData?.artworkMipmaps === 'generate' ? false : undefined;
-    }
-    if(shadows){
-      const active=probeLights(poses[0]).filter(light=>light.layers.isEnabled(0));
-      const casters=meshes.filter(mesh=>mesh.castShadow);
-      // r170 selects its own instanced/skinned depth and distance materials.
-      // A real shadow pass also allocates the light's retained shadow target.
-      for(let i=0;i<casters.length;i+=6){
-        const batch=casters.slice(i,i+6);
-        submit(batch,active,detailed?target:null,false,true);
-        report.shadowCasters+=batch.length;
+    if (shadows) {
+      const casters = meshes.filter(mesh => mesh.castShadow);
+      // A color compile does not visit Three's native shadow materials. Warm
+      // those bindings through its actual depth pass, independent of the
+      // follow camera's current coverage or the caster's live visibility.
+      const shadowPasses = new Map();
+      for (const {active,passShadows} of variants.values()) {
+        if (passShadows && active.some(light => light.castShadow)) {
+          shadowPasses.set(variantKey(active,target),active);
+        }
+      }
+      // Also keep the caller's explicit shadow pass for custom scenes.
+      if (!shadowPasses.size) {
+        const active = probeLights(poses[0]).filter(light => light.layers.isEnabled(0));
+        shadowPasses.set(variantKey(active,target),active);
+      }
+      for (const active of shadowPasses.values()) {
+        // Initialize the retained map even when every caster arrives late.
+        submit([],active,target,false,true);
         yield false;
+        for (const caster of casters) {
+          const draw = () => submit([caster],active,target,false,true);
+          const materials = captureShadowMaterials(renderer,draw);
+          try {
+            if (materials.length) {
+              yield false;
+              const linking = submit([caster],active,target,true,false,true,materials);
+              yield false;
+              if (parallel) for (const program of linking) while (!program.isReady()) yield false;
+            }
+            draw();
+            yield false;
+          } finally {
+            materials.forEach(material => material.dispose());
+          }
+        }
       }
+      report.shadowCasters += casters.length;
     }
     let completedPoses=0;
     for(const visit of visits){

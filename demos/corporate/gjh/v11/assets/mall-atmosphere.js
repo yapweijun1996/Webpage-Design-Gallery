@@ -90,7 +90,7 @@ function publicEnvironmentZone({x,y,z},atrium) {
 
 // Local lighting resources. All three PMREMs share the same shader layout.
 export function createMallAtmosphere(T, renderer, scene, slots, {
-  atrium = {x:0,z:8}, contact, plane
+  atrium = {x:0,z:8}, contact, plane, frameTrace
 } = {}) {
   const classicAccents = [0xb84739,0xd4a159,0x79a992,0x785a68,0x913f35,0x667887,0x9c4937,0x477aac,0x294f7c];
   const interiorWarm = new T.Color(0xffd5a0);
@@ -195,7 +195,11 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     currentIntensity = intensity;
     const environment = environments[zone];
     if (!environment) return;
-    if (scene.environment !== environment.texture) scene.environment = environment.texture;
+    if (scene.environment !== environment.texture) {
+      const before = frameTrace?.start();
+      scene.environment = environment.texture;
+      frameTrace?.end('environment.switch',before,zone,true);
+    }
     scene.environmentIntensity = intensity;
   }
   function releaseEnvironment() {
@@ -203,7 +207,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     Object.values(environments).forEach(target => target.dispose());
     environments = {};
   }
-  function restoreEnvironment() {
+  function* prepareEnvironments() {
     const generator = new T.PMREMGenerator(renderer), studio = new T.Scene();
     const geometry = new T.BoxGeometry(1,1,1);
     const materials = [new T.MeshBasicMaterial({side:T.BackSide}), new T.MeshBasicMaterial(), new T.MeshBasicMaterial()];
@@ -219,23 +223,29 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
         materials[1].color.set(panels).multiplyScalar(1.3);
         materials[2].color.set(colour).multiplyScalar(1.5);
         ceiling.scale.set(width,.1,width);
+        const before = frameTrace?.start();
         next[zone] = generator.fromScene(studio,.04);
+        frameTrace?.end('environment.pmrem',before,zone,true);
+        yield false;
       }
       releaseEnvironment();
       environments = next;
       selectEnvironment(currentZone,currentIntensity);
-    } catch (error) {
-      Object.values(next).forEach(target => target.dispose());
-      throw error;
     } finally {
+      if (environments !== next) Object.values(next).forEach(target => target.dispose());
       generator.dispose(); geometry.dispose(); materials.forEach(material=>material.dispose());
     }
+  }
+  function restoreEnvironment() {
+    // Recovery validates the first frame before reopening the mall.
+    for (const _ of prepareEnvironments()) { /* Drain under the recovery overlay. */ }
   }
 
   // A quarter-resolution, selective glow pass: only explicitly tagged light
   // strips and signs are rendered. The composite fills the drawing buffer.
   let base, glow, blurredGlow, blur, composite, blurScene, postScene, postCamera;
-  const bufferSize=new T.Vector2(), savedClearColor=new T.Color();
+  const savedClearColor=new T.Color();
+  let postReady = false;
   function initPost() {
     if (base) return;
     base=new T.WebGLRenderTarget(1,1,{samples:Math.min(2,renderer.capabilities?.maxSamples ?? 0)});
@@ -279,11 +289,17 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     blurredGlow.setSize(glow.width,glow.height);
     blur.uniforms.texel.value.set(1/glow.width,1/glow.height);
   }
+  function postPrepared(width,height) {
+    return postReady && base.width === width && base.height === height;
+  }
+  function invalidatePost() { postReady = false; }
   function* preparePost(width,height,screenPixel) {
+    if (postPrepared(width,height)) return;
+    invalidatePost();
     sizePost(width,height);
     for(const target of [base,glow,blurredGlow]) {
       renderer.initRenderTarget(target);
-      yield;
+      yield false;
     }
     const previous=renderer.getRenderTarget();
     const box=renderer.getScissor(new T.Vector4()), test=renderer.getScissorTest();
@@ -310,8 +326,9 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
         renderer.setScissor(box);renderer.setScissorTest(test);
         renderer.setRenderTarget(previous);
       }
-      yield;
+      yield false;
     }
+    postReady = true;
   }
   const state={bloom:false,nonNpcCalls:0,npcCalls:0,admitted:0,totalCalls:0,submissions:0};
   function renderVisitors(camera,npcs,reservedCalls,budget) {
@@ -338,7 +355,8 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     state.npcCalls=renderer.info.render.calls-before;
   }
   function render(camera, enabled, npcs, budget) {
-    state.bloom=Boolean(enabled);
+    enabled = Boolean(enabled && postReady);
+    state.bloom=enabled;
     state.npcCalls=0; state.submissions=0;
     const autoReset=renderer.info.autoReset, shadowAutoUpdate=renderer.shadowMap.autoUpdate;
     const target=renderer.getRenderTarget(), mask=camera.layers.mask, background=scene.background;
@@ -350,8 +368,6 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
         renderer.render(scene,camera); state.submissions++;
         renderVisitors(camera,npcs,0,budget);
       } else {
-        const size=renderer.getDrawingBufferSize(bufferSize);
-        sizePost(size.x,size.y);
         renderer.shadowMap.autoUpdate=false;
         camera.layers.set(1); scene.background=null; renderer.setClearColor(0x000000,0);
         renderer.setRenderTarget(glow); renderer.render(scene,camera); state.submissions++;
@@ -372,7 +388,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       renderer.setRenderTarget(target); renderer.info.autoReset=autoReset; renderer.shadowMap.autoUpdate=shadowAutoUpdate;
     }
   }
-  return {update,setLightFloor,lightVariants,interiorWarmLights:lights,preparePost,applyTheme,releaseEnvironment,restoreEnvironment,render,get state(){return state;}};
+  return {update,setLightFloor,lightVariants,interiorWarmLights:lights,preparePost,postPrepared,invalidatePost,applyTheme,releaseEnvironment,prepareEnvironments,restoreEnvironment,render,get state(){return state;}};
 }
 
 export function createVisitorShadows(T, scene, plane, contact) {

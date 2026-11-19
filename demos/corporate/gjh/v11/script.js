@@ -62,7 +62,8 @@ const firstFrame = new Promise(resolve => { markFirstFrame = resolve; });
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
 const quality = createGraphicsQuality(change => {
   if (change === 'resolution' && quality.state) {
-    quality.apply(quality.state);
+    requestedProfile = quality.resolve(renderWidth);
+    scheduleTier();
     requestRender();
   } else resize();
 });
@@ -438,7 +439,7 @@ function tierWork(profile, report, startup = false) {
     width:renderWidth, height:renderHeight, screenPixel, applyProfile, frameTrace, startup}, profile, report);
 }
 function tierKey(profile) {
-  return [profile.tier,profile.shadows,profile.basePixelRatio,profile.preference,renderWidth,renderHeight].join('/');
+  return [profile.tier,profile.shadows,profile.pixelRatio,profile.preference,renderWidth,renderHeight].join('/');
 }
 function scheduleTier() {
   const profile=requestedProfile, active=quality.state;
@@ -448,12 +449,21 @@ function scheduleTier() {
     if (warmRunner.blocking || warmKey === key) return;
     warmRunner.stop('superseded');
   }
-  if(!tierQueue.pending && profile.tier===active.tier && profile.shadows===active.shadows &&
+  if(profile.tier===active.tier && profile.shadows===active.shadows &&
      (!world.signage || world.signage.getTier()===profile.tier) &&
      (!world.interiors || world.interiors.activeTier===profile.tier)){
-    tierQueue.cancel();
-    world.interiors?.setTier(profile.tier);
-    applyProfile(profile);
+    const width = Math.floor(renderWidth*profile.pixelRatio), height = Math.floor(renderHeight*profile.pixelRatio);
+    if (expanded && profile.shadows && !atmosphere.postPrepared(width,height)) {
+      void tierQueue.request(key, function* () {
+        yield* atmosphere.preparePost(width,height,()=>!manual && !modes.paused() ? 1 : 0);
+        applyProfile(profile);
+        requestRender();
+      }).catch(error=>console.warn('Mall render target preparation interrupted',error));
+    } else {
+      tierQueue.cancel();
+      world.interiors?.setTier(profile.tier);
+      applyProfile(profile);
+    }
     return;
   }
   void tierQueue.request(key,()=>tierWork(profile,createWarmReport())).catch(error=>{
@@ -680,6 +690,7 @@ canvas.addEventListener('webglcontextlost', event => {
   mallTheme?.suspend();
   // Retire the reflection target and NPC bone textures against their original context.
   atmosphere?.releaseEnvironment();
+  atmosphere?.invalidatePost();
   npcs?.clearVisitors();
   player?.interruptGraphics(); elevator?.interrupt?.();
   if (!fatal) graphicsStatus = 'lost';
@@ -742,6 +753,7 @@ function validateRestoration() {
     quality.recover(); world.signage?.recover(); resize();
     const gl = renderer.getContext();
     if (gl.isContextLost()) return;
+    renderer.shadowMap.type = three.PCFSoftShadowMap;
     frameTrace?.watchShadowMap();
     try { atmosphere?.restoreEnvironment(); } catch { /* Reflections are optional after recovery. */ }
     world.prepareUpperLevel();
@@ -819,8 +831,11 @@ async function initialize() {
   window.mallLoader?.complete('physics');
   modelWarmup = createModelWarmup(T, renderer);
   tierQueue = createTierQueue(modelWarmup.enqueueSweep);
+  const warmShadows = () => requestedProfile?.shadows || quality.state?.shadows;
   const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
-    linear: () => expanded && quality.state?.tier === 'detailed' && renderWidth >= 1000, ...options
+    linear: () => expanded && Boolean(warmShadows()),
+    lighting: lights => warmShadows() ? atmosphere?.lightVariants(lights) : undefined,
+    ...options
   });
   const {createWorld} = await import('./assets/world.js');
   world = await createWorld(T, R, physics, expanded, warmModel,
@@ -833,8 +848,15 @@ async function initialize() {
   document.getElementById('loader-asset-notice').hidden = !assetRecords.some(record => record?.status === 'fallback');
   window.mallLoader?.complete('scene');
   atmosphere=createMallAtmosphere(T,renderer,world.scene,expanded ? expandedLayout.slots : spatial.stores.map(store=>store.bounds),
-    expanded ? {atrium:expandedLayout.atrium, contact:world.contact, plane:world.plane} : undefined);
-  try { if (!contextLost && !context.isContextLost()) atmosphere.restoreEnvironment(); } catch { /* Keep the mall usable without reflections. */ }
+    {frameTrace,...(expanded && {atrium:expandedLayout.atrium, contact:world.contact, plane:world.plane})});
+  try {
+    const environments = atmosphere.prepareEnvironments();
+    try {
+      while (!pageEnded && !contextLost && !context.isContextLost() && !environments.next().done) {
+        await new Promise(resolve => requestAnimationFrame(resolve));
+      }
+    } finally { environments.return(); }
+  } catch { /* Keep the mall usable without reflections. */ }
   if (expanded) {
     try {
       const {createMallThemeCoordinator} = await loadOptionalThemeModule(() => import('./assets/mall-themes.js'));

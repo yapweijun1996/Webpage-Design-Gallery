@@ -515,11 +515,11 @@ function createFrameTrace(renderer) {
     const { geometries, textures } = renderer.info.memory;
     return { at: performance.now(), programs: programCount(), geometries, textures };
   }
-  function end(work, before, subject) {
+  function end(work, before, subject, force = false) {
     const ms = performance.now() - before.at;
     const { geometries, textures } = renderer.info.memory;
     const programs = programCount() - before.programs;
-    if (ms < 2 && !programs && textures === before.textures && geometries === before.geometries)
+    if (!force && ms < 2 && !programs && textures === before.textures && geometries === before.geometries)
       return;
     events[next] = {
       work,
@@ -549,9 +549,19 @@ function createFrameTrace(renderer) {
     if (shadowMap === renderer.shadowMap)
       return;
     shadowMap = renderer.shadowMap;
-    wrap(shadowMap, "render", "shadowMap.render", ([, scene]) => scene.name || scene.type);
+    const render = shadowMap.render;
+    shadowMap.render = function(lights, scene, camera) {
+      const active = this.enabled && (this.autoUpdate || this.needsUpdate);
+      const allocating = active && lights.some((light) => !light.shadow?.map);
+      const before = start();
+      try {
+        return render.call(this, lights, scene, camera);
+      } finally {
+        end(allocating ? "shadowMap.firstRender" : "shadowMap.render", before, scene.name || scene.type, allocating);
+      }
+    };
   }
-  for (const method of ["compile", "render", "initTexture", "initRenderTarget"]) {
+  for (const method of ["compile", "render", "initTexture", "initRenderTarget", "setRenderTarget"]) {
     wrap(renderer, method, `renderer.${method}`, ([subject, camera]) => {
       const name = subject?.name || subject?.image?.src || subject?.type;
       if (method !== "render")
@@ -3192,7 +3202,8 @@ function publicEnvironmentZone({ x, y, z }, atrium) {
 function createMallAtmosphere(T, renderer, scene, slots, {
   atrium = { x: 0, z: 8 },
   contact,
-  plane
+  plane,
+  frameTrace
 } = {}) {
   const classicAccents = [12076857, 13934937, 7973266, 7887464, 9518901, 6715527, 10242359, 4684460, 2707324];
   const interiorWarm = new T.Color(16766368);
@@ -3314,8 +3325,11 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     const environment = environments[zone];
     if (!environment)
       return;
-    if (scene.environment !== environment.texture)
+    if (scene.environment !== environment.texture) {
+      const before = frameTrace?.start();
       scene.environment = environment.texture;
+      frameTrace?.end("environment.switch", before, zone, true);
+    }
     scene.environmentIntensity = intensity;
   }
   function releaseEnvironment() {
@@ -3323,7 +3337,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     Object.values(environments).forEach((target) => target.dispose());
     environments = {};
   }
-  function restoreEnvironment() {
+  function* prepareEnvironments() {
     const generator = new T.PMREMGenerator(renderer), studio = new T.Scene;
     const geometry = new T.BoxGeometry(1, 1, 1);
     const materials = [new T.MeshBasicMaterial({ side: T.BackSide }), new T.MeshBasicMaterial, new T.MeshBasicMaterial];
@@ -3346,22 +3360,28 @@ function createMallAtmosphere(T, renderer, scene, slots, {
         materials[1].color.set(panels).multiplyScalar(1.3);
         materials[2].color.set(colour).multiplyScalar(1.5);
         ceiling.scale.set(width, 0.1, width);
+        const before = frameTrace?.start();
         next[zone] = generator.fromScene(studio, 0.04);
+        frameTrace?.end("environment.pmrem", before, zone, true);
+        yield false;
       }
       releaseEnvironment();
       environments = next;
       selectEnvironment(currentZone, currentIntensity);
-    } catch (error) {
-      Object.values(next).forEach((target) => target.dispose());
-      throw error;
     } finally {
+      if (environments !== next)
+        Object.values(next).forEach((target) => target.dispose());
       generator.dispose();
       geometry.dispose();
       materials.forEach((material) => material.dispose());
     }
   }
+  function restoreEnvironment() {
+    for (const _ of prepareEnvironments()) {}
+  }
   let base, glow, blurredGlow, blur, composite, blurScene, postScene, postCamera;
-  const bufferSize = new T.Vector2, savedClearColor = new T.Color;
+  const savedClearColor = new T.Color;
+  let postReady = false;
   function initPost() {
     if (base)
       return;
@@ -3417,11 +3437,20 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     blurredGlow.setSize(glow.width, glow.height);
     blur.uniforms.texel.value.set(1 / glow.width, 1 / glow.height);
   }
+  function postPrepared(width, height) {
+    return postReady && base.width === width && base.height === height;
+  }
+  function invalidatePost() {
+    postReady = false;
+  }
   function* preparePost(width, height, screenPixel) {
+    if (postPrepared(width, height))
+      return;
+    invalidatePost();
     sizePost(width, height);
     for (const target of [base, glow, blurredGlow]) {
       renderer.initRenderTarget(target);
-      yield;
+      yield false;
     }
     const previous = renderer.getRenderTarget();
     const box = renderer.getScissor(new T.Vector4), test = renderer.getScissorTest();
@@ -3460,8 +3489,9 @@ function createMallAtmosphere(T, renderer, scene, slots, {
         renderer.setScissorTest(test);
         renderer.setRenderTarget(previous);
       }
-      yield;
+      yield false;
     }
+    postReady = true;
   }
   const state = { bloom: false, nonNpcCalls: 0, npcCalls: 0, admitted: 0, totalCalls: 0, submissions: 0 };
   function renderVisitors(camera, npcs, reservedCalls, budget) {
@@ -3492,7 +3522,8 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     state.npcCalls = renderer.info.render.calls - before;
   }
   function render(camera, enabled, npcs, budget) {
-    state.bloom = Boolean(enabled);
+    enabled = Boolean(enabled && postReady);
+    state.bloom = enabled;
     state.npcCalls = 0;
     state.submissions = 0;
     const autoReset = renderer.info.autoReset, shadowAutoUpdate = renderer.shadowMap.autoUpdate;
@@ -3507,8 +3538,6 @@ function createMallAtmosphere(T, renderer, scene, slots, {
         state.submissions++;
         renderVisitors(camera, npcs, 0, budget);
       } else {
-        const size = renderer.getDrawingBufferSize(bufferSize);
-        sizePost(size.x, size.y);
         renderer.shadowMap.autoUpdate = false;
         camera.layers.set(1);
         scene.background = null;
@@ -3542,7 +3571,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       renderer.shadowMap.autoUpdate = shadowAutoUpdate;
     }
   }
-  return { update, setLightFloor, lightVariants, interiorWarmLights: lights, preparePost, applyTheme, releaseEnvironment, restoreEnvironment, render, get state() {
+  return { update, setLightFloor, lightVariants, interiorWarmLights: lights, preparePost, postPrepared, invalidatePost, applyTheme, releaseEnvironment, prepareEnvironments, restoreEnvironment, render, get state() {
     return state;
   } };
 }
@@ -3750,6 +3779,41 @@ function limitWarmGeometry(geometry, grouped) {
     geometry.setDrawRange(start, count);
   };
 }
+function captureShadowMaterials(renderer, draw) {
+  const render = renderer.renderBufferDirect;
+  if (!render)
+    return [];
+  const materials = [];
+  renderer.renderBufferDirect = function(camera, scene, geometry, material) {
+    if (scene === null) {
+      const copy = material.clone();
+      copy.onBeforeCompile = material.onBeforeCompile;
+      copy.customProgramCacheKey = material.customProgramCacheKey;
+      materials.push(copy);
+    }
+  };
+  try {
+    draw();
+    return materials;
+  } catch (error) {
+    materials.forEach((material) => material.dispose());
+    throw error;
+  } finally {
+    renderer.renderBufferDirect = render;
+  }
+}
+function withShadowMaterials(mesh, materials, staging, work) {
+  const { material } = mesh, { fog, environment } = staging;
+  try {
+    mesh.material = materials;
+    staging.fog = staging.environment = null;
+    return work();
+  } finally {
+    mesh.material = material;
+    staging.fog = fog;
+    staging.environment = environment;
+  }
+}
 function createModelWarmup(T, renderer) {
   const scheduler = createUploadScheduler();
   let initialized = new WeakMap;
@@ -3770,22 +3834,25 @@ function createModelWarmup(T, renderer) {
     initialized.set(texture, texture.version);
     return true;
   }
-  function withMesh(mesh, scene, mask, linear, work) {
+  function withMesh(mesh, scene, mask, linear, work, pass) {
     const { visible, frustumCulled, children, count } = mesh;
     const layers = mesh.layers.mask;
     const previousTarget = renderer.getRenderTarget();
     const activeFace = renderer.getActiveCubeFace(), activeMip = renderer.getActiveMipmapLevel();
     const scissorTest = renderer.getScissorTest();
     const { autoClear, toneMapping, sortObjects } = renderer, autoReset = renderer.info.autoReset;
-    const shadows = renderer.shadowMap, { autoUpdate, needsUpdate } = shadows;
+    const shadows = renderer.shadowMap, { enabled, autoUpdate, needsUpdate } = shadows;
     const { calls, triangles, points, lines } = renderer.info.render;
+    const lightVisibility = pass?.lights?.map((light) => light.visible);
     renderer.getScissor(scissor);
     try {
       staging.fog = scene.fog;
       staging.environment = scene.environment;
       staging.environmentIntensity = scene.environmentIntensity;
-      staging.children = scene.children.filter((node) => node.isLight && node.visible);
+      staging.children = pass?.lights?.slice() ?? scene.children.filter((node) => node.isLight && node.visible);
       staging.children.push(mesh);
+      for (const light of pass?.lights ?? [])
+        light.visible = true;
       mesh.children = [];
       mesh.layers.mask = mask;
       mesh.visible = true;
@@ -3797,7 +3864,9 @@ function createModelWarmup(T, renderer) {
       renderer.autoClear = false;
       renderer.sortObjects = false;
       renderer.info.autoReset = false;
-      shadows.autoUpdate = shadows.needsUpdate = false;
+      if (pass)
+        shadows.enabled = pass.shadows;
+      shadows.autoUpdate = shadows.needsUpdate = Boolean(pass?.depth);
       renderer.setRenderTarget(linear ? target : null);
       if (!linear) {
         renderer.setScissor(0, 0, 0, 0);
@@ -3817,6 +3886,11 @@ function createModelWarmup(T, renderer) {
       renderer.toneMapping = toneMapping;
       renderer.info.autoReset = autoReset;
       Object.assign(renderer.info.render, { calls, triangles, points, lines });
+      if (pass)
+        shadows.enabled = enabled;
+      pass?.lights?.forEach((light, index) => {
+        light.visible = lightVisibility[index];
+      });
       shadows.autoUpdate = autoUpdate;
       shadows.needsUpdate = needsUpdate;
       renderer.setScissor(scissor);
@@ -3824,28 +3898,55 @@ function createModelWarmup(T, renderer) {
       renderer.setRenderTarget(previousTarget, activeFace, activeMip);
     }
   }
-  function* prepareMesh(mesh, scene, mask, linear) {
-    let programs;
-    yield () => {
-      const materials = withMesh(mesh, scene, mask, linear, () => renderer.compile(staging, camera));
+  function* prepareMesh(mesh, scene, mask, linear, pass) {
+    let programs, depthMaterials;
+    function compile() {
+      const materials = renderer.compile(staging, camera);
       if (renderer.extensions?.has("KHR_parallel_shader_compile")) {
-        programs = [...materials].map((material) => renderer.properties.get(material).currentProgram);
+        programs = [...materials].flatMap((material) => {
+          const state = renderer.properties.get(material);
+          return state.programs ? [...state.programs.values()] : [state.currentProgram];
+        });
       }
-      return false;
-    };
-    while (programs?.some((program) => !program.isReady()))
-      yield () => false;
-    yield () => {
+    }
+    function draw() {
       const restore = limitWarmGeometry(mesh.geometry, Array.isArray(mesh.material));
       try {
-        withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera));
+        withMesh(mesh, scene, mask, linear, () => renderer.render(staging, camera), pass);
       } finally {
         restore();
       }
-      return false;
-    };
+    }
+    try {
+      if (pass?.depth) {
+        yield () => {
+          depthMaterials = captureShadowMaterials(renderer, draw);
+          return false;
+        };
+        if (depthMaterials.length) {
+          yield () => {
+            withMesh(mesh, scene, mask, true, () => withShadowMaterials(mesh, depthMaterials, staging, compile), pass);
+            return false;
+          };
+          while (programs?.some((program) => !program.isReady()))
+            yield () => false;
+        }
+      }
+      yield () => {
+        withMesh(mesh, scene, mask, linear, compile, pass);
+        return false;
+      };
+      while (programs?.some((program) => !program.isReady()))
+        yield () => false;
+      yield () => {
+        draw();
+        return false;
+      };
+    } finally {
+      depthMaterials?.forEach((material) => material.dispose());
+    }
   }
-  function prepare(root, scene, { hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, ...options } = {}) {
+  function prepare(root, scene, { hide = false, linear = () => false, artworkTier, alternates = [], includeInSceneSweep = true, lighting, fence = false, ...options } = {}) {
     const meshes = [];
     for (const model of Array.isArray(root) ? root : [root]) {
       model.traverse((mesh) => {
@@ -3864,17 +3965,52 @@ function createModelWarmup(T, renderer) {
         mesh.layers.mask = 0;
     return scheduler.enqueue(function* () {
       for (const { mesh, mask } of meshes) {
-        for (const texture of new Set(meshTextures(mesh))) {
+        const variants = lighting?.(scene.children.filter((node) => node.isLight));
+        for (const texture of new Set(meshTextures(mesh, Boolean(variants)))) {
           if (artworkTier === undefined && initialized.get(texture) === texture.version)
             continue;
           yield () => {
-            if (initTexture(texture, artworkTier) && texture.userData?.artworkMipmaps === "generate")
+            if (initTexture(texture, artworkTier) && (fence || texture.userData?.artworkMipmaps === "generate"))
               return false;
           };
         }
-        yield* prepareMesh(mesh, scene, mask, false);
-        if (linear())
-          yield* prepareMesh(mesh, scene, mask, true);
+        if (variants) {
+          for (const lights of variants) {
+            yield* prepareMesh(mesh, scene, mask, false, { lights, shadows: false });
+            yield* prepareMesh(mesh, scene, mask, false, {
+              lights,
+              shadows: true,
+              depth: mesh.castShadow && (mask & 1) !== 0
+            });
+            if (linear())
+              yield* prepareMesh(mesh, scene, mask, true, { lights, shadows: true });
+          }
+        } else {
+          yield* prepareMesh(mesh, scene, mask, false);
+          if (linear())
+            yield* prepareMesh(mesh, scene, mask, true);
+        }
+      }
+      if (fence) {
+        const gl = renderer.getContext();
+        const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (!sync)
+          throw new Error("Unable to fence model uploads");
+        try {
+          gl.flush();
+          let status;
+          do {
+            yield () => {
+              status = gl.clientWaitSync(sync, 0, 0);
+              return false;
+            };
+          } while (status === gl.TIMEOUT_EXPIRED);
+          if (status === gl.WAIT_FAILED)
+            throw new Error("Model upload fence failed");
+        } finally {
+          if (!gl.isContextLost())
+            gl.deleteSync(sync);
+        }
       }
     }, options).then(() => {
       for (const [owner, alternate] of alternates) {
@@ -4434,7 +4570,7 @@ function* prepareScene({
       });
     }
   }
-  function submit(batch, activeLights, output, compile, depth = false, passShadows = shadows) {
+  function submit(batch, activeLights, output, compile, depth = false, passShadows = shadows, depthMaterials) {
     const objects = [...activeLights, ...batch];
     const saved = objects.map((node) => [node.visible, node.frustumCulled, node.layers.mask, node.children]);
     const instanceCounts = new Map;
@@ -4484,7 +4620,9 @@ function* prepareScene({
       renderer.sortObjects = false;
       if (compile) {
         const linked = [];
-        for (const material of renderer.compile(staging, probe)) {
+        const compileBatch = () => renderer.compile(staging, probe);
+        const materials = depthMaterials ? withShadowMaterials(batch[0], depthMaterials, staging, compileBatch) : compileBatch();
+        for (const material of materials) {
           for (const program of renderer.properties.get(material).programs.values()) {
             if (!programs.has(program)) {
               programs.add(program);
@@ -4587,32 +4725,60 @@ function* prepareScene({
       }
     }
     report.lightVariants = Math.max(report.lightVariants, variants.size);
+    for (const texture of textures) {
+      const uploaded = initTexture(texture, artworkTier);
+      report.textures++;
+      yield uploaded && (shadows || texture.userData?.artworkMipmaps === "generate") ? false : undefined;
+    }
     for (const { active, output, candidates, passShadows } of variants.values()) {
-      for (let i = 0;i < candidates.length; i += batchSize) {
-        const linking = submit(candidates.slice(i, i + batchSize), active, output, true, false, passShadows);
+      const linkSize = shadows ? 1 : batchSize;
+      for (let i = 0;i < candidates.length; i += linkSize) {
+        const linking = submit(candidates.slice(i, i + linkSize), active, output, true, false, passShadows);
         if (parallel && linking.length) {
           yield false;
           for (const program of linking)
             while (!program.isReady())
               yield false;
         }
-        yield;
+        yield shadows && linking.length ? false : undefined;
       }
-    }
-    for (const texture of textures) {
-      const uploaded = initTexture(texture, artworkTier);
-      report.textures++;
-      yield uploaded && texture.userData?.artworkMipmaps === "generate" ? false : undefined;
     }
     if (shadows) {
-      const active = probeLights(poses[0]).filter((light) => light.layers.isEnabled(0));
       const casters = meshes.filter((mesh) => mesh.castShadow);
-      for (let i = 0;i < casters.length; i += 6) {
-        const batch = casters.slice(i, i + 6);
-        submit(batch, active, detailed ? target : null, false, true);
-        report.shadowCasters += batch.length;
-        yield false;
+      const shadowPasses = new Map;
+      for (const { active, passShadows } of variants.values()) {
+        if (passShadows && active.some((light) => light.castShadow)) {
+          shadowPasses.set(variantKey(active, target), active);
+        }
       }
+      if (!shadowPasses.size) {
+        const active = probeLights(poses[0]).filter((light) => light.layers.isEnabled(0));
+        shadowPasses.set(variantKey(active, target), active);
+      }
+      for (const active of shadowPasses.values()) {
+        submit([], active, target, false, true);
+        yield false;
+        for (const caster of casters) {
+          const draw = () => submit([caster], active, target, false, true);
+          const materials = captureShadowMaterials(renderer, draw);
+          try {
+            if (materials.length) {
+              yield false;
+              const linking = submit([caster], active, target, true, false, true, materials);
+              yield false;
+              if (parallel)
+                for (const program of linking)
+                  while (!program.isReady())
+                    yield false;
+            }
+            draw();
+            yield false;
+          } finally {
+            materials.forEach((material) => material.dispose());
+          }
+        }
+      }
+      report.shadowCasters += casters.length;
     }
     let completedPoses = 0;
     for (const visit of visits) {
@@ -5439,7 +5605,8 @@ var viewportWidth = innerWidth;
 var viewportHeight = innerHeight;
 var quality = createGraphicsQuality((change) => {
   if (change === "resolution" && quality.state) {
-    quality.apply(quality.state);
+    requestedProfile = quality.resolve(renderWidth);
+    scheduleTier();
     requestRender();
   } else
     resize();
@@ -5986,7 +6153,7 @@ function tierWork(profile, report, startup = false) {
   }, profile, report);
 }
 function tierKey(profile) {
-  return [profile.tier, profile.shadows, profile.basePixelRatio, profile.preference, renderWidth, renderHeight].join("/");
+  return [profile.tier, profile.shadows, profile.pixelRatio, profile.preference, renderWidth, renderHeight].join("/");
 }
 function scheduleTier() {
   const profile = requestedProfile, active = quality.state;
@@ -5998,10 +6165,19 @@ function scheduleTier() {
       return;
     warmRunner.stop("superseded");
   }
-  if (!tierQueue.pending && profile.tier === active.tier && profile.shadows === active.shadows && (!world.signage || world.signage.getTier() === profile.tier) && (!world.interiors || world.interiors.activeTier === profile.tier)) {
-    tierQueue.cancel();
-    world.interiors?.setTier(profile.tier);
-    applyProfile(profile);
+  if (profile.tier === active.tier && profile.shadows === active.shadows && (!world.signage || world.signage.getTier() === profile.tier) && (!world.interiors || world.interiors.activeTier === profile.tier)) {
+    const width = Math.floor(renderWidth * profile.pixelRatio), height = Math.floor(renderHeight * profile.pixelRatio);
+    if (expanded && profile.shadows && !atmosphere.postPrepared(width, height)) {
+      tierQueue.request(key, function* () {
+        yield* atmosphere.preparePost(width, height, () => !manual && !modes.paused() ? 1 : 0);
+        applyProfile(profile);
+        requestRender();
+      }).catch((error) => console.warn("Mall render target preparation interrupted", error));
+    } else {
+      tierQueue.cancel();
+      world.interiors?.setTier(profile.tier);
+      applyProfile(profile);
+    }
     return;
   }
   tierQueue.request(key, () => tierWork(profile, createWarmReport())).catch((error) => {
@@ -6352,6 +6528,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   modelWarmup?.invalidate();
   mallTheme?.suspend();
   atmosphere?.releaseEnvironment();
+  atmosphere?.invalidatePost();
   npcs?.clearVisitors();
   player?.interruptGraphics();
   elevator?.interrupt?.();
@@ -6433,6 +6610,7 @@ function validateRestoration() {
     const gl = renderer.getContext();
     if (gl.isContextLost())
       return;
+    renderer.shadowMap.type = three.PCFSoftShadowMap;
     frameTrace?.watchShadowMap();
     try {
       atmosphere?.restoreEnvironment();
@@ -6546,8 +6724,10 @@ async function initialize() {
   window.mallLoader?.complete("physics");
   modelWarmup = createModelWarmup(T, renderer);
   tierQueue = createTierQueue(modelWarmup.enqueueSweep);
+  const warmShadows = () => requestedProfile?.shadows || quality.state?.shadows;
   const warmModel = (model, scene, options) => modelWarmup.prepare(model, scene, {
-    linear: () => expanded && quality.state?.tier === "detailed" && renderWidth >= 1000,
+    linear: () => expanded && Boolean(warmShadows()),
+    lighting: (lights) => warmShadows() ? atmosphere?.lightVariants(lights) : undefined,
     ...options
   });
   const { createWorld } = await import("./assets/world.bundle.js");
@@ -6559,10 +6739,16 @@ async function initialize() {
     assetRecords.push(world.productAssets.shelf);
   document.getElementById("loader-asset-notice").hidden = !assetRecords.some((record) => record?.status === "fallback");
   window.mallLoader?.complete("scene");
-  atmosphere = createMallAtmosphere(T, renderer, world.scene, expanded ? expandedLayout.slots : spatial.stores.map((store) => store.bounds), expanded ? { atrium: expandedLayout.atrium, contact: world.contact, plane: world.plane } : undefined);
+  atmosphere = createMallAtmosphere(T, renderer, world.scene, expanded ? expandedLayout.slots : spatial.stores.map((store) => store.bounds), { frameTrace, ...expanded && { atrium: expandedLayout.atrium, contact: world.contact, plane: world.plane } });
   try {
-    if (!contextLost && !context.isContextLost())
-      atmosphere.restoreEnvironment();
+    const environments = atmosphere.prepareEnvironments();
+    try {
+      while (!pageEnded && !contextLost && !context.isContextLost() && !environments.next().done) {
+        await new Promise((resolve) => requestAnimationFrame(resolve));
+      }
+    } finally {
+      environments.return();
+    }
   } catch {}
   if (expanded) {
     try {

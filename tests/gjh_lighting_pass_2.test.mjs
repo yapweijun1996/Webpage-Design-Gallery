@@ -21,7 +21,11 @@ test('the shared atlas stays optional while loading and its tier owns the visibl
     const contact=material();
     const lighting=createMallBakedLighting(T,scene,{phone,contact,floors:[panel],ceilings:[{...panel,y:8}],
       load:url=>new Promise(resolve=>pending.set(url.split('/').at(-1),resolve)),
-      prepareModel:async (mesh,options)=>prepared.push([mesh.material.map,options])
+      prepareModel:async (meshes,options)=>{
+        assert.deepEqual(meshes.map(mesh=>mesh.name),[floorName,ceilingName]);
+        assert.ok(meshes.every(mesh=>mesh.material.map===meshes[0].material.map));
+        prepared.push([meshes[0].material.map,options]);
+      }
     });
     const [floor,ceiling]=scene.children;
     lighting.setTier('low');
@@ -56,7 +60,7 @@ test('the shared atlas stays optional while loading and its tier owns the visibl
     lighting.setTier('low');
     assert.equal(floor.material.map,lowMap);
     assert.equal(ceiling.visible,false);
-    assert.ok(prepared.every(([,options])=>!options.late && !options.includeInSceneSweep));
+    assert.ok(prepared.every(([,options])=>!options.late && !options.includeInSceneSweep && options.fence));
   }
 });
 

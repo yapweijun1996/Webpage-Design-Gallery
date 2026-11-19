@@ -7719,14 +7719,14 @@ function createMallBakedLighting(T, scene, {
   const floor = createLayer(T, floors, material, false), ceiling = createLayer(T, ceilings, material, true);
   scene.add(floor, ceiling);
   const atlasSize2 = (tier) => phone || tier === "low" ? 1024 : 2048;
-  const atlases = new Map, requests = new Map;
+  const materials2 = new Map, requests = new Map;
   let currentTier = "low";
   function apply() {
-    const atlas = atlases.get(atlasSize2(currentTier)) ?? atlases.get(1024);
-    if (atlas)
-      material.map = atlas;
-    floor.visible = Boolean(atlas);
-    ceiling.visible = Boolean(atlas) && currentTier !== "low";
+    const warmed = materials2.get(atlasSize2(currentTier)) ?? materials2.get(1024);
+    if (warmed)
+      floor.material = ceiling.material = warmed;
+    floor.visible = Boolean(warmed);
+    ceiling.visible = Boolean(warmed) && currentTier !== "low";
   }
   function prepare(tier) {
     const size = atlasSize2(tier);
@@ -7737,17 +7737,21 @@ function createMallBakedLighting(T, scene, {
         atlas.minFilter = T.LinearFilter;
         const stagingMaterial = contact.clone();
         stagingMaterial.map = atlas;
-        const sample = floor.clone();
-        sample.material = stagingMaterial;
+        const samples2 = [floor, ceiling].map((mesh) => {
+          const sample = mesh.clone();
+          sample.material = stagingMaterial;
+          return sample;
+        });
         try {
-          await prepareModel?.(sample, { late: false, includeInSceneSweep: false, priority: () => 100 });
-          atlases.set(size, atlas);
+          await prepareModel?.(samples2, { late: false, includeInSceneSweep: false, fence: true, priority: () => 100 });
+          materials2.set(size, stagingMaterial);
           apply();
         } catch {
           atlas.dispose();
-        } finally {
-          sample.dispose();
           stagingMaterial.dispose();
+        } finally {
+          for (const sample of samples2)
+            sample.dispose();
         }
       }).catch(() => {});
       requests.set(size, request);

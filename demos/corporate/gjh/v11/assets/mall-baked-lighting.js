@@ -41,14 +41,14 @@ export function createMallBakedLighting(T, scene, {floors, ceilings, contact, ph
   const floor = createLayer(T,floors,material,false), ceiling = createLayer(T,ceilings,material,true);
   scene.add(floor,ceiling);
   const atlasSize = tier => phone || tier === 'low' ? 1024 : 2048;
-  const atlases = new Map(), requests = new Map();
+  const materials = new Map(), requests = new Map();
   let currentTier = 'low';
   function apply() {
     // A desktop upgrade can keep the warmed floor visible during the fetch.
-    const atlas = atlases.get(atlasSize(currentTier)) ?? atlases.get(1024);
-    if (atlas) material.map = atlas;
-    floor.visible = Boolean(atlas);
-    ceiling.visible = Boolean(atlas) && currentTier !== 'low';
+    const warmed = materials.get(atlasSize(currentTier)) ?? materials.get(1024);
+    if (warmed) floor.material = ceiling.material = warmed;
+    floor.visible = Boolean(warmed);
+    ceiling.visible = Boolean(warmed) && currentTier !== 'low';
   }
   function prepare(tier) {
     const size = atlasSize(tier);
@@ -59,19 +59,22 @@ export function createMallBakedLighting(T, scene, {floors, ceilings, contact, ph
         atlas.minFilter = T.LinearFilter;
         const stagingMaterial = contact.clone();
         stagingMaterial.map = atlas;
-        const sample = floor.clone();
-        sample.material = stagingMaterial;
+        const samples = [floor,ceiling].map(mesh => {
+          const sample = mesh.clone();
+          sample.material = stagingMaterial;
+          return sample;
+        });
         try {
           // Use the shared upload budget and retain the authored fallback
           // lighting while this optional texture is decoded and uploaded.
-          await prepareModel?.(sample,{late:false,includeInSceneSweep:false,priority:() => 100});
-          atlases.set(size,atlas);
+          await prepareModel?.(samples,{late:false,includeInSceneSweep:false,fence:true,priority:() => 100});
+          materials.set(size,stagingMaterial);
           apply();
         } catch {
           atlas.dispose();
-        } finally {
-          sample.dispose();
           stagingMaterial.dispose();
+        } finally {
+          for (const sample of samples) sample.dispose();
         }
       }).catch(() => {});
       requests.set(size,request);

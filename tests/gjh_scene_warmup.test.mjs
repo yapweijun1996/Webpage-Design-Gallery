@@ -179,7 +179,7 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
   const originalTarget = {}, viewport = new T.Vector4(0,0,393,612), scissor = new T.Vector4(2,3,4,5);
   let target = originalTarget, face = 2, mip = 1, testScissor = false, linked = false, gpuDone = false;
   let deleted = 0, fence = null;
-  const draws = [], compiles = [], textures = [], report = createWarmReport();
+  const draws = [], depthCompiles = [], depthDraws = [], compiles = [], textures = [], report = createWarmReport();
   const program = {isReady:() => linked};
   const gl = {
     TIMEOUT_EXPIRED:1, WAIT_FAILED:2, CONDITION_SATISFIED:3,
@@ -195,7 +195,19 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
     setViewport:(...args) => args.length === 1 ? viewport.copy(args[0]) : viewport.set(...args),
     setScissor:(...args) => args.length === 1 ? scissor.copy(args[0]) : scissor.set(...args),
     setRenderTarget:(value, f=0, m=0) => { target = value; face = f; mip = m; },
-    compile(staging) { compiles.push(staging.children.slice()); return new Set([a,b]); },
+    compile(staging) {
+      const nodes = staging.children.slice();
+      compiles.push(nodes);
+      for (const mesh of nodes.filter(node => node.isMesh)) {
+        for (const material of [mesh.material].flat()) {
+          if (material.isMeshDepthMaterial) depthCompiles.push([mesh.name,nodes.filter(node=>node.isLight),material]);
+        }
+      }
+      return new Set([a,b]);
+    },
+    renderBufferDirect(probe, scene, geometry, material, mesh) {
+      depthDraws.push([mesh.name,material]);
+    },
     render(staging, probe) {
       assert.ok(linked || !parallel);
       assert.notEqual(probe, camera);
@@ -211,6 +223,11 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
         assert.equal(instances.count, 1);
         assert.ok(instances.geometry.groups.every(group => group.count <= 6));
         assert.equal(b.visible, true);
+      }
+      if (renderer.shadowMap.needsUpdate && stagingOptions.captureDepth) {
+        for (const mesh of staging.children.filter(node=>node.castShadow && node.isMesh)) {
+          renderer.renderBufferDirect(probe,null,mesh.geometry,mesh.customDepthMaterial,mesh);
+        }
       }
       draws.push({objects:staging.children.slice(), pose:probe.position.toArray(), linear:Boolean(target), depth:renderer.shadowMap.needsUpdate, shadows:renderer.shadowMap.enabled});
       if (failDraw) throw Error('injected draw failure');
@@ -236,7 +253,7 @@ function sceneFixture(detailed, failDraw = false, parallel = true, corridorOnly 
     assert.deepEqual(scissor.toArray(), [2,3,4,5]);
     assert.deepEqual(camera.position.toArray(), [5,7,9]);
   }
-  return {work, restored, report, draws, compiles, instances, child, point, textures, expectedTextures:[map,uniform,environment],
+  return {work, restored, report, draws, depthCompiles, depthDraws, compiles, instances, child, point, textures, expectedTextures:[map,uniform,environment],
     link() { linked = true; }, signal() { gpuDone = true; }, get fence() { return fence; }, get deleted() { return deleted; }};
 }
 
@@ -347,6 +364,57 @@ test('Detailed warms the direct fallback with shadows off as well as its final p
   assert.ok(f.draws.some(draw=>!draw.linear && !draw.shadows && draw.objects.includes(f.instances)));
   assert.ok(f.draws.some(draw=>!draw.linear && draw.shadows && draw.objects.includes(f.instances)));
   assert.ok(f.draws.some(draw=>draw.linear && draw.shadows && draw.objects.includes(f.instances)));
+  f.signal();
+  assert.equal(f.work.next().done,true);
+  f.restored();
+});
+
+test('Detailed warm plan links every shadow caster class and both authored light counts before drawing', () => {
+  const geometry = new T.BoxGeometry(), material = new T.MeshStandardMaterial();
+  const regular = () => new T.Mesh(geometry,material);
+  const instanced = () => new T.InstancedMesh(geometry,material,1);
+  const skinned = () => {
+    const bound = geometry.clone(), length = bound.attributes.position.count*4;
+    const weights = new Float32Array(length);
+    for (let i=0; i<length; i+=4) weights[i]=1;
+    bound.setAttribute('skinIndex',new T.Uint16BufferAttribute(new Uint16Array(length),4));
+    bound.setAttribute('skinWeight',new T.Float32BufferAttribute(weights,4));
+    const mesh = new T.SkinnedMesh(bound,material), bone = new T.Bone();
+    mesh.add(bone);
+    mesh.bind(new T.Skeleton([bone]));
+    return mesh;
+  };
+  const extra = [
+    ['furnishing', regular()], ['signage', instanced()], ['player', skinned()],
+    ['visitor', skinned()], ['interior', regular()]
+  ].map(([name,mesh]) => {
+    mesh.name = name;
+    mesh.castShadow = true;
+    mesh.customDepthMaterial = new T.MeshDepthMaterial({depthPacking:T.RGBADepthPacking});
+    return mesh;
+  });
+  const key = new T.DirectionalLight(), accents = [new T.PointLight(),new T.PointLight()];
+  key.castShadow = true;
+  const f = sceneFixture(true,false,true,false,{shadows:true,extra,captureDepth:true,
+    lightVariants:lights=>[[key,...lights.filter(light=>!light.isPointLight)],[key,...lights.filter(light=>!light.isPointLight),...accents]]});
+  f.instances.customDepthMaterial = new T.MeshDepthMaterial();
+  f.link();
+  let steps = 0;
+  while (!f.fence) {
+    f.work.next();
+    assert.ok(++steps < 3000);
+    for (const [name,depth] of f.depthDraws) {
+      assert.ok(f.depthCompiles.some(([compiled,,material])=>compiled===name && material.depthPacking===depth.depthPacking));
+    }
+  }
+  for (const mesh of extra) {
+    const linked = f.depthCompiles.filter(([name])=>name===mesh.name);
+    assert.ok(linked.some(([,lights])=>lights.includes(key) && !lights.some(light=>light.isPointLight)));
+    assert.ok(linked.some(([,lights])=>accents.every(light=>lights.includes(light))));
+    assert.ok(f.depthDraws.some(([name])=>name===mesh.name));
+  }
+  assert.ok(f.report.lightVariants >= 7);
+  assert.equal(f.report.shadowCasters,extra.length+1);
   f.signal();
   assert.equal(f.work.next().done,true);
   f.restored();
