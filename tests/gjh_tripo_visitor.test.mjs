@@ -195,14 +195,16 @@ test('the runtime seat pose fits the actual visitor to ground and upper benches 
       character.setSeated(true);
       character.update('idle', 1/60, 'idle', 1, seat);
       const pelvis = hips.getWorldPosition(new T.Vector3());
-      assert.ok(Math.abs(pelvis.x - seat.x) < .01, seat.name);
+      const c = Math.cos(seat.angle), s = Math.sin(seat.angle);
+      const lateral = point => (point.x-seat.x)*c-(point.z-seat.z)*s;
+      assert.ok(Math.abs(lateral(pelvis)) < .01, seat.name);
       assert.ok(pelvis.y > seat.y && pelvis.y < seat.y+.17, seat.name);
-      assert.ok((pelvis.z-seat.z)*seat.facing > -seat.frontEdge, seat.name);
+      assert.ok(((pelvis.z-seat.z)*c+(pelvis.x-seat.x)*s) > -seat.frontEdge, seat.name);
       const footForward = toe.getWorldPosition(new T.Vector3()).sub(foot.getWorldPosition(new T.Vector3()));
-      assert.ok(footForward.z*seat.facing < -.10, seat.name);
+      assert.ok((footForward.z*c+footForward.x*s) < -.10, seat.name);
       const soles = [Infinity, Infinity];
       meshVertices(character.visual, skin, vertex => {
-        const side = Number(vertex.x >= seat.x);
+        const side = Number(lateral(vertex) >= 0);
         soles[side] = Math.min(soles[side], vertex.y);
       });
       assert.ok(soles.every(y => Math.abs(y-footY) < .012), `${seat.name} soles ${soles}`);

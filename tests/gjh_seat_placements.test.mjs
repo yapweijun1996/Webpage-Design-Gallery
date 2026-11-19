@@ -13,15 +13,16 @@ const near = (a,b) => assert.ok(Math.abs(a-b)<1e-9, `${a} != ${b}`);
 test('all classic and expanded bench placements have authored seat data and stable identities', () => {
   const classic=createSeatPlacements(false), expanded=createSeatPlacements(true);
   assert.deepEqual(coordinates(classic), [[-7.8,9.5],[7.8,9.5],[-7.8,13],[7.8,13],[-3,-6.8],[3,-6.8],[7,-6.8],[13,-6.8]]);
-  assert.deepEqual(coordinates(expanded), [[-5.7,24.5],[-2.3,24.5],[22.3,24.5],[25.7,24.5],[-2.55,-6.8],[3.4,-7.97],[7,-6.8],[13,-6.8],[-6.65,12.55],[.1,8.8],[-3,6]]);
+  assert.deepEqual(coordinates(expanded), [[-5.7,24.5],[-2.3,24.5],[22.3,24.5],[25.7,24.5],[-2.7,-6.8],[3.05,-7.85],[7,-6.8],[13.35,-7.05],[-6.65,12.55],[.1,8.8],[-3,6]]);
   for(const placements of [classic,expanded]) {
     for(const [index,p] of placements.entries()) {
       assert.equal(p.id,index ? `bench-seat-${index+1}` : 'courtyard-seat');
-      assert.equal(p.exit.x,p.x); assert.equal(p.exit.y,p.floor); near(p.exit.z,p.z-1.2*p.facing);
-      assert.equal(p.pose.facing,p.facing); assert.equal(p.pose.angle,p.facing===1?0:Math.PI);
+      assert.equal(p.exit.y,p.floor);
+      assert(Math.hypot(p.exit.x-p.x+1.2*Math.sin(p.pose.angle),p.exit.z-p.z+1.2*Math.cos(p.pose.angle))<1e-6);
+      assert.equal(p.pose.facing,p.facing); if (placements===classic || !['mili','gogo'].includes(p.group)) assert.equal(p.pose.angle,p.facing===1?0:Math.PI);
       assert.equal(p.clearance.interactionRadius,1.65); assert.equal(p.clearance.capsuleRadius,.3);
       const seat=createSeatAnchor(p,123);
-      assert.equal(seat.collider,123); assert.equal(seat.x,p.x);
+      assert.equal(seat.collider,123); near((seat.x-p.x)*Math.cos(p.pose.angle)-(seat.z-p.z)*Math.sin(p.pose.angle),0);
       assert.equal(seat.exitX,p.exit.x); assert.equal(seat.exitZ,p.exit.z);
       assert.equal(seat.clearance,p.clearance); assert.equal(seat.accessible,p.accessible);
     }
@@ -55,22 +56,23 @@ test('every interactive bench anchor lands on the GLB cushion and faces its open
     for (const placement of createSeatPlacements(expanded)) {
       const seat = createSeatAnchor(placement, 1);
       const label = seat.name;
-      const localX = (seat.x - placement.x) * placement.facing;
-      const localZ = (seat.z - placement.z) * placement.facing;
+      const c=Math.cos(seat.angle), s=Math.sin(seat.angle);
+      const localX=(seat.x-placement.x)*c-(seat.z-placement.z)*s;
+      const localDepth=(x,z)=>(x-placement.x)*s+(z-placement.z)*c;
+      const localZ=localDepth(seat.x,seat.z);
       assert.ok(Math.abs(localX) < .01 && localX > bounds.min.x && localX < bounds.max.x, label);
       assert.ok(localZ > cushion.min.z && localZ < backrest.min.z, label);
       assert.ok(Math.abs(localZ - (flatFront + backrest.min.z) / 2) < .003, label);
       assert.ok(Math.abs(seat.y - placement.floor - cushion.max.y * .8) < .002, label);
-      const forwardZ = -Math.cos(seat.angle) * placement.facing;
-      assert.ok(forwardZ * (localZ - backrest.min.z) > 0, label);
-      assert.ok((seat.exitZ - seat.z) * placement.facing < bounds.min.z - localZ - .3, label);
+      assert.ok(localZ < backrest.min.z, label);
+      assert.ok(localDepth(seat.exitX,seat.exitZ) - localZ < bounds.min.z - localZ - .3, label);
       const fallback = placement.group === 'deck' ? deckBenchFallback : groundBenchFallback;
       const fallbackScale = placement.group === 'deck' ? 1 : .8;
       const fallbackSeat = createSeatAnchor(placement, 1, fallback, fallbackScale);
-      const fallbackZ = (fallbackSeat.z - placement.z) * placement.facing;
+      const fallbackZ = localDepth(fallbackSeat.x,fallbackSeat.z);
       near(fallbackSeat.y, placement.floor+fallback.top*fallbackScale);
       assert.ok(fallbackZ > fallback.front && fallbackZ < fallback.backrestFront, label);
-      assert.ok(-Math.cos(fallbackSeat.angle) * placement.facing * (fallbackZ - fallback.backrestFront) > 0, label);
+      assert.ok(fallbackZ < fallback.backrestFront, label);
     }
   }
 });

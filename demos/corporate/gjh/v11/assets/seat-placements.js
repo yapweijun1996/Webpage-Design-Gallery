@@ -1,4 +1,4 @@
-import {miliSeats} from './interiors/mili-seats.js';
+import {shopBenches} from './interiors/mili-seats.js';
 import {atriumLayout} from './atrium-layout.js';
 import {liftLayout} from './lift-layout.js';
 import {spatial, storeCenterX} from './spatial.js';
@@ -43,8 +43,18 @@ export function createSeatPlacements(expanded) {
   }
   for (const store of spatial.stores.filter(store => store.id !== 'newmoon')) {
     const x = storeCenterX(store);
-    const seats = expanded && store.id === 'mili' ? miliSeats : [[-3,0,-.8],[3,0,-.8]];
-    for (const [dx,,dz] of seats) add(store.id, x + dx, -6 + dz, -1);
+    if (expanded) {
+      for (const bench of shopBenches[store.id]) {
+        const [dx,,dz] = bench.xyz;
+        add(store.id,x+dx,-6+dz,-1);
+        const placement = placements.at(-1);
+        placement.pose.angle = bench.yawDeg*Math.PI/180;
+        const [ex,ez] = bench.exit;
+        placement.exit = {x:x+ex,y:0,z:-6+ez};
+      }
+    } else {
+      for (const dx of [-3,3]) add(store.id,x+dx,-6.8,-1);
+    }
   }
   if (expanded) {
     for(const [i,seat] of atriumLayout.upperSeats.entries()){
@@ -64,9 +74,11 @@ export function createSeatAnchor(placement, collider, profile = loungeBench, sca
     z:z + centre * Math.cos(pose.angle)
   };
   const [width, height, depth] = profile.size;
+  const c = Math.abs(Math.cos(pose.angle)), s = Math.abs(Math.sin(pose.angle));
+  const halfX = (c*width+s*depth)/2, halfZ = (s*width+c*depth)/2;
   const bounds = {
-    min:{x:x-width/2, y:floor, z:z-depth/2},
-    max:{x:x+width/2, y:floor+height*scale, z:z+depth/2}
+    min:{x:x-halfX, y:floor, z:z-halfZ},
+    max:{x:x+halfX, y:floor+height*scale, z:z+halfZ}
   };
   return {id, name, x:anchor.x, y:anchor.y, z:anchor.z,
     exitX:exit.x, exitZ:exit.z, floor, facing:pose.facing,

@@ -387,9 +387,17 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     const {x,z,facing,group}=placement;
     const modelPlaced=furnishings.place('bench', x, z, benchScale, facing, 0, placement.pose.angle, activeShopSlot);
     const seatCollider=collider(x, .3*benchScale, z, placement.clearance.colliderWidth, .4*benchScale, placement.clearance.colliderDepth);
+    if (placement.pose.angle % Math.PI) {
+      const halfYaw=placement.pose.angle/2;
+      seatCollider.setRotation({x:0,y:Math.sin(halfYaw),z:0,w:Math.cos(halfYaw)});
+    }
     const footY=group==='atrium' ? (expanded ? .016 : 0) : (expanded ? .0245 : .015);
     seats.push(createSeatAnchor(placement,seatCollider.handle,modelPlaced ? undefined : groundBenchFallback,benchScale,footY));
-    const benchBox=(m,bx,by,bz,sx,sy,sz)=>box(m,bx,by*benchScale,bz,sx,sy*benchScale,sz);
+    const angle=placement.pose.angle, c=Math.cos(angle), s=Math.sin(angle);
+    const benchBox=(m,bx,by,bz,sx,sy,sz)=>{
+      const dx=bx-x, dz=(bz-z)*facing;
+      solid('box',m,x+c*dx+s*dz,by*benchScale,z-s*dx+c*dz,sx,sy*benchScale,sz,angle);
+    };
     if (!modelPlaced) {
       const {top,front}=groundBenchFallback;
       benchBox('wood', x, .3, z, 2.5, .4, .85); benchBox('seat', x, top-.09, z, 2.55, .18, -2*front);
@@ -956,13 +964,15 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
           for (const stool of gogoStools) {
             const sx = originX+stool.position_m[0], sz = originZ+stool.position_m[2];
             const [width,height,depth] = stool.envelope_whd_m;
-            const placed = furnishings.place('barStool',sx,sz,1,1,0,Math.PI/2,activeShopSlot);
+            const angle = stool.yaw_deg*Math.PI/180;
+            const placed = furnishings.place('barStool',sx,sz,1,1,0,angle,activeShopSlot);
             if (!placed) {
               cylinder('brass',sx,.36,sz,.042,.65);
               cylinder('brass',sx,.06,sz,.23,.065);
               cylinder('seat',sx,.72,sz,.22,.12);
             }
             const pan = collider(sx,height/2,sz,width,height,depth);
+            pan.setRotation({x:0,y:Math.sin(angle/2),z:0,w:Math.cos(angle/2)});
             seats.push(gogoStoolSeat(frame,stool,pan.handle,placed));
           }
         }

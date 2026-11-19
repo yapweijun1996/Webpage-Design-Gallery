@@ -170,3 +170,68 @@ test('world shop details build from the validated layout for every shop zone',()
     }
   }
 });
+
+test('each playable probe route reaches its registered stance with an open door', async () => {
+  const script = `import json,sys
+sys.path.insert(0, 'docs')
+from verify_interactions import PROGRAMME, WAYPOINTS, expected_items, shop_threshold
+shops = json.loads(PROGRAMME.read_text())['stores']
+print(json.dumps([sorted(expected_items(shops)), WAYPOINTS, {s['slot']:shop_threshold(s) for s in shops}]))`;
+  const [actions,waypoints,doors]=JSON.parse(execFileSync('python3',['-c',script]));
+  assert.equal(actions.length,65);
+  const studio=await studioBoxes();
+  for (const shop of plan.stores) {
+    const floor=floorGrid(shop,obstacles(shop,studio));
+    const [ox,,oz]=shop.frame.world_origin_m, yaw=shop.frame.yaw_world_deg*Math.PI/180;
+    const c=Math.cos(yaw), s=Math.sin(yaw);
+    const local=([x,z])=>[(x-ox)*c-(z-oz)*s,(x-ox)*s+(z-oz)*c];
+    for (const [slot,id] of actions.filter(([slot])=>slot===shop.slot)) {
+      const item=shop.items.find(i=>i.id===id);
+      const path=[doors[slot],...(waypoints[id]??[])].map(local);
+      path.push(item.standing);
+      for (const [k,end] of path.slice(1).entries()) assert(floor.edge(path[k],end,capsule),id+' segment '+k);
+    }
+  }
+});
+
+test('large furniture gap catches crossing, containment and near misses at rotated corners', async () => {
+  const {footprintGap}=await import('../scripts/gjh_interiors/placement.mjs');
+  const a={xyz:[0,0,0],size:[2,1,.4],yawDeg:45};
+  assert.equal(footprintGap(a,{...a,yawDeg:-45}),0);
+  assert.equal(footprintGap(a,{...a,size:[.2,.2,.1]}),0);
+  const square={xyz:[0,0,0],size:[1,1,1]};
+  assert(Math.abs(footprintGap(square,{...square,xyz:[1.09,0,1.12]})-.15)<1e-8);
+  const shop=structuredClone(plan.stores[14]);
+  const panel=shop.items.find(i=>i.socket==='pianoback'), cabinet=shop.items.find(i=>i.socket==='leftrear');
+  cabinet.xyz=[...panel.xyz];
+  assert(audit(shop,[]).some(([id,issue])=>id===panel.id && issue.includes('footprint gap')));
+});
+
+test('focal envelopes contain every shipped tier at its native origin', () => {
+  const manifest=JSON.parse(readFileSync(new URL('../demos/corporate/gjh/v11/assets/interiors/manifest.json',import.meta.url)));
+  for (const shop of plan.stores.slice(1)) {
+    const item=shop.items.find(i=>i.id===shop.focal);
+    for (const file of new Set(Object.values(item.lod))) {
+      const {min,max}=manifest.assets.find(entry=>entry.file===file).bounds_m;
+      for (const axis of [0,1,2]) {
+        const lower=axis===1?0:-item.size[axis]/2;
+        assert(min[axis]>=lower-1e-5 && max[axis]<=lower+item.size[axis]+1e-5,file);
+      }
+    }
+  }
+});
+
+test('a doorway obstruction, a rotated shelf and a shifted decal fail their own checks', async () => {
+  const shop=structuredClone(plan.stores[6]);
+  const rack=shop.items.find(i=>i.socket==='leftrear');
+  rack.yawDeg+=10;
+  shop.floor.position_m[0]=.05;
+  const blocker=shop.items.find(i=>i.socket==='leftfront');
+  blocker.xyz=[0,0,4];
+  blocker.size=[2,3,.3];
+  const problems=audit(shop,await studioBoxes());
+  for (const expected of ['entrance sightline blocked','back more than 0.02 m from wall finish',
+    'off 0.05 m placement grid or 15 degree yaw','floor off axis']) {
+    assert(problems.some(([,message])=>message===expected),expected);
+  }
+});

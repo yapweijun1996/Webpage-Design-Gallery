@@ -1,4 +1,5 @@
 // Store-local metres. The grid is used offline only.
+import {placementIssues} from './placement.mjs';
 import {readFileSync} from 'node:fs';
 import {pathToFileURL} from 'node:url';
 import * as T from '../../demos/corporate/gjh/v11/vendor/three.module.min.js';
@@ -39,18 +40,23 @@ export async function studioBoxes() {
   }
 }
 
-export function obstacles(shop, studio = []) {
+function studioObstacles(shop, studio) {
   const {world_origin_m:[ox,,oz],yaw_world_deg:yaw} = shop.frame;
   const a = yaw*Math.PI/180, c = Math.cos(a), s = Math.sin(a);
   const [w,d] = shop.frame.lot_width_depth_m;
   const boxes = studio.map(b => {
     const dx = b.x-ox, dz = b.z-oz;
-    return {xyz:[dx*c-dz*s,b.y-b.height/2,dx*s+dz*c], size:[b.width,b.height,b.depth],yawDeg:-yaw};
+    return {xyz:[dx*c-dz*s,b.y-b.height/2,dx*s+dz*c], size:[b.width,b.height,b.depth],yawDeg:-yaw,replacedDisplay:b.replacedDisplay};
   }).filter(b => Math.abs(b.xyz[0])<w/2 && Math.abs(b.xyz[2])<=d/2);
+  return [...boxes,...(shop.retainedObstacles ?? [])];
+}
+
+export function obstacles(shop, studio = []) {
+  const boxes=studioObstacles(shop,studio);
   for (const item of shop.items) {
     if (item.collision !== 'none') boxes.push(item);
   }
-  return [...boxes,...(shop.retainedObstacles ?? [])].filter(b => b.xyz[1]<1.75 && b.xyz[1]+b.size[1]>.1);
+  return boxes.filter(b => b.xyz[1]<1.75 && b.xyz[1]+b.size[1]>.1);
 }
 
 export function floorGrid(shop, boxes) {
@@ -170,7 +176,13 @@ export function audit(shop,studio) {
       issues.push([id,'inside wall']);
   }
   // A ray from standing eye height to the upper half of the focal silhouette.
-  if (['S01','S02','S03'].includes(shop.slot)) {
+  if (shop.slot !== 'S01') {
+    issues.push(...placementIssues(shop,floor,studioObstacles(shop,studio)));
+    const route=shop.frame.walk_path_local_xz_m;
+    for (const [k,to] of route.slice(1).entries()) {
+      if (!floor.edge(route[k],to,.6)) issues.push([shop.slot,'entrance/browse aisle < 1.2 m']);
+    }
+  } else {
     const target=shop.items.find(item=>item.id===shop.focal);
     const start=shop.frame.threshold_local_xz_m;
     for (let step=1;step<100;step++) {
