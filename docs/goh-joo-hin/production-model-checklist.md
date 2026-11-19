@@ -54,12 +54,16 @@ S04 passed on Pages build `deaf0fd98cc414b0`. Desktop and 390 px touch-emulated 
 - [ ] **Single 3 g unit, exact retail carton.** Confirm physical dimensions, closure and current packaging art independently of the enlarged display study.
 - [ ] **GJH 10-piece format.** Verify the outer pack shape, size and relationship to the 3 g carton before modeling.
 
+S05 passed on Pages build `ef5f8f14a4d09bd5`. Both Chrome routes entered the shop, opened the carton story, continued behind the counter and returned to the atrium. The published room GLB matched the Blender export. The 40-triangle model is part of the existing room mesh, and the parsed Low shop total is 2,350 triangles. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44638720871)
+
 ## S06 Flying Wheel
 
 [Design and runtime](06-flying-wheel/README.md) · [Inventory](06-flying-wheel/model-inventory.md)
 
-- [ ] **Air-Dried Singapore Ban Mee 70 g.** Verify packet silhouette, seals and current retailer artwork.
-- [ ] **Shanghai LaMian.** Verify regional SKU, packet geometry and print edition separately from Ban Mee.
+- [ ] **Air-Dried Singapore Ban Mee 70 g.** The [5 × 70 g outer-pack front, back and side gallery](https://www.gjheshop.com/product/bundle-of-6-flying-wheel-all-natural-air-dried-singapore-ban-mee-noodles-5-x-70g/) shows five wrapped portions under a flexible seal. Obtain exact dimensions, single-sleeve views and current retailer artwork.
+- [ ] **Shanghai LaMian 70 g.** The [separate 5 × 70 g outer-pack gallery](https://www.gjheshop.com/product/flying-wheel-all-natural-air-dried-shanghai-lamian-noodles-5-x-70g/) confirms the analogous assembly. Verify regional edition, physical package and sleeve dimensions, and print independently.
+
+The unprinted Blender studies reached the visual review stage. The rendered sleeves and seal still read as stiff parts because the transparent film's continuous wrap did not carry through the side views. The production room retains the loom and catalogue story. Revisit the soft outer-film representation within the existing opaque-room rendering contract.
 
 ## S07 Gu Long
 

@@ -21,5 +21,5 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| Flying Wheel Air-Dried Singapore Ban Mee Noodles 70g | Near shelf facing the right aisle | Pending source-matched package. A flexible 70g unprinted form study accompanies the official listing. |
-| Flying Wheel Shanghai LaMian | Separate rear shelf | Pending package model and exact region-specific artwork. |
+| Flying Wheel Air-Dried Singapore Ban Mee Noodles 70g | Near shelf facing the right aisle | Official gallery documents the 5 × 70 g outer pack. Exact stand-alone sleeve and soft outer-film model are pending. |
+| Flying Wheel Shanghai LaMian | Separate rear shelf | Official gallery independently documents a 5 × 70 g outer pack. Soft outer-film geometry, regional print and physical measurements remain pending. |
