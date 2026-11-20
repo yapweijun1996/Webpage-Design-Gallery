@@ -1765,6 +1765,17 @@ em{font-weight:400}
   }
   body[data-entry-mode="walk"] .app-loader:not([hidden])[data-pending-motion][data-motion-paused] .app-loader-ambient { animation-play-state: paused; }
 }
+/* An endless infinity loop in the courtyard shows that the mall is still loading. */
+.app-loader-orbit { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--loader-gold) 70%, transparent)); }
+@media (prefers-reduced-motion: no-preference) {
+  .app-loader:not([hidden])[data-pending-motion] .app-loader-orbit-spark {
+    animation: app-loader-orbit 3.2s linear infinite;
+  }
+  .app-loader:not([hidden])[data-pending-motion][data-motion-paused] .app-loader-orbit-spark { animation-play-state: paused; }
+}
+@keyframes app-loader-orbit {
+  to { stroke-dashoffset: -100; }
+}
 @keyframes app-loader-ambient {
   0%, 100% { opacity: .13; }
   50% { opacity: .54; }
