@@ -4,7 +4,11 @@ const FILES = __ASSETS__;
 const BASE = new URL('./', self.location.href);
 const PREFIX = 'wdg:demo:' + BASE.pathname + ':';
 const CACHE = PREFIX + RELEASE.build;
-const canonical = new Set(Object.keys(FILES).map(path => new URL(path, BASE).href));
+const entries = Object.entries(FILES).map(([path, sha256]) => ({path, sha256}));
+const assets = new Map(entries.map(entry => [new URL(entry.path, BASE).href, entry]));
+const shell = new URL('index.html', BASE);
+
+__PRECACHE_RUNTIME__
 
 async function readReleaseFile(path) {
   const url = new URL(path, BASE);
@@ -18,20 +22,7 @@ async function install() {
   try {
     const identity = await (await readReleaseFile(__IDENTITY__)).json();
     if (identity.build !== RELEASE.build || identity.version !== RELEASE.version) throw new Error('Build mismatch');
-    const cache = await caches.open(CACHE);
-    const files = Object.entries(FILES);
-    // Bound memory on phones and finish all in-flight writes before cleanup.
-    for (let offset = 0; offset < files.length; offset += 6) {
-      const results = await Promise.allSettled(files.slice(offset, offset + 6).map(async ([path, hash]) => {
-        const response = await readReleaseFile(path);
-        const digest = await crypto.subtle.digest('SHA-256', await response.clone().arrayBuffer());
-        const actual = Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('');
-        if (actual !== hash) throw new Error('Integrity check failed: ' + path);
-        await cache.put(new URL(path, BASE), response);
-      }));
-      const failure = results.find(item => item.status === 'rejected');
-      if (failure) throw failure.reason;
-    }
+    await preparePrecache(entries, CACHE, RELEASE.build);
   } catch (error) {
     await caches.delete(CACHE);
     throw error;
@@ -45,7 +36,7 @@ self.addEventListener('activate', event => event.waitUntil(
 ));
 self.addEventListener('message', event => {
   if (event.data?.type === 'GET_VERSION') event.ports[0]?.postMessage(RELEASE);
-  if (event.data?.type === 'SKIP_WAITING') event.waitUntil(self.skipWaiting());
+  if (event.data?.type === 'SKIP_WAITING') event.waitUntil(activateVerified(entries, CACHE, RELEASE.build, event.ports[0]));
 });
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
@@ -54,10 +45,18 @@ self.addEventListener('fetch', event => {
   // The document keeps its query and fragment. Only the saved file key is canonical.
   url.search = '';
   url.hash = '';
-  if (canonical.has(url.href)) {
-    event.respondWith(caches.open(CACHE).then(cache => cache.match(url)).then(response =>
-      response || new Response('Saved content is unavailable. Reconnect and check for updates.', {status: 503})));
-  } else if (event.request.mode === 'navigate' && url.pathname.startsWith(BASE.pathname)) {
-    event.respondWith(fetch(event.request).catch(() => Response.redirect(new URL('index.html', BASE).href)));
+  const entry = assets.get(url.href);
+  const navigation = event.request.mode === 'navigate';
+  async function fallback() {
+    if (url.href !== shell.href && await cachedResource(assets.get(shell.href), CACHE)) {
+      return Response.redirect(shell.href);
+    }
+    return offlinePage();
+  }
+  if (entry) {
+    event.respondWith(precachedResource(entry, CACHE, RELEASE.build).catch(() =>
+      navigation ? fallback() : Response.error()));
+  } else if (navigation && url.pathname.startsWith(BASE.pathname)) {
+    event.respondWith(fetch(event.request).catch(fallback));
   }
 });

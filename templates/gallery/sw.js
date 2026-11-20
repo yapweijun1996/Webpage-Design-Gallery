@@ -6,25 +6,18 @@ const BASE = new URL('./', self.location.href);
 const CACHE_PREFIX = 'wdg:' + BASE.pathname + ':shell:';
 const CACHE_NAME = CACHE_PREFIX + BUILD;
 
+const assets = new Map(PRECACHE.map(entry => [entry.path, entry]));
+const offlineURL = new URL('offline.html', BASE);
+
+__PRECACHE_RUNTIME__
+
 async function installRelease() {
   try {
     const identity = await fetch(new URL('version.json?v=' + BUILD, BASE), { cache: 'reload' });
     if (!identity.ok) throw new Error('Build identity unavailable');
     const release = await identity.json();
     if (release.build !== BUILD || release.version !== VERSION) throw new Error('Build identity mismatch');
-    const cache = await caches.open(CACHE_NAME);
-    // Verify actual bytes as well as identity, so a CDN race cannot commit a mixed shell.
-    await Promise.all(PRECACHE.map(async (entry) => {
-      const url = new URL(entry.path, BASE);
-      url.searchParams.set('v', BUILD);
-      const response = await fetch(url, { cache: 'reload' });
-      if (!response.ok || response.redirected) throw new Error('Precache resource unavailable');
-      const bytes = await response.clone().arrayBuffer();
-      const digest = await crypto.subtle.digest('SHA-256', bytes);
-      const actual = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
-      if (actual !== entry.sha256) throw new Error('Precache integrity mismatch: ' + entry.path);
-      await cache.put(new URL(entry.path, BASE), response);
-    }));
+    await preparePrecache(PRECACHE, CACHE_NAME, BUILD);
   } catch (error) {
     // Never delete a different active build or another project's caches.
     await caches.delete(CACHE_NAME);
@@ -42,8 +35,14 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'GET_VERSION') event.ports[0]?.postMessage({ version: VERSION, build: BUILD });
-  if (event.data?.type === 'SKIP_WAITING') event.waitUntil(self.skipWaiting());
+  if (event.data?.type === 'SKIP_WAITING') event.waitUntil(activateVerified(PRECACHE, CACHE_NAME, BUILD, event.ports[0]));
 });
+
+async function navigationFallback(path) {
+  const offline = await cachedResource(assets.get('offline.html'), CACHE_NAME);
+  if (!offline) return offlinePage();
+  return path === 'offline.html' ? offline : Response.redirect(offlineURL.href);
+}
 
 self.addEventListener('fetch', (event) => {
   const request = event.request;
@@ -51,7 +50,8 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || url.origin !== BASE.origin || !url.pathname.startsWith(BASE.pathname)) return;
   let path = url.pathname.slice(BASE.pathname.length);
   if (!path || path.endsWith('/')) path += 'index.html';
-  if (PRECACHE.some((entry) => entry.path === path)) {
+  const entry = assets.get(path);
+  if (entry) {
     // One coherent shell stays active until the user accepts a waiting release.
     // Query parameters remain in the page URL; only the cache key is canonical.
     event.respondWith((async () => {
@@ -61,9 +61,11 @@ self.addEventListener('fetch', (event) => {
       if (request.mode !== 'navigate' && client?.url.startsWith(new URL('demos/', BASE).href)) {
         return fetch(request, { cache: 'no-cache' });
       }
-      const cache = await caches.open(CACHE_NAME);
-      const response = await cache.match(new URL(path, BASE));
-      return response || new Response('Saved gallery resource unavailable. Reconnect and check for updates.', { status: 503 });
+      try {
+        return await precachedResource(entry, CACHE_NAME, BUILD);
+      } catch {
+        return request.mode === 'navigate' ? navigationFallback(path) : Response.error();
+      }
     })());
     return;
   }
@@ -75,6 +77,6 @@ self.addEventListener('fetch', (event) => {
         client?.postMessage({ type: 'CHECK_FOR_UPDATE' });
       }
       return response;
-    }).catch(() => Response.redirect(new URL('offline.html', BASE).href)));
+    }).catch(() => navigationFallback(path)));
   }
 });

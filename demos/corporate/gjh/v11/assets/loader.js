@@ -142,7 +142,6 @@ if (typeof document !== 'undefined') {
   reduced.addEventListener('change', () => renderMotion(state.snapshot()));
   new MutationObserver(() => renderText(state.snapshot())).observe(document.documentElement, {attributes:true, attributeFilter:['lang']});
   document.addEventListener('visibilitychange', () => state.visibility(document.hidden));
-  retry.addEventListener('click', () => location.reload());
   enterNow.addEventListener('click', () => state.enterNow());
   directory.addEventListener('click', () => {
     state.dismiss();
@@ -269,7 +268,10 @@ if (typeof document !== 'undefined') {
       if (mode === 'directory') directoryMounted = true;
       if (entryMode === 'directory' && (document.activeElement === document.body || document.activeElement === target))
         target.focus({preventScroll:true});
-    }).catch(() => state.fail('The 3D mall could not start. Retry or browse the store directory.'));
+    }).catch(() => {
+      state.fail('The 3D mall could not start. Retry or browse the store directory.');
+      if (overlay.hidden) window.dispatchEvent(new Event('mall-loader-failed'));
+    });
   }
   window.addEventListener('hashchange', route);
   route();
