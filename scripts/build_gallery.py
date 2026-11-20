@@ -272,7 +272,7 @@ def runtime_resources(catalog):
         resources.update(directory / name for name in ("style.css", "script.js") if (ROOT / directory / name).is_file())
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
-        for nested in ("brand-kit", "brands", "gallery-assets", "signage", "interiors", "chibi-crowd", "elevator", "tram"):
+        for nested in ("brand-kit", "brands", "gallery-assets", "signage", "interiors", "chibi-crowd", "elevator", "tram", "audio"):
             resources.update(path.relative_to(ROOT) for path in (assets / nested).rglob("*") if path.is_file())
         vendor = ROOT / directory / "vendor"
         if vendor.is_dir():
@@ -396,6 +396,10 @@ def pwa_outputs(pages, catalog, release):
         if len(content) != entry["bytes"] or hashlib.sha256(content).hexdigest() != entry["sha256"]:
             raise ValueError(f"Mall NPC asset receipt mismatch: {entry['file']}")
         mall_lazy.append({"path": f"assets/chibi-crowd/{entry['file']}", "sha256": entry["sha256"]})
+    # Use the verified, build-versioned runtime cache for optional piano samples.
+    for path in sorted((mall_root / "assets/audio/piano").glob("*.mp3")):
+        mall_lazy.append({"path": path.relative_to(mall_root).as_posix(),
+                          "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
     mall_worker = (ROOT / "templates/gallery/gjh-v11-sw.js").read_text(encoding="utf-8")
     mall_worker = mall_worker.replace("__BUILD__", json.dumps(release["build"])).replace("__VERSION__", json.dumps(release["version"])).replace("__PRECACHE__", json.dumps(mall_entries, indent=2))
     mall_worker = mall_worker.replace("__LAZY_ASSETS__", json.dumps(mall_lazy, indent=2))

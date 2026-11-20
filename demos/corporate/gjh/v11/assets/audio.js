@@ -2,9 +2,7 @@ import {MOVEMENT_KEYS} from './movement.js';
 
 // One procedural mixer shared by the mall's entry, player and lazy shop modules.
 export const AUDIO_KEY = 'gjh-v11-audio-v1';
-export const BEAT = 60 / 72;
 export const LOOKAHEAD = .18;
-const SWING = .58;
 const INIT_BUDGET_MS = 1.5;
 const MUSIC_DELAY_MS = 1500;
 const DEFAULT_LEVELS = {music:.26, effects:.65, ambience:.30};
@@ -31,38 +29,6 @@ const SOUNDS = {
   'floor-chime':['mallet',[79,84],.52,.095], 'tram-departure':['mallet',[72,79],.53,.093],
   'tram-station':['mallet',[79,76,72],.60,.093]
 };
-const CHORDS = [
-  [[64,67,71],[48,52,55,57]], // Cmaj7
-  [[64,67,72],[45,48,52,56]], // Am7
-  [[65,69,72],[50,53,57,59]], // Dm7
-  [[65,69,71],[43,47,50,52]], // G9
-  [[64,67,71],[48,52,55,54]], // Cmaj7
-  [[64,67,69],[41,45,48,49]], // Fmaj9
-  [[65,69,72],[50,53,57,56]], // Dm7
-  [[65,69,71],[43,47,50,47]]  // G9 to Cmaj7
-];
-const LOBBY = {key:0, timbre:'piano'};
-const UPPER = {key:2, timbre:'mallet'};
-const STYLES = {
-  upper:UPPER,
-  newmoon:{key:0,timbre:'piano',motif:[76,79]},
-  mili:{key:-2,timbre:'piano',motif:[74,77]},
-  gogo:{key:0,timbre:'mallet',motif:[79,76]},
-  'planned-space-04':{key:0,timbre:'mallet',motif:[76,81]},
-  'planned-space-05':{key:-2,timbre:'piano',motif:[74,69]},
-  'planned-space-06':{key:2,timbre:'piano',motif:[76,78]},
-  'planned-space-07':{key:0,timbre:'mallet',motif:[72,79]},
-  'planned-space-08':{key:0,timbre:'piano',motif:[79,81]},
-  'planned-space-09':{key:2,timbre:'mallet',motif:[78,81]},
-  'planned-space-10':{key:0,timbre:'mallet',motif:[81,79]},
-  'planned-space-11':{key:-2,timbre:'piano',motif:[72,77]},
-  'planned-space-12':{key:2,timbre:'mallet',motif:[81,78]},
-  'planned-space-13':{key:-2,timbre:'piano',motif:[72,76]},
-  'planned-space-14':{key:2,timbre:'piano',motif:[73,78]},
-  'planned-space-15':{key:0,timbre:'piano',motif:[77,74]},
-  'planned-space-16':{key:2,timbre:'mallet',motif:[76,81]},
-  'planned-space-17':{key:0,timbre:'mallet',motif:[76,72]}
-};
 const HARMONICS = {
   piano:[0,1,.18,.20,.03,.085],
   mallet:[0,1,0,0,.27,0,0,.045],
@@ -84,9 +50,20 @@ function nextIdleFrame(callback) {
   });
 }
 
+function pianoSeed() {
+  const key = 'gjh-v11-piano-seed';
+  let visitor = Math.random().toString(36).slice(2);
+  try {
+    const session = globalThis.sessionStorage;
+    visitor = session?.getItem(key) || visitor;
+    session?.setItem(key, visitor);
+  } catch { /* Keep the in-memory seed. */ }
+  return `${new Date().toISOString().slice(0,10)}/${visitor}`;
+}
+
 export function createAudioManager({
   createContext = browserContext, storage, now = () => performance.now(),
-  idle = nextIdleFrame, later = (callback, ms) => setTimeout(callback, ms),
+  idle = nextIdleFrame, fetchSample, seed, later = (callback, ms) => setTimeout(callback, ms),
   cancelLater = id => clearTimeout(id),
   every = (callback, ms) => setInterval(callback, ms), stopEvery = id => clearInterval(id)
 } = {}) {
@@ -101,8 +78,8 @@ export function createAudioManager({
   let musicChoice = typeof saved?.music === 'boolean' ? saved.music : null;
   let voiceChoice = saved?.voice === true, narrationStop = noop;
   let active = false, hidden = false, activated = false, disposed = false, unavailable = false;
-  let phone = false, low = false, quiet = false;
-  let pendingCreation = false, effectRequested = false;
+  let phone = false, low = false;
+  let pendingCreation = false, effectRequested = false, awaitingControls = false;
   let context, master, timer, wanted, transitionId = 0, serial = 0;
   const buses = {}, coefficients = {}, waves = {}, voices = [];
   const timbres = Object.keys(HARMONICS);
@@ -111,13 +88,17 @@ export function createAudioManager({
   let audioCreateMs = null, audioCreateDuring = null, audioCreateFrame = null;
   const effectLimit = () => phone ? 6 : 8;
   const listeners = new Set();
-  let step = 0, next = null, zone = 'atrium', style = LOBBY, lastStyleZone = '', motif = null;
+  let zone = 'atrium', theme = 'everyday', tram = false;
+  let pianoModules, composer, samplerModule, sampler;
+  let scoreBar, barNumber = 0, phrase, phraseIndex, phrasePiece, phraseBar, playingPiece;
+  const pieces = new Map();
   let stride = 0, railVoice, duckUntil = 0, captionDucking = false, speechDucking = false, musicDucked = false;
-  const musicEnabled = () => musicChoice ?? !(quiet || (phone && low));
-  const canResume = () => active && activated && !muted && !hidden && !disposed;
-  const audible = canResume;
+  const musicEnabled = () => musicChoice === true;
+  const audible = () => active && activated && !muted && !hidden && !disposed;
+  const canResume = () => audible() && !awaitingControls;
   const deferCreation = () => phone && low;
   const canCreate = () => !context && !muted && !hidden && !disposed && !unavailable;
+  const waitingForLowSound = () => active && deferCreation() && (awaitingControls || canCreate());
   const wantsSound = () => effectRequested || (musicEnabled() && levels.music > 0);
   const running = () => audible() && !unavailable && wanted === true && context?.state === 'running';
   const wantsMusic = () => running() && musicEnabled() && levels.music > 0;
@@ -206,47 +187,81 @@ export function createAudioManager({
     voice.token = token;
     return voice;
   }
-  function score(index, time) {
-    const bar = Math.floor(index / 8), beat = Math.floor(index % 8 / 2);
-    const [chord, bass] = CHORDS[bar];
-    if (index % 2) {
-      note('music','brush',time,.12,.038,89,0,0,null,3);
-      if (beat === 2 && motif && !demoMuted) {
-        note('music',style.timbre,time,.31,.080,motif[0],0,0,motif,1);
-      }
+  function currentPiece() {
+    const place = tram ? 'tram' : zone === 'newmoon' || zone === 'upper' ? zone :
+      theme === 'christmas' ? theme : 'courtyard';
+    if (!composer) return;
+    if (!pieces.has(place)) pieces.set(place, composer.createPianoPiece(seed ??= pianoSeed(), place));
+    return pieces.get(place);
+  }
+  function beginBar(start) {
+    const piece = currentPiece();
+    const {BARS_PER_PHRASE, composePianoBars} = composer;
+    const index = Math.floor(barNumber / BARS_PER_PHRASE);
+    if (phrasePiece !== piece || phraseIndex !== index) {
+      phrase = composePianoBars(piece, index);
+      phrasePiece = piece;
+      phraseIndex = index;
+      phraseBar = 0;
+    }
+    const offset = barNumber++ % BARS_PER_PHRASE;
+    let bar;
+    // Preserve the phrase position when the visitor changes zones mid-phrase.
+    do { bar = phrase.next().value; } while (phraseBar++ < offset);
+    const beatSeconds = 60 / piece.bpm;
+    const end = start + bar.beats * beatSeconds;
+    const events = [...bar.bass, ...bar.melody].filter(event => event.note !== null)
+      .sort((left,right) => left.beat - right.beat);
+    return {start,end,beatSeconds,events,index:0,sampled:sampler?.ready,piece};
+  }
+  function scheduleNote(event, start, bar) {
+    const sustain = event.beats * bar.beatSeconds + .16;
+    const duration = Math.min(sustain, bar.end - start);
+    if (bar.sampled) {
+      const {PIANO_RELEASE, PIANO_VOICES} = samplerModule;
+      sampler.play(buses.music, event.note, start, duration - PIANO_RELEASE, event.velocity,
+        phone ? PIANO_VOICES.phone : PIANO_VOICES.desktop);
       return;
     }
-    if (beat === 0) {
-      style = STYLES[zone] ?? LOBBY;
-      motif = zone === lastStyleZone ? null : style.motif;
-      lastStyleZone = zone;
-    }
-    note('music','sine',time,.46,.14,bass[beat] + style.key,0,0,null,0);
-    if (beat === 0 || beat === 2) {
-      // The bass supplies the root and the two upper voices carry the color.
-      note('music',style.timbre,time,.43,.085,chord[0] + style.key,0,0,null,1);
-      note('music',style.timbre,time + .012,.43,.085,chord[beat === 0 ? 2 : 1] + style.key,0,0,null,2);
-    }
+    const slot = voices.findIndex((voice,index) => index < 4 && voice.until <= start);
+    if (slot >= 0) note('music','piano',start,duration,event.velocity * .26,event.note,0,0,null,slot);
   }
   function schedule() {
     if (!musicPlaying() || !wantsMusic()) return;
-    const now = context.currentTime;
+    const now = context.currentTime, horizon = now + LOOKAHEAD;
     applyDuck(now);
-    if (next === null || next < now) next = now + .026;
-    while (next <= now + LOOKAHEAD) {
-      score(step, next);
-      next += BEAT * (step % 2 ? 1 - SWING : SWING);
-      step = (step + 1) % (CHORDS.length * 8);
+    if (scoreBar?.end < now) scoreBar = null;
+    scoreBar ??= beginBar(now + .026);
+    for (;;) {
+      if (scoreBar.start <= now && playingPiece !== scoreBar.piece) {
+        playingPiece = scoreBar.piece;
+        publish();
+      }
+      const event = scoreBar.events[scoreBar.index];
+      if (event) {
+        const start = scoreBar.start + event.beat * scoreBar.beatSeconds;
+        if (start > horizon) break;
+        if (start >= now) scheduleNote(event, start, scoreBar);
+        scoreBar.index++;
+      } else {
+        if (scoreBar.end > horizon) break;
+        scoreBar = beginBar(scoreBar.end);
+      }
     }
+    // Give the opening bar to the oscillator before requesting any MP3s.
+    sampler ??= samplerModule?.createPianoSampler(context, {idle, fetchSample});
+    void sampler?.load();
   }
   function syncClock() {
     if (timer !== undefined && !wantsMusic()) {
       stopEvery(timer);
       timer = undefined;
       buses.music.disconnect();
-      next = null;
+      scoreBar = playingPiece = null;
+      sampler?.stop();
       for (const voice of voices) if (voice?.bus === 'music') silence(voice);
     }
+    if (!musicEnabled()) sampler?.cancelLoad();
   }
   function createBus(bus) {
     const output = context.createGain();
@@ -278,6 +293,8 @@ export function createAudioManager({
       if (!voices[slot]) return () => voiceAt(slot);
     }
     if (!readyForMusic || !wantsMusic() || musicPlaying()) return;
+    if (!pianoModules) return () => { void prefetchMusic(); };
+    if (!composer) return;
     if (!buses.music) return () => createBus('music');
     for (let slot = 0; slot < 4; slot++) {
       if (!voices[slot]) return () => voiceAt(slot);
@@ -319,6 +336,22 @@ export function createAudioManager({
     queueWarmup();
     publish();
   }
+  function prefetchMusic() {
+    pianoModules ??= new Promise(resolve => {
+      idle(() => {
+        if (disposed) { resolve(); return; }
+        const score = import('./piano-composer.js').then(module => {
+          if (disposed) return;
+          composer = module;
+          queueWarmup();
+          if (musicEnabled()) publish();
+        }, noop);
+        const samples = import('./piano-sampler.js').then(module => { samplerModule = module; }, noop);
+        resolve(Promise.all([score, samples]));
+      });
+    });
+    return pianoModules;
+  }
   function setContextRunning(play) {
     wanted = play;
     const id = ++transitionId;
@@ -352,6 +385,7 @@ export function createAudioManager({
   }
   function closeContext() {
     if (!context) return;
+    sampler?.cancelLoad();
     context.onstatechange = null;
     railVoice = null;
     for (const voice of voices) if (voice) {
@@ -397,6 +431,11 @@ export function createAudioManager({
   function prepareForLoader(frame = 0) {
     if (canCreate() && (!deferCreation() || wantsSound())) prepareContext('loader', frame);
   }
+  function primeLowContext(frame) {
+    if (!deferCreation() || !canCreate()) return;
+    prepareContext('loader', frame);
+    awaitingControls = Boolean(context) && !wantsSound();
+  }
   function scheduleCreation(isStationary, getFrame) {
     if (pendingCreation || !active || !canCreate() || deferCreation()) return;
     pendingCreation = true;
@@ -425,7 +464,10 @@ export function createAudioManager({
     }
   }
   function prepareForControls(frame, explicit = false) {
-    if (active && canCreate() && (explicit || wantsSound())) prepareContext('gesture', frame);
+    if (active && (explicit || wantsSound())) {
+      awaitingControls = false;
+      if (canCreate()) prepareContext('gesture', frame);
+    }
     unlock({allowCreate:false});
   }
   function sceneGesture(event, isStationary, frame) {
@@ -436,7 +478,7 @@ export function createAudioManager({
     unlock({allowCreate:canCreateOnGesture && isStationary(), frame});
   }
   function requestEffect() {
-    if (!context && active && deferCreation() && canCreate()) effectRequested = true;
+    if (waitingForLowSound()) effectRequested = true;
   }
   function duck(seconds) {
     if (!running()) return;
@@ -467,16 +509,17 @@ export function createAudioManager({
     if (!Object.hasOwn(levels,bus) || !Number.isFinite(value)) return;
     levels[bus] = Math.min(1,Math.max(0,value));
     if (context && buses[bus]) gain(buses[bus], levels[bus] * (bus === 'music' && musicDucked ? .32 : 1));
-    save(); syncClock(); publish();
+    save(); audioStateChanged();
   }
   return {
     performanceReport() { return {audioInitMs, audioInitSliceMaxMs, audioCreateMs, audioCreateDuring, audioCreateFrame}; },
     get demoMuted() { return demoMuted; },
     get canNarrate() { return audible() && voiceChoice; },
     get state() { return {muted,demoMuted,musicEnabled:musicEnabled(),musicPlaying:musicPlaying(),
+      musicTitle:musicEnabled() ? (playingPiece ?? currentPiece())?.title ?? '' : '',
       voice:voiceChoice,levels:{...levels},available:!unavailable}; },
     subscribe(listener) { listeners.add(listener); listener(); return () => listeners.delete(listener); },
-    prepareForLoader, scheduleCreation, prepareForControls, sceneGesture, unlock, play, shop, duck, setVolume,
+    prefetchMusic, prepareForLoader, primeLowContext, scheduleCreation, prepareForControls, sceneGesture, unlock, play, shop, duck, setVolume,
     setMuted(value) { muted = value; save(); sync(); },
     setMusic(value) { musicChoice = value; save(); sync(); },
     setDemoMuted(value) {
@@ -499,14 +542,18 @@ export function createAudioManager({
       sync();
     },
     setHidden(value) { if (hidden !== value) { hidden = value; sync(); } },
-    setPolicy(isPhone, isLow, prefersQuiet) {
-      if (phone === isPhone && low === isLow && quiet === prefersQuiet) return;
+    setPolicy(isPhone, isLow) {
+      if (phone === isPhone && low === isLow) return;
       if (isPhone && context) for (let i = 6; i < voices.length; i++) if (voices[i]) silence(voices[i]);
-      phone = isPhone; low = isLow; quiet = prefersQuiet; sync();
+      phone = isPhone; low = isLow;
+      if (!deferCreation()) awaitingControls = false;
+      sync();
     },
-    setZone(value) { zone = value; },
+    setZone(value) { if (zone !== value) { zone = value; if (!playingPiece && musicEnabled()) publish(); } },
+    setTheme(value) { if (theme !== value) { theme = value; if (!playingPiece && musicEnabled()) publish(); } },
+    setTram(value) { if (tram !== value) { tram = value; if (!playingPiece && musicEnabled()) publish(); } },
     walk(distance) {
-      if (!distance || !levels.effects || (!running() && !(active && deferCreation() && canCreate()))) return;
+      if (!distance || !levels.effects || (!running() && !waitingForLowSound())) return;
       stride += distance;
       if (stride >= .79) { stride %= .79; play('step'); }
     },

@@ -1591,6 +1591,7 @@ function createTramHud(parent, scene, canControl) {
     const active = Boolean(state?.active);
     const restoreFocus = wasActive && !active && card.contains(document.activeElement);
     wasActive = active;
+    mallAudio2.setTram(active);
     card.hidden = !active && !boardReason;
     const shop = active ? tramCaptions[state.caption] : null;
     if (!shop && lastShop || state?.paused && !wasPaused)
@@ -6518,13 +6519,28 @@ var speaker = document.getElementById("mall-speaker");
 var music = document.getElementById("mall-music");
 var musicStatus = document.getElementById("mall-music-status");
 var mixer = document.querySelectorAll("[data-audio-bus]");
-var connection = navigator.connection;
+var musicTitle = document.getElementById("mall-music-title");
+var musicToggleState = document.getElementById("mall-music-state");
+var speakerState = document.getElementById("mall-speaker-state");
 var lastMusicStatus;
+var lastMusicEnabled;
+var lastMuted;
 mallAudio3.subscribe(() => {
   const state = mallAudio3.state;
   music.disabled = !state.available;
   speaker.setAttribute("aria-pressed", String(state.muted));
-  music.checked = state.musicEnabled;
+  music.setAttribute("aria-pressed", String(state.musicEnabled));
+  if (lastMusicEnabled !== state.musicEnabled) {
+    lastMusicEnabled = state.musicEnabled;
+    musicToggleState.textContent = state.musicEnabled ? "On" : "Off";
+  }
+  if (lastMuted !== state.muted) {
+    lastMuted = state.muted;
+    speakerState.textContent = state.muted ? "Sound off" : "Sound on";
+  }
+  musicTitle.hidden = !state.musicTitle;
+  if (musicTitle.textContent !== state.musicTitle)
+    musicTitle.textContent = state.musicTitle;
   for (const input of mixer) {
     input.disabled = !state.available;
     input.value = Math.round(state.levels[input.dataset.audioBus] * 100);
@@ -6539,9 +6555,10 @@ function toggleMute() {
     mallAudio3.prepareForControls(frames, true);
 }
 speaker.addEventListener("click", toggleMute);
-music.addEventListener("change", () => {
-  mallAudio3.setMusic(music.checked);
-  if (music.checked)
+music.addEventListener("click", () => {
+  const enabled = !mallAudio3.state.musicEnabled;
+  mallAudio3.setMusic(enabled);
+  if (enabled)
     mallAudio3.prepareForControls(frames, true);
 });
 for (const input of mixer)
@@ -6591,11 +6608,9 @@ var quality = createGraphicsQuality((change) => {
     resize();
 });
 function syncAudioPolicy(tier = quality.state?.tier ?? quality.resolve(innerWidth).tier) {
-  mallAudio3.setPolicy(quality.deviceClass === "phone", tier === "low", reducedMotion2.matches || connection?.saveData === true);
+  mallAudio3.setPolicy(quality.deviceClass === "phone", tier === "low");
 }
 syncAudioPolicy();
-reducedMotion2.addEventListener("change", () => syncAudioPolicy());
-connection?.addEventListener?.("change", () => syncAudioPolicy());
 var floorChime = () => mallAudio3.play("floor-chime");
 var renderRequested = false;
 var forceRender = false;
@@ -7435,6 +7450,7 @@ function animate(now) {
     enteredAt = now;
     markEntered();
     activateSceneAudio();
+    mallAudio3.prefetchMusic();
   }
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
@@ -8041,6 +8057,7 @@ async function initialize() {
           stage?.setTier?.(quality.state?.tier);
           stage?.mount?.();
           themeStage = stage;
+          mallAudio3.setTheme(next.id);
         } catch (error) {
           world.applyMallTheme(previous);
           elevator?.applyMallTheme?.(previous);
@@ -8051,6 +8068,7 @@ async function initialize() {
       if (!world.applyMallTheme(mallTheme.definition()))
         throw new Error("Invalid initial theme");
       atmosphere.applyTheme(mallTheme.definition());
+      mallAudio3.setTheme(mallTheme.definition().id);
       if (contextLost || interrupted)
         mallTheme.suspend();
     } catch {
@@ -8256,6 +8274,8 @@ async function initialize() {
     return;
   if (!renderer.info.render.calls)
     throw new Error("First scene frame unavailable");
+  if (!startupOverlay.hidden)
+    mallAudio3.primeLowContext(frames);
   window.mallLoader?.complete("frame");
   window.__sceneReady = true;
   ui.offerFirstGuide();
