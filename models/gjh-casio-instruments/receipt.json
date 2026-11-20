@@ -1,0 +1,52 @@
+{
+  "scope": "CT-S1BK 61-key exterior and closed GP-510BP cabinet. Component tolerances, audio and seat interaction remain separate.",
+  "referenceImages": [
+    {
+      "url": "https://support.casio.com/global/en/emi/manual/CT-S1/images/img_ct-s1.png",
+      "sha256": "5c961d7c26820ca064888cc06622cb09f5b2464270c3891dfe867edf1a995564"
+    },
+    {
+      "url": "https://www.casio.com/content/dam/casio/product-info/locales/us/en/emi/product/G/GP/GP5/GP-510BP/assets/GP-510BP_Seq2.jpg.transform/main-visual-pc/image.jpg",
+      "sha256": "fed2465727dbdc08b5245f27d9d0d8635b250b2c1746f16c047cb69147357fa5"
+    },
+    {
+      "url": "https://www.casio.com/content/dam/casio/global/support/manuals/electronic-musical-instruments/pdf/008-en/g/GP510_usersguide_A_EN.pdf",
+      "sha256": "1dd30040d922ed6779857b5e9f2a1cc800a7c686c136dea172857c034caa59ff"
+    }
+  ],
+  "blender": {
+    "version": "5.1.2",
+    "buildMethod": "Blender MCP background export",
+    "editableSource": {
+      "file": "models/gjh-casio-instruments/casio-instruments.blend",
+      "sha256": "4ad29fd6c27afac2f509e3e80244bbd74a5ca6217192037d76f504e26cd664e2"
+    },
+    "reviewGlbSha256": "a3565f6aa7c378a5df89a8269c9192584f82d253d453d39c9ee1ccfdd5fed7d1"
+  },
+  "runtime": {
+    "file": "demos/corporate/gjh/v11/assets/interiors/s15-recital-details.glb",
+    "sha256": "6ea7e2308380383067b81651f3d29de442f10624481aeb2c88263c1819b00e4c",
+    "detailTriangles": 748,
+    "wholeRoomTriangles": {
+      "low": 2748,
+      "balanced": 4600,
+      "detailed": 4660
+    }
+  },
+  "verification": {
+    "localBuild": "2a5c452460ef78fd",
+    "views": {
+      "1440-S15-focal.jpg": "b64b9c74b160050c8ca29be4b858438edb5881d2beccd066b532b3ad2b6fda61",
+      "1440-S15-hybrid-cabinet.jpg": "fef6b7d95f85817a71b39d4975f250ff5fac0986e2163436397abea72eeae883",
+      "1440-S15-portable-keyboard.jpg": "0298a0345fb1e8587e59a88bf6e9363abda0a667abe97269ebe23e0e2d516d9c",
+      "1440-S15-story.jpg": "69b9855a6c04ec9bd99641b306de1e5008b82f8d4e330dc5f4b49f2dde9c06cb",
+      "390-S15-hybrid-cabinet.jpg": "fda3385a094ac290d324a77dc98ae5d6019507550df80513b898c6d090e4d82d",
+      "390-S15-portable-keyboard.jpg": "4082051b1383236601cd15d4ddb9f82a1308c14d8d97638305864e606c783c30",
+      "390-S15-story.jpg": "5822c7048e04f98552f913c8d5b0e83f4501f48f89d1a80e4436ba080ffc7d70",
+      "specimen-ct-s1bk.png": "47f89109e8aa0767ce9e1a1c8cc5eb6ec2c59c7d070d13f1df0404287af67554",
+      "specimen-gp-510bp.png": "6337991e549366cb8a372479c8c31dcde4cde7d39f38ea20efc5c00dc0f3d069"
+    },
+    "chrome": "1440\u00d7900 desktop and 390\u00d7844 touch-emulated Chrome passed map entry, story, model view, exit and GLB response.",
+    "visualReview": "GPT-6.2 Astra comparison of the portable keyboard and cabinet with retained revisions."
+  }
+}

@@ -14,6 +14,26 @@ from palette import SWATCHES
 CRAFT, PRINT, PULSE, SCROLL = "Enamel", "Printed opal", "Pulse", "Scroll"
 
 
+def smooth_face_ranges(obj, ranges, dot_floor=.48):
+    """Share normals across coincident face corners within each curved part."""
+    data = obj.data
+    data.update()
+    normals = [(0, 0, 0)] * len(data.loops)
+    for start, stop in ranges:
+        faces = data.polygons[start:stop]
+        adjacent = defaultdict(list)
+        for face in faces:
+            for vertex in face.vertices:
+                adjacent[tuple(data.vertices[vertex].co)].append(face.normal.copy())
+        for face in faces:
+            face.use_smooth = True
+            for index in face.loop_indices:
+                coordinate = tuple(data.vertices[data.loops[index].vertex_index].co)
+                nearby = (normal for normal in adjacent[coordinate] if face.normal.dot(normal) > dot_floor)
+                normals[index] = sum(nearby, Vector()).normalized()
+    data.normals_split_custom_set(normals)
+
+
 def linear(hexcode):
     rgb = tuple(int(hexcode[i:i+2], 16)/255 for i in (0, 2, 4))
     return [c/12.92 if c <= .04045 else ((c+.055)/1.055)**2.4 for c in rgb]+[1]

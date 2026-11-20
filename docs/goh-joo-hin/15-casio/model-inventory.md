@@ -21,5 +21,7 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| Casiotone CT-S1BK | Right-side instrument stand | Pending exact casing, control and speaker layout. Manufacturer dimensions 930 × 258 × 83 mm. Existing generic 61-key asset is a geometry candidate. |
-| CELVIANO Grand Hybrid GP-510BP | Cabinet-form sample beyond the recital anchor | Pending straight cabinet model with three pedals. The curved stage grand has a materially different form. |
+| Casiotone CT-S1BK | Right-side instrument stand | Installed 930 × 258 × 83 mm study with 61 keys, top controls and a dark textile speaker deck. |
+| CELVIANO Grand Hybrid GP-510BP | Cabinet-form sample beyond the recital anchor | Installed straight cabinet at (1.55, 0.081, -4.00). The covered instrument uses the published envelope and three visible pedals. |
+
+[Editable Blender sources and QA receipt](../../../models/gjh-casio-instruments/README.md)

@@ -26,8 +26,8 @@ World origin (40, 0, 44), yaw -90°. Dimensions are authored metres. The [floor 
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| Gigaset A170 | Left alcove phone tray | Pending exact handset and cradle. The A170 has an amber 34 × 22 mm display and a 159 × 48 × 30 mm handset. [Manufacturer gallery](https://www.gigaset.com/en_en/gigaset-a170/) |
-| Gigaset COMFORT 550A | Right alcove phone tray | Pending exact keypad and answering-machine base. The black 550A handset is 161 × 52 × 26 mm and its base is 43 × 123 × 99 mm. [Manufacturer gallery and specifications](https://www.gigaset.com/hq_en/gigaset-comfort-550/), with the black answering-machine variant selected. |
+| Gigaset A170 | Left side of the tabletop island | Installed handset and rounded cradle. The A170 has an amber 34 × 22 mm display and a 159 × 48 × 30 mm handset. [Manufacturer gallery](https://www.gigaset.com/en_en/gigaset-a170/) |
+| Gigaset COMFORT 550A | Right side of the tabletop island | Installed handset with a wider answering base and control panel. The black 550A handset is 161 × 52 × 26 mm and its base is 43 × 123 × 99 mm. [Manufacturer gallery and specifications](https://www.gigaset.com/hq_en/gigaset-comfort-550/), with the black answering-machine variant selected. |
 
 The official product galleries supply model views, while the dealership source covers product families.
 
@@ -43,10 +43,12 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 
 ## Runtime acceptance
 
-Both Chrome input paths passed. Exact handset models and Sofa Sit remain proposed.
+Both Chrome input paths passed the story, tabletop views and exit. Sofa Sit remains separate work.
 
 ## Catalogue exhibit
 
-Two simplified tabletop specimens show an A170-sized handset with an amber display and compact base, and a 550A-inspired handset with a wider answering-machine base. The story links to the A170 manufacturer reference. The exact 550A pack and materials remain under research.
+Two editable tabletop sets show the A170 handset with amber display and rounded cradle, and the 550A handset with its wider answering base, message window and physical controls. The A170 base axes and exact finishes remain open.
 
 Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action opened the reference and displayed the source link. [Runtime Chrome views](exhibit-runtime.webp)
+
+[Editable Blender sources and QA receipt](../../../models/gjh-gigaset-handsets/README.md)

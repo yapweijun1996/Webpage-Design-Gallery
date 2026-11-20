@@ -3313,9 +3313,9 @@
       {
         "store": "S15",
         "file": "s15-recital-details.glb",
-        "bytes": 37608,
-        "sha256": "57a79f4b9ae519d83be892eaed528e933beea4f1edbe3296379454b1240db9b1",
-        "triangles": 502,
+        "bytes": 58748,
+        "sha256": "6ea7e2308380383067b81651f3d29de442f10624481aeb2c88263c1819b00e4c",
+        "triangles": 748,
         "draws": 2,
         "instances": 0,
         "motion": [],
@@ -3329,9 +3329,9 @@
       {
         "store": "S16",
         "file": "s16-power-details.glb",
-        "bytes": 22604,
-        "sha256": "0f32e9c78c008509137b8f850de327f8c85d2abdf006bb3ec7c266ce18098efa",
-        "triangles": 266,
+        "bytes": 107220,
+        "sha256": "00fbe25bb18db35b5e40eb71af732e3867f1ef64e095bcb8aab076e037006969",
+        "triangles": 1406,
         "draws": 3,
         "instances": 0,
         "motion": [
@@ -3347,9 +3347,9 @@
       {
         "store": "S17",
         "file": "s17-telephone-details.glb",
-        "bytes": 36748,
-        "sha256": "0c9c8530ea5aae83e5492155cf1692abdfd69db1a68ecb11e1aed36f87796ccb",
-        "triangles": 512,
+        "bytes": 145016,
+        "sha256": "8835a8cbdfa9dfcbf07a1f98493dd65c856d85a08d5a1a0fe861a5a1fe6723ca",
+        "triangles": 1992,
         "draws": 4,
         "instances": 4,
         "motion": [

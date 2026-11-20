@@ -1,10 +1,7 @@
 """S13 Sony audio specimens in metres, with local +Y up and +Z front."""
-from collections import defaultdict
 from math import cos, pi, sin, tau
 
-from mathutils import Vector
-
-from mesh import CRAFT
+from mesh import CRAFT, smooth_face_ranges
 
 WALKMAN_NAME = "Sony NW-A306 Walkman"
 HEADPHONES_NAME = "Sony WH-1000XM6 Headphones"
@@ -223,22 +220,6 @@ def add_sony_audio_models(room):
 
 def smooth_headphones(obj, parts):
     """Share normals across joined shell faces without rounding the narrow hinge."""
-    data = obj.data
-    data.update()
-    normals = [(0, 0, 0)] * len(data.loops)
     ordered = list(parts.items())
-    for (name, start), (_, stop) in zip(ordered, ordered[1:]):
-        if "cup shell" not in name and "headband" not in name:
-            continue
-        faces = data.polygons[start:stop]
-        adjacent = defaultdict(list)
-        for face in faces:
-            for vertex in face.vertices:
-                adjacent[tuple(data.vertices[vertex].co)].append(face.normal.copy())
-        for face in faces:
-            face.use_smooth = True
-            for index in face.loop_indices:
-                coordinate = tuple(data.vertices[data.loops[index].vertex_index].co)
-                nearby = (normal for normal in adjacent[coordinate] if face.normal.dot(normal) > .48)
-                normals[index] = sum(nearby, Vector()).normalized()
-    data.normals_split_custom_set(normals)
+    smooth_face_ranges(obj, [(start, stop) for (name, start), (_, stop) in zip(ordered, ordered[1:])
+                             if "cup shell" in name or "headband" in name])

@@ -21,6 +21,8 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| GP Ultra+ Alkaline AA | Rear power shelf and one native-size front sample | Pending cell and current paper-pack geometry. Cell form 14.5 × 50.5 mm from manufacturer. |
-| GP eTag Smart Tracker | Small sample next to the eyelet | Pending exact tracker casing. Manufacturer example from Malaysia, Singapore availability unverified. |
-| GP CR2032 | Separate tracker accessory | Pending low-detail coin-cell geometry distinct from AA. |
+| GP Ultra+ Alkaline AA | Right demo plinth | The GP15AUP maximum envelope and raised positive terminal are modeled. Paper-pack revision and artwork remain open. |
+| GP eTag Smart Tracker | Right demo plinth | The white GP Malaysia tracker form has a contoured face and cover seam. Aperture placement and Singapore availability remain open. |
+| GP CR2032 | Right demo plinth, centre | Unmarked Ø20 × 3.2 mm disk with stepped underside. Packaging and markings remain open. |
+
+[Editable Blender sources and QA receipt](../../../models/gjh-gp-power/README.md)

@@ -142,24 +142,30 @@ S12 passed both Chrome routes with matching live asset bytes across the same Pag
 - [x] **OLED55C5PSA stand-free cabinet.** The [editable model](../../models/gjh-lg-oled/README.md) uses the 1,222 × 703 × 45.1 mm envelope, stepped rear housing, vent and four VESA mounts. The enlarged gallery screen retains its own content.
 - [ ] **Exact OLED55C5PSA.ATC jack panel.** Obtain a sharp Singapore rear and side connector view for layout, socket orientation and casing details.
 
+S13 and S14 passed both Chrome routes on Pages build `e41e09428bb8f71f` with matching live GLB hashes. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44653176777)
+
 ## S15 Casio
 
 [Design and runtime](15-casio/README.md) · [Inventory](15-casio/model-inventory.md)
 
-- [ ] **Casiotone CT-S1BK.** Refine the nominal 930 × 258 × 83 mm, 61-key study with source-backed control and speaker details.
-- [ ] **CELVIANO Grand Hybrid GP-510BP.** Build the straight cabinet and three pedals rather than adapting the curved stage grand. Audio and Sit are separate interaction work.
+- [x] **Casiotone CT-S1BK.** Published envelope, 61-key arrangement, dark speaker deck and top controls in the [editable model](../../models/gjh-casio-instruments/README.md).
+- [x] **CELVIANO Grand Hybrid GP-510BP.** Separate closed-lid, closed-cover cabinet with three pedals on the rear wall. The recital grand stays in the centre.
+- [ ] **Detailed controls and finishes.** Use measured component views for exact switch spacing, materials and key detail. Instrument audio and Sit are separate interaction work.
 
 ## S16 GP Batteries
 
 [Design and runtime](16-gp-batteries/README.md) · [Inventory](16-gp-batteries/model-inventory.md)
 
-- [ ] **GP Ultra+ AA.** Verify the 14.5 × 50.5 mm cell, terminal shoulders and packaging revision.
-- [ ] **GP eTag.** Match the exact case and seam to the manufacturer example. Singapore market availability remains separate.
-- [ ] **GP CR2032.** Build a distinct coin-cell specimen and verify package identity before applying markings.
+- [x] **GP Ultra+ AA, white eTag and CR2032.** Three [editable models](../../models/gjh-gp-power/README.md) use manufacturer envelopes. The AA shows its stepped terminal and the eTag shows the cover seam.
+- [ ] **GP Ultra+ AA and GP CR2032 packaging.** Confirm the intended sales revision and obtain authorized art before applying pack or cell markings.
+- [ ] **GP eTag case apertures.** Confirm the physical lanyard opening, cover pinhole and seam against a close-up. Singapore market availability remains separate.
 
 ## S17 Gigaset
 
 [Design and runtime](17-gigaset/README.md) · [Inventory](17-gigaset/model-inventory.md)
 
-- [ ] **A170.** Verify the 159 × 48 × 30 mm handset, amber display and cradle geometry from the manufacturer.
-- [ ] **COMFORT 550A.** Verify the exact 161 × 52 × 26 mm handset, keypad and 43 × 123 × 99 mm answering base for the black variant. Sofa Sit is separate interaction work.
+- [x] **A170 and COMFORT 550A black.** Two [editable handset and base sets](../../models/gjh-gigaset-handsets/README.md) distinguish the amber A170 face from the 550A display and answering base controls. The handset envelopes and the 550A base use manufacturer dimensions.
+- [ ] **A170 base dimensions.** Compare the H, W and D axes against a measured black A170 cradle. The shallower base orientation is inferred from the photo and nominal dimensions.
+- [ ] **Precision retail detail.** Confirm the A170 cradle curvature, both key legends and display appearance against measured parts and authorized artwork. Sofa Sit is separate interaction work.
+
+S15 through S17 passed the map, store entry, story, model view and exit checks in desktop and touch-emulated Chrome. Their model receipts record build `2a5c452460ef78fd` and the installed GLB checksums. [Casio receipt](../../models/gjh-casio-instruments/receipt.json) · [GP Batteries receipt](../../models/gjh-gp-power/receipt.json) · [Gigaset receipt](../../models/gjh-gigaset-handsets/receipt.json)

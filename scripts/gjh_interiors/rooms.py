@@ -6,6 +6,9 @@ from borsch_packs import add_borsch_lingzhi_pair, add_borsch_patch_pack
 from california_mexico_tins import SAMPLES as CALIFORNIA_MEXICO_SAMPLES, add_california_mexico_tin
 from california_mexico_tins import SHELF_DEPTH as CALIFORNIA_MEXICO_SHELF_DEPTH
 from california_mexico_tins import SHELF_TOP as CALIFORNIA_MEXICO_SHELF_TOP
+from casio_instruments import add_ct_s1, add_gp_510
+from gigaset_models import add_gigaset
+from gp_power_models import add_aa, add_cr2032, add_etag
 from gulong_tins import SAMPLES as GULONG_SAMPLES, SHELF_TOP as GULONG_SHELF_TOP, add_gulong_tin
 from hormel_chili_tins import add_hormel_chili_tins
 from lg_oled_model import add_lg_oled
@@ -376,6 +379,8 @@ def living(r,_):
 
 
 def recital(r,_):
+    add_ct_s1(r)
+    add_gp_510(r)
     angle=radians(-22)
     # Align the ivory tips with the measured key fronts on both piano exports.
     for i in range(32):
@@ -389,18 +394,19 @@ def recital(r,_):
         pz=z+(i-1)*.37
         r.box(x,1.175,pz,.26,.09,.29,"b6a887")
         r.box(x,1.253,pz,.115,.08,.23,"574746")
-        r.lathe(x,1.29,pz,.082,.042,((1,0),(1,1)),[GOLD],10)
-        r.lathe(x,1.331,pz,.066,.008,((1,0),(1,1)),[INK],10)
-        r.line((x,1.342,pz),(x+.034,1.342,pz-.014),.011,BONE)
+        r.lathe(x,1.29,pz,.082,.049,((1,0),(1,.82),(.80,1)),[GOLD,GOLD,INK],6)
+        r.face([(x,1.342,pz+.004),(x+.035,1.342,pz-.010),
+                (x+.033,1.342,pz-.018),(x,1.342,pz-.004)],BONE)
         r.tag(x+.341,1.105,pz,.24,i,yaw=pi/2)
     for i in range(3):
         x,z=-.7+i*.54,2.29+i*.08
-        r.ring(x,r.floor,z,.12,.087,.044,GOLD,PRINT,True,n=12)
+        r.ring(x,r.floor,z,.12,.087,.044,GOLD,PRINT,True,n=6)
         r.ribbon([(x+.11,r.floor,z),(x+.11,r.floor,z-.39),(x+.23,r.floor,z-.32)],.033,GOLD,PRINT,True)
     for x in (-1.17,1.17): r.box(x,3.989,-.86,.065,.056,2.84,BONE,PRINT)
 
 
 def power(r,_):
+    r.gp_power_profiles = (add_aa(r), add_cr2032(r), add_etag(r))
     # Standee and demo meter share the right-hand permanent workbench.
     x,z=1.74,-.49
     r.lathe(x,1.122,z,.35,1.34,((.94,0),(1,.04),(1,.20),(1,.72),(1,.84),(.97,.98),(.87,1)),
@@ -417,6 +423,7 @@ def power(r,_):
 
 
 def telephone(r,_):
+    r.gigaset_shells = add_gigaset(r)
     # Handset rests in a two-ear cradle on the existing writing desk.
     x,y,z=-2.96,1.09,-1.80
     r.box(x,y+.11,z,.68,.22,.93,"424c50")

@@ -21,7 +21,9 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| Gigaset A170 | Left alcove phone tray | Pending exact handset and cradle. The A170 has an amber 34 × 22 mm display and a 159 × 48 × 30 mm handset. [Manufacturer gallery](https://www.gigaset.com/en_en/gigaset-a170/) |
-| Gigaset COMFORT 550A | Right alcove phone tray | Pending exact keypad and answering-machine base. The black 550A handset is 161 × 52 × 26 mm and its base is 43 × 123 × 99 mm. [Manufacturer gallery and specifications](https://www.gigaset.com/hq_en/gigaset-comfort-550/), with the black answering-machine variant selected. |
+| Gigaset A170 | Left side of the tabletop island | Installed handset and rounded cradle. The A170 has an amber 34 × 22 mm display and a 159 × 48 × 30 mm handset. [Manufacturer gallery](https://www.gigaset.com/en_en/gigaset-a170/) |
+| Gigaset COMFORT 550A | Right side of the tabletop island | Installed handset with a wider answering base and control panel. The black 550A handset is 161 × 52 × 26 mm and its base is 43 × 123 × 99 mm. [Manufacturer gallery and specifications](https://www.gigaset.com/hq_en/gigaset-comfort-550/), with the black answering-machine variant selected. |
 
 [Generated shape study](product-model-reference.webp) shows the small A170-style charger and amber display beside the wider 550A-style answering station and TFT. The linked manufacturer galleries govern the final handset contours, keypad layout and cradle geometry.
+
+[Editable Blender sources and QA receipt](../../../models/gjh-gigaset-handsets/README.md)
