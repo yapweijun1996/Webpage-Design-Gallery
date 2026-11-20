@@ -7,6 +7,79 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/opaque-batch.js
+import { mergeGeometries } from "../vendor/BufferGeometryUtils.js";
+function instancedSurfaceMaterial(T) {
+  const plainFinish = new T.MeshStandardMaterial;
+  plainFinish.onBeforeCompile = (shader) => {
+    shader.vertexShader = `attribute vec2 instanceSurface; varying vec2 vSurface;
+` + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
+vSurface=instanceSurface;`);
+    shader.fragmentShader = `varying vec2 vSurface;
+` + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
+roughnessFactor=vSurface.x;`).replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
+metalnessFactor=vSurface.y;`);
+  };
+  return plainFinish;
+}
+function opaqueSurfaceMaterial(T) {
+  const material = new T.MeshStandardMaterial({ vertexColors: true, side: T.DoubleSide });
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader.replace("#include <common>", `#include <common>
+attribute vec2 obSurface; varying vec2 vObSurface;`).replace("#include <begin_vertex>", `#include <begin_vertex>
+vObSurface=obSurface;`);
+    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", `#include <common>
+varying vec2 vObSurface;`).replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
+roughnessFactor=vObSurface.x;`).replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
+metalnessFactor=vObSurface.y;`);
+  };
+  material.customProgramCacheKey = () => "mall-opaque-pbr-v1";
+  return material;
+}
+function opaqueBatch(T, parts, shadows) {
+  if (!parts.length)
+    return null;
+  const geometry = mergeGeometries(parts);
+  parts.forEach((part) => part.dispose());
+  geometry.computeBoundingSphere();
+  const material = opaqueSurfaceMaterial(T);
+  const mesh = new T.Mesh(geometry, material);
+  mesh.name = "Opaque mall amenities";
+  mesh.castShadow = shadows;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+function batchFurniture(T, primitives) {
+  const parts = primitives.map((primitive) => {
+    const source = primitive.geometry;
+    const geometry = source.index ? source.toNonIndexed() : source.clone();
+    geometry.applyMatrix4(primitive.matrix);
+    const vertexColour = primitive.material.vertexColors && geometry.getAttribute("color");
+    for (const name of Object.keys(geometry.attributes))
+      if (name !== "position" && name !== "normal")
+        geometry.deleteAttribute(name);
+    const count = geometry.attributes.position.count, colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
+    for (let i = 0;i < count; i++) {
+      colour[i * 3] = material.color.r * (vertexColour ? vertexColour.getX(i) : 1);
+      colour[i * 3 + 1] = material.color.g * (vertexColour ? vertexColour.getY(i) : 1);
+      colour[i * 3 + 2] = material.color.b * (vertexColour ? vertexColour.getZ(i) : 1);
+      surface[i * 2] = material.roughness;
+      surface[i * 2 + 1] = material.metalness;
+    }
+    geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
+    geometry.setAttribute("obSurface", new T.BufferAttribute(surface, 2));
+    return geometry;
+  });
+  const mesh = opaqueBatch(T, parts, false);
+  for (const geometry of new Set(primitives.map((primitive) => primitive.geometry)))
+    geometry.dispose();
+  for (const material of new Set(primitives.map((primitive) => primitive.material)))
+    material.dispose();
+  return [{ geometry: mesh.geometry, material: mesh.material, matrix: new T.Matrix4 }];
+}
+
 // demos/corporate/gjh/v11/assets/physics-props.js
 var CAPSULE_SOLVER_GROUP = 2147532799;
 var PROP_SOLVER_GROUP = 1073774591;
@@ -505,8 +578,10 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
   const doorBatch = new T.InstancedMesh(leafShape, leafMaterial, restroomRooms.length * 2);
   doorBatch.instanceMatrix.setUsage(T.DynamicDrawUsage);
   doorBatch.name = "Restroom sliding door leaves";
-  doorBatch.visible = false;
   scene.add(doorBatch);
+  leafShape.computeBoundingBox();
+  const doorBounds = new T.Box3, panelBounds = new T.Box3;
+  const submitted = [];
   let doorBatchDirty = true;
   const streamShape = new T.CylinderGeometry(0.02, 0.014, 0.31, 8);
   const rippleShape = new T.TorusGeometry(0.14, 0.013, 5, 16);
@@ -527,11 +602,9 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
     box("green", 27.08, 1.03, room.minZ + 0.65, 0.12, 2.06, 1.26, true);
     const panelWidth = half - 0.02;
     const leaves = [-1, 1].map((side) => {
-      const panel = new T.Mesh(leafShape, leafMaterial);
-      panel.name = room.id + " sliding door";
+      const panel = new T.Object3D;
       panel.scale.set(0.055, 2.2, panelWidth);
       panel.position.set(maxX, 1.1, z + side * panelWidth / 2);
-      scene.add(panel);
       doorPanels.push(panel);
       const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(maxX, 1.1, panel.position.z));
       physics.createCollider(R.ColliderDesc.cuboid(0.028, 1.1, panelWidth / 2), body);
@@ -604,20 +677,28 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
     }
   }
   return {
-    updateDraw(tier) {
-      const low = tier === "low";
-      if (doorBatch.visible !== low) {
-        doorBatch.visible = low;
-        for (const panel of doorPanels)
-          panel.visible = !low;
-      }
-      if (low && doorBatchDirty) {
-        for (const [index, panel] of doorPanels.entries()) {
+    updateDraw(frustum) {
+      let count = 0, changed = doorBatchDirty;
+      doorBounds.makeEmpty();
+      for (const panel of doorPanels) {
+        if (doorBatchDirty)
           panel.updateMatrix();
-          doorBatch.setMatrixAt(index, panel.matrix);
-        }
+        panelBounds.copy(leafShape.boundingBox).applyMatrix4(panel.matrix);
+        if (frustum && !frustum.intersectsBox(panelBounds))
+          continue;
+        changed ||= submitted[count] !== panel;
+        submitted[count] = panel;
+        doorBounds.union(panelBounds);
+        count++;
+      }
+      if (changed || count !== doorBatch.count) {
+        doorBatch.count = count;
+        doorBatch.visible = count > 0;
+        for (let i = 0;i < count; i++)
+          doorBatch.setMatrixAt(i, submitted[i].matrix);
         doorBatch.instanceMatrix.needsUpdate = true;
-        doorBatch.computeBoundingSphere();
+        doorBatch.boundingSphere ??= new T.Sphere;
+        doorBounds.getBoundingSphere(doorBatch.boundingSphere);
         doorBatchDirty = false;
       }
     },
@@ -2626,64 +2707,6 @@ function addOriginalShopDetails(zone, x, { box, cylinder, solid, collider, seats
 
 // demos/corporate/gjh/v11/assets/world.js
 import { mergeGeometries as mergeGeometries5 } from "../vendor/BufferGeometryUtils.js";
-
-// demos/corporate/gjh/v11/assets/opaque-batch.js
-import { mergeGeometries } from "../vendor/BufferGeometryUtils.js";
-function opaqueSurfaceMaterial(T) {
-  const material = new T.MeshStandardMaterial({ vertexColors: true, side: T.DoubleSide });
-  material.onBeforeCompile = (shader) => {
-    shader.vertexShader = shader.vertexShader.replace("#include <common>", `#include <common>
-attribute vec2 obSurface; varying vec2 vObSurface;`).replace("#include <begin_vertex>", `#include <begin_vertex>
-vObSurface=obSurface;`);
-    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", `#include <common>
-varying vec2 vObSurface;`).replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
-roughnessFactor=vObSurface.x;`).replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
-metalnessFactor=vObSurface.y;`);
-  };
-  material.customProgramCacheKey = () => "mall-opaque-pbr-v1";
-  return material;
-}
-function opaqueBatch(T, parts, shadows) {
-  if (!parts.length)
-    return null;
-  const geometry = mergeGeometries(parts);
-  parts.forEach((part) => part.dispose());
-  geometry.computeBoundingSphere();
-  const material = opaqueSurfaceMaterial(T);
-  const mesh = new T.Mesh(geometry, material);
-  mesh.name = "Opaque mall amenities";
-  mesh.castShadow = shadows;
-  mesh.receiveShadow = true;
-  return mesh;
-}
-function batchFurniture(T, primitives) {
-  const parts = primitives.map((primitive) => {
-    const source = primitive.geometry;
-    const geometry = source.index ? source.toNonIndexed() : source.clone();
-    geometry.applyMatrix4(primitive.matrix);
-    const vertexColour = primitive.material.vertexColors && geometry.getAttribute("color");
-    for (const name of Object.keys(geometry.attributes))
-      if (name !== "position" && name !== "normal")
-        geometry.deleteAttribute(name);
-    const count = geometry.attributes.position.count, colour = new Float32Array(count * 3), surface = new Float32Array(count * 2), material = primitive.material;
-    for (let i = 0;i < count; i++) {
-      colour[i * 3] = material.color.r * (vertexColour ? vertexColour.getX(i) : 1);
-      colour[i * 3 + 1] = material.color.g * (vertexColour ? vertexColour.getY(i) : 1);
-      colour[i * 3 + 2] = material.color.b * (vertexColour ? vertexColour.getZ(i) : 1);
-      surface[i * 2] = material.roughness;
-      surface[i * 2 + 1] = material.metalness;
-    }
-    geometry.setAttribute("color", new T.BufferAttribute(colour, 3));
-    geometry.setAttribute("obSurface", new T.BufferAttribute(surface, 2));
-    return geometry;
-  });
-  const mesh = opaqueBatch(T, parts, false);
-  for (const geometry of new Set(primitives.map((primitive) => primitive.geometry)))
-    geometry.dispose();
-  for (const material of new Set(primitives.map((primitive) => primitive.material)))
-    material.dispose();
-  return [{ geometry: mesh.geometry, material: mesh.material, matrix: new T.Matrix4 }];
-}
 
 // demos/corporate/gjh/v11/assets/amenities.js
 import { GLTFLoader as GLTFLoader2 } from "../vendor/GLTFLoader.js";
@@ -4702,7 +4725,7 @@ function createInteriorAdditions(T, {
       schedule();
     }
     for (const batch of batches) {
-      batch.update(({ row, bounds }) => enabled(row) && !view.deckVisible && (row.slot === null || shopNear.get(row.slot)) && (!view.frustum || view.frustum.intersectsBox(bounds)) ? 0 : -1);
+      batch.update(({ row, bounds }) => enabled(row) && !view.deckVisible && (row.slot === null || shopNear.get(row.slot) && !view.shopVisibility?.occluded(row.slot, bounds)) && (!view.frustum || view.frustum.intersectsBox(bounds)) ? 0 : -1);
       batch.mesh.visible = batch.mesh.geometry.drawRange.count > 0;
     }
   } };
@@ -6205,12 +6228,12 @@ async function addShopSignAtlas(T, layout, scene) {
 }
 
 // demos/corporate/gjh/v11/assets/expanded-storefronts.js
-function addExpandedStorefronts(T, layout, scene, signs, lowTrimMaterial) {
+function addExpandedStorefronts(T, layout, scene, signs, trimMaterial = instancedSurfaceMaterial(T)) {
   const geometry = new T.BoxGeometry(1, 1, 1);
   const batches = {
-    frame: { material: new T.MeshStandardMaterial({ color: 1059362, roughness: 0.29, metalness: 0.16 }), matrices: [] },
-    brass: { material: new T.MeshStandardMaterial({ color: 13215070, metalness: 0.78, roughness: 0.28 }), matrices: [] },
-    accent: { material: new T.MeshStandardMaterial({ color: 16777215, roughness: 0.58 }), matrices: [], colours: [] },
+    frame: { material: { color: 1059362, roughness: 0.29, metalness: 0.16 }, matrices: [] },
+    brass: { material: { color: 13215070, metalness: 0.78, roughness: 0.28 }, matrices: [] },
+    accent: { material: { roughness: 0.58, metalness: 0 }, matrices: [], colours: [] },
     glass: { material: new T.MeshBasicMaterial({
       color: 12179920,
       transparent: true,
@@ -6268,74 +6291,46 @@ function addExpandedStorefronts(T, layout, scene, signs, lowTrimMaterial) {
     }
     box("frame", 0, 4, 0.08, width, 0.16, 0.24);
   }
-  const meshes = {};
-  for (const [kind2, batch] of Object.entries(batches)) {
-    if (!batch.matrices.length)
-      continue;
-    const mesh = new T.InstancedMesh(geometry, batch.material, batch.matrices.length);
-    batch.matrices.forEach((matrix, index) => mesh.setMatrixAt(index, matrix));
-    if (batch.colours) {
-      const color = new T.Color;
-      batch.colours.forEach((tint2, index) => mesh.setColorAt(index, color.set(tint2)));
-      mesh.instanceColor.needsUpdate = true;
-    }
-    mesh.name = `Expanded storefront ${kind2}`;
-    mesh.receiveShadow = kind2 !== "glass";
-    mesh.computeBoundingSphere();
-    scene.add(mesh);
-    meshes[kind2] = mesh;
+  const glass = new T.InstancedMesh(geometry, batches.glass.material, batches.glass.matrices.length);
+  glass.name = "Expanded storefront glass";
+  batches.glass.matrices.forEach((matrix, index) => glass.setMatrixAt(index, matrix));
+  glass.computeBoundingSphere();
+  const finishes = ["frame", "brass", "accent"];
+  const count = finishes.reduce((total, kind2) => total + batches[kind2].matrices.length, 0);
+  const surfaces = new T.InstancedBufferAttribute(new Float32Array(count * 2), 2);
+  const trimGeometry = geometry.clone().setAttribute("instanceSurface", surfaces);
+  const trim = new T.InstancedMesh(trimGeometry, trimMaterial, count);
+  trim.name = "Expanded storefront trim";
+  trim.receiveShadow = true;
+  trim.instanceMatrix.setUsage(T.DynamicDrawUsage);
+  const color = new T.Color;
+  let offset = 0;
+  for (const kind2 of finishes) {
+    const { matrices, material, colours } = batches[kind2];
+    batches[kind2].offset = offset;
+    matrices.forEach((matrix, index) => {
+      const target = offset + index;
+      trim.setMatrixAt(target, matrix);
+      trim.setColorAt(target, color.set(colours ? colours[index] : material.color));
+      surfaces.setXY(target, material.roughness, material.metalness);
+    });
+    offset += matrices.length;
   }
-  const trim = ["frame", "brass", "accent"];
-  let lowTrim;
-  if (lowTrimMaterial) {
-    const count = trim.reduce((total, kind2) => total + batches[kind2].matrices.length, 0);
-    const surfaces = new T.InstancedBufferAttribute(new Float32Array(count * 2), 2);
-    const lowGeometry = geometry.clone().setAttribute("instanceSurface", surfaces);
-    lowTrim = new T.InstancedMesh(lowGeometry, lowTrimMaterial, count);
-    lowTrim.name = "Expanded storefront trim";
-    lowTrim.receiveShadow = true;
-    lowTrim.visible = false;
-    lowTrim.instanceMatrix.setUsage(T.DynamicDrawUsage);
-    const color = new T.Color;
-    let offset = 0;
-    for (const kind2 of trim) {
-      const { matrices, material, colours } = batches[kind2];
-      batches[kind2].lowOffset = offset;
-      matrices.forEach((matrix, index) => {
-        const target = offset + index;
-        lowTrim.setMatrixAt(target, matrix);
-        lowTrim.setColorAt(target, colours ? color.set(colours[index]) : material.color);
-        surfaces.setXY(target, material.roughness, material.metalness);
-      });
-      offset += matrices.length;
-    }
-    lowTrim.computeBoundingSphere();
-    scene.add(lowTrim);
-  }
+  trim.computeBoundingSphere();
+  glass.boundingSphere.radius += 1.3;
+  trim.boundingSphere.radius += 1.3;
+  scene.add(glass, trim);
   const moved = new T.Matrix4;
-  function slide(number, travel) {
+  return function slide(number, travel) {
     for (const { kind: kind2, index, dx, dz } of slidingParts.get(number)) {
-      moved.copy(batches[kind2].matrices[index]);
+      const batch = batches[kind2], mesh = kind2 === "glass" ? glass : trim;
+      moved.copy(batch.matrices[index]);
       moved.elements[12] += dx * travel;
       moved.elements[14] += dz * travel;
-      meshes[kind2].setMatrixAt(index, moved);
-      meshes[kind2].instanceMatrix.needsUpdate = true;
-      const offset = batches[kind2].lowOffset;
-      if (offset !== undefined) {
-        lowTrim.setMatrixAt(offset + index, moved);
-        lowTrim.instanceMatrix.needsUpdate = true;
-      }
+      mesh.setMatrixAt((batch.offset ?? 0) + index, moved);
+      mesh.instanceMatrix.needsUpdate = true;
     }
-  }
-  slide.setTier = (tier) => {
-    const low = tier === "low";
-    if (!lowTrim || lowTrim.visible === low)
-      return;
-    lowTrim.visible = low;
-    for (const kind2 of trim)
-      meshes[kind2].visible = !low;
   };
-  return slide;
 }
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
@@ -8285,6 +8280,7 @@ function createInteriorKit(T, scene, {
 }) {
   const materials2 = interiorMaterials(T);
   const report = emptyInteriorReport("low"), renderedShops = new Set;
+  const visibilityParts = new WeakMap;
   let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
   let lastUpdate;
   if (packshot && !packshot.userData.artworkMipmaps)
@@ -8471,8 +8467,19 @@ function createInteriorKit(T, scene, {
         shop.group.add(root);
       }
       shop.group.updateMatrixWorld(true);
-      for (const root of fresh)
+      for (const root of fresh) {
         root.userData.roomBounds = new T.Box3().setFromObject(root);
+        const parts = [];
+        root.traverse((node) => {
+          if (node === root || !node.isMesh || !node.visible)
+            return;
+          const localBounds = node.isInstancedMesh ? node.boundingBox : node.geometry.boundingBox;
+          if (localBounds && !localBounds.isEmpty()) {
+            parts.push({ node, bounds: localBounds.clone().applyMatrix4(node.matrixWorld) });
+          }
+        });
+        visibilityParts.set(root, parts);
+      }
       if (freshDecoration)
         shop.layers[detail] = freshDecoration;
       for (const member of required) {
@@ -8552,7 +8559,12 @@ function createInteriorKit(T, scene, {
         if (shop.group.visible)
           for (const root of shop.shown) {
             const bounds = root.userData.roomBounds;
-            root.visible = !view?.shopVisibility || bounds.isEmpty() || !view.shopVisibility.occluded(i + 1, bounds);
+            const visible = (box) => (!view?.frustum || view.frustum.intersectsBox(box)) && !view?.shopVisibility?.occluded(i + 1, box);
+            root.visible = bounds.isEmpty() || visible(bounds);
+            if (root.visible)
+              for (const { node, bounds: bounds2 } of visibilityParts.get(root)) {
+                node.visible = visible(bounds2);
+              }
           }
         if (!shop.group.visible || !wasNear || !shop.motion || reducedMotion?.matches)
           continue;
@@ -9239,8 +9251,10 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       shopUploads.get(slot2).push(...meshes);
     }, solid = function(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ", rz = 0) {
       const source = materials2[material];
-      const plain = expanded && type === "box" && source.isMeshStandardMaterial && !source.transparent && !source.map && !source.emissive.getHex() && !["paving", "shellFloor", "courtStone"].includes(material);
-      const finish2 = plain ? "plain" : type === "publicLeaf" ? "canopy" : finishForRole.get(material);
+      const roleFinish = finishForRole.get(material);
+      const plainType = type === "box" || type === "cylinder" && roleFinish !== "woodGrain";
+      const plain = expanded && plainType && source.isMeshStandardMaterial && !source.transparent && !source.map && !source.emissive.getHex() && !["paving", "shellFloor", "courtStone"].includes(material);
+      const finish2 = plain ? "plain" : type === "publicLeaf" ? "canopy" : roleFinish;
       const shared = expanded && (!source.transparent && !material.endsWith("Backdrop") || material === "contact" || material === "lightPool");
       const shopSlot = shared ? null : activeShopSlot;
       const key2 = `${type}:${finish2 || material}${shopSlot === null ? "" : `:shop-${shopSlot}`}${activeDeck ? ":deck" : ""}`;
@@ -9261,8 +9275,10 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       batch.slots?.push(activeShopSlot);
       if (finish2)
         batch.colours.push(source.color);
-      if (plain)
-        batch.surfaces.push(source.roughness, source.metalness);
+      if (plain) {
+        const surface = type === "cylinder" && roleFinish === "matte" ? finishMaterials.matte : source;
+        batch.surfaces.push(surface.roughness, surface.metalness);
+      }
       position.set(x, y, z);
       scale.set(sx, sy, sz);
       euler.set(rx, ry, rz, order);
@@ -9284,6 +9300,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         emissiveIntensity: 0.2
       })), -1);
       const mesh = new T.Mesh(plane, material);
+      mesh.name = name;
       mesh.position.set(x + decalClearance * Math.sin(ry), y, z + decalClearance * Math.cos(ry));
       mesh.rotation.y = ry;
       mesh.scale.set(width, height, 1);
@@ -9311,6 +9328,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       context.fillText(text, 512, 64);
       const texture = setupArtworkTexture(T, new T.CanvasTexture(canvas2), artworkTier());
       const mesh = placeDecal(new T.Mesh(plane, decalMaterial(new T.MeshBasicMaterial({ map: texture, transparent: true }))));
+      mesh.name = text;
       mesh.position.set(x, y, decalHeight(z));
       mesh.scale.set(width, height, 1);
       scene.add(mesh);
@@ -9498,8 +9516,6 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         return;
       }
       interactables.physicsProps?.setTier(tier);
-      restrooms?.updateDraw(tier);
-      slide?.setTier(tier);
       materials2.glass.forceSinglePass = tier === "low";
       shopVisibility.setOverheadCulling(tier === "low");
       bakedLighting.setTier(tier);
@@ -9518,6 +9534,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         shopVisibility.setEye(eye);
         view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
       }
+      restrooms?.updateDraw(camera && view.frustum);
       productDisplay?.updateShopLods(visitor, camera && view);
       interiorKit.update(visitor, camera && view);
       const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
@@ -9533,7 +9550,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         if (!shopNear.has(slot2))
           continue;
         let near = shopNear.get(slot2);
-        if (near && camera && tier === "low" && mesh.userData.shopDecal) {
+        if (near && camera && mesh.userData.shopDecal) {
           mesh.geometry.boundingBox ?? mesh.geometry.computeBoundingBox();
           mesh.updateWorldMatrix(true, false);
           near = !shopVisibility.occluded(slot2, decalBounds.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld));
@@ -9708,18 +9725,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           finishForRole.set(role, finish2);
       }
     }
-    const plainFinish = mat(16777215);
-    plainFinish.onBeforeCompile = (shader) => {
-      shader.vertexShader = `attribute vec2 instanceSurface; varying vec2 vSurface;
-` + shader.vertexShader;
-      shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>", `#include <begin_vertex>
-vSurface=instanceSurface;`);
-      shader.fragmentShader = `varying vec2 vSurface;
-` + shader.fragmentShader;
-      shader.fragmentShader = shader.fragmentShader.replace("#include <roughnessmap_fragment>", `#include <roughnessmap_fragment>
-roughnessFactor=vSurface.x;`).replace("#include <metalnessmap_fragment>", `#include <metalnessmap_fragment>
-metalnessFactor=vSurface.y;`);
-    };
+    const plainFinish = instancedSurfaceMaterial(T);
     const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
     const shopVisibility = createShopVisibility(T);
     const shopUploads = new Map;
@@ -10064,8 +10070,10 @@ metalnessFactor=vSurface.y;`);
         shopVisibility.addWall(Number(store2.number), x, 4.7, 0, 9.7, 1.55, 0.5, true);
       }
       ceilingBox("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4, null);
-      if (expanded)
+      if (expanded) {
+        shopVisibility.addWall(Number(store2.number), x, 2.85, -10.5, 10, 5.7, 0.25);
         shopVisibility.addCeiling(Number(store2.number), x, 5.8, -5.2, 9.7, 10.4);
+      }
       activeShopSlot = expanded ? Number(store2.number) : null;
       if (expanded && zone === "newmoon") {
         for (const z of [-2.5, -5.4, -8.3]) {

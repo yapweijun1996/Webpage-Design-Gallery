@@ -44,6 +44,7 @@ test('sliced additions stay outside the mandatory startup transfer', () => {
 
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {createInteriorAdditions} from '../demos/corporate/gjh/v11/assets/interior-additions.js';
+import {createShopVisibility} from '../demos/corporate/gjh/v11/assets/shop-visibility.js';
 import {audit, distance, obstacles, programme, studioBoxes} from '../scripts/gjh_interiors/sweep.mjs';
 import {footprintGap} from '../scripts/gjh_interiors/placement.mjs';
 import {atriumLayout} from '../demos/corporate/gjh/v11/assets/atrium-layout.js';
@@ -187,4 +188,23 @@ test('offline smoke loads real GLBs, warms before attach, and switches rendered 
   assert.equal(seats[0].collider,proxies[0].handle);
   assert.ok(Math.abs(seats[0].y-.466)<.001);
   assert.ok(entries.every(e=>e.placed && e.placement.note));
+
+  const inside = entries.find(entry => entry.placement.support === 'S08');
+  const {xyz:[x,y,z],size:[w,h,d]} = worldBox(inside);
+  const portal = createShopVisibility(T);
+  portal.addWall(8,x,y+h/2,z+d/2+1,w+4,h+4,.2);
+  const view = {
+    shopVisibility:portal,
+    frustum:{intersectsBox: bounds => bounds.containsPoint(new T.Vector3(x,y+h/2,z))}
+  };
+  const batch = scene.getObjectByName('Interior additions / balanced');
+  portal.setEye(new T.Vector3(x,y+h/2,z+d/2+2));
+  model.update('balanced',view,allNear);
+  assert.equal(batch.geometry.drawRange.count,0);
+  assert.equal(batch.visible,false);
+  assert.equal(proxies[entries.indexOf(inside)].enabled,true);
+  portal.setEye(new T.Vector3(x,y+h/2,z));
+  model.update('balanced',view,allNear);
+  assert.equal(batch.geometry.drawRange.count,inside.triangles*3);
+  assert.equal(batch.visible,true);
 });

@@ -1,5 +1,19 @@
 // Shared static, texture-free PBR batching; preserve each source surface.
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+export function instancedSurfaceMaterial(T) {
+  const plainFinish = new T.MeshStandardMaterial();
+  plainFinish.onBeforeCompile = shader => {
+    shader.vertexShader = 'attribute vec2 instanceSurface; varying vec2 vSurface;\n' + shader.vertexShader;
+    shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>',
+      '#include <begin_vertex>\nvSurface=instanceSurface;');
+    shader.fragmentShader = 'varying vec2 vSurface;\n' + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor=vSurface.x;')
+      .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor=vSurface.y;');
+  };
+  return plainFinish;
+}
+
 export function opaqueSurfaceMaterial(T) {
   const material=new T.MeshStandardMaterial({vertexColors:true,side:T.DoubleSide});
   // These pinned sources have solid PBR colours and no maps. Carry their original

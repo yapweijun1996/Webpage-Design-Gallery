@@ -1,13 +1,14 @@
+import {instancedSurfaceMaterial} from './opaque-batch.js';
 import {fasciaBand} from './signage/config.js';
 import {shopEntrance} from './expanded-layout.js';
 
 // Batch facade trim and sliding glass leaves across the expanded mall.
-export function addExpandedStorefronts(T, layout, scene, signs, lowTrimMaterial) {
+export function addExpandedStorefronts(T, layout, scene, signs, trimMaterial = instancedSurfaceMaterial(T)) {
   const geometry = new T.BoxGeometry(1, 1, 1);
   const batches = {
-    frame: {material: new T.MeshStandardMaterial({color: 0x102a22, roughness: .29, metalness: .16}), matrices: []},
-    brass: {material: new T.MeshStandardMaterial({color: 0xc9a55e, metalness: .78, roughness: .28}), matrices: []},
-    accent: {material: new T.MeshStandardMaterial({color: 0xffffff, roughness: .58}), matrices: [], colours: []},
+    frame: {material: {color: 0x102a22, roughness: .29, metalness: .16}, matrices: []},
+    brass: {material: {color: 0xc9a55e, metalness: .78, roughness: .28}, matrices: []},
+    accent: {material: {roughness: .58, metalness: 0}, matrices: [], colours: []},
     glass: {material: new T.MeshBasicMaterial({color: 0xb9d9d0,
       transparent: true, opacity: .065, depthWrite: false}), matrices: []}
   };
@@ -67,67 +68,46 @@ export function addExpandedStorefronts(T, layout, scene, signs, lowTrimMaterial)
     }
     box('frame', 0, 4, .08, width, .16, .24);
   }
-  const meshes = {};
-  for (const [kind, batch] of Object.entries(batches)) {
-    if (!batch.matrices.length) continue;
-    const mesh = new T.InstancedMesh(geometry, batch.material, batch.matrices.length);
-    batch.matrices.forEach((matrix, index) => mesh.setMatrixAt(index, matrix));
-    if (batch.colours) {
-      const color=new T.Color();
-      batch.colours.forEach((tint,index) => mesh.setColorAt(index,color.set(tint)));
-      mesh.instanceColor.needsUpdate=true;
-    }
-    mesh.name = `Expanded storefront ${kind}`;
-    mesh.receiveShadow = kind !== 'glass';
-    mesh.computeBoundingSphere();
-    scene.add(mesh);
-    meshes[kind] = mesh;
+  const glass = new T.InstancedMesh(geometry, batches.glass.material, batches.glass.matrices.length);
+  glass.name = 'Expanded storefront glass';
+  batches.glass.matrices.forEach((matrix, index) => glass.setMatrixAt(index, matrix));
+  glass.computeBoundingSphere();
+
+  const finishes = ['frame','brass','accent'];
+  const count = finishes.reduce((total,kind) => total + batches[kind].matrices.length, 0);
+  const surfaces = new T.InstancedBufferAttribute(new Float32Array(count*2),2);
+  const trimGeometry = geometry.clone().setAttribute('instanceSurface',surfaces);
+  const trim = new T.InstancedMesh(trimGeometry,trimMaterial,count);
+  trim.name = 'Expanded storefront trim';
+  trim.receiveShadow = true;
+  trim.instanceMatrix.setUsage(T.DynamicDrawUsage);
+  const color = new T.Color();
+  let offset = 0;
+  for (const kind of finishes) {
+    const {matrices, material, colours} = batches[kind];
+    batches[kind].offset = offset;
+    matrices.forEach((matrix,index) => {
+      const target = offset + index;
+      trim.setMatrixAt(target,matrix);
+      trim.setColorAt(target,color.set(colours ? colours[index] : material.color));
+      surfaces.setXY(target,material.roughness,material.metalness);
+    });
+    offset += matrices.length;
   }
-  const trim = ['frame','brass','accent'];
-  let lowTrim;
-  if (lowTrimMaterial) {
-    const count = trim.reduce((total,kind) => total + batches[kind].matrices.length, 0);
-    const surfaces = new T.InstancedBufferAttribute(new Float32Array(count*2),2);
-    const lowGeometry = geometry.clone().setAttribute('instanceSurface',surfaces);
-    lowTrim = new T.InstancedMesh(lowGeometry,lowTrimMaterial,count);
-    lowTrim.name = 'Expanded storefront trim';
-    lowTrim.receiveShadow = true;
-    lowTrim.visible = false;
-    lowTrim.instanceMatrix.setUsage(T.DynamicDrawUsage);
-    const color = new T.Color();
-    let offset = 0;
-    for (const kind of trim) {
-      const {matrices, material, colours} = batches[kind];
-      batches[kind].lowOffset = offset;
-      matrices.forEach((matrix,index) => {
-        const target = offset + index;
-        lowTrim.setMatrixAt(target,matrix);
-        lowTrim.setColorAt(target,colours ? color.set(colours[index]) : material.color);
-        surfaces.setXY(target,material.roughness,material.metalness);
-      });
-      offset += matrices.length;
-    }
-    lowTrim.computeBoundingSphere();
-    scene.add(lowTrim);
-  }
+  // Include the leaf travel without changing its matrix or its collision body.
+  trim.computeBoundingSphere();
+  glass.boundingSphere.radius += 1.3;
+  trim.boundingSphere.radius += 1.3;
+  scene.add(glass,trim);
   const moved = new T.Matrix4();
-  function slide(number, travel) {
-    for(const {kind,index,dx,dz} of slidingParts.get(number)) {
-      moved.copy(batches[kind].matrices[index]);
-      moved.elements[12]+=dx*travel; moved.elements[14]+=dz*travel;
-      meshes[kind].setMatrixAt(index,moved); meshes[kind].instanceMatrix.needsUpdate=true;
-      const offset = batches[kind].lowOffset;
-      if (offset !== undefined) {
-        lowTrim.setMatrixAt(offset+index,moved);
-        lowTrim.instanceMatrix.needsUpdate = true;
-      }
+  return function slide(number, travel) {
+    for (const {kind,index,dx,dz} of slidingParts.get(number)) {
+      const batch = batches[kind], mesh = kind === 'glass' ? glass : trim;
+      moved.copy(batch.matrices[index]);
+      moved.elements[12] += dx*travel;
+      moved.elements[14] += dz*travel;
+      mesh.setMatrixAt((batch.offset ?? 0)+index,moved);
+      mesh.instanceMatrix.needsUpdate = true;
     }
-  }
-  slide.setTier = tier => {
-    const low = tier === 'low';
-    if (!lowTrim || lowTrim.visible === low) return;
-    lowTrim.visible = low;
-    for (const kind of trim) meshes[kind].visible = !low;
   };
-  return slide;
 }

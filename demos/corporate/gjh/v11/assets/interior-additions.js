@@ -103,7 +103,8 @@ export function createInteriorAdditions(T, {scene, collider, seats, prepareModel
     }
     for (const batch of batches) {
       batch.update(({row,bounds}) => enabled(row) && !view.deckVisible &&
-        (row.slot === null || shopNear.get(row.slot)) && (!view.frustum || view.frustum.intersectsBox(bounds)) ? 0 : -1);
+        (row.slot === null || shopNear.get(row.slot) && !view.shopVisibility?.occluded(row.slot,bounds)) &&
+        (!view.frustum || view.frustum.intersectsBox(bounds)) ? 0 : -1);
       batch.mesh.visible = batch.mesh.geometry.drawRange.count > 0;
     }
   }};

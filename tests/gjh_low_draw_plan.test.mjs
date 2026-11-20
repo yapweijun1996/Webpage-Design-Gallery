@@ -2,8 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {prepareChristmasDecor} from '../demos/corporate/gjh/v11/assets/christmas.js';
-import {addExpandedStorefronts} from '../demos/corporate/gjh/v11/assets/expanded-storefronts.js';
-import {expandedLayout} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
 import {createShopVisibility} from '../demos/corporate/gjh/v11/assets/shop-visibility.js';
 import {createProductDisplayLod} from '../demos/corporate/gjh/v11/assets/product-display-lod.js';
 
@@ -34,33 +32,6 @@ test('Low Christmas decorations use four draws and restore the desktop scene on 
   assert.deepEqual(draws(scene),high);
   stage.dispose();
   assert.equal(draws(scene).length,0);
-});
-
-test('Low storefront trim uses a single draw and follows the authored sliding parts', () => {
-  const scene = new T.Scene();
-  const signs = new Map(expandedLayout.slots.map(bay=>['S'+bay.number,{palette:{accent:'#e6d7c1'}}]));
-  const slide = addExpandedStorefronts(T,expandedLayout,scene,signs,new T.MeshStandardMaterial());
-  const high = draws(scene);
-  const trim = scene.getObjectByName('Expanded storefront trim');
-  const separate = high.filter(mesh => mesh.name !== 'Expanded storefront glass');
-  function compareTransforms() {
-    const matrix = new T.Matrix4(), combined = new T.Matrix4();
-    let index = 0;
-    for (const mesh of separate) for (let i = 0; i < mesh.count; i++) {
-      mesh.getMatrixAt(i,matrix);
-      trim.getMatrixAt(index++,combined);
-      assert.ok(matrix.equals(combined));
-    }
-    assert.equal(trim.count,index);
-  }
-  assert.equal(high.length,4);
-  slide.setTier('low');
-  assert.deepEqual(draws(scene).map(mesh => mesh.name),['Expanded storefront glass','Expanded storefront trim']);
-  compareTransforms();
-  slide('04',1.3);
-  compareTransforms();
-  slide.setTier('balanced');
-  assert.deepEqual(draws(scene),high);
 });
 
 test('Low retains stock near the camera, ground-floor stock and grazing views past roof edges', () => {
