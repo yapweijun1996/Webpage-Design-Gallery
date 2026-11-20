@@ -278,7 +278,7 @@ def runtime_resources(catalog):
             localized = ROOT / directory / locale_dir / "index.html"
             if localized.is_file():
                 resources.add(localized.relative_to(ROOT))
-        resources.update(directory / name for name in ("style.css", "script.js") if (ROOT / directory / name).is_file())
+        resources.update(directory / name for name in ("style.css", "script.js", "i18n.js") if (ROOT / directory / name).is_file())
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
         for nested in ("brand-kit", "brands", "gallery-assets", "signage", "interiors", "chibi-crowd", "elevator", "tram", "audio"):
