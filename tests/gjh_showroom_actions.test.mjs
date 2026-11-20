@@ -5,10 +5,10 @@ import {expandedStoreAt, plannedSpaces} from '../demos/corporate/gjh/v11/assets/
 import {installShopInteractions} from '../demos/corporate/gjh/v11/assets/interiors/shop-interactions.js';
 import {createInteractionRegistry} from '../demos/corporate/gjh/v11/assets/interaction-registry.js';
 
-async function setup() {
+async function setup(audio) {
   const meshes = [], entries = [], messages = [];
   const registry = createInteractionRegistry(entries);
-  const targets = await installShopInteractions(T,{add:mesh => meshes.push(mesh)},registry,m => messages.push(m));
+  const targets = await installShopInteractions(T,{add:mesh => meshes.push(mesh)},registry,m => messages.push(m),undefined,audio);
   function focus(target, camera = 'first-person') {
     const position = {...target.standing,y:target.floor};
     const zone = expandedStoreAt(position.x,position.z).id;
@@ -58,39 +58,36 @@ test('no-browser showroom installation and dispatch in all real zones and both c
   }
 });
 
-test('audio starts on activation, supports mute in both shops and stops on cancellation', async t => {
+test('showroom dispatch uses the shared audio mute and cancellation', async () => {
   const starts = [], stops = [];
-  const param = {setValueAtTime() {},linearRampToValueAtTime() {},exponentialRampToValueAtTime() {}};
-  class AudioStub {
-    currentTime = 0;
-    createOscillator() {
-      return {frequency:param,connect() {},disconnect() {},start:time=>starts.push(time),stop:time=>stops.push(time)};
+  const audio = {
+    demoMuted:false,
+    setDemoMuted(muted) { this.demoMuted = muted; },
+    shop(effect) {
+      if (this.demoMuted) return;
+      starts.push(effect);
+      return () => stops.push(effect);
     }
-    createGain() { return {gain:param,connect() {},disconnect() {}}; }
-  }
-  const original = Object.getOwnPropertyDescriptor(globalThis,'AudioContext');
-  Object.defineProperty(globalThis,'AudioContext',{configurable:true,value:AudioStub});
-  t.after(() => {
-    if (original) Object.defineProperty(globalThis,'AudioContext',original);
-    else delete globalThis.AudioContext;
-  });
-  const {registry,targets,focus} = await setup();
+  };
+  const {registry,targets,focus,messages} = await setup(audio);
   function activate(id,complete=true) {
     const item = focus(targets.find(target => target.id === id));
     assert(registry.dispatch(item));
     if (complete) registry.advanceShopActions(item.shopAction.zone,1);
   }
-  assert.equal(starts.length,0);
+  assert.deepEqual(starts,[]);
   activate('S15-focal',false);
-  assert.equal(starts.length,1);
+  assert.deepEqual(starts,['play']);
   registry.advanceShopActions('atrium',.1);
-  assert.equal(stops.at(-1),undefined);
+  assert.deepEqual(stops,['play']);
   assert.equal(registry.shopState('S15-focal').phase,'cancelled');
   activate('S13-leftfront');
+  assert.equal(messages.at(-1),'Demo audio muted.');
   activate('S15-leftfront');
   activate('S13-onleft');
-  assert.equal(starts.length,1);
+  assert.deepEqual(starts,['play']);
   activate('S15-pianoback');
+  assert.equal(messages.at(-1),'Demo audio enabled.');
   activate('S13-focal');
-  assert.equal(starts.length,2);
+  assert.deepEqual(starts,['play','listen']);
 });

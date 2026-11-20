@@ -13,7 +13,7 @@ from gulong_tins import SAMPLES as GULONG_SAMPLES, SHELF_TOP as GULONG_SHELF_TOP
 from hormel_chili_tins import add_hormel_chili_tins
 from lg_oled_model import add_lg_oled
 from mili_mock_duck import add_mili_mock_duck
-from pzh_carton import add_pzh_carton
+from pzh_carton import add_pzh_carton, add_pzh_ten_carton
 from skippy_jars import SAMPLES as SKIPPY_SAMPLES
 from skippy_jars import SHELF_DEPTH as SKIPPY_SHELF_DEPTH, SHELF_TOP as SKIPPY_SHELF_TOP, add_skippy_jar
 from sony_audio_models import add_sony_audio_models
@@ -160,6 +160,7 @@ def herbal(r,profiles):
         r.ribbon([(x-.44,r.floor,z),(x-.23,r.floor,z+.12),(x+.30,r.floor,z+.12)],
                  .041,GOLD,PRINT,True)
     add_pzh_carton(r.batches[CRAFT], x=.54, y=1.2475, z=-.36)
+    add_pzh_ten_carton(r.batches[CRAFT], x=-.38, y=1.2475, z=-.36)
 
 
 def wheel(r,_):

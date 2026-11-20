@@ -1,3 +1,4 @@
+import {mallAudio} from './audio.js';
 import {createTramCar} from './tram-car.js';
 import {tramEnvelopes, tramRoute, tramStations} from './tram-layout.js';
 
@@ -134,6 +135,7 @@ export function createTramRide({blocked, canBoard, canExit, onBoard, onExit}) {
       }
     },
     get active() { return phase !== 'idle'; },
+    get arrived() { return phase === 'arrival'; },
     get seated() { return seated(); },
     get distance() { return distance; },
     get state() {
@@ -183,7 +185,7 @@ export function createPlayerTram({expanded, search, T, scene, getPosition, getBo
   const floor = .4025;
   const seat = {id:TRAM_STATION_ID, name:'Mall tram', floor, footY:floor, frontEdge:.20};
   const seatAt = distance => car.seatPose(tramRoute.sample(distance));
-  let previousDistance = 0;
+  let previousDistance = 0, atArrival = false;
   function nearStation() {
     const p = getPosition();
     return Math.abs(p.y - .89) <= .5 && atTramLanding(p);
@@ -195,8 +197,9 @@ export function createPlayerTram({expanded, search, T, scene, getPosition, getBo
     onBoard: () => {
       const pose = seatAt(0);
       enterSeat(Object.assign(seat, pose), pose);
+      mallAudio.play('tram-departure');
     },
-    onExit: () => exitSeat(exit)
+    onExit: () => { mallAudio.rail(false); exitSeat(exit); }
   });
   function loadCar() {
     if (!requested && detailsEnabled()) { requested = true; void car.select(requestedTier); }
@@ -211,6 +214,7 @@ export function createPlayerTram({expanded, search, T, scene, getPosition, getBo
       }
       if (controls.reason || !nearStation() || !ride.board()) return false;
       previousDistance = ride.distance;
+      atArrival = false;
       car.place(tramRoute.sample(ride.distance));
       return true;
     },
@@ -240,6 +244,11 @@ export function createPlayerTram({expanded, search, T, scene, getPosition, getBo
       if (!ride.active) {
         car.mesh.visible = false;
         return null;
+      }
+      mallAudio.rail(ride.seated && previousDistance !== ride.distance);
+      if (!atArrival && ride.arrived) {
+        atArrival = true;
+        mallAudio.play('tram-station');
       }
       return ride.seated ? seatAt(ride.distance) : null;
     },

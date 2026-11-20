@@ -173,21 +173,28 @@ export function createAdaptiveQuality(targetFps) {
   };
 }
 
+export function browserDeviceClass() {
+  return detectDeviceClass({userAgent:navigator.userAgent, platform:navigator.platform,
+    maxTouchPoints:navigator.maxTouchPoints, coarsePointer:window.matchMedia('(pointer: coarse)').matches,
+    width:window.innerWidth, height:window.innerHeight});
+}
+
+export function savedQualityPreference() {
+  try { return qualityPreference(localStorage.getItem(QUALITY_KEY)); } catch { return 'auto'; }
+}
+
 export function createGraphicsQuality(onChange) {
   const select = document.getElementById('graphics-quality');
   const autoResolution = document.getElementById('auto-resolution');
   const status = document.getElementById('graphics-quality-status');
-  const deviceClass = detectDeviceClass({userAgent:navigator.userAgent, platform:navigator.platform,
-    maxTouchPoints:navigator.maxTouchPoints, coarsePointer:window.matchMedia('(pointer: coarse)').matches,
-    width:window.innerWidth, height:window.innerHeight});
+  const deviceClass = browserDeviceClass();
   const cadence = createRenderCadence(deviceClass);
   const androidChrome = isAndroidChrome(navigator.userAgent);
   const adaptive = createAdaptiveQuality(cadence.targetFps);
-  let preference = 'auto', recovered = false, profile, autoTier = null;
+  let preference = savedQualityPreference(), recovered = false, profile, autoTier = null;
   let tierDowngrades = 0, pendingDowngrade = null, highPerformanceWebGL2 = false;
   let autoEnabled = true;
   try {
-    preference = qualityPreference(localStorage.getItem(QUALITY_KEY));
     autoEnabled = localStorage.getItem(RESOLUTION_KEY) !== 'off';
   } catch { /* Optional preference storage. */ }
   select.value = preference;

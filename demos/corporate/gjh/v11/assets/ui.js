@@ -1,3 +1,5 @@
+import {mallAudio, createTramNarration} from './audio.js';
+import {tramCaptionCopy} from './tram-caption-copy.js';
 import {floorDestinations} from './elevator-ride.js';
 import {TRAM_BOARD_LABEL, TRAM_STATION_ID, tramCaptions} from './tram-ride.js';
 import {restroomArrival, restroomRooms} from './restroom-layout.js';
@@ -67,6 +69,10 @@ export function createTramHud(parent, scene, canControl) {
   Object.assign(actions.style, {display:'flex', gap:'4px', flexWrap:'wrap'});
   const buttons = {};
   let controls = null, previousIndex = -2, wasActive = false;
+  let lastShop = null, lastLanguage, wasPaused = false, localized;
+  const narration = createTramNarration(mallAudio,
+    'speechSynthesis' in globalThis ? () => globalThis.speechSynthesis : null,
+    globalThis.SpeechSynthesisUtterance);
   for (const [action,label,key] of [['pause','Pause','Space'], ['skip','Skip shop','N'], ['end','End','Escape']]) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -76,6 +82,22 @@ export function createTramHud(parent, scene, canControl) {
     button.addEventListener('click', () => command(action));
     actions.append(button);
     buttons[action] = button;
+  }
+  if (narration.available) {
+    const voice = document.createElement('button');
+    voice.type = 'button';
+    voice.textContent = 'Voice';
+    Object.assign(voice.style, {minWidth:'44px', minHeight:'44px', margin:'0', paddingInline:'8px'});
+    voice.setAttribute('aria-pressed', String(mallAudio.state.voice));
+    voice.addEventListener('click', () => {
+      mallAudio.unlock({allowCreate:false});
+      const enabled = !mallAudio.state.voice;
+      if (enabled) narration.selectSystemVoice();
+      mallAudio.setVoice(enabled);
+      voice.setAttribute('aria-pressed', String(enabled));
+      show(controls);
+    });
+    actions.append(voice);
   }
   buttons.end.title = 'End the tour at the south entrance station';
   card.append(caption, progress, actions);
@@ -91,7 +113,11 @@ export function createTramHud(parent, scene, canControl) {
     command(action);
   });
   function command(action) {
-    if (canControl() && controls?.[action]()) show(controls);
+    if (canControl() && controls?.[action]()) {
+      narration.stop();
+      if (action !== 'skip') mallAudio.rail(false);
+      show(controls);
+    }
   }
   function show(next, boardReason = '') {
     controls = next;
@@ -100,13 +126,24 @@ export function createTramHud(parent, scene, canControl) {
     const restoreFocus = wasActive && !active && card.contains(document.activeElement);
     wasActive = active;
     card.hidden = !active && !boardReason;
+    const shop = active ? tramCaptions[state.caption] : null;
+    if ((!shop && lastShop) || (state?.paused && !wasPaused)) narration.stop();
+    wasPaused = Boolean(state?.paused);
+    mallAudio.setCaptionDucking(Boolean(shop && !wasPaused));
     if (card.hidden) {
+      lastShop = null;
       if (restoreFocus && canControl()) scene.focus({preventScroll:true});
       return;
     }
     progress.hidden = actions.hidden = !active;
-    const shop = active ? tramCaptions[state.caption] : null;
-    const heading = shop ? `${shop.name} · ${shop.direction}` : 'South entrance tram';
+    const language = document.documentElement.lang || 'en';
+    if (shop && (shop !== lastShop || language !== lastLanguage)) {
+      localized = tramCaptionCopy(shop, language);
+      localized.speech = `${localized.heading}. ${localized.feature}`;
+    }
+    lastShop = shop;
+    lastLanguage = language;
+    const heading = shop ? localized.heading : 'South entrance tram';
     let copy = boardReason;
     if (active) {
       if (state.phase === 'arrival') copy = state.blocked ? 'Waiting for a clear exit.' : 'Arriving at the south entrance.';
@@ -115,11 +152,12 @@ export function createTramHud(parent, scene, canControl) {
       else if (state.phase === 'approach') copy = 'The tram is approaching.';
       else if (state.ending) copy = 'Returning to the south entrance.';
       else if (state.paused) copy = 'Ride paused.';
-      else if (shop) copy = shop.feature;
+      else if (shop) copy = localized.feature;
       else copy = state.index >= 0 ? 'Next shop ahead.' : 'The brand tour begins along the west wing.';
     }
     setHudText(title, heading);
-    setHudText(feature, shop && copy !== shop.feature ? `${shop.feature} ${copy}` : copy);
+    setHudText(feature, shop && copy !== localized.feature ? `${localized.feature} ${copy}` : copy);
+    if (shop && !state.paused && !document.hidden) narration.read(localized, localized.speech, language);
     const index = active ? state.index : -1;
     if (index !== previousIndex) {
       dots.forEach((dot, i) => {

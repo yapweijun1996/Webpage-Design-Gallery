@@ -51,8 +51,9 @@ S04 passed on Pages build `deaf0fd98cc414b0`. Desktop and 390 px touch-emulated 
 [Design and runtime](05-pien-tze-huang/README.md) · [Inventory](05-pien-tze-huang/model-inventory.md)
 
 - [x] **Single 3 g unit, unprinted form study.** The smaller carton in the manufacturer photo supports a nearly square front and narrower side. The [editable 220 × 216 × 100 mm study](../../models/gjh-pzh-single-carton/README.md) preserves the exhibit position and uses photo-estimated proportions.
+- [x] **Manufacturer ten-unit intermediate carton, unprinted form study.** The 2023 front and back photos show a closed carton approximately twice as wide as tall and an offset film tear strip. The [editable companion study](../../models/gjh-pzh-ten-carton/README.md) uses these visible proportions.
 - [ ] **Single 3 g unit, exact retail carton.** Confirm physical dimensions, closure and current packaging art independently of the enlarged display study.
-- [ ] **GJH 10-piece format.** Verify the outer pack shape, size and relationship to the 3 g carton before modeling.
+- [ ] **GJH 10-piece format.** The GJH listing uses a photo marked as a one-unit carton. The manufacturer documents a ten-unit intermediate carton with an outer film tear strip from batch 2208129. Obtain Singapore-edition outer-pack and open-carton views and dimensions to confirm that version and how it holds the 3 g units. [GJH listing](https://www.gjheshop.com/product/zhang-zhou-pien-tze-huang-10-pcs/) · [Manufacturer packaging notice](https://www.pzhchina.com/gsdt/info_139.aspx?itemid=28536)
 
 S05 passed on Pages build `ef5f8f14a4d09bd5`. Both Chrome routes entered the shop, opened the carton story, continued behind the counter and returned to the atrium. The published room GLB matched the Blender export. The 40-triangle model is part of the existing room mesh, and the parsed Low shop total is 2,350 triangles. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44638720871)
 
@@ -140,7 +141,7 @@ S12 passed both Chrome routes with matching live asset bytes across the same Pag
 [Design and runtime](14-lg/README.md) · [Inventory](14-lg/model-inventory.md)
 
 - [x] **OLED55C5PSA stand-free cabinet.** The [editable model](../../models/gjh-lg-oled/README.md) uses the 1,222 × 703 × 45.1 mm envelope, stepped rear housing, vent and four VESA mounts. The enlarged gallery screen retains its own content.
-- [ ] **Exact OLED55C5PSA.ATC jack panel.** Obtain a sharp Singapore rear and side connector view for layout, socket orientation and casing details.
+- [ ] **Exact OLED55C5PSA.ATC jack panel.** LG Singapore specifies four HDMI inputs, with eARC on HDMI 2, three USB ports, Ethernet, optical out and RF. Its support page supplies a C5 family setup guide that shows the rear cable routing and individual plug types. It leaves the exact Singapore jack order, orientation and placement open. Obtain a sharp connector photo or labeled jack diagram for the ATC unit. [Singapore specifications](https://www.lg.com/sg/tvs-soundbars/oled-evo/oled55c5psa/) · [ATC support and setup guide](https://www.lg.com/sg/support/product-support/cs-OLED55C5PSA.ATC/)
 
 S13 and S14 passed both Chrome routes on Pages build `e41e09428bb8f71f` with matching live GLB hashes. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44653176777)
 
@@ -149,8 +150,9 @@ S13 and S14 passed both Chrome routes on Pages build `e41e09428bb8f71f` with mat
 [Design and runtime](15-casio/README.md) · [Inventory](15-casio/model-inventory.md)
 
 - [x] **Casiotone CT-S1BK.** Published envelope, 61-key arrangement, dark speaker deck and top controls in the [editable model](../../models/gjh-casio-instruments/README.md).
+- [x] **CT-S1BK control layout, unprinted exhibit detail.** The power button, offset volume knob, four utility buttons, seven main tone buttons and separately spaced tone variation button follow the manufacturer manual and AR reference. [CT-S1 guide, EN-4](https://www.casio.com/content/dam/casio/global/support/manuals/electronic-musical-instruments/pdf/008-en/c/CTS1_usersguide_EN.pdf#page=5) · [Casio AR references](https://www.casio.com/us/electronic-musical-instruments/web-ar/)
 - [x] **CELVIANO Grand Hybrid GP-510BP.** Separate closed-lid, closed-cover cabinet with three pedals on the rear wall. The recital grand stays in the centre.
-- [ ] **Detailed controls and finishes.** Use measured component views for exact switch spacing, materials and key detail. Instrument audio and Sit are separate interaction work.
+- [ ] **Detailed controls and finishes.** Obtain measured views for exact cap and switch dimensions, materials, indicators and key detail. Casio's AR references are simulations. The GP-510BP's open control panel is documented in the catalogue for a separate open-state study. Instrument audio and Sit are separate interaction work. [Casio AR references](https://www.casio.com/us/electronic-musical-instruments/web-ar/) · [Grand Hybrid catalogue](https://www.casio.com/content/dam/casio/global/emi/catalog/pdf/ja/celviano-grand-hybrid.pdf)
 
 ## S16 GP Batteries
 
@@ -158,14 +160,16 @@ S13 and S14 passed both Chrome routes on Pages build `e41e09428bb8f71f` with mat
 
 - [x] **GP Ultra+ AA, white eTag and CR2032.** Three [editable models](../../models/gjh-gp-power/README.md) use manufacturer envelopes. The AA shows its stepped terminal and the eTag shows the cover seam.
 - [ ] **GP Ultra+ AA and GP CR2032 packaging.** Confirm the intended sales revision and obtain authorized art before applying pack or cell markings.
-- [ ] **GP eTag case apertures.** Confirm the physical lanyard opening, cover pinhole and seam against a close-up. Singapore market availability remains separate.
+- [x] **GP eTag cover-release aperture, exhibit detail.** GP Malaysia's white-unit FAQ photo supports a rounded recess on the sidewall below the cover seam. The [editable model](../../models/gjh-gp-power/README.md) retains the Malaysia-listed envelope and uses an estimated recessed opening. [Official close-up](https://cdn.shopify.com/s/files/1/0728/4939/1936/files/FAQ_eTag_location_not_updating_img_8_v2.png?v=1750657965)
+- [ ] **GP eTag precise apertures.** Measure the pinhole, seam and lanyard opening on an identified white unit. Confirm the lanyard routing and the Singapore market variant. GP's Nordic TAGA drawing specifies a different envelope. [TAGA specification](https://www.gpbmnordic.com/Product/Files/Global/Product%20Specification%20eTag.pdf)
 
 ## S17 Gigaset
 
 [Design and runtime](17-gigaset/README.md) · [Inventory](17-gigaset/model-inventory.md)
 
 - [x] **A170 and COMFORT 550A black.** Two [editable handset and base sets](../../models/gjh-gigaset-handsets/README.md) distinguish the amber A170 face from the 550A display and answering base controls. The handset envelopes and the 550A base use manufacturer dimensions.
-- [ ] **A170 base dimensions.** Compare the H, W and D axes against a measured black A170 cradle. The shallower base orientation is inferred from the photo and nominal dimensions.
+- [x] **A170 base nominal axis assignment.** Gigaset's 2018 French A170/AL170A sheet gives 89 × 89 × 43 mm in length × width × height for the A170 base. That order supports the existing 89 mm square footprint and 43 mm height. The English catalogue uses a conflicting axis header. [Gigaset technical sheet, p. 2](https://www.procie.com/mediaprovider/index/index/media_type/notice/filename/A170NOIR.pdf/#page=2) · [English catalogue](https://www.gigaset.com/en_en/gigaset-a170/)
+- [ ] **A170 base measured dimensions.** Verify the intended Singapore cradle's width, depth, height and exact curvature on a physical sample or its regional engineering drawing.
 - [ ] **Precision retail detail.** Confirm the A170 cradle curvature, both key legends and display appearance against measured parts and authorized artwork. Sofa Sit is separate interaction work.
 
 S15 through S17 passed the map, store entry, story, model view and exit checks in desktop and touch-emulated Chrome. Their model receipts record build `2a5c452460ef78fd` and the installed GLB checksums. [Casio receipt](../../models/gjh-casio-instruments/receipt.json) · [GP Batteries receipt](../../models/gjh-gp-power/receipt.json) · [Gigaset receipt](../../models/gjh-gigaset-handsets/receipt.json)

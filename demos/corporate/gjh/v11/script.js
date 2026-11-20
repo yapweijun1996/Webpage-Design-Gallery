@@ -1,5 +1,3 @@
-import {startPhysics} from './assets/startup-physics.js';
-import {startStartupPack} from './assets/startup-asset-pack.js';
 import {restroomAt} from './assets/restroom-layout.js';
 import {readStandardGamepad,gamepadMotion} from '../../../../assets/onboarding/gamepad.js';
 import {createPerformanceMonitor} from './assets/performance-monitor.js';
@@ -12,7 +10,7 @@ import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {allowMallLightWash, createMallAtmosphere} from './assets/mall-atmosphere.js';
-import {createArrivalChime} from './assets/elevator-chime.js';
+import {mallAudio} from './assets/audio.js';
 import {liftLayout} from './assets/lift-layout.js';
 import {createModelWarmup} from './assets/model-warmup.js';
 import {createWarmReport, createWarmRunner, createTierQueue, prepareEntryFrame, prepareTier} from './assets/scene-warmup.js';
@@ -47,7 +45,6 @@ const liftEnabled = startupFlags.get('visitor') !== 'v1';
 const testEnabled = startupFlags.get('test') === '1' || Boolean(window.__GJH_TEST);
 document.body.classList.toggle('is-expanded', expanded);
 
-const arrivalChime = createArrivalChime();
 const skipRide = document.getElementById('skip-lift-ride');
 skipRide.addEventListener('click',()=>{player?.skipRide();canvas.focus({preventScroll:true});});
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -67,10 +64,67 @@ let themeStage = null;
 let themeMidnightTimer;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
-let markEntered;
-const entry = new Promise(resolve => { markEntered = resolve; });
-const detailsEnabled = () => enteredAt !== null;
+let markFirstFrame;
+const firstFrame = new Promise(resolve => { markFirstFrame = resolve; });
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
+const speaker = document.getElementById('mall-speaker');
+const music = document.getElementById('mall-music');
+const musicStatus = document.getElementById('mall-music-status');
+const mixer = document.querySelectorAll('[data-audio-bus]');
+const connection = navigator.connection;
+let lastMusicStatus;
+mallAudio.subscribe(() => {
+  const state = mallAudio.state;
+  music.disabled = !state.available;
+  speaker.setAttribute('aria-pressed', String(state.muted));
+  music.checked = state.musicEnabled;
+  for (const input of mixer) {
+    input.disabled = !state.available;
+    input.value = Math.round(state.levels[input.dataset.audioBus] * 100);
+  }
+  const status = state.musicPlaying ? 'Music on' : 'Music off';
+  if (lastMusicStatus !== status) musicStatus.textContent = lastMusicStatus = status;
+});
+function toggleMute() {
+  mallAudio.setMuted(!mallAudio.state.muted);
+  if (!mallAudio.state.muted) mallAudio.prepareForControls(frames, true);
+}
+speaker.addEventListener('click', toggleMute);
+music.addEventListener('change', () => {
+  mallAudio.setMusic(music.checked);
+  if (music.checked) mallAudio.prepareForControls(frames, true);
+});
+for (const input of mixer) input.addEventListener('input', () => {
+  mallAudio.setVolume(input.dataset.audioBus, input.valueAsNumber / 100);
+});
+const sceneEntered = () => startupOverlay.hidden && document.body.classList.contains('is-3d');
+const sceneStationary = () => sceneEntered() && !player?.movementPending && !testWalk?.active;
+function activateSceneAudio() {
+  mallAudio.setActive(true);
+  mallAudio.scheduleCreation(sceneStationary, () => frames);
+}
+function unlockAudio(event) {
+  if (!sceneEntered()) return;
+  activateSceneAudio();
+  mallAudio.sceneGesture(event, sceneStationary, frames);
+}
+const audioTools = document.getElementById('mall-tools');
+audioTools.addEventListener('toggle', () => {
+  if (audioTools.open && sceneEntered()) mallAudio.prepareForControls(frames);
+});
+document.addEventListener('pointerdown', event => { if (event.pointerType === 'mouse') unlockAudio(event); }, true);
+document.addEventListener('pointerup', event => { if (event.pointerType !== 'mouse') unlockAudio(event); }, true);
+document.addEventListener('click', unlockAudio);
+document.addEventListener('keydown', event => {
+  if (event.isTrusted && event.code === 'KeyM' && !event.defaultPrevented && !event.repeat &&
+      !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.isContentEditable &&
+      !event.target.closest?.('input, select, textarea, dialog') &&
+      sceneEntered()) {
+    event.preventDefault();
+    toggleMute();
+  } else unlockAudio(event);
+}, true);
+mallAudio.setHidden(document.hidden);
 const quality = createGraphicsQuality(change => {
   if (change === 'resolution' && quality.state) {
     requestedProfile = quality.resolve(renderWidth);
@@ -78,13 +132,20 @@ const quality = createGraphicsQuality(change => {
     requestRender();
   } else resize();
 });
+function syncAudioPolicy(tier = quality.state?.tier ?? quality.resolve(innerWidth).tier) {
+  mallAudio.setPolicy(quality.deviceClass === 'phone', tier === 'low',
+    reducedMotion.matches || connection?.saveData === true);
+}
+syncAudioPolicy();
+reducedMotion.addEventListener('change', () => syncAudioPolicy());
+connection?.addEventListener?.('change', () => syncAudioPolicy());
+const floorChime = () => mallAudio.play('floor-chime');
 let renderRequested = false, forceRender = false, enteredAt = null;
 let simulationMs = 0, simulationSteps = 0;
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
 let selectedInteraction = null, interactionDistance = Infinity, windowBlurred = false, interactions;
 let shopActionsLoad, shopActionsAttemptZone, shopActionsTime, testWalk;
-let cartWarming = false;
-let lastPreloadUpdate = -Infinity, preloadSettled = !expanded;
+let lastPreloadUpdate = -Infinity, initialPreloadStarted = null, preloadSettled = !expanded;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); spatialHud?.suspend(); }
 let pendingFloorRide;
 let nearby = null, currentZone = 'atrium', wasRiding = false;
@@ -126,6 +187,7 @@ function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
     movement: movementReport(),
+    ...mallAudio.performanceReport(),
     renderScale: quality.state?.renderScale ?? 1,
     targetFps: quality.targetFps,
     refreshHz: quality.refreshHz,
@@ -383,6 +445,7 @@ function updateHUD() {
   if (skipRide.hidden===p.elevatorTravel) skipRide.hidden=!p.elevatorTravel;
   const zone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? restroomAt(p.x,p.z) ?? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
   if (zone !== currentZone || Boolean(p.elevatorTravel) !== wasRiding) quality.resetSampling();
+  if (zone !== currentZone) mallAudio.setZone(zone);
   currentZone = zone;
   wasRiding = Boolean(p.elevatorTravel);
   if(expanded&&currentZone==='upper'&&!brandWallStarted){
@@ -418,6 +481,7 @@ function tick(refreshHud = true) {
   for (const door of world.doors) {
     if (door.advance) { door.advance(p, STEP, reducedMotion.matches); continue; }
     const open = shouldOpenStoreDoor(door, p) || (door.open > 0 && door.occupied());
+    if (open !== door.targetOpen) mallAudio.play('door');
     door.targetOpen = open;
     const next = reducedMotion.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
     if (next === door.open) continue;
@@ -555,7 +619,7 @@ function updateModelPreload(now) {
   const visitorLod=player.state.character.lod;
   const lodStatus=visitorLod ? (visitorLod.available?'loaded':visitorLod.failed?'fallback':'pending') : 'loaded';
   const assets=models.concat(Object.values(state.sceneModels),furnishings.map(item => item.status),lodStatus);
-  if(elevator?.kit?.tier)assets.push(elevator.kit.status);
+  if(elevator?.kit)assets.push(elevator.kit.status);
   const done=assets.filter(status => status==='loaded'||status==='fallback').length;
   const failed=assets.filter(status => status==='fallback').length;
   const ready=done===assets.length && state.settled===state.total;
@@ -563,8 +627,12 @@ function updateModelPreload(now) {
   node.hidden=false;
   const zh=document.documentElement.lang?.startsWith('zh');
   node.textContent=ready ? (failed ? (zh?'商店模型准备完成，部分模型不可用。':'Shop models prepared; some assets are unavailable.') : (zh?'商店模型已准备完成，首次显示仍可能需要一些时间。':'Shop models prepared. First views may still take time to render.')) :
-    (zh?`正在准备商店模型（${done}/${assets.length}）。`:`Preparing shop models (${done}/${assets.length}).`);
-
+    (zh?`正在准备商店模型（${done}/${assets.length}）。您可等待或立即进入。`:`Preparing shop models (${done}/${assets.length}). You can wait or enter now.`);
+  if (initialPreloadStarted !== null && !window.mallLoader?.snapshot().ready) {
+    if (ready || now-initialPreloadStarted >= 30000) {
+      initialPreloadStarted=null;
+    } else window.mallLoader?.prepare(node.textContent);
+  }
 }
 function tierWork(profile, report, startup = false) {
   const screenPixel = () => !startupOverlay.hidden || (!manual && !modes.paused()) ? 1 : 0;
@@ -610,6 +678,8 @@ function cancelEntryPresentation() {
 function advanceStartupWarm() {
   const loader = window.mallLoader;
   if (!loader || loader.ready || contextLost || restorePending || pageEnded) return false;
+  if (loader.skipSignal.aborted) initialPreloadStarted = null;
+  if (initialPreloadStarted !== null) return false;
   if (loader.snapshot().stage === 'frame') loader.complete('frame');
   if (loader.snapshot().stage !== 'warm') return false;
   if (!warmRunner) {
@@ -689,10 +759,10 @@ function animate(now) {
     quality.resetSampling(now);
     return;
   }
-  const entered = startupOverlay.hidden && document.body.classList.contains('is-3d');
+  const entered = sceneEntered();
   if (entered && enteredAt === null) {
     enteredAt = now;
-    markEntered();
+    activateSceneAudio();
   }
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
@@ -725,13 +795,16 @@ function animate(now) {
   const live = advancing && !modes.paused() || modes.current() === 'shelf';
   // Direct-pass warm-up submits a scissored draw to the default framebuffer.
   // Its non-preserved back buffer must be covered by a live draw before paint.
-  const uploadMs = cartWarming || live || renderRequested && (forceRender || !modes.paused()) ? warmModels(player.state) : 0;
+  // The mobile settings panel pauses walking, but its tier request still
+  // needs the upload queue to finish before it can become the active tier.
+  const uploadMs = live || tierQueue?.pending || renderRequested && (forceRender || !modes.paused())
+    ? warmModels(player.state) : 0;
   let pose, callbackMs = 0;
-  if (live || renderRequested || cartWarming) {
+  if (live || renderRequested) {
     // Tier preparation can exercise one real screen pixel. The live scene
     // covers it in this same animation callback, before presentation.
     const renderStart = performance.now();
-    const force = forceRender || cartWarming;
+    const force = forceRender;
     renderRequested = forceRender = false;
     if (advancing && !modes.paused() && !shelfFocus?.open) {
       player.updateCamera(Math.min(.1, slotMs / 1000), false, fixedClock.alpha);
@@ -774,7 +847,7 @@ function resume() {
 }
 function fallback(message, terminal = true) {
   if (terminal) window.mallLoader?.fail(message);
-  if (terminal) { fatal = true; graphicsStatus = 'failed'; cancelEntryPresentation(); world?.interiors?.dispose(); modelWarmup?.dispose(); }
+  if (terminal) { fatal = true; graphicsStatus = 'failed'; cancelEntryPresentation(); world?.interiors?.dispose(); modelWarmup?.dispose(); markFirstFrame(); }
   pausePerformance();
   hideGuidance();
   ready = false; window.__sceneFailed = true; window.__sceneReady = false;
@@ -783,12 +856,10 @@ function fallback(message, terminal = true) {
 }
 function rideElevator(options) {
   if (!ready || !elevator) return {reason:'The elevator is unavailable right now. Please try again.'};
-  world.prepareUpperFurniture();
-  void elevator.kit?.select(quality.state?.tier ?? 'low');
   manual = false;
   player.setInput(null);
-  const result = player.useElevator(elevator, arrivalChime.play, options);
-  if (result.riding) arrivalChime.unlock();
+  const result = player.useElevator(elevator, floorChime, options);
+  if (result.riding || result.calling) mallAudio.play('lift-ding');
   return result;
 }
 function requestFloorRide(upper, arrival) {
@@ -796,8 +867,6 @@ function requestFloorRide(upper, arrival) {
   const result = rideElevator({approach:true, target});
   if (result.calling) {
     pendingFloorRide = {target, arrival, phase:'calling'};
-    // Unlock during the map tap, before the automatic boarding tick.
-    arrivalChime.unlock();
   } else if (result.riding && arrival) {
     pendingFloorRide = {target, arrival, phase:'riding'};
   }
@@ -812,7 +881,20 @@ ui.onTeleport(zone => {
   quality.resetSampling(); updateHUD(); requestRender(); canvas.focus({preventScroll: true}); return true;
 });
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();requestRender();return ok;});
-ui.onView(visual => { if (visual) { last = performance.now(); requestRender(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
+ui.onView(visual => {
+  if (!visual) mallAudio.setActive(false);
+  else if (sceneEntered()) activateSceneAudio();
+  if (visual) {
+    last = performance.now();
+    requestRender();
+  } else {
+    player?.setCart(false);
+    if (player?.state.seated) player.stand(true);
+    player?.clearInput();
+    player?.cancelCollection();
+    if (player) updateHUD();
+  }
+});
 ui.onShopCycle(() => { if (interactions.cycle(1)) { updateHUD(); requestRender(); } });
 function interactNearby() {
   if (!nearby) return false;
@@ -853,8 +935,13 @@ function refreshCalendarTheme() {
   scheduleThemeMidnight();
   if (ready && !pageEnded) void mallTheme?.refresh();
 }
-window.addEventListener('pageshow', refreshCalendarTheme);
+window.addEventListener('pageshow', () => {
+  mallAudio.setHidden(document.hidden);
+  refreshCalendarTheme();
+});
 document.addEventListener('visibilitychange', () => {
+  mallAudio.setHidden(document.hidden);
+  if (!document.hidden && sceneEntered()) activateSceneAudio();
   warmRunner?.visibility(document.hidden);
   if (document.hidden) { pausePerformance();if(ready)mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
   else { if (ready) { quality.resetSampling(); refreshCalendarTheme(); updateHUD(); requestRender(); } else validateRestoration(); resume(); }
@@ -916,8 +1003,9 @@ function resize() {
 }
 function applyProfile(profile) {
   profile = quality.apply(profile);
+  syncAudioPolicy(profile.tier);
   themeStage?.setTier?.(profile.tier);
-  if (elevator?.kit?.tier) void elevator.kit.select(profile.tier);
+  void elevator?.kit?.select(profile.tier);
   void player?.setTramTier?.(profile.tier);
   npcs?.setQuality({tier:profile.tier,mobile:renderWidth<1000,enabled:new URLSearchParams(location.search).get('npcs')!=='off'});
   if (!contextLost) renderer.shadowMap.enabled = profile.shadows;
@@ -939,6 +1027,7 @@ function validateRestoration() {
     renderer.shadowMap.type = three.PCFSoftShadowMap;
     frameTrace?.watchShadowMap();
     try { atmosphere?.restoreEnvironment(); } catch { /* Reflections are optional after recovery. */ }
+    world.prepareUpperLevel();
     if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || (elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))) throw new Error('Theme restoration failed');
     atmosphere?.applyTheme(mallTheme?.definition());
     atmosphere?.update(player.state,undefined,quality.state?.tier);
@@ -956,6 +1045,7 @@ function validateRestoration() {
       throw new Error('Restored scene frame unavailable');
     validations++; frames++; ready = true; graphicsStatus = 'available';
     if (window.mallLoader?.ready) scheduleTier();
+    markFirstFrame();
     window.__sceneFailed = false; window.__sceneReady = true;
     mallTheme?.resume();ui.restored();resume();void mallTheme?.restore();scheduleThemeMidnight();
   } catch {
@@ -978,7 +1068,7 @@ async function installNpcs(T, R, prepareModel, highResolution, source) {
     else {
       npcs = system;
       npcs.setQuality({mobile:innerWidth<1000,tier:quality.state?.tier||'balanced'});
-      void entry.then(() => {
+      void firstFrame.then(() => {
         if (pageEnded || fatal) return;
         system.enableModular();
         return system.loadBoy();
@@ -987,13 +1077,6 @@ async function installNpcs(T, R, prepareModel, highResolution, source) {
   } catch { /* NPCs are optional. */ }
 }
 async function initialize() {
-  const packTask = startStartupPack();
-  const physicsTask = Promise.all([import('./vendor/rapier.mjs'), startPhysics()]);
-  const worldTask = import('./assets/world.js');
-  const playerTask = import('./assets/player.js');
-  const elevatorTask = liftEnabled ? import('./assets/elevator-v2.js') : null;
-  const themeTask = expanded ? import('./assets/mall-themes.js') : null;
-  for (const task of [physicsTask, worldTask, playerTask, elevatorTask, themeTask]) void task?.catch(() => {});
   // Allow the initial overlay to paint before expensive module and scene work.
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   const attributes = {antialias: !expanded, alpha: false, powerPreference: 'high-performance'};
@@ -1016,7 +1099,7 @@ async function initialize() {
   renderer.outputColorSpace = T.SRGBColorSpace; renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.08;
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
-  try { const [rapier, bytes] = await physicsTask; R = rapier.default; await R.init(bytes); }
+  try { R = (await import('./vendor/rapier.mjs')).default; await R.init(); }
   catch { fallback('The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.'); return; }
   physics = new R.World({x: 0, y: -24, z: 0}); physics.timestep = STEP;
   window.mallLoader?.complete('physics');
@@ -1028,11 +1111,9 @@ async function initialize() {
     lighting: lights => warmShadows() ? atmosphere?.lightVariants(lights) : undefined,
     ...options
   });
-  const {createWorld} = await worldTask;
-  // Consumers start their own asset deadlines only after the shared transfer.
-  await packTask;
+  const {createWorld} = await import('./assets/world.js');
   world = await createWorld(T, R, physics, expanded, warmModel,
-    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === 'phone', detailsEnabled);
+    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === 'phone');
   if (expanded) renderer.toneMappingExposure = world.defaultExposure;
   ui.setBrandStories(world.shopExhibits);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
@@ -1053,7 +1134,7 @@ async function initialize() {
   } catch { /* Keep the mall usable without reflections. */ }
   if (expanded) {
     try {
-      const {createMallThemeCoordinator} = await loadOptionalThemeModule(() => themeTask);
+      const {createMallThemeCoordinator} = await loadOptionalThemeModule(() => import('./assets/mall-themes.js'));
       let storage;
       try { storage=window.localStorage; } catch { storage=null; }
       const packs={
@@ -1111,7 +1192,7 @@ async function initialize() {
     ui.configureMallTheme(mallTheme);
   }
   if (liftEnabled) {
-    const {createElevatorV2} = await elevatorTask;
+    const {createElevatorV2} = await import('./assets/elevator-v2.js');
     elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel);
     world.prepareUpperLevel();
     if(mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {mallTheme.destroy();mallTheme=null;ui.configureMallTheme(null);}
@@ -1127,8 +1208,6 @@ async function initialize() {
   const portraitProfile = quality.resolve(innerWidth);
   const portrait = {
     highResolution:usesPortraitAtlas(quality.deviceClass, portraitProfile.tier),
-    compactEntry:true, entry, detailsEnabled, canUpgrade:() => !pageEnded && !fatal,
-    prepareBitmap:modelWarmup.prepareBitmap,
     anisotropy:renderer.capabilities.getMaxAnisotropy(),
     async preload(mesh) {
       // The regular animation loop starts after the first visible draw. Drive its
@@ -1147,10 +1226,11 @@ async function initialize() {
       }
     }
   };
-  const {createPlayer} = await playerTask;
+  const {createPlayer} = await import('./assets/player.js');
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,
     world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);
-  if (player.npcSource || player.state.character.model === 'gjh-tripo-visitor') void entry.then(() => installNpcs(T, R, prepareAvatar, portrait.highResolution, player.npcSource));
+  if (player.npcSource) await installNpcs(T, R, prepareAvatar, portrait.highResolution, player.npcSource);
+  else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareAvatar, portrait.highResolution));
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');
@@ -1162,6 +1242,10 @@ async function initialize() {
   ui.setShelfFocus(shelfFocus);
   ui.setRestrooms(world.restrooms);
   interactions = createInteractionRegistry(world.interactables, item => ui.describeInteraction(item));
+  interactions.subscribe(item => {
+    if (item.kind === 'pickup') mallAudio.play('pickup');
+    else if (item.kind === 'drop' || item.kind === 'return') mallAudio.play('drop');
+  });
   ui.setInteractionRegistry(interactions);
   if (player.state.character.physicalProduct) {
     try {
@@ -1189,15 +1273,8 @@ async function initialize() {
   }, requestFloorRide);
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
-  ui.onCart(()=>({...player.state.character.cart,available:ready&&(player.state.character.cart.available||player.state.character.cart.requestable),seated:player.state.seated,heldProduct:player.state.character.physicalProduct?.id,elevatorTravel:player.state.elevatorTravel,capability:player.cartCapability()}),async value=>{
+  ui.onCart(()=>({...player.state.character.cart,available:ready&&player.state.character.cart.available,seated:player.state.seated,heldProduct:player.state.character.physicalProduct?.id,elevatorTravel:player.state.elevatorTravel,capability:player.cartCapability()}),value=>{
     if(!ready)return false;
-    if (value && !player.cartCapability().allowed) return false;
-    if (value) {
-      cartWarming = true;
-      try { await player.prepareCart?.(); }
-      finally { cartWarming = false; }
-    }
-    if (pageEnded || fatal) return false;
     const ok=player.setCart(value);updateHUD();requestRender();return ok;
   });
   ui.onCollect(id=>Boolean(!player.state.seated&&player.state.character.collection.available!==false&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
@@ -1233,7 +1310,11 @@ async function initialize() {
   render(true);
   if (contextLost || context.isContextLost()) return;
   if (!renderer.info.render.calls) throw new Error('First scene frame unavailable');
-  window.mallLoader?.complete('frame');
+  markFirstFrame();
+  if (expanded && !window.mallLoader?.snapshot().dismissed) {
+    initialPreloadStarted=performance.now();
+    window.mallLoader?.prepare('Preparing shop models. You can enter now or browse the directory.');
+  }
   window.__sceneReady = true; ui.offerFirstGuide(); resume(); scheduleThemeMidnight();
 }
 // The directory mounts its controls above without downloading physics, models or a WebGL world.
@@ -1241,8 +1322,12 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   console.error('3D mall initialization failed:', error);
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
-window.addEventListener('pagehide', event=>{if(!event.persisted) {
+window.addEventListener('pagehide', event => {
+  if (event.persisted) {
+    mallAudio.setHidden(true);
+    return;
+  }
   clearTimeout(themeMidnightTimer);
   cancelEntryPresentation();
-  pageEnded = true; elevator?.kit?.dispose(); arrivalChime.dispose(); tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
-}});
+  pageEnded = true; elevator?.kit?.dispose(); mallAudio.dispose(); tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
+});

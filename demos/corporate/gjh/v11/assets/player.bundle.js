@@ -7,6 +7,9 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/player.js
+import { mallAudio as mallAudio2 } from "./audio.js";
+
 // demos/corporate/gjh/v11/assets/elevator-ride.js
 var rideTime = Object.freeze({ open: 0.22, board: 0.55, close: 0.78, arrive: 1.36, reopen: 1.58, exit: 1.84 });
 function easedInterval(time, start, end) {
@@ -704,6 +707,20 @@ function positionTramChase(camera, distance, target) {
 
 // demos/corporate/gjh/v11/assets/movement.js
 var FIXED_STEP = 1 / 60;
+var MOVEMENT_KEYS = [
+  "KeyW",
+  "KeyA",
+  "KeyS",
+  "KeyD",
+  "KeyQ",
+  "KeyE",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "ShiftLeft",
+  "ShiftRight"
+];
 var MOVEMENT = Object.freeze({
   desktopWalk: 3.4,
   desktopRun: 5.2,
@@ -744,6 +761,9 @@ function interpolateAngle(from, to, alpha) {
   const difference = to - from;
   return from + Math.atan2(Math.sin(difference), Math.cos(difference)) * alpha;
 }
+
+// demos/corporate/gjh/v11/assets/tram-ride.js
+import { mallAudio } from "./audio.js";
 
 // demos/corporate/gjh/v11/assets/tram-car.js
 function createTramCar(T, scene, prepareModel) {
@@ -960,6 +980,9 @@ function createTramRide({ blocked, canBoard, canExit, onBoard, onExit }) {
     get active() {
       return phase !== "idle";
     },
+    get arrived() {
+      return phase === "arrival";
+    },
     get seated() {
       return seated();
     },
@@ -1014,7 +1037,7 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
   const floor = 0.4025;
   const seat = { id: TRAM_STATION_ID, name: "Mall tram", floor, footY: floor, frontEdge: 0.2 };
   const seatAt = (distance) => car.seatPose(tramRoute.sample(distance));
-  let previousDistance = 0;
+  let previousDistance = 0, atArrival = false;
   function nearStation() {
     const p = getPosition();
     return Math.abs(p.y - 0.89) <= 0.5 && atTramLanding(p);
@@ -1026,8 +1049,12 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
     onBoard: () => {
       const pose = seatAt(0);
       enterSeat(Object.assign(seat, pose), pose);
+      mallAudio.play("tram-departure");
     },
-    onExit: () => exitSeat(exit)
+    onExit: () => {
+      mallAudio.rail(false);
+      exitSeat(exit);
+    }
   });
   function loadCar() {
     if (!requested && detailsEnabled()) {
@@ -1050,6 +1077,7 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
       if (controls.reason || !nearStation() || !ride.board())
         return false;
       previousDistance = ride.distance;
+      atArrival = false;
       car.place(tramRoute.sample(ride.distance));
       return true;
     },
@@ -1088,6 +1116,11 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
       if (!ride.active) {
         car.mesh.visible = false;
         return null;
+      }
+      mallAudio.rail(ride.seated && previousDistance !== ride.distance);
+      if (!atArrival && ride.arrived) {
+        atArrival = true;
+        mallAudio.play("tram-station");
       }
       return ride.seated ? seatAt(ride.distance) : null;
     },
@@ -1565,7 +1598,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       setPitch(currentPitch() + (event.code === "PageUp" ? -0.12 : 0.12));
       return;
     }
-    if (["KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "ShiftLeft", "ShiftRight"].includes(event.code)) {
+    if (MOVEMENT_KEYS.includes(event.code)) {
       if (event.target === canvas || event.target === document.body)
         event.preventDefault();
       keys.add(event.code);
@@ -1884,7 +1917,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     yaw += turning * MOVEMENT.turnRate * dt;
     const speed = pushing ? MOVEMENT.cart : stick ? running ? MOVEMENT.touchRun : MOVEMENT.touchWalk : running ? MOVEMENT.desktopRun : MOVEMENT.desktopWalk;
     advanceVelocity(velocity, forward, right, yaw, speed, dt);
-    vertical = controller.computedGrounded() ? -0.5 : Math.max(-18, vertical - 24 * dt);
+    const grounded = controller.computedGrounded();
+    vertical = grounded ? -0.5 : Math.max(-18, vertical - 24 * dt);
     movement.x = velocity.x * dt;
     movement.y = vertical * dt;
     movement.z = velocity.z * dt;
@@ -1901,6 +1935,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     body.setNextKinematicTranslation(next);
     const distance = Math.hypot(corrected.x, corrected.z);
     const walking = distance > 0.001;
+    if (walking && grounded)
+      mallAudio2.walk(distance);
     const state = walking ? running ? "run" : "walk" : "idle";
     const requested = Math.hypot(forward, right) > 0.001 ? running ? "run" : "walk" : "idle";
     const referenceSpeed = pushing ? MOVEMENT.cart : running ? MOVEMENT.runClipSpeed : MOVEMENT.walkClipSpeed;
@@ -2539,6 +2575,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     },
     get tramState() {
       return tram?.controls.state;
+    },
+    get movementPending() {
+      return Boolean(keys.size || stick || drag || pinch || injected?.forward || injected?.right || gamepad?.forward || gamepad?.right || gamepad?.lookX || gamepad?.lookY || Math.hypot(velocity.x, velocity.z) > 0.001 || elevatorTravel || productApproach || beforeTram || seatPhase !== "idle" && seatPhase !== "seated");
     },
     get collisionTicks() {
       return collisions;

@@ -10,6 +10,8 @@ Auto starts at Balanced on phones and on viewports narrower than 1000 CSS pixels
 
 The controller skips entry's first three seconds, asset warm-up, hidden or unfocused time, and lift rides. It clears its sample window and settles after view or zone transitions, teleports, and resizes. Scale applies to the full-resolution base and composite output and their quarter-resolution glow targets. Each pass retains its MSAA settings. The camera, HUD and pointer coordinates use the canvas's CSS size. The performance report and JSON export include `renderScale`, the effective `targetFps`, measured `refreshHz`, `deviceClass` and the number of completed automatic `tierDowngrades`. `refreshHz` is `null` until the sample window fills. The history also records the scale used for each frame.
 
+On compact screens, opening graphics settings pauses walking. An explicit graphics tier change continues preparing room and signage assets while the panel stays open. The app applies the new tier and its crowd settings when that preparation finishes.
+
 In the expanded mall, loaded shelves and stock use compacted submissions with current bounds. The 18 m range applies to the loaded shelf fixtures, shelf stock and hero can. Showcase cans remain eligible whenever their bounds intersect the view. Authored slot indices own pickup and reservation.
 
 The expanded mall uses frame budgets of 220,000 triangles and 70 draws on Low, 300,000 and 90 on Balanced, and 420,000 and 110 on Detailed. Ambient visitor admission uses the remaining budget after the world and post-processing passes. An opaque shop wall can reject a render bound only when it covers every sightline to that bound. Partial views through the glazing remain eligible. Physics uses the authored room and door geometry.

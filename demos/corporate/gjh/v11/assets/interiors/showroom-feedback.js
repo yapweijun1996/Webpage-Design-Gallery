@@ -1,5 +1,7 @@
+import {mallAudio} from '../audio.js';
+
 // The installer shares its single unlit mesh and geometry cache with the pilot rooms.
-export function createShowroomFeedback(T, shapes, merge) {
+export function createShowroomFeedback(T, shapes, merge, audio = mallAudio) {
   const box = (...size) => new T.BoxGeometry(...size);
   const hoop = () => new T.TorusGeometry(.41,.065,5,16);
   Object.assign(shapes, {
@@ -12,39 +14,22 @@ export function createShowroomFeedback(T, shapes, merge) {
       .scale(.45,.85,.12).rotateZ(-Math.sign(x)*.48).translate(x,0,0))),
     bars: () => merge([.36,.66,.96].map((h,i) => box(.22,h,.1).translate((i-1)*.33,h/2-.5,0)))
   });
-  let audio, muted = false;
   const alternate = new Map();
   function begin({id,shopAction}) {
-    const {effect,duration} = shopAction;
+    const {effect} = shopAction;
+    if (effect === 'mute') {
+      const {demoMuted} = audio;
+      audio.setDemoMuted(!demoMuted);
+      shopAction.done = demoMuted ? 'Demo audio enabled.' : 'Demo audio muted.';
+      return () => audio.setDemoMuted(demoMuted);
+    }
+    const stop = audio.shop(effect);
     if (effect === 'try' || effect === 'torch') {
       const previous = alternate.get(id);
       alternate.set(id,!previous);
-      return () => alternate.set(id,previous);
+      return () => { alternate.set(id,previous); stop?.(); };
     }
-    if (effect === 'mute') {
-      muted = !muted;
-      shopAction.done = muted ? 'Demo audio muted.' : 'Demo audio enabled.';
-      return () => { muted = !muted; };
-    }
-    if (!['listen','play','ring'].includes(effect) || muted || !globalThis.AudioContext) return;
-    // Allocate and unlock only on the visitor's F/touch gesture.
-    try {
-      audio ??= new globalThis.AudioContext();
-      if (audio.state === 'suspended') void audio.resume().catch(() => {});
-      const tone = audio.createOscillator(), volume = audio.createGain();
-      const start = audio.currentTime;
-      const notes = effect === 'ring' ? [660,880] : [261.63,329.63,392];
-      notes.forEach((hz,i) => tone.frequency.setValueAtTime(hz,start+i*duration/notes.length));
-      volume.gain.setValueAtTime(0,start);
-      volume.gain.linearRampToValueAtTime(.045,start+.015);
-      volume.gain.exponentialRampToValueAtTime(.0001,start+duration);
-      tone.connect(volume);
-      volume.connect(audio.destination);
-      tone.onended = () => { tone.disconnect(); volume.disconnect(); };
-      tone.start(start);
-      tone.stop(start+duration);
-      return () => tone.stop();
-    } catch { /* Visual feedback also runs when the device declines audio. */ }
+    return stop;
   }
   function present(target,t,draw) {
     const {item,effect} = target.shopAction;
@@ -86,7 +71,7 @@ export function createShowroomFeedback(T, shapes, merge) {
       case 'meter': return show('bars',green,[.34,.12+.09*Math.min(3,Math.floor(t*4)),.18]);
       case 'ring': return show('receiver',0x86c6d3,[.35,.28,.26],0,.24*t,0,.35*t);
       case 'water': return show('disc',0x71cede,[.065,.09+.18*peak,.065],0,.22*(1-t));
-      case 'mute': return show('waveform',muted?0xa1a7ac:green,[.34,muted?.08:.3,.15]);
+      case 'mute': return show('waveform',audio.demoMuted ? 0xa1a7ac : green,[.34,audio.demoMuted ? .08 : .3,.15]);
     }
   }
   return {begin,present};

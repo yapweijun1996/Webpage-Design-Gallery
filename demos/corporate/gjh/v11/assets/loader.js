@@ -2,6 +2,8 @@ import {startStartupPack, startupPackBytes} from './startup-asset-pack.js';
 import {physicsBytes, startPhysics} from './startup-physics.js';
 import {setupDemoBag} from './demo-bag.js';
 import {icon} from './icons.js';
+import {mallAudio} from './audio.js';
+import {browserDeviceClass, resolveQuality, savedQualityPreference} from './graphics-quality.js';
 
 // Each unit is a completed startup milestone, not an estimate of bytes or time.
 const stages = ['physics', 'scene', 'models', 'frame', 'warm'];
@@ -58,6 +60,19 @@ export function createLoaderState(onChange = () => {}) {
   };
 }
 
+export function bindLoaderAudioGestures(root, overlay, enterNow, audio = mallAudio) {
+  const prepare = event => {
+    if (event.isTrusted && !root.hidden) audio.prepareForLoader();
+  };
+  root.getElementById('arrival-walk').addEventListener('click', prepare);
+  enterNow.addEventListener('click', event => {
+    if (!overlay.hidden && !enterNow.hidden) prepare(event);
+  });
+  for (const type of ['pointerdown', 'touchstart']) root.addEventListener(type, event => {
+    if (root.body.hasAttribute('data-arrivals')) prepare(event);
+  }, {capture:true, passive:true});
+}
+
 // This module is also loaded independently of the main application bundle so a
 // failed startup import can leave the static directory and retry controls usable.
 if (typeof document !== 'undefined') {
@@ -71,6 +86,11 @@ if (typeof document !== 'undefined') {
   const motion = document.getElementById('loader-motion');
   const directory = document.getElementById('loader-directory');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const deviceClass = browserDeviceClass();
+  const {tier} = resolveQuality({deviceClass, preference:savedQualityPreference(),
+    width:innerWidth, cores:navigator.hardwareConcurrency, memory:navigator.deviceMemory});
+  mallAudio.setPolicy(deviceClass === 'phone', tier === 'low', reduced.matches || navigator.connection?.saveData === true);
+  bindLoaderAudioGestures(document, overlay, enterNow);
   const detailsStep = steps.find(step => step.dataset.stage === 'warm');
   let lastProgress;
   let fadeTimer, restoreFocus = false, previousStatus, previousStep;

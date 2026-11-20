@@ -1020,6 +1020,14 @@ html[data-gjh-design="v11"] body.is-3d{
   max-height:calc(100dvh - var(--gjh-header-size) - var(--hud-corner-top) - var(--size-control) - var(--space-3)
     - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--context-navigation-height,0px));
 }
+.mall-audio{display:grid;gap:var(--space-1)}
+.mall-audio label{display:flex;align-items:center;justify-content:space-between;gap:var(--space-2);min-height:44px}
+.mall-audio .mall-music-toggle{justify-content:flex-start;cursor:pointer}
+.mall-audio input[type="range"]{width:45%;min-height:44px;margin:0;accent-color:var(--gold)}
+#mall-speaker{justify-content:flex-start;min-height:44px;min-width:44px}
+#mall-speaker kbd{margin-inline-start:auto}
+#mall-speaker[aria-pressed="true"] .speaker-waves,
+#mall-speaker[aria-pressed="false"] .speaker-mute{display:none}
 .mall-tools-content :is(.scene-tools,details){min-width:0}
 .hud-rail .scene-tools{
   position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-1);
