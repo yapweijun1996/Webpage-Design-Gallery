@@ -1,6 +1,6 @@
 import {createInstanceVisibility, createPackedDraw} from './packed-draw.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
-import {liftLayout as lift, cutRectangle} from './lift-layout.js';
+import {liftLayout as lift, cutRectangle, shaftFinish} from './lift-layout.js';
 import {atriumLayout} from './atrium-layout.js';
 import {loadStaticAsset} from './static-asset.js';
 import {uvRect} from './signage/builder.js';
@@ -36,6 +36,7 @@ export async function loadUpperLevel(T, artworkTier = () => 'low') {
 export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWash}) {
   const group=new T.Group();group.name='Premium Open Atrium';group.userData.deckLod=true;
   const floor=lift.upper, gold=[], emit=[], solids=[], prints=[], glass=[];
+  const viewUpdates = [];
   const unit=new T.BoxGeometry(), plane=new T.PlaneGeometry(), transform=new T.Object3D();
   function matrix(x,y,z,w,h,d,yaw=0,pitch=0) {
     transform.position.set(x,floor+y,z);transform.rotation.set(pitch,yaw,0,'YXZ');
@@ -77,7 +78,7 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
     if(!door)guard(minX,cz,.1,maxZ-minZ);
     else for(const [a,b] of [[minZ,door.minZ],[door.maxZ,maxZ]])guard(minX,(a+b)/2,.1,b-a);
   }
-  frame(lift.slab);frame(lift.shaft,lift.threshold);
+  frame(lift.slab);
   for(const {x,z,width,depth} of thresholdReturns()){
     guard(x,z,width,depth);
     collider(x,floor+.55,z,width,1.10,depth);
@@ -160,6 +161,52 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   for(const y of [.43,2.14])brass(east+.025,y,cz,.035,.032,3.09);
   print(cells.mark,east+.025,1.32,cz,2.06,1.48,1,-Math.PI/2);
 
+  // The west elevation wraps the fitted portal. Leave the full door opening
+  // and the animated indicator clear. All other elevations meet at the cap.
+  const {west,east:eastFace,north,south,height:capHeight}=shaftFinish;
+  const cx=(west+eastFace)/2, widthX=eastFace-west, widthZ=south-north;
+  const lacquer=[];
+  function elevation(x,z,width,yaw,bottom=0,top=capHeight) {
+    const nx=Math.sin(yaw),nz=Math.cos(yaw);
+    const pose=(y,out,w,h,d)=>[x+nx*out,y,z+nz*out,w,h,d,yaw];
+    lacquer.push(plane.clone().applyMatrix4(matrix(...pose((bottom+top)/2,0,width,top-bottom,1))));
+    // A satin highlight on the front keeps the metal legible in backlight.
+    // Its edges still catch the scene lighting on the underlying brass trim.
+    if(bottom===0){
+      brass(...pose(.095,.012,width,.19,.026));
+      print(cells.brushedBrass,...pose(.11,.027,width,.115,1));
+    }
+    if(top===capHeight){
+      brass(...pose(capHeight-.045,.016,width,.09,.045));
+      print(cells.brushedBrass,...pose(capHeight-.045,.041,width,.05,1));
+      led(...pose(capHeight-.118,.011,width,.037,.026));
+    }
+    const bays=Math.round(width/.8);
+    for(let i=1;i<bays;i++){
+      const along=width*(i/bays-.5);
+      print(cells.brushedBrass,x+nz*along+nx*.026,(bottom+top)/2,
+        z-nx*along+nz*.026,.018,top-bottom,1,yaw);
+      brass(x+nz*along+nx*.012,(bottom+top)/2,z-nx*along+nz*.012,.026,top-bottom,.024,yaw);
+    }
+  }
+  elevation(cx,south,widthX,0);
+  elevation(cx,north,widthX,Math.PI);
+  elevation(eastFace,cz,widthZ,Math.PI/2);
+  for(const [a,b] of [[north,lift.threshold.minZ],[lift.threshold.maxZ,south]])
+    elevation(west,(a+b)/2,b-a,-Math.PI/2);
+  elevation(west,cz,lift.threshold.maxZ-lift.threshold.minZ,-Math.PI/2,2.93);
+  lacquer.push(plane.clone().applyMatrix4(matrix(cx,capHeight,cz,widthX,widthZ,1,0,-Math.PI/2)));
+  // Attach the directory to the face across from the brand rail. The west
+  // landing keeps its visitor-facing copy and the full turning circle.
+  brass(cx,1.89,south+.033,1.56,1.49,.032);
+  print(cells.directory,cx,1.89,south+.052,1.48,1.40,1);
+  brass(west-.048,3.35,cz,1.24,.42,.034,-Math.PI/2);
+  print(cells.lift,west-.069,3.35,cz,1.17,.36,1,-Math.PI/2);
+  const finish=new T.MeshStandardMaterial({color:0x46715a,roughness:.32,metalness:.14,
+    emissive:0x335644,emissiveIntensity:.46});
+  finish.name='Deep green shaft lacquer';
+  merged('Upper lift shaft lacquer panels',lacquer,finish,group);
+
   // A shallow sign at the west guard faces the cabin along the exit axis.
   const {x,z,width,height,yaw}=directory;
   block(0x694d35,x,1.16,z,width+.10,height+.15,.15,yaw);
@@ -209,7 +256,6 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   }
   print(cells.sky,lift.x,52.95,lift.z,2.05*radius,2.05*radius,1,0,Math.PI/2);
 
-  const viewUpdates = [];
   function merged(name, parts, material, parent) {
     let mesh;
     if (material.transparent) {

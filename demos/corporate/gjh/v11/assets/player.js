@@ -1,7 +1,7 @@
 import {rideTime,sampleRide,elevatorRideBlockReason} from './elevator-ride.js';
 import {createCharacter} from './character.js';
 import {spatial, courtyardArrival} from './spatial.js';
-import {liftLayout} from './lift-layout.js';
+import {insideLiftShaft,liftLayout,upperLiftCameraBounds} from './lift-layout.js';
 import {expandedLayout, expandedStoreArrival} from './expanded-layout.js';
 import {isShelfInReach} from './visitor-v2-contact.js';
 import {
@@ -13,11 +13,6 @@ import {createPlayerTram, tramBoardReason} from './tram-ride.js';
 import {seatEyeHeight} from './tram-layout.js';
 import {isInFrontOfSeat} from './seat-placements.js';
 
-// An orbit above the cabin roof can still put its opaque shell between the
-// lens and the visitor. Keep deck-side chase views on the visitor's side.
-const shaft=liftLayout.shaft;
-const upperCameraBoundary=[{min:{x:shaft.minX,y:liftLayout.upper,z:shaft.minZ},
-  max:{x:shaft.maxX,y:Infinity,z:shaft.maxZ}}];
 const CAMERA_LIFTS = [1.1, 2.2];
 const ZOOM_STEP = .2;
 const CHASE_NEAR = .08;
@@ -440,9 +435,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const start = performance.now();
     const bounded = sweepCameraClearance(physics, origin, cameraRotation, direction, cameraBall, length, capsule, body, cameraObstacles);
     cameraQueryMs += performance.now() - start;
-    if(expanded && !elevatorTravel && visual.position.y>liftLayout.upper-.1 &&
-        (origin.x<shaft.minX || origin.x>shaft.maxX || origin.z<shaft.minZ || origin.z>shaft.maxZ)){
-      return limitCameraByObstacles(origin,direction,bounded,cameraBall.radius,upperCameraBoundary);
+    if(expanded && !elevatorTravel && visual.position.y>liftLayout.upper-.1){
+      return limitCameraByObstacles(origin,direction,bounded,cameraBall.radius,upperLiftCameraBounds(visual.position));
     }
     return bounded;
   }
@@ -528,7 +522,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     // Keep the Tripo entrance framing near neutral and orbit the avatar at both extremes.
     const closeFraming = T.MathUtils.clamp((cameraDistance - 1) / 2, 0, 1);
     const framingWeight = closeFraming * neutralFramingWeight(renderedPitch);
-    const orbitHeight = seatView ? Math.max(.9, framing.height * .7) : actionView ? 0 : framing.height * framingWeight;
+    const inUpperCar=expanded && !elevatorTravel && visual.position.y>liftLayout.upper-.1 && insideLiftShaft(visual.position);
+    const orbitHeight = seatView ? Math.max(.9, framing.height * .7) : actionView || inUpperCar ? 0 : framing.height * framingWeight;
     // The walking level also bounds the camera where the upper floor has no slab.
     const floor = elevatorTravel?.height ?? (visual.position.y > liftLayout.upper / 2 ? liftLayout.upper : 0);
     const minimumY = floor + cameraRadius + .04;
@@ -537,7 +532,16 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const preferredY = anchor.y;
     const floorLimited = limitCameraByFloor(preferredY, sinPitch, cameraDistance, minimumY);
     // A floor-limited arm is already at the requested low angle. Lift only to clear geometry.
-    if (length < Math.min(floorLimited - .05, cameraLift ? 2.4 : 2)) {
+    if(inUpperCar && length<.85 && cameraDistance>1.15){
+      // In a car corner a vertical escape frames only the top of the head.
+      // Try a short shoulder-height arm towards the open centre instead.
+      offset.set(liftLayout.x-target.x,.48,liftLayout.z-target.z).normalize()
+        .multiplyScalar(Math.min(cameraDistance,1.7));
+      const available=cameraCandidate(0,probe,minimumY,false);
+      if(available>length+.25){
+        length=available;desired.copy(probe);anchor.copy(candidateAnchor);
+      }
+    }else if (!inUpperCar && length < Math.min(floorLimited - .05, cameraLift ? 2.4 : 2)) {
       for (const height of CAMERA_LIFTS) {
         const available = cameraCandidate(orbitHeight + height, probe, minimumY, seatView);
         if (available > length + .25) {
@@ -551,7 +555,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const allowed=sweepCamera(anchor,safe,minimumY);safe.copy(anchor).addScaledVector(direction,allowed);
     // A newly blocked interpolation must contract immediately to a known clear candidate.
     if(allowed<.9&&length>=2)safe.copy(desired);
-    const lookAhead=actionView?0:framing.lookAhead * framingWeight;
+    // A distant walking target beyond the cabin wall can fill the screen
+    // after the arm contracts. Frame the visitor inside the docked cabin.
+    const lookAhead=actionView || inUpperCar ? 0 : framing.lookAhead * framingWeight;
     sightline.copy(target);
     sightline.x-=Math.sin(viewYaw)*lookAhead;sightline.z-=Math.cos(viewYaw)*lookAhead;
     camera.position.copy(safe);camera.lookAt(sightline);

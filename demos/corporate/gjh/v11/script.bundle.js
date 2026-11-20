@@ -296,6 +296,31 @@ var liftLayout = freeze({
   showcase: { x: -7, z: 18 },
   facilities: { ...restroomParcel, status: "open" }
 });
+var shaftFinish = Object.freeze({
+  west: liftLayout.shaft.minX - 0.27,
+  east: liftLayout.shaft.maxX + 0.18,
+  north: liftLayout.shaft.minZ - 0.11,
+  south: liftLayout.shaft.maxZ + 0.11,
+  height: 3.84
+});
+var shaft = liftLayout.shaft;
+var upperCameraBoundary = [{
+  min: { x: shaftFinish.west - 0.12, y: liftLayout.upper, z: shaftFinish.north - 0.04 },
+  max: { x: shaftFinish.east + 0.05, y: Infinity, z: shaftFinish.south + 0.04 }
+}];
+var cabinCameraBounds = [];
+var { x: carX, z: carZ, upper: carFloor, cabin } = liftLayout;
+var halfW = cabin.width / 2;
+var halfD = cabin.depth / 2;
+function carBound(x0, z0, x1, z1, bottom, top) {
+  cabinCameraBounds.push({ min: { x: x0, y: carFloor + bottom, z: z0 }, max: { x: x1, y: carFloor + top, z: z1 } });
+}
+for (const side of [-1, 1]) {
+  const z = carZ + side * (halfD - 0.1);
+  carBound(carX - halfW, z, carX + halfW, z, 0, 2.92);
+}
+carBound(carX + halfW - 0.1, carZ - halfD, carX + halfW - 0.1, carZ + halfD, 0, 2.92);
+carBound(carX - halfW, carZ - halfD, carX + halfW, carZ + halfD, 2.84, 2.92);
 
 // demos/corporate/gjh/v11/assets/expanded-layout.js
 var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({

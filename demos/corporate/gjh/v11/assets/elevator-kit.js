@@ -31,6 +31,7 @@ export function assembleElevatorKit(T, source, layout) {
       const apronOffset = !expanded && y===0 && name==='MarbleInlay' ? .045 : 0;
       const geo = part.geometry.clone().applyMatrix4(part.matrixWorld).translate(0,y+apronOffset,0);
       if(upperLanding && name==='ElevatorSign')geo.scale(.74,1,1);
+      if(upperLanding && name==='FloorIndicator')geo.translate(0,0,.055);
       if (name === 'FloorIndicator') displays.push([vertex, geo.attributes.uv.array.slice()]);
       parts.push(geo);
       vertex += geo.attributes.position.count;

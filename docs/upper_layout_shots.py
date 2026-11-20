@@ -35,7 +35,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--url", default=URL)
     parser.add_argument("--out", type=Path, default=EVIDENCE)
-    parser.add_argument("stage", choices=("before", "after"))
+    parser.add_argument("stage", choices=("before", "after", "after-v2"))
     args = parser.parse_args()
     folder = args.out / args.stage
     folder.mkdir(parents=True, exist_ok=True)
@@ -52,14 +52,17 @@ def main():
             rows[name] = page.evaluate(POSE, [stops, angles])
             Image.open(BytesIO(page.screenshot())).save(folder / (name + ".webp"), quality=86)
         (folder / "poses.json").write_text(json.dumps(rows, indent=2) + "\n")
-        if args.stage == "after":
-            before = json.loads((args.out / "before/poses.json").read_text())
+        if args.stage != "before":
+            reference = "after" if args.stage == "after-v2" else "before"
+            before = json.loads((args.out / reference / "poses.json").read_text())
             for name, row in rows.items():
                 baseline = before[name]
                 # Each walk terminates within 0.08 m of the shared target.
                 if math.hypot(row["x"] - baseline["x"], row["z"] - baseline["z"]) > .162:
                     raise AssertionError(f"{name}: viewpoints do not match")
-                if row["drawCalls"] > 70 or row["triangles"] > baseline["triangles"] + 1000:
+                draw_limit = min(70, baseline["drawCalls"] + 1) if args.stage == "after-v2" else 70
+                extra_triangles = 600 if args.stage == "after-v2" else 1000
+                if row["drawCalls"] > draw_limit or row["triangles"] > baseline["triangles"] + extra_triangles:
                     raise AssertionError(f"{name}: render budget exceeded: {row}")
 
 

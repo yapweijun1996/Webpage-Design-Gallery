@@ -436,6 +436,37 @@ var liftLayout = freeze({
   showcase: { x: -7, z: 18 },
   facilities: { ...restroomParcel, status: "open" }
 });
+var shaftFinish = Object.freeze({
+  west: liftLayout.shaft.minX - 0.27,
+  east: liftLayout.shaft.maxX + 0.18,
+  north: liftLayout.shaft.minZ - 0.11,
+  south: liftLayout.shaft.maxZ + 0.11,
+  height: 3.84
+});
+var shaft = liftLayout.shaft;
+var upperCameraBoundary = [{
+  min: { x: shaftFinish.west - 0.12, y: liftLayout.upper, z: shaftFinish.north - 0.04 },
+  max: { x: shaftFinish.east + 0.05, y: Infinity, z: shaftFinish.south + 0.04 }
+}];
+var cabinCameraBounds = [];
+var { x: carX, z: carZ, upper: carFloor, cabin } = liftLayout;
+var halfW = cabin.width / 2;
+var halfD = cabin.depth / 2;
+function carBound(x0, z0, x1, z1, bottom, top) {
+  cabinCameraBounds.push({ min: { x: x0, y: carFloor + bottom, z: z0 }, max: { x: x1, y: carFloor + top, z: z1 } });
+}
+for (const side of [-1, 1]) {
+  const z = carZ + side * (halfD - 0.1);
+  carBound(carX - halfW, z, carX + halfW, z, 0, 2.92);
+}
+carBound(carX + halfW - 0.1, carZ - halfD, carX + halfW - 0.1, carZ + halfD, 0, 2.92);
+carBound(carX - halfW, carZ - halfD, carX + halfW, carZ + halfD, 2.84, 2.92);
+function insideLiftShaft({ x, z }) {
+  return x >= shaft.minX && x <= shaft.maxX && z >= shaft.minZ && z <= shaft.maxZ;
+}
+function upperLiftCameraBounds(position) {
+  return insideLiftShaft(position) ? cabinCameraBounds : upperCameraBoundary;
+}
 
 // demos/corporate/gjh/v11/assets/expanded-layout.js
 var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
@@ -1325,11 +1356,6 @@ function isInFrontOfSeat(seat, { x, z }) {
 }
 
 // demos/corporate/gjh/v11/assets/player.js
-var shaft = liftLayout.shaft;
-var upperCameraBoundary = [{
-  min: { x: shaft.minX, y: liftLayout.upper, z: shaft.minZ },
-  max: { x: shaft.maxX, y: Infinity, z: shaft.maxZ }
-}];
 var CAMERA_LIFTS = [1.1, 2.2];
 var ZOOM_STEP = 0.2;
 var CHASE_NEAR = 0.08;
@@ -1908,8 +1934,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const start = performance.now();
     const bounded = sweepCameraClearance(physics, origin, cameraRotation, direction, cameraBall, length, capsule, body, cameraObstacles);
     cameraQueryMs += performance.now() - start;
-    if (expanded && !elevatorTravel && visual.position.y > liftLayout.upper - 0.1 && (origin.x < shaft.minX || origin.x > shaft.maxX || origin.z < shaft.minZ || origin.z > shaft.maxZ)) {
-      return limitCameraByObstacles(origin, direction, bounded, cameraBall.radius, upperCameraBoundary);
+    if (expanded && !elevatorTravel && visual.position.y > liftLayout.upper - 0.1) {
+      return limitCameraByObstacles(origin, direction, bounded, cameraBall.radius, upperLiftCameraBounds(visual.position));
     }
     return bounded;
   }
@@ -2002,14 +2028,23 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     offset.set(Math.sin(viewYaw) * cosPitch, sinPitch, Math.cos(viewYaw) * cosPitch).multiplyScalar(cameraDistance);
     const closeFraming = T.MathUtils.clamp((cameraDistance - 1) / 2, 0, 1);
     const framingWeight = closeFraming * neutralFramingWeight(renderedPitch);
-    const orbitHeight = seatView ? Math.max(0.9, framing.height * 0.7) : actionView ? 0 : framing.height * framingWeight;
+    const inUpperCar = expanded && !elevatorTravel && visual.position.y > liftLayout.upper - 0.1 && insideLiftShaft(visual.position);
+    const orbitHeight = seatView ? Math.max(0.9, framing.height * 0.7) : actionView || inUpperCar ? 0 : framing.height * framingWeight;
     const floor = elevatorTravel?.height ?? (visual.position.y > liftLayout.upper / 2 ? liftLayout.upper : 0);
     const minimumY = floor + cameraRadius + 0.04;
     let length = cameraCandidate(orbitHeight, desired, minimumY, seatView);
     anchor.copy(candidateAnchor);
     const preferredY = anchor.y;
     const floorLimited = limitCameraByFloor(preferredY, sinPitch, cameraDistance, minimumY);
-    if (length < Math.min(floorLimited - 0.05, cameraLift ? 2.4 : 2)) {
+    if (inUpperCar && length < 0.85 && cameraDistance > 1.15) {
+      offset.set(liftLayout.x - target.x, 0.48, liftLayout.z - target.z).normalize().multiplyScalar(Math.min(cameraDistance, 1.7));
+      const available = cameraCandidate(0, probe, minimumY, false);
+      if (available > length + 0.25) {
+        length = available;
+        desired.copy(probe);
+        anchor.copy(candidateAnchor);
+      }
+    } else if (!inUpperCar && length < Math.min(floorLimited - 0.05, cameraLift ? 2.4 : 2)) {
       for (const height of CAMERA_LIFTS) {
         const available = cameraCandidate(orbitHeight + height, probe, minimumY, seatView);
         if (available > length + 0.25) {
@@ -2027,7 +2062,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     safe.copy(anchor).addScaledVector(direction, allowed);
     if (allowed < 0.9 && length >= 2)
       safe.copy(desired);
-    const lookAhead = actionView ? 0 : framing.lookAhead * framingWeight;
+    const lookAhead = actionView || inUpperCar ? 0 : framing.lookAhead * framingWeight;
     sightline.copy(target);
     sightline.x -= Math.sin(viewYaw) * lookAhead;
     sightline.z -= Math.cos(viewYaw) * lookAhead;

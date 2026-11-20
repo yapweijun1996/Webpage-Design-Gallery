@@ -5,7 +5,8 @@ import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
 import {buildUpperLevel,loadUpperLevel,deckPlanters} from '../demos/corporate/gjh/v11/assets/upper-level.js';
 import {createElevatorV2} from '../demos/corporate/gjh/v11/assets/elevator-v2.js';
-import {liftLayout as L} from '../demos/corporate/gjh/v11/assets/lift-layout.js';
+import {limitCameraByObstacles} from '../demos/corporate/gjh/v11/assets/camera-controller.js';
+import {liftLayout as L,upperLiftCameraBounds,shaftFinish} from '../demos/corporate/gjh/v11/assets/lift-layout.js';
 import {createMallSurfaceAtmosphere} from '../demos/corporate/gjh/v11/assets/mall-atmosphere.js';
 import {cells,categories} from '../demos/corporate/gjh/v11/assets/upper-level-atlas.js';
 import {createSeatAnchor,createSeatPlacements} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
@@ -71,7 +72,10 @@ test('actual upper batches, gallery GLBs and tier washes fit the phone budget',a
       if(mat.map)assert(mat.map.image.width<=256&&mat.map.image.height<=256);
     });
     t.diagnostic(tier+' '+draws+' draws, '+triangles+' triangles (including the shared wash batch when visible)');
-    if(tier==='low'){assert(draws<=6);assert(triangles<=6000);}
+    // Pre-finish Low batch was 6 draws / 5,633 triangles. Higher tiers
+    // also draw the shared light wash.
+    assert(draws <= (tier==='low' ? 6+1 : 7+2));
+    if(tier==='low')assert(triangles<=Math.min(6000,5633+600));
   }
   assert.deepEqual(labels.filter(([,x])=>x===9).map(([label])=>label),['DIRECTORY','Upper Level',...categories]);
   for(const rect of [cells.mark,cells.directory,...cells.signs])assert(rect.x+rect.w<=256&&rect.y+rect.h<=256);
@@ -311,4 +315,31 @@ test('upper plan leaves the arrival circle, furniture spacing and circulation la
     }
   }
   assert(7.34+.6<L.shaft.minZ-.05 && 1.10-.6>L.shaft.maxX+.17);
+});
+
+test('shaft elevations and roof share green lacquer and leave the door clear',()=>{
+  const {group}=buildUpperLevel(T,{map:null,models:{}},{collider:()=>{},lightWash:()=>{}});
+  const panels=group.getObjectByName('Upper lift shaft lacquer panels');
+  assert.equal(panels.material.name,'Deep green shaft lacquer');
+  const {r,g,b}=panels.material.color;
+  assert(Math.min(r,g,b)>=.06 && g>r && g>b);
+  const cast=(origin,direction)=>new T.Raycaster(new T.Vector3(...origin),
+    new T.Vector3(...direction),0,3).intersectObject(panels);
+  const y=L.upper+1.5;
+  for(const [origin,direction] of [
+    [[-7,y,8.55],[1,0,0]],[[1,y,10],[-1,0,0]],
+    [[-3,y,6],[0,0,1]],[[-3,y,14],[0,0,-1]],
+    [[-7,L.upper+3.4,10],[1,0,0]],[[-3,L.upper+5,10],[0,-1,0]]
+  ])assert(cast(origin,direction).length>0);
+  assert.equal(cast([-7,y,10],[1,0,0]).length,0);
+});
+
+test('phone chase sweep stays inside the docked cabin and outside the finished walkway face',()=>{
+  const sweep=(x,z,dx,dy,dz)=>limitCameraByObstacles({x,y:L.upper+1.6,z},
+    {x:dx,y:dy,z:dz},5,.22,upperLiftCameraBounds({x,z}));
+  assert(sweep(-1.8,11.2,0,0,1)<.28);
+  assert(sweep(-1.8,11.2,0,1,0)<1.04);
+  const outside=1.0;
+  assert(outside-sweep(outside,10,-1,0,0)>=shaftFinish.east+.22);
+  assert(sweep(L.x,L.z,-1,0,0)>3,'open doorway');
 });

@@ -7,9 +7,9 @@ export const categories = ['Fashion', 'Lifestyle', 'Tech & Games', 'Food & Drink
 export const cells = {
   directory:{x:2,y:2,w:155,h:146}, mark:{x:161,y:2,w:93,h:67},
   signs:categories.map((_,i)=>({x:161,y:73+i*22,w:93,h:19})),
-  rug:{x:2,y:153,w:49,h:100},
+  lift:{x:60,y:151,w:25,h:11}, rug:{x:2,y:153,w:49,h:100},
   windows:categories.map((_,i)=>({x:60+i%2*98,y:165+Math.floor(i/2)*46,w:94,h:42})),
-  sky:{x:54,y:164,w:3,h:89}, filament:{x:88,y:151,w:8,h:6}, louvres:{x:100,y:151,w:55,h:11}
+  sky:{x:54,y:164,w:3,h:89}, brushedBrass:{x:55,y:151,w:3,h:10}, filament:{x:88,y:151,w:8,h:6}, louvres:{x:100,y:151,w:55,h:11}
 };
 
 export function paintUpperAtlas(T, mark, tier) {
@@ -36,6 +36,11 @@ export function paintUpperAtlas(T, mark, tier) {
       ctx.strokeStyle=swatch.gold;ctx.lineWidth=2;ctx.beginPath();
       ctx.moveTo(0,6);ctx.lineTo(0,-6);ctx.moveTo(-5,-1);ctx.lineTo(0,-6);ctx.lineTo(5,-1);ctx.stroke();ctx.restore();
     });
+  });
+  inCell(cells.lift,(w,h)=>{
+    ctx.fillStyle=brass;ctx.fillRect(0,0,w,h);
+    ctx.textAlign='center';ctx.fillStyle=green;ctx.font='bold 9px Arial';
+    ctx.fillText('LIFT',w/2,9);
   });
   inCell(cells.mark,(w,h)=>{
     ctx.textAlign='center';ctx.fillStyle=cream;
@@ -98,6 +103,11 @@ export function paintUpperAtlas(T, mark, tier) {
     ctx.fillStyle='#5e6353';ctx.fillRect(0,0,w,h);
     for(let x=0;x<w;x+=4){ctx.fillStyle='#857c60';ctx.fillRect(x,0,1,h);ctx.fillStyle='#434d42';ctx.fillRect(x+1,0,1,h);}
     ctx.fillStyle='#a68d64';ctx.fillRect(0,0,w,1);
+  });
+  inCell(cells.brushedBrass,(_,h)=>{
+    for(const [x,color] of ['#a47e4c','#d3b278','#b89661'].entries()){
+      ctx.fillStyle=color;ctx.fillRect(x,0,1,h);
+    }
   });
   inCell(cells.filament,(w,h)=>{ctx.fillStyle='#ffedba';ctx.fillRect(0,0,w,h);});
   return setupArtworkTexture(T,new T.CanvasTexture(canvas),tier);

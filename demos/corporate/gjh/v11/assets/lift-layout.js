@@ -16,6 +16,37 @@ export const liftLayout = freeze({
   directory:{x:-5,z:45}, desk:{x:25,z:45}, showcase:{x:-7,z:18},
   facilities:{...restroomParcel,status:'open'},
 });
+export const shaftFinish=Object.freeze({
+  west:liftLayout.shaft.minX-.27,east:liftLayout.shaft.maxX+.18,
+  north:liftLayout.shaft.minZ-.11,south:liftLayout.shaft.maxZ+.11,height:3.84
+});
+
+// An orbit above the cabin roof can still put its opaque shell between the
+// lens and the visitor. Keep deck-side chase views on the visitor's side.
+const shaft=liftLayout.shaft;
+const upperCameraBoundary=[{min:{x:shaftFinish.west-.12,y:liftLayout.upper,z:shaftFinish.north-.04},
+  max:{x:shaftFinish.east+.05,y:Infinity,z:shaftFinish.south+.04}}];
+// Inside the docked car, sweep against its inner walls and ceiling. The
+// open west end still allows the camera to follow the visitor through the door.
+const cabinCameraBounds=[];
+const {x:carX,z:carZ,upper:carFloor,cabin}=liftLayout;
+const halfW=cabin.width/2,halfD=cabin.depth/2;
+function carBound(x0,z0,x1,z1,bottom,top){
+  cabinCameraBounds.push({min:{x:x0,y:carFloor+bottom,z:z0},max:{x:x1,y:carFloor+top,z:z1}});
+}
+for(const side of [-1,1]){
+  const z=carZ+side*(halfD-.1);
+  carBound(carX-halfW,z,carX+halfW,z,0,2.92);
+}
+carBound(carX+halfW-.1,carZ-halfD,carX+halfW-.1,carZ+halfD,0,2.92);
+carBound(carX-halfW,carZ-halfD,carX+halfW,carZ+halfD,2.84,2.92);
+export function insideLiftShaft({x,z}){
+  return x>=shaft.minX && x<=shaft.maxX && z>=shaft.minZ && z<=shaft.maxZ;
+}
+export function upperLiftCameraBounds(position){
+  return insideLiftShaft(position) ? cabinCameraBounds : upperCameraBoundary;
+}
+
 // Four disjoint panels cover the source rectangle except its intersection with a cutout.
 export function cutRectangle(rect, hole) {
   const x0=Math.max(rect.minX,hole.minX),x1=Math.min(rect.maxX,hole.maxX);

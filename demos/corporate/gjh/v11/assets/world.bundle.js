@@ -2206,6 +2206,31 @@ var liftLayout = freeze({
   showcase: { x: -7, z: 18 },
   facilities: { ...restroomParcel, status: "open" }
 });
+var shaftFinish = Object.freeze({
+  west: liftLayout.shaft.minX - 0.27,
+  east: liftLayout.shaft.maxX + 0.18,
+  north: liftLayout.shaft.minZ - 0.11,
+  south: liftLayout.shaft.maxZ + 0.11,
+  height: 3.84
+});
+var shaft = liftLayout.shaft;
+var upperCameraBoundary = [{
+  min: { x: shaftFinish.west - 0.12, y: liftLayout.upper, z: shaftFinish.north - 0.04 },
+  max: { x: shaftFinish.east + 0.05, y: Infinity, z: shaftFinish.south + 0.04 }
+}];
+var cabinCameraBounds = [];
+var { x: carX, z: carZ, upper: carFloor, cabin } = liftLayout;
+var halfW = cabin.width / 2;
+var halfD = cabin.depth / 2;
+function carBound(x0, z0, x1, z1, bottom, top) {
+  cabinCameraBounds.push({ min: { x: x0, y: carFloor + bottom, z: z0 }, max: { x: x1, y: carFloor + top, z: z1 } });
+}
+for (const side of [-1, 1]) {
+  const z = carZ + side * (halfD - 0.1);
+  carBound(carX - halfW, z, carX + halfW, z, 0, 2.92);
+}
+carBound(carX + halfW - 0.1, carZ - halfD, carX + halfW - 0.1, carZ + halfD, 0, 2.92);
+carBound(carX - halfW, carZ - halfD, carX + halfW, carZ + halfD, 2.84, 2.92);
 function cutRectangle(rect, hole) {
   const x0 = Math.max(rect.minX, hole.minX), x1 = Math.min(rect.maxX, hole.maxX);
   const z0 = Math.max(rect.minZ, hole.minZ), z1 = Math.min(rect.maxZ, hole.maxZ);
@@ -3650,9 +3675,11 @@ var cells = {
   directory: { x: 2, y: 2, w: 155, h: 146 },
   mark: { x: 161, y: 2, w: 93, h: 67 },
   signs: categories.map((_, i) => ({ x: 161, y: 73 + i * 22, w: 93, h: 19 })),
+  lift: { x: 60, y: 151, w: 25, h: 11 },
   rug: { x: 2, y: 153, w: 49, h: 100 },
   windows: categories.map((_, i) => ({ x: 60 + i % 2 * 98, y: 165 + Math.floor(i / 2) * 46, w: 94, h: 42 })),
   sky: { x: 54, y: 164, w: 3, h: 89 },
+  brushedBrass: { x: 55, y: 151, w: 3, h: 10 },
   filament: { x: 88, y: 151, w: 8, h: 6 },
   louvres: { x: 100, y: 151, w: 55, h: 11 }
 };
@@ -3703,6 +3730,14 @@ function paintUpperAtlas(T, mark, tier) {
       ctx.stroke();
       ctx.restore();
     });
+  });
+  inCell(cells.lift, (w, h) => {
+    ctx.fillStyle = brass;
+    ctx.fillRect(0, 0, w, h);
+    ctx.textAlign = "center";
+    ctx.fillStyle = green;
+    ctx.font = "bold 9px Arial";
+    ctx.fillText("LIFT", w / 2, 9);
   });
   inCell(cells.mark, (w, h) => {
     ctx.textAlign = "center";
@@ -3813,6 +3848,12 @@ function paintUpperAtlas(T, mark, tier) {
     ctx.fillStyle = "#a68d64";
     ctx.fillRect(0, 0, w, 1);
   });
+  inCell(cells.brushedBrass, (_, h) => {
+    for (const [x, color] of ["#a47e4c", "#d3b278", "#b89661"].entries()) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, 0, 1, h);
+    }
+  });
   inCell(cells.filament, (w, h) => {
     ctx.fillStyle = "#ffedba";
     ctx.fillRect(0, 0, w, h);
@@ -3849,6 +3890,7 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   group.name = "Premium Open Atrium";
   group.userData.deckLod = true;
   const floor = liftLayout.upper, gold = [], emit = [], solids = [], prints = [], glass = [];
+  const viewUpdates = [];
   const unit = new T.BoxGeometry, plane = new T.PlaneGeometry, transform = new T.Object3D;
   function matrix(x2, y, z2, w, h, d, yaw2 = 0, pitch = 0) {
     transform.position.set(x2, floor + y, z2);
@@ -3892,9 +3934,9 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     lightWash(x2, floor + 0.018, z2, alongX ? w : 0.64, alongX ? 0.64 : d, 0, -Math.PI / 2);
   }
   function frame(rect, door) {
-    const { minX, maxX, minZ, maxZ } = rect, cx = (minX + maxX) / 2, cz2 = (minZ + maxZ) / 2;
+    const { minX, maxX, minZ, maxZ } = rect, cx2 = (minX + maxX) / 2, cz2 = (minZ + maxZ) / 2;
     for (const z2 of [minZ, maxZ])
-      guard(cx, z2, maxX - minX, 0.1);
+      guard(cx2, z2, maxX - minX, 0.1);
     guard(maxX, cz2, 0.1, maxZ - minZ);
     if (!door)
       guard(minX, cz2, 0.1, maxZ - minZ);
@@ -3903,7 +3945,6 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
         guard(minX, (a + b) / 2, 0.1, b - a);
   }
   frame(liftLayout.slab);
-  frame(liftLayout.shaft, liftLayout.threshold);
   for (const { x: x2, z: z2, width: width2, depth } of thresholdReturns()) {
     guard(x2, z2, width2, depth);
     collider(x2, floor + 0.55, z2, width2, 1.1, depth);
@@ -3954,12 +3995,12 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     return benchProfile(width2, centre + thickness / 2, 4 * spacing + slatDepth);
   }
   const [benchX, benchY, benchZ] = [1.52, 1.1, 1.55];
-  for (const { finish, x: x2, z: z2, yaw: yaw2 } of atriumLayout.upperSeats) {
-    if (finish === "oak" && furniture("bench", [x2, z2], benchX, benchY, benchZ, null, yaw2)) {
+  for (const { finish: finish2, x: x2, z: z2, yaw: yaw2 } of atriumLayout.upperSeats) {
+    if (finish2 === "oak" && furniture("bench", [x2, z2], benchX, benchY, benchZ, null, yaw2)) {
       const [width2, height2, depth] = models.bench.dimensions_m;
-      seatProfiles.set(finish, benchProfile(width2 * benchX, furnitureOffset + height2 * benchY, depth * benchZ, -0.04));
-    } else if (finish === "oak" || finish === "slats")
-      seatProfiles.set(finish, slats(x2, z2, yaw2));
+      seatProfiles.set(finish2, benchProfile(width2 * benchX, furnitureOffset + height2 * benchY, depth * benchZ, -0.04));
+    } else if (finish2 === "oak" || finish2 === "slats")
+      seatProfiles.set(finish2, slats(x2, z2, yaw2));
   }
   furniture("table", table, 0.78, 0.81, 0.92, (x2, z2) => {
     block(12159064, x2, 0.64, z2, 0.86, 0.09, 0.55);
@@ -3991,6 +4032,49 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   for (const y of [0.43, 2.14])
     brass(east + 0.025, y, cz, 0.035, 0.032, 3.09);
   print(cells.mark, east + 0.025, 1.32, cz, 2.06, 1.48, 1, -Math.PI / 2);
+  const { west, east: eastFace, north, south, height: capHeight } = shaftFinish;
+  const cx = (west + eastFace) / 2, widthX = eastFace - west, widthZ = south - north;
+  const lacquer = [];
+  function elevation(x2, z2, width2, yaw2, bottom = 0, top = capHeight) {
+    const nx = Math.sin(yaw2), nz = Math.cos(yaw2);
+    const pose = (y, out, w, h, d) => [x2 + nx * out, y, z2 + nz * out, w, h, d, yaw2];
+    lacquer.push(plane.clone().applyMatrix4(matrix(...pose((bottom + top) / 2, 0, width2, top - bottom, 1))));
+    if (bottom === 0) {
+      brass(...pose(0.095, 0.012, width2, 0.19, 0.026));
+      print(cells.brushedBrass, ...pose(0.11, 0.027, width2, 0.115, 1));
+    }
+    if (top === capHeight) {
+      brass(...pose(capHeight - 0.045, 0.016, width2, 0.09, 0.045));
+      print(cells.brushedBrass, ...pose(capHeight - 0.045, 0.041, width2, 0.05, 1));
+      led(...pose(capHeight - 0.118, 0.011, width2, 0.037, 0.026));
+    }
+    const bays = Math.round(width2 / 0.8);
+    for (let i = 1;i < bays; i++) {
+      const along = width2 * (i / bays - 0.5);
+      print(cells.brushedBrass, x2 + nz * along + nx * 0.026, (bottom + top) / 2, z2 - nx * along + nz * 0.026, 0.018, top - bottom, 1, yaw2);
+      brass(x2 + nz * along + nx * 0.012, (bottom + top) / 2, z2 - nx * along + nz * 0.012, 0.026, top - bottom, 0.024, yaw2);
+    }
+  }
+  elevation(cx, south, widthX, 0);
+  elevation(cx, north, widthX, Math.PI);
+  elevation(eastFace, cz, widthZ, Math.PI / 2);
+  for (const [a, b] of [[north, liftLayout.threshold.minZ], [liftLayout.threshold.maxZ, south]])
+    elevation(west, (a + b) / 2, b - a, -Math.PI / 2);
+  elevation(west, cz, liftLayout.threshold.maxZ - liftLayout.threshold.minZ, -Math.PI / 2, 2.93);
+  lacquer.push(plane.clone().applyMatrix4(matrix(cx, capHeight, cz, widthX, widthZ, 1, 0, -Math.PI / 2)));
+  brass(cx, 1.89, south + 0.033, 1.56, 1.49, 0.032);
+  print(cells.directory, cx, 1.89, south + 0.052, 1.48, 1.4, 1);
+  brass(west - 0.048, 3.35, cz, 1.24, 0.42, 0.034, -Math.PI / 2);
+  print(cells.lift, west - 0.069, 3.35, cz, 1.17, 0.36, 1, -Math.PI / 2);
+  const finish = new T.MeshStandardMaterial({
+    color: 4616538,
+    roughness: 0.32,
+    metalness: 0.14,
+    emissive: 3364420,
+    emissiveIntensity: 0.46
+  });
+  finish.name = "Deep green shaft lacquer";
+  merged("Upper lift shaft lacquer panels", lacquer, finish, group);
   const { x, z, width, height, yaw } = directory;
   block(6901045, x, 1.16, z, width + 0.1, height + 0.15, 0.15, yaw);
   print(cells.directory, x + 0.083, 1.16, z, width, height, 1, yaw);
@@ -4028,7 +4112,6 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     print(cells.sky, liftLayout.x + radius * Math.sin(a), 23, liftLayout.z + radius * Math.cos(a), 2 * radius * Math.tan(Math.PI / segments) + 0.04, 60, 1, a + Math.PI);
   }
   print(cells.sky, liftLayout.x, 52.95, liftLayout.z, 2.05 * radius, 2.05 * radius, 1, 0, Math.PI / 2);
-  const viewUpdates = [];
   function merged(name, parts, material, parent) {
     let mesh;
     if (material.transparent) {
@@ -9572,9 +9655,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       if (!upperLevel)
         return;
       const { group, panes, cabinMark } = upperLevel;
-      const cabin = scene.getObjectByName("Expanded physical lift cabin");
-      if (cabinMark.parent !== cabin)
-        cabin?.add(cabinMark);
+      const cabin2 = scene.getObjectByName("Expanded physical lift cabin");
+      if (cabinMark.parent !== cabin2)
+        cabin2?.add(cabinMark);
       if (!warmModel)
         return;
       landingLights ??= new T.Scene;
