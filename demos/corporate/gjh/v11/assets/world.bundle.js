@@ -6465,14 +6465,7 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       box(x, h, z + 0.23, w, 0.085, 0.5, oak);
       box(x, h - 0.04, decalHeight(z + 0.48) - 0.0175, w - 0.05, 0.035, 0.035, shopLamp);
       const featured = n === 4 && x === 0 || h === 2.07 && x < 0 && [5, 6, 7, 8, 10, 11, 12, 17].includes(n);
-      if (featured && n === 11) {
-        const pair = [10106426, 11881270];
-        for (const [i, colour] of pair.entries())
-          can(x + (i === 0 ? -0.59 : 0.59), h + 0.043, z + 0.29, colour, 0.064, 0.106);
-      } else if (featured && n === 12) {
-        box(x - 0.55, h + 0.167, z + 0.32, 0.113, 0.248, 0.088, white);
-        can(x + 0.55, h + 0.043, z + 0.32, cream, 0.046, 0.155);
-      } else if (!featured)
+      if (!featured)
         packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind2, c);
     }
   }
@@ -7984,12 +7977,12 @@ var roomDetails = {
   },
   S11: {
     file: "s11-deli-details.glb",
-    bytes: 75704,
+    bytes: 107652,
     roomDetail: true
   },
   S12: {
     file: "s12-herbarium-details.glb",
-    bytes: 33300,
+    bytes: 106468,
     roomDetail: true
   },
   S13: {

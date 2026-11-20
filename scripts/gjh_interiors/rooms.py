@@ -7,12 +7,14 @@ from california_mexico_tins import SAMPLES as CALIFORNIA_MEXICO_SAMPLES, add_cal
 from california_mexico_tins import SHELF_DEPTH as CALIFORNIA_MEXICO_SHELF_DEPTH
 from california_mexico_tins import SHELF_TOP as CALIFORNIA_MEXICO_SHELF_TOP
 from gulong_tins import SAMPLES as GULONG_SAMPLES, SHELF_TOP as GULONG_SHELF_TOP, add_gulong_tin
+from hormel_chili_tins import add_hormel_chili_tins
 from mili_mock_duck import add_mili_mock_duck
 from pzh_carton import add_pzh_carton
 from skippy_jars import SAMPLES as SKIPPY_SAMPLES
 from skippy_jars import SHELF_DEPTH as SKIPPY_SHELF_DEPTH, SHELF_TOP as SKIPPY_SHELF_TOP, add_skippy_jar
 from spam_tins import SAMPLES as SPAM_SAMPLES
 from spam_tins import SHELF_DEPTH as SPAM_SHELF_DEPTH, SHELF_TOP as SPAM_SHELF_TOP, add_spam_tin
+from zeria_packs import add_zeria_packs
 
 GOLD, BONE, INK = "d7a95b", "f6ecd2", "203545"
 MINT, RED, SEA = "70cdb9", "c34339", "357675"
@@ -290,6 +292,7 @@ def coast(r,_):
 
 
 def deli(r,_):
+    r.hormel_chili_tin_bands = add_hormel_chili_tins(r)
     # Dress the existing packing bench with a chilled, brass-framed service rack.
     x,y,z=-.56,1.46,-.57
     r.box(x,y,z,2.17,.115,.52,"985841")
@@ -315,6 +318,7 @@ def deli(r,_):
 
 
 def herbarium(r,_):
+    r.zeria_bottle_bands = add_zeria_packs(r)
     for i,(x,y,z) in enumerate(((-2.92,1.09,-1.72),(1.28,.085,-3.72),(1.72,.085,-3.78))):
         r.lathe(x,y,z,.18,.33,((.73,0),(1,.93),(1,1)),["d3c5aa",BONE],8)
         for j in range(7):
