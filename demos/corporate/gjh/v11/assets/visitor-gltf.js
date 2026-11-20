@@ -1,4 +1,5 @@
 import {fetchStartupAsset} from './startup-asset-pack.js';
+import {parseWarmGLTF} from './gltf-warmup.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
 export function disposeVisitorScene(scene) {
@@ -18,7 +19,7 @@ export function disposeVisitorScene(scene) {
   }
 }
 
-export async function loadVisitorGLTF(url) {
+export async function loadVisitorGLTF(url, waitForSlice) {
   const controller = new AbortController();
   let timer, abandoned = false;
   const timeout = new Promise((_, reject) => {
@@ -33,7 +34,7 @@ export async function loadVisitorGLTF(url) {
       const response = await fetchStartupAsset(url, {signal: controller.signal});
       if (!response.ok) throw new Error('Visitor model unavailable');
       const buffer = await response.arrayBuffer();
-      const gltf = await new GLTFLoader().parseAsync(buffer, new URL('.', url).href);
+      const gltf = await parseWarmGLTF(new GLTFLoader(), buffer, new URL('.', url).href, waitForSlice, controller.signal);
       if (abandoned) disposeVisitorScene(gltf.scene);
       return gltf;
     };

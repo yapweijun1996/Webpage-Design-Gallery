@@ -215,7 +215,7 @@ export function cloneNpcRig(source) {
 }
 
 export async function loadNpcSystem(T, options) {
-  const source = await loadVisitorGLTF(new URL('./gjh-mall-visitor-v2.glb', import.meta.url));
+  const source = await loadVisitorGLTF(new URL('./gjh-mall-visitor-v2.glb', import.meta.url), options.waitForSlice);
   let customization;
   const disposeSource = () => {
     customization?.dispose();
@@ -230,7 +230,7 @@ export async function loadNpcSystem(T, options) {
   }
 }
 
-export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,tram=false,mobile=false,tier='balanced',highResolution=false,enabled=true,drawCallBudget=200,disposeSource,prepareModel,onModularFallback,onAvatarEvent}) {
+export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,tram=false,mobile=false,tier='balanced',highResolution=false,enabled=true,drawCallBudget=200,disposeSource,prepareModel,waitForSlice,onModularFallback,onAvatarEvent}) {
   let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, hasPlayer=false;
   let admission=nextNpcAdmission();
   const admissionOptions={}, lastPlayer={x:0,z:0}, nextPosition={x:0,z:0};
@@ -294,7 +294,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       reportModularFallback();
     });
   }
-  async function loadBoy(loader=signal=>loadTripoNpc(signal,undefined,highResolution)) {
+  async function loadBoy(loader=signal=>loadTripoNpc(signal,undefined,highResolution,waitForSlice)) {
     if (!limitForSettings() || boyLoad) return boyLoad;
     boyController=new AbortController();
     boyLoading=true;

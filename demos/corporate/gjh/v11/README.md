@@ -130,7 +130,7 @@ The ambient crowd includes the V2 chibi fallback, an optional Tripo boy and modu
 
 The Walk link starts Rapier and a gzip-compressed startup pack in parallel. The pack contains the first-view models, a compact visitor atlas and shop-sign artwork. The loader reports received WASM and pack payload bytes while it builds the minimum scene. Once the first visible frame renders with physics, **Enter 3D mall now** skips the remaining warm-up. Waiting keeps the six-second GPU warm-up cap. The store directory stays available throughout.
 
-Interiors continue to install nearest-first using the existing sliced GPU uploads. Gallery fixtures and the portrait upgrade start after entry. The cart loads when requested, the tram loads near its station, and upper lounge models load on lift selection. The PWA install keeps its small reconnect shell and caches verified wardrobe files on demand.
+Interiors continue to install nearest-first. Shop GLB parsing, visitor LOD parsing and GPU uploads use the sliced warm-up queue. The compact visitor is parsed under the loader. Gallery fixtures and the portrait upgrade start after entry. The cart loads when requested, the tram loads near its station, and upper lounge models load on lift selection. The PWA install keeps its small reconnect shell and caches verified wardrobe files on demand.
 
 Edit the entry template and first-view manifest in `templates/gallery/gjh-v11-index.html` and `data/gjh-first-view.json`. Regenerate with `python scripts/build_gallery.py`. To refresh entry artwork from the authored sources, run `python scripts/build_gjh_first_view_art.py` with Pillow and WebP support before building.
 

@@ -175,7 +175,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     const eyeHand = createFirstPersonHand(T, visual, undefined, prepareModel);
     const transfer = createProductTransfer(T, avatar, wrist, visual, grip, eyeHand);
     lod = createVisitorLOD(T, placement, {
-      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareMaterial, prepareModel, entry:portrait?.entry
+      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareMaterial, prepareModel, entry:portrait?.entry, waitForSlice:portrait?.waitForSlice
     });
 
     const resolveLocomotion = createLocomotionContinuity();

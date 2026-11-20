@@ -17,7 +17,7 @@ BUN_VERSION = '1.3.11'
 JOBS = (
     {
         'entry': BASE / 'script.js', 'output': BASE / 'script.bundle.js',
-        'external': ('*world.js', '*player.js', '*elevator-v2.js', '*mall-themes.js',
+        'external': ('*startup-physics.js', '*startup-asset-pack.js', '*world.js', '*player.js', '*elevator-v2.js', '*mall-themes.js',
                      '*dom-projection.js', '*target-guidance.js', '*shelf-focus.js',
                      '*visitor-v2-product-ui.js', '*visitor-v2-controls.js', '*original-tin.js', '*npcs.js',
                      '*shop-interactions.js',

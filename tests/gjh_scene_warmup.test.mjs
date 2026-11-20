@@ -1,5 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {setImmediate as nextTurn} from 'node:timers/promises';
+import {GLTFLoader} from '../demos/corporate/gjh/v11/vendor/GLTFLoader.js';
+import {parseWarmGLTF} from '../demos/corporate/gjh/v11/assets/gltf-warmup.js';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {createWarmReport, createWarmRunner, createTierQueue, mallProbePoses, prepareEntryFrame, prepareScene} from '../demos/corporate/gjh/v11/assets/scene-warmup.js';
 import {createModelWarmup} from '../demos/corporate/gjh/v11/assets/model-warmup.js';
@@ -15,6 +19,39 @@ function clock() {
     advance(ms) { time += ms; if (timer && timer.at <= time) timer.callback(); }
   };
 }
+
+test('warm parsing dispatches each shipped shop mesh and visitor animation in separate slices', async () => {
+  const root = new URL('../demos/corporate/gjh/v11/assets/', import.meta.url);
+  const loader = new GLTFLoader();
+  for (const [file, dependency] of [
+    ['interiors/s01-crescent-header-detailed.glb', 'meshes'],
+    ['chibi-crowd/motion-clips.glb', 'animations'],
+  ]) {
+    const bytes = await readFile(new URL(file, root));
+    const json = JSON.parse(bytes.subarray(20, 20 + bytes.readUInt32LE(12)));
+    const buffer = Uint8Array.from(bytes).buffer;
+    const pending = [];
+    const parsed = parseWarmGLTF(loader, buffer, '', () => new Promise(resolve => pending.push(resolve)));
+    assert.equal(pending.length, 1, 'the parse itself waits for a slice');
+    pending.shift()();
+    await nextTurn();
+    assert.equal(pending.length, json[dependency].length);
+    while (pending.length) {
+      pending.shift()();
+      await nextTurn();
+    }
+    const model = await parsed;
+    const direct = await loader.parseAsync(buffer, '');
+    assert.deepEqual(model.animations.map(clip => clip.name), direct.animations.map(clip => clip.name));
+    const meshes = result => {
+      const names = [];
+      result.scene.traverse(node => { if (node.isMesh) names.push(node.name); });
+      return names;
+    };
+    assert.deepEqual(meshes(model), meshes(direct));
+    assert.equal(loader.pluginCallbacks.length, new GLTFLoader().pluginCallbacks.length);
+  }
+});
 
 test('early entry draws once, waits for completion and releases a stalled fence at 300 ms', () => {
   for (const outcome of ['complete','timeout','cancelled','context-loss']) {

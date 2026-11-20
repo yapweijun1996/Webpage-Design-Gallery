@@ -34,7 +34,6 @@ import {pzhCartonX, pzhCartonStandingZ} from './window-studios.js';
 import {createInteriorKit} from './interiors/runtime.js';
 import {interiorFloorColour,interiorStores,worldInteriorBox,worldInteriorPoint} from './interiors/config.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
-import {releaseStartupAssetPack} from './startup-asset-pack.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {gogoStoolSeat} from './interiors/gogo-seats.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
@@ -129,8 +128,7 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
 }
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
-export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low', phone = false, detailsEnabled = () => true) {
-  try {
+export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low', phone = false, detailsEnabled = () => true, waitForSlice) {
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
   // Local textures share the HTML packshots' request mode, avoiding duplicate image loads.
@@ -1178,7 +1176,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       collider(x,liftLayout.upper+.25,z,.68,.5,.68);
     }
     activeDeck=false;
-    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility,artworkTier,detailsEnabled);
+    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility,artworkTier,detailsEnabled,waitForSlice);
     interiorModels=interiors;
     for(const {x,y,z,width,height,depth} of interiors.collisionBoxes) {
       collider(x,y,z,width,height,depth);
@@ -1192,7 +1190,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }
     shopLodUpdates.push(interiors.update);
     interiorKit = createInteriorKit(T, scene, {
-      assetBase:new URL('.',import.meta.url), packshot:textures.get('new-moon-nz-425g-front.jpg'), artworkTier,
+      assetBase:new URL('.',import.meta.url), packshot:textures.get('new-moon-nz-425g-front.jpg'), artworkTier, waitForSlice,
       prepareModel, registerCollider({center:[x,y,z],size:[w,h,d],yaw}) {
         // The camera sweep already uses these oriented Rapier boxes.
         const box = physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
@@ -1607,7 +1605,4 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, prepareUpperFurniture, get upperWarmStatus(){return upperWarmStatus;}, furnishings: Object.freeze({...furnishingState,...additions?.state}), productAssets: Object.freeze(worldProductAssets)};
-  } finally {
-    releaseStartupAssetPack();
-  }
 }

@@ -7,11 +7,11 @@ import {createLazyCart} from './push-cart.js';
 import {createSeatContact} from './seat-contact.js';
 
 // Skinned v2 adapter; v1 remains available through the explicit visitor=v1 URL.
-export async function createCharacterV2(T, createLocomotionContinuity, prepareModel, entry) {
+export async function createCharacterV2(T, createLocomotionContinuity, prepareModel, entry, waitForSlice) {
   const model = 'gjh-mall-visitor-v2';
   const gltf = await new GLTFLoader().loadAsync(new URL(`./${model}.glb`, import.meta.url).href);
   const avatar = gltf.scene;
-  const lod=createVisitorLOD(T,avatar,{prepareModel,entry});
+  const lod=createVisitorLOD(T,avatar,{prepareModel,entry,waitForSlice});
   const customization = createVisitorCustomization(avatar);
   const bounds = new T.Box3().setFromObject(avatar);
   const nativeHeight = bounds.max.y - bounds.min.y;

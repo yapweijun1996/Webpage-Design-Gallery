@@ -33,7 +33,8 @@ const stubs = {
     }
   `,
   '/assets/world.bundle.js': `
-    export async function createWorld(T) {
+    export async function createWorld(T, R, physics, expanded, prepareModel, artworkTier, phone, detailsEnabled) {
+      if (detailsEnabled()) throw Error('Shop detail requests must wait for entry');
       return {scene: new T.Scene(), interactables: [], doors: [], seats: [],
         cameraObstacles: [], shelves: [], shopExhibits: {}, applyMallTheme: () => true,
         updateShopLods() {}, updateSigns() {}, prepareUpperLevel() {},
@@ -41,7 +42,12 @@ const stubs = {
     }
   `,
   '/assets/player.bundle.js': `
-    export async function createPlayer(T) {
+    import {fetchStartupAsset} from './startup-asset-pack.js';
+    export async function createPlayer(T, R, physics, scene, canvas, contact, plane, seats, obstacles, expanded, prepareModel, portrait) {
+      if (!portrait.compactEntry || portrait.detailsEnabled()) throw Error('Expected the compact entry avatar');
+      const response = await fetchStartupAsset(new URL('./gjh-tripo-entry.glb', import.meta.url));
+      const bytes = await response.arrayBuffer();
+      if (new TextDecoder().decode(bytes.slice(0, 4)) !== 'glTF') throw Error('Expected a packed visitor model');
       return {camera: new T.PerspectiveCamera(),
         state: {x: 0, y: 0, z: 0, character: {cart: {}, collection: {}}},
         teleport() {}, setBagCount() {}, setPaused() {}, resizeCamera() {}, updateCamera() {},

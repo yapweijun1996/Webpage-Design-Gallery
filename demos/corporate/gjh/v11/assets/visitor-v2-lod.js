@@ -10,7 +10,7 @@ export function projectedVisitorLevel(heightPx, previous) {
 
 /** Both levels share the live skeleton and mixer. V2 keeps its customized material. */
 export function createVisitorLOD(T,avatar,{
-  url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url), swapMaterial=false, prepareMaterial, prepareModel, entry
+  url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url), swapMaterial=false, prepareMaterial, prepareModel, entry, waitForSlice
 }={}) {
   const parts=[],position=new T.Vector3();
   avatar.traverse(mesh=>{
@@ -27,7 +27,7 @@ export function createVisitorLOD(T,avatar,{
   async function load(){
     attempts++;
     try{
-      const gltf=await loadVisitorGLTF(url);
+      const gltf=await loadVisitorGLTF(url, waitForSlice);
       if(disposed){disposeVisitorScene(gltf.scene);return;}
       try{
         for(const part of parts){

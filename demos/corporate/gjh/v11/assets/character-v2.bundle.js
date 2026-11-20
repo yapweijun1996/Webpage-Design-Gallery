@@ -119,6 +119,29 @@ async function fetchStartupAsset(url, options = {}) {
   return new Response(pack.bytes.slice(pack.start + offset, pack.start + offset + length), { status: 200, headers: { "Content-Type": mime[name.split(".").pop()] } });
 }
 
+// demos/corporate/gjh/v11/assets/gltf-warmup.js
+async function parseWarmGLTF(loader, buffer, path, waitForSlice, signal) {
+  if (!waitForSlice)
+    return loader.parseAsync(buffer, path);
+  await waitForSlice(signal);
+  const split = (parser) => {
+    for (const method of ["loadMesh", "loadAnimation"]) {
+      const load = parser[method].bind(parser);
+      parser[method] = async (index) => {
+        await waitForSlice(signal);
+        return load(index);
+      };
+    }
+    return { name: "GJH_warm_parse" };
+  };
+  loader.register(split);
+  try {
+    return loader.parseAsync(buffer, path);
+  } finally {
+    loader.unregister(split);
+  }
+}
+
 // demos/corporate/gjh/v11/assets/visitor-gltf.js
 import { GLTFLoader } from "../vendor/GLTFLoader.js";
 function disposeVisitorScene(scene) {
@@ -143,7 +166,7 @@ function disposeVisitorScene(scene) {
       resource.source.data?.close?.();
   }
 }
-async function loadVisitorGLTF(url) {
+async function loadVisitorGLTF(url, waitForSlice) {
   const controller2 = new AbortController;
   let timer, abandoned = false;
   const timeout = new Promise((_, reject) => {
@@ -159,7 +182,7 @@ async function loadVisitorGLTF(url) {
       if (!response.ok)
         throw new Error("Visitor model unavailable");
       const buffer = await response.arrayBuffer();
-      const gltf = await new GLTFLoader().parseAsync(buffer, new URL(".", url).href);
+      const gltf = await parseWarmGLTF(new GLTFLoader, buffer, new URL(".", url).href, waitForSlice, controller2.signal);
       if (abandoned)
         disposeVisitorScene(gltf.scene);
       return gltf;
@@ -254,7 +277,8 @@ function createVisitorLOD(T, avatar, {
   swapMaterial = false,
   prepareMaterial,
   prepareModel,
-  entry
+  entry,
+  waitForSlice
 } = {}) {
   const parts = [], position = new T.Vector3;
   avatar.traverse((mesh) => {
@@ -280,7 +304,7 @@ function createVisitorLOD(T, avatar, {
   async function load() {
     attempts++;
     try {
-      const gltf = await loadVisitorGLTF(url);
+      const gltf = await loadVisitorGLTF(url, waitForSlice);
       if (disposed) {
         disposeVisitorScene(gltf.scene);
         return;
@@ -975,11 +999,11 @@ function createSeatContact(T, visual, rig, { prefix = "", tripo = false } = {}) 
 }
 
 // demos/corporate/gjh/v11/assets/character-v2.js
-async function createCharacterV2(T, createLocomotionContinuity, prepareModel, entry) {
+async function createCharacterV2(T, createLocomotionContinuity, prepareModel, entry, waitForSlice) {
   const model = "gjh-mall-visitor-v2";
   const gltf = await new GLTFLoader3().loadAsync(new URL(`./${model}.glb`, import.meta.url).href);
   const avatar = gltf.scene;
-  const lod = createVisitorLOD(T, avatar, { prepareModel, entry });
+  const lod = createVisitorLOD(T, avatar, { prepareModel, entry, waitForSlice });
   const customization = createVisitorCustomization(avatar);
   const bounds = new T.Box3().setFromObject(avatar);
   const nativeHeight = bounds.max.y - bounds.min.y;

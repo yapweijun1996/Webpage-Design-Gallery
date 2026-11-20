@@ -13,6 +13,14 @@
     "vendor/rapier.mjs"
   ],
   "criticalFiles": [
+    "assets/dom-projection.js",
+    "assets/gogo-brand-cover.webp",
+    "assets/mili-brand-cover.webp",
+    "assets/new-moon-brand-cover.webp",
+    "assets/products.js",
+    "assets/shelf-focus.js",
+    "assets/target-guidance.js",
+    "assets/visitor-v2-product-ui.js",
     "assets/startup-assets.pack",
     "vendor/rapier_bg.wasm",
     "../../../../assets/icons.svg",
@@ -77,11 +85,8 @@
   ],
   "walkImagePreloads": [
     "assets/concourse-marble.webp",
-    "assets/gogo-brand-cover.webp",
     "assets/gogo-logo.jpg",
-    "assets/mili-brand-cover.webp",
     "assets/mili-logo.jpg",
-    "assets/new-moon-brand-cover.webp",
     "assets/new-moon-logo.svg",
     "assets/new-moon-au-425g-front.webp",
     "assets/new-moon-mx-454g-front.webp",

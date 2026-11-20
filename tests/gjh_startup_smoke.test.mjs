@@ -110,10 +110,17 @@ async function runStartup() {
   location.hash = '#experience';
   window.dispatchEvent(new Event('hashchange'));
   assert.match(document.getElementById('loader-count').textContent, /^0\.0 of \d+\.\d MB$/);
+  const enterNow = document.getElementById('loader-enter-now');
+  const overlay = document.getElementById('app-loader');
   for (let turn = 0; turn < 1000 && !window.mallLoader.ready; turn++) {
     const state = window.mallLoader.snapshot();
     assert.equal(state.failed, false);
-    if (state.stage === 'warm') document.getElementById('loader-enter-now').dispatchEvent(new Event('click'));
+    if (state.stage === 'warm' && !window.mallLoader.skipSignal.aborted) {
+      assert.equal(enterNow.hidden, false);
+      assert.equal(overlay.hidden, false);
+      assert.equal(window.__sceneReady, true);
+      enterNow.dispatchEvent(new Event('click'));
+    }
     const pending = [...frames.keys()];
     for (const id of pending) {
       const callback = frames.get(id);
@@ -124,6 +131,10 @@ async function runStartup() {
   }
   const state = window.mallLoader.snapshot();
   assert.equal(state.ready, true, state.message);
+  assert.equal(window.mallLoader.skipSignal.reason, 'enter-now');
+  assert.equal(enterNow.hidden, true);
+  await delay(5);
+  assert.equal(overlay.hidden, true);
   assert.equal(window.__sceneReady, true);
   assert.equal(window.__mall?.ready, true);
   assert.equal(state.message, 'The mall is ready.');

@@ -4,6 +4,7 @@ import {GLTFLoader, mergeGeometries} from '../shop-sign-vendor.js';
 import {setupArtworkTexture, setupMaterialArtwork} from '../artwork-textures.js';
 import {decalHeight} from '../surface-decals.js';
 import {interiorStores} from './config.js';
+import {parseWarmGLTF} from '../gltf-warmup.js';
 
 // Room details were baked against fixed floor planes. Rebase just their
 // horizontal inlays when the layered floor finish sits above that datum.
@@ -82,7 +83,7 @@ async function readMember(assetBase, asset, signal) {
   }
 }
 
-export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(), artworkTier = () => 'low') {
+export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(), artworkTier = () => 'low', waitForSlice) {
   let atlas;
   const shared = new Map(), lifetime = new AbortController();
   async function loadAtlas() {
@@ -151,7 +152,7 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
 
   async function load(asset, signal, build) {
     const buffer = await readMember(assetBase,asset,signal);
-    const {scene} = await loader.parseAsync(buffer,new URL('interiors/',assetBase).href);
+    const {scene} = await parseWarmGLTF(loader,buffer,new URL('interiors/',assetBase).href,waitForSlice,signal);
     try {
       if (signal?.aborted) throw new DOMException('Interior asset cancelled','AbortError');
       const store = interiorStores[asset.file.slice(0,3).toUpperCase()];

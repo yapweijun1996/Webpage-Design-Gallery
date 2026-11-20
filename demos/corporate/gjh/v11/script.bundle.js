@@ -7,6 +7,10 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/script.js
+import { startPhysics } from "./assets/startup-physics.js";
+import { releaseStartupAssetPack, startStartupPack } from "./assets/startup-asset-pack.js";
+
 // demos/corporate/gjh/v11/assets/restroom-layout.js
 var restroomParcel = Object.freeze({ minX: 21, maxX: 29, minZ: 6, maxZ: 14 });
 var restroomArrival = Object.freeze({ x: 31.4, z: 10, yaw: Math.PI / 2 });
@@ -6501,10 +6505,11 @@ var contextWaiter;
 var graphicsStatus = "initializing";
 var losses = 0;
 var validations = 0;
-var markFirstFrame;
-var firstFrame = new Promise((resolve) => {
-  markFirstFrame = resolve;
+var markEntered;
+var entry = new Promise((resolve) => {
+  markEntered = resolve;
 });
+var detailsEnabled = () => enteredAt !== null;
 var renderWidth = 0;
 var renderHeight = 0;
 var viewportWidth = innerWidth;
@@ -6605,8 +6610,8 @@ var shopActionsLoad;
 var shopActionsAttemptZone;
 var shopActionsTime;
 var testWalk;
+var cartWarming = false;
 var lastPreloadUpdate = -Infinity;
-var initialPreloadStarted = null;
 var preloadSettled = !expanded;
 function hideGuidance() {
   guidance?.hide();
@@ -7256,7 +7261,7 @@ function updateModelPreload(now) {
   const visitorLod = player.state.character.lod;
   const lodStatus = visitorLod ? visitorLod.available ? "loaded" : visitorLod.failed ? "fallback" : "pending" : "loaded";
   const assets = models.concat(Object.values(state.sceneModels), furnishings.map((item) => item.status), lodStatus);
-  if (elevator?.kit)
+  if (elevator?.kit?.tier)
     assets.push(elevator.kit.status);
   const done = assets.filter((status) => status === "loaded" || status === "fallback").length;
   const failed = assets.filter((status) => status === "fallback").length;
@@ -7264,13 +7269,7 @@ function updateModelPreload(now) {
   preloadSettled = ready2;
   node.hidden = false;
   const zh = document.documentElement.lang?.startsWith("zh");
-  node.textContent = ready2 ? failed ? zh ? "商店模型准备完成，部分模型不可用。" : "Shop models prepared; some assets are unavailable." : zh ? "商店模型已准备完成，首次显示仍可能需要一些时间。" : "Shop models prepared. First views may still take time to render." : zh ? `正在准备商店模型（${done}/${assets.length}）。您可等待或立即进入。` : `Preparing shop models (${done}/${assets.length}). You can wait or enter now.`;
-  if (initialPreloadStarted !== null && !window.mallLoader?.snapshot().ready) {
-    if (ready2 || now - initialPreloadStarted >= 30000) {
-      initialPreloadStarted = null;
-    } else
-      window.mallLoader?.prepare(node.textContent);
-  }
+  node.textContent = ready2 ? failed ? zh ? "商店模型准备完成，部分模型不可用。" : "Shop models prepared; some assets are unavailable." : zh ? "商店模型已准备完成，首次显示仍可能需要一些时间。" : "Shop models prepared. First views may still take time to render." : zh ? `正在准备商店模型（${done}/${assets.length}）。` : `Preparing shop models (${done}/${assets.length}).`;
 }
 function tierWork(profile, report, startup = false) {
   const screenPixel = () => !startupOverlay.hidden || !manual && !modes.paused() ? 1 : 0;
@@ -7330,10 +7329,6 @@ function cancelEntryPresentation() {
 function advanceStartupWarm() {
   const loader = window.mallLoader;
   if (!loader || loader.ready || contextLost || restorePending || pageEnded)
-    return false;
-  if (loader.skipSignal.aborted)
-    initialPreloadStarted = null;
-  if (initialPreloadStarted !== null)
     return false;
   if (loader.snapshot().stage === "frame")
     loader.complete("frame");
@@ -7430,6 +7425,7 @@ function animate(now) {
   const entered = sceneEntered();
   if (entered && enteredAt === null) {
     enteredAt = now;
+    markEntered();
     activateSceneAudio();
   }
   quality.observeRefresh(now, entered && !windowBlurred);
@@ -7467,11 +7463,11 @@ function animate(now) {
   if (!slotMs)
     return;
   const live = advancing && !modes.paused() || modes.current() === "shelf";
-  const uploadMs = live || tierQueue?.pending || renderRequested && (forceRender || !modes.paused()) ? warmModels(player.state) : 0;
+  const uploadMs = cartWarming || live || tierQueue?.pending || renderRequested && (forceRender || !modes.paused()) ? warmModels(player.state) : 0;
   let pose, callbackMs = 0;
-  if (live || renderRequested) {
+  if (live || renderRequested || cartWarming) {
     const renderStart = performance.now();
-    const force = forceRender;
+    const force = forceRender || cartWarming;
     renderRequested = forceRender = false;
     if (advancing && !modes.paused() && !shelfFocus?.open) {
       player.updateCamera(Math.min(0.1, slotMs / 1000), false, fixedClock.alpha);
@@ -7530,7 +7526,7 @@ function fallback(message, terminal = true) {
     cancelEntryPresentation();
     world?.interiors?.dispose();
     modelWarmup?.dispose();
-    markFirstFrame();
+    releaseStartupAssetPack();
   }
   pausePerformance();
   hideGuidance();
@@ -7546,6 +7542,8 @@ function fallback(message, terminal = true) {
 function rideElevator(options) {
   if (!ready || !elevator)
     return { reason: "The elevator is unavailable right now. Please try again." };
+  world.prepareUpperFurniture();
+  elevator.kit?.select(quality.state?.tier ?? "low");
   manual = false;
   player.setInput(null);
   const result = player.useElevator(elevator, floorChime, options);
@@ -7794,7 +7792,8 @@ function applyProfile(profile) {
   profile = quality.apply(profile);
   syncAudioPolicy(profile.tier);
   themeStage?.setTier?.(profile.tier);
-  elevator?.kit?.select(profile.tier);
+  if (elevator?.kit?.tier)
+    elevator.kit.select(profile.tier);
   player?.setTramTier?.(profile.tier);
   npcs?.setQuality({ tier: profile.tier, mobile: renderWidth < 1000, enabled: new URLSearchParams(location.search).get("npcs") !== "off" });
   if (!contextLost)
@@ -7844,7 +7843,6 @@ function validateRestoration() {
     graphicsStatus = "available";
     if (window.mallLoader?.ready)
       scheduleTier();
-    markFirstFrame();
     window.__sceneFailed = false;
     window.__sceneReady = true;
     mallTheme?.resume();
@@ -7855,6 +7853,9 @@ function validateRestoration() {
   } catch {
     fallback("The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.");
   }
+}
+function waitForParseSlice(signal) {
+  return modelWarmup.enqueueSweep(function* () {}, { priority: () => -50, signal });
 }
 async function installNpcs(T, R, prepareModel, highResolution, source) {
   if (pageEnded || fatal)
@@ -7878,6 +7879,7 @@ async function installNpcs(T, R, prepareModel, highResolution, source) {
       tier: quality.state?.tier || "balanced",
       enabled,
       prepareModel,
+      waitForSlice: waitForParseSlice,
       highResolution,
       onModularFallback() {
         document.getElementById("npc-appearance-status").hidden = false;
@@ -7889,16 +7891,20 @@ async function installNpcs(T, R, prepareModel, highResolution, source) {
     else {
       npcs = system;
       npcs.setQuality({ mobile: innerWidth < 1000, tier: quality.state?.tier || "balanced" });
-      firstFrame.then(() => {
-        if (pageEnded || fatal)
-          return;
-        system.enableModular();
-        return system.loadBoy();
-      });
+      system.enableModular();
+      system.loadBoy();
     }
   } catch {}
 }
 async function initialize() {
+  const packTask = startStartupPack();
+  const physicsTask = Promise.all([import("./vendor/rapier.mjs"), startPhysics()]);
+  const worldTask = import("./assets/world.bundle.js");
+  const playerTask = import("./assets/player.bundle.js");
+  const elevatorTask = liftEnabled ? import("./assets/elevator-v2.js") : null;
+  const themeTask = expanded ? import("./assets/mall-themes.js") : null;
+  for (const task of [physicsTask, worldTask, playerTask, elevatorTask, themeTask])
+    task?.catch(() => {});
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   const attributes = { antialias: !expanded, alpha: false, powerPreference: "high-performance" };
   const preferredContext = quality.androidChrome ? canvas.getContext("webgl2", { ...attributes, failIfMajorPerformanceCaveat: true }) : null;
@@ -7925,8 +7931,9 @@ async function initialize() {
   renderer.shadowMap.type = T.PCFSoftShadowMap;
   let R;
   try {
-    R = (await import("./vendor/rapier.mjs")).default;
-    await R.init();
+    const [rapier, bytes] = await physicsTask;
+    R = rapier.default;
+    await R.init(bytes);
   } catch {
     fallback("The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.");
     return;
@@ -7942,8 +7949,9 @@ async function initialize() {
     lighting: (lights) => warmShadows() ? atmosphere?.lightVariants(lights) : undefined,
     ...options
   });
-  const { createWorld } = await import("./assets/world.bundle.js");
-  world = await createWorld(T, R, physics, expanded, warmModel, () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === "phone");
+  const { createWorld } = await worldTask;
+  await packTask;
+  world = await createWorld(T, R, physics, expanded, warmModel, () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === "phone", detailsEnabled, waitForParseSlice);
   if (expanded)
     renderer.toneMappingExposure = world.defaultExposure;
   ui.setBrandStories(world.shopExhibits);
@@ -7978,7 +7986,7 @@ async function initialize() {
         }
         return pack.promise;
       };
-      const { createMallThemeCoordinator } = await loadOptionalThemeModule(() => import("./assets/mall-themes.js"));
+      const { createMallThemeCoordinator } = await loadOptionalThemeModule(() => themeTask);
       let storage;
       try {
         storage = window.localStorage;
@@ -8045,7 +8053,7 @@ async function initialize() {
     ui.configureMallTheme(mallTheme);
   }
   if (liftEnabled) {
-    const { createElevatorV2 } = await import("./assets/elevator-v2.js");
+    const { createElevatorV2 } = await elevatorTask;
     elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel);
     world.prepareUpperLevel();
     if (mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {
@@ -8064,6 +8072,12 @@ async function initialize() {
   const portraitProfile = quality.resolve(innerWidth);
   const portrait = {
     highResolution: usesPortraitAtlas(quality.deviceClass, portraitProfile.tier),
+    compactEntry: true,
+    entry,
+    detailsEnabled,
+    canUpgrade: () => !pageEnded && !fatal,
+    prepareBitmap: modelWarmup.prepareBitmap,
+    waitForSlice: waitForParseSlice,
     anisotropy: renderer.capabilities.getMaxAnisotropy(),
     async preload(mesh) {
       let frame2;
@@ -8085,12 +8099,14 @@ async function initialize() {
       }
     }
   };
-  const { createPlayer } = await import("./assets/player.bundle.js");
+  const { createPlayer } = await playerTask;
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);
-  if (player.npcSource)
-    await installNpcs(T, R, prepareAvatar, portrait.highResolution, player.npcSource);
-  else if (player.state.character.model === "gjh-tripo-visitor")
-    firstFrame.then(() => installNpcs(T, R, prepareAvatar, portrait.highResolution));
+  releaseStartupAssetPack();
+  if (player.npcSource || player.state.character.model === "gjh-tripo-visitor")
+    entry.then(() => {
+      if (!pageEnded && !fatal)
+        return installNpcs(T, R, prepareAvatar, portrait.highResolution, player.npcSource);
+    });
   const { createDOMProjection } = await import("./assets/dom-projection.js");
   const projection = createDOMProjection(T, canvas);
   const { createTargetGuidance } = await import("./assets/target-guidance.js");
@@ -8156,8 +8172,20 @@ async function initialize() {
     }, requestFloorRide);
   ui.setSeats(world.seats);
   player.setPaused(() => modes.paused());
-  ui.onCart(() => ({ ...player.state.character.cart, available: ready && player.state.character.cart.available, seated: player.state.seated, heldProduct: player.state.character.physicalProduct?.id, elevatorTravel: player.state.elevatorTravel, capability: player.cartCapability() }), (value) => {
+  ui.onCart(() => ({ ...player.state.character.cart, available: ready && (player.state.character.cart.available || player.state.character.cart.requestable), seated: player.state.seated, heldProduct: player.state.character.physicalProduct?.id, elevatorTravel: player.state.elevatorTravel, capability: player.cartCapability() }), async (value) => {
     if (!ready)
+      return false;
+    if (value && !player.cartCapability().allowed)
+      return false;
+    if (value) {
+      cartWarming = true;
+      try {
+        await player.prepareCart?.();
+      } finally {
+        cartWarming = false;
+      }
+    }
+    if (pageEnded || fatal)
       return false;
     const ok = player.setCart(value);
     updateHUD();
@@ -8220,11 +8248,7 @@ async function initialize() {
     return;
   if (!renderer.info.render.calls)
     throw new Error("First scene frame unavailable");
-  markFirstFrame();
-  if (expanded && !window.mallLoader?.snapshot().dismissed) {
-    initialPreloadStarted = performance.now();
-    window.mallLoader?.prepare("Preparing shop models. You can enter now or browse the directory.");
-  }
+  window.mallLoader?.complete("frame");
   window.__sceneReady = true;
   ui.offerFirstGuide();
   resume();
@@ -8241,6 +8265,7 @@ window.addEventListener("pagehide", (event) => {
     return;
   }
   clearTimeout(themeMidnightTimer);
+  releaseStartupAssetPack();
   cancelEntryPresentation();
   pageEnded = true;
   elevator?.kit?.dispose();

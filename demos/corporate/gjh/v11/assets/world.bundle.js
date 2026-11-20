@@ -7256,6 +7256,31 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
 import { GLTFLoader as GLTFLoader4 } from "../vendor/GLTFLoader.js";
+
+// demos/corporate/gjh/v11/assets/gltf-warmup.js
+async function parseWarmGLTF(loader, buffer, path, waitForSlice, signal) {
+  if (!waitForSlice)
+    return loader.parseAsync(buffer, path);
+  await waitForSlice(signal);
+  const split = (parser) => {
+    for (const method of ["loadMesh", "loadAnimation"]) {
+      const load2 = parser[method].bind(parser);
+      parser[method] = async (index) => {
+        await waitForSlice(signal);
+        return load2(index);
+      };
+    }
+    return { name: "GJH_warm_parse" };
+  };
+  loader.register(split);
+  try {
+    return loader.parseAsync(buffer, path);
+  } finally {
+    loader.unregister(split);
+  }
+}
+
+// demos/corporate/gjh/v11/assets/expanded-interiors.js
 var displayFiles = {
   4: ["pharmacy-counter"],
   5: ["pharmacy-counter"],
@@ -7286,7 +7311,7 @@ function displayPlacements(number, heroX, heroZ) {
   const scale = number === 17 ? 1.5 : number === 13 || number === 15 || number === 16 ? 1.3 : 0.7;
   return [[heroX, height, heroZ, scale]];
 }
-async function createExpandedInteriors(T, expandedLayout2, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => "low", detailsEnabled = () => true) {
+async function createExpandedInteriors(T, expandedLayout2, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => "low", detailsEnabled = () => true, waitForSlice) {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
   const material = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.65 });
   const woodFinishes = new Set([11633494, 6701359, 6898732, 9132600, 11700828, 12950889, 9325877, 6703151, 6309172, 6899253, 11175012]);
@@ -7330,7 +7355,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
         const response = await fetch(url, { signal: controller.signal });
         if (!response.ok)
           throw new Error(`Model request failed: ${response.status}`);
-        const gltf = await gltfLoader.parseAsync(await response.arrayBuffer(), new URL(".", url).href);
+        const gltf = await parseWarmGLTF(gltfLoader, await response.arrayBuffer(), new URL(".", url).href, waitForSlice, controller.signal);
         if (abandoned) {
           gltf.scene.traverse((node) => {
             if (!node.isMesh)
@@ -8256,7 +8281,7 @@ async function readMember(assetBase2, asset, signal) {
     signal?.removeEventListener("abort", abort);
   }
 }
-function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3, artworkTier = () => "low") {
+function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3, artworkTier = () => "low", waitForSlice) {
   let atlas;
   const shared = new Map, lifetime = new AbortController;
   async function loadAtlas() {
@@ -8335,7 +8360,7 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3, artw
   }
   async function load2(asset, signal, build) {
     const buffer = await readMember(assetBase2, asset, signal);
-    const { scene } = await loader.parseAsync(buffer, new URL("interiors/", assetBase2).href);
+    const { scene } = await parseWarmGLTF(loader, buffer, new URL("interiors/", assetBase2).href, waitForSlice, signal);
     try {
       if (signal?.aborted)
         throw new DOMException("Interior asset cancelled", "AbortError");
@@ -8427,7 +8452,8 @@ function createInteriorKit(T, scene, {
   prepareModel,
   registerCollider,
   artworkTier = () => "low",
-  loadModel = createInteriorModelLoader(T, assetBase2, undefined, artworkTier),
+  waitForSlice,
+  loadModel = createInteriorModelLoader(T, assetBase2, undefined, artworkTier, waitForSlice),
   reducedMotion = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)"),
   now = () => performance.now()
 }) {
@@ -8798,9 +8824,6 @@ function createInteriorKit(T, scene, {
     }
   };
 }
-
-// demos/corporate/gjh/v11/assets/world.js
-import { releaseStartupAssetPack } from "./startup-asset-pack.js";
 
 // demos/corporate/gjh/v11/assets/interiors/gogo-seats.js
 function gogoStoolSeat(frame, stool, collider, modelPlaced) {
@@ -9379,1677 +9402,1695 @@ function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient
   fog?.color.set(l.fog);
   return true;
 }
-async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => "low", phone = false, detailsEnabled = () => true) {
-  try {
-    let ceilingBounds = function(x, y, z, sx, sy, sz) {
-      ceilingObstacles.push({ min: { x: x - sx / 2, y: y - sy / 2, z: z - sz / 2 }, max: { x: x + sx / 2, y: y + sy / 2, z: z + sz / 2 } });
-    }, ceilingBox = function(material, x, y, z, sx, sy, sz, hole = liftLayout.shaft) {
-      const bounds = { minX: x - sx / 2, maxX: x + sx / 2, minZ: z - sz / 2, maxZ: z + sz / 2 };
-      const panels = expandedLift && hole ? cutRectangle(bounds, hole) : [bounds];
-      for (const r of panels) {
-        const panel = [(r.minX + r.maxX) / 2, y, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, sy, r.maxZ - r.minZ];
-        box(material, ...panel);
-        ceilingBounds(...panel);
-      }
-      if (expanded && (material === "shellCeiling" || material === "cream")) {
-        for (const rect of panels)
-          bakedCeilings.push({ ...rect, y: y - sy / 2 - 0.003 });
-      }
-      return panels;
-    }, refreshInstanceColours = function() {
-      for (const refresh of colourBatches)
-        refresh();
-    }, queueShopUpload = function(slot2, ...meshes) {
-      if (!expanded || !prepareModel)
-        return;
-      if (!shopUploads.has(slot2))
-        shopUploads.set(slot2, []);
-      shopUploads.get(slot2).push(...meshes);
-    }, solid = function(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ", rz = 0) {
-      const source = materials2[material];
-      const roleFinish = finishForRole.get(material);
-      const plainType = type === "box" || type === "cylinder" && roleFinish !== "woodGrain";
-      const plain = expanded && plainType && source.isMeshStandardMaterial && !source.transparent && !source.map && !source.emissive.getHex() && !["paving", "shellFloor", "courtStone"].includes(material);
-      const finish2 = plain ? "plain" : type === "publicLeaf" ? "canopy" : roleFinish;
-      const shared = expanded && (!source.transparent && !material.endsWith("Backdrop") || material === "contact" || material === "lightPool");
-      const shopSlot = shared ? null : activeShopSlot;
-      const key2 = `${type}:${finish2 || material}${shopSlot === null ? "" : `:shop-${shopSlot}`}${activeDeck ? ":deck" : ""}`;
-      if (!batches.has(key2))
-        batches.set(key2, {
-          type,
-          finish: finish2,
-          geometry: geometry[type],
-          material: plain ? plainFinish : finish2 ? finishMaterials[finish2] : source,
-          transforms: [],
-          shopSlot,
-          deckLod: activeDeck,
-          colours: finish2 ? [] : null,
-          surfaces: plain ? [] : null,
-          slots: shared ? [] : null
-        });
-      const batch = batches.get(key2);
-      batch.slots?.push(activeShopSlot);
-      if (finish2)
-        batch.colours.push(source.color);
-      if (plain) {
-        const surface = type === "cylinder" && roleFinish === "matte" ? finishMaterials.matte : source;
-        batch.surfaces.push(surface.roughness, surface.metalness);
-      }
-      position.set(x, y, z);
-      scale.set(sx, sy, sz);
-      euler.set(rx, ry, rz, order);
-      quaternion.setFromEuler(euler);
-      matrix.compose(position, quaternion, scale);
-      batch.transforms.push(matrix.clone());
-    }, collider = function(x, y, z, sx, sy, sz) {
-      return physics.createCollider(R.ColliderDesc.cuboid(sx / 2, sy / 2, sz / 2).setTranslation(x, y, z));
-    }, box = function(m, x, y, z, sx, sy, sz, collision = false) {
-      solid("box", m, x, y, z, sx, sy, sz);
-      if (collision)
-        collider(x, y, z, sx, sy, sz);
-    }, art = function(name, x, y, z, width, ry = 0) {
-      const texture = textures.get(name), height = width * texture.image.height / texture.image.width;
-      const material = decalMaterial(filterWallArtwork(T, mat(16777215, {
-        map: texture,
-        emissiveMap: texture,
-        emissive: 16777215,
-        emissiveIntensity: 0.2
-      })), -1);
-      const mesh = new T.Mesh(plane, material);
-      mesh.name = name;
-      mesh.position.set(x + decalClearance * Math.sin(ry), y, z + decalClearance * Math.cos(ry));
-      mesh.rotation.y = ry;
-      mesh.scale.set(width, height, 1);
-      scene.add(mesh);
-      mesh.userData.shopDecal = true;
-      if (activeShopSlot !== null)
-        queueShopUpload(activeShopSlot, mesh);
-      return tagShopLod(mesh);
-    }, sign = function(text, x, y, z, width, height = 0.4, framed = false, fontSize = 42) {
-      const canvas2 = document.createElement("canvas");
-      canvas2.width = 1024;
-      canvas2.height = 128;
-      const context = canvas2.getContext("2d");
-      if (framed) {
-        context.fillStyle = "#17372e";
-        context.fillRect(0, 0, 1024, 128);
-        context.strokeStyle = "#b59b62";
-        context.lineWidth = 3;
-        context.strokeRect(8, 8, 1008, 112);
-      }
-      context.fillStyle = "#e9d6a9";
-      context.font = `500 ${fontSize}px Georgia`;
-      context.textAlign = "center";
-      context.textBaseline = "middle";
-      context.fillText(text, 512, 64);
-      const texture = setupArtworkTexture(T, new T.CanvasTexture(canvas2), artworkTier());
-      const mesh = placeDecal(new T.Mesh(plane, decalMaterial(new T.MeshBasicMaterial({ map: texture, transparent: true }))));
-      mesh.name = text;
-      mesh.position.set(x, y, decalHeight(z));
-      mesh.scale.set(width, height, 1);
-      scene.add(mesh);
-      mesh.userData.shopDecal = true;
-      if (activeShopSlot !== null)
-        queueShopUpload(activeShopSlot, mesh);
-      return tagShopLod(mesh);
-    }, shadow = function(x, z, w, d) {
-      solid("plane", "contact", x, 0.018, z, w, d, 1, 0, -Math.PI / 2);
-    }, lightPool = function(x, y, z, width, height, ry = 0, rx = -Math.PI / 2) {
-      solid("plane", "lightPool", x, y, z, width, height, 1, ry, rx);
-    }, plant = function(x, z, tall = 1) {
-      if (!furnishings.place("planter", x, z, tall, 1, 0, null, activeShopSlot)) {
-        cylinder("pot", x, 0.32, z, 0.42, 0.64);
-        cylinder("brass", x, 0.64, z, 0.43, 0.045);
-        cylinder("brass", x, 0.055, z, 0.4, 0.075);
-        cylinder("wood", x, 0.656, z, 0.37, 0.016);
-        for (let i = 0;i < 8; i++) {
-          const a = i * Math.PI / 4;
-          solid("box", "brass", x + Math.cos(a) * 0.416, 0.32, z + Math.sin(a) * 0.416, 0.018, 0.44, 0.018, a);
-        }
-        cylinder("wood", x, 0.9 * tall, z, 0.04, 1.2 * tall);
-        for (let i = 0;i < 5; i++) {
-          const a = i * 2.4;
-          sphere(i % 2 ? "leaf" : "foliage", x + Math.cos(a) * 0.26, (1.25 + i * 0.12) * tall, z + Math.sin(a) * 0.26, 0.36, 0.6 * tall, 0.34);
-        }
-      }
-      if (expanded)
-        lightPool(x, 0.091, z, 1.9, 1.9);
-      collider(x, 0.4, z, 0.85, 0.8, 0.85);
-      shadow(x, z, 2.1, 2.1);
-    }, bench = function(placement) {
-      const { x, z, facing, group } = placement;
-      const modelPlaced = furnishings.place("bench", x, z, benchScale, facing, 0, placement.pose.angle, activeShopSlot);
-      const seatCollider = collider(x, 0.3 * benchScale, z, placement.clearance.colliderWidth, 0.4 * benchScale, placement.clearance.colliderDepth);
-      if (placement.pose.angle % Math.PI) {
-        const halfYaw = placement.pose.angle / 2;
-        seatCollider.setRotation({ x: 0, y: Math.sin(halfYaw), z: 0, w: Math.cos(halfYaw) });
-      }
-      const footY = group === "atrium" ? expanded ? 0.016 : 0 : expanded ? 0.0245 : 0.015;
-      seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : groundBenchFallback, benchScale, footY));
-      const angle = placement.pose.angle, c = Math.cos(angle), s = Math.sin(angle);
-      const benchBox = (m, bx, by, bz, sx, sy, sz) => {
-        const dx = bx - x, dz = (bz - z) * facing;
-        solid("box", m, x + c * dx + s * dz, by * benchScale, z - s * dx + c * dz, sx, sy * benchScale, sz, angle);
-      };
-      if (!modelPlaced) {
-        const { top, front } = groundBenchFallback;
-        benchBox("wood", x, 0.3, z, 2.5, 0.4, 0.85);
-        benchBox("seat", x, top - 0.09, z, 2.55, 0.18, -2 * front);
-        benchBox("seat", x, 0.94, z + facing * 0.35, 2.55, 0.7, 0.18);
-        benchBox("brass", x, 0.47, z - facing * 0.451, 2.52, 0.035, 0.025);
-        benchBox("oak", x, 1.285, z + facing * 0.35, 2.58, 0.065, 0.21);
-        for (const dx of [-0.42, 0.42]) {
-          benchBox("wood", x + dx, 0.653, z, 0.018, 0.006, 0.82);
-          benchBox("wood", x + dx, 0.96, z + facing * 0.253, 0.018, 0.52, 0.008);
-        }
-        for (const dx of [-1.15, 1.15]) {
-          benchBox("brass", x + dx, 0.68, z, 0.08, 0.5, 0.9);
-          benchBox("oak", x + dx, 0.955, z, 0.13, 0.065, 0.92);
-        }
-      }
-      shadow(x, z, 3.6, 2);
-      lightPool(x, 0.051, z - facing * 0.6, 3.6, 2.4);
-    }, pendant = function(x, z, y = 4.7) {
-      cylinder("brass", x, (6 + y) / 2, z, 0.022, 6 - y);
-      cylinder("brass", x, y, z, 0.62, 0.12);
-      cylinder("glow", x, y - 0.08, z, 0.54, 0.035);
-      cylinder("dark", x, y + 0.08, z, 0.42, 0.065);
-      if (expanded && activeShopSlot === null)
-        lightWash(x, 0.054, z, 3.1, 3.1, 0, -Math.PI / 2, true);
-      else
-        lightPool(x, 0.052, z, 4.6, 4.6);
-    }, shopBackdrop = function(zone) {
-      const panel = document.createElement("canvas");
-      panel.width = 1024;
-      panel.height = 576;
-      const ctx = panel.getContext("2d");
-      function rectangle(color, x, y, width, height) {
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, width, height);
-      }
-      rectangle(zone === "mili" ? "#a77c53" : "#eadcc3", 0, 0, 1024, 576);
-      if (zone === "gogo") {
-        ctx.fillStyle = "#466858";
-        ctx.beginPath();
-        ctx.roundRect(220, 98, 584, 450, [112, 112, 0, 0]);
-        ctx.fill();
-      }
-      for (const x of [24, 782]) {
-        ctx.fillStyle = "#735239";
-        ctx.beginPath();
-        ctx.roundRect(x, 84, 218, 398, zone === "mili" ? 4 : [65, 65, 0, 0]);
-        ctx.fill();
-        for (let shelf = 0;shelf < 3; shelf++) {
-          const y = 114 + shelf * 107;
-          const wash = ctx.createLinearGradient(0, y, 0, y + 90);
-          wash.addColorStop(0, "#edcb87");
-          wash.addColorStop(0.25, "#ad8250");
-          wash.addColorStop(1, "#78583e");
-          rectangle(wash, x + 13, y + 15, 192, 84);
-          for (let k = 0;k < 6; k++) {
-            const ox = x + 22 + 29 * k, h = 20 + (k + shelf) % 3 * 7;
-            ctx.fillStyle = ["#b7894c", "#e1cdaa", "#927754"][k % 3];
-            ctx.beginPath();
-            ctx.roundRect(ox, y + 94 - h, 17, h, 4);
-            ctx.fill();
-            rectangle("#e4cc99", ox + 2, y + 91 - h, 13, 4);
-          }
-          rectangle("#cfac77", x + 9, y + 98, 200, 5);
-        }
-      }
-      const map = setupArtworkTexture(T, new T.CanvasTexture(panel), artworkTier());
-      return mat(16777215, { map, roughness: 0.88 });
-    }, updateFrames = function({ frustum }) {
-      let count = 0, changed = false;
-      for (const group of doorFrames) {
-        matrix.makeTranslation(group.position.x, group.position.y, group.position.z);
-        if (!frustum.intersectsBox(frameBox.copy(doorFrameGeometry.boundingBox).applyMatrix4(matrix)))
-          continue;
-        if (previousDoorX[count] !== group.position.x)
-          changed = true;
-        previousDoorX[count] = group.position.x;
-        frames.setMatrixAt(count++, matrix);
-      }
-      if (!changed && count === frameCount)
-        return;
-      frameCount = frames.count = count;
-      frames.instanceMatrix.needsUpdate = true;
-      frames.computeBoundingSphere();
-    }, updateSigns = function(camera, canvas2, reducedMotion) {
-      signage?.update(camera, reducedMotion, performance.now());
-      const frame = canvas2.getBoundingClientRect();
-      for (const label of roomSigns) {
-        const mesh = label.mesh;
-        label.left = label.top = Infinity;
-        label.right = label.bottom = -Infinity;
-        for (const dx of [-0.5, 0.5])
-          for (const dy of [-0.5, 0.5]) {
-            signPoint.set(mesh.position.x + dx * mesh.scale.x, mesh.position.y + dy * mesh.scale.y, mesh.position.z).project(camera);
-            const x = frame.left + (signPoint.x + 1) * frame.width / 2;
-            const y = frame.top + (1 - signPoint.y) * frame.height / 2;
-            label.left = Math.min(label.left, x);
-            label.right = Math.max(label.right, x);
-            label.top = Math.min(label.top, y);
-            label.bottom = Math.max(label.bottom, y);
-          }
-        let overlaps = false;
-        if (frame.width < 600)
-          for (const hud of signHUD) {
-            const rect = hud.getBoundingClientRect();
-            if (label.left < rect.right + 8 && label.right > rect.left - 8 && label.top < rect.bottom + 8 && label.bottom > rect.top - 8)
-              overlaps = true;
-          }
-        mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
-      }
-    }, drawWithPlayerContact = function(shadow2, draw2) {
-      if (!contactBatch || !shadow2.visible)
-        return draw2();
-      const { count, boundingSphere, instanceMatrix } = contactBatch;
-      shadow2.updateMatrix();
-      contactBatch.setMatrixAt(count, shadow2.matrix);
-      instanceMatrix.clearUpdateRanges();
-      instanceMatrix.addUpdateRange(0, (count + 1) * 16);
-      instanceMatrix.needsUpdate = true;
-      geometry.plane.boundingSphere ?? geometry.plane.computeBoundingSphere();
-      savedContactBounds.copy(boundingSphere);
-      boundingSphere.union(contactBounds.copy(geometry.plane.boundingSphere).applyMatrix4(shadow2.matrix));
-      contactBatch.count++;
-      shadow2.visible = false;
+async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => "low", phone = false, detailsEnabled = () => true, waitForSlice) {
+  let shellState = null;
+  const expandedLift = expanded && new URLSearchParams(location.search).get("visitor") !== "v1";
+  const textures = new Map, loader = new T.TextureLoader().setCrossOrigin(undefined);
+  const names = ["new-moon-logo.svg", "mili-logo.jpg", "gogo-logo.jpg", "new-moon-brand-cover.jpg", "mili-brand-cover.jpg", "gogo-brand-cover.jpg", ...["nz-425g", "au-425g", "sa-425g", "mx-454g"].map((id) => `new-moon-${id}-front.jpg`)];
+  const texturesTask = Promise.all(names.map(async (name) => {
+    let texture;
+    for (let attempt = 0;attempt < 3; attempt++) {
       try {
-        return draw2();
-      } finally {
-        shadow2.visible = true;
-        contactBatch.count = count;
-        boundingSphere.copy(savedContactBounds);
+        const url = new URL(name.replace(/(?:-brand-cover|-front)\.jpg$/, (match) => match.replace(".jpg", ".webp")), import.meta.url);
+        if (attempt)
+          url.searchParams.set("retry", String(attempt));
+        texture = await loader.loadAsync(url.href);
+        break;
+      } catch (error) {
+        if (attempt === 2)
+          throw new Error(`Mall texture failed to load: ${name}`, { cause: error });
+        await new Promise((resolve) => setTimeout(resolve, attempt ? 800 : 200));
       }
-    }, updateShopLods = function(visitor, shadows = true, tier, camera, height, focus, lightWash2, reducedMotion = false) {
-      productDisplay?.setShadows(shadows);
-      if (!expanded) {
-        if (camera) {
-          view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-          updateFrames(view);
-        }
-        return;
-      }
-      interactables.physicsProps?.setTier(tier);
-      materials2.glass.forceSinglePass = tier === "low";
-      shopVisibility.setOverheadCulling(tier === "low");
-      bakedLighting.setTier(tier);
-      skylightDapple?.update(tier, reducedMotion);
-      if (shadows && tier === "detailed")
-        playerShadow.update(visitor);
-      if (surfaceAtmosphere.setTier(tier, lightWash2) && mappedPaving)
-        mappedPaving.roughness = materials2.paving.roughness;
-      uploadVisitor = visitor;
-      if (camera) {
-        view.camera = camera;
-        view.pixelScale = camera.projectionMatrix.elements[5] * height / 2;
-        view.shadows = shadows;
-        view.focus = focus;
-        eye.setFromMatrixPosition(camera.matrixWorld);
-        shopVisibility.setEye(eye);
-        view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
-      }
-      restrooms?.updateDraw(camera && view.frustum);
-      productDisplay?.updateShopLods(visitor, camera && view);
-      interiorKit.update(visitor, camera && view);
-      const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
-      view.deckVisible = deckVisible;
-      view.low = tier === "low";
-      for (const [slot2, bay] of shopBays) {
-        const x = (bay.minX + bay.maxX) / 2;
-        const z = slot2 <= 3 ? Math.min(bay.maxZ, Math.max(bay.minZ, visitor.z)) : (bay.minZ + bay.maxZ) / 2;
-        shopNear.set(slot2, Math.hypot(visitor.x - x, visitor.y, visitor.z - z) < shopDistance);
-      }
-      for (const mesh of shopLodMeshes) {
-        const slot2 = mesh.userData.shopSlot;
-        if (!shopNear.has(slot2))
-          continue;
-        let near = shopNear.get(slot2);
-        if (near && camera && mesh.userData.shopDecal) {
-          mesh.geometry.boundingBox ?? mesh.geometry.computeBoundingBox();
-          mesh.updateWorldMatrix(true, false);
-          near = !shopVisibility.occluded(slot2, decalBounds.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld));
-        }
-        mesh.visible = mesh.userData.shopLodNear = near;
-        if (mesh.visible && !deckVisible)
-          furnishings.loadShopDetails(slot2);
-      }
-      if (!deckLodMeshes) {
-        deckLodMeshes = [];
-        scene.traverse((mesh) => {
-          if (mesh.userData.deckLod)
-            deckLodMeshes.push(mesh);
-        });
-      }
-      for (const mesh of deckLodMeshes)
-        mesh.visible = deckVisible;
-      for (const mesh of standalonePools)
-        mesh.visible = tier !== "low" && (!mesh.userData.deckLod || deckVisible);
-      for (const update of shopLodUpdates)
-        update(visitor, camera && view);
-      additions?.update(tier, camera ? view : { deckVisible }, shopNear);
-      furnishings.updateView(camera ? view : { deckVisible }, shopNear);
-      if (camera) {
-        for (const update of viewUpdates)
-          update(view);
-        surfaceAtmosphere.updateView(view);
-        amenities.updateView(view);
-        upperLevel?.updateView(view.frustum);
-      }
-    }, prepareUpperLevel = function() {
-      if (!upperLevel)
-        return;
-      const { group, panes, cabinMark } = upperLevel;
-      const cabin2 = scene.getObjectByName("Expanded physical lift cabin");
-      if (cabinMark.parent !== cabin2)
-        cabin2?.add(cabinMark);
-      if (!warmModel)
-        return;
-      landingLights ??= new T.Scene;
-      landingLights.children = [ambient, key];
-      landingLights.fog = scene.fog;
-      landingLights.environment = scene.environment;
-      landingLights.environmentIntensity = scene.environmentIntensity;
-      if (upperWarmStatus === "pending" || upperWarmStatus === "ready")
-        return;
-      upperWarmStatus = "pending";
-      warmModel([group, panes, cabinMark], landingLights, {
-        late: false,
-        priority: () => -100,
-        linear: () => false
-      }).then(() => {
-        upperWarmStatus = "ready";
-      }, (error) => {
-        upperWarmStatus = "interrupted";
-        console.warn("Upper level GPU warmup interrupted", error);
+    }
+    textures.set(name, setupArtworkTexture(T, texture, artworkTier()));
+  }));
+  const productsTask = import("./products.js");
+  productsTask.catch(() => {});
+  const furnishingTask = createFurnishings(T, true, expanded, detailsEnabled);
+  const shellTask = expanded ? null : createShell(T);
+  const ceilingObstacles = [], shopObstacles = [];
+  const bakedFloors = [], bakedCeilings = [];
+  function ceilingBounds(x, y, z, sx, sy, sz) {
+    ceilingObstacles.push({ min: { x: x - sx / 2, y: y - sy / 2, z: z - sz / 2 }, max: { x: x + sx / 2, y: y + sy / 2, z: z + sz / 2 } });
+  }
+  function ceilingBox(material, x, y, z, sx, sy, sz, hole = liftLayout.shaft) {
+    const bounds = { minX: x - sx / 2, maxX: x + sx / 2, minZ: z - sz / 2, maxZ: z + sz / 2 };
+    const panels = expandedLift && hole ? cutRectangle(bounds, hole) : [bounds];
+    for (const r of panels) {
+      const panel = [(r.minX + r.maxX) / 2, y, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, sy, r.maxZ - r.minZ];
+      box(material, ...panel);
+      ceilingBounds(...panel);
+    }
+    if (expanded && (material === "shellCeiling" || material === "cream")) {
+      for (const rect of panels)
+        bakedCeilings.push({ ...rect, y: y - sy / 2 - 0.003 });
+    }
+    return panels;
+  }
+  const seats = [], seatPlacements = createSeatPlacements(expanded);
+  const scene = new T.Scene;
+  const prepareModel = warmModel && ((model, options2) => warmModel(model, scene, options2));
+  scene.background = new T.Color(expanded ? 8493979 : 1650226);
+  scene.fog = new T.Fog(expanded ? EVERYDAY.lighting.fog : 12037532, expanded ? 75 : 40, expanded ? 155 : 100);
+  const ambient = new T.HemisphereLight(16772832, 7166779, 1.05);
+  const key = new T.DirectionalLight(16766368, expanded ? EVERYDAY.lighting.keyIntensity : 2.1);
+  const mat = (color, extra = {}) => new T.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
+  const materials2 = {
+    jade: mat(2181182, { roughness: 0.24, metalness: 0.22 }),
+    jadeAlt: mat(2378818, { roughness: 0.28, metalness: 0.18 }),
+    courtStone: mat(4810331, { roughness: 0.32, metalness: 0.16 }),
+    shellFloor: mat(13222572, { roughness: 0.9 }),
+    shellCeiling: mat(15195592, { emissive: 10325104, emissiveIntensity: 0.35 }),
+    shellWall: mat(12039849, { roughness: 0.82 }),
+    rugSand: mat(9207907, { roughness: 1 }),
+    rugSage: mat(5991768, { roughness: 1 }),
+    green: mat(1391664),
+    dark: mat(796963),
+    ivory: mat(14931639),
+    cream: mat(16115915),
+    brass: mat(11901794, { metalness: 0.68, roughness: 0.31 }),
+    wood: mat(7031089),
+    oak: mat(10649685),
+    timber: mat(10783591),
+    timberAlt: mat(10520419),
+    foliage: mat(3234616),
+    leaf: mat(5403976),
+    pot: mat(11971468),
+    seat: mat(13153166),
+    glow: mat(16770996, { emissive: 16765066, emissiveIntensity: 1.2 }),
+    water: mat(5213312, { metalness: 0.48, roughness: 0.15 }),
+    glass: mat(10537406, { transparent: true, opacity: 0.15, metalness: 0.2, roughness: 0.1, depthWrite: false, side: T.DoubleSide })
+  };
+  if (expanded) {
+    let timer;
+    try {
+      const module = await Promise.race([
+        import("./natural-materials.js"),
+        new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error("Optional finish timeout")), 2000);
+        })
+      ]);
+      const natural = module.createNaturalSurfaceTextures(T);
+      if (natural.stone)
+        materials2.shellFloor.map = natural.stone;
+      if (natural.wood)
+        for (const name of ["wood", "oak", "timber", "timberAlt"])
+          materials2[name].map = natural.wood;
+    } catch {} finally {
+      clearTimeout(timer);
+    }
+    applyMallThemeToWorld(EVERYDAY, { expanded, materials: materials2, ambient, key, fog: scene.fog });
+    materials2.shellFloor.roughness = 0.34;
+    materials2.brass.roughness = 0.28;
+    materials2.brass.metalness = 0.78;
+    materials2.green.roughness = 0.24;
+    materials2.green.metalness = 0.23;
+    materials2.dark.roughness = 0.3;
+    materials2.dark.metalness = 0.12;
+  }
+  const geometry = {
+    box: new T.BoxGeometry(1, 1, 1),
+    cylinder: new T.CylinderGeometry(1, 1, 1, 32),
+    sphere: new T.SphereGeometry(1, 12, 8),
+    plane: new T.PlaneGeometry(1, 1),
+    torus: new T.TorusGeometry(1, 0.045, 8, 64),
+    ring: new T.RingGeometry(0.985, 1, 64)
+  };
+  const storefrontGlassMaterial = expanded ? materials2.glass.clone() : materials2.glass;
+  if (expanded)
+    storefrontGlassMaterial.forceSinglePass = true;
+  const doorGlassMaterial = expanded ? new T.MeshBasicMaterial({
+    color: materials2.glass.color,
+    opacity: materials2.glass.opacity * 0.76,
+    transparent: true,
+    depthWrite: false
+  }) : materials2.glass;
+  materials2.skylightGlass = materials2.glass.clone();
+  materials2.skylightGlass.side = T.FrontSide;
+  const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
+  doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
+  const doorFrameGeometry = mergeGeometries6(doorFrameParts);
+  doorFrameParts.forEach((part) => part.dispose());
+  const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
+  const finishForRole = new Map;
+  const finishMaterials = {}, colourBatches = [], viewUpdates = [];
+  if (expanded) {
+    finishMaterials.shopFloor = materials2.shellFloor.clone();
+    finishMaterials.shopFloor.color.set(16777215);
+    for (const [finish2, roles] of Object.entries({
+      matte: ["ivory", "green", "dark", "cream", "foliage", "leaf", "pot", "seat"],
+      woodGrain: ["wood", "oak", "timber", "timberAlt"]
+    })) {
+      const base = materials2[roles[0]].clone();
+      base.color.set(16777215);
+      finishMaterials[finish2] = base;
+      for (const role of roles)
+        finishForRole.set(role, finish2);
+    }
+  }
+  const plainFinish = instancedSurfaceMaterial(T);
+  function refreshInstanceColours() {
+    for (const refresh of colourBatches)
+      refresh();
+  }
+  const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
+  const shopVisibility = createShopVisibility(T);
+  const shopUploads = new Map;
+  const atmosphereWashes = [];
+  const lightWash = (...placement) => atmosphereWashes.push(placement);
+  let uploadVisitor, pavingMesh, mappedPaving;
+  function queueShopUpload(slot2, ...meshes) {
+    if (!expanded || !prepareModel)
+      return;
+    if (!shopUploads.has(slot2))
+      shopUploads.set(slot2, []);
+    shopUploads.get(slot2).push(...meshes);
+  }
+  async function setPavingMap(map) {
+    const material = materials2.paving.clone();
+    material.map = map;
+    material.color.set(16315889);
+    const sample = new T.InstancedMesh(geometry.paving, material, 1);
+    try {
+      await prepareModel?.(sample);
+      material.roughness = materials2.paving.roughness;
+      mappedPaving = material;
+      if (pavingMesh)
+        pavingMesh.material = material;
+      materials2.paving.dispose();
+    } catch {
+      map.dispose();
+      material.dispose();
+    } finally {
+      sample.dispose();
+    }
+  }
+  let activeShopSlot = null, activeDeck = false, upperLevel = null, interiorModels = null, productDisplay = null;
+  const tagShopLod = (mesh) => {
+    if (expanded && activeShopSlot !== null) {
+      mesh.userData.shopSlot = activeShopSlot;
+      shopLodMeshes.push(mesh);
+    }
+    return mesh;
+  };
+  function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = "XYZ", rz = 0) {
+    const source = materials2[material];
+    const roleFinish = finishForRole.get(material);
+    const plainType = type === "box" || type === "cylinder" && roleFinish !== "woodGrain";
+    const plain = expanded && plainType && source.isMeshStandardMaterial && !source.transparent && !source.map && !source.emissive.getHex() && !["paving", "shellFloor", "courtStone"].includes(material);
+    const finish2 = plain ? "plain" : type === "publicLeaf" ? "canopy" : roleFinish;
+    const shared = expanded && (!source.transparent && !material.endsWith("Backdrop") || material === "contact" || material === "lightPool");
+    const shopSlot = shared ? null : activeShopSlot;
+    const key2 = `${type}:${finish2 || material}${shopSlot === null ? "" : `:shop-${shopSlot}`}${activeDeck ? ":deck" : ""}`;
+    if (!batches.has(key2))
+      batches.set(key2, {
+        type,
+        finish: finish2,
+        geometry: geometry[type],
+        material: plain ? plainFinish : finish2 ? finishMaterials[finish2] : source,
+        transforms: [],
+        shopSlot,
+        deckLod: activeDeck,
+        colours: finish2 ? [] : null,
+        surfaces: plain ? [] : null,
+        slots: shared ? [] : null
       });
-    }, prepareUpperFurniture = function() {
-      if (!upperLevel)
-        return;
-      prepareUpperLevel();
-      upperFurniture ??= loadUpperFurniture(T).then((records) => upperLevel.installFurniture(records, prepareModel)).catch((error) => console.warn("Upper level furniture unavailable", error));
-    }, ensureBrandWall = function() {
-      if (!expanded)
-        return Promise.reject(new Error("Brand wall is only available in the expanded mall"));
-      if (!brandWallPromise)
-        brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene, liftLayout.upper, prepareModel, artworkTier)).then((result) => {
-          interactables.push(...result.interactables);
-          deckLodMeshes?.push(result.mesh);
-          return result;
-        });
-      return brandWallPromise;
-    };
-    let shellState = null;
-    const expandedLift = expanded && new URLSearchParams(location.search).get("visitor") !== "v1";
-    const textures = new Map, loader = new T.TextureLoader().setCrossOrigin(undefined);
-    const names = ["new-moon-logo.svg", "mili-logo.jpg", "gogo-logo.jpg", "new-moon-brand-cover.jpg", "mili-brand-cover.jpg", "gogo-brand-cover.jpg", ...["nz-425g", "au-425g", "sa-425g", "mx-454g"].map((id) => `new-moon-${id}-front.jpg`)];
-    const texturesTask = Promise.all(names.map(async (name) => {
-      let texture;
-      for (let attempt = 0;attempt < 3; attempt++) {
-        try {
-          const url = new URL(name.replace(/(?:-brand-cover|-front)\.jpg$/, (match) => match.replace(".jpg", ".webp")), import.meta.url);
-          if (attempt)
-            url.searchParams.set("retry", String(attempt));
-          texture = await loader.loadAsync(url.href);
-          break;
-        } catch (error) {
-          if (attempt === 2)
-            throw new Error(`Mall texture failed to load: ${name}`, { cause: error });
-          await new Promise((resolve) => setTimeout(resolve, attempt ? 800 : 200));
-        }
-      }
-      textures.set(name, setupArtworkTexture(T, texture, artworkTier()));
-    }));
-    const productsTask = import("./products.js");
-    productsTask.catch(() => {});
-    const furnishingTask = createFurnishings(T, true, expanded, detailsEnabled);
-    const shellTask = expanded ? null : createShell(T);
-    const ceilingObstacles = [], shopObstacles = [];
-    const bakedFloors = [], bakedCeilings = [];
-    const seats = [], seatPlacements = createSeatPlacements(expanded);
-    const scene = new T.Scene;
-    const prepareModel = warmModel && ((model, options2) => warmModel(model, scene, options2));
-    scene.background = new T.Color(expanded ? 8493979 : 1650226);
-    scene.fog = new T.Fog(expanded ? EVERYDAY.lighting.fog : 12037532, expanded ? 75 : 40, expanded ? 155 : 100);
-    const ambient = new T.HemisphereLight(16772832, 7166779, 1.05);
-    const key = new T.DirectionalLight(16766368, expanded ? EVERYDAY.lighting.keyIntensity : 2.1);
-    const mat = (color, extra = {}) => new T.MeshStandardMaterial({ color, roughness: 0.72, ...extra });
-    const materials2 = {
-      jade: mat(2181182, { roughness: 0.24, metalness: 0.22 }),
-      jadeAlt: mat(2378818, { roughness: 0.28, metalness: 0.18 }),
-      courtStone: mat(4810331, { roughness: 0.32, metalness: 0.16 }),
-      shellFloor: mat(13222572, { roughness: 0.9 }),
-      shellCeiling: mat(15195592, { emissive: 10325104, emissiveIntensity: 0.35 }),
-      shellWall: mat(12039849, { roughness: 0.82 }),
-      rugSand: mat(9207907, { roughness: 1 }),
-      rugSage: mat(5991768, { roughness: 1 }),
-      green: mat(1391664),
-      dark: mat(796963),
-      ivory: mat(14931639),
-      cream: mat(16115915),
-      brass: mat(11901794, { metalness: 0.68, roughness: 0.31 }),
-      wood: mat(7031089),
-      oak: mat(10649685),
-      timber: mat(10783591),
-      timberAlt: mat(10520419),
-      foliage: mat(3234616),
-      leaf: mat(5403976),
-      pot: mat(11971468),
-      seat: mat(13153166),
-      glow: mat(16770996, { emissive: 16765066, emissiveIntensity: 1.2 }),
-      water: mat(5213312, { metalness: 0.48, roughness: 0.15 }),
-      glass: mat(10537406, { transparent: true, opacity: 0.15, metalness: 0.2, roughness: 0.1, depthWrite: false, side: T.DoubleSide })
-    };
-    if (expanded) {
-      let timer;
-      try {
-        const module = await Promise.race([
-          import("./natural-materials.js"),
-          new Promise((_, reject) => {
-            timer = setTimeout(() => reject(new Error("Optional finish timeout")), 2000);
-          })
-        ]);
-        const natural = module.createNaturalSurfaceTextures(T);
-        if (natural.stone)
-          materials2.shellFloor.map = natural.stone;
-        if (natural.wood)
-          for (const name of ["wood", "oak", "timber", "timberAlt"])
-            materials2[name].map = natural.wood;
-      } catch {} finally {
-        clearTimeout(timer);
-      }
-      applyMallThemeToWorld(EVERYDAY, { expanded, materials: materials2, ambient, key, fog: scene.fog });
-      materials2.shellFloor.roughness = 0.34;
-      materials2.brass.roughness = 0.28;
-      materials2.brass.metalness = 0.78;
-      materials2.green.roughness = 0.24;
-      materials2.green.metalness = 0.23;
-      materials2.dark.roughness = 0.3;
-      materials2.dark.metalness = 0.12;
+    const batch = batches.get(key2);
+    batch.slots?.push(activeShopSlot);
+    if (finish2)
+      batch.colours.push(source.color);
+    if (plain) {
+      const surface = type === "cylinder" && roleFinish === "matte" ? finishMaterials.matte : source;
+      batch.surfaces.push(surface.roughness, surface.metalness);
     }
-    const geometry = {
-      box: new T.BoxGeometry(1, 1, 1),
-      cylinder: new T.CylinderGeometry(1, 1, 1, 32),
-      sphere: new T.SphereGeometry(1, 12, 8),
-      plane: new T.PlaneGeometry(1, 1),
-      torus: new T.TorusGeometry(1, 0.045, 8, 64),
-      ring: new T.RingGeometry(0.985, 1, 64)
-    };
-    const storefrontGlassMaterial = expanded ? materials2.glass.clone() : materials2.glass;
+    position.set(x, y, z);
+    scale.set(sx, sy, sz);
+    euler.set(rx, ry, rz, order);
+    quaternion.setFromEuler(euler);
+    matrix.compose(position, quaternion, scale);
+    batch.transforms.push(matrix.clone());
+  }
+  function collider(x, y, z, sx, sy, sz) {
+    return physics.createCollider(R.ColliderDesc.cuboid(sx / 2, sy / 2, sz / 2).setTranslation(x, y, z));
+  }
+  function box(m, x, y, z, sx, sy, sz, collision = false) {
+    solid("box", m, x, y, z, sx, sy, sz);
+    if (collision)
+      collider(x, y, z, sx, sy, sz);
+  }
+  const cylinder = (m, x, y, z, r, h) => solid("cylinder", m, x, y, z, r, h, r);
+  const sphere = (m, x, y, z, sx, sy, sz) => solid("sphere", m, x, y, z, sx, sy, sz);
+  const [furnishings, shell] = await Promise.all([furnishingTask, shellTask, texturesTask]);
+  const plane = geometry.plane;
+  function art(name, x, y, z, width, ry = 0) {
+    const texture = textures.get(name), height = width * texture.image.height / texture.image.width;
+    const material = decalMaterial(filterWallArtwork(T, mat(16777215, {
+      map: texture,
+      emissiveMap: texture,
+      emissive: 16777215,
+      emissiveIntensity: 0.2
+    })), -1);
+    const mesh = new T.Mesh(plane, material);
+    mesh.name = name;
+    mesh.position.set(x + decalClearance * Math.sin(ry), y, z + decalClearance * Math.cos(ry));
+    mesh.rotation.y = ry;
+    mesh.scale.set(width, height, 1);
+    scene.add(mesh);
+    mesh.userData.shopDecal = true;
+    if (activeShopSlot !== null)
+      queueShopUpload(activeShopSlot, mesh);
+    return tagShopLod(mesh);
+  }
+  const roomSigns = [];
+  let restrooms = null;
+  let signage, interiorKit;
+  function sign(text, x, y, z, width, height = 0.4, framed = false, fontSize = 42) {
+    const canvas2 = document.createElement("canvas");
+    canvas2.width = 1024;
+    canvas2.height = 128;
+    const context = canvas2.getContext("2d");
+    if (framed) {
+      context.fillStyle = "#17372e";
+      context.fillRect(0, 0, 1024, 128);
+      context.strokeStyle = "#b59b62";
+      context.lineWidth = 3;
+      context.strokeRect(8, 8, 1008, 112);
+    }
+    context.fillStyle = "#e9d6a9";
+    context.font = `500 ${fontSize}px Georgia`;
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(text, 512, 64);
+    const texture = setupArtworkTexture(T, new T.CanvasTexture(canvas2), artworkTier());
+    const mesh = placeDecal(new T.Mesh(plane, decalMaterial(new T.MeshBasicMaterial({ map: texture, transparent: true }))));
+    mesh.name = text;
+    mesh.position.set(x, y, decalHeight(z));
+    mesh.scale.set(width, height, 1);
+    scene.add(mesh);
+    mesh.userData.shopDecal = true;
+    if (activeShopSlot !== null)
+      queueShopUpload(activeShopSlot, mesh);
+    return tagShopLod(mesh);
+  }
+  const shadowCanvas = document.createElement("canvas");
+  shadowCanvas.width = shadowCanvas.height = 64;
+  const shadowContext = shadowCanvas.getContext("2d"), gradient = shadowContext.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gradient.addColorStop(0, "rgba(4,18,12,.58)");
+  gradient.addColorStop(0.35, "rgba(4,18,12,.34)");
+  gradient.addColorStop(1, "rgba(4,18,12,0)");
+  shadowContext.fillStyle = gradient;
+  shadowContext.fillRect(0, 0, 64, 64);
+  const contact = decalMaterial(new T.MeshBasicMaterial({ map: new T.CanvasTexture(shadowCanvas), transparent: true }), -1);
+  materials2.contact = contact;
+  function shadow(x, z, w, d) {
+    solid("plane", "contact", x, 0.018, z, w, d, 1, 0, -Math.PI / 2);
+  }
+  const poolCanvas = document.createElement("canvas");
+  poolCanvas.width = poolCanvas.height = 64;
+  const poolContext = poolCanvas.getContext("2d"), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);
+  poolGradient.addColorStop(0, expanded ? "rgba(255,231,200,.18)" : "rgba(255,226,171,.3)");
+  poolGradient.addColorStop(0.35, expanded ? "rgba(255,234,206,.09)" : "rgba(255,226,171,.15)");
+  poolGradient.addColorStop(1, "rgba(255,226,171,0)");
+  poolContext.fillStyle = poolGradient;
+  poolContext.fillRect(0, 0, 64, 64);
+  const poolTexture = new T.CanvasTexture(poolCanvas);
+  poolTexture.colorSpace = T.SRGBColorSpace;
+  materials2.lightPool = decalMaterial(new T.MeshBasicMaterial({
+    map: poolTexture,
+    transparent: true,
+    blending: T.AdditiveBlending,
+    toneMapped: false
+  }), -1);
+  function lightPool(x, y, z, width, height, ry = 0, rx = -Math.PI / 2) {
+    solid("plane", "lightPool", x, y, z, width, height, 1, ry, rx);
+  }
+  function plant(x, z, tall = 1) {
+    if (!furnishings.place("planter", x, z, tall, 1, 0, null, activeShopSlot)) {
+      cylinder("pot", x, 0.32, z, 0.42, 0.64);
+      cylinder("brass", x, 0.64, z, 0.43, 0.045);
+      cylinder("brass", x, 0.055, z, 0.4, 0.075);
+      cylinder("wood", x, 0.656, z, 0.37, 0.016);
+      for (let i = 0;i < 8; i++) {
+        const a = i * Math.PI / 4;
+        solid("box", "brass", x + Math.cos(a) * 0.416, 0.32, z + Math.sin(a) * 0.416, 0.018, 0.44, 0.018, a);
+      }
+      cylinder("wood", x, 0.9 * tall, z, 0.04, 1.2 * tall);
+      for (let i = 0;i < 5; i++) {
+        const a = i * 2.4;
+        sphere(i % 2 ? "leaf" : "foliage", x + Math.cos(a) * 0.26, (1.25 + i * 0.12) * tall, z + Math.sin(a) * 0.26, 0.36, 0.6 * tall, 0.34);
+      }
+    }
     if (expanded)
-      storefrontGlassMaterial.forceSinglePass = true;
-    const doorGlassMaterial = expanded ? new T.MeshBasicMaterial({
-      color: materials2.glass.color,
-      opacity: materials2.glass.opacity * 0.76,
-      transparent: true,
-      depthWrite: false
-    }) : materials2.glass;
-    materials2.skylightGlass = materials2.glass.clone();
-    materials2.skylightGlass.side = T.FrontSide;
-    const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
-    doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
-    const doorFrameGeometry = mergeGeometries6(doorFrameParts);
-    doorFrameParts.forEach((part) => part.dispose());
-    const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
-    const finishForRole = new Map;
-    const finishMaterials = {}, colourBatches = [], viewUpdates = [];
-    if (expanded) {
-      finishMaterials.shopFloor = materials2.shellFloor.clone();
-      finishMaterials.shopFloor.color.set(16777215);
-      for (const [finish2, roles] of Object.entries({
-        matte: ["ivory", "green", "dark", "cream", "foliage", "leaf", "pot", "seat"],
-        woodGrain: ["wood", "oak", "timber", "timberAlt"]
-      })) {
-        const base = materials2[roles[0]].clone();
-        base.color.set(16777215);
-        finishMaterials[finish2] = base;
-        for (const role of roles)
-          finishForRole.set(role, finish2);
-      }
+      lightPool(x, 0.091, z, 1.9, 1.9);
+    collider(x, 0.4, z, 0.85, 0.8, 0.85);
+    shadow(x, z, 2.1, 2.1);
+  }
+  function bench(placement) {
+    const { x, z, facing, group } = placement;
+    const modelPlaced = furnishings.place("bench", x, z, benchScale, facing, 0, placement.pose.angle, activeShopSlot);
+    const seatCollider = collider(x, 0.3 * benchScale, z, placement.clearance.colliderWidth, 0.4 * benchScale, placement.clearance.colliderDepth);
+    if (placement.pose.angle % Math.PI) {
+      const halfYaw = placement.pose.angle / 2;
+      seatCollider.setRotation({ x: 0, y: Math.sin(halfYaw), z: 0, w: Math.cos(halfYaw) });
     }
-    const plainFinish = instancedSurfaceMaterial(T);
-    const position = new T.Vector3, scale = new T.Vector3, shopLodMeshes = [], shopLodUpdates = [], shopBays = new Map(expandedLayout.slots.map((bay) => [Number(bay.number), bay]));
-    const shopVisibility = createShopVisibility(T);
-    const shopUploads = new Map;
-    const atmosphereWashes = [];
-    const lightWash = (...placement) => atmosphereWashes.push(placement);
-    let uploadVisitor, pavingMesh, mappedPaving;
-    async function setPavingMap(map) {
-      const material = materials2.paving.clone();
-      material.map = map;
-      material.color.set(16315889);
-      const sample = new T.InstancedMesh(geometry.paving, material, 1);
-      try {
-        await prepareModel?.(sample);
-        material.roughness = materials2.paving.roughness;
-        mappedPaving = material;
-        if (pavingMesh)
-          pavingMesh.material = material;
-        materials2.paving.dispose();
-      } catch {
-        map.dispose();
-        material.dispose();
-      } finally {
-        sample.dispose();
-      }
-    }
-    let activeShopSlot = null, activeDeck = false, upperLevel = null, interiorModels = null, productDisplay = null;
-    const tagShopLod = (mesh) => {
-      if (expanded && activeShopSlot !== null) {
-        mesh.userData.shopSlot = activeShopSlot;
-        shopLodMeshes.push(mesh);
-      }
-      return mesh;
+    const footY = group === "atrium" ? expanded ? 0.016 : 0 : expanded ? 0.0245 : 0.015;
+    seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : groundBenchFallback, benchScale, footY));
+    const angle = placement.pose.angle, c = Math.cos(angle), s = Math.sin(angle);
+    const benchBox = (m, bx, by, bz, sx, sy, sz) => {
+      const dx = bx - x, dz = (bz - z) * facing;
+      solid("box", m, x + c * dx + s * dz, by * benchScale, z - s * dx + c * dz, sx, sy * benchScale, sz, angle);
     };
-    const cylinder = (m, x, y, z, r, h) => solid("cylinder", m, x, y, z, r, h, r);
-    const sphere = (m, x, y, z, sx, sy, sz) => solid("sphere", m, x, y, z, sx, sy, sz);
-    const [furnishings, shell] = await Promise.all([furnishingTask, shellTask, texturesTask]);
-    const plane = geometry.plane;
-    const roomSigns = [];
-    let restrooms = null;
-    let signage, interiorKit;
-    const shadowCanvas = document.createElement("canvas");
-    shadowCanvas.width = shadowCanvas.height = 64;
-    const shadowContext = shadowCanvas.getContext("2d"), gradient = shadowContext.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gradient.addColorStop(0, "rgba(4,18,12,.58)");
-    gradient.addColorStop(0.35, "rgba(4,18,12,.34)");
-    gradient.addColorStop(1, "rgba(4,18,12,0)");
-    shadowContext.fillStyle = gradient;
-    shadowContext.fillRect(0, 0, 64, 64);
-    const contact = decalMaterial(new T.MeshBasicMaterial({ map: new T.CanvasTexture(shadowCanvas), transparent: true }), -1);
-    materials2.contact = contact;
-    const poolCanvas = document.createElement("canvas");
-    poolCanvas.width = poolCanvas.height = 64;
-    const poolContext = poolCanvas.getContext("2d"), poolGradient = poolContext.createRadialGradient(32, 32, 0, 32, 32, 32);
-    poolGradient.addColorStop(0, expanded ? "rgba(255,231,200,.18)" : "rgba(255,226,171,.3)");
-    poolGradient.addColorStop(0.35, expanded ? "rgba(255,234,206,.09)" : "rgba(255,226,171,.15)");
-    poolGradient.addColorStop(1, "rgba(255,226,171,0)");
-    poolContext.fillStyle = poolGradient;
-    poolContext.fillRect(0, 0, 64, 64);
-    const poolTexture = new T.CanvasTexture(poolCanvas);
-    poolTexture.colorSpace = T.SRGBColorSpace;
-    materials2.lightPool = decalMaterial(new T.MeshBasicMaterial({
-      map: poolTexture,
-      transparent: true,
-      blending: T.AdditiveBlending,
-      toneMapped: false
-    }), -1);
-    if (expanded) {
-      box("dark", 10, -0.22, 18, 70, 0.4, 60, true);
-      box("shellFloor", 10, -0.035, 18, 70, 0.04, 60);
+    if (!modelPlaced) {
+      const { top, front } = groundBenchFallback;
+      benchBox("wood", x, 0.3, z, 2.5, 0.4, 0.85);
+      benchBox("seat", x, top - 0.09, z, 2.55, 0.18, -2 * front);
+      benchBox("seat", x, 0.94, z + facing * 0.35, 2.55, 0.7, 0.18);
+      benchBox("brass", x, 0.47, z - facing * 0.451, 2.52, 0.035, 0.025);
+      benchBox("oak", x, 1.285, z + facing * 0.35, 2.58, 0.065, 0.21);
+      for (const dx of [-0.42, 0.42]) {
+        benchBox("wood", x + dx, 0.653, z, 0.018, 0.006, 0.82);
+        benchBox("wood", x + dx, 0.96, z + facing * 0.253, 0.018, 0.52, 0.008);
+      }
+      for (const dx of [-1.15, 1.15]) {
+        benchBox("brass", x + dx, 0.68, z, 0.08, 0.5, 0.9);
+        benchBox("oak", x + dx, 0.955, z, 0.13, 0.065, 0.92);
+      }
+    }
+    shadow(x, z, 3.6, 2);
+    lightPool(x, 0.051, z - facing * 0.6, 3.6, 2.4);
+  }
+  function pendant(x, z, y = 4.7) {
+    cylinder("brass", x, (6 + y) / 2, z, 0.022, 6 - y);
+    cylinder("brass", x, y, z, 0.62, 0.12);
+    cylinder("glow", x, y - 0.08, z, 0.54, 0.035);
+    cylinder("dark", x, y + 0.08, z, 0.42, 0.065);
+    if (expanded && activeShopSlot === null)
+      lightWash(x, 0.054, z, 3.1, 3.1, 0, -Math.PI / 2, true);
+    else
+      lightPool(x, 0.052, z, 4.6, 4.6);
+  }
+  if (expanded) {
+    box("dark", 10, -0.22, 18, 70, 0.4, 60, true);
+    box("shellFloor", 10, -0.035, 18, 70, 0.04, 60);
+    for (const x of [6.8, 13.2]) {
+      box("green", x, -0.009, 32.5, 0.46, 0.008, 29);
+      box("brass", x, -0.002, 32.5, 0.035, 0.004, 29);
+    }
+    for (const z of [22, 28, 34, 40, 46]) {
       for (const x of [6.8, 13.2]) {
-        box("green", x, -0.009, 32.5, 0.46, 0.008, 29);
-        box("brass", x, -0.002, 32.5, 0.035, 0.004, 29);
+        solid("box", "brass", x, 0.002, z, 0.38, 0.005, 0.38, Math.PI / 4);
+        solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
       }
-      for (const z of [22, 28, 34, 40, 46]) {
-        for (const x of [6.8, 13.2]) {
-          solid("box", "brass", x, 0.002, z, 0.38, 0.005, 0.38, Math.PI / 4);
-          solid("box", "green", x, 0.007, z, 0.26, 0.004, 0.26, Math.PI / 4);
-        }
-      }
-      if (new URLSearchParams(location.search).get("tram") === "debug")
-        shopLodUpdates.push(addTramDebug(T, scene));
-      shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, detailsEnabled, setPavingMap, ceilingBounds, artworkTier, daylightSkylight: expandedLift, setCanopyMaterial: (material) => {
-        finishMaterials.canopy = material;
-      } }));
-      if (expandedLift)
-        addAtriumSkylight(T, scene, liftLayout.roofOpening);
-    } else {
-      for (const proxy of SHELL_LAYOUT.aggregate_colliders)
-        collider(...proxy.position, ...proxy.size);
-      const foundation = SHELL_LAYOUT.foundation_visual;
-      box(foundation.material, ...foundation.position, ...foundation.size);
     }
-    if (!expanded) {
-      for (const [x, y, z] of SHELL_LAYOUT.retained_tiles)
-        box((x + z) % 4 === 1 ? "jade" : "jadeAlt", x, y, z, 1.99, 0.04, 1.99);
-      for (const x of [-14.6, -5, 5, 14.6])
-        box("brass", x, 0.022, 9, 0.025, 0.012, 17.8);
-      for (const z of [0.6, 4, 11.5, 17.3])
-        box("brass", 0, 0.023, z, 29.3, 0.012, 0.025);
-      box("courtStone", 0, 0.026, 13.8, 8.4, 0.012, 5.8);
-      for (const x of [-4.23, 4.23])
-        box("brass", x, 0.037, 13.8, 0.055, 0.008, 5.91);
-      for (const z of [10.87, 16.73])
-        box("brass", 0, 0.037, z, 8.51, 0.008, 0.055);
-      for (const x of [-3.98, 3.98])
-        box("dark", x, 0.037, 13.8, 0.025, 0.008, 5.36);
-      for (const z of [11.13, 16.47])
-        box("dark", 0, 0.037, z, 7.98, 0.008, 0.025);
-      for (const radius2 of [1.15, 1.55]) {
-        for (const side of [-1, 1])
-          for (const end of [-1, 1]) {
-            solid("box", "brass", side * radius2 / 2, 0.039, 13.6 + end * radius2 / 2, radius2 * Math.SQRT2, 0.008, 0.035, side * end * Math.PI / 4);
-          }
+    if (new URLSearchParams(location.search).get("tram") === "debug")
+      shopLodUpdates.push(addTramDebug(T, scene));
+    shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, detailsEnabled, setPavingMap, ceilingBounds, artworkTier, daylightSkylight: expandedLift, setCanopyMaterial: (material) => {
+      finishMaterials.canopy = material;
+    } }));
+    if (expandedLift)
+      addAtriumSkylight(T, scene, liftLayout.roofOpening);
+  } else {
+    for (const proxy of SHELL_LAYOUT.aggregate_colliders)
+      collider(...proxy.position, ...proxy.size);
+    const foundation = SHELL_LAYOUT.foundation_visual;
+    box(foundation.material, ...foundation.position, ...foundation.size);
+  }
+  if (!expanded) {
+    for (const [x, y, z] of SHELL_LAYOUT.retained_tiles)
+      box((x + z) % 4 === 1 ? "jade" : "jadeAlt", x, y, z, 1.99, 0.04, 1.99);
+    for (const x of [-14.6, -5, 5, 14.6])
+      box("brass", x, 0.022, 9, 0.025, 0.012, 17.8);
+    for (const z of [0.6, 4, 11.5, 17.3])
+      box("brass", 0, 0.023, z, 29.3, 0.012, 0.025);
+    box("courtStone", 0, 0.026, 13.8, 8.4, 0.012, 5.8);
+    for (const x of [-4.23, 4.23])
+      box("brass", x, 0.037, 13.8, 0.055, 0.008, 5.91);
+    for (const z of [10.87, 16.73])
+      box("brass", 0, 0.037, z, 8.51, 0.008, 0.055);
+    for (const x of [-3.98, 3.98])
+      box("dark", x, 0.037, 13.8, 0.025, 0.008, 5.36);
+    for (const z of [11.13, 16.47])
+      box("dark", 0, 0.037, z, 7.98, 0.008, 0.025);
+    for (const radius2 of [1.15, 1.55]) {
+      for (const side of [-1, 1])
+        for (const end of [-1, 1]) {
+          solid("box", "brass", side * radius2 / 2, 0.039, 13.6 + end * radius2 / 2, radius2 * Math.SQRT2, 0.008, 0.035, side * end * Math.PI / 4);
+        }
+    }
+    for (const side of [-1, 1]) {
+      box("brass", side * 2.9, 0.039, 13.6, 1.6, 0.008, 0.035);
+      for (const z of [11.8, 15.8]) {
+        solid("box", "brass", side * 2.9, 0.039, z, 0.34, 0.008, 0.34, Math.PI / 4);
+        solid("box", "jade", side * 2.9, 0.045, z, 0.25, 0.004, 0.25, Math.PI / 4);
       }
+    }
+  }
+  if (!expanded) {
+    const roof = new URLSearchParams(location.search).get("visitor") !== "v1" ? SHELL_LAYOUT.roof_v2 : SHELL_LAYOUT.roof_v1;
+    for (const component of [...SHELL_LAYOUT.caps, ...roof])
+      ceilingBox(component.material, ...component.position, ...component.size);
+    const ceiling = SHELL_LAYOUT.assets.ceiling;
+    const [width, height, depth] = ceiling.bounds_max.map((max, axis) => max - ceiling.bounds_min[axis]);
+    for (const [x, y, z] of ceiling.placements)
+      ceilingBounds(x, y + height / 2, z, width, height, depth);
+    shellState = shell.finish(scene, solid);
+  }
+  if (!expanded) {
+    ceilingBox("dark", 0, 6.29, 8.3, 14.6, 0.06, 13);
+    ceilingBox("skylightGlass", 0, 6.25, 8.3, 14.1, 0.025, 12.6);
+    for (let x = -7;x <= 7; x += 2)
+      ceilingBox("brass", x, 6.18, 8.3, 0.045, 0.08, 12.7);
+    for (const z of [2, 5.1, 8.3, 11.5, 14.6])
+      ceilingBox("brass", 0, 6.15, z, 14.1, 0.08, 0.045);
+    const skylight = new T.Mesh(new T.PlaneGeometry(14, 12.5), new T.ShaderMaterial({ side: T.DoubleSide, vertexShader: "varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}", fragmentShader: "varying vec2 v;void main(){gl_FragColor=vec4(mix(vec3(.13,.24,.28),vec3(.78,.52,.29),pow(1.-v.y,3.)),1.);}" }));
+    skylight.rotation.x = Math.PI / 2;
+    skylight.position.set(0, 6.23, 8.3);
+    scene.add(skylight);
+  }
+  if (!expanded)
+    for (const x of [-14.5, -5, 5, 14.5]) {
+      box("dark", x, 2.9, 0.4, 0.65, 5.8, 0.9, true);
+      box("brass", x, 0.18, 0.4, 0.85, 0.18, 1.1);
+      box("brass", x, 5.5, 0.4, 0.85, 0.12, 1.1);
+      for (const dx of [-0.19, 0, 0.19])
+        box("brass", x + dx, 2.9, 0.865, 0.018, 4.85, 0.025);
+      box("glow", x, 5.36, 0.87, 0.52, 0.025, 0.025);
+      lightPool(x, 0.053, 1.1, 2.6, 3.1);
+    }
+  if (!expanded)
+    for (const x of [-14.7, 14.7])
+      for (const z of [4, 10, 16]) {
+        if (!furnishings.place("wallLight", x, z, 1, 1, 2.1, x < 0 ? Math.PI / 2 : -Math.PI / 2)) {
+          box("brass", x, 2.6, z, 0.2, 1.1, 0.4);
+          box("glow", x + (x < 0 ? 0.13 : -0.13), 2.65, z, 0.12, 0.8, 0.3);
+        }
+        lightPool(x < 0 ? -14.82 : 14.82, 2.5, z, 2.2, 2.9, x < 0 ? Math.PI / 2 : -Math.PI / 2, 0);
+        lightPool(x < 0 ? -14 : 14, 0.054, z, 2.8, 3.8);
+      }
+  for (const x of [-9.5, 9.5])
+    for (const z of [4.2, 12.5])
+      pendant(x, z, 4.9);
+  if (!expanded) {
+    plant(-5.7, 4);
+    plant(5.7, 4);
+    plant(-12.9, 15.8, 1.3);
+    plant(12.9, 15.8, 1.3);
+    for (const placement of seatPlacements.filter((item) => item.group === "atrium"))
+      bench(placement);
+  } else {
+    const garden = atriumLayout.garden;
+    box("ivory", garden.x, garden.height / 2, garden.z, garden.width, garden.height, garden.depth, true);
+    box("wood", garden.x, garden.height + 0.012, garden.z, garden.width - 0.18, 0.025, garden.depth - 0.18);
+    for (let i = 0;i < 13; i++) {
+      const x = garden.x - 3.45 + i * 0.575, z = garden.z + (i % 3 - 1) * 0.65;
+      sphere("foliage", x, 0.57, z, 0.28, 0.14, 0.23);
+      for (let leaf = 0;leaf < 8; leaf++) {
+        const angle = leaf * Math.PI * 2 / 8 + i % 3 * 0.2;
+        solid("sphere", leaf % 2 ? "leaf" : "foliage", x + Math.sin(angle) * 0.2, 0.72, z + Math.cos(angle) * 0.2, 0.1, i % 4 === 0 ? 0.38 : 0.3, 0.065, angle, 0.72, "YXZ");
+      }
+    }
+    for (const lounge3 of atriumLayout.lounges) {
+      box("rugSand", lounge3.x, 0.01, lounge3.z, 5.8, 0.012, 7.8);
       for (const side of [-1, 1]) {
-        box("brass", side * 2.9, 0.039, 13.6, 1.6, 0.008, 0.035);
-        for (const z of [11.8, 15.8]) {
-          solid("box", "brass", side * 2.9, 0.039, z, 0.34, 0.008, 0.34, Math.PI / 4);
-          solid("box", "jade", side * 2.9, 0.045, z, 0.25, 0.004, 0.25, Math.PI / 4);
-        }
+        box("oak", lounge3.x + side * 2.84, 0.019, lounge3.z, 0.035, 0.008, 7.62);
+        box("oak", lounge3.x, 0.019, lounge3.z + side * 3.74, 5.7, 0.008, 0.035);
       }
-    }
-    if (!expanded) {
-      const roof = new URLSearchParams(location.search).get("visitor") !== "v1" ? SHELL_LAYOUT.roof_v2 : SHELL_LAYOUT.roof_v1;
-      for (const component of [...SHELL_LAYOUT.caps, ...roof])
-        ceilingBox(component.material, ...component.position, ...component.size);
-      const ceiling = SHELL_LAYOUT.assets.ceiling;
-      const [width, height, depth] = ceiling.bounds_max.map((max, axis) => max - ceiling.bounds_min[axis]);
-      for (const [x, y, z] of ceiling.placements)
-        ceilingBounds(x, y + height / 2, z, width, height, depth);
-      shellState = shell.finish(scene, solid);
-    }
-    if (!expanded) {
-      ceilingBox("dark", 0, 6.29, 8.3, 14.6, 0.06, 13);
-      ceilingBox("skylightGlass", 0, 6.25, 8.3, 14.1, 0.025, 12.6);
-      for (let x = -7;x <= 7; x += 2)
-        ceilingBox("brass", x, 6.18, 8.3, 0.045, 0.08, 12.7);
-      for (const z of [2, 5.1, 8.3, 11.5, 14.6])
-        ceilingBox("brass", 0, 6.15, z, 14.1, 0.08, 0.045);
-      const skylight = new T.Mesh(new T.PlaneGeometry(14, 12.5), new T.ShaderMaterial({ side: T.DoubleSide, vertexShader: "varying vec2 v;void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}", fragmentShader: "varying vec2 v;void main(){gl_FragColor=vec4(mix(vec3(.13,.24,.28),vec3(.78,.52,.29),pow(1.-v.y,3.)),1.);}" }));
-      skylight.rotation.x = Math.PI / 2;
-      skylight.position.set(0, 6.23, 8.3);
-      scene.add(skylight);
-    }
-    if (!expanded)
-      for (const x of [-14.5, -5, 5, 14.5]) {
-        box("dark", x, 2.9, 0.4, 0.65, 5.8, 0.9, true);
-        box("brass", x, 0.18, 0.4, 0.85, 0.18, 1.1);
-        box("brass", x, 5.5, 0.4, 0.85, 0.12, 1.1);
-        for (const dx of [-0.19, 0, 0.19])
-          box("brass", x + dx, 2.9, 0.865, 0.018, 4.85, 0.025);
-        box("glow", x, 5.36, 0.87, 0.52, 0.025, 0.025);
-        lightPool(x, 0.053, 1.1, 2.6, 3.1);
-      }
-    if (!expanded)
-      for (const x of [-14.7, 14.7])
-        for (const z of [4, 10, 16]) {
-          if (!furnishings.place("wallLight", x, z, 1, 1, 2.1, x < 0 ? Math.PI / 2 : -Math.PI / 2)) {
-            box("brass", x, 2.6, z, 0.2, 1.1, 0.4);
-            box("glow", x + (x < 0 ? 0.13 : -0.13), 2.65, z, 0.12, 0.8, 0.3);
-          }
-          lightPool(x < 0 ? -14.82 : 14.82, 2.5, z, 2.2, 2.9, x < 0 ? Math.PI / 2 : -Math.PI / 2, 0);
-          lightPool(x < 0 ? -14 : 14, 0.054, z, 2.8, 3.8);
-        }
-    for (const x of [-9.5, 9.5])
-      for (const z of [4.2, 12.5])
-        pendant(x, z, 4.9);
-    if (!expanded) {
-      plant(-5.7, 4);
-      plant(5.7, 4);
-      plant(-12.9, 15.8, 1.3);
-      plant(12.9, 15.8, 1.3);
-      for (const placement of seatPlacements.filter((item) => item.group === "atrium"))
+      for (const placement of seatPlacements.filter((item) => item.group === "atrium" && item.name.startsWith(lounge3.id === "west" ? "West" : "East")))
         bench(placement);
-    } else {
-      const garden = atriumLayout.garden;
-      box("ivory", garden.x, garden.height / 2, garden.z, garden.width, garden.height, garden.depth, true);
-      box("wood", garden.x, garden.height + 0.012, garden.z, garden.width - 0.18, 0.025, garden.depth - 0.18);
-      for (let i = 0;i < 13; i++) {
-        const x = garden.x - 3.45 + i * 0.575, z = garden.z + (i % 3 - 1) * 0.65;
-        sphere("foliage", x, 0.57, z, 0.28, 0.14, 0.23);
-        for (let leaf = 0;leaf < 8; leaf++) {
-          const angle = leaf * Math.PI * 2 / 8 + i % 3 * 0.2;
-          solid("sphere", leaf % 2 ? "leaf" : "foliage", x + Math.sin(angle) * 0.2, 0.72, z + Math.cos(angle) * 0.2, 0.1, i % 4 === 0 ? 0.38 : 0.3, 0.065, angle, 0.72, "YXZ");
+      const table2 = lounge3.table;
+      cylinder("brass", table2.x, 0.27, table2.z, 0.055, 0.5);
+      cylinder("oak", table2.x, 0.53, table2.z, 0.29, 0.06);
+      cylinder("brass", table2.x, 0.04, table2.z, 0.2, 0.05);
+      collider(table2.x, 0.28, table2.z, 0.58, 0.56, 0.58);
+      shadow(table2.x, table2.z, 1, 1);
+      for (const planter of lounge3.planters) {
+        box("green", planter.x, 0.3, planter.z, 0.7, 0.6, 0.7, true);
+        const aisle = Math.sign(atriumLayout.garden.x - planter.x);
+        lightWash(planter.x + aisle * 0.354, 0.21, planter.z, 0.72, 0.52, aisle * Math.PI / 2, 0, true);
+        box("wood", planter.x, 0.61, planter.z, 0.6, 0.025, 0.6);
+        for (let i = 0;i < 9; i++) {
+          const a = i * Math.PI * 2 / 9;
+          solid("sphere", i % 2 ? "leaf" : "foliage", planter.x + Math.sin(a) * 0.12, 0.8, planter.z + Math.cos(a) * 0.12, 0.08, 0.27, 0.05, a, 0.72, "YXZ");
         }
+        lightWash(planter.x, 0.025, planter.z, 1.55, 1.55, 0, -Math.PI / 2, true);
       }
-      for (const lounge3 of atriumLayout.lounges) {
-        box("rugSand", lounge3.x, 0.01, lounge3.z, 5.8, 0.012, 7.8);
-        for (const side of [-1, 1]) {
-          box("oak", lounge3.x + side * 2.84, 0.019, lounge3.z, 0.035, 0.008, 7.62);
-          box("oak", lounge3.x, 0.019, lounge3.z + side * 3.74, 5.7, 0.008, 0.035);
-        }
-        for (const placement of seatPlacements.filter((item) => item.group === "atrium" && item.name.startsWith(lounge3.id === "west" ? "West" : "East")))
-          bench(placement);
-        const table2 = lounge3.table;
-        cylinder("brass", table2.x, 0.27, table2.z, 0.055, 0.5);
-        cylinder("oak", table2.x, 0.53, table2.z, 0.29, 0.06);
-        cylinder("brass", table2.x, 0.04, table2.z, 0.2, 0.05);
-        collider(table2.x, 0.28, table2.z, 0.58, 0.56, 0.58);
-        shadow(table2.x, table2.z, 1, 1);
-        for (const planter of lounge3.planters) {
-          box("green", planter.x, 0.3, planter.z, 0.7, 0.6, 0.7, true);
-          const aisle = Math.sign(atriumLayout.garden.x - planter.x);
-          lightWash(planter.x + aisle * 0.354, 0.21, planter.z, 0.72, 0.52, aisle * Math.PI / 2, 0, true);
-          box("wood", planter.x, 0.61, planter.z, 0.6, 0.025, 0.6);
-          for (let i = 0;i < 9; i++) {
-            const a = i * Math.PI * 2 / 9;
-            solid("sphere", i % 2 ? "leaf" : "foliage", planter.x + Math.sin(a) * 0.12, 0.8, planter.z + Math.cos(a) * 0.12, 0.08, 0.27, 0.05, a, 0.72, "YXZ");
-          }
-          lightWash(planter.x, 0.025, planter.z, 1.55, 1.55, 0, -Math.PI / 2, true);
-        }
-        for (const z of [22, 26]) {
-          box("glow", lounge3.x, 8.34, z, 4, 0.035, 0.065);
-          lightPool(lounge3.x, 0.025, z, 5, 4);
-        }
+      for (const z of [22, 26]) {
+        box("glow", lounge3.x, 8.34, z, 4, 0.035, 0.065);
+        lightPool(lounge3.x, 0.025, z, 5, 4);
       }
     }
-    if (!expanded) {
-      if (!furnishings.place("plinth", 0, 7.5)) {
-        cylinder("brass", 0, 0.12, 7.5, 2.25, 0.22);
-        cylinder("ivory", 0, 0.38, 7.5, 2.04, 0.48);
-        cylinder("wood", 0, 0.245, 7.5, 2.075, 0.045);
-        cylinder("brass", 0, 0.58, 7.5, 2.055, 0.045);
-        cylinder("water", 0, 0.63, 7.5, 1.88, 0.045);
-      }
-      cylinder("brass", 0, 0.69, 7.5, 0.36, 0.08);
-      cylinder("ivory", 0, 0.83, 7.5, 0.23, 0.24);
-      cylinder("brass", 0, 1.01, 7.5, 0.065, 0.26);
-      solid("torus", "brass", 0, 1.84, 7.5, 0.78, 0.9, 1);
-      solid("torus", "brass", 0, 0.65, 7.5, 1.965, 1.965, 0.6, 0, -Math.PI / 2);
-      for (const radius2 of [0.9, 1.48])
-        solid("ring", "brass", 0, 0.657, 7.5, radius2, radius2, 1, 0, -Math.PI / 2);
-      lightPool(0, 0.662, 7.5, 3.8, 3.8);
-      physics.createCollider(R.ColliderDesc.cylinder(0.6, 2.25).setTranslation(0, 0.5, 7.5));
-      shadow(0, 7.5, 5.4, 5.4);
-      for (const radius2 of [2.58, 2.74])
-        solid("ring", "brass", 0, 0.032, 7.5, radius2, radius2, 1, 0, -Math.PI / 2);
-      for (let i = 0;i < 12; i++) {
-        const a = i * Math.PI / 6;
-        solid("box", "brass", Math.sin(a) * 2.66, 0.034, 7.5 + Math.cos(a) * 2.66, 0.035, 0.008, 0.1, a);
-      }
-      lightPool(0, 0.05, 7.5, 7.2, 7.2);
+  }
+  if (!expanded) {
+    if (!furnishings.place("plinth", 0, 7.5)) {
+      cylinder("brass", 0, 0.12, 7.5, 2.25, 0.22);
+      cylinder("ivory", 0, 0.38, 7.5, 2.04, 0.48);
+      cylinder("wood", 0, 0.245, 7.5, 2.075, 0.045);
+      cylinder("brass", 0, 0.58, 7.5, 2.055, 0.045);
+      cylinder("water", 0, 0.63, 7.5, 1.88, 0.045);
     }
-    if (!expanded) {
-      for (let i = 0;i < 3; i++)
-        box("ivory", -11, 0.06 * (i + 1), 11.8 + i * 0.4, 3.1, 0.12 * (i + 1), 0.42, true);
-      box("ivory", -11, 0.18, 14, 3.1, 0.36, 2.8, true);
+    cylinder("brass", 0, 0.69, 7.5, 0.36, 0.08);
+    cylinder("ivory", 0, 0.83, 7.5, 0.23, 0.24);
+    cylinder("brass", 0, 1.01, 7.5, 0.065, 0.26);
+    solid("torus", "brass", 0, 1.84, 7.5, 0.78, 0.9, 1);
+    solid("torus", "brass", 0, 0.65, 7.5, 1.965, 1.965, 0.6, 0, -Math.PI / 2);
+    for (const radius2 of [0.9, 1.48])
+      solid("ring", "brass", 0, 0.657, 7.5, radius2, radius2, 1, 0, -Math.PI / 2);
+    lightPool(0, 0.662, 7.5, 3.8, 3.8);
+    physics.createCollider(R.ColliderDesc.cylinder(0.6, 2.25).setTranslation(0, 0.5, 7.5));
+    shadow(0, 7.5, 5.4, 5.4);
+    for (const radius2 of [2.58, 2.74])
+      solid("ring", "brass", 0, 0.032, 7.5, radius2, radius2, 1, 0, -Math.PI / 2);
+    for (let i = 0;i < 12; i++) {
+      const a = i * Math.PI / 6;
+      solid("box", "brass", Math.sin(a) * 2.66, 0.034, 7.5 + Math.cos(a) * 2.66, 0.035, 0.008, 0.1, a);
     }
-    const doors = [], interactables = [], doorFrames = [], doorGlass = [], windowGlass = [];
+    lightPool(0, 0.05, 7.5, 7.2, 7.2);
+  }
+  if (!expanded) {
+    for (let i = 0;i < 3; i++)
+      box("ivory", -11, 0.06 * (i + 1), 11.8 + i * 0.4, 3.1, 0.12 * (i + 1), 0.42, true);
+    box("ivory", -11, 0.18, 14, 3.1, 0.36, 2.8, true);
+  }
+  const doors = [], interactables = [], doorFrames = [], doorGlass = [], windowGlass = [];
+  if (expanded) {
+    interactables.push(addFeatureKiosk({ x: 10, z: 20, box, cylinder, sign }));
+    collider(10, 0.5, 20, 1.8, 1, 1.4);
+    lightPool(10, 0.054, 20, 4, 4);
+  }
+  let createCollectProp = () => null, reserveProduct = () => null, staticProductCount = 0;
+  let worldProductAssets = Object.freeze({ status: "not-loaded" }), shelves = [];
+  const directory2 = expanded ? liftLayout.directory : { x: -5.3, z: 10.4 };
+  if (expanded || !furnishings.place("kiosk", directory2.x, directory2.z, 1, -1)) {
+    box("jade", directory2.x, 1.22, directory2.z, 0.94, 1.6, 0.22);
+    box("brass", directory2.x, 0.08, directory2.z, 0.96, 0.16, 0.68);
+    box("dark", directory2.x, 1.3, directory2.z + 0.13, 0.78, 1.25, 0.035);
+    if (expanded)
+      sign("DIRECTORY", directory2.x, 1.55, directory2.z + 0.16, 0.7, 0.16, false, 90);
+  }
+  collider(directory2.x, 1.025, directory2.z, 0.96, 2.05, 0.68);
+  shadow(directory2.x, directory2.z, 1.2, 0.9);
+  interactables.push({ id: "mall-directory", ...directory2, radius: 2.8 });
+  function shopBackdrop(zone) {
+    const panel = document.createElement("canvas");
+    panel.width = 1024;
+    panel.height = 576;
+    const ctx = panel.getContext("2d");
+    function rectangle(color, x, y, width, height) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, width, height);
+    }
+    rectangle(zone === "mili" ? "#a77c53" : "#eadcc3", 0, 0, 1024, 576);
+    if (zone === "gogo") {
+      ctx.fillStyle = "#466858";
+      ctx.beginPath();
+      ctx.roundRect(220, 98, 584, 450, [112, 112, 0, 0]);
+      ctx.fill();
+    }
+    for (const x of [24, 782]) {
+      ctx.fillStyle = "#735239";
+      ctx.beginPath();
+      ctx.roundRect(x, 84, 218, 398, zone === "mili" ? 4 : [65, 65, 0, 0]);
+      ctx.fill();
+      for (let shelf = 0;shelf < 3; shelf++) {
+        const y = 114 + shelf * 107;
+        const wash = ctx.createLinearGradient(0, y, 0, y + 90);
+        wash.addColorStop(0, "#edcb87");
+        wash.addColorStop(0.25, "#ad8250");
+        wash.addColorStop(1, "#78583e");
+        rectangle(wash, x + 13, y + 15, 192, 84);
+        for (let k = 0;k < 6; k++) {
+          const ox = x + 22 + 29 * k, h = 20 + (k + shelf) % 3 * 7;
+          ctx.fillStyle = ["#b7894c", "#e1cdaa", "#927754"][k % 3];
+          ctx.beginPath();
+          ctx.roundRect(ox, y + 94 - h, 17, h, 4);
+          ctx.fill();
+          rectangle("#e4cc99", ox + 2, y + 91 - h, 13, 4);
+        }
+        rectangle("#cfac77", x + 9, y + 98, 200, 5);
+      }
+    }
+    const map = setupArtworkTexture(T, new T.CanvasTexture(panel), artworkTier());
+    return mat(16777215, { map, roughness: 0.88 });
+  }
+  for (const store2 of spatial.stores) {
+    const zone = store2.id, x = storeCenterX(store2);
+    const lightNewMoon = expanded && zone === "newmoon";
+    const wall = expanded ? lightNewMoon ? "newMoonWall" : "cream" : zone === "mili" ? "cream" : "green";
+    if (lightNewMoon)
+      materials2.newMoonWall = mat(15131871);
     if (expanded) {
-      interactables.push(addFeatureKiosk({ x: 10, z: 20, box, cylinder, sign }));
-      collider(10, 0.5, 20, 1.8, 1, 1.4);
-      lightPool(10, 0.054, 20, 4, 4);
+      const floor = `${zone}Floor`;
+      finishForRole.set(floor, "shopFloor");
+      materials2[floor] = materials2.shellFloor.clone();
+      materials2[floor].color.set(interiorFloorColour(interiorStores["S" + store2.number]));
+      const y = 0.012, z = -5.1, width = 9.55, height = 0.025, depth = 10.25;
+      box(floor, x, y, z, width, height, depth);
+      bakedFloors.push({ minX: x - width / 2, maxX: x + width / 2, minZ: z - depth / 2, maxZ: z + depth / 2, y: y + height / 2 + 0.009 });
+    } else
+      for (let i = 0;i < 18; i++)
+        box(i % 3 ? "timber" : "timberAlt", x - 4.25 + i * 0.5, -0.005, -5, 0.49, 0.04, 10);
+    const backdrop = `${zone}Backdrop`;
+    let rearWall = wall;
+    if (lightNewMoon) {
+      materials2.newMoonOak = mat(interiorStores.S01.palette[0].hex);
+      materials2.newMoonBlue = mat(interiorStores.S01.palette[3].hex);
+    } else if (expanded) {
+      materials2[backdrop] = shopBackdrop(zone);
+      rearWall = backdrop;
     }
-    let createCollectProp = () => null, reserveProduct = () => null, staticProductCount = 0;
-    let worldProductAssets = Object.freeze({ status: "not-loaded" }), shelves = [];
-    const directory2 = expanded ? liftLayout.directory : { x: -5.3, z: 10.4 };
-    if (expanded || !furnishings.place("kiosk", directory2.x, directory2.z, 1, -1)) {
-      box("jade", directory2.x, 1.22, directory2.z, 0.94, 1.6, 0.22);
-      box("brass", directory2.x, 0.08, directory2.z, 0.96, 0.16, 0.68);
-      box("dark", directory2.x, 1.3, directory2.z + 0.13, 0.78, 1.25, 0.035);
-      if (expanded)
-        sign("DIRECTORY", directory2.x, 1.55, directory2.z + 0.16, 0.7, 0.16, false, 90);
-    }
-    collider(directory2.x, 1.025, directory2.z, 0.96, 2.05, 0.68);
-    shadow(directory2.x, directory2.z, 1.2, 0.9);
-    interactables.push({ id: "mall-directory", ...directory2, radius: 2.8 });
-    for (const store2 of spatial.stores) {
-      const zone = store2.id, x = storeCenterX(store2);
-      const lightNewMoon = expanded && zone === "newmoon";
-      const wall = expanded ? lightNewMoon ? "newMoonWall" : "cream" : zone === "mili" ? "cream" : "green";
-      if (lightNewMoon)
-        materials2.newMoonWall = mat(15131871);
+    box(rearWall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
+    for (const side of [-1, 1]) {
+      box(wall, x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5, true);
       if (expanded) {
-        const floor = `${zone}Floor`;
-        finishForRole.set(floor, "shopFloor");
-        materials2[floor] = materials2.shellFloor.clone();
-        materials2[floor].color.set(interiorFloorColour(interiorStores["S" + store2.number]));
-        const y = 0.012, z = -5.1, width = 9.55, height = 0.025, depth = 10.25;
-        box(floor, x, y, z, width, height, depth);
-        bakedFloors.push({ minX: x - width / 2, maxX: x + width / 2, minZ: z - depth / 2, maxZ: z + depth / 2, y: y + height / 2 + 0.009 });
-      } else
-        for (let i = 0;i < 18; i++)
-          box(i % 3 ? "timber" : "timberAlt", x - 4.25 + i * 0.5, -0.005, -5, 0.49, 0.04, 10);
-      const backdrop = `${zone}Backdrop`;
-      let rearWall = wall;
-      if (lightNewMoon) {
-        materials2.newMoonOak = mat(interiorStores.S01.palette[0].hex);
-        materials2.newMoonBlue = mat(interiorStores.S01.palette[3].hex);
-      } else if (expanded) {
-        materials2[backdrop] = shopBackdrop(zone);
-        rearWall = backdrop;
-      }
-      box(rearWall, x, 2.85, -10.5, 10, 5.7, 0.25, true);
-      for (const side of [-1, 1]) {
-        box(wall, x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5, true);
-        if (expanded) {
-          shopVisibility.addWall(Number(store2.number), x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5);
-          const windowX = x + side * 3.55;
-          windowGlass.push({ position: new T.Vector3(windowX, 2.6, 0), scale: new T.Vector3(2.4, 5.2, 0.12) });
-          collider(windowX, 2.6, 0, 2.4, 5.2, 0.12);
-          box("shellWall", x + side * 3.55, 0.26, 0.1, 2.4, 0.52, 0.2);
+        shopVisibility.addWall(Number(store2.number), x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5);
+        const windowX = x + side * 3.55;
+        windowGlass.push({ position: new T.Vector3(windowX, 2.6, 0), scale: new T.Vector3(2.4, 5.2, 0.12) });
+        collider(windowX, 2.6, 0, 2.4, 5.2, 0.12);
+        box("shellWall", x + side * 3.55, 0.26, 0.1, 2.4, 0.52, 0.2);
+        for (const edge of [-1, 1]) {
+          box("green", x + side * 3.55 + edge * 1.15, 2.65, 0.1, 0.11, 5.05, 0.18);
+          box("brass", x + side * 3.55, 2.6 + edge * 2.49, 0.12, 2.3, 0.06, 0.16);
+        }
+        box("brass", x + side * 3.55, 2.58, 0.12, 2.3, 0.035, 0.12);
+      } else {
+        for (const face of [-1, 1]) {
+          box("glass", x + side * 3.6, 2.08, face * 0.23, 2.12, 3.5, 0.055);
           for (const edge of [-1, 1]) {
-            box("green", x + side * 3.55 + edge * 1.15, 2.65, 0.1, 0.11, 5.05, 0.18);
-            box("brass", x + side * 3.55, 2.6 + edge * 2.49, 0.12, 2.3, 0.06, 0.16);
+            box("brass", x + side * 3.6 + edge * 1.1, 2.08, face * 0.28, 0.035, 3.57, 0.045);
+            box("brass", x + side * 3.6, 2.08 + edge * 1.785, face * 0.28, 2.23, 0.035, 0.045);
           }
-          box("brass", x + side * 3.55, 2.58, 0.12, 2.3, 0.035, 0.12);
+        }
+      }
+      box("brass", x + side * 2.36, 1.9, 0.22, 0.065, 3.8, 0.08);
+      box("glow", x + side * 3.6, 3.67, 0.28, 2.12, 0.035, 0.04);
+      lightPool(x + side * 3.6, 0.053, 1.15, 3.4, 3.7);
+    }
+    if (expanded) {
+      box("green", x, 4.7, 0, 9.7, 1.55, 0.5, true);
+      box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
+      shopVisibility.addWall(Number(store2.number), x, 4.7, 0, 9.7, 1.55, 0.5, true);
+    }
+    ceilingBox("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4, null);
+    if (expanded) {
+      shopVisibility.addWall(Number(store2.number), x, 2.85, -10.5, 10, 5.7, 0.25);
+      shopVisibility.addCeiling(Number(store2.number), x, 5.8, -5.2, 9.7, 10.4);
+    }
+    activeShopSlot = expanded ? Number(store2.number) : null;
+    if (expanded && zone === "newmoon") {
+      for (const z of [-2.5, -5.4, -8.3]) {
+        ceilingBox("ivory", x, 5.63, z, 7.9, 0.12, 2.35, null);
+        for (const side of [-1, 1]) {
+          box("brass", x + side * 3.85, 5.55, z, 0.06, 0.06, 2.24);
+          box("brass", x, 5.55, z + side * 1.12, 7.75, 0.06, 0.06);
+        }
+      }
+    }
+    if (expanded) {
+      for (const side of [-1, 1]) {
+        const bx = x + 3.57 * side, bz = -0.66;
+        if (zone === "newmoon" || zone === "mili" && side < 0) {
+          const casing = lightNewMoon ? "newMoonOak" : "oak";
+          box(casing, bx, 1.98, bz - 0.32, 1.96, 3.45, 0.09);
+          for (const edge of [-1, 1])
+            box(casing, bx + edge * 0.96, 1.98, bz, 0.075, 3.45, 0.68);
+          collider(bx, 1.98, bz, 2, 3.46, 0.7);
+          for (const y of [0.63, 1.4, 2.17, 2.94]) {
+            box(casing, bx, y, bz, 1.95, 0.07, 0.7);
+            box("glow", bx, y - 0.05, bz + 0.3, 1.84, 0.025, 0.035);
+            if (lightNewMoon)
+              lightWash(bx, y - 0.28, bz + 0.38, 1.85, 0.52, 0, 0, true);
+            for (const dx of [-0.51, 0, 0.51]) {
+              cylinder(zone === "newmoon" ? "brass" : "cream", bx + dx, y + 0.19, bz + 0.11, 0.14, 0.29);
+              cylinder(zone === "newmoon" ? "wood" : "cream", bx + dx, y + 0.36, bz + 0.11, 0.095, 0.075);
+            }
+          }
         } else {
-          for (const face of [-1, 1]) {
-            box("glass", x + side * 3.6, 2.08, face * 0.23, 2.12, 3.5, 0.055);
-            for (const edge of [-1, 1]) {
-              box("brass", x + side * 3.6 + edge * 1.1, 2.08, face * 0.28, 0.035, 3.57, 0.045);
-              box("brass", x + side * 3.6, 2.08 + edge * 1.785, face * 0.28, 2.23, 0.035, 0.045);
-            }
-          }
-        }
-        box("brass", x + side * 2.36, 1.9, 0.22, 0.065, 3.8, 0.08);
-        box("glow", x + side * 3.6, 3.67, 0.28, 2.12, 0.035, 0.04);
-        lightPool(x + side * 3.6, 0.053, 1.15, 3.4, 3.7);
-      }
-      if (expanded) {
-        box("green", x, 4.7, 0, 9.7, 1.55, 0.5, true);
-        box("brass", x, 5.45, 0.3, 9.8, 0.045, 0.08);
-        shopVisibility.addWall(Number(store2.number), x, 4.7, 0, 9.7, 1.55, 0.5, true);
-      }
-      ceilingBox("cream", x, 5.8, -5.2, 9.7, 0.22, 10.4, null);
-      if (expanded) {
-        shopVisibility.addWall(Number(store2.number), x, 2.85, -10.5, 10, 5.7, 0.25);
-        shopVisibility.addCeiling(Number(store2.number), x, 5.8, -5.2, 9.7, 10.4);
-      }
-      activeShopSlot = expanded ? Number(store2.number) : null;
-      if (expanded && zone === "newmoon") {
-        for (const z of [-2.5, -5.4, -8.3]) {
-          ceilingBox("ivory", x, 5.63, z, 7.9, 0.12, 2.35, null);
-          for (const side of [-1, 1]) {
-            box("brass", x + side * 3.85, 5.55, z, 0.06, 0.06, 2.24);
-            box("brass", x, 5.55, z + side * 1.12, 7.75, 0.06, 0.06);
-          }
-        }
-      }
-      if (expanded) {
-        for (const side of [-1, 1]) {
-          const bx = x + 3.57 * side, bz = -0.66;
-          if (zone === "newmoon" || zone === "mili" && side < 0) {
-            const casing = lightNewMoon ? "newMoonOak" : "oak";
-            box(casing, bx, 1.98, bz - 0.32, 1.96, 3.45, 0.09);
-            for (const edge of [-1, 1])
-              box(casing, bx + edge * 0.96, 1.98, bz, 0.075, 3.45, 0.68);
-            collider(bx, 1.98, bz, 2, 3.46, 0.7);
-            for (const y of [0.63, 1.4, 2.17, 2.94]) {
-              box(casing, bx, y, bz, 1.95, 0.07, 0.7);
-              box("glow", bx, y - 0.05, bz + 0.3, 1.84, 0.025, 0.035);
-              if (lightNewMoon)
-                lightWash(bx, y - 0.28, bz + 0.38, 1.85, 0.52, 0, 0, true);
-              for (const dx of [-0.51, 0, 0.51]) {
-                cylinder(zone === "newmoon" ? "brass" : "cream", bx + dx, y + 0.19, bz + 0.11, 0.14, 0.29);
-                cylinder(zone === "newmoon" ? "wood" : "cream", bx + dx, y + 0.36, bz + 0.11, 0.095, 0.075);
-              }
-            }
-          } else {
-            box("brass", bx, 0.12, bz, 1.6, 0.18, 0.9);
-            box("shellFloor", bx, 0.41, bz, 1.62, 0.44, 0.91);
-            collider(bx, 0.32, bz, 1.62, 0.64, 0.92);
-            for (const dx of [-0.38, 0.29]) {
-              cylinder("pot", bx + dx, 0.84, bz, 0.22, 0.4);
-              for (const [offset, height] of [[-0.16, 1.38], [0.1, 1.6], [0.22, 1.32]]) {
-                sphere("leaf", bx + dx + offset, height, bz, 0.21, 0.54, 0.14);
-              }
-            }
-          }
-        }
-        if (!expanded && zone === "mili") {
-          for (const z of [-2.75, -5.05, -7.35]) {
-            for (const y of [1.35, 2.17, 3]) {
-              box("oak", x - 4.45, y, z, 0.45, 0.085, 2.15);
-              box("glow", x - 4.24, y - 0.055, z, 0.025, 0.024, 2.07);
-              const rack = y === 3 && z !== -7.35 && furnishings.place("pantryRack", x - 4.43, z, 1, 1, y + 0.0425, Math.PI / 2, activeShopSlot);
-              if (!rack)
-                for (const dz of [-0.72, -0.23, 0.23, 0.72])
-                  cylinder("cream", x - 4.43, y + 0.18, z + dz, 0.14, 0.265);
+          box("brass", bx, 0.12, bz, 1.6, 0.18, 0.9);
+          box("shellFloor", bx, 0.41, bz, 1.62, 0.44, 0.91);
+          collider(bx, 0.32, bz, 1.62, 0.64, 0.92);
+          for (const dx of [-0.38, 0.29]) {
+            cylinder("pot", bx + dx, 0.84, bz, 0.22, 0.4);
+            for (const [offset, height] of [[-0.16, 1.38], [0.1, 1.6], [0.22, 1.32]]) {
+              sphere("leaf", bx + dx + offset, height, bz, 0.21, 0.54, 0.14);
             }
           }
         }
       }
+      if (!expanded && zone === "mili") {
+        for (const z of [-2.75, -5.05, -7.35]) {
+          for (const y of [1.35, 2.17, 3]) {
+            box("oak", x - 4.45, y, z, 0.45, 0.085, 2.15);
+            box("glow", x - 4.24, y - 0.055, z, 0.025, 0.024, 2.07);
+            const rack = y === 3 && z !== -7.35 && furnishings.place("pantryRack", x - 4.43, z, 1, 1, y + 0.0425, Math.PI / 2, activeShopSlot);
+            if (!rack)
+              for (const dz of [-0.72, -0.23, 0.23, 0.72])
+                cylinder("cream", x - 4.43, y + 0.18, z + dz, 0.14, 0.265);
+          }
+        }
+      }
+    }
+    for (const side of [-1, 1]) {
+      box("oak", x + side * 4.665, 0.13, -5.25, 0.055, 0.2, 10.15);
+      box("brass", x + side * 4.63, 0.245, -5.25, 0.025, 0.025, 10.15);
+      box("oak", x + side * 4.65, 5.37, -5.25, 0.09, 0.16, 10.15);
+      box("brass", x + side * 4.59, 5.26, -5.25, 0.025, 0.025, 10.15);
+      if (!lightNewMoon) {
+        box("oak", x + side * 4.64, 1.08, -5.25, 0.075, 0.095, 10.15);
+        box("brass", x + side * 4.59, 1.15, -5.25, 0.025, 0.018, 10.15);
+      }
+      if (!lightNewMoon && (side > 0 || zone === "mili"))
+        for (const z of [-2.2, -5.2, -8.2]) {
+          for (const edge of [-1, 1]) {
+            box("oak", x + side * 4.635, 2.85, z + edge * 1.13, 0.045, 2.55, 0.045);
+            box("oak", x + side * 4.635, 2.85 + edge * 1.275, z, 0.045, 0.045, 2.3);
+          }
+          if (z !== -5.2) {
+            if (!furnishings.place("wallLight", x + side * 4.57, z, 1, 1, 2.52, -side * Math.PI / 2, activeShopSlot)) {
+              box("brass", x + side * 4.57, 3.02, z, 0.09, 0.94, 0.25);
+              box("glow", x + side * 4.49, 3.02, z, 0.075, 0.67, 0.16);
+            }
+            lightPool(x + side * 4.585, 3.18, z, 2.1, 2.8, -side * Math.PI / 2, 0);
+          }
+        }
+    }
+    box("oak", x, 0.13, -10.33, 9.3, 0.16, 0.06);
+    box("oak", x, 5.37, -10.31, 9.3, 0.16, 0.09);
+    box("brass", x, 5.26, -10.25, 9.3, 0.025, 0.025);
+    box("glow", x, 5.19, -10.22, 8.9, 0.025, 0.025);
+    for (const side of [-1, 1]) {
+      box("brass", x + side * 3.08, 3.8, -10.25, 0.28, 0.94, 0.1);
+      box("glow", x + side * 3.08, 3.8, -10.17, 0.17, 0.68, 0.075);
+      lightPool(x + side * 3.08, 3.96, -10.18, 2.5, 2.6, 0, 0);
+    }
+    if (!expanded) {
+      const rugX = x + (zone === "newmoon" ? -0.35 : 0);
+      const rugZ = zone === "newmoon" ? -5.1 : -5.9;
+      const rugWidth = zone === "newmoon" ? 5.2 : 6.8, rugDepth = zone === "newmoon" ? 5.4 : 4.8;
+      box("oak", rugX, 0.025, rugZ, rugWidth, 0.012, rugDepth);
+      box(zone === "gogo" ? "rugSage" : "rugSand", rugX, 0.034, rugZ, rugWidth - 0.14, 0.006, rugDepth - 0.14);
       for (const side of [-1, 1]) {
-        box("oak", x + side * 4.665, 0.13, -5.25, 0.055, 0.2, 10.15);
-        box("brass", x + side * 4.63, 0.245, -5.25, 0.025, 0.025, 10.15);
-        box("oak", x + side * 4.65, 5.37, -5.25, 0.09, 0.16, 10.15);
-        box("brass", x + side * 4.59, 5.26, -5.25, 0.025, 0.025, 10.15);
-        if (!lightNewMoon) {
-          box("oak", x + side * 4.64, 1.08, -5.25, 0.075, 0.095, 10.15);
-          box("brass", x + side * 4.59, 1.15, -5.25, 0.025, 0.018, 10.15);
+        const trimY = decalHeight(0.037) + 0.002;
+        box("timber", rugX + side * (rugWidth / 2 - 0.19), trimY, rugZ, 0.025, 0.004, rugDepth - 0.355);
+        box("timber", rugX, trimY, rugZ + side * (rugDepth / 2 - 0.19), rugWidth - 0.405, 0.004, 0.025);
+        for (const end of [-1, 1]) {
+          const cornerX = rugX + side * (rugWidth / 2 - 0.43), cornerZ = rugZ + end * (rugDepth / 2 - 0.43);
+          solid("box", "oak", cornerX, 0.041, cornerZ, 0.16, 0.004, 0.16, Math.PI / 4);
         }
-        if (!lightNewMoon && (side > 0 || zone === "mili"))
-          for (const z of [-2.2, -5.2, -8.2]) {
-            for (const edge of [-1, 1]) {
-              box("oak", x + side * 4.635, 2.85, z + edge * 1.13, 0.045, 2.55, 0.045);
-              box("oak", x + side * 4.635, 2.85 + edge * 1.275, z, 0.045, 0.045, 2.3);
-            }
-            if (z !== -5.2) {
-              if (!furnishings.place("wallLight", x + side * 4.57, z, 1, 1, 2.52, -side * Math.PI / 2, activeShopSlot)) {
-                box("brass", x + side * 4.57, 3.02, z, 0.09, 0.94, 0.25);
-                box("glow", x + side * 4.49, 3.02, z, 0.075, 0.67, 0.16);
-              }
-              lightPool(x + side * 4.585, 3.18, z, 2.1, 2.8, -side * Math.PI / 2, 0);
-            }
+      }
+      for (let i = 0;i < 14; i++)
+        for (const end of [-1, 1]) {
+          box("timber", rugX + (i - 6.5) * (rugWidth - 0.6) / 13, 0.034, rugZ + end * (rugDepth / 2 + 0.045), 0.035, 0.006, 0.12);
+        }
+    }
+    box("brass", x, 0.03, 0.25, 4.7, 0.025, 0.7);
+    const logo = zone === "newmoon" ? "new-moon-logo.svg" : `${zone}-logo.jpg`;
+    if (!expanded && !furnishings.place("storeSign", x, 0.28, 1, 1, 4.065, null, activeShopSlot)) {
+      box("brass", x, 4.67, 0.3, 2.52, 1.21, 0.09);
+      box("cream", x, 4.67, 0.36, 2.42, 1.11, 0.05);
+    }
+    if (!expanded)
+      art(logo, x, 4.67, 0.4, 2.2);
+    if (!expanded)
+      box("glow", x, 5.36, 0.36, 2.42, 0.025, 0.045);
+    box("brass", x, 4.02, 0.29, 9.3, 0.025, 0.04);
+    const label = sign(`${store2.number}  /  ${store2.label.toUpperCase()}`, x, expanded ? 4.07 : 3.5, 0.38, expanded ? 1.9 : 3.9, expanded ? 0.14 : 0.48, true, 80);
+    roomSigns.push({ zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0 });
+    const leaves = [];
+    for (const side of [-1, 1]) {
+      const group = new T.Group;
+      group.position.set(x + side * 1.16, 1.8, 0.05);
+      scene.add(group);
+      const paneScale = new T.Vector3(2.25, 3.5, 0.06);
+      if (expanded) {
+        doorGlass.push({ position: group.position, scale: paneScale });
+      } else {
+        const glass = new T.Mesh(geometry.box, materials2.glass);
+        glass.scale.copy(paneScale);
+        group.add(glass);
+      }
+      doorFrames.push(group);
+      const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, 0.05));
+      physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
+      leaves.push({ group, body, side });
+    }
+    const occupied = createDoorwayOccupancy(R, physics, { x, y: 1.8, z: 0.05 }, [2.29, 1.75, 0.08], leaves);
+    const door = { zone, x, open: 0, targetOpen: false, leaves, occupied };
+    doors.push(door);
+    if (expanded && zone === "newmoon") {
+      cylinder("brass", x + 1.8, 4.46, -4, 0.028, 2.35);
+      cylinder("brass", x + 1.8, 3.25, -4, 1.05, 0.14);
+      cylinder("glow", x + 1.8, 3.17, -4, 1.01, 0.04);
+    } else if (expanded && zone === "gogo") {
+      for (const z of [-2.1, -3.7, -5.3])
+        pendant(x + 2.7, z, 3.35);
+    } else if (!expanded) {
+      pendant(x, -4, 4.2);
+      pendant(x, -8, 4.2);
+    }
+    box("brass", x, 0.22, -10.32, 9.3, 0.045, 0.04);
+    if (zone === "newmoon") {
+      lightPool(x, 0.054, -8.6, 7.5, 2.1);
+      if (lightNewMoon) {
+        const image3 = textures.get("new-moon-nz-425g-front.jpg").image;
+        textures.set("new-moon-heritage-panel", setupArtworkTexture(T, new T.CanvasTexture(heritagePanel(image3)), artworkTier()));
+        const shop = interiorStores.S01;
+        const [ox, oy, oz] = shop.frame.world_origin_m;
+        const worldPoint = ([px, py, pz]) => [ox + px, oy + py, oz + pz];
+        for (const panel of shop.storyPanels) {
+          const yaw = panel.yawDeg * Math.PI / 180;
+          box(panel.material, ...worldPoint(panel.frame), ...panel.size);
+          art(panel.texture, ...worldPoint(panel.art), panel.width, yaw);
+          if (panel.caption) {
+            const serving = sign(newMoonExhibit[panel.id].tagline.toUpperCase(), ...worldPoint(panel.caption), 2.8, 0.19, true, 54);
+            serving.rotation.y = yaw;
           }
+          const [px, pz] = panel.interactionXZ;
+          interactables.push({ id: panel.id, x: ox + px, z: oz + pz, radius: panel.radius });
+        }
+      } else {
+        const cover = art("new-moon-brand-cover.jpg", x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
+        box("brass", x - 4.665, 2.8, -5.8, 0.035, cover.scale.y + 0.14, 3.74);
+        box("oak", x - 4.67, 2.8, -5.8, 0.04, cover.scale.y + 0.28, 3.88);
       }
-      box("oak", x, 0.13, -10.33, 9.3, 0.16, 0.06);
-      box("oak", x, 5.37, -10.31, 9.3, 0.16, 0.09);
-      box("brass", x, 5.26, -10.25, 9.3, 0.025, 0.025);
-      box("glow", x, 5.19, -10.22, 8.9, 0.025, 0.025);
-      for (const side of [-1, 1]) {
-        box("brass", x + side * 3.08, 3.8, -10.25, 0.28, 0.94, 0.1);
-        box("glow", x + side * 3.08, 3.8, -10.17, 0.17, 0.68, 0.075);
-        lightPool(x + side * 3.08, 3.96, -10.18, 2.5, 2.6, 0, 0);
+      let sampleCan = null;
+      if (expanded) {
+        for (const [material, y, height, radius2] of [["brass", 0.085, 0.17, 0.76], ["shellFloor", 0.63, 0.96, 0.78], ["ivory", 1.14, 0.09, 0.8]]) {
+          box(material, x + 2.65, y, -4, radius2 * 2, height, 2);
+          for (const end of [-1, 1])
+            cylinder(material, x + 2.65, y, -4 + end, radius2, height);
+        }
+        collider(x + 2.65, 0.57, -4, 1.56, 1.14, 3.3);
+        const top = 1.185;
+        sampleCan = [x + 2.65, top, -3.05];
+        furnishings.place("teaKettle", x + 2.8, -4.55, 1, 1, top, -0.45, activeShopSlot);
+        for (const [dx, dz] of [[-0.35, 0.54], [0.15, 0.73], [-0.29, -0.05]]) {
+          furnishings.place("teaCup", x + 2.65 + dx, -4 + dz, 1, 1, top, 0.2, activeShopSlot);
+        }
+      } else {
+        box("green", x + 2.8, 0.55, -4, 2.1, 1.1, 1.25, true);
+        box("cream", x + 2.8, 1.15, -4, 2.2, 0.12, 1.4);
+        for (let i = 0;i < 9; i++)
+          box("brass", x + 1.9 + i * 0.22, 0.56, -3.35, 0.025, 1, 0.025);
+        box("brass", x + 2.8, 1.08, -3.285, 2.17, 0.045, 0.03);
+        box("brass", x + 2.8, 0.09, -3.36, 2.1, 0.08, 0.03);
       }
-      if (!expanded) {
-        const rugX = x + (zone === "newmoon" ? -0.35 : 0);
-        const rugZ = zone === "newmoon" ? -5.1 : -5.9;
-        const rugWidth = zone === "newmoon" ? 5.2 : 6.8, rugDepth = zone === "newmoon" ? 5.4 : 4.8;
-        box("oak", rugX, 0.025, rugZ, rugWidth, 0.012, rugDepth);
-        box(zone === "gogo" ? "rugSage" : "rugSand", rugX, 0.034, rugZ, rugWidth - 0.14, 0.006, rugDepth - 0.14);
+      cylinder("pot", x + 3.48, 1.38, -4, 0.15, 0.32);
+      cylinder("brass", x + 3.48, 1.545, -4, 0.155, 0.025);
+      sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
+      const { addProducts } = await productsTask;
+      const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
+      const firstProduct = scene.children.length;
+      productDisplay = await addProducts(T, scene, textures, materials2.brass, displayProducts, [], sampleCan, activeShopSlot, artworkTier);
+      queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter((mesh) => mesh.isMesh));
+      interactables.push(...productDisplay.interactables);
+      for (const c of productDisplay.colliders)
+        collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
+      if (expanded)
+        for (const shelf of productDisplay.shelves) {
+          const shelfX = (shelf.min.x + shelf.max.x) / 2, width = shelf.max.x - shelf.min.x;
+          const shelfZ = shelf.max.z + 0.024;
+          for (const fraction of [0.39, 0.63, 0.88]) {
+            const y = shelf.max.y * fraction;
+            box("glow", shelfX, y, shelfZ, width * 0.87, 0.022, 0.026);
+            lightWash(shelfX, y - 0.2, shelfZ + 0.02, width * 0.9, 0.44, 0, 0, true);
+          }
+        }
+      for (const [index, country] of ["NEW ZEALAND", "AUSTRALIA", "SOUTH AFRICA", "MEXICO"].entries()) {
+        sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, 0.16, true, expanded ? 78 : undefined);
+      }
+      staticProductCount = productDisplay.displayedProducts;
+      worldProductAssets = productDisplay.assets;
+      shelves = productDisplay.shelves;
+      createCollectProp = productDisplay.createCollectProp;
+      reserveProduct = productDisplay.reserveProduct;
+      plant(x - 3.6, -2.3);
+    } else {
+      const cover = `${zone}-brand-cover.jpg`;
+      box("brass", x, 2.85, -10.3, 3.65, 3.65, 0.08);
+      art(cover, x, 2.85, -10.24, 3.48);
+      box("oak", x, 2.85, -10.35, 3.88, 3.88, 0.055);
+      box("oak", x, 0.92, -10.09, 4, 0.075, 0.28);
+      box("glow", x, 4.77, -10.16, 3.7, 0.025, 0.07);
+      interactables.push({ id: zone, x, z: -9, radius: 2.5 });
+      for (const placement of seatPlacements.filter((item) => item.group === zone))
+        bench(placement);
+      if (expanded && zone === "mili") {
+        const { frame, cookbase } = interiorStores.S02;
+        const [originX, , originZ] = frame.world_origin_m;
+        const [fixtureX, , fixtureZ] = cookbase.xyz;
+        const [standingX, standingZ] = cookbase.standing;
+        const counterX = originX + fixtureX, counterZ = originZ + fixtureZ;
+        sign("COMPARE THE TWO MILI SAUCES", counterX, 0.91, counterZ + 1.307, 1.5, 0.14, true, 60);
+        interactables.push({ id: "mili-sauce-story", x: originX + standingX, z: originZ + standingZ, radius: 1.12 });
+        box("jadeAlt", x, 0.57, -5.5, 1.7, 1.12, 2.55);
+        box("brass", x, 0.095, -5.5, 1.72, 0.15, 2.57);
+        for (let dx = -0.8;dx <= 0.85; dx += 0.2)
+          box("courtStone", x + dx, 0.6, -4.218, 0.012, 0.96, 0.015);
+        for (let y = 0.22;y < 1.13; y += 0.2)
+          box("courtStone", x, y, -4.218, 1.68, 0.014, 0.015);
+        box("shellFloor", x, 1.16, -5.5, 1.82, 0.12, 2.69);
+        collider(x, 0.57, -5.5, 1.72, 1.14, 2.55);
+      } else if (!expanded) {
+        if (!furnishings.place("coffeeTable", x, -5.5, 1, 1, 0, null, activeShopSlot)) {
+          cylinder("brass", x, 0.4, -5.5, 0.08, 0.75);
+          cylinder("oak", x, 0.8, -5.5, 0.8, 0.1);
+          cylinder("brass", x, 0.853, -5.5, 0.805, 0.025);
+        }
+        collider(x, 0.4375, -5.5, 1.61, 0.875, 1.61);
+        cylinder("pot", x, 0.99, -5.5, 0.115, 0.24);
+        sphere("foliage", x, 1.2, -5.5, 0.2, 0.23, 0.18);
+      }
+      plant(x - 3.8, -8.8, 1.15);
+      plant(x + 3.8, -8.8, 1.15);
+      plant(x + 3.8, -2.5);
+      if (zone === "gogo") {
+        if (expanded) {
+          const { frame, anchor, gogoStools } = interiorStores.S03;
+          const [standingX, standingZ] = anchor.standing;
+          const [originX, originY, originZ] = frame.world_origin_m;
+          art("gogo-logo.jpg", originX - 2.213, originY + 1.6, originZ + 2.669, 0.49, anchor.yaw_deg * Math.PI / 180);
+          interactables.push({ id: "gogo-potong-story", x: frame.world_origin_m[0] + standingX, z: frame.world_origin_m[2] + standingZ, radius: 1 });
+          const cx = x + 3.15, cz = -2.4;
+          box("water", cx, 0.59, cz, 1.55, 1.16, 3.25);
+          box("brass", cx, 0.1, cz, 1.57, 0.16, 3.29);
+          box("cream", cx, 1.2, cz, 1.67, 0.12, 3.4);
+          furnishings.place("coffeeMachine", cx + 0.16, cz + 0.55, 1, 1, 1.26, -Math.PI / 2, activeShopSlot);
+          collider(cx, 0.59, cz, 1.55, 1.18, 3.25);
+          for (let dz = -1.55;dz < 1.61; dz += 0.1)
+            box("jadeAlt", cx - 0.79, 0.65, cz + dz, 0.045, 0.88, 0.045);
+          for (let dx = -0.73;dx < 0.77; dx += 0.1)
+            box("jadeAlt", cx + dx, 0.65, cz + 1.64, 0.045, 0.88, 0.045);
+          for (const stool of gogoStools) {
+            const sx = originX + stool.position_m[0], sz = originZ + stool.position_m[2];
+            const [width, height, depth] = stool.envelope_whd_m;
+            const angle = stool.yaw_deg * Math.PI / 180;
+            const placed = furnishings.place("barStool", sx, sz, 1, 1, 0, angle, activeShopSlot);
+            if (!placed) {
+              cylinder("brass", sx, 0.36, sz, 0.042, 0.65);
+              cylinder("brass", sx, 0.06, sz, 0.23, 0.065);
+              cylinder("seat", sx, 0.72, sz, 0.22, 0.12);
+            }
+            const pan = collider(sx, height / 2, sz, width, height, depth);
+            pan.setRotation({ x: 0, y: Math.sin(angle / 2), z: 0, w: Math.cos(angle / 2) });
+            seats.push(gogoStoolSeat(frame, stool, pan.handle, placed));
+          }
+        }
+        for (let z = -9.5;z < -2; z += 0.38)
+          box("oak", x - 4.61, 2.6, z, 0.08, 4.7, 0.055);
+        for (const dx of [-2, 0, 2]) {
+          cylinder("pot", x + dx, 0.3, -9.2, 0.28, 0.6);
+          cylinder("brass", x + dx, 0.6, -9.2, 0.29, 0.035);
+          sphere("leaf", x + dx, 0.9, -9.2, 0.42, 0.55, 0.4);
+        }
+        for (const z of [-8.9, -4.3]) {
+          box("oak", x - 4.42, 1.78, z, 0.42, 0.09, 1.5);
+          box("brass", x - 4.39, 1.66, z, 0.035, 0.2, 1.25);
+          for (const dz of [-0.42, 0.42]) {
+            cylinder("pot", x - 4.4, 1.98, z + dz, 0.14, 0.3);
+            sphere("foliage", x - 4.4, 2.27, z + dz, 0.21, 0.34, 0.23);
+          }
+        }
+      } else {
+        for (let dx = -4;dx <= 4; dx += 0.6)
+          box("oak", x + dx, 1.15, -10.31, 0.04, 1.9, 0.04);
+        box("oak", x, 1.05, -10.28, 9.1, 0.08, 0.06);
         for (const side of [-1, 1]) {
-          const trimY = decalHeight(0.037) + 0.002;
-          box("timber", rugX + side * (rugWidth / 2 - 0.19), trimY, rugZ, 0.025, 0.004, rugDepth - 0.355);
-          box("timber", rugX, trimY, rugZ + side * (rugDepth / 2 - 0.19), rugWidth - 0.405, 0.004, 0.025);
-          for (const end of [-1, 1]) {
-            const cornerX = rugX + side * (rugWidth / 2 - 0.43), cornerZ = rugZ + end * (rugDepth / 2 - 0.43);
-            solid("box", "oak", cornerX, 0.041, cornerZ, 0.16, 0.004, 0.16, Math.PI / 4);
-          }
+          for (const y of [1.18, 2.75])
+            box("oak", x + side * 3.32, y, -10.25, 1.65, 0.055, 0.075);
+          for (const dx of [-0.8, 0.8])
+            box("oak", x + side * 3.32 + dx, 1.965, -10.25, 0.045, 1.6, 0.075);
         }
-        for (let i = 0;i < 14; i++)
-          for (const end of [-1, 1]) {
-            box("timber", rugX + (i - 6.5) * (rugWidth - 0.6) / 13, 0.034, rugZ + end * (rugDepth / 2 + 0.045), 0.035, 0.006, 0.12);
-          }
       }
-      box("brass", x, 0.03, 0.25, 4.7, 0.025, 0.7);
-      const logo = zone === "newmoon" ? "new-moon-logo.svg" : `${zone}-logo.jpg`;
-      if (!expanded && !furnishings.place("storeSign", x, 0.28, 1, 1, 4.065, null, activeShopSlot)) {
-        box("brass", x, 4.67, 0.3, 2.52, 1.21, 0.09);
-        box("cream", x, 4.67, 0.36, 2.42, 1.11, 0.05);
+      if (!expanded && zone === "mili") {
+        cylinder("green", x, 0.25, -1.35, 0.075, 0.34);
+        cylinder("oak", x, 0.45, -1.35, 0.038, 0.09);
+        cylinder("brass", x, 0.505, -1.35, 0.04, 0.025);
+      } else if (!expanded && zone === "gogo") {
+        cylinder("cream", x - 0.11, 0.07, -1.35, 0.034, 0.14);
+        cylinder("brass", x - 0.11, 0.144, -1.35, 0.035, 0.012);
+        box("ivory", x + 0.12, 0.08, -1.35, 0.055, 0.16, 0.045);
+        box("oak", x + 0.12, 0.08, -1.325, 0.035, 0.11, 0.006);
       }
-      if (!expanded)
-        art(logo, x, 4.67, 0.4, 2.2);
-      if (!expanded)
-        box("glow", x, 5.36, 0.36, 2.42, 0.025, 0.045);
-      box("brass", x, 4.02, 0.29, 9.3, 0.025, 0.04);
-      const label = sign(`${store2.number}  /  ${store2.label.toUpperCase()}`, x, expanded ? 4.07 : 3.5, 0.38, expanded ? 1.9 : 3.9, expanded ? 0.14 : 0.48, true, 80);
-      roomSigns.push({ zone, mesh: label, left: 0, right: 0, top: 0, bottom: 0 });
+    }
+    if (expanded)
+      addOriginalShopDetails(zone, x, { box, cylinder, solid, collider, seats });
+    activeShopSlot = null;
+  }
+  let slide;
+  if (expanded) {
+    let warmStrip = function(x, z, width, depth) {
+      const panels = ceilingBox("glow", x, 8.34, z, width, 0.035, depth, liftLayout.roofOpening);
+      for (const r of panels)
+        lightWash((r.minX + r.maxX) / 2, 8.31, (r.minZ + r.maxZ) / 2, Math.max(0.88, r.maxX - r.minX), Math.max(0.88, r.maxZ - r.minZ), 0, Math.PI / 2, true, 16764820, 1.55);
+      const washWidth = width > depth ? width : 2.4, washDepth = width > depth ? 2.4 : depth;
+      const bounds = { minX: x - washWidth / 2, maxX: x + washWidth / 2, minZ: z - washDepth / 2, maxZ: z + washDepth / 2 };
+      const washes = expandedLift ? cutRectangle(bounds, liftLayout.roofOpening) : [bounds];
+      for (const r of washes)
+        lightWash((r.minX + r.maxX) / 2, 8.367, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, r.maxZ - r.minZ, 0, Math.PI / 2, false, 16765854, 1.25);
+    };
+    signage = await addShopSignAtlas(T, expandedLayout, scene);
+    slide = addExpandedStorefronts(T, expandedLayout, scene, signage.configs, plainFinish);
+    for (const x of atriumLayout.anchorPierXs) {
+      box("green", x, 2.83, 0.27, 0.29, 5.66, 0.24);
+      box("brass", x, 0.15, 0.31, 0.35, 0.24, 0.27);
+      box("brass", x, 5.63, 0.29, 0.36, 0.065, 0.27);
+      lightWash(x, 0.22, 0.449, 0.66, 0.58, 0, 0, true);
+      for (const side of [-1, 1])
+        lightWash(x + side * 0.122, 2.9, 0.394, 0.038, 5.35, 0, 0, true, 16763513, 2.3);
+      lightWash(x - 0.046, 2.76, 0.394, 0.155, 4.96, 0, 0, true, 11585189, 0.42);
+    }
+    for (const side of [-1, 1]) {
+      const { inset, depth } = atriumLayout.arcadePilaster;
+      const face = (side < 0 ? -15 : 35) + side * (inset - depth / 2 - 0.004), yaw = -side * Math.PI / 2;
+      for (let i = 0;i < 6; i++) {
+        const z = i * 8 + 0.12;
+        for (const edge of [-1, 1])
+          lightWash(face, 2.9, z + edge * 0.151, 0.038, 5.35, yaw, 0, true, 16763513, 2.2);
+        lightWash(face, 2.78, z + 0.045, 0.15, 4.96, yaw, 0, true, 11585189, 0.38);
+      }
+    }
+    for (const store2 of spatial.stores) {
+      const x = storeCenterX(store2);
+      box("glow", x, 5.595, 0.416, 9.67, 0.048, 0.07);
+      for (const dx of [-3.2, 0, 3.2]) {
+        lightWash(x + dx, 5.43, 0.3, 3.85, 0.82, 0, 0, true, 16763525, 1.75);
+      }
+    }
+    for (const bay of expandedLayout.slots) {
+      const { x, z, normalX, normalZ, yaw } = shopEntrance(bay);
+      const frontage = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
+      const tint2 = shopLampTint(T, "S" + bay.number);
+      const offset = 2.15;
+      lightWash(x + normalX * offset, 0.029, z + normalZ * offset, frontage * 0.78, 4.2, yaw, -Math.PI / 2, false, tint2);
+      lightWash(x - normalX * 0.28, 3.88, z - normalZ * 0.28, frontage * 0.72, 0.72, yaw, Math.PI / 2, true, tint2, 1.7);
+      lightWash(x - normalX * 1.05, 0.052, z - normalZ * 1.05, 2.5, 2.5, yaw, -Math.PI / 2, true, tint2, 0.78);
+      if (bay.number === "14") {
+        lightWash(x + normalX * 0.23, 2.21, z, frontage * 0.95, 3.6, yaw, 0, true, tint2, 1.24);
+        lightWash(x + normalX * 0.24, 1.55, z + 2.35, 2.65, 2.4, yaw, 0, true);
+      }
+    }
+    for (const bay of expandedLayout.slots.slice(3)) {
+      const { x, z, alongX, alongZ, normalX, normalZ } = shopEntrance(bay);
+      const width = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
+      const halfOpening = 1.24, paneWidth = width / 2 - halfOpening;
       const leaves = [];
       for (const side of [-1, 1]) {
-        const group = new T.Group;
-        group.position.set(x + side * 1.16, 1.8, 0.05);
-        scene.add(group);
-        const paneScale = new T.Vector3(2.25, 3.5, 0.06);
-        if (expanded) {
-          doorGlass.push({ position: group.position, scale: paneScale });
-        } else {
-          const glass = new T.Mesh(geometry.box, materials2.glass);
-          glass.scale.copy(paneScale);
-          group.add(glass);
-        }
-        doorFrames.push(group);
-        const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, 0.05));
-        physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
-        leaves.push({ group, body, side });
+        const offset = side * (halfOpening + paneWidth / 2);
+        collider(x + alongX * offset, 1.96, z + alongZ * offset, normalZ ? paneWidth : 0.18, 3.92, normalZ ? 0.18 : paneWidth);
+        const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(x + alongX * side * 0.64 + normalX * 0.025, 1.97, z + alongZ * side * 0.64 + normalZ * 0.025));
+        physics.createCollider(R.ColliderDesc.cuboid(normalZ ? 0.62 : 0.035, 1.93, normalZ ? 0.035 : 0.62), body);
+        leaves.push({ side, body });
       }
-      const occupied = createDoorwayOccupancy(R, physics, { x, y: 1.8, z: 0.05 }, [2.29, 1.75, 0.08], leaves);
-      const door = { zone, x, open: 0, targetOpen: false, leaves, occupied };
+      const occupied = createDoorwayOccupancy(R, physics, { x: x + normalX * 0.025, y: 1.97, z: z + normalZ * 0.025 }, normalZ ? [halfOpening, 1.93, 0.08] : [0.08, 1.93, halfOpening], leaves);
+      const door = {
+        zone: `planned-space-${bay.number}`,
+        x,
+        z,
+        open: 0,
+        targetOpen: false,
+        advance(visitor, dt, reducedMotion) {
+          const dx = visitor.x - x, dz = visitor.z - z;
+          const nearby = visitor.y < 2 && Math.abs(dx * alongX + dz * alongZ) < 2.25 && Math.abs(dx * normalX + dz * normalZ) < 3.25 || this.open > 0 && occupied();
+          if (nearby !== this.targetOpen)
+            mallAudio.play("door");
+          this.targetOpen = nearby;
+          const next = reducedMotion ? Number(nearby) : Math.max(0, Math.min(1, this.open + (nearby ? 1 : -1) * dt * 3));
+          if (next === this.open)
+            return;
+          this.open = next;
+          const travel = 1.3 * next;
+          slide(bay.number, travel);
+          for (const { side, body } of leaves) {
+            const along = side * (0.64 + travel);
+            body.setNextKinematicTranslation({ x: x + alongX * along + normalX * 0.025, y: 1.97, z: z + alongZ * along + normalZ * 0.025 });
+          }
+        }
+      };
       doors.push(door);
-      if (expanded && zone === "newmoon") {
-        cylinder("brass", x + 1.8, 4.46, -4, 0.028, 2.35);
-        cylinder("brass", x + 1.8, 3.25, -4, 1.05, 0.14);
-        cylinder("glow", x + 1.8, 3.17, -4, 1.01, 0.04);
-      } else if (expanded && zone === "gogo") {
-        for (const z of [-2.1, -3.7, -5.3])
-          pendant(x + 2.7, z, 3.35);
-      } else if (!expanded) {
-        pendant(x, -4, 4.2);
-        pendant(x, -8, 4.2);
-      }
-      box("brass", x, 0.22, -10.32, 9.3, 0.045, 0.04);
-      if (zone === "newmoon") {
-        lightPool(x, 0.054, -8.6, 7.5, 2.1);
-        if (lightNewMoon) {
-          const image3 = textures.get("new-moon-nz-425g-front.jpg").image;
-          textures.set("new-moon-heritage-panel", setupArtworkTexture(T, new T.CanvasTexture(heritagePanel(image3)), artworkTier()));
-          const shop = interiorStores.S01;
-          const [ox, oy, oz] = shop.frame.world_origin_m;
-          const worldPoint = ([px, py, pz]) => [ox + px, oy + py, oz + pz];
-          for (const panel of shop.storyPanels) {
-            const yaw = panel.yawDeg * Math.PI / 180;
-            box(panel.material, ...worldPoint(panel.frame), ...panel.size);
-            art(panel.texture, ...worldPoint(panel.art), panel.width, yaw);
-            if (panel.caption) {
-              const serving = sign(newMoonExhibit[panel.id].tagline.toUpperCase(), ...worldPoint(panel.caption), 2.8, 0.19, true, 54);
-              serving.rotation.y = yaw;
-            }
-            const [px, pz] = panel.interactionXZ;
-            interactables.push({ id: panel.id, x: ox + px, z: oz + pz, radius: panel.radius });
-          }
-        } else {
-          const cover = art("new-moon-brand-cover.jpg", x - 4.64, 2.8, -5.8, 3.6, Math.PI / 2);
-          box("brass", x - 4.665, 2.8, -5.8, 0.035, cover.scale.y + 0.14, 3.74);
-          box("oak", x - 4.67, 2.8, -5.8, 0.04, cover.scale.y + 0.28, 3.88);
-        }
-        let sampleCan = null;
-        if (expanded) {
-          for (const [material, y, height, radius2] of [["brass", 0.085, 0.17, 0.76], ["shellFloor", 0.63, 0.96, 0.78], ["ivory", 1.14, 0.09, 0.8]]) {
-            box(material, x + 2.65, y, -4, radius2 * 2, height, 2);
-            for (const end of [-1, 1])
-              cylinder(material, x + 2.65, y, -4 + end, radius2, height);
-          }
-          collider(x + 2.65, 0.57, -4, 1.56, 1.14, 3.3);
-          const top = 1.185;
-          sampleCan = [x + 2.65, top, -3.05];
-          furnishings.place("teaKettle", x + 2.8, -4.55, 1, 1, top, -0.45, activeShopSlot);
-          for (const [dx, dz] of [[-0.35, 0.54], [0.15, 0.73], [-0.29, -0.05]]) {
-            furnishings.place("teaCup", x + 2.65 + dx, -4 + dz, 1, 1, top, 0.2, activeShopSlot);
-          }
-        } else {
-          box("green", x + 2.8, 0.55, -4, 2.1, 1.1, 1.25, true);
-          box("cream", x + 2.8, 1.15, -4, 2.2, 0.12, 1.4);
-          for (let i = 0;i < 9; i++)
-            box("brass", x + 1.9 + i * 0.22, 0.56, -3.35, 0.025, 1, 0.025);
-          box("brass", x + 2.8, 1.08, -3.285, 2.17, 0.045, 0.03);
-          box("brass", x + 2.8, 0.09, -3.36, 2.1, 0.08, 0.03);
-        }
-        cylinder("pot", x + 3.48, 1.38, -4, 0.15, 0.32);
-        cylinder("brass", x + 3.48, 1.545, -4, 0.155, 0.025);
-        sphere("leaf", x + 3.48, 1.72, -4, 0.22, 0.3, 0.19);
-        const { addProducts } = await productsTask;
-        const displayProducts = showcaseProducts(SHOWCASE_PRODUCTS, expanded);
-        const firstProduct = scene.children.length;
-        productDisplay = await addProducts(T, scene, textures, materials2.brass, displayProducts, [], sampleCan, activeShopSlot, artworkTier);
-        queueShopUpload(activeShopSlot, ...scene.children.slice(firstProduct).filter((mesh) => mesh.isMesh));
-        interactables.push(...productDisplay.interactables);
-        for (const c of productDisplay.colliders)
-          collider(c.x, c.y, c.z, c.sx, c.sy, c.sz);
-        if (expanded)
-          for (const shelf of productDisplay.shelves) {
-            const shelfX = (shelf.min.x + shelf.max.x) / 2, width = shelf.max.x - shelf.min.x;
-            const shelfZ = shelf.max.z + 0.024;
-            for (const fraction of [0.39, 0.63, 0.88]) {
-              const y = shelf.max.y * fraction;
-              box("glow", shelfX, y, shelfZ, width * 0.87, 0.022, 0.026);
-              lightWash(shelfX, y - 0.2, shelfZ + 0.02, width * 0.9, 0.44, 0, 0, true);
-            }
-          }
-        for (const [index, country] of ["NEW ZEALAND", "AUSTRALIA", "SOUTH AFRICA", "MEXICO"].entries()) {
-          sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, 0.16, true, expanded ? 78 : undefined);
-        }
-        staticProductCount = productDisplay.displayedProducts;
-        worldProductAssets = productDisplay.assets;
-        shelves = productDisplay.shelves;
-        createCollectProp = productDisplay.createCollectProp;
-        reserveProduct = productDisplay.reserveProduct;
-        plant(x - 3.6, -2.3);
-      } else {
-        const cover = `${zone}-brand-cover.jpg`;
-        box("brass", x, 2.85, -10.3, 3.65, 3.65, 0.08);
-        art(cover, x, 2.85, -10.24, 3.48);
-        box("oak", x, 2.85, -10.35, 3.88, 3.88, 0.055);
-        box("oak", x, 0.92, -10.09, 4, 0.075, 0.28);
-        box("glow", x, 4.77, -10.16, 3.7, 0.025, 0.07);
-        interactables.push({ id: zone, x, z: -9, radius: 2.5 });
-        for (const placement of seatPlacements.filter((item) => item.group === zone))
-          bench(placement);
-        if (expanded && zone === "mili") {
-          const { frame, cookbase } = interiorStores.S02;
-          const [originX, , originZ] = frame.world_origin_m;
-          const [fixtureX, , fixtureZ] = cookbase.xyz;
-          const [standingX, standingZ] = cookbase.standing;
-          const counterX = originX + fixtureX, counterZ = originZ + fixtureZ;
-          sign("COMPARE THE TWO MILI SAUCES", counterX, 0.91, counterZ + 1.307, 1.5, 0.14, true, 60);
-          interactables.push({ id: "mili-sauce-story", x: originX + standingX, z: originZ + standingZ, radius: 1.12 });
-          box("jadeAlt", x, 0.57, -5.5, 1.7, 1.12, 2.55);
-          box("brass", x, 0.095, -5.5, 1.72, 0.15, 2.57);
-          for (let dx = -0.8;dx <= 0.85; dx += 0.2)
-            box("courtStone", x + dx, 0.6, -4.218, 0.012, 0.96, 0.015);
-          for (let y = 0.22;y < 1.13; y += 0.2)
-            box("courtStone", x, y, -4.218, 1.68, 0.014, 0.015);
-          box("shellFloor", x, 1.16, -5.5, 1.82, 0.12, 2.69);
-          collider(x, 0.57, -5.5, 1.72, 1.14, 2.55);
-        } else if (!expanded) {
-          if (!furnishings.place("coffeeTable", x, -5.5, 1, 1, 0, null, activeShopSlot)) {
-            cylinder("brass", x, 0.4, -5.5, 0.08, 0.75);
-            cylinder("oak", x, 0.8, -5.5, 0.8, 0.1);
-            cylinder("brass", x, 0.853, -5.5, 0.805, 0.025);
-          }
-          collider(x, 0.4375, -5.5, 1.61, 0.875, 1.61);
-          cylinder("pot", x, 0.99, -5.5, 0.115, 0.24);
-          sphere("foliage", x, 1.2, -5.5, 0.2, 0.23, 0.18);
-        }
-        plant(x - 3.8, -8.8, 1.15);
-        plant(x + 3.8, -8.8, 1.15);
-        plant(x + 3.8, -2.5);
-        if (zone === "gogo") {
-          if (expanded) {
-            const { frame, anchor, gogoStools } = interiorStores.S03;
-            const [standingX, standingZ] = anchor.standing;
-            const [originX, originY, originZ] = frame.world_origin_m;
-            art("gogo-logo.jpg", originX - 2.213, originY + 1.6, originZ + 2.669, 0.49, anchor.yaw_deg * Math.PI / 180);
-            interactables.push({ id: "gogo-potong-story", x: frame.world_origin_m[0] + standingX, z: frame.world_origin_m[2] + standingZ, radius: 1 });
-            const cx = x + 3.15, cz = -2.4;
-            box("water", cx, 0.59, cz, 1.55, 1.16, 3.25);
-            box("brass", cx, 0.1, cz, 1.57, 0.16, 3.29);
-            box("cream", cx, 1.2, cz, 1.67, 0.12, 3.4);
-            furnishings.place("coffeeMachine", cx + 0.16, cz + 0.55, 1, 1, 1.26, -Math.PI / 2, activeShopSlot);
-            collider(cx, 0.59, cz, 1.55, 1.18, 3.25);
-            for (let dz = -1.55;dz < 1.61; dz += 0.1)
-              box("jadeAlt", cx - 0.79, 0.65, cz + dz, 0.045, 0.88, 0.045);
-            for (let dx = -0.73;dx < 0.77; dx += 0.1)
-              box("jadeAlt", cx + dx, 0.65, cz + 1.64, 0.045, 0.88, 0.045);
-            for (const stool of gogoStools) {
-              const sx = originX + stool.position_m[0], sz = originZ + stool.position_m[2];
-              const [width, height, depth] = stool.envelope_whd_m;
-              const angle = stool.yaw_deg * Math.PI / 180;
-              const placed = furnishings.place("barStool", sx, sz, 1, 1, 0, angle, activeShopSlot);
-              if (!placed) {
-                cylinder("brass", sx, 0.36, sz, 0.042, 0.65);
-                cylinder("brass", sx, 0.06, sz, 0.23, 0.065);
-                cylinder("seat", sx, 0.72, sz, 0.22, 0.12);
-              }
-              const pan = collider(sx, height / 2, sz, width, height, depth);
-              pan.setRotation({ x: 0, y: Math.sin(angle / 2), z: 0, w: Math.cos(angle / 2) });
-              seats.push(gogoStoolSeat(frame, stool, pan.handle, placed));
-            }
-          }
-          for (let z = -9.5;z < -2; z += 0.38)
-            box("oak", x - 4.61, 2.6, z, 0.08, 4.7, 0.055);
-          for (const dx of [-2, 0, 2]) {
-            cylinder("pot", x + dx, 0.3, -9.2, 0.28, 0.6);
-            cylinder("brass", x + dx, 0.6, -9.2, 0.29, 0.035);
-            sphere("leaf", x + dx, 0.9, -9.2, 0.42, 0.55, 0.4);
-          }
-          for (const z of [-8.9, -4.3]) {
-            box("oak", x - 4.42, 1.78, z, 0.42, 0.09, 1.5);
-            box("brass", x - 4.39, 1.66, z, 0.035, 0.2, 1.25);
-            for (const dz of [-0.42, 0.42]) {
-              cylinder("pot", x - 4.4, 1.98, z + dz, 0.14, 0.3);
-              sphere("foliage", x - 4.4, 2.27, z + dz, 0.21, 0.34, 0.23);
-            }
-          }
-        } else {
-          for (let dx = -4;dx <= 4; dx += 0.6)
-            box("oak", x + dx, 1.15, -10.31, 0.04, 1.9, 0.04);
-          box("oak", x, 1.05, -10.28, 9.1, 0.08, 0.06);
-          for (const side of [-1, 1]) {
-            for (const y of [1.18, 2.75])
-              box("oak", x + side * 3.32, y, -10.25, 1.65, 0.055, 0.075);
-            for (const dx of [-0.8, 0.8])
-              box("oak", x + side * 3.32 + dx, 1.965, -10.25, 0.045, 1.6, 0.075);
-          }
-        }
-        if (!expanded && zone === "mili") {
-          cylinder("green", x, 0.25, -1.35, 0.075, 0.34);
-          cylinder("oak", x, 0.45, -1.35, 0.038, 0.09);
-          cylinder("brass", x, 0.505, -1.35, 0.04, 0.025);
-        } else if (!expanded && zone === "gogo") {
-          cylinder("cream", x - 0.11, 0.07, -1.35, 0.034, 0.14);
-          cylinder("brass", x - 0.11, 0.144, -1.35, 0.035, 0.012);
-          box("ivory", x + 0.12, 0.08, -1.35, 0.055, 0.16, 0.045);
-          box("oak", x + 0.12, 0.08, -1.325, 0.035, 0.11, 0.006);
-        }
-      }
-      if (expanded)
-        addOriginalShopDetails(zone, x, { box, cylinder, solid, collider, seats });
-      activeShopSlot = null;
     }
-    let slide;
-    if (expanded) {
-      let warmStrip = function(x, z, width, depth) {
-        const panels = ceilingBox("glow", x, 8.34, z, width, 0.035, depth, liftLayout.roofOpening);
-        for (const r of panels)
-          lightWash((r.minX + r.maxX) / 2, 8.31, (r.minZ + r.maxZ) / 2, Math.max(0.88, r.maxX - r.minX), Math.max(0.88, r.maxZ - r.minZ), 0, Math.PI / 2, true, 16764820, 1.55);
-        const washWidth = width > depth ? width : 2.4, washDepth = width > depth ? 2.4 : depth;
-        const bounds = { minX: x - washWidth / 2, maxX: x + washWidth / 2, minZ: z - washDepth / 2, maxZ: z + washDepth / 2 };
-        const washes = expandedLift ? cutRectangle(bounds, liftLayout.roofOpening) : [bounds];
-        for (const r of washes)
-          lightWash((r.minX + r.maxX) / 2, 8.367, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, r.maxZ - r.minZ, 0, Math.PI / 2, false, 16765854, 1.25);
-      };
-      signage = await addShopSignAtlas(T, expandedLayout, scene);
-      slide = addExpandedStorefronts(T, expandedLayout, scene, signage.configs, plainFinish);
-      for (const x of atriumLayout.anchorPierXs) {
-        box("green", x, 2.83, 0.27, 0.29, 5.66, 0.24);
-        box("brass", x, 0.15, 0.31, 0.35, 0.24, 0.27);
-        box("brass", x, 5.63, 0.29, 0.36, 0.065, 0.27);
-        lightWash(x, 0.22, 0.449, 0.66, 0.58, 0, 0, true);
-        for (const side of [-1, 1])
-          lightWash(x + side * 0.122, 2.9, 0.394, 0.038, 5.35, 0, 0, true, 16763513, 2.3);
-        lightWash(x - 0.046, 2.76, 0.394, 0.155, 4.96, 0, 0, true, 11585189, 0.42);
-      }
-      for (const side of [-1, 1]) {
-        const { inset, depth } = atriumLayout.arcadePilaster;
-        const face = (side < 0 ? -15 : 35) + side * (inset - depth / 2 - 0.004), yaw = -side * Math.PI / 2;
-        for (let i = 0;i < 6; i++) {
-          const z = i * 8 + 0.12;
-          for (const edge of [-1, 1])
-            lightWash(face, 2.9, z + edge * 0.151, 0.038, 5.35, yaw, 0, true, 16763513, 2.2);
-          lightWash(face, 2.78, z + 0.045, 0.15, 4.96, yaw, 0, true, 11585189, 0.38);
-        }
-      }
-      for (const store2 of spatial.stores) {
-        const x = storeCenterX(store2);
-        box("glow", x, 5.595, 0.416, 9.67, 0.048, 0.07);
-        for (const dx of [-3.2, 0, 3.2]) {
-          lightWash(x + dx, 5.43, 0.3, 3.85, 0.82, 0, 0, true, 16763525, 1.75);
-        }
-      }
-      for (const bay of expandedLayout.slots) {
-        const { x, z, normalX, normalZ, yaw } = shopEntrance(bay);
-        const frontage = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
-        const tint2 = shopLampTint(T, "S" + bay.number);
-        const offset = 2.15;
-        lightWash(x + normalX * offset, 0.029, z + normalZ * offset, frontage * 0.78, 4.2, yaw, -Math.PI / 2, false, tint2);
-        lightWash(x - normalX * 0.28, 3.88, z - normalZ * 0.28, frontage * 0.72, 0.72, yaw, Math.PI / 2, true, tint2, 1.7);
-        lightWash(x - normalX * 1.05, 0.052, z - normalZ * 1.05, 2.5, 2.5, yaw, -Math.PI / 2, true, tint2, 0.78);
-        if (bay.number === "14") {
-          lightWash(x + normalX * 0.23, 2.21, z, frontage * 0.95, 3.6, yaw, 0, true, tint2, 1.24);
-          lightWash(x + normalX * 0.24, 1.55, z + 2.35, 2.65, 2.4, yaw, 0, true);
-        }
-      }
-      for (const bay of expandedLayout.slots.slice(3)) {
-        const { x, z, alongX, alongZ, normalX, normalZ } = shopEntrance(bay);
-        const width = normalZ ? bay.maxX - bay.minX : bay.maxZ - bay.minZ;
-        const halfOpening = 1.24, paneWidth = width / 2 - halfOpening;
-        const leaves = [];
-        for (const side of [-1, 1]) {
-          const offset = side * (halfOpening + paneWidth / 2);
-          collider(x + alongX * offset, 1.96, z + alongZ * offset, normalZ ? paneWidth : 0.18, 3.92, normalZ ? 0.18 : paneWidth);
-          const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(x + alongX * side * 0.64 + normalX * 0.025, 1.97, z + alongZ * side * 0.64 + normalZ * 0.025));
-          physics.createCollider(R.ColliderDesc.cuboid(normalZ ? 0.62 : 0.035, 1.93, normalZ ? 0.035 : 0.62), body);
-          leaves.push({ side, body });
-        }
-        const occupied = createDoorwayOccupancy(R, physics, { x: x + normalX * 0.025, y: 1.97, z: z + normalZ * 0.025 }, normalZ ? [halfOpening, 1.93, 0.08] : [0.08, 1.93, halfOpening], leaves);
-        const door = {
-          zone: `planned-space-${bay.number}`,
-          x,
-          z,
-          open: 0,
-          targetOpen: false,
-          advance(visitor, dt, reducedMotion) {
-            const dx = visitor.x - x, dz = visitor.z - z;
-            const nearby = visitor.y < 2 && Math.abs(dx * alongX + dz * alongZ) < 2.25 && Math.abs(dx * normalX + dz * normalZ) < 3.25 || this.open > 0 && occupied();
-            if (nearby !== this.targetOpen)
-              mallAudio.play("door");
-            this.targetOpen = nearby;
-            const next = reducedMotion ? Number(nearby) : Math.max(0, Math.min(1, this.open + (nearby ? 1 : -1) * dt * 3));
-            if (next === this.open)
-              return;
-            this.open = next;
-            const travel = 1.3 * next;
-            slide(bay.number, travel);
-            for (const { side, body } of leaves) {
-              const along = side * (0.64 + travel);
-              body.setNextKinematicTranslation({ x: x + alongX * along + normalX * 0.025, y: 1.97, z: z + alongZ * along + normalZ * 0.025 });
-            }
-          }
-        };
-        doors.push(door);
-      }
-      for (const x of [-25, 45])
-        box("ivory", x, 3.3, 18, 0.3, 6.6, 60, true);
-      box("ivory", 10, 3.3, -12, 70, 6.6, 0.3, true);
-      for (const x of [-10.5, 30.5])
-        box("ivory", x, 3.3, 48, 29, 6.6, 0.3, true);
-      box("glass", 10, 2.8, 48, 12, 5.6, 0.3, true);
-      for (const x of [4, 10, 16])
-        box("brass", x, 2.8, 47.8, 0.08, 5.6, 0.08);
-      ceilingBox("shellCeiling", 10, 8.5, 18, 70, 0.25, 60, liftLayout.roofOpening);
-      for (const x of [-12, 32])
-        for (const z of [10, 22, 34])
-          warmStrip(x, z, 0.07, 6);
-      for (const x of [-5, 10, 25])
-        warmStrip(x, 3, 6, 0.07);
-      const { minX: roofWest, maxX: roofEast, minZ: roofNorth, maxZ: roofSouth } = liftLayout.roofOpening;
-      if (expandedLift) {
-        for (const x of [roofWest - 0.2, roofEast + 0.2])
-          warmStrip(x, (roofNorth + roofSouth) / 2, 0.07, roofSouth - roofNorth);
-        for (const z of [roofNorth - 0.2, roofSouth + 0.2])
-          warmStrip((roofWest + roofEast) / 2, z, roofEast - roofWest, 0.07);
-      }
-      for (const x of [-9, 29])
-        warmStrip(x, 20, 0.09, 27);
-      for (const z of [6.5, 33.5])
-        warmStrip(10, z, 38, 0.09);
-      for (const radius2 of [2.2, 3.2])
-        solid("torus", "glow", 10, 8.05, 20, radius2, radius2, 0.8, 0, -Math.PI / 2);
-      lightPool(10, 0.053, 20, 8, 8);
-      restrooms = buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, materials: materials2, doors, interactables });
-      for (const x of [-12, 32]) {
-        box("brass", x, 0.024, 21, 0.035, 0.008, 36);
-        lightWash(x, 0.029, 21, 0.028, 36, 0, -Math.PI / 2, true);
-      }
-      for (const z of [3, 39]) {
-        box("brass", 10, 0.024, z, 44, 0.008, 0.035);
-        lightWash(10, 0.029, z, 44, 0.028, 0, -Math.PI / 2, true);
-      }
-      activeDeck = true;
-      const band = brandRail;
-      box("wood", band.x, liftLayout.upper + band.y, band.z, band.width, band.height, band.depth, true);
-      for (const edge of [-1, 1])
-        box("brass", band.x, liftLayout.upper + band.y + edge * band.height / 2, band.z - band.depth / 2, band.width, 0.028, 0.035);
-      if (expandedLift) {
-        upperLevel = buildUpperLevel(T, { tier: artworkTier() }, { collider, lightWash });
-        scene.add(upperLevel.group, upperLevel.panes);
-      }
-      const deckBench = (placement) => {
-        const { x, z, facing } = placement;
-        const slattedProfile = upperLevel?.seatProfiles.get(placement.finish);
-        const modelPlaced = !slattedProfile && furnishings.place("bench", x, z, benchScale, facing, liftLayout.upper, placement.pose.angle, -1);
-        if (!slattedProfile && !modelPlaced) {
-          const { top, front } = deckBenchFallback;
-          box("wood", x, liftLayout.upper + 0.24, z, 2.3, 0.32, 0.72);
-          box("seat", x, liftLayout.upper + top - 0.09, z, 2.34, 0.18, -2 * front);
-          box("seat", x, liftLayout.upper + 0.82, z + facing * 0.28, 2.34, 0.54, 0.16);
-          box("brass", x, liftLayout.upper + 0.44, z - facing * 0.38, 2.32, 0.025, 0.025);
-        }
-        const seatCollider = collider(x, liftLayout.upper + 0.26, z, placement.clearance.colliderWidth, 0.5, placement.clearance.colliderDepth);
-        if (placement.accessible !== false)
-          seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : slattedProfile || deckBenchFallback, modelPlaced ? benchScale : 1));
-      };
-      for (const placement of seatPlacements.filter((item) => item.group === "deck"))
-        deckBench(placement);
-      for (const [x, z] of deckPlanters) {
-        if (!furnishings.place("planter", x, z, 0.68, 1, liftLayout.upper, null, -1)) {
-          box("pot", x, liftLayout.upper + 0.24, z, 0.68, 0.48, 0.68, true);
-          box("wood", x, liftLayout.upper + 0.49, z, 0.58, 0.025, 0.58);
-          for (let i = 0;i < 4; i++)
-            solid("sphere", i % 2 ? "leaf" : "foliage", x + (i % 2 ? -0.14 : 0.14), liftLayout.upper + 0.78, z + (i < 2 ? -0.14 : 0.14), 0.19, 0.36, 0.19);
-        }
-        collider(x, liftLayout.upper + 0.25, z, 0.68, 0.5, 0.68);
-      }
-      activeDeck = false;
-      const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials2.shellFloor.map, prepareModel, shopVisibility, artworkTier, detailsEnabled);
-      interiorModels = interiors;
-      for (const { x, y, z, width, height, depth } of interiors.collisionBoxes) {
-        collider(x, y, z, width, height, depth);
-        shopObstacles.push({
-          min: { x: x - width / 2, y: y - height / 2, z: z - depth / 2 },
-          max: { x: x + width / 2, y: y + height / 2, z: z + depth / 2 }
-        });
-        const rect = { minX: x - width / 2, maxX: x + width / 2, minZ: z - depth / 2, maxZ: z + depth / 2 };
-        if (y === 0.041 && height === 0.08)
-          bakedFloors.push({ ...rect, y: y + height / 2 + 0.009 });
-        if (y === 4.19 && height === 0.18)
-          bakedCeilings.push({ ...rect, y: y - height / 2 - 0.003 });
-      }
-      shopLodUpdates.push(interiors.update);
-      interiorKit = createInteriorKit(T, scene, {
-        assetBase: new URL(".", import.meta.url),
-        packshot: textures.get("new-moon-nz-425g-front.jpg"),
-        artworkTier,
-        prepareModel,
-        registerCollider({ center: [x, y, z], size: [w, h, d], yaw }) {
-          const box2 = physics.createCollider(R.ColliderDesc.cuboid(w / 2, h / 2, d / 2).setTranslation(x, y, z).setRotation({ x: 0, y: Math.sin(yaw / 2), z: 0, w: Math.cos(yaw / 2) }));
-          return () => physics.removeCollider(box2, false);
-        }
-      });
-      for (const [id, store2] of Object.entries(interiorStores)) {
-        activeShopSlot = Number(id.slice(1));
-        const [fx, , fz] = store2.ambient.focus;
-        const [standingX, standingZ] = store2.anchor.standing;
-        const floorY = Math.max(0.036, store2.floor.position_m[1] + 0.012);
-        const [px, py, pz] = worldInteriorPoint(store2, [(fx + standingX) / 2, floorY, (fz + standingZ) / 2]);
-        const width = id === "S01" ? 7.8 : 3.25;
-        const intensity = id === "S03" ? 1.1 : 1.42;
-        lightWash(px, py, pz, width, 2.75, store2.frame.yaw_world_deg * Math.PI / 180, -Math.PI / 2, activeShopSlot, id === "S01" ? 16764561 : 16768942, intensity);
-        if (id === "S04") {
-          for (const [storyId, [x, z]] of [
-            ["borsch-patch-story", store2.anchor.standing],
-            ["borsch-lingzhi-story", store2.lingzhiStanding]
-          ]) {
-            const [wx, , wz] = worldInteriorPoint(store2, [x, 0, z]);
-            interactables.push({ id: storyId, x: wx, z: wz, radius: 1 });
-          }
-        } else if (id === "S05") {
-          const [x, , z] = worldInteriorPoint(store2, [pzhCartonX, 0, pzhCartonStandingZ]);
-          interactables.push({ id: "pzh-carton-story", x, z, radius: 1 });
-        } else if (shopCatalogueFocals[id]) {
-          const exhibit = shopCatalogueFocals[id];
-          const [x, , z] = worldInteriorPoint(store2, [standingX, 0, standingZ]);
-          const plaque = sign(exhibit.caption, ...worldInteriorPoint(store2, exhibit.panel), 1.02, 0.15, true, 65);
-          plaque.rotation.y = store2.frame.yaw_world_deg * Math.PI / 180;
-          interactables.push({ id: exhibit.id, x, z, radius: 1 });
-        }
-        for (const footprint of store2.colliders) {
-          const { center: [x, , z], size: [w, , d], yaw } = worldInteriorBox(store2, footprint);
-          const y = store2.frame.world_origin_m[1] + store2.floor.position_m[1] + 0.024;
-          solid("plane", "contact", x, y, z, w * 1.22, d * 1.22, 1, yaw, -Math.PI / 2, "YXZ");
-        }
-      }
-      activeShopSlot = null;
+    for (const x of [-25, 45])
+      box("ivory", x, 3.3, 18, 0.3, 6.6, 60, true);
+    box("ivory", 10, 3.3, -12, 70, 6.6, 0.3, true);
+    for (const x of [-10.5, 30.5])
+      box("ivory", x, 3.3, 48, 29, 6.6, 0.3, true);
+    box("glass", 10, 2.8, 48, 12, 5.6, 0.3, true);
+    for (const x of [4, 10, 16])
+      box("brass", x, 2.8, 47.8, 0.08, 5.6, 0.08);
+    ceilingBox("shellCeiling", 10, 8.5, 18, 70, 0.25, 60, liftLayout.roofOpening);
+    for (const x of [-12, 32])
+      for (const z of [10, 22, 34])
+        warmStrip(x, z, 0.07, 6);
+    for (const x of [-5, 10, 25])
+      warmStrip(x, 3, 6, 0.07);
+    const { minX: roofWest, maxX: roofEast, minZ: roofNorth, maxZ: roofSouth } = liftLayout.roofOpening;
+    if (expandedLift) {
+      for (const x of [roofWest - 0.2, roofEast + 0.2])
+        warmStrip(x, (roofNorth + roofSouth) / 2, 0.07, roofSouth - roofNorth);
+      for (const z of [roofNorth - 0.2, roofSouth + 0.2])
+        warmStrip((roofWest + roofEast) / 2, z, roofEast - roofWest, 0.07);
     }
-    const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded, artworkTier);
-    interactables.push(...amenities.interactables);
-    const frames = new T.InstancedMesh(doorFrameGeometry, materials2.brass, doorFrames.length);
-    frames.name = "Sliding shop door frames";
-    frames.instanceMatrix.setUsage(T.DynamicDrawUsage);
-    let frameCount = -1;
-    const previousDoorX = [];
-    doorFrames.forEach((group, index) => {
-      group.updateMatrix();
-      frames.setMatrixAt(index, group.matrix);
-    });
-    frames.computeBoundingSphere();
-    scene.add(frames);
-    doorFrameGeometry.computeBoundingBox();
-    const frameBox = new T.Box3;
-    viewUpdates.push(updateFrames);
-    if (expanded)
-      for (const [name, panes, material, receiveShadow] of [
-        ["Sliding shop door glass", doorGlass, doorGlassMaterial, false],
-        ["Original shop window glass", windowGlass, storefrontGlassMaterial, true]
-      ]) {
-        const batch = createGlassBatch(T, geometry.box, material, panes);
-        batch.mesh.name = name;
-        batch.mesh.receiveShadow = receiveShadow;
-        scene.add(batch.mesh);
-        viewUpdates.push(batch.update);
-      }
-    const stagingLods = [], standalonePools = [], poolBatches = [];
-    const shopNear = new Map;
-    let contactBatch;
-    const glowParts = [];
-    const lowCylinder = new T.CylinderGeometry(1, 1, 1, 12);
-    const lowSphere = new T.SphereGeometry(1, 8, 5);
-    const radius = (m, axis) => Math.hypot(...m.elements.slice(axis * 4, axis * 4 + 3));
-    for (const batch of batches.values()) {
-      if (expanded && batch.material === materials2.glow && !batch.deckLod) {
-        batch.transforms.forEach((transform, index) => {
-          const piece = batch.geometry.clone().applyMatrix4(transform);
-          piece.computeBoundingBox();
-          glowParts.push({ geometries: [piece], bounds: piece.boundingBox, slot: batch.slots?.[index] });
-        });
-        continue;
-      }
-      const surfaces = batch.surfaces && new T.InstancedBufferAttribute(new Float32Array(batch.surfaces), 2);
-      const source = surfaces ? batch.geometry.clone().setAttribute("instanceSurface", surfaces) : batch.geometry;
-      const playerContact = expanded && !batch.deckLod && batch.material === contact;
-      const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length + Number(playerContact));
-      if (playerContact) {
-        mesh.count = batch.transforms.length;
-        contactBatch = mesh;
-      }
-      if (batch.material === contact)
-        placeDecal(mesh);
-      if (batch.material === materials2.lightPool) {
-        placeDecal(mesh, -1);
-        if (expanded) {
-          mesh.instanceColor = new T.InstancedBufferAttribute(new Float32Array(batch.transforms.length * 3).fill(1), 3);
-          standalonePools.push(mesh);
-          poolBatches.push(batch);
-        }
-      }
-      mesh.name = `${batch.type} ${batch.finish || batch.material.name}`;
-      if (batch.material === contact)
-        mesh.name = "Mall contact shadows";
-      if (batch.material === materials2.lightPool)
-        mesh.name = "Mall floor and wall light pools";
-      if (batch.material === materials2.paving) {
-        mesh.name = "Mall ivory marble paving";
-        pavingMesh = mesh;
-        if (mappedPaving)
-          mesh.material = mappedPaving;
-      }
-      for (const store2 of spatial.stores) {
-        if (batch.material === materials2[`${store2.id}Backdrop`])
-          queueShopUpload(Number(store2.number), mesh);
-      }
-      batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
-      batch.colours?.forEach((colour, i) => mesh.setColorAt(i, colour));
-      mesh.receiveShadow = batch.material !== materials2.lightPool;
-      mesh.userData.shopSlot = batch.shopSlot;
-      mesh.userData.deckLod = batch.deckLod;
-      if (batch.material === materials2.glow)
-        mesh.layers.enable(1);
-      scene.add(mesh);
-      if (batch.shopSlot !== null)
-        shopLodMeshes.push(mesh);
-      const isTimber = batch.type === "cylinder" && batch.finish === "woodGrain";
-      const isMatteSphere = batch.type === "sphere" && batch.finish === "matte";
-      let lod;
-      if ((isTimber || isMatteSphere) && batch.shopSlot === null && !batch.deckLod) {
-        lod = createProjectedBatch(T, mesh, isTimber ? lowCylinder : lowSphere, isTimber ? (m) => Math.max(radius(m, 0), radius(m, 2)) * (1 - Math.cos(Math.PI / 12)) : (m) => Math.max(radius(m, 0), radius(m, 1), radius(m, 2)) * (1 - Math.cos(Math.PI / 8) * Math.cos(Math.PI / 10)), batch.colours, batch.slots);
-        stagingLods.push({ original: mesh, lod });
-      }
-      const compact = !mesh.material.transparent || [materials2.contact, materials2.lightPool].includes(batch.material);
-      const controller = expanded && compact ? createInstanceVisibility(T, mesh, {
-        colours: batch.colours,
-        slots: batch.slots,
-        attributes: surfaces ? [surfaces] : []
-      }) : null;
-      const allow = batch.material === contact ? (slot2) => slot2 === null || interiorKit.groups[slot2 - 1]?.visible : (slot2) => slot2 === null || shopNear.get(slot2);
-      viewUpdates.push((view2) => {
-        if (lod?.mesh.parent)
-          lod.update(view2, batch.slots ? allow : undefined);
-        else if (mesh.visible && controller)
-          controller.update(view2.frustum, batch.slots ? allow : undefined, false, view2.shopVisibility.occluded);
-      });
-      if (batch.colours)
-        colourBatches.push(() => {
-          lod?.refreshColours();
-          if (controller)
-            controller.refreshColours();
-        });
+    for (const x of [-9, 29])
+      warmStrip(x, 20, 0.09, 27);
+    for (const z of [6.5, 33.5])
+      warmStrip(10, z, 38, 0.09);
+    for (const radius2 of [2.2, 3.2])
+      solid("torus", "glow", 10, 8.05, 20, radius2, radius2, 0.8, 0, -Math.PI / 2);
+    lightPool(10, 0.053, 20, 8, 8);
+    restrooms = buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, materials: materials2, doors, interactables });
+    for (const x of [-12, 32]) {
+      box("brass", x, 0.024, 21, 0.035, 0.008, 36);
+      lightWash(x, 0.029, 21, 0.028, 36, 0, -Math.PI / 2, true);
     }
-    if (glowParts.length) {
-      const glow = createPackedDraw(T, glowParts, materials2.glow);
-      glow.mesh.name = "Mall fixture glow";
-      glow.mesh.receiveShadow = true;
-      glow.mesh.layers.enable(1);
-      scene.add(glow.mesh);
-      viewUpdates.push((view2) => glow.update(({ bounds, slot: slot2 }) => (slot2 == null || shopNear.get(slot2)) && view2.frustum.intersectsBox(bounds) && !view2.shopVisibility.occluded(slot2, bounds) ? 0 : -1));
+    for (const z of [3, 39]) {
+      box("brass", 10, 0.024, z, 44, 0.008, 0.035);
+      lightWash(10, 0.029, z, 44, 0.028, 0, -Math.PI / 2, true);
     }
-    lowCylinder.dispose();
-    lowSphere.dispose();
-    key.position.set(...expanded ? [-12, 16, 6] : [-8, 15, 9]);
-    key.castShadow = true;
-    scene.add(ambient, key);
-    const playerShadow = expanded ? createPlayerShadow(T, scene, key) : null;
-    if (!expanded) {
-      key.shadow.mapSize.set(1024, 1024);
-      Object.assign(key.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 0.5, far: 50 });
-      key.shadow.normalBias = 0.05;
-      key.shadow.bias = -0.0004;
+    activeDeck = true;
+    const band = brandRail;
+    box("wood", band.x, liftLayout.upper + band.y, band.z, band.width, band.height, band.depth, true);
+    for (const edge of [-1, 1])
+      box("brass", band.x, liftLayout.upper + band.y + edge * band.height / 2, band.z - band.depth / 2, band.width, 0.028, 0.035);
+    if (expandedLift) {
+      upperLevel = buildUpperLevel(T, { tier: artworkTier() }, { collider, lightWash });
+      scene.add(upperLevel.group, upperLevel.panes);
     }
-    let bakedLighting, skylightDapple;
-    if (expanded) {
-      const holes = expandedLift ? [...bakedFloors, liftLayout.shaft] : bakedFloors;
-      const publicFloor = holes.reduce((panels, hole) => panels.flatMap((panel) => cutRectangle(panel, hole)), [expandedLayout.bounds]);
-      if (expandedLift) {
-        const { minX: minX2, maxX: maxX2, minZ: minZ2, maxZ: maxZ2 } = liftLayout.roofOpening;
-        const projection2 = { minX: minX2 + 2, maxX: maxX2 + 4, minZ: Math.max(0.4, minZ2), maxZ: maxZ2 - 1 };
-        skylightDapple = createSkylightDapple(T, scene, {
-          contact,
-          prepareModel,
-          projection: projection2,
-          panels: cutRectangle(projection2, liftLayout.shaft).map((rect) => ({ ...rect, y: 0.026 }))
-        });
+    const deckBench = (placement) => {
+      const { x, z, facing } = placement;
+      const slattedProfile = upperLevel?.seatProfiles.get(placement.finish);
+      const modelPlaced = !slattedProfile && furnishings.place("bench", x, z, benchScale, facing, liftLayout.upper, placement.pose.angle, -1);
+      if (!slattedProfile && !modelPlaced) {
+        const { top, front } = deckBenchFallback;
+        box("wood", x, liftLayout.upper + 0.24, z, 2.3, 0.32, 0.72);
+        box("seat", x, liftLayout.upper + top - 0.09, z, 2.34, 0.18, -2 * front);
+        box("seat", x, liftLayout.upper + 0.82, z + facing * 0.28, 2.34, 0.54, 0.16);
+        box("brass", x, liftLayout.upper + 0.44, z - facing * 0.38, 2.32, 0.025, 0.025);
       }
-      bakedLighting = createMallBakedLighting(T, scene, {
-        contact,
-        phone,
-        prepareModel,
-        floors: [...publicFloor.map((rect) => ({ ...rect, y: 0.014 })), ...bakedFloors],
-        ceilings: bakedCeilings,
-        skylightDapple
-      });
-    }
-    const fill = expanded ? null : new T.DirectionalLight(15325378, 0.45);
-    if (fill) {
-      fill.position.set(4, 8, -5);
-      scene.add(fill);
-    }
-    const surfaceAtmosphere = expanded ? createMallSurfaceAtmosphere(T, scene, {
-      plane: geometry.plane,
-      poolMaterial: materials2.lightPool,
-      washes: atmosphereWashes,
-      pools: poolBatches,
-      shopNear,
-      floors: [materials2.shellFloor, materials2.paving, materials2.courtStone],
-      fixtures: materials2.glow,
-      vault: materials2.vaultOak
-    }) : null;
-    refreshInstanceColours();
-    for (const { original, lod } of stagingLods) {
-      const attach = () => {
-        original.removeFromParent();
-        original.dispose();
-        scene.add(lod.mesh);
-      };
-      if (prepareModel)
-        prepareModel(lod.mesh, { late: false }).then(attach, () => lod.mesh.geometry.dispose());
-      else
-        attach();
-    }
-    const applyMallTheme = (theme) => {
-      const applied = applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fog: scene.fog });
-      if (applied) {
-        surfaceAtmosphere.setFixtureEmission(theme.materials.glowIntensity);
-        storefrontGlassMaterial.color.copy(materials2.glass.color);
-        storefrontGlassMaterial.opacity = materials2.glass.opacity;
-        storefrontGlassMaterial.roughness = materials2.glass.roughness;
-        storefrontGlassMaterial.metalness = materials2.glass.metalness;
-        doorGlassMaterial.color.copy(materials2.glass.color);
-        doorGlassMaterial.opacity = materials2.glass.opacity * 0.76;
-        materials2.skylightGlass.color.copy(materials2.glass.color);
-        materials2.skylightGlass.opacity = materials2.glass.opacity;
-        materials2.skylightGlass.roughness = materials2.glass.roughness;
-        materials2.skylightGlass.metalness = materials2.glass.metalness;
-        refreshInstanceColours();
-      }
-      return applied;
+      const seatCollider = collider(x, liftLayout.upper + 0.26, z, placement.clearance.colliderWidth, 0.5, placement.clearance.colliderDepth);
+      if (placement.accessible !== false)
+        seats.push(createSeatAnchor(placement, seatCollider.handle, modelPlaced ? undefined : slattedProfile || deckBenchFallback, modelPlaced ? benchScale : 1));
     };
-    sign("G O O D N E S S ,   A L L   A R O U N D", 0, 5.75, -0.3, 10, 0.48);
-    const signPoint = new T.Vector3;
-    const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
-    const eye = new T.Vector3, projection = new T.Matrix4;
-    const decalBounds = new T.Box3;
-    const contactBounds = new T.Sphere, savedContactBounds = new T.Sphere;
-    const view = { frustum: new T.Frustum, eye, shopVisibility };
-    let deckLodMeshes = null;
-    const additions = expanded ? createInteriorAdditions(T, { scene, collider, seats, prepareModel, detailsEnabled, tier: artworkTier }) : null;
-    interactables.push(...seats.map((seat) => ({ id: seat.id, kind: "sit", x: seat.exitX, y: seat.floor, z: seat.exitZ, floor: seat.floor, radius: seat.clearance.interactionRadius, seat })));
-    const firstFurnishing = shopLodMeshes.length;
-    const furnishingState = furnishings.finish(scene, (mesh) => shopLodMeshes.push(mesh), prepareModel);
-    for (const mesh of shopLodMeshes.slice(firstFurnishing))
-      queueShopUpload(mesh.userData.shopSlot, mesh);
-    for (const [slot2, meshes] of shopUploads) {
-      const bay = shopBays.get(slot2);
-      const x = (bay.minX + bay.maxX) / 2;
-      const priority = () => uploadVisitor ? Math.abs(uploadVisitor.x - x) - 60 : -60;
-      prepareModel(meshes, { late: false, priority }).catch(() => {});
+    for (const placement of seatPlacements.filter((item) => item.group === "deck"))
+      deckBench(placement);
+    for (const [x, z] of deckPlanters) {
+      if (!furnishings.place("planter", x, z, 0.68, 1, liftLayout.upper, null, -1)) {
+        box("pot", x, liftLayout.upper + 0.24, z, 0.68, 0.48, 0.68, true);
+        box("wood", x, liftLayout.upper + 0.49, z, 0.58, 0.025, 0.58);
+        for (let i = 0;i < 4; i++)
+          solid("sphere", i % 2 ? "leaf" : "foliage", x + (i % 2 ? -0.14 : 0.14), liftLayout.upper + 0.78, z + (i < 2 ? -0.14 : 0.14), 0.19, 0.36, 0.19);
+      }
+      collider(x, liftLayout.upper + 0.25, z, 0.68, 0.5, 0.68);
     }
-    const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
-    let upperWarmStatus = null, landingLights, upperFurniture;
-    let brandWallPromise = null;
-    reserveProduct = registerPhysicsProps(T, R, physics, {
-      scene,
-      interactables,
-      reserveProduct,
-      expanded,
+    activeDeck = false;
+    const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials2.shellFloor.map, prepareModel, shopVisibility, artworkTier, detailsEnabled, waitForSlice);
+    interiorModels = interiors;
+    for (const { x, y, z, width, height, depth } of interiors.collisionBoxes) {
+      collider(x, y, z, width, height, depth);
+      shopObstacles.push({
+        min: { x: x - width / 2, y: y - height / 2, z: z - depth / 2 },
+        max: { x: x + width / 2, y: y + height / 2, z: z + depth / 2 }
+      });
+      const rect = { minX: x - width / 2, maxX: x + width / 2, minZ: z - depth / 2, maxZ: z + depth / 2 };
+      if (y === 0.041 && height === 0.08)
+        bakedFloors.push({ ...rect, y: y + height / 2 + 0.009 });
+      if (y === 4.19 && height === 0.18)
+        bakedCeilings.push({ ...rect, y: y - height / 2 - 0.003 });
+    }
+    shopLodUpdates.push(interiors.update);
+    interiorKit = createInteriorKit(T, scene, {
+      assetBase: new URL(".", import.meta.url),
+      packshot: textures.get("new-moon-nz-425g-front.jpg"),
+      artworkTier,
+      waitForSlice,
+      prepareModel,
+      registerCollider({ center: [x, y, z], size: [w, h, d], yaw }) {
+        const box2 = physics.createCollider(R.ColliderDesc.cuboid(w / 2, h / 2, d / 2).setTranslation(x, y, z).setRotation({ x: 0, y: Math.sin(yaw / 2), z: 0, w: Math.cos(yaw / 2) }));
+        return () => physics.removeCollider(box2, false);
+      }
+    });
+    for (const [id, store2] of Object.entries(interiorStores)) {
+      activeShopSlot = Number(id.slice(1));
+      const [fx, , fz] = store2.ambient.focus;
+      const [standingX, standingZ] = store2.anchor.standing;
+      const floorY = Math.max(0.036, store2.floor.position_m[1] + 0.012);
+      const [px, py, pz] = worldInteriorPoint(store2, [(fx + standingX) / 2, floorY, (fz + standingZ) / 2]);
+      const width = id === "S01" ? 7.8 : 3.25;
+      const intensity = id === "S03" ? 1.1 : 1.42;
+      lightWash(px, py, pz, width, 2.75, store2.frame.yaw_world_deg * Math.PI / 180, -Math.PI / 2, activeShopSlot, id === "S01" ? 16764561 : 16768942, intensity);
+      if (id === "S04") {
+        for (const [storyId, [x, z]] of [
+          ["borsch-patch-story", store2.anchor.standing],
+          ["borsch-lingzhi-story", store2.lingzhiStanding]
+        ]) {
+          const [wx, , wz] = worldInteriorPoint(store2, [x, 0, z]);
+          interactables.push({ id: storyId, x: wx, z: wz, radius: 1 });
+        }
+      } else if (id === "S05") {
+        const [x, , z] = worldInteriorPoint(store2, [pzhCartonX, 0, pzhCartonStandingZ]);
+        interactables.push({ id: "pzh-carton-story", x, z, radius: 1 });
+      } else if (shopCatalogueFocals[id]) {
+        const exhibit = shopCatalogueFocals[id];
+        const [x, , z] = worldInteriorPoint(store2, [standingX, 0, standingZ]);
+        const plaque = sign(exhibit.caption, ...worldInteriorPoint(store2, exhibit.panel), 1.02, 0.15, true, 65);
+        plaque.rotation.y = store2.frame.yaw_world_deg * Math.PI / 180;
+        interactables.push({ id: exhibit.id, x, z, radius: 1 });
+      }
+      for (const footprint of store2.colliders) {
+        const { center: [x, , z], size: [w, , d], yaw } = worldInteriorBox(store2, footprint);
+        const y = store2.frame.world_origin_m[1] + store2.floor.position_m[1] + 0.024;
+        solid("plane", "contact", x, y, z, w * 1.22, d * 1.22, 1, yaw, -Math.PI / 2, "YXZ");
+      }
+    }
+    activeShopSlot = null;
+  }
+  const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded, artworkTier);
+  interactables.push(...amenities.interactables);
+  const frames = new T.InstancedMesh(doorFrameGeometry, materials2.brass, doorFrames.length);
+  frames.name = "Sliding shop door frames";
+  frames.instanceMatrix.setUsage(T.DynamicDrawUsage);
+  let frameCount = -1;
+  const previousDoorX = [];
+  doorFrames.forEach((group, index) => {
+    group.updateMatrix();
+    frames.setMatrixAt(index, group.matrix);
+  });
+  frames.computeBoundingSphere();
+  scene.add(frames);
+  doorFrameGeometry.computeBoundingBox();
+  const frameBox = new T.Box3;
+  function updateFrames({ frustum }) {
+    let count = 0, changed = false;
+    for (const group of doorFrames) {
+      matrix.makeTranslation(group.position.x, group.position.y, group.position.z);
+      if (!frustum.intersectsBox(frameBox.copy(doorFrameGeometry.boundingBox).applyMatrix4(matrix)))
+        continue;
+      if (previousDoorX[count] !== group.position.x)
+        changed = true;
+      previousDoorX[count] = group.position.x;
+      frames.setMatrixAt(count++, matrix);
+    }
+    if (!changed && count === frameCount)
+      return;
+    frameCount = frames.count = count;
+    frames.instanceMatrix.needsUpdate = true;
+    frames.computeBoundingSphere();
+  }
+  viewUpdates.push(updateFrames);
+  if (expanded)
+    for (const [name, panes, material, receiveShadow] of [
+      ["Sliding shop door glass", doorGlass, doorGlassMaterial, false],
+      ["Original shop window glass", windowGlass, storefrontGlassMaterial, true]
+    ]) {
+      const batch = createGlassBatch(T, geometry.box, material, panes);
+      batch.mesh.name = name;
+      batch.mesh.receiveShadow = receiveShadow;
+      scene.add(batch.mesh);
+      viewUpdates.push(batch.update);
+    }
+  const stagingLods = [], standalonePools = [], poolBatches = [];
+  const shopNear = new Map;
+  let contactBatch;
+  const glowParts = [];
+  const lowCylinder = new T.CylinderGeometry(1, 1, 1, 12);
+  const lowSphere = new T.SphereGeometry(1, 8, 5);
+  const radius = (m, axis) => Math.hypot(...m.elements.slice(axis * 4, axis * 4 + 3));
+  for (const batch of batches.values()) {
+    if (expanded && batch.material === materials2.glow && !batch.deckLod) {
+      batch.transforms.forEach((transform, index) => {
+        const piece = batch.geometry.clone().applyMatrix4(transform);
+        piece.computeBoundingBox();
+        glowParts.push({ geometries: [piece], bounds: piece.boundingBox, slot: batch.slots?.[index] });
+      });
+      continue;
+    }
+    const surfaces = batch.surfaces && new T.InstancedBufferAttribute(new Float32Array(batch.surfaces), 2);
+    const source = surfaces ? batch.geometry.clone().setAttribute("instanceSurface", surfaces) : batch.geometry;
+    const playerContact = expanded && !batch.deckLod && batch.material === contact;
+    const mesh = new T.InstancedMesh(source, batch.material, batch.transforms.length + Number(playerContact));
+    if (playerContact) {
+      mesh.count = batch.transforms.length;
+      contactBatch = mesh;
+    }
+    if (batch.material === contact)
+      placeDecal(mesh);
+    if (batch.material === materials2.lightPool) {
+      placeDecal(mesh, -1);
+      if (expanded) {
+        mesh.instanceColor = new T.InstancedBufferAttribute(new Float32Array(batch.transforms.length * 3).fill(1), 3);
+        standalonePools.push(mesh);
+        poolBatches.push(batch);
+      }
+    }
+    mesh.name = `${batch.type} ${batch.finish || batch.material.name}`;
+    if (batch.material === contact)
+      mesh.name = "Mall contact shadows";
+    if (batch.material === materials2.lightPool)
+      mesh.name = "Mall floor and wall light pools";
+    if (batch.material === materials2.paving) {
+      mesh.name = "Mall ivory marble paving";
+      pavingMesh = mesh;
+      if (mappedPaving)
+        mesh.material = mappedPaving;
+    }
+    for (const store2 of spatial.stores) {
+      if (batch.material === materials2[`${store2.id}Backdrop`])
+        queueShopUpload(Number(store2.number), mesh);
+    }
+    batch.transforms.forEach((m, i) => mesh.setMatrixAt(i, m));
+    batch.colours?.forEach((colour, i) => mesh.setColorAt(i, colour));
+    mesh.receiveShadow = batch.material !== materials2.lightPool;
+    mesh.userData.shopSlot = batch.shopSlot;
+    mesh.userData.deckLod = batch.deckLod;
+    if (batch.material === materials2.glow)
+      mesh.layers.enable(1);
+    scene.add(mesh);
+    if (batch.shopSlot !== null)
+      shopLodMeshes.push(mesh);
+    const isTimber = batch.type === "cylinder" && batch.finish === "woodGrain";
+    const isMatteSphere = batch.type === "sphere" && batch.finish === "matte";
+    let lod;
+    if ((isTimber || isMatteSphere) && batch.shopSlot === null && !batch.deckLod) {
+      lod = createProjectedBatch(T, mesh, isTimber ? lowCylinder : lowSphere, isTimber ? (m) => Math.max(radius(m, 0), radius(m, 2)) * (1 - Math.cos(Math.PI / 12)) : (m) => Math.max(radius(m, 0), radius(m, 1), radius(m, 2)) * (1 - Math.cos(Math.PI / 8) * Math.cos(Math.PI / 10)), batch.colours, batch.slots);
+      stagingLods.push({ original: mesh, lod });
+    }
+    const compact = !mesh.material.transparent || [materials2.contact, materials2.lightPool].includes(batch.material);
+    const controller = expanded && compact ? createInstanceVisibility(T, mesh, {
+      colours: batch.colours,
+      slots: batch.slots,
+      attributes: surfaces ? [surfaces] : []
+    }) : null;
+    const allow = batch.material === contact ? (slot2) => slot2 === null || interiorKit.groups[slot2 - 1]?.visible : (slot2) => slot2 === null || shopNear.get(slot2);
+    viewUpdates.push((view2) => {
+      if (lod?.mesh.parent)
+        lod.update(view2, batch.slots ? allow : undefined);
+      else if (mesh.visible && controller)
+        controller.update(view2.frustum, batch.slots ? allow : undefined, false, view2.shopVisibility.occluded);
+    });
+    if (batch.colours)
+      colourBatches.push(() => {
+        lod?.refreshColours();
+        if (controller)
+          controller.refreshColours();
+      });
+  }
+  if (glowParts.length) {
+    const glow = createPackedDraw(T, glowParts, materials2.glow);
+    glow.mesh.name = "Mall fixture glow";
+    glow.mesh.receiveShadow = true;
+    glow.mesh.layers.enable(1);
+    scene.add(glow.mesh);
+    viewUpdates.push((view2) => glow.update(({ bounds, slot: slot2 }) => (slot2 == null || shopNear.get(slot2)) && view2.frustum.intersectsBox(bounds) && !view2.shopVisibility.occluded(slot2, bounds) ? 0 : -1));
+  }
+  lowCylinder.dispose();
+  lowSphere.dispose();
+  key.position.set(...expanded ? [-12, 16, 6] : [-8, 15, 9]);
+  key.castShadow = true;
+  scene.add(ambient, key);
+  const playerShadow = expanded ? createPlayerShadow(T, scene, key) : null;
+  if (!expanded) {
+    key.shadow.mapSize.set(1024, 1024);
+    Object.assign(key.shadow.camera, { left: -20, right: 20, top: 20, bottom: -20, near: 0.5, far: 50 });
+    key.shadow.normalBias = 0.05;
+    key.shadow.bias = -0.0004;
+  }
+  let bakedLighting, skylightDapple;
+  if (expanded) {
+    const holes = expandedLift ? [...bakedFloors, liftLayout.shaft] : bakedFloors;
+    const publicFloor = holes.reduce((panels, hole) => panels.flatMap((panel) => cutRectangle(panel, hole)), [expandedLayout.bounds]);
+    if (expandedLift) {
+      const { minX: minX2, maxX: maxX2, minZ: minZ2, maxZ: maxZ2 } = liftLayout.roofOpening;
+      const projection2 = { minX: minX2 + 2, maxX: maxX2 + 4, minZ: Math.max(0.4, minZ2), maxZ: maxZ2 - 1 };
+      skylightDapple = createSkylightDapple(T, scene, {
+        contact,
+        prepareModel,
+        projection: projection2,
+        panels: cutRectangle(projection2, liftLayout.shaft).map((rect) => ({ ...rect, y: 0.026 }))
+      });
+    }
+    bakedLighting = createMallBakedLighting(T, scene, {
+      contact,
       phone,
       prepareModel,
-      interiors: interiorKit,
-      initialTier: artworkTier()
+      floors: [...publicFloor.map((rect) => ({ ...rect, y: 0.014 })), ...bakedFloors],
+      ceilings: bakedCeilings,
+      skylightDapple
     });
-    return { signage, defaultExposure: EVERYDAY.lighting.exposure, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits } : {}, getPreloadedModels() {
-      return interiorModels?.getPreloadedModels() || [];
-    }, get modelPreload() {
-      const preload = interiorModels?.preloadState;
-      return preload ? { ...preload, sceneModels: Object.fromEntries(["Gallery lift directory standee", "Gallery atrium chandelier"].map((name) => [name, scene.getObjectByName(name)?.userData.sourceStatus || "pending"])) } : null;
-    }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, prepareUpperFurniture, get upperWarmStatus() {
-      return upperWarmStatus;
-    }, furnishings: Object.freeze({ ...furnishingState, ...additions?.state }), productAssets: Object.freeze(worldProductAssets) };
-  } finally {
-    releaseStartupAssetPack();
   }
+  const fill = expanded ? null : new T.DirectionalLight(15325378, 0.45);
+  if (fill) {
+    fill.position.set(4, 8, -5);
+    scene.add(fill);
+  }
+  const surfaceAtmosphere = expanded ? createMallSurfaceAtmosphere(T, scene, {
+    plane: geometry.plane,
+    poolMaterial: materials2.lightPool,
+    washes: atmosphereWashes,
+    pools: poolBatches,
+    shopNear,
+    floors: [materials2.shellFloor, materials2.paving, materials2.courtStone],
+    fixtures: materials2.glow,
+    vault: materials2.vaultOak
+  }) : null;
+  refreshInstanceColours();
+  for (const { original, lod } of stagingLods) {
+    const attach = () => {
+      original.removeFromParent();
+      original.dispose();
+      scene.add(lod.mesh);
+    };
+    if (prepareModel)
+      prepareModel(lod.mesh, { late: false }).then(attach, () => lod.mesh.geometry.dispose());
+    else
+      attach();
+  }
+  const applyMallTheme = (theme) => {
+    const applied = applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient, key, fog: scene.fog });
+    if (applied) {
+      surfaceAtmosphere.setFixtureEmission(theme.materials.glowIntensity);
+      storefrontGlassMaterial.color.copy(materials2.glass.color);
+      storefrontGlassMaterial.opacity = materials2.glass.opacity;
+      storefrontGlassMaterial.roughness = materials2.glass.roughness;
+      storefrontGlassMaterial.metalness = materials2.glass.metalness;
+      doorGlassMaterial.color.copy(materials2.glass.color);
+      doorGlassMaterial.opacity = materials2.glass.opacity * 0.76;
+      materials2.skylightGlass.color.copy(materials2.glass.color);
+      materials2.skylightGlass.opacity = materials2.glass.opacity;
+      materials2.skylightGlass.roughness = materials2.glass.roughness;
+      materials2.skylightGlass.metalness = materials2.glass.metalness;
+      refreshInstanceColours();
+    }
+    return applied;
+  };
+  sign("G O O D N E S S ,   A L L   A R O U N D", 0, 5.75, -0.3, 10, 0.48);
+  const signPoint = new T.Vector3;
+  const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
+  function updateSigns(camera, canvas2, reducedMotion) {
+    signage?.update(camera, reducedMotion, performance.now());
+    const frame = canvas2.getBoundingClientRect();
+    for (const label of roomSigns) {
+      const mesh = label.mesh;
+      label.left = label.top = Infinity;
+      label.right = label.bottom = -Infinity;
+      for (const dx of [-0.5, 0.5])
+        for (const dy of [-0.5, 0.5]) {
+          signPoint.set(mesh.position.x + dx * mesh.scale.x, mesh.position.y + dy * mesh.scale.y, mesh.position.z).project(camera);
+          const x = frame.left + (signPoint.x + 1) * frame.width / 2;
+          const y = frame.top + (1 - signPoint.y) * frame.height / 2;
+          label.left = Math.min(label.left, x);
+          label.right = Math.max(label.right, x);
+          label.top = Math.min(label.top, y);
+          label.bottom = Math.max(label.bottom, y);
+        }
+      let overlaps = false;
+      if (frame.width < 600)
+        for (const hud of signHUD) {
+          const rect = hud.getBoundingClientRect();
+          if (label.left < rect.right + 8 && label.right > rect.left - 8 && label.top < rect.bottom + 8 && label.bottom > rect.top - 8)
+            overlaps = true;
+        }
+      mesh.visible = !overlaps && (mesh.userData.shopSlot === undefined || mesh.userData.shopLodNear);
+    }
+  }
+  const eye = new T.Vector3, projection = new T.Matrix4;
+  const decalBounds = new T.Box3;
+  const contactBounds = new T.Sphere, savedContactBounds = new T.Sphere;
+  function drawWithPlayerContact(shadow2, draw2) {
+    if (!contactBatch || !shadow2.visible)
+      return draw2();
+    const { count, boundingSphere, instanceMatrix } = contactBatch;
+    shadow2.updateMatrix();
+    contactBatch.setMatrixAt(count, shadow2.matrix);
+    instanceMatrix.clearUpdateRanges();
+    instanceMatrix.addUpdateRange(0, (count + 1) * 16);
+    instanceMatrix.needsUpdate = true;
+    geometry.plane.boundingSphere ?? geometry.plane.computeBoundingSphere();
+    savedContactBounds.copy(boundingSphere);
+    boundingSphere.union(contactBounds.copy(geometry.plane.boundingSphere).applyMatrix4(shadow2.matrix));
+    contactBatch.count++;
+    shadow2.visible = false;
+    try {
+      return draw2();
+    } finally {
+      shadow2.visible = true;
+      contactBatch.count = count;
+      boundingSphere.copy(savedContactBounds);
+    }
+  }
+  const view = { frustum: new T.Frustum, eye, shopVisibility };
+  let deckLodMeshes = null;
+  function updateShopLods(visitor, shadows = true, tier, camera, height, focus, lightWash2, reducedMotion = false) {
+    productDisplay?.setShadows(shadows);
+    if (!expanded) {
+      if (camera) {
+        view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+        updateFrames(view);
+      }
+      return;
+    }
+    interactables.physicsProps?.setTier(tier);
+    materials2.glass.forceSinglePass = tier === "low";
+    shopVisibility.setOverheadCulling(tier === "low");
+    bakedLighting.setTier(tier);
+    skylightDapple?.update(tier, reducedMotion);
+    if (shadows && tier === "detailed")
+      playerShadow.update(visitor);
+    if (surfaceAtmosphere.setTier(tier, lightWash2) && mappedPaving)
+      mappedPaving.roughness = materials2.paving.roughness;
+    uploadVisitor = visitor;
+    if (camera) {
+      view.camera = camera;
+      view.pixelScale = camera.projectionMatrix.elements[5] * height / 2;
+      view.shadows = shadows;
+      view.focus = focus;
+      eye.setFromMatrixPosition(camera.matrixWorld);
+      shopVisibility.setEye(eye);
+      view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+    }
+    restrooms?.updateDraw(camera && view.frustum);
+    productDisplay?.updateShopLods(visitor, camera && view);
+    interiorKit.update(visitor, camera && view);
+    const deckVisible = Math.abs(visitor.y - liftLayout.upper) < 3, shopDistance = 12;
+    view.deckVisible = deckVisible;
+    view.low = tier === "low";
+    for (const [slot2, bay] of shopBays) {
+      const x = (bay.minX + bay.maxX) / 2;
+      const z = slot2 <= 3 ? Math.min(bay.maxZ, Math.max(bay.minZ, visitor.z)) : (bay.minZ + bay.maxZ) / 2;
+      shopNear.set(slot2, Math.hypot(visitor.x - x, visitor.y, visitor.z - z) < shopDistance);
+    }
+    for (const mesh of shopLodMeshes) {
+      const slot2 = mesh.userData.shopSlot;
+      if (!shopNear.has(slot2))
+        continue;
+      let near = shopNear.get(slot2);
+      if (near && camera && mesh.userData.shopDecal) {
+        mesh.geometry.boundingBox ?? mesh.geometry.computeBoundingBox();
+        mesh.updateWorldMatrix(true, false);
+        near = !shopVisibility.occluded(slot2, decalBounds.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld));
+      }
+      mesh.visible = mesh.userData.shopLodNear = near;
+      if (mesh.visible && !deckVisible)
+        furnishings.loadShopDetails(slot2);
+    }
+    if (!deckLodMeshes) {
+      deckLodMeshes = [];
+      scene.traverse((mesh) => {
+        if (mesh.userData.deckLod)
+          deckLodMeshes.push(mesh);
+      });
+    }
+    for (const mesh of deckLodMeshes)
+      mesh.visible = deckVisible;
+    for (const mesh of standalonePools)
+      mesh.visible = tier !== "low" && (!mesh.userData.deckLod || deckVisible);
+    for (const update of shopLodUpdates)
+      update(visitor, camera && view);
+    additions?.update(tier, camera ? view : { deckVisible }, shopNear);
+    furnishings.updateView(camera ? view : { deckVisible }, shopNear);
+    if (camera) {
+      for (const update of viewUpdates)
+        update(view);
+      surfaceAtmosphere.updateView(view);
+      amenities.updateView(view);
+      upperLevel?.updateView(view.frustum);
+    }
+  }
+  const additions = expanded ? createInteriorAdditions(T, { scene, collider, seats, prepareModel, detailsEnabled, tier: artworkTier }) : null;
+  interactables.push(...seats.map((seat) => ({ id: seat.id, kind: "sit", x: seat.exitX, y: seat.floor, z: seat.exitZ, floor: seat.floor, radius: seat.clearance.interactionRadius, seat })));
+  const firstFurnishing = shopLodMeshes.length;
+  const furnishingState = furnishings.finish(scene, (mesh) => shopLodMeshes.push(mesh), prepareModel);
+  for (const mesh of shopLodMeshes.slice(firstFurnishing))
+    queueShopUpload(mesh.userData.shopSlot, mesh);
+  for (const [slot2, meshes] of shopUploads) {
+    const bay = shopBays.get(slot2);
+    const x = (bay.minX + bay.maxX) / 2;
+    const priority = () => uploadVisitor ? Math.abs(uploadVisitor.x - x) - 60 : -60;
+    prepareModel(meshes, { late: false, priority }).catch(() => {});
+  }
+  const cameraObstacles = ceilingObstacles.concat(shopObstacles, seats.map((seat) => seat.bounds));
+  let upperWarmStatus = null, landingLights, upperFurniture;
+  function prepareUpperLevel() {
+    if (!upperLevel)
+      return;
+    const { group, panes, cabinMark } = upperLevel;
+    const cabin2 = scene.getObjectByName("Expanded physical lift cabin");
+    if (cabinMark.parent !== cabin2)
+      cabin2?.add(cabinMark);
+    if (!warmModel)
+      return;
+    landingLights ??= new T.Scene;
+    landingLights.children = [ambient, key];
+    landingLights.fog = scene.fog;
+    landingLights.environment = scene.environment;
+    landingLights.environmentIntensity = scene.environmentIntensity;
+    if (upperWarmStatus === "pending" || upperWarmStatus === "ready")
+      return;
+    upperWarmStatus = "pending";
+    warmModel([group, panes, cabinMark], landingLights, {
+      late: false,
+      priority: () => -100,
+      linear: () => false
+    }).then(() => {
+      upperWarmStatus = "ready";
+    }, (error) => {
+      upperWarmStatus = "interrupted";
+      console.warn("Upper level GPU warmup interrupted", error);
+    });
+  }
+  function prepareUpperFurniture() {
+    if (!upperLevel)
+      return;
+    prepareUpperLevel();
+    upperFurniture ??= loadUpperFurniture(T).then((records) => upperLevel.installFurniture(records, prepareModel)).catch((error) => console.warn("Upper level furniture unavailable", error));
+  }
+  let brandWallPromise = null;
+  function ensureBrandWall() {
+    if (!expanded)
+      return Promise.reject(new Error("Brand wall is only available in the expanded mall"));
+    if (!brandWallPromise)
+      brandWallPromise = import("./brand-wall.js").then(({ addBrandWallAtlas }) => addBrandWallAtlas(T, scene, liftLayout.upper, prepareModel, artworkTier)).then((result) => {
+        interactables.push(...result.interactables);
+        deckLodMeshes?.push(result.mesh);
+        return result;
+      });
+    return brandWallPromise;
+  }
+  reserveProduct = registerPhysicsProps(T, R, physics, {
+    scene,
+    interactables,
+    reserveProduct,
+    expanded,
+    phone,
+    prepareModel,
+    interiors: interiorKit,
+    initialTier: artworkTier()
+  });
+  return { signage, defaultExposure: EVERYDAY.lighting.exposure, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits } : {}, getPreloadedModels() {
+    return interiorModels?.getPreloadedModels() || [];
+  }, get modelPreload() {
+    const preload = interiorModels?.preloadState;
+    return preload ? { ...preload, sceneModels: Object.fromEntries(["Gallery lift directory standee", "Gallery atrium chandelier"].map((name) => [name, scene.getObjectByName(name)?.userData.sourceStatus || "pending"])) } : null;
+  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, prepareUpperFurniture, get upperWarmStatus() {
+    return upperWarmStatus;
+  }, furnishings: Object.freeze({ ...furnishingState, ...additions?.state }), productAssets: Object.freeze(worldProductAssets) };
 }
 export {
   createWorld,

@@ -10,7 +10,7 @@ import {emptyInteriorReport} from './warmup.js';
 
 export function createInteriorKit(T, scene, {
   assetBase, packshot, prepareModel, registerCollider, artworkTier = () => 'low',
-  loadModel = createInteriorModelLoader(T,assetBase,undefined,artworkTier),
+  waitForSlice, loadModel = createInteriorModelLoader(T,assetBase,undefined,artworkTier,waitForSlice),
   reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),
   now = () => performance.now()
 }) {

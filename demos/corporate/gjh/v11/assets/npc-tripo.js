@@ -53,15 +53,15 @@ function canShareSkin(high, low) {
       sameMatrix(low.skeleton.boneInverses[i],high.skeleton.boneInverses[i]));
 }
 
-function loadModel(level, signal, highResolution) {
+function loadModel(level, signal, highResolution, waitForSlice) {
   if (signal.aborted) return null;
   const suffix = level ? '-lod1' : highResolution ? '-1k' : '';
   const url = new URL(`./gjh-tripo-npc-boy${suffix}.glb`, import.meta.url);
-  return loadVisitorGLTF(url);
+  return loadVisitorGLTF(url, waitForSlice);
 }
 
-export async function loadTripoNpc(signal, readModel = loadModel, highResolution = false) {
-  const [base, detail] = await Promise.allSettled([0,1].map(async level => readModel(level,signal,highResolution)));
+export async function loadTripoNpc(signal, readModel = loadModel, highResolution = false, waitForSlice) {
+  const [base, detail] = await Promise.allSettled([0,1].map(async level => readModel(level,signal,highResolution,waitForSlice)));
   const high = base.value?.scene, low = detail.value?.scene;
   let accepted = false, lowGeometry = null;
   try {

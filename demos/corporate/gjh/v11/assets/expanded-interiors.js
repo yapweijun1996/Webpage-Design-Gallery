@@ -7,6 +7,7 @@ import {setupMaterialArtwork} from './artwork-textures.js';
 import {westShopPlacements} from './gallery-west-shops.js';
 import {eastShopPlacements} from './gallery-east-shops.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
+import {parseWarmGLTF} from './gltf-warmup.js';
 
 // All exports use metres, a floor-centred origin and local +Z as the front.
 const displayFiles = {
@@ -37,7 +38,7 @@ function displayPlacements(number, heroX, heroZ) {
 
 // Furniture is vertex-coloured and merged; model displays load in the background.
 // Coordinates inside each bay have the glazed front on local +Z.
-export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => 'low', detailsEnabled = () => true) {
+export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => 'low', detailsEnabled = () => true, waitForSlice) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
   const material = new T.MeshStandardMaterial({vertexColors:true, roughness:.65});
   const woodFinishes = new Set([0xb18356,0x66412f,0x69442c,0x8b5a38,0xb28a5c,0xc59d69,0x8e4d35,0x66482f,0x604534,0x694635,0xaa8464]);
@@ -79,7 +80,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       const load = async () => {
         const response = await fetch(url, {signal:controller.signal});
         if (!response.ok) throw new Error(`Model request failed: ${response.status}`);
-        const gltf = await gltfLoader.parseAsync(await response.arrayBuffer(), new URL('.',url).href);
+        const gltf = await parseWarmGLTF(gltfLoader, await response.arrayBuffer(), new URL('.',url).href, waitForSlice, controller.signal);
         if (abandoned) {
           gltf.scene.traverse(node => {
             if (!node.isMesh) return;

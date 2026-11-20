@@ -203,7 +203,7 @@ function createCharacter(T, prepareModel, portrait) {
     },
     async v2() {
       const { createCharacterV2 } = await import("./character-v2.bundle.js");
-      return createCharacterV2(T, createLocomotionContinuity, prepareModel, portrait?.entry);
+      return createCharacterV2(T, createLocomotionContinuity, prepareModel, portrait?.entry, portrait?.waitForSlice);
     },
     v1: () => createCharacterV1(T, prepareModel)
   });

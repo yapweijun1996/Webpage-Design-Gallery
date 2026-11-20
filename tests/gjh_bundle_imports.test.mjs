@@ -19,6 +19,7 @@ const lazyExports = {
   'assets/collection-gesture.js': ['createCollectionGesture'],
   'assets/crowd.js': ['loadModularLooks'],
   'assets/deepavali.js': ['prepareDeepavaliDecor'],
+  'assets/dom-projection.js': ['createDOMProjection'],
   'assets/elevator-v2.js': ['createElevatorV2'],
   'assets/interiors/action-layout.js': ['actionsBySlot:object'],
   'assets/interiors/shop-interactions.js': ['installShopInteractions'],
@@ -27,10 +28,14 @@ const lazyExports = {
   'assets/natural-materials.js': ['createNaturalSurfaceTextures'],
   'assets/npcs.js': ['createNpcSystem', 'loadNpcSystem'],
   'assets/player.bundle.js': ['createPlayer'],
-  'assets/products.js': ['NEW_MOON_CANS:array'],
+  'assets/products.js': ['NEW_MOON_CANS:array', 'addProducts'],
   'assets/push-cart.js': ['createLazyCart'],
   'assets/seated-pose.js': ['createSeatedPose'],
+  'assets/shelf-focus.js': ['createShelfFocus'],
+  'assets/target-guidance.js': ['createTargetGuidance'],
   'assets/visitor-gltf.js': ['loadVisitorGLTF', 'disposeVisitorScene'],
+  'assets/visitor-v2-controls.js': ['installVisitorV2Controls'],
+  'assets/visitor-v2-product-ui.js': ['installPhysicalProductControl'],
   'assets/world.bundle.js': ['createWorld'],
   'script.bundle.js': [], // The route imports for side effects, exercised by the startup smoke.
   'vendor/GLTFLoader.js': ['GLTFLoader'],
@@ -38,15 +43,8 @@ const lazyExports = {
   'vendor/three.module.min.js': ['WebGLRenderer', 'Scene', 'Vector3'],
 };
 
-// Bun turns these dynamic imports into promises of internal namespaces.
-const inlineExports = {
-  exports_dom_projection: ['assets/dom-projection.js', 'createDOMProjection'],
-  exports_target_guidance: ['assets/target-guidance.js', 'createTargetGuidance'],
-  exports_shelf_focus: ['assets/shelf-focus.js', 'createShelfFocus'],
-  exports_visitor_v2_product_ui: ['assets/visitor-v2-product-ui.js', 'installPhysicalProductControl'],
-  exports_visitor_v2_controls: ['assets/visitor-v2-controls.js', 'installVisitorV2Controls'],
-  exports_products: ['assets/products.js', 'addProducts'],
-};
+// Bun can turn a dynamic import into a promise of an internal namespace.
+const inlineExports = {};
 
 // Use Node's bundled parser so the tests need no npm install or Bun compiler.
 if (process.execArgv.includes('--expose-internals')) {
