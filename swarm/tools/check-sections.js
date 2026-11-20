@@ -5,6 +5,7 @@
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
+const { listLayers, parseSectionFile } = require('../lib/layers');
 
 const DEFAULT_PROJECT = path.resolve(__dirname, '../projects/home');
 const REPO_ROOT = path.resolve(__dirname, '../..');
@@ -15,6 +16,7 @@ const RAW_TAGS = new Set('script style textarea title xmp iframe noembed noframe
 const NON_TEXT_TAGS = new Set(['defs', 'desc', 'head', 'template']);
 const SVG_URL_ATTRS = new Set('clip-path cursor fill filter marker marker-end marker-mid marker-start mask stroke'.split(' '));
 const CSS_GROUPS = new Set(['media', 'supports', 'layer', 'container', 'starting-style']);
+const LAYER_SCOPE_RULE = 'layer-scope';
 const CSS_LITERALS = /\/\*[\s\S]*?(?:\*\/|$)|"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|\\(?:[a-f\d]{1,6}(?:\r\n|[ \t\r\n\f])?|[\s\S])/gi;
 const CSS_ESCAPE = /\\(?:([a-f\d]{1,6})(?:\r\n|[ \t\r\n\f])?|(\r\n|[\s\S]))/gi;
 const CSS_NAME_ESCAPE = String.raw`\\(?:[a-f\d]{1,6}(?:\r\n|[ \t\r\n\f])?|[^\r\n\f])`;
@@ -165,6 +167,14 @@ function cssSource(source) {
   return { text, code: text.replace(CSS_LITERALS, token => '\ue000'.repeat(token.length)) };
 }
 
+function layerSelectorCode(selector) {
+  return selector.replace(CSS_LITERALS, literal => {
+    // Section IDs start with a digit, which CSS authors can escape in an ID selector.
+    const name = literal.startsWith('\\') ? decodeCss(literal) : '';
+    return /^[\w-]$/.test(name) ? name : '\ue000'.repeat(literal.length);
+  });
+}
+
 function* cssDelimiters(code, wanted) {
   let depth = 0;
   for (let index = 0; index < code.length; index += 1) {
@@ -231,7 +241,7 @@ function selectorParts(selector) {
   return compounds;
 }
 
-function selectorFacts(compound, scope) {
+function selectorFacts(compound, scope, sectionId) {
   const bits = {
     scoped: false, hasRoot: false, classes: [], ids: [], attributes: [], alternatives: [],
     type: /^[a-z][\w-]*/i.exec(compound)?.[0].toLowerCase(), universal: compound.startsWith('*'),
@@ -246,6 +256,7 @@ function selectorFacts(compound, scope) {
       if (name === scope) bits.scoped = true;
     } else if (prefix === '#') {
       bits.ids.push(name);
+      if (name === sectionId) bits.scoped = true;
     } else if (pseudo) {
       const name = pseudoName.toLowerCase();
       if (pseudo === '::' || /^(?:before|after|first-letter|first-line)$/.test(name)) bits.pseudoElement = true;
@@ -260,7 +271,7 @@ function selectorFacts(compound, scope) {
           end += 1;
         }
         const argument = compound.slice(start, depth ? end : end - 1);
-        const alternatives = splitCss(argument, ',').map(selector => selectorFactsForList(selector, scope));
+        const alternatives = splitCss(argument, ',').map(selector => selectorFactsForList(selector, scope, sectionId));
         if (alternatives.some(branch => branch.hasRoot)) bits.hasRoot = true;
         if (/^(?:is|where)$/.test(name)) {
           bits.alternatives.push(...alternatives);
@@ -273,7 +284,7 @@ function selectorFacts(compound, scope) {
   return bits;
 }
 
-function selectorFactsForList(selector, scope) {
+function selectorFactsForList(selector, scope, sectionId) {
   let scoped = false;
   let ancestorScoped = false;
   let hasRoot = false;
@@ -281,7 +292,7 @@ function selectorFactsForList(selector, scope) {
   for (const { piece, combinator } of selectorParts(selector.trim())) {
     if (combinator === ' ' || combinator === '>') ancestorScoped = scoped;
     if (combinator === '|') ancestorScoped = false;
-    target = selectorFacts(piece, scope);
+    target = selectorFacts(piece, scope, sectionId);
     scoped = target.scoped || ancestorScoped;
     hasRoot ||= target.hasRoot;
   }
@@ -461,16 +472,11 @@ function inspectSdsDeclarations(statements, report) {
   }
 }
 
-function collectCss(source, report, { scope, inline = false, header = false, controls, palette }) {
-  const css = cssSource(source);
-  const statements = cssStatements(css);
+function collectCss(stylesheets, { scope, inline = false, header = false, controls, palette }) {
   const rules = [];
-  for (const url of cssUrls(css)) {
-    if (externalUrl(url)) report('error', 'external-resource', 'CSS url() loads an external resource.');
-  }
   function walk(statements, context) {
     const rule = { ...context, declarations: [] };
-    const { selectors, keyframes, conditions, guarded } = context;
+    const { selectors, keyframes, conditions, guarded, report, sectionId } = context;
     const parent = selectors.length ? `:is(${selectors.join(',')})` : '';
     rules.push(rule);
     for (const statement of statements) {
@@ -498,18 +504,23 @@ function collectCss(source, report, { scope, inline = false, header = false, con
         if (found) rule.declarations.push(found);
         continue;
       }
-      const children = splitCss(statement.code, ',').map(selector => {
+      const selectorCode = sectionId ? layerSelectorCode(statement.text) : statement.code;
+      const children = splitCss(selectorCode, ',').map(selector => {
         const clean = selector.trim();
         if (!parent) return clean;
         return clean.includes('&') ? clean.replace(/&/g, parent) : `${parent} ${clean}`;
       });
-      const facts = children.map(selector => selectorFactsForList(selector, scope));
+      const facts = children.map(selector => selectorFactsForList(selector, scope, sectionId));
       const frame = keyframes && children.every(selector => /^(?:from|to|(?:\d*\.)?\d+%)$/i.test(selector));
       const scoped = !keyframes && facts.every(fact => fact.scoped && !fact.hasRoot);
       if (!scoped && !frame) {
-        const message = `Scope every selector in "${statement.text}" to .${scope}.`;
-        report('error', 'css-scope', message);
-        if (!keyframes) report('error', 'unscoped-selector', message);
+        if (sectionId && !keyframes) {
+          report('warn', LAYER_SCOPE_RULE, `Scope every selector in "${statement.text}" to .${scope} or #${sectionId}.`);
+        } else {
+          const message = `Scope every selector in "${statement.text}" to .${scope}.`;
+          report('error', 'css-scope', message);
+          if (!keyframes) report('error', 'unscoped-selector', message);
+        }
       }
       if (!keyframes && children.some((selector, index) => {
         if (facts[index].scoped) return false;
@@ -524,17 +535,29 @@ function collectCss(source, report, { scope, inline = false, header = false, con
       });
     }
   }
-  walk(statements, {
-    selectors: [], conditions: [], scoped: false, keyframes: false, guarded: false, tap: inline && controls.length > 0,
-  });
-  inspectSdsDeclarations(statements, report);
+  for (const { source, report, sectionId } of stylesheets) {
+    const css = cssSource(source);
+    const statements = cssStatements(css);
+    for (const url of cssUrls(css)) {
+      if (externalUrl(url)) report('error', 'external-resource', 'CSS url() loads an external resource.');
+    }
+    walk(statements, {
+      selectors: [], conditions: [], scoped: false, keyframes: false, guarded: false,
+      tap: inline && controls.length > 0, report, sectionId,
+    });
+    inspectSdsDeclarations(statements, report);
+  }
   let important = 0;
-  for (const [index, { declarations, selectors, scoped, conditions, guarded, tap }] of rules.entries()) {
+  let importantReport;
+  for (const [index, { declarations, selectors, scoped, conditions, guarded, tap, report }] of rules.entries()) {
     let leadingTokens = true;
     for (const item of declarations) {
       const { property, value } = item;
       leadingTokens &&= property.startsWith('--');
-      if (item.important) important += 1;
+      if (item.important) {
+        important += 1;
+        importantReport ??= report;
+      }
       if (!(palette && scoped && leadingTokens)
         && /(?<![\w-])(?:#(?:[\da-f]{8}|[\da-f]{6}|[\da-f]{4}|[\da-f]{3})(?![\w-])|(?:rgba?|hsla?)\()/i.test(withoutUrls(value))) {
         report('warn', 'hard-coded-color', `Use a color token in ${property}.`);
@@ -566,7 +589,7 @@ function collectCss(source, report, { scope, inline = false, header = false, con
       }
     }
   }
-  return important;
+  return { important, importantReport };
 }
 
 function responsiveCap(value) {
@@ -628,11 +651,14 @@ function inspectHtml(html, report, options, sectionIds) {
       }
     }
     if (attrs.has('style')) {
-      options.important += collectCss(attrs.get('style'), report, {
+      options.important += collectCss([{ source: attrs.get('style'), report }], {
         ...options, inline: true, controls: isControl({ tag, attrs }) ? [{ tag, attrs }] : [],
-      });
+      }).important;
     }
-    if (css) options.important += collectCss(foreign ? css.replace(/^\s*<!\[CDATA\[|\]\]>\s*$/g, '') : css, report, options);
+    if (css) {
+      const source = foreign ? css.replace(/^\s*<!\[CDATA\[|\]\]>\s*$/g, '') : css;
+      options.important += collectCss([{ source, report }], options).important;
+    }
   }
 }
 
@@ -659,26 +685,30 @@ function checkProject(projectDir = DEFAULT_PROJECT) {
     }
   }
 
+  const sectionsDir = path.join(project, 'sections');
   let files = [];
   try {
-    files = fs.readdirSync(path.join(project, 'sections'));
+    files = fs.readdirSync(sectionsDir);
   } catch (error) {
     report('sections', 'error', 'file-read', `Cannot read sections directory (${error.code ?? error.message}).`);
   }
   const palette = /\bPalette\b/i.test(read('brief.md', false).source);
-  const ids = [...new Set(files.filter(file => /^\d{2}-[\w-]+\.(?:html|css)$/.test(file))
-    .map(file => path.parse(file).name))].sort();
+  const ids = [...new Set(files.map(parseSectionFile).filter(Boolean).map(file => file.base))].sort();
   const fragments = ids.map(id => {
     const htmlFile = `sections/${id}.html`;
     const cssFile = `sections/${id}.css`;
     const html = read(htmlFile);
-    const css = read(cssFile);
+    const stylesheets = [{ ...read(cssFile), file: cssFile, report: report.bind(null, cssFile) }];
+    for (const { file } of listLayers(sectionsDir, id)) {
+      const relative = `sections/${path.basename(file)}`;
+      stylesheets.push({ ...read(relative, false), file: relative, report: report.bind(null, relative), sectionId: id });
+    }
     const parsed = parseHtml(html.source);
     const [root] = parsed.roots;
     const scope = `s-${id.slice(0, 2)}`;
     const validRoot = parsed.roots.length === 1 && !parsed.outside && root.closed && ROOT_TAGS.has(root.tag)
       && root.attrs.get('id') === id && (root.attrs.get('class') ?? '').split(HTML_SPACE).includes(scope);
-    return { id, htmlFile, cssFile, html, css, parsed, root, validRoot, scope };
+    return { id, htmlFile, html, stylesheets, parsed, root, validRoot, scope };
   });
 
   const hero = ids.find(id => /hero/i.test(id.slice(3)));
@@ -691,17 +721,16 @@ function checkProject(projectDir = DEFAULT_PROJECT) {
   let keptHeading = false;
 
   for (const fragment of fragments) {
-    const { id, htmlFile, cssFile, html, css, parsed, validRoot, scope } = fragment;
+    const { id, htmlFile, html, stylesheets, parsed, validRoot, scope } = fragment;
     const htmlReport = report.bind(null, htmlFile);
-    const cssReport = report.bind(null, cssFile);
     const options = { scope, palette, header: id === header, controls: parsed.elements.filter(isControl), important: 0 };
     if (!html.missing) {
       if (!parsed.roots.length && !parsed.outside) htmlReport('warn', 'empty-html', 'The section HTML is empty.');
       else if (!validRoot) htmlReport('error', 'section-root', `Expected one section, header, or footer root with id="${id}" and class "${scope}".`);
     }
     // Large inline data: URIs bloat the page and bypass the image library; ask for a normal URL instead.
-    for (const [file, text] of [[htmlFile, html.source], [cssFile, css.source]]) {
-      const big = (text.match(/data:[a-z0-9.+/-]+;base64,[A-Za-z0-9+/=]{20000,}/gi) || []).length;
+    for (const { file, source } of [{ ...html, file: htmlFile }, ...stylesheets]) {
+      const big = (source.match(/data:[a-z0-9.+/-]+;base64,[A-Za-z0-9+/=]{20000,}/gi) || []).length;
       if (big) report(file, 'warn', 'inline-large-data-uri', `${big} inline data: URI(s) over 20 KB; reference the image by URL instead.`);
     }
     inspectHtml(parsed, htmlReport, options, sectionIds);
@@ -711,14 +740,16 @@ function checkProject(projectDir = DEFAULT_PROJECT) {
       if (id === firstHeading && !keptHeading) keptHeading = true;
       else htmlReport('error', 'multiple-h1', 'The page must have at most one <h1>.');
     }
-    const cssImportant = collectCss(css.source, cssReport, options);
+    const { important: cssImportant, importantReport } = collectCss(stylesheets, options);
     const important = options.important + cssImportant;
     if (important > 3) {
-      const importantReport = cssImportant ? cssReport : htmlReport;
-      importantReport('warn', 'too-many-important', `The section uses !important ${important} times.`);
+      const emit = importantReport ?? htmlReport;
+      emit('warn', 'too-many-important', `The section uses !important ${important} times.`);
     }
-    const count = findings.filter(finding => finding.file === htmlFile || finding.file === cssFile).length;
-    sections.push({ section: id, htmlBytes: html.bytes, cssBytes: css.bytes, findings: count });
+    const sectionFiles = new Set([htmlFile, ...stylesheets.map(stylesheet => stylesheet.file)]);
+    const count = findings.filter(finding => sectionFiles.has(finding.file)).length;
+    const cssBytes = stylesheets.reduce((sum, stylesheet) => sum + stylesheet.bytes, 0);
+    sections.push({ section: id, htmlBytes: html.bytes, cssBytes, findings: count });
   }
   const errors = findings.filter(finding => finding.severity === 'error').length;
   const counts = new Map();
@@ -754,8 +785,10 @@ function checkBaseline(result, update) {
     const projectName = verdict.projectName;
     const enrolled = Object.hasOwn(baseline, projectName);
     const allowed = enrolled ? baseline[projectName] : {};
+    const counts = { ...result.counts };
+    delete counts[LAYER_SCOPE_RULE];
     if (!update || enrolled) {
-      verdict.offenders = Object.entries(result.counts).flatMap(([rule, count]) => {
+      verdict.offenders = Object.entries(counts).flatMap(([rule, count]) => {
         const limit = Object.hasOwn(allowed, rule) ? allowed[rule] : 0;
         return count > limit ? [{ rule, count, baseline: limit }] : [];
       });
@@ -766,9 +799,9 @@ function checkBaseline(result, update) {
       return;
     }
     if (update) {
-      if (result.counts['file-read']) throw new Error('Resolve file-read errors before updating the baseline.');
-      const rules = [...new Set([...Object.keys(allowed), ...Object.keys(result.counts)])].sort();
-      const next = Object.fromEntries(rules.map(rule => [rule, Object.hasOwn(result.counts, rule) ? result.counts[rule] : 0]));
+      if (counts['file-read']) throw new Error('Resolve file-read errors before updating the baseline.');
+      const rules = [...new Set([...Object.keys(allowed), ...Object.keys(counts)])].sort();
+      const next = Object.fromEntries(rules.map(rule => [rule, Object.hasOwn(counts, rule) ? counts[rule] : 0]));
       if (!enrolled || rules.some(rule => next[rule] !== allowed[rule])) {
         const updated = { ...baseline, [projectName]: next };
         fs.writeFileSync(BASELINE_FILE, JSON.stringify(updated, null, 2) + '\n');

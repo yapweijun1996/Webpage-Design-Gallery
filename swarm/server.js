@@ -103,12 +103,12 @@ function watchProject() {
   if (watcher) watcher.close();
   watcher = fs.watch(PROJECT, { recursive: true }, (_ev, file) => {
     if (!file) return;
-    const m = /^(sections|notes)[\\/](\d\d)(?:-[a-z0-9]+)?\.(html|css|md)$/.exec(file);
+    const m = /^(sections|notes)[\\/](\d\d)(?:-[a-z0-9-]+)?(?:\.(layout|type|color|imagery|icons|motion|polish))?\.(html|css|md)$/.exec(file);
     const d = /^(?:(direction|decisions|review1|review2)\.md|discussion[\\/](\d\d)\.md)$/.exec(file);
     if (!m && !d) return;
     const key = file;
     clearTimeout(debounce.get(key));
-    debounce.set(key, setTimeout(() => emit(m ? { type: 'edit', id: m[2], kind: m[1], file } : { type: 'doc', id: d[2] || '00', file: file.replace(/\\/g, '/') }), 120));
+    debounce.set(key, setTimeout(() => emit(m ? { type: 'edit', id: (m[3] && (squadAgents.find(x => x.squad.layer === m[3]) || {}).id) || m[2], kind: m[1], file } : { type: 'doc', id: d[2] || '00', file: file.replace(/\\/g, '/') }), 120));
   });
 }
 
@@ -162,6 +162,7 @@ function withPreamble(promptText, a, label) {
 
 function ownedGlobs(a) {
   if (a.id === MANAGER.id) return ['direction.md', 'decisions.md', 'review.md', 'review1.md', 'review2.md', 'research.md', 'chat/00.jsonl', 'inbox/00.md'];
+  if (a.squad) { let w = []; try { w = SQ.ownedGlobs(a.squad, a.base || '00-none'); } catch (_) { /* no section yet */ } return [...w, `chat/${a.id}.jsonl`, `notes/${a.id}.md`]; }
   return [`sections/${a.id}-*.html`, `sections/${a.id}-*.css`, `notes/${a.id}.md`, `discussion/${a.id}.md`, `chat/${a.id}.jsonl`];
 }
 
@@ -251,13 +252,44 @@ function runWorker(a, step) { return runProcess(a, step.label, prompt(a, step), 
 const { createChat } = require('./lib/chat');
 const { createTurns } = require('./lib/turns');
 let chat = null, turns = null;
-const everyone = () => [MANAGER, ...agentsDef];
+const SQ = require('./lib/squad');
+const SQ_COLORS = ['#38bdf8', '#a78bfa', '#f472b6', '#facc15', '#34d399', '#fb923c', '#94a3b8', '#f87171', '#22d3ee', '#c084fc'];
+const squadAgents = SQ_AGENTS_BUILD();
+function SQ_AGENTS_BUILD() { return SQ.roster().map((spec, i) => ({ id: String(81 + i), name: spec.title, title: spec.title, color: SQ_COLORS[i % SQ_COLORS.length], section: 'sq-' + spec.id, lane: spec.mission, runner: spec.runner, squad: spec })); }
+const SQ_FILE = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS ? process.env.SWARM_SETTINGS + '.squad' : path.join(ROOT, '.run', 'squad.json'));
+let squadOn = false;
+try { squadOn = !!JSON.parse(fs.readFileSync(SQ_FILE, 'utf8')).on; } catch (_) { /* default off */ }
+function setSquad(on) {
+  squadOn = !!on;
+  try { fs.mkdirSync(path.dirname(SQ_FILE), { recursive: true }); fs.writeFileSync(SQ_FILE, JSON.stringify({ on: squadOn })); } catch (_) { /* best effort */ }
+  for (const a of squadAgents) {
+    if (squadOn) state.agents[a.id] = state.agents[a.id] || { id: a.id, name: a.name, title: a.title, color: a.color, section: '', lane: a.lane, status: 'queued', thought: '', action: '', target: a.id };
+    else delete state.agents[a.id];
+  }
+  emit({ type: 'state', state });
+}
+// Plan one squad turn for the screen the owner looks at (first in-scope section).
+function squadPlan(owner) {
+  const ids = owner.scope && Array.isArray(owner.scope.sections) ? owner.scope.sections : [];
+  const def = agentsDef.find(a => a.id === ids[0]);
+  if (!def) return null;
+  const base = def.id + '-' + def.section;
+  const picked = SQ.pickSquad(owner.scope, owner.text);
+  const members = picked.map(spec => squadAgents.find(a => a.squad.id === spec.id)).filter(Boolean);
+  for (const m of members) m.base = base;
+  const byId = new Map(members.map(m => [m.squad.id, m]));
+  const waves = SQ.waves(picked).map(w => w.map(spec => byId.get(spec.id)).filter(Boolean)).filter(w => w.length);
+  const prompts = {};
+  for (const m of members) prompts[m.id] = SQ.promptFor(m.squad, { base, scopeLine: '' });
+  return { base, members, waves, prompts, layoutId: (byId.get('layout') || {}).id };
+}
+const everyone = () => [MANAGER, ...agentsDef, ...squadAgents];
 function setupChat() {
   if (chat) chat.stop();
   chat = createChat({ projectDir: PROJECT, agents: everyone().map(a => ({ id: a.id, name: a.name, section: a.section, color: a.color })), emit });
   chat.start();
   turns = createTurns({
-    chat, agents: everyone(), managerId: MANAGER.id, maxDiscussRounds: 2,
+    chat, agents: everyone(), managerId: MANAGER.id, maxDiscussRounds: 2, squad: { on: () => squadOn, plan: squadPlan },
     // After each agent process exits, ingest its outbox immediately so the next step sees its messages (no watcher race).
     runAgent: ({ id, label, prompt: pr }) => { const a = everyone().find(x => x.id === id); return a ? runProcess(a, label, pr, false).then(ok => { chat.sync(); return ok; }) : Promise.resolve(false); }
   });
@@ -472,6 +504,8 @@ http.createServer(async (req, res) => {
     try { const d = applyTeam(r.value); return send(res, 200, { agents: agentsDef, diff: d }); }
     catch (e) { return send(res, 500, { errors: [{ path: '$', message: 'Could not apply the team: ' + e.message }] }); }
   }
+  if (p === '/api/squad' && req.method === 'GET') return send(res, 200, { on: squadOn, specialists: squadAgents.map(a => ({ id: a.id, title: a.title, layer: a.squad.layer || '', runner: a.runner })) });
+  if (p === '/api/squad' && req.method === 'POST') { const b = await body(req); setSquad(b.on); return send(res, 200, { on: squadOn }); }
   if (p === '/api/autopilot' && req.method === 'GET') return send(res, 200, autopilotView());
   if (p === '/api/autopilot' && req.method === 'POST') {
     const b = await body(req);
@@ -550,6 +584,7 @@ if (fs.existsSync(PROJECT)) {
   watchProject();
   setupChat();
 }
+if (squadOn) setSquad(true);
 loadAutopilot();
 if (autopilot.on) maybeAutopilot(); // resume the owner's autopilot after a restart
 process.on('SIGTERM', () => { stopAll(); process.exit(0); });

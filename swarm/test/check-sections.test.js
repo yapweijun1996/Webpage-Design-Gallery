@@ -15,9 +15,12 @@ function fixture(t, sections, brief) {
   t.after(() => fs.rmSync(project, { recursive: true, force: true }));
   fs.mkdirSync(path.join(project, 'sections'));
   if (brief !== undefined) fs.writeFileSync(path.join(project, 'brief.md'), brief);
-  for (const [id, { html, css }] of Object.entries(sections)) {
+  for (const [id, { html, css, layers = {} }] of Object.entries(sections)) {
     if (html !== undefined) fs.writeFileSync(path.join(project, 'sections', id + '.html'), html);
     if (css !== undefined) fs.writeFileSync(path.join(project, 'sections', id + '.css'), css);
+    for (const [layer, source] of Object.entries(layers)) {
+      fs.writeFileSync(path.join(project, 'sections', `${id}.${layer}.css`), source);
+    }
   }
   return project;
 }
@@ -125,6 +128,55 @@ test('selector lists, functional pseudos and nested rules cannot escape scope', 
   ].join('\n');
   const result = checkProject(fixture(t, { '02-hero': { html, css } }));
   assert.deepEqual(rules(result, 'error'), [...Array(8).fill('css-scope'), ...Array(7).fill('unscoped-selector')]);
+});
+
+test('layer scopes accept both section roots and warn for escaping selector branches', t => {
+  const html = fragment('02-content');
+  const css = '.legacy-outside { opacity: 0; }';
+  const layer = [
+    '@media (width >= 40em) { .s-02 > p, #02-content > p { opacity: 1; } }',
+    String.raw`:where(#\30 2-content, .s-02) { & > p, &.active { opacity: 1; } }`,
+    '@keyframes show { from, 50% { opacity: 0; } to { opacity: 1; } }',
+    '.s-02 p, .outside { opacity: 1; }',
+    ':is(.s-02, #03-other) p { opacity: 0; }',
+    '#02-content + .outside { opacity: 0; }',
+    '.fake:not(.s-02), [data-id="#02-content"], #02-content-other { opacity: 0; }',
+    '.s-02 { & ~ aside { opacity: 0; } }',
+  ].join('\n');
+  const project = fixture(t, { '02-content': { html, css, layers: { motion: layer, unknown: 'body { color: red; }' } } });
+  const result = checkProject(project);
+  assert.deepEqual(rules(result, 'error'), ['css-scope', 'unscoped-selector']);
+  assert.deepEqual(rules(result, 'warn'), Array(5).fill('layer-scope'));
+  assert.ok(result.findings.filter(finding => finding.severity === 'warn')
+    .every(finding => finding.file === 'sections/02-content.motion.css'));
+  assert.deepEqual(result.sections, [
+    { section: '02-content', htmlBytes: Buffer.byteLength(html), cssBytes: Buffer.byteLength(css + layer), findings: 7 },
+  ]);
+});
+
+test('section CSS rules recognize cross-layer responsive guards and aggregate important declarations', t => {
+  const project = fixture(t, {
+    '02-content': {
+      html: fragment('02-content', '<div style="opacity: 1 !important"></div>'),
+      css: '.s-02 p { width: 500px; opacity: 1 !important; }',
+      layers: {
+        layout: '.s-02 h3 { width: 500px; } .s-02 p { max-width: 100%; }',
+        color: '.s-02 p { opacity: 1 !important; color: red; }',
+        polish: '@media (max-width: 600px) { .s-02 h3 { width: auto; opacity: 1 !important; } }',
+      },
+    },
+  });
+  const result = checkProject(project);
+  assert.deepEqual(result.counts, { important: 4, 'raw-color': 1, 'too-many-important': 1 });
+  assert.equal(result.findings.find(finding => finding.rule === 'too-many-important').file, 'sections/02-content.css');
+  assert.equal(result.findings.find(finding => finding.rule === 'raw-color').file, 'sections/02-content.color.css');
+});
+
+test('a layer-only section reports missing legacy files and still checks the layer', t => {
+  const css = '.s-05 { padding: 8px; }';
+  const result = checkProject(fixture(t, { '05-content': { layers: { layout: css } } }));
+  assert.deepEqual(result.counts, { 'file-read': 2, 'raw-spacing': 1 });
+  assert.deepEqual(result.sections, [{ section: '05-content', htmlBytes: 0, cssBytes: Buffer.byteLength(css), findings: 3 }]);
 });
 
 test('CSS URLs handle quoting, parentheses, escapes and imports', t => {
@@ -319,14 +371,38 @@ test('inline-large-data-uri retains its existing boundary without treating a URL
 function isolatedCli(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-check-cli-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  for (const directory of ['swarm/tools', 'swarm/design-system']) {
+  for (const directory of ['swarm/tools', 'swarm/design-system', 'swarm/lib']) {
     fs.mkdirSync(path.join(root, directory), { recursive: true });
   }
   const script = path.join(root, 'swarm/tools/check-sections.js');
   fs.copyFileSync(cli, script);
+  fs.copyFileSync(require.resolve('../lib/layers'), path.join(root, 'swarm/lib/layers.js'));
   const run = (project, ...flags) => spawnSync(process.execPath, [script, project, ...flags], { cwd: root, encoding: 'utf8' });
   return { root, run, baselineFile: path.join(root, 'swarm/design-system/ssot-baseline.json') };
 }
+
+test('baseline excludes layer scope warnings and still ratchets ordinary rules in layers', t => {
+  const { run, baselineFile } = isolatedCli(t);
+  const project = fixture(t, {
+    '01-content': { html: fragment('01-content'), css: '', layers: { type: '.outside { opacity: 1; }' } },
+  });
+  const projectName = path.basename(project);
+  const before = run(project, '--baseline', '--json');
+  assert.equal(before.status, 0, before.stderr);
+  const report = JSON.parse(before.stdout);
+  assert.equal(report.warnings, 1);
+  assert.deepEqual(report.counts, { 'layer-scope': 1 });
+  assert.deepEqual(report.baseline, { status: 'pass', projectName, offenders: [] });
+
+  const enrollment = run(project, '--update-baseline', '--json');
+  assert.equal(enrollment.status, 0, enrollment.stderr);
+  assert.deepEqual(JSON.parse(fs.readFileSync(baselineFile)), { [projectName]: {} });
+
+  fs.writeFileSync(path.join(project, 'sections/01-content.type.css'), '.outside { font-size: 13px; }');
+  const after = run(project, '--baseline', '--json');
+  assert.equal(after.status, 1, after.stderr);
+  assert.deepEqual(JSON.parse(after.stdout).baseline.offenders, [{ rule: 'raw-font-size', count: 1, baseline: 0 }]);
+});
 
 test('baseline enrolls once, tolerates recorded findings, lowers counts and refuses regressions', t => {
   const { run, baselineFile } = isolatedCli(t);

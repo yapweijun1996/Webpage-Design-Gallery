@@ -1,0 +1,92 @@
+[
+  {
+    "id": "layout",
+    "title": "Layout & Structure Engineer",
+    "layer": "layout",
+    "role": "workers",
+    "runner": "pi",
+    "mission": "Own semantic HTML, responsive structure and spacing. Integrate copy proposals and specialist handoffs in the focused section.",
+    "writes": ["sections/{base}.html", "sections/{base}.layout.css"]
+  },
+  {
+    "id": "type",
+    "title": "Typography Designer",
+    "layer": "type",
+    "role": "workers",
+    "runner": "pi",
+    "mission": "Refine font choices, hierarchy, scale, line lengths and rhythm using the design system.",
+    "writes": ["sections/{base}.type.css"]
+  },
+  {
+    "id": "color",
+    "title": "Colour & Theme Designer",
+    "layer": "color",
+    "role": "workers",
+    "runner": "pi",
+    "mission": "Refine palette, contrast and interactive colour states using the design system's theme tokens.",
+    "writes": ["sections/{base}.color.css"]
+  },
+  {
+    "id": "imagery",
+    "title": "Imagery Art Director",
+    "layer": "imagery",
+    "role": "workers",
+    "runner": "pi",
+    "mission": "Art-direct the section's visuals with responsive crops, overlays and filters. Coordinate asset placement with Layout.",
+    "writes": ["sections/{base}.imagery.css"]
+  },
+  {
+    "id": "image-gen",
+    "title": "Image Generator",
+    "layer": null,
+    "role": "image",
+    "runner": "codex",
+    "mission": "Use Codex image generation to create new PNG assets for the section. Share the file paths and suggested placement with Imagery and Layout through chat.",
+    "writes": ["assets/generated/{base}-*.png"]
+  },
+  {
+    "id": "icons",
+    "title": "Icon & SVG Designer",
+    "layer": "icons",
+    "role": "workers",
+    "runner": "pi",
+    "mission": "Make icon styling consistent and legible. Send any inline SVG markup or accessibility labels to Layout through chat.",
+    "writes": ["sections/{base}.icons.css"]
+  },
+  {
+    "id": "copy",
+    "title": "Copywriter",
+    "layer": null,
+    "role": "workers",
+    "runner": "pi",
+    "mission": "Draft concise, accurate text for the section and send exact copy proposals to Layout through chat.",
+    "writes": []
+  },
+  {
+    "id": "motion",
+    "title": "Motion Designer",
+    "layer": "motion",
+    "role": "workers",
+    "runner": "pi",
+    "mission": "Refine transitions and animation timings. Keep the section usable with reduced motion enabled.",
+    "writes": ["sections/{base}.motion.css"]
+  },
+  {
+    "id": "qa",
+    "title": "Responsive & Accessibility QA",
+    "layer": "polish",
+    "role": "workers",
+    "runner": "pi",
+    "mission": "Review the integrated section across viewports and check keyboard access, contrast and reduced motion. Report findings and apply small CSS fixes in the polish layer.",
+    "writes": ["sections/{base}.polish.css"]
+  },
+  {
+    "id": "researcher",
+    "title": "Brand Researcher",
+    "layer": null,
+    "role": "research",
+    "runner": "codex",
+    "mission": "Use Codex web search to verify relevant brand facts and collect references. Record source links and practical guidance in research.md.",
+    "writes": ["research.md"]
+  }
+]

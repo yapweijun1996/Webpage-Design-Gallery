@@ -20,7 +20,9 @@ function fixture(t) {
   const output = path.join(root, 'offline page');
   fs.mkdirSync(sections, { recursive: true });
   fs.mkdirSync(path.dirname(exporter), { recursive: true });
+  fs.mkdirSync(path.join(root, 'swarm/lib'));
   fs.copyFileSync(EXPORTER, exporter);
+  fs.copyFileSync(require.resolve('../lib/layers'), path.join(root, 'swarm/lib/layers.js'));
   fs.writeFileSync(path.join(project, 'tokens.css'), TOKENS);
 
   return {
@@ -107,6 +109,35 @@ body{margin:0;background:var(--dc-bg);color:var(--dc-ink);font-family:var(--dc-f
 </body>
 </html>
 `);
+});
+
+test('exports only recognized layers after their base and rewrites minified layer images', t => {
+  const f = fixture(t);
+  f.section('01-hero', '<h1>Hero</h1>', '.s-01{display: block}');
+  f.section('02-content', '<section></section>');
+  f.section('03-legacy.name', '<aside></aside>', '.legacy{opacity: .5}');
+  f.asset('layer.png', 'layer image');
+  for (const [name, css] of [
+    ['01-hero.polish.css', '.s-01{opacity: .9}'],
+    ['01-hero.imagery.css', '.s-01 {\n  background-image: url("/gjh/layer.png#crop");\n}'],
+    ['01-hero.layout.css', '.s-01{display: grid}'],
+    ['01-hero.unknown.css', 'unrecognized layer'],
+    ['02-content.type.css', '.s-02{font: inherit}'],
+  ]) {
+    fs.writeFileSync(path.join(f.sections, name), css);
+  }
+
+  const result = f.run('--minify');
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stderr.trim(), 'Warning: Missing stylesheet 02-content.css');
+  const page = fs.readFileSync(path.join(f.dist, 'index.html'), 'utf8');
+  assert.ok(page.includes('<style>\n.s-01{display: block} /* layer: layout */ .s-01{display: grid}'
+    + ' /* layer: imagery */ .s-01 { background-image: url("assets/layer.png#crop"); }'
+    + ' /* layer: polish */ .s-01{opacity: .9}\n</style>'));
+  assert.ok(page.includes('<style>\n/* layer: type */ .s-02{font: inherit}\n</style>'));
+  assert.ok(page.includes('<style>\n.legacy{opacity: .5}\n</style>'));
+  assert.ok(!page.includes('unrecognized layer'));
+  assert.equal(fs.readFileSync(path.join(f.dist, 'assets/layer.png'), 'utf8'), 'layer image');
 });
 
 test('copies and rewrites image URLs, preserving descriptors and unique flat names', t => {

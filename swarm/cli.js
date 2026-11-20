@@ -239,6 +239,10 @@ async function waitForIdle(idleMs, timeoutMs) {
       console.log(`${runner}: ${r.ok ? 'ready' : 'NOT ready'} version=${r.version || '?'} login=${r.login || '?'} ${r.detail || ''} (${r.ms || 0} ms)`);
       if (!r.ok) process.exitCode = 2;
     } else throw new Error('settings: expected set or test');
+  } else if (cmd === 'squad') {
+    const r = args[1] === 'on' || args[1] === 'off' ? await api('/api/squad', 'POST', { on: args[1] === 'on' }) : await api('/api/squad');
+    console.log(`squad mode: ${r.on ? 'on' : 'off'}`);
+    if (r.specialists) for (const x of r.specialists) console.log(`${x.id} ${x.title} (${x.runner}${x.layer ? ', layer ' + x.layer : ''})`);
   } else if (cmd === 'status') {
     const s = await api('/api/state');
     console.log(`phase=${s.phase} round=${s.round}/${s.rounds} model=${s.model}`);

@@ -44,7 +44,27 @@ function buildPrompt(agent, label, owner, assignment, isManager) {
   return `${instructions}\n${owner.text.slice(0, requestLimit)}`;
 }
 
-function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRounds = 2, reviewRounds = 1 }) {
+function squadPrompt(member, wave, waveNo, plan, owner) {
+  const mates = wave.filter(m => m.id !== member.id).map(m => `${m.id} ${m.title}`).join('; ');
+  const role = member.id === plan.layoutId
+    ? 'You are the integrator: read the layer files your teammates wrote (sections/' + plan.base + '.*.css), add the HTML hooks and classes they need, remove clashes, keep one h1 and valid structure.'
+    : 'Write only your own file. If you need an HTML class or hook, post a short message to the layout engineer instead of editing the HTML.';
+  const lines = [
+    `STEP: Work | AGENT: ${member.id}`,
+    `You are ${member.name}, job title: ${member.title}, agent ${member.id}, in squad wave ${waveNo} on section ${plan.base}.`,
+    'Read CONTRACT.md, brief.md, direction.md (if present) and channel.md. Open the real page at /p/dist/index.html state when useful.',
+    `To post, append exactly one JSON object per line to chat/${member.id}.jsonl. Example: ${JSON.stringify({ to: [plan.layoutId], kind: 'msg', text: 'I need class .hero-title on the headline.', reply: owner.id })}`,
+    'Live narration rule: before each major step write one short sentence of intent (max 20 words) in your live commentary.',
+    mates && `Teammates working at the same time: ${mates}. Do not edit their files.`,
+    role,
+    plan.prompts[member.id],
+    'Finally append one kind:"done" line to your outbox stating what changed in one sentence.',
+    `Current request #${owner.id} from ${owner.from}:`
+  ].filter(Boolean).join('\n');
+  return lines + '\n' + String(owner.text).slice(0, Math.max(0, PROMPT_LIMIT + 800 - lines.length));
+}
+
+function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRounds = 2, reviewRounds = 1, squad = null }) {
   const manager = agents.find(agent => agent.id === managerId);
   const workers = new Map(agents.filter(agent => agent.id !== managerId).map(agent => [agent.id, agent]));
   const maxReviewRounds = Math.min(2, Math.trunc(reviewRounds));
@@ -86,7 +106,26 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
 
   async function handle(owner) {
     currentScope = Array.isArray(owner.scope?.sections) && owner.scope.sections.length ? new Set(owner.scope.sections) : null;
-    try { await handleScoped(owner); } finally { currentScope = null; }
+    try {
+      const plan = squad && squad.on() ? squad.plan(owner) : null;
+      if (plan) await handleSquad(owner, plan); else await handleScoped(owner);
+    } finally { currentScope = null; }
+  }
+
+  // Squad mode: several specialists work on the SAME focused screen. Each writes only its own layer file; waves keep the order researcher, layers in parallel, layout integration, QA.
+  async function handleSquad(owner, plan) {
+    notice(`Squad on ${plan.base}: ${plan.members.map(m => m.title).join(', ')}`);
+    let n = 0;
+    for (const wave of plan.waves) {
+      n += 1;
+      notice(`Squad wave ${n}/${plan.waves.length}: ${wave.map(m => m.title).join(', ')}`);
+      await Promise.all(wave.map(async member => {
+        const prompt = squadPrompt(member, wave, n, plan, owner);
+        try { if (await runAgent({ id: member.id, label: 'Work', prompt })) return; } catch { /* a failed specialist must not block the squad */ }
+        notice(`Agent ${member.id} (${member.title}) failed in squad wave ${n}`);
+      }));
+    }
+    notice('Squad finished');
   }
 
   async function handleScoped(owner) {

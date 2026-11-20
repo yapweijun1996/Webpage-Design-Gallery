@@ -365,3 +365,24 @@ test('an assignment without a recipient is inferred from its text, or from a sin
   await second.turns.onOwnerMessage(second.chat.post({ from: 'owner', text: 'tighten', scope: { sections: ['03'] } }));
   assert.ok(runLabels(second.calls).includes('Work:03'), 'a single-section scope receives an assignment with no recipient');
 });
+
+test('squad mode runs waves in order, in parallel inside a wave, and skips the Manager', async () => {
+  const messages = [];
+  const chat = { start() {}, stop() {}, post: p => { const m = { to: [], kind: 'msg', ...p, id: messages.length + 1 }; messages.push(m); return m; }, history: s => messages.filter(m => m.id > (s || 0)), render: () => '' };
+  const order = [];
+  const mk = (id, title) => ({ id, name: title, title });
+  const wave1 = [mk('81', 'Type'), mk('82', 'Color')], layout = mk('83', 'Layout'), qa = mk('84', 'QA');
+  const plan = { base: '01-hero', members: [...wave1, layout, qa], waves: [wave1, [layout], [qa]], prompts: { 81: 'p81', 82: 'p82', 83: 'p83', 84: 'p84' }, layoutId: '83' };
+  const turns = createTurns({
+    chat, agents, managerId: '00', squad: { on: () => true, plan: () => plan },
+    runAgent: async ({ id, prompt }) => { order.push(['start', id, prompt]); await new Promise(r => setTimeout(r, id === '81' ? 20 : 1)); order.push(['end', id]); return true; }
+  });
+  await turns.onOwnerMessage({ id: 1, from: 'owner', text: 'make it warmer', scope: { sections: ['01'], elements: [] } });
+  const starts = order.filter(e => e[0] === 'start').map(e => e[1]);
+  assert.deepEqual(starts, ['81', '82', '83', '84']);
+  assert.ok(!starts.includes('00'));
+  assert.ok(order.findIndex(e => e[0] === 'end' && e[1] === '81') < order.findIndex(e => e[0] === 'start' && e[1] === '83'), 'layout waits for the parallel wave');
+  assert.ok(order.find(e => e[1] === '83')[2].includes('integrator'));
+  assert.ok(order.find(e => e[1] === '81')[2].includes('Write only your own file'));
+  assert.ok(messages.some(m => /Squad finished/.test(m.text)));
+});

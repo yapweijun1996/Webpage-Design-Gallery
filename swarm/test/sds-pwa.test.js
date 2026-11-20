@@ -24,6 +24,7 @@ function fixture(t) {
   }
 
   write('swarm/tools/export-page.js', fs.readFileSync(path.join(SWARM, 'tools/export-page.js')));
+  write('swarm/lib/layers.js', fs.readFileSync(path.join(SWARM, 'lib/layers.js')));
   fs.cpSync(path.join(SWARM, 'design-system/shell'), path.join(root, 'swarm/design-system/shell'), { recursive: true });
   const system = {
     'tokens.css': ':root { --sds-color-bg: #eef3e8; }',
@@ -171,6 +172,16 @@ test('content changes rotate the version while an identical export is reproducib
   assert.notEqual(cacheName(f.text('sw.js')), cacheName(worker));
   assert.equal(cacheName(f.text('sw.js')).split('-').at(-1), cacheName(worker).split('-').at(-1));
   assert.deepEqual(precache(f.text('sw.js')), precache(worker));
+});
+
+test('a specialist layer changes the PWA page and cache identity', t => {
+  const f = fixture(t);
+  f.export();
+  const originalCache = cacheName(f.text('sw.js'));
+  f.write('project/sections/01-hero.color.css', '.s-01 { color: var(--sds-color-text-muted); }');
+  f.export();
+  assert.match(f.text('index.html'), /\/\* layer: color \*\/\n\.s-01 \{ color: var\(--sds-color-text-muted\); \}/);
+  assert.notEqual(cacheName(f.text('sw.js')), originalCache);
 });
 
 test('invalid options and missing required inputs fail before writing output', t => {

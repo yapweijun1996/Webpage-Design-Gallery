@@ -6,6 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
 const { parseArgs } = require('node:util');
+const { assembleCss, parseSectionFile } = require('../lib/layers');
 
 const SWARM_ROOT = path.resolve(__dirname, '..');
 const REPO_ROOT = path.resolve(SWARM_ROOT, '..');
@@ -179,7 +180,11 @@ function processSection(file, sectionsDir, rewriteImage, minify, warnings) {
   if (scripts) warnings.push(`${file} contains ${scripts} <script> tag(s)`);
 
   const cssFile = path.join(sectionsDir, file.replace(/\.html$/, '.css'));
-  const css = rewriteCss(optionalText(cssFile, warnings), rewriteImage, minify);
+  const section = parseSectionFile(file);
+  // The original exporter also accepts HTML filenames outside the section slug format.
+  const source = section ? assembleCss(sectionsDir, section.base) : optionalText(cssFile, warnings);
+  if (section && !fs.existsSync(cssFile)) warnings.push(`Missing stylesheet ${path.basename(cssFile)}`);
+  const css = rewriteCss(source, rewriteImage, minify);
   return { file, headings, html, css };
 }
 
