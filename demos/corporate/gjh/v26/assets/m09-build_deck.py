@@ -56,7 +56,7 @@ def build_deck():
     deck.slide_width = Inches(13 + 1 / 3)
     deck.slide_height = Inches(7.5)
     deck.core_properties.title = "GJH 故事工作室"
-    deck.core_properties.subject = "吴裕兴故事与品牌名录"
+    deck.core_properties.subject = "GJH故事与品牌名录"
     deck.core_properties.author = "GJH 故事工作室"
     blank_layout = deck.slide_layouts[6]
     for layout in list(deck.slide_layouts):
