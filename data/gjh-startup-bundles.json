@@ -94,7 +94,7 @@
     "demos/corporate/gjh/v11/assets/signage/runtime.js": "aae291e5882685c84327f5ebbd7c5bceb11764672a1cee31e65d36d27b70042e",
     "demos/corporate/gjh/v11/assets/signage/tokens.js": "f6ac2f924ad3468de45112b8493747d2b1db5ccf82fba5626d44502ac1481352",
     "demos/corporate/gjh/v11/assets/spatial.js": "7cafcdf06b91dec11675ce25601e42fd30b618a80abfde7ef13024d8fb1d6b25",
-    "demos/corporate/gjh/v11/assets/startup-asset-pack.js": "4926535fc69e3bd7fe271d31c03aca4bfe805de965cb002b8bcd532fd1875d98",
+    "demos/corporate/gjh/v11/assets/startup-asset-pack.js": "a90dfb926ca63800af0fc543578829bb9e728bf84eeb35d5f4816b1520d2a637",
     "demos/corporate/gjh/v11/assets/static-asset.js": "ea70b7e7becf1c3cb60b820e97ae2a8725597b176de67b4eca8d796e5ab56f37",
     "demos/corporate/gjh/v11/assets/store-destinations.js": "b5c8aa850caee6d56995cddf8855c5497cf8a288cab157edc783b1175c69f0f3",
     "demos/corporate/gjh/v11/assets/surface-decals.js": "2202430dee003a66cdbd88c9f6daf9a2fc080c2db37b34b58e8927baecc3f307",
@@ -122,6 +122,6 @@
     "demos/corporate/gjh/v11/script.bundle.js": "79e0b2e742bce9b9dcd985ae1ae62f7bd910e2bbc2fc24e2f0068a5b5fa90cf1",
     "demos/corporate/gjh/v11/assets/world.bundle.js": "bbda0b5f1ce1bf9b66101ae5a232773bef74a8400ec9d7cd181b98ad7bb6389a",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "63da46ea1b0853d3c3da3020c1d149dd707a2b48d94d668587c5339bff7f193a",
-    "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "b18efd12f25e03780f0f282fadb99001750a86ee53b56da89f5ee63b413a1a93"
+    "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "bee113f83473c8d8f0f5678a530ca146d9be0c2bd1c6c74e67f3f6f004065fc8"
   }
 }
