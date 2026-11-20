@@ -3,6 +3,9 @@ from math import cos, pi, radians, sin, tau
 
 from mesh import CRAFT, PRINT, PULSE, SCROLL, Room, library_profile, logo
 from borsch_packs import add_borsch_lingzhi_pair, add_borsch_patch_pack
+from california_mexico_tins import SAMPLES as CALIFORNIA_MEXICO_SAMPLES, add_california_mexico_tin
+from california_mexico_tins import SHELF_DEPTH as CALIFORNIA_MEXICO_SHELF_DEPTH
+from california_mexico_tins import SHELF_TOP as CALIFORNIA_MEXICO_SHELF_TOP
 from gulong_tins import SAMPLES as GULONG_SAMPLES, SHELF_TOP as GULONG_SHELF_TOP, add_gulong_tin
 from mili_mock_duck import add_mili_mock_duck
 from pzh_carton import add_pzh_carton
@@ -264,10 +267,11 @@ def spam(r,_):
 
 
 def coast(r,_):
-    r.lathe(-.45,1.175,-1.31,.345,.65,[(max(.035,sin(k*pi/8)),(1-cos(k*pi/8))/2) for k in range(9)],
-            ["d8edf4"],18,PRINT)
+    # Keep the background ornaments within the room detail budget after adding the tins.
+    r.lathe(-.45,1.175,-1.31,.345,.65,[(max(.035,sin(k*pi/6)),(1-cos(k*pi/6))/2) for k in range(7)],
+            ["d8edf4"],12,PRINT)
     for j in range(3):
-        r.ring(-.38,r.floor,1.12+j*.46,1.02+j*.26,.36,.042,"70cdb9",PRINT,True,.10,pi-.10)
+        r.ring(-.38,r.floor,1.12+j*.46,1.02+j*.26,.36,.042,"70cdb9",PRINT,True,.10,pi-.10,n=14)
     for i,(x,z) in enumerate(((-2.4,-.93),(-2.02,-1.1),(-2.65,-1.23))):
         y=3.2+i*.15
         r.line((x,4.05,z),(x,y+.27,z),.018,GOLD)
@@ -278,6 +282,11 @@ def coast(r,_):
             a=(j-2)*.31
             r.line((x,y,-3.74),(x+.20*sin(a),y+.25*cos(a),-3.74),.049,"d3b49d")
     r.tag(-1.13,1.12,-1.04,.28)
+    r.california_mexico_tin_bands = [
+        add_california_mexico_tin(r.batches[CRAFT], pigment, x, CALIFORNIA_MEXICO_SHELF_TOP,
+                                  CALIFORNIA_MEXICO_SHELF_DEPTH, include_base=False)
+        for _, pigment, x in CALIFORNIA_MEXICO_SAMPLES
+    ]
 
 
 def deli(r,_):

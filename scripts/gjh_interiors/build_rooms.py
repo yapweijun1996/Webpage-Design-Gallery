@@ -11,6 +11,7 @@ import bpy
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
+from california_mexico_tins import smooth_california_mexico_tins
 from gulong_tins import smooth_gulong_tins
 from mesh import CRAFT, PULSE, SCROLL
 from mili_mock_duck import apply_mili_mock_duck_normals
@@ -81,6 +82,8 @@ def export(slot, gallery, output):
             smooth_gulong_tins(obj, room.gulong_tin_bands)
         if slot == 8 and name == CRAFT:
             smooth_skippy_heels(obj, room.skippy_heel_bands)
+        if slot == 10 and name == CRAFT:
+            smooth_california_mexico_tins(obj, room.california_mexico_tin_bands)
     for prototype, locations in room.instances:
         holder = bpy.data.objects.new("Shelf stock",None)
         bpy.context.collection.objects.link(holder)

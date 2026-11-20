@@ -6465,8 +6465,8 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       box(x, h, z + 0.23, w, 0.085, 0.5, oak);
       box(x, h - 0.04, decalHeight(z + 0.48) - 0.0175, w - 0.05, 0.035, 0.035, shopLamp);
       const featured = n === 4 && x === 0 || h === 2.07 && x < 0 && [5, 6, 7, 8, 10, 11, 12, 17].includes(n);
-      if (featured && (n === 10 || n === 11)) {
-        const pair = n === 10 ? [10040880, 2697258] : [10106426, 11881270];
+      if (featured && n === 11) {
+        const pair = [10106426, 11881270];
         for (const [i, colour] of pair.entries())
           can(x + (i === 0 ? -0.59 : 0.59), h + 0.043, z + 0.29, colour, 0.064, 0.106);
       } else if (featured && n === 12) {
@@ -7979,7 +7979,7 @@ var roomDetails = {
   },
   S10: {
     file: "s10-coast-details.glb",
-    bytes: 71920,
+    bytes: 78468,
     roomDetail: true
   },
   S11: {

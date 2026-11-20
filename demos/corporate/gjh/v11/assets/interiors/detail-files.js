@@ -48,7 +48,7 @@ export const roomDetails = {
   },
   "S10": {
     "file": "s10-coast-details.glb",
-    "bytes": 71920,
+    "bytes": 78468,
     "roomDetail": true
   },
   "S11": {

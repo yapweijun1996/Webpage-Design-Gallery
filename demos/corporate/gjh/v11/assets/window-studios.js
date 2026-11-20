@@ -108,8 +108,8 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       box(x,h-.04,decalHeight(z+.48)-.0175,w-.05,.035,.035,shopLamp);
       // The Low room kit supplies linked, category-shaped stock to these bays.
       const featured = n===4 && x===0 || h===2.07 && x<0 && [5,6,7,8,10,11,12,17].includes(n);
-      if (featured && (n===10 || n===11)) {
-        const pair = n===10 ? [0x993630,0x29282a] : [0x9a363a,0xb54b36];
+      if (featured && n===11) {
+        const pair = [0x9a363a,0xb54b36];
         for (const [i,colour] of pair.entries()) can(x+(i===0?-.59:.59),h+.043,z+.29,colour,.064,.106);
       } else if (featured && n===12) {
         box(x-.55,h+.167,z+.32,.113,.248,.088,white);

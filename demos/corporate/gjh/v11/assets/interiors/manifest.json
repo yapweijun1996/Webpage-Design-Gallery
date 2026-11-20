@@ -3229,9 +3229,9 @@
       {
         "store": "S10",
         "file": "s10-coast-details.glb",
-        "bytes": 71920,
-        "sha256": "70cf42760d3393f52c51595f7dbb0056234183e621003ac324251390283e45a7",
-        "triangles": 1096,
+        "bytes": 78468,
+        "sha256": "905719cc3097ee0ac5148d01dd80095336869374293d4687f9c2fc8b8f37ad28",
+        "triangles": 1164,
         "draws": 3,
         "instances": 4,
         "motion": [],

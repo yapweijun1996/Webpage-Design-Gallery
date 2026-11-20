@@ -100,8 +100,9 @@ S08 passed on Pages build `3b578e6230629f54`. Desktop and touch-emulated Chrome 
 
 [Design and runtime](10-california-mexico/README.md) · [Inventory](10-california-mexico/model-inventory.md)
 
-- [ ] **Red California Mexico Abalone 454 g.** Verify measured can, lid and current authorized Red artwork.
-- [ ] **Black California Mexico Abalone 454 g.** Verify the corresponding separate Black pack. The New Moon Mexico tin has a different product identity.
+- [x] **Red and Black 454 g unprinted form studies.** The [editable pair](../../models/gjh-california-mexico-tins/README.md) uses a photo-estimated Ø75 × 120 mm display envelope. Both specimens were viewed in desktop and touch-emulated Chrome.
+- [ ] **Red California Mexico Abalone 454 g retail pack.** Verify the measured can, closure and current authorized artwork for the [Red catalogue product](https://www.gjheshop.com/product/red-california-mexico-abalone-454g/).
+- [ ] **Black California Mexico Abalone 454 g retail pack.** Verify the measured can, closure and current authorized artwork for the [Black catalogue product](https://www.gjheshop.com/product/black-california-mexico-abalone-454g/).
 
 ## S11 Hormel
 
