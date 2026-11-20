@@ -2,6 +2,15 @@ import {MALL_THEME_COPY} from './mall-theme-copy.js';
 
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
+  ['Mute sound','静音','Senyapkan bunyi'],
+  ['Background music','背景音乐','Muzik latar'],
+  ['Volume settings','音量设置','Tetapan kelantangan'],
+  ['Effects volume','音效音量','Kelantangan kesan'],
+  ['Music volume','音乐音量','Kelantangan muzik'],
+  ['Ambience volume','环境音量','Kelantangan suasana'],
+  ['Music on','音乐已开启','Muzik dihidupkan'],
+  ['Music off','音乐已关闭','Muzik dimatikan'],
+  ['Voice','语音','Suara'],
   ["Casio · Two digital keyboard formats","Casio · 两种数码键盘","Casio · Dua format papan kekunci digital"],
   ["Two digital keyboard formats","两种数码键盘","Dua format papan kekunci digital"],
   ["Casio documents the 61-key CT-S1BK portable keyboard and the cabinet-form GP-510BP digital hybrid with three pedals. The open-lid grand on the stage is a recital fixture.","卡西欧公布了 61 键便携键盘 CT-S1BK，以及带三踏板的柜式混合数码钢琴 GP-510BP。舞台上的开盖三角钢琴是演奏布景。","Casio mendokumenkan papan kekunci mudah alih CT-S1BK dengan 61 kekunci dan piano hibrid digital GP-510BP jenis kabinet dengan tiga pedal. Piano besar di pentas ialah sebahagian daripada ruang persembahan."],

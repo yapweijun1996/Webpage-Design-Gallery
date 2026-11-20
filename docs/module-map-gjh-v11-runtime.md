@@ -152,7 +152,7 @@ Layout modules are pure data/geometry helpers; builders import them, never the r
 | `assets/interaction-registry.js` | Nearest-target selection over `world.interactables`; subscriptions | `createInteractionRegistry` | `script` | targets, subscribers | `gjh_interaction_registry`, `gjh_ux_spatial`, `gjh_ux_tutorial`, `gjh_held_product` |
 | `assets/seat-placements.js` | Bench/seat anchors and front test | `benchScale, groundBenchFallback, deckBenchFallback, createSeatPlacements, createSeatAnchor, isInFrontOfSeat` | interaction-registry, player, shop-anchor-details-first, world | seat list | `gjh_seat_placements`; `browser_gjh_all_seats.py`, `browser_gjh_seat*.py` |
 | `assets/elevator-v2.js`, `elevator-kit.js` | Lift car and kit assembly from `assets/elevator/{low,balanced,detailed}.glb`; theme-aware | `createElevatorV2`; `assembleElevatorKit, createKitLoader` | `script*`; elevator-v2 | kit, colliders, `interactables` | `gjh_elevator_kit`, `gjh_lift_themes`; `browser_gjh_lift.py`, `browser_gjh_lift_interruptions.py` |
-| `assets/elevator-chime.js` | Arrival chime | `createArrivalChime` | `script` | audio state | none found |
+| `assets/audio.js` | [Procedural audio and narration](gjh-v11-audio.md) | `mallAudio`, `createAudioManager`, `createTramNarration` | entry, world, player, shop feedback, demo bag, lift and tram | audio mixer, voice pool and preferences | `gjh_audio` |
 | `assets/target-guidance.js`, `dom-projection.js` | On-screen target pointer; world-to-screen projection | `createTargetGuidance`; `createDOMProjection` | `script*` | DOM node | `browser_gjh_target_guidance.py` (NOT VERIFIED which module) |
 | `assets/shelf-focus.js` | Shelf close-up camera with details/add actions | `createShelfFocus` | `script*` | `open` flag, saved camera | `browser_gjh_shelf_focus.py` (NOT VERIFIED by name) |
 
@@ -272,7 +272,7 @@ No other authored JS file lacks an importer once these entry and dynamic cases a
 
 ## 9. Test coverage gaps
 
-No `tests/gjh_*.test.mjs` imports these: `script.js`, `pwa.js`, `ui.js`, `restroom-layout`, `restrooms`, the five `*-exhibit` files, `feature-kiosk`, `elevator-chime`, `frame-trace`, `color-scheme`, `mall-language`, `mall-theme-copy`, `store-destinations`, `target-guidance`, `dom-projection`, `shelf-focus`, `context-navigation`, `newmoon-detail-preview`, `original-tin`, `push-cart`, `carry-bag`, `collection-gesture`, `seated-pose`, `seat-contact`, `deck-railings`. Some have Python browser coverage (section 3). Per `FEATURES_MAP.md`, browser suites are not part of CI.
+No `tests/gjh_*.test.mjs` imports these: `script.js`, `pwa.js`, `ui.js`, `restroom-layout`, `restrooms`, the five `*-exhibit` files, `feature-kiosk`, `frame-trace`, `color-scheme`, `mall-language`, `mall-theme-copy`, `store-destinations`, `target-guidance`, `dom-projection`, `shelf-focus`, `context-navigation`, `newmoon-detail-preview`, `original-tin`, `push-cart`, `carry-bag`, `collection-gesture`, `seated-pose`, `seat-contact`, `deck-railings`. Some have Python browser coverage (section 3). Per `FEATURES_MAP.md`, browser suites are not part of CI.
 
 ## 10. Refreshing this document
 

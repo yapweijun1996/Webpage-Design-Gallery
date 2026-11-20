@@ -1,3 +1,4 @@
+import {mallAudio} from './audio.js';
 import {instancedSurfaceMaterial} from './opaque-batch.js';
 import {registerPhysicsProps} from './physics-props.js';
 import {addTramDebug} from './tram-layout.js';
@@ -1072,11 +1073,13 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       const occupied = createDoorwayOccupancy(R,physics,{x:x+normalX*.025,y:1.97,z:z+normalZ*.025},
         normalZ ? [halfOpening,1.93,.08] : [.08,1.93,halfOpening],leaves);
       const door={
-        zone:`planned-space-${bay.number}`, x,z,open:0,
+        zone:`planned-space-${bay.number}`, x,z,open:0,targetOpen:false,
         advance(visitor,dt,reducedMotion) {
           const dx=visitor.x-x,dz=visitor.z-z;
           const nearby=(visitor.y<2 && Math.abs(dx*alongX+dz*alongZ)<2.25 &&
             Math.abs(dx*normalX+dz*normalZ)<3.25) || (this.open > 0 && occupied());
+          if (nearby !== this.targetOpen) mallAudio.play('door');
+          this.targetOpen = nearby;
           const next=reducedMotion ? Number(nearby) : Math.max(0,Math.min(1,this.open+(nearby?1:-1)*dt*3));
           if (next===this.open) return;
           this.open=next;

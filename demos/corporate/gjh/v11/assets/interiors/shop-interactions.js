@@ -73,16 +73,16 @@ export async function buildShopInteractionTargets(slots = Object.keys(interiorSt
     layouts[index].map(item => createShopInteractionTarget(slot,interiorStores[slot],item)));
 }
 
-export async function installShopInteractions(T, scene, registry, announce, getTier) {
+export async function installShopInteractions(T, scene, registry, announce, getTier, audio) {
   const targets = await buildShopInteractionTargets(Object.values(interactiveShopSlots));
   // Existing seats retain their collision checks, stand behaviour and original IDs.
   const nearby = targets.filter(target => !target.shopAction.seat &&
     (!target.shopAction.zone.startsWith('planned-space-') || target.shopAction.effect));
-  registry.installShopActions(nearby, {announce, ...createShopActionVisual(T,scene,targets,getTier)});
+  registry.installShopActions(nearby, {announce, ...createShopActionVisual(T,scene,targets,getTier,audio)});
   return nearby;
 }
 
-function createShopActionVisual(T, scene, targets, getTier) {
+function createShopActionVisual(T, scene, targets, getTier, audio) {
   const items = new Map(targets.map(({id,shopAction:{item}}) => [id,item]));
   const shapes = new Map();
   let mesh, mounted = false;
@@ -134,7 +134,7 @@ function createShopActionVisual(T, scene, targets, getTier) {
     mesh.scale.set(...size);
     mesh.visible = true;
   }
-  const showroom = createShowroomFeedback(T,makeShape,merge);
+  const showroom = createShowroomFeedback(T,makeShape,merge,audio);
   function present(target,t) {
     if (mesh) mesh.visible = false;
     paint(target,t);

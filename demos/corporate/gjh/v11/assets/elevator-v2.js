@@ -1,3 +1,4 @@
+import {mallAudio} from './audio.js';
 import {createKitLoader} from './elevator-kit.js';
 import {liftLayout,cutRectangle} from './lift-layout.js';
 import {opaqueBatch} from './opaque-batch.js';
@@ -187,6 +188,10 @@ export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel) 
   const kit=prepareModel ? createKitLoader(T,scene,lift,prepareModel,lift.replaceCabin) : null;
   const physicalUpdate=lift.update, setHeight=lift.setHeight, interrupt=lift.interrupt;
   let y=0, ground=0, upper=0, dwell=0, down=false;
+  function soundDoors(oldGround, oldUpper) {
+    if ((ground > oldGround && oldGround === 0) || (upper > oldUpper && oldUpper === 0) ||
+        (ground < oldGround && oldGround === 1) || (upper < oldUpper && oldUpper === 1)) mallAudio.play('door');
+  }
   function paint(){
     kit?.update(y,ground,upper,(y>=lift.upper/2?2:0)+(down?1:0));
   }
@@ -194,7 +199,9 @@ export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel) 
   lift.setHeight=height=>{setHeight(height);y=height;};
   lift.pose=(trip)=>{
     lift.setHeight(trip.height);
+    const oldGround=ground, oldUpper=upper;
     ground=trip.groundDoor;upper=trip.upperDoor;down=trip.phase==='exit' ? trip.to!==0 : trip.to===0;
+    soundDoors(oldGround,oldUpper);
     paint();
   };
   lift.finishRide=()=>{dwell=1.1;};
@@ -203,7 +210,10 @@ export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel) 
     const wasCalling=lift.calling, oldY=y;
     physicalUpdate?.(dt,p);
     if (expanded) y=lift.height;
-    if (wasCalling && !lift.calling) dwell=1.1;
+    if (wasCalling && !lift.calling) {
+      dwell=1.1;
+      if (Math.abs(y-p.y)<.45) mallAudio.play('floor-chime');
+    }
     if (oldY!==y) down=y<oldY;
     else if (!dwell) down=y===lift.upper;
     dwell=Math.max(0,dwell-dt);
@@ -212,8 +222,10 @@ export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel) 
       Math.abs(p.x-lift.x)<.77 && Math.abs(p.z-(lift.z-1.36))<.65;
     const open=!lift.calling && (dwell>0 || atDoor && Math.abs(p.y-y)<.45);
     const step=motion?.matches?1:dt/.22;
+    const oldGround=ground, oldUpper=upper;
     ground=Math.max(0,Math.min(1,ground+(open&&y===0?step:-step)));
     upper=Math.max(0,Math.min(1,upper+(open&&y===lift.upper?step:-step)));
+    soundDoors(oldGround,oldUpper);
     paint();
   };
   lift.interrupt=()=>{

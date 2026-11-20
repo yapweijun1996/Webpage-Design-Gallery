@@ -1,3 +1,4 @@
+import {mallAudio} from './audio.js';
 import {rideTime,sampleRide,elevatorRideBlockReason} from './elevator-ride.js';
 import {createCharacter} from './character.js';
 import {spatial, courtyardArrival} from './spatial.js';
@@ -374,7 +375,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       : stick ? (running ? MOVEMENT.touchRun : MOVEMENT.touchWalk)
       : (running ? MOVEMENT.desktopRun : MOVEMENT.desktopWalk);
     advanceVelocity(velocity, forward, right, yaw, speed, dt);
-    vertical = controller.computedGrounded() ? -.5 : Math.max(-18, vertical - 24 * dt);
+    const grounded = controller.computedGrounded();
+    vertical = grounded ? -.5 : Math.max(-18, vertical - 24 * dt);
     movement.x = velocity.x * dt; movement.y = vertical * dt; movement.z = velocity.z * dt;
     const queryStart = performance.now();
     controller.computeColliderMovement(capsule, movement);
@@ -388,6 +390,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     body.setNextKinematicTranslation(next);
     const distance = Math.hypot(corrected.x, corrected.z);
     const walking = distance > .001;
+    if (walking && grounded) mallAudio.walk(distance);
     const state = walking ? running ? 'run' : 'walk' : 'idle';
     const requested = Math.hypot(forward, right) > .001 ? running ? 'run' : 'walk' : 'idle';
     const referenceSpeed = pushing ? MOVEMENT.cart : running ? MOVEMENT.runClipSpeed : MOVEMENT.walkClipSpeed;

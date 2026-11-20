@@ -1,3 +1,4 @@
+import {mallAudio} from './audio.js';
 import {icon} from './icons.js';
 
 /** Session-only demo selection. No prices, checkout, orders or network writes. */
@@ -49,9 +50,12 @@ export function setupDemoBag() {
   const measureHeader=()=>dialog.style.setProperty('--bag-header-height',`${header.getBoundingClientRect().height}px`);
   new ResizeObserver(measureHeader).observe(header);
   function button(text, label, action) { const el = document.createElement('button'); el.type='button'; el.textContent=text; el.setAttribute('aria-label',label); el.addEventListener('click',action); return el; }
+  let previousTotal;
   function render(value) {
     const active = document.activeElement, focusKey = active?.dataset.bagFocus;
     const total = Object.values(value).reduce((a,b)=>a+b,0);
+    if (total > previousTotal) mallAudio.play('bag');
+    previousTotal = total;
     bagCount.textContent = String(total);
     open.setAttribute('aria-label',`Open inventory bag, ${total} collected items`);
     open.title = 'Inventory Bag — items collected in the mall, not purchases';

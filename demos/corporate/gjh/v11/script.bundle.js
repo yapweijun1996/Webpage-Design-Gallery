@@ -662,12 +662,44 @@ function createProgramTrace(renderer) {
   return { event, player, sample, report: () => samples.length < 512 ? samples.slice() : [...samples.slice(next), ...samples.slice(0, next)] };
 }
 
+// demos/corporate/gjh/v11/assets/ui.js
+import { mallAudio as mallAudio2, createTramNarration } from "./assets/audio.js";
+
+// demos/corporate/gjh/v11/assets/tram-caption-copy.js
+var translations = {
+  S11: ["开放式包装台、牛皮纸卷和叠放的板条箱，营造出罐头食品库房的工作氛围。", "Meja pembungkusan terbuka, gulungan kertas kraf dan peti berbilah bertindan membentuk stor barangan bertin."],
+  S10: ["浅色灰泥墙前，深凹的扇贝壳托起海鲜礼品陈列。", "Cangkerang kekapis yang dalam menempatkan pameran hadiah makanan laut di hadapan plaster berwarna pasir."],
+  S09: ["深蓝色机器台上，停下的装罐输送线和黄色回转轮引导视线斜向延伸。", "Konveyor pengetinan yang berhenti dan roda pemulang kuning menarik pandangan merentasi kaunter biru tua."],
+  S08: ["条纹早餐亭前立着一座花生酱罐高架，旁边是与餐台齐高的吐司托盘。", "Rak tinggi berisi balang mentega kacang terletak di hadapan gerai sarapan berjalur dengan dulang roti bakar."],
+  S07: ["红灯笼下，无标识的罐头在翠绿色圆台上层层叠起，宛如宴席中心的摆设。", "Piramid tin polos di atas pelantar hijau jed, di bawah tanglung merah, menyerupai hiasan tengah jamuan."],
+  S06: ["安静的灰蓝墙前，独立木架上垂着长短不一的金色面条。", "Jalur mi keemasan pelbagai panjang tergantung pada rangka kayu di hadapan dinding kelabu kebiruan."],
+  S01: ["奶油色扇形门楣与黄色新月引向四个蜜色橡木陈列区，过道旁还有品牌沿革和食用介绍。", "Bingkai berlekuk warna krim dan bulan sabit kuning menghala ke empat ruang pameran kayu oak madu, dengan kisah warisan dan hidangan di tepi lorong."],
+  S02: ["低矮的漆面出餐台与宽大的铜色排烟罩围出备餐区，调味料就在手边。", "Kaunter hidangan berkemasan lakuer dan hud tembaga lebar membingkai tempat penyediaan makanan, dengan perasa dalam jangkauan."],
+  S03: ["波浪边阳伞和小巧雪糕车，把街边冰品摊带进室内。", "Payung bertepi berlekuk dan troli aiskrim kecil membawa suasana gerai pencuci mulut sejuk ke dalam bangunan."],
+  S04: ["鼠尾草绿样品台展开成巨大的折叠册，白色内页陈列素面贴片卡。", "Kaunter sampel hijau sage terbuka seperti folio lipat besar, dengan kad tampalan polos pada helaian putih."],
+  S05: ["层叠的深木色抽屉环绕着一只浅色瓷碗，呈现安静的药铺。", "Deretan laci kayu gelap bertingkat mengelilingi sebuah mangkuk porselin pucat di ruang apotek yang tenang."],
+  S12: ["错落的磨砂分隔片从低矮的白色陈列台升起，在台面投下蓝绿色阴影。", "Panel indeks legap yang berselang-seli menjulang dari pameran putih rendah dan membentuk bayang biru kehijauan."],
+  S13: ["背光勾勒出耳机轮廓，深灰色毛毡试听台营造出适合近距离体验的音响展厅。", "Siluet fon kepala bercahaya latar menghidupkan ruang pameran audio yang redup dengan kaunter dengar berfelt arang."],
+  S14: ["两面错落的屏幕围出象牙色软装客厅，像一间明亮的家庭影院。", "Dua skrin berselang membingkai ruang tamu berkemasan gading seperti pawagam rumah yang cerah."],
+  S15: ["掀开的琴盖在胡桃木格栅前划出斜线，琴身下是打着暖白光的矮舞台。", "Penutup piano yang terangkat membentuk garis pepenjuru di hadapan bilah kayu walnut, dengan pentas rendah bercahaya gading di bawahnya."],
+  S16: ["青绿色穿孔工具板上排着一组大号空心环孔，下方是小型追踪器演示台。", "Papan alatan teal berlubang memuatkan deretan gegelang besar di atas meja demonstrasi penjejak kecil."],
+  S17: ["温暖的走廊尽头，山墙形毛毡壁龛内摆着一部实际尺寸的无线电话。", "Relung telefon berfelt berbumbung segi tiga menempatkan gagang tanpa wayar bersaiz sebenar di hujung koridor yang hangat."]
+};
+function tramCaptionCopy(shop, language) {
+  const index = language === "zh-Hans" ? 0 : language === "ms" ? 1 : -1;
+  const direction = ["在左侧", "Di sebelah kiri"][index] ?? shop.direction;
+  return { heading: `${shop.name} · ${direction}`, feature: translations[shop.id]?.[index] ?? shop.feature };
+}
+
 // demos/corporate/gjh/v11/assets/elevator-ride.js
 var rideTime = Object.freeze({ open: 0.22, board: 0.55, close: 0.78, arrive: 1.36, reopen: 1.58, exit: 1.84 });
 var floorDestinations = Object.freeze({
   "floor-upper": Object.freeze({ label: "Upper level", upper: true }),
   "floor-ground": Object.freeze({ label: "Ground floor", upper: false })
 });
+
+// demos/corporate/gjh/v11/assets/tram-ride.js
+import { mallAudio } from "./assets/audio.js";
 
 // demos/corporate/gjh/v11/assets/tram-layout.js
 function roundedLoop(west, north, east, south, radius = 2) {
@@ -1497,6 +1529,8 @@ function createTramHud(parent, scene, canControl) {
   Object.assign(actions2.style, { display: "flex", gap: "4px", flexWrap: "wrap" });
   const buttons = {};
   let controls = null, previousIndex = -2, wasActive = false;
+  let lastShop = null, lastLanguage, wasPaused = false, localized;
+  const narration = createTramNarration(mallAudio2, globalThis.speechSynthesis, globalThis.SpeechSynthesisUtterance);
   for (const [action, label, key] of [["pause", "Pause", "Space"], ["skip", "Skip shop", "N"], ["end", "End", "Escape"]]) {
     const button2 = document.createElement("button");
     button2.type = "button";
@@ -1506,6 +1540,21 @@ function createTramHud(parent, scene, canControl) {
     button2.addEventListener("click", () => command(action));
     actions2.append(button2);
     buttons[action] = button2;
+  }
+  if (narration.available) {
+    const voice = document.createElement("button");
+    voice.type = "button";
+    voice.textContent = "Voice";
+    Object.assign(voice.style, { minWidth: "44px", minHeight: "44px", margin: "0", paddingInline: "8px" });
+    voice.setAttribute("aria-pressed", String(mallAudio2.state.voice));
+    voice.addEventListener("click", () => {
+      mallAudio2.unlock();
+      const enabled = !mallAudio2.state.voice;
+      mallAudio2.setVoice(enabled);
+      voice.setAttribute("aria-pressed", String(enabled));
+      show(controls);
+    });
+    actions2.append(voice);
   }
   buttons.end.title = "End the tour at the south entrance station";
   card.append(caption, progress, actions2);
@@ -1523,8 +1572,12 @@ function createTramHud(parent, scene, canControl) {
     command(action);
   });
   function command(action) {
-    if (canControl() && controls?.[action]())
+    if (canControl() && controls?.[action]()) {
+      narration.stop();
+      if (action !== "skip")
+        mallAudio2.rail(false);
       show(controls);
+    }
   }
   function show(next, boardReason = "") {
     controls = next;
@@ -1533,14 +1586,26 @@ function createTramHud(parent, scene, canControl) {
     const restoreFocus = wasActive && !active && card.contains(document.activeElement);
     wasActive = active;
     card.hidden = !active && !boardReason;
+    const shop = active ? tramCaptions[state.caption] : null;
+    if (!shop && lastShop || state?.paused && !wasPaused)
+      narration.stop();
+    wasPaused = Boolean(state?.paused);
+    mallAudio2.setCaptionDucking(Boolean(shop && !wasPaused));
     if (card.hidden) {
+      lastShop = null;
       if (restoreFocus && canControl())
         scene.focus({ preventScroll: true });
       return;
     }
     progress.hidden = actions2.hidden = !active;
-    const shop = active ? tramCaptions[state.caption] : null;
-    const heading = shop ? `${shop.name} · ${shop.direction}` : "South entrance tram";
+    const language = document.documentElement.lang || "en";
+    if (shop && (shop !== lastShop || language !== lastLanguage)) {
+      localized = tramCaptionCopy(shop, language);
+      localized.speech = `${localized.heading}. ${localized.feature}`;
+    }
+    lastShop = shop;
+    lastLanguage = language;
+    const heading = shop ? localized.heading : "South entrance tram";
     let copy = boardReason;
     if (active) {
       if (state.phase === "arrival")
@@ -1556,12 +1621,14 @@ function createTramHud(parent, scene, canControl) {
       else if (state.paused)
         copy = "Ride paused.";
       else if (shop)
-        copy = shop.feature;
+        copy = localized.feature;
       else
         copy = state.index >= 0 ? "Next shop ahead." : "The brand tour begins along the west wing.";
     }
     setHudText(title, heading);
-    setHudText(feature, shop && copy !== shop.feature ? `${shop.feature} ${copy}` : copy);
+    setHudText(feature, shop && copy !== localized.feature ? `${localized.feature} ${copy}` : copy);
+    if (shop && !state.paused && !document.hidden)
+      narration.read(localized, localized.speech, language);
     const index = active ? state.index : -1;
     if (index !== previousIndex) {
       dots.forEach((dot, i) => {
@@ -4107,42 +4174,8 @@ function createVisitorShadows(T, scene, plane, contact) {
   };
 }
 
-// demos/corporate/gjh/v11/assets/elevator-chime.js
-function createArrivalChime() {
-  let context, bell;
-  return {
-    unlock() {
-      if (!globalThis.AudioContext)
-        return;
-      try {
-        context ??= new AudioContext;
-        if (!bell) {
-          bell = context.createBuffer(1, Math.ceil(context.sampleRate * 0.52), context.sampleRate);
-          const samples = bell.getChannelData(0);
-          const note = (hz, age) => age < 0 ? 0 : Math.min(1, age / 0.008) * Math.exp(-age * 10) * Math.sin(2 * Math.PI * hz * age);
-          for (let i = 0;i < samples.length; i++) {
-            const t = i / context.sampleRate, tail = Math.min(1, (samples.length - i) / (context.sampleRate * 0.04));
-            samples[i] = 0.095 * tail * (note(784, t) + note(1046.5, t - 0.115));
-          }
-        }
-        if (context.state === "suspended")
-          context.resume().catch(() => {});
-      } catch {}
-    },
-    play() {
-      if (context?.state !== "running" || !bell)
-        return;
-      const source = context.createBufferSource();
-      source.buffer = bell;
-      source.connect(context.destination);
-      source.start();
-    },
-    dispose() {
-      if (context)
-        context.close().catch(() => {});
-    }
-  };
-}
+// demos/corporate/gjh/v11/script.js
+import { mallAudio as mallAudio3 } from "./assets/audio.js";
 
 // demos/corporate/gjh/v11/assets/artwork-textures.js
 var anisotropyFor = (tier) => tier === "low" ? 2 : 4;
@@ -6356,7 +6389,6 @@ var expanded = startupFlags.get("layout") !== "classic";
 var liftEnabled = startupFlags.get("visitor") !== "v1";
 var testEnabled = startupFlags.get("test") === "1" || Boolean(window.__GJH_TEST);
 document.body.classList.toggle("is-expanded", expanded);
-var arrivalChime = createArrivalChime();
 var skipRide = document.getElementById("skip-lift-ride");
 skipRide.addEventListener("click", () => {
   player?.skipRide();
@@ -6419,6 +6451,65 @@ var renderWidth = 0;
 var renderHeight = 0;
 var viewportWidth = innerWidth;
 var viewportHeight = innerHeight;
+var speaker = document.getElementById("mall-speaker");
+var music = document.getElementById("mall-music");
+var musicStatus = document.getElementById("mall-music-status");
+var mixer = document.querySelectorAll("[data-audio-bus]");
+var connection = navigator.connection;
+var lastMusicStatus;
+mallAudio3.subscribe(() => {
+  const state = mallAudio3.state;
+  music.disabled = !state.available;
+  speaker.setAttribute("aria-pressed", String(state.muted));
+  music.checked = state.musicEnabled;
+  for (const input of mixer) {
+    input.disabled = !state.available;
+    input.value = Math.round(state.levels[input.dataset.audioBus] * 100);
+  }
+  const status = state.musicPlaying ? "Music on" : "Music off";
+  if (lastMusicStatus !== status)
+    musicStatus.textContent = lastMusicStatus = status;
+});
+function toggleMute() {
+  mallAudio3.setMuted(!mallAudio3.state.muted);
+  mallAudio3.unlock();
+}
+speaker.addEventListener("click", toggleMute);
+music.addEventListener("change", () => {
+  mallAudio3.setMusic(music.checked);
+  mallAudio3.unlock();
+});
+for (const input of mixer)
+  input.addEventListener("input", () => {
+    mallAudio3.setVolume(input.dataset.audioBus, input.valueAsNumber / 100);
+  });
+function unlockAudio(event) {
+  if (!event.isTrusted || event.repeat || event.type === "keydown" && (event.ctrlKey || event.metaKey || event.altKey))
+    return;
+  const inMall = document.body.classList.contains("is-3d");
+  if (inMall && startupOverlay.hidden) {
+    mallAudio3.setActive(true);
+    mallAudio3.unlock();
+  } else if (!startupOverlay.hidden && startupOverlay.contains(event.target) && !event.target.closest?.("#loader-directory"))
+    mallAudio3.unlock(true);
+}
+document.addEventListener("pointerdown", (event) => {
+  if (event.pointerType === "mouse")
+    unlockAudio(event);
+}, true);
+document.addEventListener("pointerup", (event) => {
+  if (event.pointerType !== "mouse")
+    unlockAudio(event);
+}, true);
+document.addEventListener("click", unlockAudio);
+document.addEventListener("keydown", (event) => {
+  if (event.code === "KeyM" && !event.defaultPrevented && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.isContentEditable && !event.target.closest?.("input, select, textarea, dialog") && document.body.classList.contains("is-3d") && startupOverlay.hidden) {
+    event.preventDefault();
+    toggleMute();
+  } else
+    unlockAudio(event);
+}, true);
+mallAudio3.setHidden(document.hidden);
 var quality = createGraphicsQuality((change) => {
   if (change === "resolution" && quality.state) {
     requestedProfile = quality.resolve(renderWidth);
@@ -6427,6 +6518,13 @@ var quality = createGraphicsQuality((change) => {
   } else
     resize();
 });
+function syncAudioPolicy(tier = quality.state?.tier ?? quality.resolve(innerWidth).tier) {
+  mallAudio3.setPolicy(quality.deviceClass === "phone", tier === "low", reducedMotion2.matches || connection?.saveData === true);
+}
+syncAudioPolicy();
+reducedMotion2.addEventListener("change", () => syncAudioPolicy());
+connection?.addEventListener?.("change", () => syncAudioPolicy());
+var floorChime = () => mallAudio3.play("floor-chime");
 var renderRequested = false;
 var forceRender = false;
 var enteredAt = null;
@@ -6873,6 +6971,8 @@ function updateHUD() {
   const zone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? restroomAt(p.x, p.z) ?? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
   if (zone !== currentZone || Boolean(p.elevatorTravel) !== wasRiding)
     quality.resetSampling();
+  if (zone !== currentZone)
+    mallAudio3.setZone(zone);
   currentZone = zone;
   wasRiding = Boolean(p.elevatorTravel);
   if (expanded && currentZone === "upper" && !brandWallStarted) {
@@ -6915,6 +7015,8 @@ function tick(refreshHud = true) {
       continue;
     }
     const open = shouldOpenStoreDoor(door, p) || door.open > 0 && door.occupied();
+    if (open !== door.targetOpen)
+      mallAudio3.play("door");
     door.targetOpen = open;
     const next = reducedMotion2.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * FIXED_STEP * 3));
     if (next === door.open)
@@ -7258,8 +7360,10 @@ function animate(now) {
     return;
   }
   const entered = startupOverlay.hidden && document.body.classList.contains("is-3d");
-  if (entered)
-    enteredAt ??= now;
+  if (entered && enteredAt === null) {
+    enteredAt = now;
+    mallAudio3.setActive(true);
+  }
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
   const elapsed = (now - last) / 1000;
@@ -7376,9 +7480,9 @@ function rideElevator(options) {
     return { reason: "The elevator is unavailable right now. Please try again." };
   manual = false;
   player.setInput(null);
-  const result = player.useElevator(elevator, arrivalChime.play, options);
-  if (result.riding)
-    arrivalChime.unlock();
+  const result = player.useElevator(elevator, floorChime, options);
+  if (result.riding || result.calling)
+    mallAudio3.play("lift-ding");
   return result;
 }
 function requestFloorRide(upper, arrival) {
@@ -7386,7 +7490,6 @@ function requestFloorRide(upper, arrival) {
   const result = rideElevator({ approach: true, target });
   if (result.calling) {
     pendingFloorRide = { target, arrival, phase: "calling" };
-    arrivalChime.unlock();
   } else if (result.riding && arrival) {
     pendingFloorRide = { target, arrival, phase: "riding" };
   }
@@ -7424,6 +7527,8 @@ ui.onSeat((sit, id) => {
   return ok;
 });
 ui.onView((visual) => {
+  if (!visual || startupOverlay.hidden)
+    mallAudio3.setActive(visual);
   if (visual) {
     last = performance.now();
     requestRender();
@@ -7513,8 +7618,12 @@ function refreshCalendarTheme() {
   if (ready && !pageEnded)
     mallTheme?.refresh();
 }
-window.addEventListener("pageshow", refreshCalendarTheme);
+window.addEventListener("pageshow", () => {
+  mallAudio3.setHidden(document.hidden);
+  refreshCalendarTheme();
+});
 document.addEventListener("visibilitychange", () => {
+  mallAudio3.setHidden(document.hidden);
   warmRunner?.visibility(document.hidden);
   if (document.hidden) {
     pausePerformance();
@@ -7611,6 +7720,7 @@ function resize() {
 }
 function applyProfile(profile) {
   profile = quality.apply(profile);
+  syncAudioPolicy(profile.tier);
   themeStage?.setTier?.(profile.tier);
   elevator?.kit?.select(profile.tier);
   player?.setTramTier?.(profile.tier);
@@ -7935,6 +8045,12 @@ async function initialize() {
   ui.setShelfFocus(shelfFocus);
   ui.setRestrooms(world.restrooms);
   interactions = createInteractionRegistry(world.interactables, (item) => ui.describeInteraction(item));
+  interactions.subscribe((item) => {
+    if (item.kind === "pickup")
+      mallAudio3.play("pickup");
+    else if (item.kind === "drop" || item.kind === "return")
+      mallAudio3.play("drop");
+  });
   ui.setInteractionRegistry(interactions);
   if (player.state.character.physicalProduct) {
     try {
@@ -8048,18 +8164,20 @@ if (document.body.dataset.entryMode !== "directory")
     fallback("The 3D mall could not load. All stores and verified products remain available in the accessible list below.");
   });
 window.addEventListener("pagehide", (event) => {
-  if (!event.persisted) {
-    clearTimeout(themeMidnightTimer);
-    cancelEntryPresentation();
-    pageEnded = true;
-    elevator?.kit?.dispose();
-    arrivalChime.dispose();
-    tierQueue?.cancel();
-    warmRunner?.stop("pagehide");
-    mallTheme?.destroy();
-    npcs?.dispose();
-    player?.dispose?.();
-    world?.interiors?.dispose();
-    modelWarmup?.dispose();
+  if (event.persisted) {
+    mallAudio3.setHidden(true);
+    return;
   }
+  clearTimeout(themeMidnightTimer);
+  cancelEntryPresentation();
+  pageEnded = true;
+  elevator?.kit?.dispose();
+  mallAudio3.dispose();
+  tierQueue?.cancel();
+  warmRunner?.stop("pagehide");
+  mallTheme?.destroy();
+  npcs?.dispose();
+  player?.dispose?.();
+  world?.interiors?.dispose();
+  modelWarmup?.dispose();
 });

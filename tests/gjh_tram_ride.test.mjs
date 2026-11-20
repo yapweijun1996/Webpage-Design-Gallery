@@ -139,7 +139,8 @@ function stubDocument() {
     contains(node) { return this === node || this.children.some(child => child.contains(node)); },
     setAttribute(name, value) { this.attributes[name] = value; },
     focus() { document.activeElement = this; },
-    addEventListener:noop
+    addEventListener(type, handler) { this.handlers ??= {}; this.handlers[type] = handler; },
+    click() { this.handlers?.click?.(); }
   });
   const body = makeNode();
   const controls = new Map();
@@ -148,7 +149,7 @@ function stubDocument() {
     return controls.get(selector);
   }
   return {
-    body, createElement:makeNode, querySelector,
+    body, documentElement:{lang:'en'}, hidden:false, createElement:makeNode, querySelector,
     addEventListener(type, handler) {
       if (!listeners.has(type)) listeners.set(type, []);
       listeners.get(type).push(handler);
@@ -163,7 +164,11 @@ function stubDocument() {
 
 test('no-browser smoke tests the bundled player, station registry and ride HUD with the flag off and on', async t => {
   const matchMedia = () => ({matches:true});
+  const utterances = [];
+  let cancellations = 0;
   const globals = {
+    speechSynthesis:{speak:utterance => utterances.push(utterance), cancel:() => { cancellations++; }},
+    SpeechSynthesisUtterance:class { constructor(text) { this.text = text; } },
     document:stubDocument(), window:{matchMedia,addEventListener() {}},
     matchMedia, location:{search:''}, self:globalThis,
     createImageBitmap:async () => ({width:1, height:1}),
@@ -191,6 +196,9 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
   await R.init();
   const {createPlayer} = await import('../demos/corporate/gjh/v11/assets/player.bundle.js');
   const {createTramHud} = await import('../demos/corporate/gjh/v11/assets/ui.js');
+  const {mallAudio} = await import('../demos/corporate/gjh/v11/assets/audio.js');
+  mallAudio.setActive(true);
+  t.after(() => mallAudio.dispose());
 
   for (const search of ['?tram=0', '']) {
     globalThis.document = stubDocument();
@@ -253,7 +261,10 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
     const [caption, progress, buttons] = card.children;
     assert.equal(card.hidden, false);
     assert.equal(progress.children.length, 17);
-    assert.equal(buttons.children.length, 3);
+    assert.equal(buttons.children.length, 4);
+    const voice = buttons.children[3];
+    assert.equal(voice.textContent,'Voice');
+    assert.equal(voice.attributes['aria-pressed'],'false');
     assert.ok(buttons.children.every(button => button.style.minHeight === '44px'));
     const step = (frames, alpha = 1) => {
       for (let i = 0; i < frames; i++) {
@@ -303,7 +314,22 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
     near(player.visual.position.z, contact.z, .0001);
     assert.equal(controls.state.caption, 0);
     assert.match(caption.children[0].textContent, /On your left/);
+    assert.equal(utterances.length,0);
+    voice.click();
+    assert.equal(voice.attributes['aria-pressed'],'true');
+    assert.equal(utterances.at(-1).lang,'en-SG');
+    document.documentElement.lang = 'zh-Hans';
+    hud.show(controls);
+    assert.match(caption.children[0].textContent,/在左侧/);
+    assert.match(utterances.at(-1).text,/在左侧/);
+    assert.equal(utterances.at(-1).lang,'zh-Hans');
+    assert.equal(cancellations,1);
+    assert.equal(document.key('Space', canvas), true);
+    assert.equal(cancellations,2);
+    assert.equal(document.key('Space', canvas), true);
+    assert.equal(utterances.at(-1).lang,'zh-Hans');
     assert.equal(document.key('KeyN', canvas), true);
+    assert.equal(cancellations,3);
     assert.equal(controls.state.caption, -1);
     assert.equal(document.key('KeyV', canvas), true);
     step(1);

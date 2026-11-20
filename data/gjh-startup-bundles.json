@@ -1,7 +1,7 @@
 {
   "version": 1,
   "bun": "1.3.11",
-  "builder": "bb250b5b77fdf5c33a398c74c458d41c4aeba16b87d41722863a18dbb30b6630",
+  "builder": "32d835caa65c20b286899d802827deda95726b3acbbc3443fd5f2208e3a1e381",
   "inputs": {
     "assets/onboarding/action-dialog.js": "caf4788835aee2f7d5dc9b45153fe01df44ec173d1ee1baab98ec70a77f840cc",
     "assets/onboarding/components.js": "9d6c51a1cb901e5b050e1956438efd0a8d920ac0aa5302bbf1dcadc709e2ea9f",
@@ -17,7 +17,6 @@
     "demos/corporate/gjh/v11/assets/character.js": "1efd57a24d9f19063b2be47f2c8d3caea5d0ca8a30f5548295bfbf04f198c3c0",
     "demos/corporate/gjh/v11/assets/context-navigation.js": "dea62dd0bb38aea995cbe967671980f779145a938da03c47f163edcd68e4ec68",
     "demos/corporate/gjh/v11/assets/doorway-occupancy.js": "0145807206349de640608a83dcfff685b21f941dda655201a83b0e0ca219cf84",
-    "demos/corporate/gjh/v11/assets/elevator-chime.js": "0abc468274f110894a36562832211709a101d472db17bf44b36b2d31f81536b0",
     "demos/corporate/gjh/v11/assets/elevator-ride.js": "4964df30b2d2e2b0c3b302ae5f22cb7b247a578d453d24aa9edbb5882fb8ba0a",
     "demos/corporate/gjh/v11/assets/expanded-interiors.js": "e586f5d4aa87a2831e30dbd9737f44548e9169a8834a2f9a6bb7ca63eb2ae4c9",
     "demos/corporate/gjh/v11/assets/expanded-layout.js": "4923c7a6f9c0c74a73c24e25bddefcb5b27188d84351b3061fe01fae4875dc29",
@@ -65,7 +64,7 @@
     "demos/corporate/gjh/v11/assets/performance-monitor.js": "1687b2edc5e53e2f0cdeab5a51c9bcf2dd9d91ad283c5a922225884a5b3a3ef6",
     "demos/corporate/gjh/v11/assets/performance-panel.js": "9b7e56353cc226c97e6ef718b3e0dc43316617cda4db172895ae15cf218b0148",
     "demos/corporate/gjh/v11/assets/physics-props.js": "93712448bc13aa7689df33bd1ef35becfdf302d2114bd315d1ff6334f385b523",
-    "demos/corporate/gjh/v11/assets/player.js": "0156216575a751d446c678624728c11bc04ef4ce67888f4bba4d937a6529e20e",
+    "demos/corporate/gjh/v11/assets/player.js": "2c6ba914ead8ad78b53cd8ff0f87f708883c0b987c2a1f87b4d82f735caaa348",
     "demos/corporate/gjh/v11/assets/public-architecture.js": "636b764ef97808d16378c86f3d864f79423aaa466c536a7712131fbc4e9487ba",
     "demos/corporate/gjh/v11/assets/push-cart.js": "b57b31fc55c21808a8b95192ccfdf92cc47307473a562eb76e44189d72fb07fd",
     "demos/corporate/gjh/v11/assets/pzh-exhibit.js": "88e0b55b667249e7f459584528175c641edb2db89d0fee3b1fdf927efcd8f701",
@@ -97,10 +96,11 @@
     "demos/corporate/gjh/v11/assets/store-destinations.js": "b5c8aa850caee6d56995cddf8855c5497cf8a288cab157edc783b1175c69f0f3",
     "demos/corporate/gjh/v11/assets/surface-decals.js": "2202430dee003a66cdbd88c9f6daf9a2fc080c2db37b34b58e8927baecc3f307",
     "demos/corporate/gjh/v11/assets/test-walk.js": "61a5cb3589348c5dc02be0b75986710d996f4eb5beefe83cc87aaf13fb638680",
+    "demos/corporate/gjh/v11/assets/tram-caption-copy.js": "25f1b5ded09e3f87578c348b9b5b39d08c8e1cec17198d2dfb835167a41cbf90",
     "demos/corporate/gjh/v11/assets/tram-car.js": "0bb6340a4310c5b6dca5382ba940f39da3f1020c50aee83da8ccdf314a70f308",
     "demos/corporate/gjh/v11/assets/tram-layout.js": "c0731472686ff79be4e310ebd8116b5bdd714fa790823c12529aae1c5e7cde37",
-    "demos/corporate/gjh/v11/assets/tram-ride.js": "d58e6d76d569d0f0edf0f87f4f6ee520c298bde1216769835b1c8ec18dc2e4b9",
-    "demos/corporate/gjh/v11/assets/ui.js": "c63b5ed1e5200dfbdeacea4c8d69d9c5c2eed59f07c89f1f1ebd8ddf0c573bf2",
+    "demos/corporate/gjh/v11/assets/tram-ride.js": "4a5b58c7fbc0e55115e7d5ddd5b16ca192e3de84e10191d3cbc0b88e6a8772b8",
+    "demos/corporate/gjh/v11/assets/ui.js": "4a0496178d5bf57fec4e97e1124a2dc28f54e6ff37eb1644e70d2d36dc3dbd37",
     "demos/corporate/gjh/v11/assets/upper-layout.js": "ee42543c61268d4f2ccde8bf2f55cfe155e7e65027ee308dcbfe764ae3d7445a",
     "demos/corporate/gjh/v11/assets/upper-level-atlas.js": "6b1b81c1000c2e2bb4a305d1a9cb12c6829b4fbdd66649e02513ae97b898b7b8",
     "demos/corporate/gjh/v11/assets/upper-level.js": "d5a646ea63b5a9ca9befa6360394459b1264e10e6a48fbdb9616bf96f85d45a5",
@@ -112,13 +112,13 @@
     "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "06f77543852578d8d3e11de82e8d0e6b9e063b32ac37e5655d986d3229da165d",
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "767cb347ec0e15a09c80c640cd8efe0d4ae3f1be334a2c8dbae7ddf206d8e490",
     "demos/corporate/gjh/v11/assets/window-studios.js": "2603bc84246f3c19f9e47d2fb380232a242bc856f493511e73219c18da924dc4",
-    "demos/corporate/gjh/v11/assets/world.js": "1058be3fdc8446e9602708d1c88d65eef411f176dc946cf54ae2a7d697408a09",
-    "demos/corporate/gjh/v11/script.js": "0af26e08fbeb3811b4473fd18d61bec28acfbd2ace65fff2a560e60dddd654c3"
+    "demos/corporate/gjh/v11/assets/world.js": "9671469bb7bee36139f739a2c50b683f9ae5efcd7c798dbdcebd7f6c4e9d1679",
+    "demos/corporate/gjh/v11/script.js": "e2c2857f81c2ac2113d8d44af2e13dde92f7fd1981f1f413ebdaf9039def998a"
   },
   "outputs": {
-    "demos/corporate/gjh/v11/script.bundle.js": "279451fe9feb4bb184d7a7aa3403e4b5773bf36b72acd49883451f837abf5812",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "d0bf52e0e563d316550754f972d59736d62f3b01ead1ff5ac90760f76a2d0332",
-    "demos/corporate/gjh/v11/assets/player.bundle.js": "6b19d1400dbf821f6f9ec10cde8f7ec1ecba1c999e88241673f4c7341873a899",
+    "demos/corporate/gjh/v11/script.bundle.js": "c59b47682b6bc438cece3a20396d6f600cc47fa32848a70961195dd5888e27d0",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "7adf0e480f7a864ce0485e01904bfbf4d1acb309e3ba4da20164ebfef0ee78df",
+    "demos/corporate/gjh/v11/assets/player.bundle.js": "7bbbc36acfc1e1964d28800fcd7864bfd3fd8d5943d7be520d932a3ca41e71eb",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "47baec7837deb630e46cb0bc58041d6d98e5e9cb7d841c3c7126eb3d81d5ec87"
   }
 }

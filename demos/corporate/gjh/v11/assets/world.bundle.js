@@ -7,6 +7,9 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
 
+// demos/corporate/gjh/v11/assets/world.js
+import { mallAudio } from "./audio.js";
+
 // demos/corporate/gjh/v11/assets/opaque-batch.js
 import { mergeGeometries } from "../vendor/BufferGeometryUtils.js";
 function instancedSurfaceMaterial(T) {
@@ -10562,9 +10565,13 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           x,
           z,
           open: 0,
+          targetOpen: false,
           advance(visitor, dt, reducedMotion) {
             const dx = visitor.x - x, dz = visitor.z - z;
             const nearby = visitor.y < 2 && Math.abs(dx * alongX + dz * alongZ) < 2.25 && Math.abs(dx * normalX + dz * normalZ) < 3.25 || this.open > 0 && occupied();
+            if (nearby !== this.targetOpen)
+              mallAudio.play("door");
+            this.targetOpen = nearby;
             const next = reducedMotion ? Number(nearby) : Math.max(0, Math.min(1, this.open + (nearby ? 1 : -1) * dt * 3));
             if (next === this.open)
               return;

@@ -10,7 +10,7 @@ import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {allowMallLightWash, createMallAtmosphere} from './assets/mall-atmosphere.js';
-import {createArrivalChime} from './assets/elevator-chime.js';
+import {mallAudio} from './assets/audio.js';
 import {liftLayout} from './assets/lift-layout.js';
 import {createModelWarmup} from './assets/model-warmup.js';
 import {createWarmReport, createWarmRunner, createTierQueue, prepareEntryFrame, prepareTier} from './assets/scene-warmup.js';
@@ -45,7 +45,6 @@ const liftEnabled = startupFlags.get('visitor') !== 'v1';
 const testEnabled = startupFlags.get('test') === '1' || Boolean(window.__GJH_TEST);
 document.body.classList.toggle('is-expanded', expanded);
 
-const arrivalChime = createArrivalChime();
 const skipRide = document.getElementById('skip-lift-ride');
 skipRide.addEventListener('click',()=>{player?.skipRide();canvas.focus({preventScroll:true});});
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -68,6 +67,56 @@ let graphicsStatus = 'initializing', losses = 0, validations = 0;
 let markFirstFrame;
 const firstFrame = new Promise(resolve => { markFirstFrame = resolve; });
 let renderWidth = 0, renderHeight = 0, viewportWidth = innerWidth, viewportHeight = innerHeight;
+const speaker = document.getElementById('mall-speaker');
+const music = document.getElementById('mall-music');
+const musicStatus = document.getElementById('mall-music-status');
+const mixer = document.querySelectorAll('[data-audio-bus]');
+const connection = navigator.connection;
+let lastMusicStatus;
+mallAudio.subscribe(() => {
+  const state = mallAudio.state;
+  music.disabled = !state.available;
+  speaker.setAttribute('aria-pressed', String(state.muted));
+  music.checked = state.musicEnabled;
+  for (const input of mixer) {
+    input.disabled = !state.available;
+    input.value = Math.round(state.levels[input.dataset.audioBus] * 100);
+  }
+  const status = state.musicPlaying ? 'Music on' : 'Music off';
+  if (lastMusicStatus !== status) musicStatus.textContent = lastMusicStatus = status;
+});
+function toggleMute() {
+  mallAudio.setMuted(!mallAudio.state.muted);
+  mallAudio.unlock();
+}
+speaker.addEventListener('click', toggleMute);
+music.addEventListener('change', () => { mallAudio.setMusic(music.checked); mallAudio.unlock(); });
+for (const input of mixer) input.addEventListener('input', () => {
+  mallAudio.setVolume(input.dataset.audioBus, input.valueAsNumber / 100);
+});
+function unlockAudio(event) {
+  if (!event.isTrusted || event.repeat || (event.type === 'keydown' &&
+      (event.ctrlKey || event.metaKey || event.altKey))) return;
+  const inMall = document.body.classList.contains('is-3d');
+  if (inMall && startupOverlay.hidden) {
+    mallAudio.setActive(true);
+    mallAudio.unlock();
+  } else if (!startupOverlay.hidden && startupOverlay.contains(event.target) &&
+      !event.target.closest?.('#loader-directory')) mallAudio.unlock(true);
+}
+document.addEventListener('pointerdown', event => { if (event.pointerType === 'mouse') unlockAudio(event); }, true);
+document.addEventListener('pointerup', event => { if (event.pointerType !== 'mouse') unlockAudio(event); }, true);
+document.addEventListener('click', unlockAudio);
+document.addEventListener('keydown', event => {
+  if (event.code === 'KeyM' && !event.defaultPrevented && !event.repeat &&
+      !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.isContentEditable &&
+      !event.target.closest?.('input, select, textarea, dialog') &&
+      document.body.classList.contains('is-3d') && startupOverlay.hidden) {
+    event.preventDefault();
+    toggleMute();
+  } else unlockAudio(event);
+}, true);
+mallAudio.setHidden(document.hidden);
 const quality = createGraphicsQuality(change => {
   if (change === 'resolution' && quality.state) {
     requestedProfile = quality.resolve(renderWidth);
@@ -75,6 +124,14 @@ const quality = createGraphicsQuality(change => {
     requestRender();
   } else resize();
 });
+function syncAudioPolicy(tier = quality.state?.tier ?? quality.resolve(innerWidth).tier) {
+  mallAudio.setPolicy(quality.deviceClass === 'phone', tier === 'low',
+    reducedMotion.matches || connection?.saveData === true);
+}
+syncAudioPolicy();
+reducedMotion.addEventListener('change', () => syncAudioPolicy());
+connection?.addEventListener?.('change', () => syncAudioPolicy());
+const floorChime = () => mallAudio.play('floor-chime');
 let renderRequested = false, forceRender = false, enteredAt = null;
 let simulationMs = 0, simulationSteps = 0;
 // Visibility does not imply focus; only an actual focus event clears blur suppression.
@@ -379,6 +436,7 @@ function updateHUD() {
   if (skipRide.hidden===p.elevatorTravel) skipRide.hidden=!p.elevatorTravel;
   const zone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? restroomAt(p.x,p.z) ?? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
   if (zone !== currentZone || Boolean(p.elevatorTravel) !== wasRiding) quality.resetSampling();
+  if (zone !== currentZone) mallAudio.setZone(zone);
   currentZone = zone;
   wasRiding = Boolean(p.elevatorTravel);
   if(expanded&&currentZone==='upper'&&!brandWallStarted){
@@ -414,6 +472,7 @@ function tick(refreshHud = true) {
   for (const door of world.doors) {
     if (door.advance) { door.advance(p, STEP, reducedMotion.matches); continue; }
     const open = shouldOpenStoreDoor(door, p) || (door.open > 0 && door.occupied());
+    if (open !== door.targetOpen) mallAudio.play('door');
     door.targetOpen = open;
     const next = reducedMotion.matches ? Number(open) : Math.max(0, Math.min(1, door.open + (open ? 1 : -1) * STEP * 3));
     if (next === door.open) continue;
@@ -692,7 +751,10 @@ function animate(now) {
     return;
   }
   const entered = startupOverlay.hidden && document.body.classList.contains('is-3d');
-  if (entered) enteredAt ??= now;
+  if (entered && enteredAt === null) {
+    enteredAt = now;
+    mallAudio.setActive(true);
+  }
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
   const elapsed = (now - last) / 1000;
@@ -784,8 +846,8 @@ function rideElevator(options) {
   if (!ready || !elevator) return {reason:'The elevator is unavailable right now. Please try again.'};
   manual = false;
   player.setInput(null);
-  const result = player.useElevator(elevator, arrivalChime.play, options);
-  if (result.riding) arrivalChime.unlock();
+  const result = player.useElevator(elevator, floorChime, options);
+  if (result.riding || result.calling) mallAudio.play('lift-ding');
   return result;
 }
 function requestFloorRide(upper, arrival) {
@@ -793,8 +855,6 @@ function requestFloorRide(upper, arrival) {
   const result = rideElevator({approach:true, target});
   if (result.calling) {
     pendingFloorRide = {target, arrival, phase:'calling'};
-    // Unlock during the map tap, before the automatic boarding tick.
-    arrivalChime.unlock();
   } else if (result.riding && arrival) {
     pendingFloorRide = {target, arrival, phase:'riding'};
   }
@@ -809,7 +869,19 @@ ui.onTeleport(zone => {
   quality.resetSampling(); updateHUD(); requestRender(); canvas.focus({preventScroll: true}); return true;
 });
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();requestRender();return ok;});
-ui.onView(visual => { if (visual) { last = performance.now(); requestRender(); } else {player?.setCart(false);if(player?.state.seated)player.stand(true);player?.clearInput();player?.cancelCollection();if(player)updateHUD();} });
+ui.onView(visual => {
+  if (!visual || startupOverlay.hidden) mallAudio.setActive(visual);
+  if (visual) {
+    last = performance.now();
+    requestRender();
+  } else {
+    player?.setCart(false);
+    if (player?.state.seated) player.stand(true);
+    player?.clearInput();
+    player?.cancelCollection();
+    if (player) updateHUD();
+  }
+});
 ui.onShopCycle(() => { if (interactions.cycle(1)) { updateHUD(); requestRender(); } });
 function interactNearby() {
   if (!nearby) return false;
@@ -850,8 +922,12 @@ function refreshCalendarTheme() {
   scheduleThemeMidnight();
   if (ready && !pageEnded) void mallTheme?.refresh();
 }
-window.addEventListener('pageshow', refreshCalendarTheme);
+window.addEventListener('pageshow', () => {
+  mallAudio.setHidden(document.hidden);
+  refreshCalendarTheme();
+});
 document.addEventListener('visibilitychange', () => {
+  mallAudio.setHidden(document.hidden);
   warmRunner?.visibility(document.hidden);
   if (document.hidden) { pausePerformance();if(ready)mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
   else { if (ready) { quality.resetSampling(); refreshCalendarTheme(); updateHUD(); requestRender(); } else validateRestoration(); resume(); }
@@ -913,6 +989,7 @@ function resize() {
 }
 function applyProfile(profile) {
   profile = quality.apply(profile);
+  syncAudioPolicy(profile.tier);
   themeStage?.setTier?.(profile.tier);
   void elevator?.kit?.select(profile.tier);
   void player?.setTramTier?.(profile.tier);
@@ -1151,6 +1228,10 @@ async function initialize() {
   ui.setShelfFocus(shelfFocus);
   ui.setRestrooms(world.restrooms);
   interactions = createInteractionRegistry(world.interactables, item => ui.describeInteraction(item));
+  interactions.subscribe(item => {
+    if (item.kind === 'pickup') mallAudio.play('pickup');
+    else if (item.kind === 'drop' || item.kind === 'return') mallAudio.play('drop');
+  });
   ui.setInteractionRegistry(interactions);
   if (player.state.character.physicalProduct) {
     try {
@@ -1227,8 +1308,12 @@ if (document.body.dataset.entryMode !== 'directory') initialize().catch(error =>
   console.error('3D mall initialization failed:', error);
   fallback('The 3D mall could not load. All stores and verified products remain available in the accessible list below.');
 });
-window.addEventListener('pagehide', event=>{if(!event.persisted) {
+window.addEventListener('pagehide', event => {
+  if (event.persisted) {
+    mallAudio.setHidden(true);
+    return;
+  }
   clearTimeout(themeMidnightTimer);
   cancelEntryPresentation();
-  pageEnded = true; elevator?.kit?.dispose(); arrivalChime.dispose(); tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
-}});
+  pageEnded = true; elevator?.kit?.dispose(); mallAudio.dispose(); tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
+});
