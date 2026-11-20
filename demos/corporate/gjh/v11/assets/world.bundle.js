@@ -6786,8 +6786,6 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
         if (s < 0) {
           const sampleX = -(side - 0.72);
           box(sampleX, 0.991, mid, 0.2, 0.026, 0.22, walnut);
-          box(sampleX, 1.0532, mid, 0.0118, 0.0984, 0.0565, charcoal);
-          box(sampleX + 0.0062, 1.066, mid, 0.001, 0.055, 0.045, 2240310);
         } else
           box(s * (side - 0.72), 1.19, mid, 0.28, 0.48, 0.3, charcoal);
       }
@@ -7987,12 +7985,12 @@ var roomDetails = {
   },
   S13: {
     file: "s13-listening-details.glb",
-    bytes: 23540,
+    bytes: 104608,
     roomDetail: true
   },
   S14: {
     file: "s14-living-details.glb",
-    bytes: 14064,
+    bytes: 38836,
     roomDetail: true
   },
   S15: {

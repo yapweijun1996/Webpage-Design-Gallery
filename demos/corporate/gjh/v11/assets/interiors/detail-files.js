@@ -63,12 +63,12 @@ export const roomDetails = {
   },
   "S13": {
     "file": "s13-listening-details.glb",
-    "bytes": 23540,
+    "bytes": 104608,
     "roomDetail": true
   },
   "S14": {
     "file": "s14-living-details.glb",
-    "bytes": 14064,
+    "bytes": 38836,
     "roomDetail": true
   },
   "S15": {

@@ -1,0 +1,53 @@
+{
+  "scope": "Sand Pink WH-1000XM6 photo-based static form and nominal-size NW-A306. Retail mechanical tolerances and unprinted markings remain open.",
+  "referenceImages": [
+    {
+      "url": "https://helpguide.sony.net/mdr/2984/v1/en/contents/image/i0080_WH-1000XM6.png",
+      "sha256": "026b44f562cfaaea71cafb8216d388cfbfca8d79ca20197b34b5cf4c212eee39"
+    },
+    {
+      "url": "https://store.sony.com.sg/cdn/shop/files/WH-1000XM6_Sand_Pink_800x.jpg?v=1770951833",
+      "sha256": "e659b6912ab46f6593bb707a2953380f931e5f93f8646dc6c27ee2b04904d805"
+    },
+    {
+      "url": "https://helpguide.sony.net/dmp/1301/v1/en/contents/image/i_a_0050_body.png",
+      "sha256": "7564a770781f6accdcf40fcab31479a8445bc96d72d90d865c45bb8de5821368"
+    }
+  ],
+  "blender": {
+    "version": "5.1.2",
+    "buildMethod": "Blender MCP background export",
+    "editableSource": {
+      "file": "models/gjh-sony-audio/sony-audio.blend",
+      "sha256": "06be63bddcd122a8a6a8440ea6e267aa48e6833800ab928bf2d920a63725b1e4"
+    },
+    "reviewGlbSha256": "ccfae5ae40f5b9a669c0c7ee098e9542cb54fb9e10c49898b6de3bd2ac16a3ca"
+  },
+  "runtime": {
+    "file": "demos/corporate/gjh/v11/assets/interiors/s13-listening-details.glb",
+    "sha256": "603c9f59f1d5cae5fd2e922fca782cc49bc536c663911358a67b4d952acc5091",
+    "detailTriangles": 1338,
+    "wholeRoomTriangles": {
+      "low": 2766,
+      "balanced": 4554,
+      "detailed": 4614
+    }
+  },
+  "verification": {
+    "localBuild": "1f69d48aab254f0d",
+    "views": {
+      "1440-S13-focal.jpg": "a57c032f0a6bb523de7e5c8ce99f9c3822b8faeefb7d1400356292c044b4ad33",
+      "1440-S13-story.jpg": "296b448d4129bbee9f98374e7dcac96078361b59282f084adffb5bcf1d1859aa",
+      "1440-S13-walkman-and-headphones.jpg": "0ab92ed2bc7a6c44b7341624f799021e61634cbca3fc2e9268fb48617a6c97da",
+      "390-S13-story.jpg": "9cabb07e7bbcd215dc4186a0228e37285db551af6c88a21d4fc9327a14ac2e26",
+      "390-S13-walkman-and-headphones.jpg": "30c89662c903e066d82bd1e32abe3ac156053a98e99d3ed76d1e68759f80b51e",
+      "specimen-headphones-front.png": "d9bfaf257640468c4345ab186d9c9f27f12b980c014708fce279fae12cf62a30",
+      "specimen-headphones-three-quarter.png": "d37a6ee45e12d2a5b42c3dc972b777b11ce72e21b7fee47beacd57ab33c1819e",
+      "specimen-walkman-bottom-and-back.png": "aa264a16d57635af9c3fa1671c777d6a1b08d27a7c18b87d6304f5f1fc3a9c58",
+      "specimen-walkman-front.png": "6ab6042ae1e2ed7f50c9929878765b013729949de8cab09d16f3267e6ca2220c",
+      "specimen-walkman-right-controls.png": "ce8435805094e12889c56e143dc993e10978025c4aa14d65cc1af2a8b38fc044"
+    },
+    "chrome": "1440\u00d7900 desktop and 390\u00d7844 touch-emulated Chrome passed map entry, story, model view, exit and GLB response.",
+    "visualReview": "GPT-6.2 Astra passed headset form and the Walkman exterior, bottom openings and rear microphone. The separate Blender measurement checked semantic right-side controls top to bottom against Sony's diagram."
+  }
+}

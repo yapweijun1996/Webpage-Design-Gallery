@@ -373,9 +373,6 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
         if (s<0) {
           const sampleX = -(side-.72);
           box(sampleX,.991,mid,.20,.026,.22,walnut);
-          // The reference Walkman is 56.5 × 98.4 × 11.8 mm.
-          box(sampleX,1.0532,mid,.0118,.0984,.0565,charcoal);
-          box(sampleX+.0062,1.066,mid,.001,.055,.045,0x222f36);
         } else box(s*(side-.72),1.19,mid,.28,.48,.30,charcoal);
       }
       break;

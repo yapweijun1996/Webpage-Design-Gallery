@@ -114,6 +114,8 @@ The S10 release passed both Chrome routes on Pages build `ef9bbe527835efd9`. The
 - [ ] **Chili No Beans 15 oz retail match.** Obtain a measured physical sample, closure views and current authorized artwork.
 - [ ] **Chili With Beans 15 oz retail match.** Confirm the intended GJH pack and edition. Obtain a measured sample, closure views and current authorized artwork.
 
+S11 passed both Chrome routes with matching live asset bytes across Pages builds `931948f65ba9f026` and `9eaeb36d80cfe04e`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44651827173)
+
 ## S12 Zeria
 
 [Design and runtime](12-zeria/README.md) · [Inventory](12-zeria/model-inventory.md)
@@ -122,18 +124,23 @@ The S10 release passed both Chrome routes on Pages build `ef9bbe527835efd9`. The
 - [ ] **Lively & Healthy 180 Tablets retail match.** Verify the physical bottle dimensions, exact closure tooling and authorized packaging.
 - [ ] **Chondro Max 300 Tablets retail match.** Verify physical bottle and carton dimensions, exact closure tooling, clear material and authorized packaging.
 
+S12 passed both Chrome routes with matching live asset bytes across the same Pages builds.
+
 ## S13 Sony
 
 [Design and runtime](13-sony/README.md) · [Inventory](13-sony/model-inventory.md)
 
-- [ ] **WH-1000XM6.** Match earcup, hinge and band shapes to the Sony Singapore model, preserving the separate architectural stand.
-- [ ] **NW-A306 Walkman.** Refine the 56.5 × 98.4 × 11.8 mm outer-body study with correct ports, buttons and surfaces.
+- [x] **WH-1000XM6 Sand Pink form study.** The [editable headset](../../models/gjh-sony-audio/README.md) has separate pads, sliders and folding-hinge forms. The headphone display stand remains a separate exhibit fixture.
+- [x] **NW-A306 exterior study.** Nominal 56.5 × 98.4 × 11.8 mm envelope with the four bottom openings, rear mic and seven right-side controls in the documented order.
+- [ ] **Precision headset details.** Obtain measured exterior and hinge dimensions plus port and microphone close-ups for a dimensioned retail match.
+- [ ] **Precision Walkman details.** Confirm control spacing, edge radii, rear groove count and surface finish against a measured unit.
 
 ## S14 LG
 
 [Design and runtime](14-lg/README.md) · [Inventory](14-lg/model-inventory.md)
 
-- [ ] **OLED55C5PSA.** Match cabinet, rear housing, ports and materials within the specified 1,222 × 703 × 45.1 mm body envelope without stand. Keep the separate enlarged architectural screen and verify any new display content in the runtime.
+- [x] **OLED55C5PSA stand-free cabinet.** The [editable model](../../models/gjh-lg-oled/README.md) uses the 1,222 × 703 × 45.1 mm envelope, stepped rear housing, vent and four VESA mounts. The enlarged gallery screen retains its own content.
+- [ ] **Exact OLED55C5PSA.ATC jack panel.** Obtain a sharp Singapore rear and side connector view for layout, socket orientation and casing details.
 
 ## S15 Casio
 

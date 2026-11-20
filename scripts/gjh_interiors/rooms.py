@@ -8,10 +8,12 @@ from california_mexico_tins import SHELF_DEPTH as CALIFORNIA_MEXICO_SHELF_DEPTH
 from california_mexico_tins import SHELF_TOP as CALIFORNIA_MEXICO_SHELF_TOP
 from gulong_tins import SAMPLES as GULONG_SAMPLES, SHELF_TOP as GULONG_SHELF_TOP, add_gulong_tin
 from hormel_chili_tins import add_hormel_chili_tins
+from lg_oled_model import add_lg_oled
 from mili_mock_duck import add_mili_mock_duck
 from pzh_carton import add_pzh_carton
 from skippy_jars import SAMPLES as SKIPPY_SAMPLES
 from skippy_jars import SHELF_DEPTH as SKIPPY_SHELF_DEPTH, SHELF_TOP as SKIPPY_SHELF_TOP, add_skippy_jar
+from sony_audio_models import add_sony_audio_models
 from spam_tins import SAMPLES as SPAM_SAMPLES
 from spam_tins import SHELF_DEPTH as SPAM_SHELF_DEPTH, SHELF_TOP as SPAM_SHELF_TOP, add_spam_tin
 from zeria_packs import add_zeria_packs
@@ -337,6 +339,7 @@ def herbarium(r,_):
 
 
 def listening(r,_):
+    r.sony_headphone_parts = add_sony_audio_models(r)
     angle=radians(8)
     r.panel(-.64-.084*sin(angle),.43+2.428,-1.05-.084*cos(angle),
             1.005,.27,(0,205,256,228),SCROLL,yaw=angle)
@@ -361,9 +364,7 @@ def living(r,_):
     aurora=(0,162,256,199)
     r.panel(-.62,2.084,-3.833,3.43,1.92,aurora,SCROLL)
     r.panel(2.63,.947,-3.518,.82,.88,aurora,SCROLL)
-    # An unprinted true-scale cabinet study sits alongside the gallery-scale screen.
-    r.box(2.34,1.70,-3.928,1.222,.703,.0451,"1e2222")
-    r.box(2.34,1.70,-3.903,1.205,.686,.005,"263334")
+    add_lg_oled(r)
     # Red architectural lightbox and a low, continuous reveal around the lounge.
     r.box(2.44,2.82,-4.13,1.14,.75,.09,"aa344a")
     r.panel(2.44,2.82,-4.076,.96,.52,logo(14))

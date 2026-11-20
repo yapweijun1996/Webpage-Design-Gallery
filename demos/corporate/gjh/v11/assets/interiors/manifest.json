@@ -3277,9 +3277,9 @@
       {
         "store": "S13",
         "file": "s13-listening-details.glb",
-        "bytes": 23540,
-        "sha256": "662c8f1f682adc7f8694101aa6744ef503d3a9c962669e3164a1add6f08227ea",
-        "triangles": 262,
+        "bytes": 104608,
+        "sha256": "603c9f59f1d5cae5fd2e922fca782cc49bc536c663911358a67b4d952acc5091",
+        "triangles": 1338,
         "draws": 3,
         "instances": 0,
         "motion": [
@@ -3295,9 +3295,9 @@
       {
         "store": "S14",
         "file": "s14-living-details.glb",
-        "bytes": 14064,
-        "sha256": "8c204068d5ad30712a2e9c3db736ba6cfb4a2415cae958f8e8b8d61c1252f416",
-        "triangles": 146,
+        "bytes": 38836,
+        "sha256": "5ca394ca181ab823ed321b1f8c8b4bf2bfd9556d83593e41e79ab32cccc98c23",
+        "triangles": 480,
         "draws": 3,
         "instances": 0,
         "motion": [

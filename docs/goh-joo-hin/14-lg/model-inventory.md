@@ -21,4 +21,6 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| LG OLED55C5PSA | Scaled product display against the rear screen wall | Pending 55-inch exact SKU model. Manufacturer dimensions without stand 1222 × 703 × 45.1 mm. Existing large screen is an architectural fixture. |
+| LG OLED55C5PSA | Scaled product display against the rear screen wall | Stand-free case matches the manufacturer outer envelope. Stepped rear housing, VESA mounts and visible recesses are modeled. Exact Singapore jack placement remains open. |
+
+[Editable Blender sources and QA receipt](../../../models/gjh-lg-oled/README.md)

@@ -21,5 +21,7 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| Sony WH-1000XM6 | Primary headphone touchpoint on forward-facing array | Pending precise earcup, hinge and band geometry matched to Sony Singapore. Reuse the stand, keep generic mesh identity until replaced. |
-| Sony NW-A306 Walkman | Recessed adjacent small-device dock | Pending model of the distinctive 56.5 × 98.4 × 11.8 mm body and control layout. |
+| Sony WH-1000XM6 | Left cabinet beside the Walkman | Sand Pink form study on the left cabinet, with separate padded cups, sliders and visible hinge geometry. Physical dimensions remain open. |
+| Sony NW-A306 Walkman | Recessed adjacent small-device dock | Installed nominal-envelope study with USB-C, headphone jack, strap opening, microSD cover, rear microphone and ordered side controls. |
+
+[Editable Blender sources and QA receipt](../../../models/gjh-sony-audio/README.md)

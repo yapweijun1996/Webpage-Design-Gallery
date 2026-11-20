@@ -1,0 +1,53 @@
+{
+  "scope": "Exact outer stand-free envelope. Detailed Singapore jack-panel layout and original textured backplate finish remain open.",
+  "referenceImages": [
+    {
+      "url": "https://www.lg.com/content/dam/channel/wcms/ph/oled-c5-1/55-c5-a/gallery1/S03.jpg",
+      "sha256": "38dadcb3ce0107c89e5df24b4a9e12fce2e4153818f6a12281e3546d84de8ef5"
+    },
+    {
+      "url": "https://www.lg.com/content/dam/channel/wcms/ph/oled-c5-1/55-c5-a/gallery1/S04.jpg",
+      "sha256": "fc8445a4f7d3725fe593d570b55cd8e3521a299a225988a08520fb9ee7a0ca60"
+    },
+    {
+      "url": "https://gscs-b2c.lge.com/open/downloadFile?fileId=zc0wLoPBGgSSwvU0S7RCQ",
+      "sha256": "532a5f41c2093ba181a9b9e4b5909bdd06cc71333d055024d234be509963e5c2"
+    }
+  ],
+  "blender": {
+    "version": "5.1.2",
+    "buildMethod": "Blender MCP background export",
+    "editableSource": {
+      "file": "models/gjh-lg-oled/lg-oled.blend",
+      "sha256": "a5929e420acdb276db2c278f3fba06317f57a287681310623d73cbf1ff7ace10"
+    },
+    "reviewGlbSha256": "a8608991b8a34e0ca501ca385051e9fe8ccc5355598f1d066751554aaa56b060"
+  },
+  "runtime": {
+    "file": "demos/corporate/gjh/v11/assets/interiors/s14-living-details.glb",
+    "sha256": "5ca394ca181ab823ed321b1f8c8b4bf2bfd9556d83593e41e79ab32cccc98c23",
+    "detailTriangles": 480,
+    "wholeRoomTriangles": {
+      "low": 1314,
+      "balanced": 1662,
+      "detailed": 1758
+    }
+  },
+  "verification": {
+    "localBuild": "1f69d48aab254f0d",
+    "views": {
+      "1440-S14-55-inch-cabinet.jpg": "a24cafe5a65fdc978f902071865ba6ab015a42999bbcc31863afbd8eb173f349",
+      "1440-S14-cabinet-and-gallery-screen.jpg": "2ff0a49abd25625de8788ceb42ba6f034d4124e2d4b09a5956c9ecc7347e3136",
+      "1440-S14-focal.jpg": "8111daf8b57471fa283c9f9fa6abe8a27749f47f4320c0433329ff301d1be980",
+      "1440-S14-story.jpg": "d34aa8bc10210e3571e63860744cc2220ff2840c57a5dfccefe97be6d3901dbf",
+      "390-S14-55-inch-cabinet.jpg": "0bc133aa54d5f31adaf59f04cf95e051250496bd23cfb964a87bc35c33452d9c",
+      "390-S14-cabinet-and-gallery-screen.jpg": "8c33e44b1551ba8cf6846191e4f00389e6d80ee7d2dce86d7872363c01014f34",
+      "390-S14-story.jpg": "f550421f78920d2abef0d3842836bef399707417620983ccad4d957e5c766c17",
+      "specimen-front.png": "dfa79892cfde24466e802452b795264f85904615bde4015d527a888271da5f2d",
+      "specimen-rear.png": "4391703280f32799904520b83f33d8545a198e9d650f2b2b98df438905b77ac7",
+      "specimen-stepped-side.png": "b64c5856190bf3bf6ec4c1eba630a9bf20dcaec0a4a073fa19308d36452d91e4"
+    },
+    "chrome": "1440\u00d7900 desktop and 390\u00d7844 touch-emulated Chrome passed map entry, story, model view, exit and GLB response.",
+    "visualReview": "GPT-6.2 Astra comparison of the front, rear and stepped-side surfaces."
+  }
+}
