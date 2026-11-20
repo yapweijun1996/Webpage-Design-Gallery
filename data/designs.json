@@ -892,6 +892,44 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "gjh-v27",
+    "companyId": "gjh",
+    "slug": "v27",
+    "version": "v27",
+    "title": "Rochor Threshold",
+    "description": "Follow five scenes from Rochor Road to the 1959 New Moon trademark filing, with sources at each stop.",
+    "styles": [
+      "corporate"
+    ],
+    "status": "concept",
+    "order": 240,
+    "demoPath": "demos/corporate/gjh/v27/index.html",
+    "thumbnail": "demos/corporate/gjh/v27/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v27/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v27/screenshots/768.png",
+        "width": 768,
+        "height": 844
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v27/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",

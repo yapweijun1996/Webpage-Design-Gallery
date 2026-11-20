@@ -161,6 +161,13 @@
     "detail": "Jump from the opening to the podcast, the ten-slide deck or the sourced fact check.", "items": ["播客", "演示文稿", "出处与核实"]
   },
   {
+    "key": "rochor-threshold", "version": "v27", "kind": "primary", "style": "Illustrated heritage walk",
+    "headline": "Along Rochor Road", "action": "Approach doorway", "image": "demos/corporate/gjh/v27/assets/five-foot-way.webp",
+    "composition": "poster", "background": "#171A16", "ink": "#F1E6CC", "accent": "#426254",
+    "notes": "Set a full-bleed AI concept illustration over a charcoal caption. Move from the five-foot way to a tighter view of the sill, then cut to the imagined interior.",
+    "detail": "Follow the five stops to the original company account, the brand history and Singapore trademark record T5924841J.", "items": ["Rochor Road", "Provision shop", "1959 filing"]
+  },
+  {
     "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
     "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
     "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",

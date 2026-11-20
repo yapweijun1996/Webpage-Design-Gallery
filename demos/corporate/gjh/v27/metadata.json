@@ -1,0 +1,19 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - Rochor Threshold",
+  "version": "v27",
+  "designStyle": "Five full-bleed heritage scenes with open source captions and a dark-cut transition.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v27/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v27",
+  "companyId": "gjh",
+  "displayTitle": "Rochor Threshold",
+  "summary": "Follow five scenes from Rochor Road to the 1959 New Moon trademark filing, with sources at each stop.",
+  "styles": [
+    "corporate"
+  ],
+  "order": 240
+}
