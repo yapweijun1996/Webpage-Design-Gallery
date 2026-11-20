@@ -168,7 +168,8 @@ S13 and S14 passed both Chrome routes on Pages build `e41e09428bb8f71f` with mat
 [Design and runtime](17-gigaset/README.md) · [Inventory](17-gigaset/model-inventory.md)
 
 - [x] **A170 and COMFORT 550A black.** Two [editable handset and base sets](../../models/gjh-gigaset-handsets/README.md) distinguish the amber A170 face from the 550A display and answering base controls. The handset envelopes and the 550A base use manufacturer dimensions.
-- [ ] **A170 base dimensions.** Compare the H, W and D axes against a measured black A170 cradle. The shallower base orientation is inferred from the photo and nominal dimensions.
+- [x] **A170 base nominal axis assignment.** Gigaset's 2018 French A170/AL170A sheet gives 89 × 89 × 43 mm in length × width × height for the A170 base. That order supports the existing 89 mm square footprint and 43 mm height. The English catalogue uses a conflicting axis header. [Gigaset technical sheet, p. 2](https://www.procie.com/mediaprovider/index/index/media_type/notice/filename/A170NOIR.pdf/#page=2) · [English catalogue](https://www.gigaset.com/en_en/gigaset-a170/)
+- [ ] **A170 base measured dimensions.** Verify the intended Singapore cradle's width, depth, height and exact curvature on a physical sample or its regional engineering drawing.
 - [ ] **Precision retail detail.** Confirm the A170 cradle curvature, both key legends and display appearance against measured parts and authorized artwork. Sofa Sit is separate interaction work.
 
 S15 through S17 passed the map, store entry, story, model view and exit checks in desktop and touch-emulated Chrome. Their model receipts record build `2a5c452460ef78fd` and the installed GLB checksums. [Casio receipt](../../models/gjh-casio-instruments/receipt.json) · [GP Batteries receipt](../../models/gjh-gp-power/receipt.json) · [Gigaset receipt](../../models/gjh-gigaset-handsets/receipt.json)
