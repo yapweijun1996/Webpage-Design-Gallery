@@ -1,0 +1,180 @@
+.s-03 {
+  --newmoon-ink: #0f1115;
+  --newmoon-ivory: #f4efe4;
+  --newmoon-red: #d9261c;
+  --newmoon-red-hover: #b81f16;
+  --newmoon-button-text: #fff;
+  --newmoon-gutter: var(--dc-space-4);
+  /* Tap target + bar padding + the agreed 16px gap. */
+  --newmoon-clearance: calc(var(--dc-tap) + 2 * var(--dc-space-4) + env(safe-area-inset-bottom, 0px));
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-rows: minmax(38svh, 1fr) auto;
+  min-block-size: 100svh;
+  background: var(--newmoon-ink);
+  color: var(--newmoon-ivory);
+  font-family: var(--dc-font);
+}
+
+.s-03 .newmoon-scene {
+  position: absolute;
+  z-index: -1;
+  grid-row: 1 / 2;
+  inset: 0;
+  overflow: hidden;
+  margin: 0;
+}
+
+.s-03 .newmoon-scene img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center 48%;
+}
+
+.s-03 .newmoon-scene::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, var(--newmoon-ink), transparent 20%, transparent 65%, var(--newmoon-ink));
+  content: "";
+}
+
+.s-03 .newmoon-credit {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: var(--dc-space-4);
+  inset-inline-start: max(var(--newmoon-gutter), calc((100% - var(--dc-container)) / 2 + var(--newmoon-gutter)));
+  padding: var(--dc-space-1) var(--dc-space-2);
+  border-radius: var(--dc-radius-sm);
+  background: var(--newmoon-ink);
+  font-size: var(--dc-text-sm);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-03 .newmoon-content {
+  grid-row: 2;
+  inline-size: 100%;
+  max-inline-size: var(--dc-container);
+  margin-inline: auto;
+  padding: 0 var(--newmoon-gutter) var(--newmoon-clearance);
+}
+
+.s-03 .newmoon-content > :is(p, h2) {
+  margin: 0;
+}
+
+.s-03 .newmoon-eyebrow {
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-bold);
+  letter-spacing: .12em;
+  line-height: var(--dc-leading-tight);
+  text-transform: uppercase;
+}
+
+.s-03 .newmoon-content h2 {
+  margin-block-start: var(--dc-space-2);
+  font-size: clamp(var(--dc-text-display), 16vw, calc(1.5 * var(--dc-text-display)));
+  font-weight: var(--dc-weight-bold);
+  letter-spacing: -.065em;
+  line-height: 1;
+}
+
+.s-03 .newmoon-description,
+.s-03 .newmoon-product {
+  max-inline-size: 36ch;
+  font-size: var(--dc-text-base);
+  line-height: var(--dc-leading);
+}
+
+.s-03 .newmoon-content .newmoon-description {
+  margin-block-start: var(--dc-space-4);
+}
+
+.s-03 .newmoon-content .newmoon-product {
+  margin-block-start: var(--dc-space-2);
+  font-weight: var(--dc-weight-medium);
+}
+
+.s-03 .newmoon-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dc-space-2);
+  margin-block-start: var(--dc-space-6);
+}
+
+.s-03 .newmoon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--dc-tap);
+  padding-inline: var(--dc-space-4);
+  scroll-margin-block-end: var(--newmoon-clearance);
+  border: thin solid transparent;
+  border-radius: var(--dc-radius-pill);
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-bold);
+  line-height: var(--dc-leading-tight);
+  text-decoration: none;
+}
+
+.s-03 .newmoon-action-primary {
+  background: var(--newmoon-red);
+  color: var(--newmoon-button-text);
+}
+
+.s-03 .newmoon-action-primary:hover {
+  background: var(--newmoon-red-hover);
+}
+
+.s-03 .newmoon-action-secondary {
+  border-color: currentColor;
+  color: var(--newmoon-ivory);
+}
+
+.s-03 .newmoon-action-secondary:hover {
+  background: var(--newmoon-ivory);
+  color: var(--newmoon-ink);
+}
+
+.s-03 .newmoon-action:focus-visible {
+  outline: medium solid var(--dc-focus);
+  outline-offset: var(--dc-space-1);
+  box-shadow: 0 0 0 var(--dc-space-1) var(--newmoon-ivory);
+}
+
+@media (min-width: 48rem) {
+  .s-03 {
+    --newmoon-clearance: var(--dc-space-12);
+    --newmoon-gutter: var(--dc-space-8);
+    grid-template-rows: 1fr;
+    align-items: center;
+  }
+
+  .s-03 .newmoon-scene img {
+    inline-size: 80%;
+    margin-inline-start: auto;
+    object-position: center;
+  }
+
+  .s-03 .newmoon-scene::after {
+    background:
+      linear-gradient(to right, var(--newmoon-ink) 23%, color-mix(in srgb, var(--newmoon-ink) 65%, transparent) 52%, transparent 76%),
+      linear-gradient(to bottom, var(--newmoon-ink), transparent 20%, transparent 73%, var(--newmoon-ink));
+  }
+
+  .s-03 .newmoon-credit {
+    inset-inline: auto max(var(--newmoon-gutter), calc((100% - var(--dc-container)) / 2 + var(--newmoon-gutter)));
+  }
+
+  .s-03 .newmoon-content {
+    grid-row: 1;
+    padding-block: var(--dc-space-12);
+  }
+
+  .s-03 .newmoon-content h2 {
+    font-size: clamp(calc(1.5 * var(--dc-text-display)), 8vw, calc(2.5 * var(--dc-text-display)));
+  }
+}

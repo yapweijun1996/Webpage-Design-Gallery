@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swarm - live design</title>
+<link rel="stylesheet" href="/tokens.css">
+<link rel="stylesheet" href="/channel.css">
+<link rel="stylesheet" href="/docs.css">
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{display:grid;grid-template-rows:auto 1fr;background:#0f1115;color:#e8eaf0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+  #top{display:flex;gap:12px;align-items:center;padding:8px 14px;background:#171a21;border-bottom:1px solid #262b36;flex-wrap:wrap}
+  #top h1{font-size:14px;margin:0;font-weight:700}
+  .chip{padding:2px 10px;border-radius:999px;background:#262b36;font-size:12px}
+  .chip.run{background:#3a2f12;color:#f5c542}.chip.done{background:#123a26;color:#3ecf8e}
+  #rounds{display:flex;gap:4px}
+  #rounds span{width:26px;height:6px;border-radius:3px;background:#262b36}
+  #rounds span.on{background:#f5c542}#rounds span.past{background:#3ecf8e}
+  #top .sp{flex:1}
+  button{font:inherit;min-height:32px;border:1px solid #333a49;border-radius:8px;background:#1f2430;color:#e8eaf0;padding:0 12px;cursor:pointer}
+  button:hover{background:#2a3040}button:focus-visible{outline:2px solid #8ab4ff;outline-offset:2px}
+  #main{display:grid;grid-template-columns:1fr 330px;min-height:0}
+  #view{overflow:auto;position:relative;background:#0f1115}
+  #stage{position:relative;zoom:var(--z,.5);background:var(--dc-bg);color:var(--dc-ink);font-family:var(--dc-font);font-size:var(--dc-text-base);line-height:var(--dc-leading);min-height:400px}
+  #stage *{box-sizing:border-box}
+  .host{position:relative;min-height:56px}
+  .host.editing{box-shadow:inset 0 0 0 4px var(--c);transition:box-shadow .2s}
+  .host .scan{position:absolute;left:0;right:0;height:3px;background:var(--c);box-shadow:0 0 18px 4px var(--c);pointer-events:none;z-index:5}
+  .stub{display:grid;place-items:center;min-height:120px;color:var(--dc-muted);font-size:13px}
+  #cursors{position:absolute;inset:0;pointer-events:none;z-index:60}
+  .cursor{position:absolute;left:0;top:0;transition:left .9s cubic-bezier(.2,.7,.2,1),top .9s cubic-bezier(.2,.7,.2,1),opacity .4s;opacity:.35}
+  .cursor.live{opacity:1}
+  .cursor .in{transform:scale(var(--inv,2));transform-origin:0 0;display:flex;align-items:flex-start;gap:2px}
+  .cursor svg{width:18px;height:22px;flex:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.4))}
+  .cursor .who{margin-top:10px}
+  .cursor .name{display:inline-block;padding:2px 8px;border-radius:6px;color:#fff;font:700 12px/1.5 system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+  .cursor .bub{display:none;margin-top:4px;max-width:230px;padding:6px 9px;border-radius:8px;border-left:4px solid var(--c);background:#fff;color:#1a1d24;font:12px/1.4 system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .cursor.talk .bub{display:block}
+  body.nobub .cursor .bub{display:none!important}
+  aside{display:flex;flex-direction:column;min-height:0;border-left:1px solid #262b36;background:#13161c}
+  #agents{overflow:auto;padding:8px;display:grid;gap:6px;flex:1 1 55%}
+  .card{border:1px solid #262b36;border-left:4px solid var(--c);border-radius:10px;padding:7px 10px;background:#171a21;cursor:pointer}
+  .card:hover{background:#1d212b}
+  .card .h{display:flex;gap:8px;align-items:center}
+  .card b{font-size:13px}.card .sec{color:#8b93a7;font-size:12px}
+  .card .st{margin-left:auto;font-size:11px;padding:1px 8px;border-radius:999px;background:#262b36}
+  .card .st.working{background:#3a2f12;color:#f5c542}.card .st.done{background:#123a26;color:#3ecf8e}.card .st.failed{background:#4a1d1d;color:#ff8a80}
+  .card .th{margin:4px 0 0;color:#c4c9d6;font-size:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .card .ac{color:#8b93a7;font-size:11px;margin-top:2px}
+  #feed{flex:1 1 45%;overflow:auto;border-top:1px solid #262b36;padding:8px 10px;font-size:12px;color:#aab0bf;list-style:none;margin:0}
+  #feed li{padding:2px 0;border-bottom:1px solid #1d212b}
+  #feed .t{color:#6f778a;margin-right:6px}#feed .mgr{color:#8ab4ff}
+  #tabs{display:flex;border-bottom:1px solid #262b36;background:#171a21}
+  #tabs button{flex:1;border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;min-height:40px;color:#8b93a7}
+  #tabs button[aria-selected=true]{color:#e8eaf0;border-bottom-color:#8ab4ff}
+  #tabs .dot{display:none;width:7px;height:7px;border-radius:50%;background:#ff6b5e;margin-left:6px;vertical-align:middle}
+  #tabs .dot.on{display:inline-block}
+  .pane{display:none;flex:1;min-height:0;flex-direction:column}.pane.on{display:flex}
+  #chan,#docs{flex:1;min-height:0;overflow:auto}
+  #pane-team{overflow:hidden}
+  @media (max-width:760px){#main{grid-template-columns:1fr}aside{display:none}}
+  @media (prefers-reduced-motion:reduce){.cursor{transition:none}}
+</style>
+</head>
+<body>
+<header id="top">
+  <h1>Swarm &middot; live design</h1>
+  <span class="chip" id="phase">connecting</span>
+  <div id="rounds" aria-label="rounds"></div><span class="chip" id="rtxt"></span>
+  <span class="chip" id="model"></span>
+  <span class="sp"></span>
+  <button id="zoom" type="button">Zoom: overview</button>
+  <button id="bub" type="button">Hide thoughts</button>
+</header>
+<div id="main">
+  <div id="view"><div id="stage"><div id="page"></div><div id="cursors"></div></div></div>
+  <aside>
+    <div id="tabs" role="tablist"><button role="tab" data-t="chan" aria-selected="true">Channel<span class="dot" id="d-chan"></span></button><button role="tab" data-t="team" aria-selected="false">Team</button><button role="tab" data-t="docs" aria-selected="false">Docs<span class="dot" id="d-docs"></span></button></div>
+    <div class="pane on" id="pane-chan"><div id="chan"></div></div>
+    <div class="pane" id="pane-team"><div id="agents"></div><ul id="feed" aria-live="polite"></ul></div>
+    <div class="pane" id="pane-docs"><div id="docs"></div></div>
+  </aside>
+</div>
+<script src="/channel.js"></script>
+<script src="/docs.js"></script>
+<script>
+(function () {
+  var $ = function (i) { return document.getElementById(i); };
+  var stage = $('stage'), page = $('page'), layer = $('cursors'), view = $('view');
+  var S = null, hosts = {}, cur = {}, cards = {}, hash = {}, seed = {}, zoom = 0.5, order = [];
+
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+  function hh(s) { var x = 0; for (var i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) | 0; return x; }
+  function fetchText(u) { return fetch(u + '?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; }); }
+  function setZoom(z) { zoom = z; stage.style.setProperty('--z', z); stage.style.setProperty('--inv', 1 / z); $('zoom').textContent = z < 1 ? 'Zoom: overview' : 'Zoom: 100%'; placeAll(); }
+
+  function build(state) {
+    S = state; page.innerHTML = ''; layer.innerHTML = ''; $('agents').innerHTML = '';
+    hosts = {}; cur = {}; cards = {}; hash = {}; order = Object.keys(S.agents).sort();
+    order.forEach(function (id, i) {
+      var a = S.agents[id], d = document.createElement('div');
+      if (a.section) {
+        d.className = 'host'; d.id = 'host-' + id; d.style.setProperty('--c', a.color);
+        d.innerHTML = '<div class="stub">' + a.name + ' &middot; ' + a.section + '</div><style></style><div class="body"></div>';
+        page.appendChild(d); hosts[id] = { el: d, timer: 0 };
+      }
+      var c = document.createElement('div'); c.className = 'cursor'; c.style.setProperty('--c', a.color);
+      c.innerHTML = '<div class="in"><svg viewBox="0 0 18 22"><path d="M1 1l15 8-6.5 1.8L7 17z" fill="' + a.color + '" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg><div class="who"><span class="name" style="background:' + a.color + '">' + a.name + '</span><div class="bub"></div></div></div>';
+      layer.appendChild(c); cur[id] = { el: c, t: 0 }; seed[id] = i * 7;
+      var k = document.createElement('div'); k.className = 'card'; k.style.setProperty('--c', a.color);
+      k.innerHTML = '<div class="h"><b>' + a.name + '</b><span class="sec">' + a.section + '</span><span class="st">queued</span></div><div class="th"></div><div class="ac"></div>';
+      k.onclick = function () { hosts[id].el.scrollIntoView({ behavior: 'smooth', block: 'start' }); pulse(id); };
+      $('agents').appendChild(k); cards[id] = k;
+      refreshCard(id);
+      if (a.section) load(id, false);
+    });
+    $('model').textContent = S.model;
+    setPhase();
+    initPanels();
+    (S.feed || []).slice(-40).forEach(function (e) { feed(e, true); });
+    setTimeout(placeAll, 300);
+  }
+
+  function setPhase() {
+    var p = $('phase'); p.textContent = S.phase; p.className = 'chip ' + (S.phase === 'running' ? 'run' : S.phase === 'done' ? 'done' : '');
+    var r = $('rounds'); r.innerHTML = '';
+    for (var i = 1; i <= S.rounds; i++) { var s = document.createElement('span'); s.className = i < S.round || S.phase === 'done' ? 'past' : i === S.round ? 'on' : ''; r.appendChild(s); }
+    $('rtxt').textContent = S.round ? 'round ' + S.round + '/' + S.rounds + ' ' + ['', 'build', 'improve together', 'apply suggestions'][S.round] : 'not started';
+  }
+
+  function refreshCard(id) {
+    var a = S.agents[id], k = cards[id], st = k.querySelector('.st'), w = (a.status || '').split(' ')[0];
+    st.textContent = a.status; st.className = 'st ' + w;
+    k.querySelector('.th').textContent = a.thought || '';
+    k.querySelector('.ac').textContent = a.action ? a.action : '';
+    cur[id].el.classList.toggle('live', w === 'working');
+  }
+
+  function load(id, animate) {
+    var a = S.agents[id], base = '/p/sections/' + id + '-' + a.section;
+    return Promise.all([fetchText(base + '.html'), fetchText(base + '.css')]).then(function (r) {
+      var h = hh(r[0] + '|' + r[1]); if (hash[id] === h) return; hash[id] = h;
+      var el = hosts[id].el, filled = r[0].trim().length > 60;
+      el.querySelector('.stub').style.display = filled ? 'none' : '';
+      el.querySelector('.body').innerHTML = r[0]; el.querySelector('style').textContent = r[1];
+      if (animate && filled) wipe(id);
+      placeAll();
+    });
+  }
+
+  function wipe(id) {
+    var el = hosts[id].el, body = el.querySelector('.body');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    body.animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 1300, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    var s = document.createElement('div'); s.className = 'scan'; el.appendChild(s);
+    var h = el.offsetHeight;
+    var an = s.animate([{ top: '0px', opacity: 1 }, { top: Math.max(h - 3, 0) + 'px', opacity: 1 }, { top: Math.max(h - 3, 0) + 'px', opacity: 0 }], { duration: 1500, easing: 'cubic-bezier(.2,.7,.2,1)' });
+    an.onfinish = function () { s.remove(); };
+  }
+
+  function mark(id, target) {
+    var h = hosts[target]; if (!h) return;
+    h.el.style.setProperty('--c', S.agents[id].color); h.el.classList.add('editing');
+    clearTimeout(h.timer); h.timer = setTimeout(function () { h.el.classList.remove('editing'); }, 2600);
+  }
+  function pulse(id) { mark(id, id); }
+
+  function place(id, target) {
+    var h = hosts[target || S.agents[id].target || id]; if (!h) return;
+    var idx = order.indexOf(id), w = stage.clientWidth || 1000, th = h.el.offsetHeight || 100;
+    var x = 12 + (idx % 5) * (w * 0.16) + (idx >= 5 ? w * 0.07 : 0);
+    var y = h.el.offsetTop + 10 + (seed[id] * 53 % Math.max(th - 70, 30));
+    cur[id].el.style.left = x + 'px'; cur[id].el.style.top = y + 'px';
+  }
+  function placeAll() { if (S) order.forEach(function (id) { place(id); }); }
+  new ResizeObserver(placeAll).observe(page);
+
+  function say(id, text) {
+    var c = cur[id]; if (!c) return;
+    c.el.querySelector('.bub').textContent = text; c.el.classList.add('talk');
+    clearTimeout(c.t); c.t = setTimeout(function () { c.el.classList.remove('talk'); }, 9000);
+  }
+
+  function feed(e, quiet) {
+    var t = new Date(e.ts || Date.now()).toLocaleTimeString([], { hour12: false }), who = e.id && S.agents[e.id] ? S.agents[e.id].name : '', line = '';
+    if (e.type === 'thought') line = who + ': ' + e.text;
+    else if (e.type === 'action') line = who + ' ' + e.verb + (e.target !== e.id ? ' section ' + e.target : ' own section');
+    else if (e.type === 'manager') line = '<span class="mgr">Manager → ' + (e.to === 'all' ? 'everyone' : 'Agent ' + Number(e.to)) + ': ' + esc(e.text) + '</span>';
+    else if (e.type === 'round') line = '— round ' + e.round + ' starts —';
+    else if (e.type === 'status') line = who + ' → ' + e.status;
+    else return;
+    var li = document.createElement('li'); li.innerHTML = '<span class="t">' + t + '</span>' + (e.type === 'manager' ? line : esc(line));
+    var f = $('feed'); f.appendChild(li); while (f.children.length > 80) f.removeChild(f.firstChild); if (!quiet) f.scrollTop = f.scrollHeight;
+  }
+
+  function tab(name) {
+    ['chan', 'team', 'docs'].forEach(function (t) { $('pane-' + t).classList.toggle('on', t === name); });
+    document.querySelectorAll('#tabs button').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.t === name ? 'true' : 'false'); });
+    if ($('d-' + name)) $('d-' + name).classList.remove('on');
+    current = name;
+  }
+  var current = 'chan';
+  document.querySelectorAll('#tabs button').forEach(function (b) { b.onclick = function () { tab(b.dataset.t); }; });
+  function jump(id) { var h = hosts[id]; if (h) { h.el.scrollIntoView({ behavior: 'smooth', block: 'start' }); pulse(id); } }
+  function initPanels() {
+    var list = order.map(function (id) { var a = S.agents[id]; return { id: id, name: a.name, section: a.section, color: a.color }; });
+    if (window.SwarmChannel) {
+      $('chan').innerHTML = '';
+      SwarmChannel.init({ root: $('chan'), agents: list, onJump: jump, send: function (text) { return fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ from: 'owner', text: text }) }); } });
+      fetch('/api/chat?since=0', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { SwarmChannel.setHistory(j.messages || []); }).catch(function () {});
+      order.forEach(function (id) { SwarmChannel.setStatus(id, S.agents[id].status || ''); });
+    }
+    if (window.SwarmDocs) { $('docs').innerHTML = ''; SwarmDocs.init({ root: $('docs'), base: '/p/' }); }
+  }
+
+  function onEvent(e) {
+    if (e.type === 'state') return build(e.state);
+    if (!S) return;
+    var a = e.id && S.agents[e.id];
+    if (e.type === 'round') { S.round = e.round; setPhase(); }
+    else if (e.type === 'phase') { S.phase = e.phase; setPhase(); }
+    else if (e.type === 'chat' && e.msg) {
+      if (window.SwarmChannel) SwarmChannel.add(e.msg);
+      if (current !== 'chan' && $('d-chan')) $('d-chan').classList.add('on');
+      if (S.agents[e.msg.from] && cur[e.msg.from] && e.msg.kind !== 'system') say(e.msg.from, e.msg.text);
+      return;
+    }
+    else if (e.type === 'busy') { if (window.SwarmChannel) SwarmChannel.setBusy(!!e.busy); return; }
+    else if (e.type === 'doc') { if (window.SwarmDocs) SwarmDocs.refresh(e.file.split('/').pop()); if (current !== 'docs' && $('d-docs')) $('d-docs').classList.add('on'); }
+    else if (e.type === 'status' && a) { a.status = e.status; if (window.SwarmChannel) SwarmChannel.setStatus(e.id, e.status); if (/^working/.test(e.status)) a.target = e.id; refreshCard(e.id); place(e.id, e.id); }
+    else if (e.type === 'thought' && a) { a.thought = e.text; refreshCard(e.id); say(e.id, e.text); }
+    else if (e.type === 'action' && a) { a.action = e.verb + (e.target !== e.id ? ' ' + e.target : ''); a.target = e.target; seed[e.id] += 3; refreshCard(e.id); place(e.id, e.target); mark(e.id, e.target); }
+    else if (e.type === 'edit' && e.kind === 'sections' && hosts[e.id]) { seed[e.id] += 5; if (S.agents[e.id]) { S.agents[e.id].target = e.id; place(e.id, e.id); mark(e.id, e.id); } load(e.id, true); }
+    feed(e);
+  }
+
+  $('zoom').onclick = function () { setZoom(zoom < 1 ? 1 : 0.5); };
+  $('bub').onclick = function () { document.body.classList.toggle('nobub'); this.textContent = document.body.classList.contains('nobub') ? 'Show thoughts' : 'Hide thoughts'; };
+  setZoom(0.5);
+
+  var es = new EventSource('/events');
+  es.onmessage = function (m) { onEvent(JSON.parse(m.data)); };
+  es.onerror = function () { $('phase').textContent = 'reconnecting'; };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Navigation · Design Canvas</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="06-navigation.css">
+</head>
+<body>
+<main>
+  <div class="intro" id="top">
+    <p class="eyebrow">Design system / Navigation</p>
+    <h1>Find your way.</h1>
+    <p>Six patterns for moving between destinations and showing where you are.</p>
+  </div>
+
+  <section class="spec" id="header">
+    <div class="spec-heading"><h2>Header</h2><span>Global</span></div>
+    <div class="sample">
+      <nav class="bar" aria-label="Primary example">
+        <a class="brand" href="#top"><span class="mark" aria-hidden="true">◆</span> Fieldwork</a>
+        <div class="cluster">
+          <a class="control" href="#header" aria-current="location">Overview</a>
+          <a class="control" href="#sidebar">Projects</a>
+          <a class="control" href="#mobile">Support</a>
+        </div>
+      </nav>
+    </div>
+    <p><strong>Anatomy</strong> Brand link · primary destinations · current location</p>
+    <p><strong>Use</strong> Keep primary destinations consistent across pages. On compact screens, use the mobile menu pattern below.</p>
+    <p class="tokens">--dc-tap · --dc-surface · --dc-brand · --dc-focus</p>
+  </section>
+
+  <section class="spec" id="tabs">
+    <div class="spec-heading"><h2>Tabs</h2><span>Local</span></div>
+    <div class="sample">
+      <div class="tablist" role="tablist" aria-label="Project details">
+        <button class="control tab" id="tab-summary" role="tab" aria-controls="summary-panel" aria-selected="true">Summary</button>
+        <button class="control tab" id="tab-activity" role="tab" aria-controls="activity-panel" aria-selected="false" tabindex="-1">Activity</button>
+        <button class="control tab" id="tab-exports" role="tab" aria-controls="exports-panel" aria-selected="false" tabindex="-1" disabled>Exports</button>
+      </div>
+      <div class="panel" id="summary-panel" role="tabpanel" aria-labelledby="tab-summary" tabindex="0">Three projects are in progress.</div>
+      <div class="panel" id="activity-panel" role="tabpanel" aria-labelledby="tab-activity" tabindex="0" hidden>Latest update: Field notes were reviewed.</div>
+      <div class="panel" id="exports-panel" role="tabpanel" aria-labelledby="tab-exports" hidden>Exports are unavailable.</div>
+    </div>
+    <p><strong>Anatomy</strong> Tab list · selected tab · panel</p>
+    <p><strong>Use</strong> Group peer views within one page. Use arrows, Home, or End to switch views.</p>
+    <p class="tokens">--dc-tap · --dc-brand · --dc-line · --dc-muted · --dc-focus</p>
+  </section>
+
+  <section class="spec" id="breadcrumbs">
+    <div class="spec-heading"><h2>Breadcrumbs</h2><span>Hierarchy</span></div>
+    <div class="sample">
+      <nav aria-label="Breadcrumb example">
+        <ol class="trail cluster">
+          <li><a class="control" href="#top">Home</a></li>
+          <li><span aria-hidden="true">/</span><a class="control" href="#sidebar">Projects</a></li>
+          <li><span aria-hidden="true">/</span><span class="current" aria-current="page">Field notes</span></li>
+        </ol>
+      </nav>
+    </div>
+    <p><strong>Anatomy</strong> Ancestor links · separators · current page</p>
+    <p><strong>Use</strong> Show the page’s place in the hierarchy. Leave the current page as text.</p>
+    <p class="tokens">--dc-tap · --dc-space-2 · --dc-muted · --dc-ink · --dc-focus</p>
+  </section>
+
+  <section class="spec" id="pagination">
+    <div class="spec-heading"><h2>Pagination</h2><span>Sequence</span></div>
+    <div class="sample">
+      <nav class="pages cluster" aria-label="Project results pages">
+        <button class="control page" data-step="-1" aria-label="Previous page" aria-disabled="true">‹</button>
+        <button class="control page" data-page="1" aria-label="Page 1" aria-current="page">1</button>
+        <button class="control page" data-page="2" aria-label="Page 2">2</button>
+        <button class="control page" data-page="3" aria-label="Page 3">3</button>
+        <button class="control page" data-step="1" aria-label="Next page" aria-disabled="false">›</button>
+      </nav>
+      <p class="result" role="status">Page 1 of 3 · Showing projects 1–6</p>
+    </div>
+    <p><strong>Anatomy</strong> Previous and next controls · page numbers · current page</p>
+    <p><strong>Use</strong> Mark the current page and disable the direction that has reached its boundary.</p>
+    <p class="tokens">--dc-tap · --dc-radius · --dc-brand · --dc-on-brand · --dc-focus</p>
+  </section>
+
+  <section class="spec" id="sidebar">
+    <div class="spec-heading"><h2>Sidebar</h2><span>Workspace</span></div>
+    <div class="sample workspace">
+      <nav class="rail" aria-label="Workspace example">
+        <p class="eyebrow">Workspace</p>
+        <a class="control" href="#sidebar" aria-current="location">Projects</a>
+        <a class="control" href="#tabs">Activity</a>
+        <a class="control" href="#mobile">Settings</a>
+      </nav>
+      <div class="workspace-content"><strong>Projects</strong><p>Browse your workspace by destination.</p></div>
+    </div>
+    <p><strong>Anatomy</strong> Group label · destination list · current location</p>
+    <p><strong>Use</strong> Group related destinations under recognizable labels. Keep the current item visible.</p>
+    <p class="tokens">--dc-tap · --dc-surface-2 · --dc-line · --dc-brand · --dc-focus</p>
+  </section>
+
+  <section class="spec" id="mobile">
+    <div class="spec-heading"><h2>Mobile menu</h2><span>Compact</span></div>
+    <div class="sample">
+      <details class="mobile-menu" open>
+        <summary><span class="brand"><span class="mark" aria-hidden="true">◆</span> Fieldwork</span><span class="menu-label">Menu <span class="chevron" aria-hidden="true">⌄</span></span></summary>
+        <nav class="mobile-links" aria-label="Mobile primary example">
+          <a class="control" href="#header">Overview</a>
+          <a class="control" href="#sidebar">Projects</a>
+          <a class="control" href="#mobile" aria-current="location">Support</a>
+        </nav>
+      </details>
+    </div>
+    <p><strong>Anatomy</strong> Disclosure trigger · expanded list · current destination</p>
+    <p><strong>Use</strong> Keep the Menu label visible in both the expanded and collapsed states.</p>
+    <p class="tokens">--dc-tap · --dc-space-2 · --dc-surface-2 · --dc-focus</p>
+  </section>
+
+  <aside class="state-guide">
+    <h2>Interaction states</h2>
+    <p>Try a link or control for its hover, keyboard focus, and pressed states. Selected items stay marked after release. Unavailable tabs and boundary controls use muted text.</p>
+    <p class="tokens">--dc-surface-2 · --dc-muted · --dc-focus</p>
+  </aside>
+</main>
+<script>
+  const tablist = document.querySelector('.tablist');
+  const tabs = [...tablist.querySelectorAll('button:not(:disabled)')];
+
+  function selectTab(selected) {
+    for (const tab of tabs) {
+      const active = tab === selected;
+      tab.setAttribute('aria-selected', String(active));
+      tab.tabIndex = active ? 0 : -1;
+      document.getElementById(tab.getAttribute('aria-controls')).hidden = !active;
+    }
+    selected.focus();
+  }
+
+  for (const tab of tabs) {
+    tab.addEventListener('click', () => selectTab(tab));
+  }
+
+  tablist.addEventListener('keydown', (event) => {
+    const index = tabs.indexOf(event.target);
+    if (index < 0) return;
+
+    let next;
+    switch (event.key) {
+      case 'ArrowLeft': next = (index + tabs.length - 1) % tabs.length; break;
+      case 'ArrowRight': next = (index + 1) % tabs.length; break;
+      case 'Home': next = 0; break;
+      case 'End': next = tabs.length - 1; break;
+      default: return;
+    }
+    event.preventDefault();
+    selectTab(tabs[next]);
+  });
+
+  const pagination = document.querySelector('.pages');
+  const pageButtons = [...pagination.querySelectorAll('[data-page]')];
+  const previousPage = pagination.querySelector('[data-step="-1"]');
+  const nextPage = pagination.querySelector('[data-step="1"]');
+  const result = document.querySelector('.result');
+  const pageSize = 6;
+  let page = 1;
+
+  pagination.addEventListener('click', (event) => {
+    const button = event.target.closest('button');
+    if (!button || button.getAttribute('aria-disabled') === 'true') return;
+
+    page = button.dataset.page ? Number(button.dataset.page) : page + Number(button.dataset.step);
+    for (const pageButton of pageButtons) {
+      if (Number(pageButton.dataset.page) === page) {
+        pageButton.setAttribute('aria-current', 'page');
+      } else {
+        pageButton.removeAttribute('aria-current');
+      }
+    }
+    previousPage.setAttribute('aria-disabled', String(page === 1));
+    nextPage.setAttribute('aria-disabled', String(page === pageButtons.length));
+    result.textContent = `Page ${page} of ${pageButtons.length} · Showing projects ${(page - 1) * pageSize + 1}–${page * pageSize}`;
+  });
+
+  const mobileMenu = document.querySelector('.mobile-menu');
+  mobileMenu.querySelector('nav').addEventListener('click', (event) => {
+    const link = event.target.closest('a');
+    if (!link) return;
+
+    mobileMenu.open = false;
+    const destination = document.querySelector(link.hash);
+    destination.tabIndex = -1;
+    destination.focus({ preventScroll: true });
+  });
+</script>
+</body>
+</html>

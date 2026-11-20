@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feedback · Design Canvas</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="08-feedback.css">
+</head>
+<body>
+  <header class="intro">
+    <p class="caption">Design Canvas / 08</p>
+    <h1>Feedback</h1>
+    <p>Show what happened, what is still running, and what people can do next.</p>
+  </header>
+  <main>
+    <section>
+      <h2>Alert</h2>
+      <p class="caption">Anatomy · Severity label + message</p>
+      <div class="alerts">
+        <p class="notice"><strong>Info</strong> Reports refresh daily.</p>
+        <p class="notice success"><strong>Success</strong> Report published.</p>
+        <p class="notice warning"><strong>Warning</strong> Access expires today.</p>
+        <p class="notice error"><strong>Error</strong> Upload failed. Try again.</p>
+      </div>
+      <p class="rule">Do keep alerts next to the affected content. Don’t rely on color to convey severity.</p>
+      <code>--dc-surface-2 · --dc-ink · --dc-{success,warning,error} · --dc-{success,warning,error}-bg</code>
+    </section>
+    <section>
+      <h2>Toast</h2>
+      <p class="caption">Anatomy · Outcome + dismiss control</p>
+      <div class="toast">
+        <div id="toast-content" class="success" role="status"><strong>Draft saved</strong></div>
+        <button type="button" id="dismiss" class="quiet" aria-label="Dismiss toast">×</button>
+      </div>
+      <div class="actions">
+        <button type="button" data-toast="Draft saved">Show success</button>
+        <button type="button" data-toast="Copied to clipboard">Show info</button>
+      </div>
+      <p class="rule">Do confirm a completed action. Don’t put required recovery steps in a toast.</p>
+      <code>--dc-surface · --dc-shadow-2 · --dc-success · --dc-success-bg</code>
+    </section>
+    <section>
+      <h2>Modal dialog</h2>
+      <p class="caption">Anatomy · Title + body + decision buttons</p>
+      <div class="actions">
+        <button type="button" data-dialog="details">Open details</button>
+        <button type="button" data-dialog="confirm">Review removal</button>
+        <button type="button" disabled>Unavailable</button>
+      </div>
+      <dialog id="details" aria-labelledby="details-title" aria-describedby="details-copy">
+        <h3 id="details-title">Export details</h3>
+        <p id="details-copy">The export includes all published reports.</p>
+        <div class="actions"><button autofocus>Done</button></div>
+      </dialog>
+      <dialog id="confirm" aria-labelledby="confirm-title" aria-describedby="confirm-copy">
+        <h3 id="confirm-title">Remove draft?</h3>
+        <p id="confirm-copy">This preview demonstrates a confirmation. No files are affected.</p>
+        <div class="actions">
+          <button autofocus>Cancel</button>
+          <button class="error" value="remove">Remove draft</button>
+        </div>
+      </dialog>
+      <p class="rule">Do use a modal for a decision that needs immediate attention. Don’t interrupt routine reading.</p>
+      <code>--dc-surface · --dc-ink · --dc-shadow-2 · --dc-error · --dc-error-bg</code>
+    </section>
+    <section>
+      <h2>Tooltip</h2>
+      <p class="caption">Anatomy · Trigger + description</p>
+      <div class="actions">
+        <span class="tip">
+          <button type="button" aria-describedby="tip-date">Report date</button>
+          <span id="tip-date" role="tooltip">Dates use your local time.</span>
+        </span>
+        <span class="tip">
+          <button type="button" aria-describedby="tip-export">Export format</button>
+          <span id="tip-export" role="tooltip">Exports are CSV files.</span>
+        </span>
+      </div>
+      <p class="rule">Do show short hints on hover, focus, or tap. Don’t hide essential instructions in a tooltip.</p>
+      <code>--dc-ink · --dc-surface · --dc-radius-sm · --dc-shadow-2</code>
+    </section>
+    <section>
+      <h2>Empty state</h2>
+      <p class="caption">Anatomy · Symbol + heading + next step</p>
+      <div class="samples">
+        <div class="empty">
+          <span class="symbol" aria-hidden="true">＋</span>
+          <h3>No reports yet</h3>
+          <p>Start with a report template.</p>
+          <button type="button" data-dialog="template">View template</button>
+        </div>
+        <div class="empty">
+          <span class="symbol" aria-hidden="true">∅</span>
+          <h3>No matches</h3>
+          <p>Try a shorter search term.</p>
+        </div>
+      </div>
+      <dialog id="template" aria-labelledby="template-title">
+        <h3 id="template-title">Weekly report template</h3>
+        <p>Include a summary, key metrics, and next steps.</p>
+        <div class="actions"><button autofocus>Done</button></div>
+      </dialog>
+      <p class="rule">Do explain why the view is empty. Don’t leave a blank panel.</p>
+      <code>--dc-surface-2 · --dc-muted · --dc-radius</code>
+    </section>
+    <section>
+      <h2>Skeleton</h2>
+      <p class="caption">Anatomy · Placeholder blocks matching the content</p>
+      <div class="samples">
+        <div>
+          <p class="caption">Loading card</p>
+          <div class="skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+        <div>
+          <p class="caption">Loading list</p>
+          <div class="skeleton list-skeleton" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+      <p class="rule">Do match the final layout. Don’t leave placeholders in place after a request fails.</p>
+      <code>--dc-surface-2 · --dc-radius-sm · --dc-space-2</code>
+    </section>
+    <section>
+      <h2>Progress</h2>
+      <p class="caption">Anatomy · Task label + track + completion value when known</p>
+      <div class="samples">
+        <div class="meter">
+          <label for="upload">Uploading · 64%</label>
+          <progress id="upload" max="100" value="64">64%</progress>
+        </div>
+        <div class="meter">
+          <label for="prepare">Preparing export</label>
+          <progress id="prepare"></progress>
+        </div>
+      </div>
+      <p class="rule">Do show a percentage when total work is known. Don’t guess at completion.</p>
+      <code>--dc-brand · --dc-surface-2 · --dc-radius-pill</code>
+    </section>
+    <footer>
+      Buttons demonstrate default, hover, keyboard focus, and pressed states. The modal includes a disabled trigger.
+      <code>--dc-tap · --dc-focus · --dc-brand · --dc-brand-dark · --dc-on-brand · --dc-dur-fast</code>
+    </footer>
+  </main>
+  <script>
+    const toast = document.querySelector('#toast-content');
+    const dismiss = document.querySelector('#dismiss');
+    let toastTrigger = document.querySelector('[data-toast]');
+
+    document.querySelectorAll('[data-toast]').forEach(button => {
+      button.addEventListener('click', () => {
+        toastTrigger = button;
+        toast.textContent = button.dataset.toast;
+        toast.classList.toggle('success', button.dataset.toast === "Draft saved");
+        dismiss.hidden = false;
+      });
+    });
+
+    dismiss.addEventListener('click', () => {
+      toast.textContent = '';
+      dismiss.hidden = true;
+      toastTrigger.focus();
+    });
+
+    document.querySelectorAll('[data-dialog]').forEach(button => {
+      button.addEventListener('click', () => {
+        document.getElementById(button.dataset.dialog).showModal();
+      });
+    });
+
+    document.querySelectorAll('dialog button').forEach(button => {
+      button.addEventListener('click', () => button.closest('dialog').close(button.value));
+    });
+
+    document.querySelectorAll('.tip').forEach(tip => {
+      const button = tip.querySelector('button');
+
+      button.addEventListener('click', () => {
+        tip.classList.remove('dismissed');
+        tip.classList.toggle('pinned');
+      });
+
+      function closeTip() {
+        tip.classList.remove('pinned');
+        tip.classList.add('dismissed');
+      }
+
+      tip.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeTip();
+      });
+      tip.addEventListener('focusout', closeTip);
+      tip.addEventListener('pointerenter', () => tip.classList.remove('dismissed'));
+      button.addEventListener('focus', () => tip.classList.remove('dismissed'));
+    });
+  </script>
+</body>
+</html>

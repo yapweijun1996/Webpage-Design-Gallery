@@ -1,0 +1,12 @@
+[
+  {"id": "01", "name": "Agent 1", "color": "#e5484d", "section": "header", "lane": "header: sticky top bar, logo wordmark, nav links to the section ids, primary CTA, mobile-friendly CSS-only menu (details/summary)."},
+  {"id": "02", "name": "Agent 2", "color": "#f76b15", "section": "hero", "lane": "hero: the ONLY h1, the promise, a sub line, two CTAs, a sample dashboard illustration in inline SVG/CSS."},
+  {"id": "03", "name": "Agent 3", "color": "#d6a100", "section": "proof", "lane": "proof: trust strip with sample stats and 'as used by' placeholder wordmarks (invented, generic)."},
+  {"id": "04", "name": "Agent 4", "color": "#30a46c", "section": "problem", "lane": "problem: the pain and the product's answer, short, calm, human."},
+  {"id": "05", "name": "Agent 5", "color": "#12a594", "section": "features", "lane": "features: 6 feature cards with inline SVG icons, outcomes not buttons."},
+  {"id": "06", "name": "Agent 6", "color": "#0090ff", "section": "how", "lane": "how: how it works in 3 steps with a clear visual flow."},
+  {"id": "07", "name": "Agent 7", "color": "#3e63dd", "section": "stories", "lane": "stories: 3 sample testimonials or a mini case study with sample figures."},
+  {"id": "08", "name": "Agent 8", "color": "#8e4ec6", "section": "pricing", "lane": "pricing: 3 tiers, monthly/annual note, highlighted middle tier."},
+  {"id": "09", "name": "Agent 9", "color": "#d6409f", "section": "faq", "lane": "faq: 6 questions using details/summary, accessible."},
+  {"id": "10", "name": "Agent 10", "color": "#6f6f6f", "section": "cta", "lane": "cta: final CTA band plus footer (link columns, legal line, language note)."}
+]

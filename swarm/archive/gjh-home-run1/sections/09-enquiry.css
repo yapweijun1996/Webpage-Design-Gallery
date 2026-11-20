@@ -1,0 +1,145 @@
+.s-09 {
+  --enquiry-surface: #171a21;
+  --enquiry-ink: #f4efe4;
+  --enquiry-red: #d9261c;
+  --enquiry-red-hover: #b81f16;
+  --enquiry-line: color-mix(in srgb, var(--enquiry-ink) 45%, var(--enquiry-surface));
+  --enquiry-clearance: calc(var(--dc-tap) + 2 * var(--dc-space-4) + env(safe-area-inset-bottom, 0px));
+  padding-block: var(--dc-space-12) var(--enquiry-clearance);
+  background: var(--enquiry-surface);
+  color: var(--enquiry-ink);
+  color-scheme: dark;
+  font: var(--dc-text-base)/var(--dc-leading) var(--dc-font);
+}
+
+.s-09 .enquiry-inner {
+  max-width: var(--dc-container);
+  margin-inline: auto;
+  padding-inline: var(--dc-space-4);
+}
+
+.s-09 h2 {
+  margin: 0;
+  font-size: clamp(var(--dc-text-2xl), 5vw, var(--dc-text-display));
+  line-height: var(--dc-leading-tight);
+}
+
+.s-09 .enquiry-intro {
+  margin: var(--dc-space-2) 0 0;
+}
+
+.s-09 .enquiry-details {
+  display: grid;
+  gap: var(--dc-space-6) var(--dc-space-8);
+  margin-block-start: var(--dc-space-6);
+}
+
+.s-09 .enquiry-brands {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.s-09 legend,
+.s-09 h3 {
+  margin: 0 0 var(--dc-space-2);
+  padding: 0;
+  font-size: var(--dc-text-base);
+  font-weight: var(--dc-weight-bold);
+}
+
+.s-09 .enquiry-chips,
+.s-09 .enquiry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dc-space-2);
+}
+
+.s-09 .enquiry-chip,
+.s-09 .enquiry-actions a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--dc-tap);
+  border: 1px solid var(--enquiry-line);
+}
+
+.s-09 .enquiry-chip {
+  gap: var(--dc-space-2);
+  padding-inline: var(--dc-space-3);
+  border-radius: var(--dc-radius-pill);
+  cursor: pointer;
+}
+
+.s-09 .enquiry-chip:hover,
+.s-09 .enquiry-chip:has(input:checked) {
+  border-color: var(--enquiry-ink);
+}
+
+.s-09 .enquiry-chip input {
+  inline-size: var(--dc-space-4);
+  block-size: var(--dc-space-4);
+  margin: 0;
+  accent-color: var(--enquiry-ink);
+}
+
+.s-09 .enquiry-checklist ul {
+  display: grid;
+  gap: var(--dc-space-1);
+  margin: 0;
+  padding-inline-start: var(--dc-space-4);
+}
+
+.s-09 .enquiry-actions {
+  margin-block-start: var(--dc-space-6);
+}
+
+.s-09 .enquiry-actions a {
+  justify-content: center;
+  padding-inline: var(--dc-space-4);
+  border-radius: var(--dc-radius-sm);
+  color: var(--enquiry-ink);
+  font-weight: var(--dc-weight-medium);
+  text-decoration: none;
+}
+
+.s-09 .enquiry-actions a:hover {
+  border-color: var(--enquiry-ink);
+  text-decoration: underline;
+}
+
+.s-09 .enquiry-actions .enquiry-contact {
+  border-color: var(--enquiry-red);
+  /* The darker fill keeps ivory text above 4.5:1 at the button's text size. */
+  background: color-mix(in srgb, var(--enquiry-red) 75%, var(--enquiry-red-hover));
+}
+
+.s-09 .enquiry-actions .enquiry-contact:hover {
+  background: var(--enquiry-red-hover);
+}
+
+.s-09 .enquiry-chip:has(input:focus-visible),
+.s-09 .enquiry-actions a:focus-visible {
+  outline: 2px solid var(--dc-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--enquiry-ink);
+}
+
+.s-09 .enquiry-chip input,
+.s-09 .enquiry-actions a {
+  scroll-margin-block-end: var(--enquiry-clearance);
+}
+
+@media (min-width: 48rem) {
+  .s-09 {
+    --enquiry-clearance: var(--dc-space-12);
+  }
+
+  .s-09 .enquiry-inner {
+    padding-inline: var(--dc-space-8);
+  }
+
+  .s-09 .enquiry-details {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}

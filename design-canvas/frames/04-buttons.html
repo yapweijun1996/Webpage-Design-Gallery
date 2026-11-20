@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>04 · Buttons and links</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="04-buttons.css">
+</head>
+<body>
+  <main>
+    <header class="intro">
+      <p class="eyebrow">Components / 04</p>
+      <h1>Buttons &amp; links</h1>
+      <p>Choose an action’s emphasis, then keep its label and feedback clear.</p>
+    </header>
+
+    <section class="card" aria-labelledby="button-title">
+      <h2 id="button-title">Action hierarchy</h2>
+      <p class="anatomy">Anatomy · container + verb label + optional icon</p>
+      <div class="matrix">
+        <div><button class="control primary" type="button">Save changes</button><p><strong>Primary</strong> · Main action</p></div>
+        <div><button class="control secondary" type="button">Preview</button><p><strong>Secondary</strong> · Supporting action</p></div>
+        <div><button class="control ghost" type="button">Dismiss</button><p><strong>Ghost</strong> · Low emphasis</p></div>
+        <div><button class="control danger" type="button">Delete draft</button><p><strong>Danger</strong> · Destructive action</p></div>
+      </div>
+      <h3>Interaction states</h3>
+      <ul class="states" aria-label="Static primary button state samples">
+        <li><span class="control primary">Save</span>Default</li>
+        <li><span class="control primary sample-hover">Save</span>Hover</li>
+        <li><span class="control primary sample-focus">Save</span>Focus-visible</li>
+        <li><span class="control primary sample-active">Save</span>Active</li>
+        <li><button class="control primary" type="button" disabled>Save</button>Disabled</li>
+      </ul>
+      <p class="guidance"><strong>Do</strong> reserve primary for the main action. <strong>Don’t</strong> use danger for routine dismissal.</p>
+      <p class="tokens">--dc-brand · --dc-brand-dark · --dc-on-brand · --dc-ink · --dc-surface · --dc-surface-2 · --dc-error · --dc-error-bg</p>
+    </section>
+
+    <div class="cards">
+      <section class="card" aria-labelledby="icon-title">
+        <h2 id="icon-title">Icon button</h2>
+        <p class="anatomy">Anatomy · glyph + accessible name</p>
+        <div class="examples">
+          <button class="control secondary icon" type="button" aria-label="Add item"><span aria-hidden="true">+</span></button>
+          <button class="control secondary icon" type="button" aria-label="Add item" disabled><span aria-hidden="true">+</span></button>
+        </div>
+        <p>Default and disabled. The enabled sample supports hover, focus-visible and active.</p>
+        <p class="guidance"><strong>Do</strong> name the action. <strong>Don’t</strong> rely on a glyph for unfamiliar actions.</p>
+        <p class="tokens">--dc-tap · --dc-text-xl · --dc-ink · --dc-surface</p>
+      </section>
+
+      <section class="card" aria-labelledby="loading-title">
+        <h2 id="loading-title">Loading</h2>
+        <p class="anatomy">Anatomy · progress indicator + status label</p>
+        <div class="examples">
+          <button class="control primary" type="button" disabled aria-busy="true"><span class="spinner" aria-hidden="true"></span>Saving…</button>
+        </div>
+        <p>Pending blocks repeat activation. On failure, re-enable Save and announce the error nearby.</p>
+        <p class="guidance"><strong>Do</strong> retain the action’s meaning. <strong>Don’t</strong> show a spinner alone.</p>
+        <p class="tokens">--dc-brand · --dc-on-brand · --dc-radius-pill · --dc-dur-slow</p>
+      </section>
+
+      <section class="card" aria-labelledby="group-title">
+        <h2 id="group-title">Button group</h2>
+        <p class="anatomy">Anatomy · named group + related controls</p>
+        <div class="examples group" role="group" aria-label="Download format">
+          <button class="control secondary" type="button">PDF</button>
+          <button class="control secondary" type="button">CSV</button>
+          <button class="control secondary" type="button" disabled>XML</button>
+        </div>
+        <p>Each available action supports default, hover, focus-visible and active. XML shows disabled.</p>
+        <p class="guidance"><strong>Do</strong> group related actions. <strong>Don’t</strong> group unrelated tasks for alignment.</p>
+        <p class="tokens">--dc-surface · --dc-ink · --dc-radius · --dc-tap</p>
+      </section>
+
+      <section class="card" aria-labelledby="link-title">
+        <h2 id="link-title">Link</h2>
+        <p class="anatomy">Anatomy · destination label + underline</p>
+        <div class="examples"><a class="control text-link" href="#button-title">Action hierarchy <span aria-hidden="true">↗</span></a></div>
+        <p>Default, hover, focus-visible and active. Omit a link when its destination is unavailable.</p>
+        <p class="guidance"><strong>Do</strong> name the destination. <strong>Don’t</strong> use a link to submit a form.</p>
+        <p class="tokens">--dc-brand · --dc-brand-dark · --dc-focus · --dc-tap</p>
+      </section>
+    </div>
+    <footer class="tokens">Shared controls · --dc-focus · --dc-tap · --dc-radius · --dc-space-2 · --dc-space-3 · --dc-text-sm · --dc-weight-medium · --dc-dur-fast · --dc-ease</footer>
+  </main>
+</body>
+</html>

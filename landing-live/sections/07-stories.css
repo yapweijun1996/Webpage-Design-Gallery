@@ -1,0 +1,71 @@
+.s-07 {
+  padding: var(--dc-space-12) var(--dc-space-4);
+  background: var(--dc-bg);
+  color: var(--dc-ink);
+  font: var(--dc-text-base) / var(--dc-leading) var(--dc-font);
+}
+
+.s-07 .stories-inner {
+  max-width: var(--dc-container);
+  margin-inline: auto;
+}
+
+.s-07 h2 {
+  margin: 0 0 var(--dc-space-6);
+  font-size: var(--dc-text-2xl);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-07 .stories-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dc-space-4);
+}
+
+.s-07 figure {
+  /* Match Pricing so all three cards switch layouts together. */
+  flex: 1 1 100%;
+  flex-basis: round(up, max(0px, var(--dc-container) * .68 - 100%), 100%);
+  min-inline-size: min(100%, calc((100% - 2 * var(--dc-space-4)) / 3));
+  max-inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: var(--dc-space-6);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+  border: thin solid var(--dc-line);
+  overflow-wrap: anywhere;
+}
+
+.s-07 .stories-label,
+.s-07 .stories-detail,
+.s-07 figcaption {
+  color: var(--dc-muted);
+  font-size: var(--dc-text-sm);
+}
+
+.s-07 .stories-label {
+  margin: 0 0 var(--dc-space-3);
+  font-weight: var(--dc-weight-medium);
+}
+
+.s-07 .stories-stat {
+  margin: 0;
+  color: var(--dc-ink);
+  font-size: var(--dc-text-xl);
+  font-weight: var(--dc-weight-bold);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-07 .stories-detail {
+  margin: var(--dc-space-1) 0 var(--dc-space-4);
+}
+
+.s-07 blockquote {
+  margin: 0 0 var(--dc-space-4);
+}
+
+.s-07 figcaption {
+  margin-top: auto;
+}

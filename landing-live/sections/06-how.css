@@ -1,0 +1,57 @@
+.s-06 {
+  padding: var(--dc-space-12) var(--dc-space-4);
+  background: var(--dc-surface);
+  color: var(--dc-ink);
+  font-family: var(--dc-font);
+  line-height: var(--dc-leading);
+}
+
+.s-06 .how-inner {
+  max-width: var(--dc-container);
+  margin-inline: auto;
+}
+
+.s-06 h2,
+.s-06 h3 {
+  margin: 0;
+  line-height: var(--dc-leading-tight);
+}
+
+.s-06 h2 {
+  font-size: var(--dc-text-2xl);
+}
+
+.s-06 h3 {
+  margin-block-end: var(--dc-space-2);
+  font-size: var(--dc-text-lg);
+}
+
+.s-06 .how-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dc-space-4) var(--dc-space-8);
+  margin: var(--dc-space-6) 0 0;
+  padding: 0;
+  padding-inline-start: var(--dc-space-6);
+}
+
+.s-06 .how-step {
+  /* Switch all three steps together when there is room for readable columns. */
+  flex: 1 1 max(0px, (var(--dc-container) * .68 - 100%) * 1000);
+  min-inline-size: min(100%, calc((100% - 2 * var(--dc-space-8)) / 3));
+  max-inline-size: 100%;
+  padding: var(--dc-space-3) var(--dc-space-4);
+  border-block-start: solid var(--dc-line);
+  border-block-start-width: thin;
+}
+
+.s-06 .how-step::marker {
+  color: var(--dc-brand);
+  font-weight: var(--dc-weight-bold);
+}
+
+.s-06 p {
+  margin: 0;
+  color: var(--dc-muted);
+  font-size: var(--dc-text-base);
+}

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>10 · Page patterns</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="10-patterns.css">
+</head>
+<body>
+  <main class="canvas">
+    <header class="intro">
+      <p class="label">Design system / 10</p>
+      <h1>Page patterns</h1>
+      <p>A landing page assembled from shared tokens.</p>
+    </header>
+
+    <article class="example" aria-label="Fieldwork example landing page">
+      <header class="hero">
+        <p class="label">Fieldwork / Team planning</p>
+        <h2>Make the week<br>work together.</h2>
+        <p>Give every project a clear owner, a next step, and a place to share progress.</p>
+        <div class="actions">
+          <a class="action primary" href="#pricing">See pricing</a>
+          <a class="action secondary" href="#features">Explore features</a>
+        </div>
+      </header>
+
+      <section class="features" aria-labelledby="features">
+        <h2 id="features">From plan to progress</h2>
+        <ul class="feature-grid">
+          <li><h3>Plan the week</h3><p>Keep priorities and deadlines on one board.</p></li>
+          <li><h3>Share ownership</h3><p>Assign one person to each next step.</p></li>
+          <li><h3>Spot blockers</h3><p>See where work needs a decision.</p></li>
+        </ul>
+      </section>
+
+      <section class="pricing" aria-labelledby="pricing">
+        <div>
+          <p class="label">Team plan</p>
+          <h2 id="pricing">$12 <small>/ person / month</small></h2>
+          <p>Includes shared boards and weekly summaries.</p>
+        </div>
+        <a class="action primary" href="#plan-details">View plan details</a>
+      </section>
+
+      <footer class="example-footer">
+        <strong>Fieldwork</strong>
+        <nav aria-label="Fieldwork footer">
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+        </nav>
+      </footer>
+    </article>
+
+    <section class="guide" aria-labelledby="guide-title">
+      <h2 id="guide-title">Pattern notes</h2>
+      <div class="notes">
+        <section>
+          <h3>Hero</h3>
+          <p><strong>Anatomy.</strong> Context label, benefit headline, supporting copy, action group.</p>
+          <p><strong>Variants.</strong> One primary action or a primary and secondary pair, shown above.</p>
+          <p><strong>Do.</strong> Name the destination in each link. <strong>Don’t.</strong> Give both links primary styling.</p>
+          <p class="tokens"><code>--dc-surface-2</code> <code>--dc-text-2xl</code> <code>--dc-space-6</code></p>
+        </section>
+        <section>
+          <h3>Feature grid</h3>
+          <p><strong>Anatomy.</strong> Section heading and a list of title–description pairs.</p>
+          <p><strong>Variants.</strong> Three columns or one stacked list at narrow widths. Static cards have a default state.</p>
+          <p><strong>Do.</strong> Describe what people can accomplish. <strong>Don’t.</strong> Style static cards as links.</p>
+          <p class="tokens"><code>--dc-surface</code> <code>--dc-line</code> <code>--dc-space-3</code> <code>--dc-radius</code></p>
+        </section>
+        <section>
+          <h3 id="plan-details">Pricing and CTA</h3>
+          <p><strong>Anatomy.</strong> Plan name, price, billing unit, included features, action.</p>
+          <p><strong>Variants.</strong> Inline CTA on wide screens and a stacked CTA on narrow screens.</p>
+          <p><strong>Do.</strong> Put the billing unit beside the price. <strong>Don’t.</strong> Hide the unit behind the CTA.</p>
+          <p class="tokens"><code>--dc-text-xl</code> <code>--dc-surface-2</code> <code>--dc-space-4</code></p>
+        </section>
+        <section>
+          <h3>Footer</h3>
+          <p><strong>Anatomy.</strong> Product name and labeled navigation.</p>
+          <p><strong>Variants.</strong> Inline links when space allows and wrapped links on narrow screens.</p>
+          <p><strong>Do.</strong> Keep link names consistent with their destinations. <strong>Don’t.</strong> Repeat every page section.</p>
+          <p class="tokens"><code>--dc-line</code> <code>--dc-text-sm</code> <code>--dc-space-4</code> <code>--dc-tap</code></p>
+        </section>
+      </div>
+      <section class="reference" aria-labelledby="states-title">
+        <h3 id="states-title">Action states</h3>
+        <p>Hero, pricing, and footer links start in their default state. Hover adds an underline, keyboard focus adds an outline, and pressing adds an inset border. Navigation links have no disabled or error state.</p>
+        <p class="tokens"><code>--dc-brand</code> <code>--dc-on-brand</code> <code>--dc-focus</code> <code>--dc-tap</code></p>
+      </section>
+    </section>
+
+    <section class="reference" aria-labelledby="checklist-title">
+      <h2 id="checklist-title">Accessibility checklist</h2>
+      <ul class="checklist">
+        <li>Follow a logical heading and keyboard order.</li>
+        <li>Tab through every link and confirm that focus remains visible.</li>
+        <li>Keep every tap target at least 44 × 44 CSS pixels.</li>
+        <li>Check text contrast in light and dark modes.</li>
+        <li>Check for horizontal overflow at 320px.</li>
+        <li>Respect reduced-motion preferences. These patterns use static state changes.</li>
+      </ul>
+      <p><strong>Do.</strong> Build each section around one job. <strong>Don’t.</strong> ask for the same decision in multiple sections.</p>
+    </section>
+  </main>
+</body>
+</html>

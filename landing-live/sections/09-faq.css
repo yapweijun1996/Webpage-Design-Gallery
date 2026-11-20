@@ -1,0 +1,62 @@
+.s-09 {
+  padding: var(--dc-space-12) var(--dc-space-4);
+  color: var(--dc-ink);
+  font-family: var(--dc-font);
+  line-height: var(--dc-leading);
+}
+
+.s-09 .faq-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: var(--dc-space-6) var(--dc-space-8);
+  max-width: var(--dc-container);
+  margin-inline: auto;
+}
+
+.s-09 h2 {
+  flex: 1 1 min(100%, calc(var(--dc-container) / 3));
+  margin: 0;
+  font-size: var(--dc-text-2xl);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-09 .faq-list {
+  flex: 2 1 min(100%, calc(var(--dc-container) / 2));
+  min-inline-size: 0;
+  display: grid;
+  gap: var(--dc-space-2);
+}
+
+.s-09 details {
+  min-width: 0;
+  border: thin solid var(--dc-line);
+  border-radius: var(--dc-radius);
+  background: var(--dc-surface);
+}
+
+.s-09 details[open] {
+  background: var(--dc-surface-2);
+}
+
+.s-09 summary {
+  min-height: var(--dc-tap);
+  padding: var(--dc-space-3) var(--dc-space-4);
+  border-radius: var(--dc-radius);
+  font-size: var(--dc-text-base);
+  font-weight: var(--dc-weight-medium);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.s-09 summary:focus-visible {
+  outline: calc(var(--dc-space-1) / 2) solid var(--dc-focus);
+  outline-offset: calc(var(--dc-space-1) / -2);
+}
+
+.s-09 details p {
+  margin: 0;
+  padding: 0 var(--dc-space-4) var(--dc-space-4);
+  color: var(--dc-muted);
+  overflow-wrap: anywhere;
+}

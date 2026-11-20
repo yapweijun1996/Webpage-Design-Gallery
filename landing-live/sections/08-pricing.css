@@ -1,0 +1,100 @@
+.s-08 {
+  padding: var(--dc-space-12) var(--dc-space-4);
+  color: var(--dc-ink);
+  font-family: var(--dc-font);
+  line-height: var(--dc-leading);
+}
+
+.s-08 .pricing-inner {
+  max-width: var(--dc-container);
+  margin-inline: auto;
+}
+
+.s-08 .pricing-intro {
+  margin-block-end: var(--dc-space-6);
+}
+
+.s-08 h2,
+.s-08 h3,
+.s-08 p {
+  margin: 0;
+}
+
+.s-08 h2 {
+  margin-block-end: var(--dc-space-2);
+  font-size: var(--dc-text-2xl);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-08 h3 {
+  font-size: var(--dc-text-xl);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-08 .pricing-plans {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dc-space-4);
+}
+
+.s-08 .pricing-plan {
+  /* Keep the featured tier in the middle whenever the cards share a row. */
+  flex: 1 1 max(0px, (var(--dc-container) * .68 - 100%) * 1000);
+  min-inline-size: min(100%, calc((100% - 2 * var(--dc-space-4)) / 3));
+  max-inline-size: 100%;
+  padding: var(--dc-space-6);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+  box-shadow: var(--dc-shadow-1);
+}
+
+.s-08 .pricing-featured {
+  background: var(--dc-surface-2);
+  box-shadow: inset 0 var(--dc-space-1) var(--dc-brand), var(--dc-shadow-1);
+}
+
+.s-08 .pricing-intro p,
+.s-08 .pricing-purpose,
+.s-08 .pricing-annual {
+  color: var(--dc-muted);
+}
+
+.s-08 .pricing-purpose {
+  margin-block: var(--dc-space-2) var(--dc-space-4);
+}
+
+.s-08 .pricing-rate strong {
+  font-size: var(--dc-text-2xl);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--dc-leading-tight);
+}
+
+.s-08 .pricing-annual {
+  font-size: var(--dc-text-sm);
+}
+
+.s-08 ul {
+  margin: var(--dc-space-4) 0 0;
+  padding: 0 0 0 var(--dc-space-4);
+}
+
+.s-08 li + li {
+  margin-block-start: var(--dc-space-2);
+}
+
+.s-08 .pricing-faq {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--dc-tap);
+  min-inline-size: var(--dc-tap);
+  margin-block-start: var(--dc-space-4);
+  padding-block: var(--dc-space-2);
+  color: var(--dc-brand);
+  font-weight: var(--dc-weight-medium);
+  text-underline-offset: var(--dc-space-1);
+}
+
+.s-08 .pricing-faq:focus-visible {
+  outline: thin solid var(--dc-focus);
+  outline-offset: var(--dc-space-1);
+}

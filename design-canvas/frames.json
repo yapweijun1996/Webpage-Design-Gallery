@@ -1,0 +1,12 @@
+[
+  {"id": "01", "title": "Foundations: color and tokens", "file": "frames/01-foundations.html", "x": 0, "y": 0},
+  {"id": "02", "title": "Typography", "file": "frames/02-typography.html", "x": 720, "y": 0},
+  {"id": "03", "title": "Spacing, grid and layout", "file": "frames/03-layout.html", "x": 1440, "y": 0},
+  {"id": "04", "title": "Buttons and actions", "file": "frames/04-buttons.html", "x": 2160, "y": 0},
+  {"id": "05", "title": "Forms and inputs", "file": "frames/05-forms.html", "x": 2880, "y": 0},
+  {"id": "06", "title": "Navigation", "file": "frames/06-navigation.html", "x": 0, "y": 580},
+  {"id": "07", "title": "Cards, lists and media", "file": "frames/07-cards.html", "x": 720, "y": 580},
+  {"id": "08", "title": "Feedback and overlays", "file": "frames/08-feedback.html", "x": 1440, "y": 580},
+  {"id": "09", "title": "Motion and interaction", "file": "frames/09-motion.html", "x": 2160, "y": 580},
+  {"id": "10", "title": "Page patterns and accessibility", "file": "frames/10-patterns.html", "x": 2880, "y": 580}
+]

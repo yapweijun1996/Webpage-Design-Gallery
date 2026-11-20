@@ -1,0 +1,10 @@
+header
+hero
+proof
+problem
+features
+how
+stories
+pricing
+faq
+cta

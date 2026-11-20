@@ -1,0 +1,128 @@
+:root {
+  color-scheme: light dark;
+  background: var(--dc-bg);
+  color: var(--dc-ink);
+  font: var(--dc-text-sm) / var(--dc-leading) var(--dc-font);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+main {
+  display: grid;
+  gap: var(--dc-space-4);
+  max-inline-size: var(--dc-container);
+  margin-inline: auto;
+  padding: var(--dc-space-4);
+}
+
+.intro {
+  padding: var(--dc-space-4);
+  border-inline-start: var(--dc-space-1) solid var(--dc-brand);
+  border-radius: var(--dc-radius);
+  background: var(--dc-surface-2);
+}
+
+h1, h2, h3, p { margin: 0; }
+h1, h2, h3 { line-height: var(--dc-leading-tight); }
+h1 { font-size: var(--dc-text-2xl); }
+h2 { font-size: var(--dc-text-lg); }
+h3 { font-size: var(--dc-text-sm); }
+
+.eyebrow, .tokens { font: var(--dc-text-xs) / var(--dc-leading) var(--dc-font-mono); }
+.eyebrow { color: var(--dc-brand); text-transform: uppercase; }
+.tokens, .anatomy, .matrix p, .states { color: var(--dc-muted); }
+.tokens { overflow-wrap: anywhere; }
+.cards, .matrix {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--dc-space-3);
+}
+
+.card {
+  display: grid;
+  align-content: start;
+  gap: var(--dc-space-2);
+  padding: var(--dc-space-4);
+  background: var(--dc-surface);
+  border: thin solid var(--dc-line);
+  border-radius: var(--dc-radius-lg);
+}
+
+.matrix {
+  padding-block: var(--dc-space-2);
+}
+.matrix p { font-size: var(--dc-text-xs); margin-block-start: var(--dc-space-1); }
+
+.states, .examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dc-space-2);
+}
+.states {
+  margin: 0;
+  padding: var(--dc-space-2);
+  list-style: none;
+  border-radius: var(--dc-radius);
+  background: var(--dc-bg);
+  font-size: var(--dc-text-xs);
+}
+.states li { display: grid; justify-items: center; gap: var(--dc-space-1); }
+.guidance { border-block-start: thin solid var(--dc-line); padding-block-start: var(--dc-space-2); }
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--dc-space-2);
+  min-block-size: var(--dc-tap);
+  min-inline-size: var(--dc-tap);
+  padding: var(--dc-space-1) var(--dc-space-3);
+  border: thin solid transparent;
+  border-radius: var(--dc-radius);
+  font: inherit;
+  font-weight: var(--dc-weight-medium);
+  text-align: center;
+  transition: background-color var(--dc-dur-fast) var(--dc-ease);
+}
+button.control:not(:disabled) { cursor: pointer; }
+.primary { background: var(--dc-brand); color: var(--dc-on-brand); }
+.secondary { background: var(--dc-surface); color: var(--dc-ink); border-color: var(--dc-muted); }
+.ghost { background: transparent; color: var(--dc-ink); }
+.danger { background: var(--dc-error-bg); color: var(--dc-error); border-color: var(--dc-error); }
+.text-link { color: var(--dc-brand); text-underline-offset: var(--dc-space-1); }
+.primary:is(:hover:not(:disabled), .sample-hover, .sample-active) { background: var(--dc-brand-dark); }
+:is(.secondary, .ghost):hover:not(:disabled) { background: var(--dc-surface-2); }
+.danger:hover:not(:disabled) { text-decoration: underline; }
+.text-link:hover { color: var(--dc-brand-dark); text-decoration-thickness: from-font; }
+.control:is(:focus-visible, .sample-focus) {
+  outline: medium solid var(--dc-focus);
+  outline-offset: var(--dc-space-1);
+}
+.control:is(:active:not(:disabled), .sample-active) {
+  box-shadow: inset 0 0 0 var(--dc-space-1) currentColor;
+}
+.control:disabled {
+  color: var(--dc-muted);
+  background: var(--dc-bg);
+  border-color: var(--dc-line);
+}
+.control[aria-busy="true"] { background: var(--dc-brand); color: var(--dc-on-brand); border-color: transparent; }
+
+.icon { padding-inline: 0; font-size: var(--dc-text-xl); line-height: var(--dc-leading-tight); }
+.group { gap: var(--dc-space-1); }
+.spinner {
+  inline-size: var(--dc-space-4);
+  block-size: var(--dc-space-4);
+  border: thin solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: var(--dc-radius-pill);
+  animation: spin var(--dc-dur-slow) linear infinite;
+}
+@keyframes spin { to { transform: rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}
+@media (max-width: 30rem) {
+  .cards { grid-template-columns: minmax(0, 1fr); }
+}

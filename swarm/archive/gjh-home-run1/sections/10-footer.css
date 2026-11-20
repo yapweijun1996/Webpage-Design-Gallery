@@ -1,0 +1,99 @@
+.s-10 {
+  --s10-bg: #0f1115;
+  --s10-ink: #f4efe4;
+  --s10-muted: color-mix(in srgb, var(--s10-ink) 75%, var(--s10-bg));
+  --s10-line: color-mix(in srgb, var(--s10-ink) 20%, var(--s10-bg));
+  --s10-actions-height: calc(var(--dc-tap) + 2 * var(--dc-space-2));
+  --s10-clearance: calc(var(--s10-actions-height) + var(--dc-space-4) + env(safe-area-inset-bottom, 0px));
+  background: var(--s10-bg);
+  color: var(--s10-ink);
+  font-family: var(--dc-font);
+  line-height: var(--dc-leading);
+}
+
+.s-10 .s10-inner {
+  max-width: var(--dc-container);
+  margin-inline: auto;
+  padding-inline: var(--dc-space-4);
+  padding-block-start: var(--dc-space-12);
+  /* Reserve the persistent actions' footprint plus a gutter below the disclosures. */
+  padding-block-end: var(--s10-clearance);
+}
+
+.s-10 .s10-details {
+  display: grid;
+  gap: var(--dc-space-4);
+}
+
+.s-10 h2 {
+  margin: 0 0 var(--dc-space-2);
+  font-size: var(--dc-text-xl);
+  line-height: var(--dc-leading-tight);
+  font-weight: var(--dc-weight-bold);
+}
+
+.s-10 address {
+  color: var(--s10-muted);
+  font-size: var(--dc-text-base);
+  font-style: normal;
+}
+
+.s-10 .s10-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--dc-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.s-10 a {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--dc-tap);
+  min-inline-size: var(--dc-tap);
+  color: inherit;
+  font-size: var(--dc-text-sm);
+  scroll-margin-block-end: var(--s10-clearance);
+  text-underline-offset: var(--dc-space-1);
+}
+
+.s-10 a:focus-visible {
+  outline: var(--dc-focus) solid;
+  outline-offset: var(--dc-space-1);
+}
+
+.s-10 .s10-disclosures {
+  display: grid;
+  gap: var(--dc-space-2);
+  margin-block-start: var(--dc-space-6);
+  padding-block-start: var(--dc-space-6);
+  border-block-start: thin solid var(--s10-line);
+  color: var(--s10-muted);
+  font-size: var(--dc-text-sm);
+}
+
+.s-10 .s10-disclosures p {
+  margin: 0;
+}
+
+@media (min-width: 48rem) {
+  .s-10 {
+    --s10-clearance: calc(var(--s10-actions-height) + var(--dc-space-8) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .s-10 .s10-inner {
+    padding-inline: var(--dc-space-8);
+  }
+
+  .s-10 .s10-details {
+    grid-template-columns: 1fr auto;
+    align-items: start;
+    gap: var(--dc-space-6);
+  }
+
+  .s-10 .s10-links {
+    display: flex;
+    gap: var(--dc-space-6);
+  }
+}

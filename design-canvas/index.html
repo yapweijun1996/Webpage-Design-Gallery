@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Canvas</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--dc-bg); color: var(--dc-ink); font-family: var(--dc-font); }
+  #board { position: fixed; inset: 0; cursor: grab; touch-action: none;
+    background-image: radial-gradient(var(--dc-line) 1px, transparent 1px); background-size: 24px 24px; }
+  #board.drag { cursor: grabbing; }
+  #world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  .frame { position: absolute; width: 680px; }
+  .frame h2 { margin: 0 0 var(--dc-space-2); font-size: var(--dc-text-sm); font-weight: var(--dc-weight-medium); color: var(--dc-muted); }
+  .frame h2 b { color: var(--dc-brand); margin-right: var(--dc-space-2); }
+  .frame iframe { width: 680px; height: 520px; border: 1px solid var(--dc-line); border-radius: var(--dc-radius); background: var(--dc-surface); box-shadow: var(--dc-shadow-1); display: block; }
+  .st { font-size: var(--dc-text-xs); padding: 2px 10px; border-radius: var(--dc-radius-pill); background: var(--dc-surface-2); color: var(--dc-muted); }
+  .st[data-s="working"] { background: var(--dc-warning-bg); color: var(--dc-warning); }
+  .st[data-s="done"] { background: var(--dc-success-bg); color: var(--dc-success); }
+  .st[data-s="failed"] { background: var(--dc-error-bg); color: var(--dc-error); }
+  #bar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 4px; padding: 6px;
+    background: var(--dc-surface); border: 1px solid var(--dc-line); border-radius: var(--dc-radius-pill); box-shadow: var(--dc-shadow-2); }
+  #bar button { min-width: var(--dc-tap); min-height: 36px; border: 0; border-radius: var(--dc-radius-pill); background: transparent; color: var(--dc-ink); font: inherit; cursor: pointer; }
+  #bar button:hover { background: var(--dc-surface-2); }
+  #bar button:focus-visible { outline: 2px solid var(--dc-focus); outline-offset: 2px; }
+  #zoom { align-self: center; min-width: 48px; text-align: center; font-size: var(--dc-text-sm); color: var(--dc-muted); }
+</style>
+</head>
+<body>
+<div id="board" aria-label="Design canvas"><div id="world"></div></div>
+<div id="bar" role="toolbar" aria-label="Canvas controls">
+  <button id="out" aria-label="Zoom out">&minus;</button><span id="zoom">100%</span><button id="in" aria-label="Zoom in">+</button><button id="fit">Fit</button>
+</div>
+<script>
+(function () {
+  var board = document.getElementById('board'), world = document.getElementById('world'), label = document.getElementById('zoom');
+  var s = 1, tx = 0, ty = 0, frames = [];
+  function apply() { world.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + s + ')'; label.textContent = Math.round(s * 100) + '%'; board.style.backgroundPosition = tx + 'px ' + ty + 'px'; board.style.backgroundSize = 24 * s + 'px ' + 24 * s + 'px'; }
+  function zoomAt(f, cx, cy) { var n = Math.min(3, Math.max(.1, s * f)); tx = cx - (cx - tx) * n / s; ty = cy - (cy - ty) * n / s; s = n; apply(); }
+  function fit() { var w = 3560, h = 1100, k = Math.min(innerWidth / w, innerHeight / h) * .94; s = k; tx = (innerWidth - w * k) / 2; ty = (innerHeight - h * k) / 2; apply(); }
+  board.addEventListener('wheel', function (e) { e.preventDefault(); if (e.ctrlKey || e.metaKey) zoomAt(Math.exp(-e.deltaY * .01), e.clientX, e.clientY); else { tx -= e.deltaX; ty -= e.deltaY; apply(); } }, { passive: false });
+  var drag = null;
+  board.addEventListener('pointerdown', function (e) { if (e.target.tagName === 'IFRAME') return; drag = { x: e.clientX - tx, y: e.clientY - ty }; board.classList.add('drag'); board.setPointerCapture(e.pointerId); });
+  board.addEventListener('pointermove', function (e) { if (drag) { tx = e.clientX - drag.x; ty = e.clientY - drag.y; apply(); } });
+  board.addEventListener('pointerup', function () { drag = null; board.classList.remove('drag'); });
+  document.getElementById('in').onclick = function () { zoomAt(1.25, innerWidth / 2, innerHeight / 2); };
+  document.getElementById('out').onclick = function () { zoomAt(.8, innerWidth / 2, innerHeight / 2); };
+  document.getElementById('fit').onclick = fit;
+  addEventListener('resize', fit);
+  fetch('frames.json').then(function (r) { return r.json(); }).then(function (list) {
+    list.forEach(function (f) {
+      var d = document.createElement('section'); d.className = 'frame'; d.style.left = f.x + 'px'; d.style.top = f.y + 'px';
+      d.innerHTML = '<h2><b>' + f.id + '</b>' + f.title + '<span class="st" style="float:right">queued</span></h2><iframe loading="lazy" title="' + f.title + '" src="' + f.file + '"></iframe>';
+      world.appendChild(d);
+    });
+    fit();
+    // Live view: poll each frame's files and worker status, reload the iframe when it changes.
+    var seen = {};
+    function poll() {
+      list.forEach(function (f) {
+        var box = world.children[list.indexOf(f)], ifr = box.querySelector('iframe'), badge = box.querySelector('.st');
+        var urls = [f.file, f.file.replace(/\.html$/, '.css'), 'tokens.css'];
+        Promise.all(urls.map(function (u) { return fetch(u, { method: 'HEAD', cache: 'no-store' }).then(function (r) { return r.headers.get('last-modified') || r.headers.get('etag') || ''; }).catch(function () { return ''; }); })).then(function (sig) {
+          var k = sig.join('|');
+          if (seen[f.id] !== undefined && seen[f.id] !== k) ifr.src = f.file + '?t=' + Date.now();
+          seen[f.id] = k;
+        });
+        fetch('status/' + f.id + '.txt', { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : 'queued'; }).catch(function () { return 'queued'; }).then(function (t) { t = t.trim(); badge.textContent = t; badge.dataset.s = t; });
+      });
+    }
+    poll(); setInterval(poll, 1200);
+  });
+})();
+</script>
+</body>
+</html>

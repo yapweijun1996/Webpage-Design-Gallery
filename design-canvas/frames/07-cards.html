@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>07 · Cards &amp; collections</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="07-cards.css">
+</head>
+<body>
+  <main>
+    <header class="intro">
+      <h1>Cards &amp; collections</h1>
+      <p>Patterns for browsing records, scanning status, and comparing values.</p>
+    </header>
+
+    <div class="specimens">
+      <section aria-labelledby="cards">
+        <h2 id="cards">Content card</h2>
+        <p class="anatomy">Anatomy · title, summary, action</p>
+        <article class="card featured">
+          <h3>Field notes</h3>
+          <p>Weekly observations from the research team.</p>
+          <a class="action" href="#media">View activity <span aria-hidden="true">↗</span></a>
+        </article>
+        <article class="card compact">
+          <h3>Archive</h3>
+          <button class="action" type="button" disabled>Unavailable</button>
+        </article>
+        <p class="note">Give the card one primary action. The featured card uses a link with hover, focus and pressed feedback. The compact card shows a disabled action.</p>
+        <p class="tokens">--dc-surface · --dc-surface-2 · --dc-radius · --dc-shadow-1 · --dc-tap</p>
+      </section>
+
+      <section aria-labelledby="rows">
+        <h2 id="rows">List rows</h2>
+        <p class="anatomy">Anatomy · leading mark, label, metadata</p>
+        <ul class="rows">
+          <li><a href="#table"><span class="mark" aria-hidden="true">↗</span><span><strong>Review queue</strong><small>3 records</small></span></a></li>
+          <li><a href="#avatars"><span class="mark" aria-hidden="true">↗</span><strong>Contributors</strong></a></li>
+          <li><span class="row-static"><span class="mark" aria-hidden="true">✓</span><span><strong>Export ready</strong><small>Read-only status</small></span></span></li>
+        </ul>
+        <p class="note">Make navigable rows one tap target. Use a plain row for status. Linked rows show hover, focus and pressed feedback.</p>
+        <p class="tokens">--dc-line · --dc-space-3 · --dc-tap · --dc-focus</p>
+      </section>
+
+      <section aria-labelledby="media">
+        <h2 id="media">Media &amp; figure</h2>
+        <p class="anatomy">Anatomy · visual, caption</p>
+        <figure>
+          <div class="graphic" aria-hidden="true">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <figcaption>Weekly reviews · 2, 4, 3, then 6</figcaption>
+        </figure>
+        <figure class="missing">
+          <div>Preview unavailable</div>
+          <figcaption>April review · original figure missing</figcaption>
+        </figure>
+        <p class="note">Keep the caption outside the visual. Supply equivalent values for charts and descriptive text when media fails.</p>
+        <p class="tokens">--dc-brand · --dc-surface-2 · --dc-error-bg · --dc-error</p>
+      </section>
+
+      <section aria-labelledby="badges">
+        <h2 id="badges">Tags &amp; badges</h2>
+        <p class="anatomy">Anatomy · pill, text label</p>
+        <div class="pills">
+          <span class="pill">Research</span>
+          <span class="pill">Notes</span>
+          <span class="pill success">Published</span>
+          <span class="pill warning">In review</span>
+          <span class="pill error">Needs changes</span>
+        </div>
+        <p class="note">Use neutral tags for topics and named badges for status. Spell out errors in text so color stays supplementary.</p>
+        <p class="tokens">--dc-radius-pill · --dc-success · --dc-warning · --dc-error</p>
+      </section>
+
+      <section aria-labelledby="avatars">
+        <h2 id="avatars">Avatar</h2>
+        <p class="anatomy">Anatomy · identity mark, name</p>
+        <ul class="identities">
+          <li><span class="avatar initials" aria-hidden="true">ML</span><span><strong>Maya Lin</strong><small>Initials</small></span></li>
+          <li><span class="avatar" aria-hidden="true">?</span><span><strong>Unknown contributor</strong><small>Fallback</small></span></li>
+        </ul>
+        <p class="note">Pair the mark with a readable name. Use initials when a photo is unavailable and a generic mark when identity is unknown.</p>
+        <p class="tokens">--dc-tap · --dc-radius-pill · --dc-brand · --dc-on-brand</p>
+      </section>
+
+      <section aria-labelledby="table">
+        <h2 id="table">Table</h2>
+        <p class="anatomy">Anatomy · caption, headers, cells</p>
+        <table>
+          <caption>Review queue</caption>
+          <thead><tr><th scope="col">Record</th><th scope="col">Status</th><th scope="col" class="number">Items</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Field notes</th><td>Ready</td><td class="number">12</td></tr>
+            <tr><th scope="row">Interview log</th><td>In review</td><td class="number">8</td></tr>
+            <tr><th scope="row">Survey</th><td><span class="pill error">Import failed</span></td><td class="number">—</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Align counts to the right. Use a dash for missing values and name the reason in the status column.</p>
+        <p class="tokens">--dc-line · --dc-surface-2 · --dc-text-sm · --dc-space-2</p>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

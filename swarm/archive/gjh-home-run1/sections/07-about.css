@@ -1,0 +1,81 @@
+.s-07 {
+  --about-ink: #0f1115;
+  --about-ivory: #f4efe4;
+  background: var(--about-ink);
+  color: var(--about-ivory);
+  font: var(--dc-text-base) / var(--dc-leading) var(--dc-font);
+}
+
+.s-07 .about-inner {
+  display: grid;
+  grid-template-areas:
+    "copy"
+    "photo"
+    "link";
+  gap: var(--dc-space-6);
+  max-width: var(--dc-container);
+  margin-inline: auto;
+  padding: var(--dc-space-12) var(--dc-space-4)
+    calc(var(--dc-tap) + 2 * var(--dc-space-4) + env(safe-area-inset-bottom, 0px));
+}
+
+.s-07 .about-copy {
+  grid-area: copy;
+}
+
+.s-07 .about-copy h2 {
+  margin: 0;
+  font-size: clamp(var(--dc-text-2xl), 8vw, var(--dc-text-display));
+  font-weight: var(--dc-weight-bold);
+  line-height: var(--dc-leading-tight);
+  letter-spacing: -.035em;
+}
+
+.s-07 .about-copy p {
+  margin: var(--dc-space-3) 0 0;
+}
+
+.s-07 .about-photo {
+  grid-area: photo;
+  display: block;
+  width: 100%;
+  height: auto;
+  align-self: center;
+}
+
+.s-07 .about-link {
+  grid-area: link;
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  justify-self: start;
+  min-height: var(--dc-tap);
+  color: var(--about-ivory);
+  font-weight: var(--dc-weight-medium);
+  text-decoration: underline;
+  text-underline-offset: .24em;
+}
+
+.s-07 .about-link:hover {
+  text-decoration-thickness: .12em;
+}
+
+.s-07 .about-link:focus-visible {
+  outline: var(--dc-space-1) solid var(--dc-focus);
+  outline-offset: var(--dc-space-1);
+}
+
+@media (min-width: 48rem) {
+  .s-07 .about-inner {
+    grid-template-areas:
+      "copy photo"
+      "link photo";
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    column-gap: var(--dc-space-12);
+    padding: var(--dc-space-12) var(--dc-space-8);
+  }
+
+  .s-07 .about-copy {
+    align-self: end;
+  }
+}

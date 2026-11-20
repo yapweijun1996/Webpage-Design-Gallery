@@ -12,6 +12,11 @@
       "port": 8000
     },
     {
+      "name": "swarm",
+      "url": "http://localhost:8800",
+      "port": 8800
+    },
+    {
       "name": "gjh-v24-wt",
       "runtimeExecutable": "python3",
       "runtimeArgs": [

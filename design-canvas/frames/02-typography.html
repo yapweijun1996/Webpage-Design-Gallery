@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>02 · Typography</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="02-typography.css">
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">02 / Foundations</p>
+      <h1>Typography</h1>
+      <p>Type roles for hierarchy, reading, and technical content.</p>
+      <p class="tokens"><code>--dc-font</code> <code>--dc-text-display</code> <code>--dc-weight-bold</code> <code>--dc-leading-tight</code></p>
+    </header>
+
+    <section aria-labelledby="scale">
+      <h2 id="scale">Type scale</h2>
+      <ul class="scale">
+        <li><span class="sample display">Display</span><span class="annotation">48 px · Hero title <code>--dc-text-display</code></span></li>
+        <li><span class="sample title">Page title</span><span class="annotation">32 px · H1 <code>--dc-text-2xl</code></span></li>
+        <li><span class="sample section-title">Section title</span><span class="annotation">24 px · H2 <code>--dc-text-xl</code></span></li>
+        <li><span class="sample subhead">Subheading</span><span class="annotation">18 px · H3 <code>--dc-text-lg</code></span></li>
+        <li><span class="sample">Body</span><span class="annotation">16 px · Reading text <code>--dc-text-base</code></span></li>
+        <li><span class="sample support">Supporting text</span><span class="annotation">14 px · Help and labels <code>--dc-text-sm</code></span></li>
+        <li><span class="sample caption">Caption</span><span class="annotation">12 px · Metadata <code>--dc-text-xs</code></span></li>
+      </ul>
+      <p class="rule">Follow the content hierarchy when assigning heading levels. Keep captions for secondary details.</p>
+    </section>
+
+    <section aria-labelledby="rhythm">
+      <h2 id="rhythm">Weight &amp; line height</h2>
+      <div class="specimens">
+        <article>
+          <h3>Weight</h3>
+          <ul class="weights">
+            <li><span class="sample">Regular · 400</span><span class="annotation"><code>--dc-weight-regular</code></span></li>
+            <li><span class="sample medium">Medium · 600</span><span class="annotation"><code>--dc-weight-medium</code></span></li>
+            <li><span class="sample bold">Bold · 700</span><span class="annotation"><code>--dc-weight-bold</code></span></li>
+          </ul>
+          <p class="rule">Use regular for paragraphs, medium for labels, and bold for headings.</p>
+        </article>
+        <article>
+          <h3>Line height</h3>
+          <p class="tight bold">Give each heading<br>one clear job.</p>
+          <p class="tokens">1.2 · <code>--dc-leading-tight</code></p>
+          <p>Keep paragraph lines open<br>as text wraps.</p>
+          <p class="tokens">1.6 · <code>--dc-leading</code></p>
+          <p class="rule">Use tight leading for headings and reading leading for body copy.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="code">
+      <h2 id="code">Code</h2>
+      <div class="specimens">
+        <article>
+          <h3>Inline code</h3>
+          <p>Set <code class="inline-code">font-size</code> on the heading.</p>
+          <p class="rule">Use inline code for identifiers within prose.</p>
+        </article>
+        <article>
+          <h3>Code block</h3>
+          <pre><code>.heading {
+  line-height:
+    var(--dc-leading-tight);
+}</code></pre>
+          <p class="rule">Preserve indentation and allow long lines to wrap.</p>
+        </article>
+      </div>
+      <p class="tokens"><code>--dc-font-mono</code> <code>--dc-text-sm</code> <code>--dc-leading</code> <code>--dc-surface-2</code></p>
+    </section>
+
+    <section aria-labelledby="overflow">
+      <h2 id="overflow">Truncation &amp; long text</h2>
+      <div class="specimens">
+        <article>
+          <h3>Single-line preview</h3>
+          <details>
+            <summary><span class="truncate">Quarterly accessibility review and remediation plan</span></summary>
+            <p>Quarterly accessibility review and remediation plan</p>
+          </details>
+          <p class="rule">Use ellipsis in compact previews with a way to reveal the full text. Select the preview to expand or collapse it.</p>
+          <p class="tokens"><code>--dc-weight-medium</code> <code>--dc-focus</code> <code>--dc-tap</code> <code>--dc-surface</code> <code>--dc-surface-2</code> <code>--dc-brand</code></p>
+        </article>
+        <article>
+          <h3>Wrapping body copy</h3>
+          <p class="long-copy">Keep essential copy visible. Let paragraphs grow vertically and wrap unbroken text such as <code>accessibilityReviewRemediationChecklist</code>.</p>
+          <p class="rule">Use a readable measure and avoid fixed heights on paragraphs.</p>
+          <p class="tokens"><code>--dc-font</code> <code>--dc-font-mono</code> <code>--dc-text-base</code> <code>--dc-leading</code></p>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

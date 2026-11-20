@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Motion · Design Canvas</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="09-motion.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="label">09 / Design system</p>
+      <h1>Motion</h1>
+      <p>Match the timing to the distance and the action.</p>
+      <p class="preference"><span class="standard">System motion is enabled</span><span class="reduced">Reduced motion is on. Changes happen instantly.</span></p>
+    </header>
+
+    <section aria-labelledby="timing">
+      <div class="section-heading">
+        <div>
+          <p class="label">Track · marker · trigger</p>
+          <h2 id="timing">Timing in action</h2>
+        </div>
+        <button id="play" type="button" aria-controls="tracks">Replay tracks</button>
+      </div>
+      <ul id="tracks">
+        <li class="fast"><span><strong>Fast</strong> <code>--dc-dur-fast</code> · 120 ms</span><span class="track" aria-hidden="true"></span></li>
+        <li><span><strong>Base</strong> <code>--dc-dur</code> · 220 ms</span><span class="track" aria-hidden="true"></span></li>
+        <li class="slow"><span><strong>Slow</strong> <code>--dc-dur-slow</code> · 400 ms</span><span class="track" aria-hidden="true"></span></li>
+        <li class="comparison"><span><strong>Linear</strong> <code>--dc-dur-slow</code> · 400 ms</span><span class="track" aria-hidden="true"></span></li>
+      </ul>
+      <p>The first three tracks use <code>--dc-ease</code> to settle into place. Compare Slow and Linear to feel the difference at the same duration.</p>
+      <p><strong>Do</strong> use fast timing for feedback and reserve slow timing for larger moves. <strong>Avoid</strong> making people wait for an animation before they can act.</p>
+    </section>
+
+    <section aria-labelledby="feedback">
+      <p class="label">Surface · label · focus ring</p>
+      <h2 id="feedback">Hover &amp; press</h2>
+      <div class="samples">
+        <button type="button" aria-controls="feedback-result" id="sample">Try feedback</button>
+        <button type="button" disabled>Unavailable</button>
+      </div>
+      <p id="feedback-result" role="status">Hover, press, or tab to the button.</p>
+      <p>Hover changes the fill. Press shifts the button while held. Keyboard focus adds a ring. The disabled button stays still.</p>
+      <p><strong>Do</strong> pair motion with a visible state. <strong>Avoid</strong> relying on movement alone to confirm an action.</p>
+      <p><code>--dc-dur-fast</code> · <code>--dc-ease</code> · <code>--dc-focus</code></p>
+    </section>
+  </main>
+  <script>
+    const tracks = document.querySelector('#tracks');
+    document.querySelector('#play').addEventListener('click', () => {
+      tracks.classList.remove('playing');
+      // Flush the removal so a replay also works mid-animation.
+      void tracks.offsetWidth;
+      tracks.classList.add('playing');
+    });
+
+    let activationCount = 0;
+    document.querySelector('#sample').addEventListener('click', () => {
+      activationCount += 1;
+      document.querySelector('#feedback-result').textContent = `Activations: ${activationCount}`;
+    });
+  </script>
+</body>
+</html>

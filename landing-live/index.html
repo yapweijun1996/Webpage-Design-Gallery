@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Harbor Ledger - live build</title>
+<link rel="stylesheet" href="../design-canvas/tokens.css">
+<style>
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--dc-bg);color:var(--dc-ink);font-family:var(--dc-font);font-size:var(--dc-text-base);line-height:var(--dc-leading)}
+  .host{position:relative;min-height:48px}
+  .host.flash{animation:flash 1.6s var(--dc-ease)}
+  @keyframes flash{0%{box-shadow:inset 0 0 0 4px var(--dc-brand)}100%{box-shadow:inset 0 0 0 4px transparent}}
+  .tag{position:absolute;z-index:50;left:8px;top:8px;display:none;gap:6px;align-items:center;padding:3px 10px;border-radius:999px;font:600 12px/1.4 var(--dc-font);background:#111;color:#fff;opacity:.85;pointer-events:none}
+  body.show .tag{display:inline-flex}
+  .tag i{width:8px;height:8px;border-radius:50%;background:#999}
+  .tag[data-s=working] i{background:#f5b82e;animation:p 1s infinite}
+  .tag[data-s=done] i{background:#3ecf8e}
+  .tag[data-s=failed] i{background:#ff6b5e}
+  @keyframes p{50%{opacity:.3}}
+  body.show .host{outline:1px dashed var(--dc-line);outline-offset:-1px}
+  #hud{position:fixed;right:12px;bottom:12px;z-index:100;background:#111;color:#fff;border-radius:12px;padding:10px 14px;font:13px/1.5 var(--dc-font);max-width:260px;opacity:.92}
+  #hud b{display:block;margin-bottom:4px}
+  #hud button{margin-top:6px;min-height:32px;border:0;border-radius:8px;padding:0 12px;font:inherit;cursor:pointer}
+  #log{max-height:120px;overflow:auto;margin:6px 0 0;padding:0;list-style:none;font-size:12px;color:#c9ccd4}
+  @media (prefers-reduced-motion:reduce){.host.flash{animation:none}}
+</style>
+</head>
+<body class="show">
+<main id="page"></main>
+<aside id="hud"><b>Live build &middot; Home page</b><span id="sum">connecting&hellip;</span><ul id="log"></ul><button id="tog" type="button">Hide worker tags</button></aside>
+<script>
+(function(){
+  var page=document.getElementById('page'),sum=document.getElementById('sum'),log=document.getElementById('log'),hosts={},hash={},counts={};
+  function h(s){var x=0;for(var i=0;i<s.length;i++)x=(x*31+s.charCodeAt(i))|0;return x}
+  function say(t){var li=document.createElement('li');li.textContent=new Date().toLocaleTimeString()+' '+t;log.insertBefore(li,log.firstChild);while(log.children.length>30)log.removeChild(log.lastChild)}
+  document.getElementById('tog').onclick=function(){document.body.classList.toggle('show');this.textContent=document.body.classList.contains('show')?'Hide worker tags':'Show worker tags'};
+  function txt(u){return fetch(u+'?_='+Date.now(),{cache:'no-store'}).then(function(r){return r.ok?r.text():''}).catch(function(){return ''})}
+  fetch('names.txt',{cache:'no-store'}).then(function(r){return r.text()}).then(function(t){
+    var names=t.trim().split('\n');
+    names.forEach(function(n,i){var id=('0'+(i+1)).slice(-2),d=document.createElement('div');d.className='host';d.innerHTML='<span class="tag" data-s="queued"><i></i>'+id+' '+n+'</span><style></style><div class="body"></div>';page.appendChild(d);hosts[id]={el:d,name:n}});
+    function poll(){
+      Object.keys(hosts).forEach(function(id){
+        var o=hosts[id],base='sections/'+id+'-'+o.name;
+        Promise.all([txt(base+'.html'),txt(base+'.css'),txt('status/'+id+'.txt')]).then(function(r){
+          var k=h(r[0]+'|'+r[1]);
+          if(hash[id]!==k){o.el.querySelector('.body').innerHTML=r[0];o.el.querySelector('style').textContent=r[1];if(hash[id]!==undefined){o.el.classList.remove('flash');void o.el.offsetWidth;o.el.classList.add('flash');say(id+' '+o.name+' updated')}}
+          hash[id]=k;
+          var s=r[2].trim()||'queued',tag=o.el.querySelector('.tag');tag.dataset.s=s.split(' ')[0];tag.lastChild.textContent=' '+id+' '+o.name+' · '+s;
+          counts[id]=s.split(' ')[0];
+          var v=Object.keys(counts).map(function(x){return counts[x]});
+          sum.textContent=v.filter(function(x){return x==='working'}).length+' working, '+v.filter(function(x){return x==='done'}).length+' done of '+names.length;
+        });
+      });
+    }
+    poll();setInterval(poll,1000);
+  });
+})();
+</script>
+</body>
+</html>

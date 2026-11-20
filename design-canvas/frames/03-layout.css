@@ -1,0 +1,116 @@
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--dc-bg);
+  color: var(--dc-ink);
+  font: var(--dc-text-sm)/var(--dc-leading) var(--dc-font);
+}
+
+h1, h2, h3, p, dl, dd { margin: 0; }
+h1, h2, h3 { line-height: var(--dc-leading-tight); }
+h1 { font-size: var(--dc-text-display); }
+h2 { font-size: var(--dc-text-xl); }
+h3 { font-size: var(--dc-text-lg); }
+code { font: inherit; font-family: var(--dc-font-mono); }
+:focus-visible { outline: thin solid var(--dc-focus); }
+
+.container {
+  max-inline-size: var(--dc-container);
+  margin-inline: auto;
+  padding: var(--dc-space-6) var(--dc-space-4) var(--dc-space-12);
+}
+
+.stack { display: grid; gap: var(--dc-space-6); }
+.masthead {
+  display: grid;
+  gap: var(--dc-space-2);
+  padding-block: var(--dc-space-2) var(--dc-space-4);
+  border-block-end: thin solid var(--dc-line);
+}
+
+.masthead > :last-child, .tokens, dd { color: var(--dc-muted); }
+.eyebrow {
+  color: var(--dc-brand);
+  font: var(--dc-weight-bold) var(--dc-text-xs)/var(--dc-leading) var(--dc-font-mono);
+  text-transform: uppercase;
+}
+
+.panel {
+  gap: var(--dc-space-4);
+  padding: var(--dc-space-4);
+  border: thin solid var(--dc-line);
+  border-radius: var(--dc-radius-lg);
+  background: var(--dc-surface);
+}
+
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+.ruler { gap: var(--dc-space-1); }
+.ruler span {
+  background: var(--dc-surface-2);
+  border-radius: var(--dc-radius-sm);
+  padding-block: var(--dc-space-1);
+  text-align: center;
+  font: var(--dc-text-xs)/var(--dc-leading) var(--dc-font-mono);
+}
+
+.spans { gap: var(--dc-space-3); }
+.spans > div {
+  grid-column: span 12;
+  display: grid;
+  gap: var(--dc-space-1);
+  padding: var(--dc-space-3);
+  border-radius: var(--dc-radius);
+  font-weight: var(--dc-weight-bold);
+}
+
+.primary { background: var(--dc-brand); color: var(--dc-on-brand); }
+.secondary { background: var(--dc-surface-2); }
+small { font-size: var(--dc-text-xs); font-weight: var(--dc-weight-regular); }
+.breakpoints, .patterns { display: grid; gap: var(--dc-space-3); }
+dt { font-weight: var(--dc-weight-bold); }
+.rule { border-block-start: thin solid var(--dc-line); padding-block-start: var(--dc-space-2); }
+.tokens { font-size: var(--dc-text-xs); overflow-wrap: anywhere; }
+
+.scale { display: grid; gap: var(--dc-space-2); list-style: none; margin: 0; padding: 0; }
+.scale li { display: grid; grid-template-columns: var(--dc-space-12) 1fr; align-items: center; gap: var(--dc-space-2); }
+.scale i { block-size: var(--dc-space-2); background: var(--dc-brand); border-radius: var(--dc-radius-pill); }
+.scale code { color: var(--dc-muted); font-size: var(--dc-text-xs); }
+.s1 { inline-size: var(--dc-space-1); }
+.s2 { inline-size: var(--dc-space-2); }
+.s3 { inline-size: var(--dc-space-3); }
+.s4 { inline-size: var(--dc-space-4); }
+.s6 { inline-size: var(--dc-space-6); }
+.s8 { inline-size: var(--dc-space-8); }
+.s12 { inline-size: var(--dc-space-12); }
+
+.inset-demo {
+  padding: var(--dc-space-2) var(--dc-space-4);
+  border: thin dashed var(--dc-brand);
+  border-radius: var(--dc-radius);
+}
+
+.inset-demo > div, .sample-stack span, .cluster span {
+  background: var(--dc-surface-2);
+  border-radius: var(--dc-radius-sm);
+  padding: var(--dc-space-1) var(--dc-space-2);
+}
+
+.inset-demo > div { text-align: center; }
+.specimen { align-content: start; gap: var(--dc-space-3); min-inline-size: 0; }
+.sample-stack { gap: var(--dc-space-2); }
+.cluster { display: flex; flex-wrap: wrap; gap: var(--dc-space-2); }
+.cluster span { border-radius: var(--dc-radius-pill); }
+
+@media (min-width: 36em) {
+  .spans .primary { grid-column: span 8; }
+  .spans .secondary { grid-column: span 4; }
+  .breakpoints { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .patterns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 64em) {
+  .container, .inset-demo { padding-inline: var(--dc-space-8); }
+  .spans { gap: var(--dc-space-6); }
+}

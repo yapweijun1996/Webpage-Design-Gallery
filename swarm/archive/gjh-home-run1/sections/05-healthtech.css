@@ -1,0 +1,182 @@
+.s-05 {
+  --healthtech-ink: #0f1115;
+  --healthtech-directory: #171a21;
+  --healthtech-ivory: #f4efe4;
+  --healthtech-red: #d9261c;
+  --healthtech-red-hover: #b81f16;
+  --healthtech-on-red: #fff;
+  --healthtech-shade: color-mix(in srgb, var(--healthtech-ink) 85%, transparent);
+  --healthtech-gutter: var(--dc-space-4);
+  --healthtech-clearance: calc(var(--dc-tap) + 2 * var(--dc-space-4) + env(safe-area-inset-bottom, 0px));
+  background: var(--healthtech-ink);
+  color: var(--healthtech-ivory);
+  font: var(--dc-weight-regular) var(--dc-text-base) / var(--dc-leading) var(--dc-font);
+}
+
+.s-05 .healthtech-chapter {
+  --healthtech-exit: var(--healthtech-ink);
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-items: end;
+  min-block-size: 100vh;
+  min-block-size: 100svh;
+  background: var(--healthtech-exit);
+}
+
+.s-05 .healthtech-chapter--sony {
+  --healthtech-exit: var(--healthtech-directory);
+}
+
+.s-05 .healthtech-picture,
+.s-05 .healthtech-picture::after {
+  position: absolute;
+  inset: 0;
+}
+
+.s-05 .healthtech-picture {
+  z-index: -1;
+}
+
+.s-05 .healthtech-picture::after {
+  content: "";
+  background: linear-gradient(to bottom, var(--healthtech-ink), transparent var(--dc-space-12));
+}
+
+.s-05 .healthtech-picture img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.s-05 .healthtech-chapter--sony img {
+  object-position: 32% center;
+}
+
+.s-05 .healthtech-content {
+  position: relative;
+  padding-block-end: var(--healthtech-clearance);
+}
+
+.s-05 .healthtech-content::before {
+  content: "";
+  position: absolute;
+  inset: calc(-2 * var(--dc-space-12)) 0 0;
+  z-index: -1;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--healthtech-shade) calc(2 * var(--dc-space-12)),
+    var(--healthtech-exit) calc(100% - var(--dc-space-4))
+  );
+}
+
+.s-05 .healthtech-inner {
+  max-inline-size: var(--dc-container);
+  margin-inline: auto;
+  padding-inline: var(--healthtech-gutter);
+}
+
+.s-05 .healthtech-inner :is(h2, p) {
+  margin: 0;
+}
+
+.s-05 .healthtech-inner h2 {
+  margin-block-start: var(--dc-space-2);
+  font-size: clamp(var(--dc-text-2xl), 11.5vw, var(--dc-text-display));
+  font-weight: var(--dc-weight-bold);
+  line-height: var(--dc-leading-tight);
+  letter-spacing: -.055em;
+}
+
+.s-05 .healthtech-inner .healthtech-description {
+  max-inline-size: 32ch;
+  margin-block-start: var(--dc-space-3);
+}
+
+.s-05 .healthtech-eyebrow {
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-medium);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.s-05 .healthtech-action {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--dc-tap);
+  margin-block-start: var(--dc-space-6);
+  padding-inline: var(--dc-space-4);
+  scroll-margin-block-end: var(--healthtech-clearance);
+  border: thin solid currentColor;
+  border-radius: var(--dc-radius-pill);
+  color: var(--healthtech-ivory);
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-bold);
+  text-decoration: none;
+}
+
+.s-05 .healthtech-action:hover {
+  background: var(--healthtech-ivory);
+  border-color: var(--healthtech-ivory);
+  color: var(--healthtech-ink);
+}
+
+.s-05 .healthtech-action--primary {
+  background: var(--healthtech-red);
+  border-color: transparent;
+  color: var(--healthtech-on-red);
+}
+
+.s-05 .healthtech-action--primary:hover {
+  background: var(--healthtech-red-hover);
+  border-color: transparent;
+  color: var(--healthtech-on-red);
+}
+
+.s-05 .healthtech-action:focus-visible {
+  box-shadow: 0 0 0 var(--dc-space-1) var(--healthtech-ivory);
+  outline: var(--dc-space-1) solid var(--dc-focus);
+  outline-offset: var(--dc-space-1);
+}
+
+.s-05 .healthtech-inner .healthtech-caption {
+  margin-block-start: var(--dc-space-3);
+  font-size: var(--dc-text-sm);
+}
+
+@media (min-width: 48rem) {
+  .s-05 {
+    --healthtech-gutter: var(--dc-space-8);
+    --healthtech-clearance: var(--dc-space-12);
+  }
+
+  .s-05 .healthtech-picture::after {
+    background:
+      linear-gradient(to bottom, var(--healthtech-ink), transparent var(--dc-space-12)),
+      linear-gradient(to top, var(--healthtech-exit), transparent 28%),
+      linear-gradient(to right, var(--healthtech-shade) 43%, transparent 78%);
+  }
+
+  .s-05 .healthtech-content {
+    padding-block: var(--healthtech-clearance);
+  }
+
+  .s-05 .healthtech-chapter {
+    align-items: center;
+  }
+
+  .s-05 .healthtech-content::before {
+    content: none;
+  }
+
+  .s-05 .healthtech-chapter--sony img {
+    object-position: center;
+  }
+
+  .s-05 .healthtech-inner h2 {
+    font-size: clamp(var(--dc-text-display), 7vw, calc(2 * var(--dc-text-display)));
+  }
+}

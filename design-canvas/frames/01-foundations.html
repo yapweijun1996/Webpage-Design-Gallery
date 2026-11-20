@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Foundations · Design Canvas</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="01-foundations.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Foundations</h1>
+      <p>Color defines meaning. Shape groups content. Elevation establishes hierarchy.</p>
+    </header>
+
+    <section aria-labelledby="color">
+      <h2 id="color">Color and contrast</h2>
+      <p class="guidance">Each swatch shows its foreground on its assigned surface. Pair the listed tokens and use text to communicate status.</p>
+      <ul class="palette">
+        <li class="canvas"><strong>Canvas</strong><span>Page background</span><code>--dc-ink / --dc-bg</code></li>
+        <li class="surface"><strong>Surface</strong><span>Supporting copy</span><code>--dc-muted / --dc-surface</code></li>
+        <li class="tint"><strong>Tinted surface</strong><span>Grouped content</span><code>--dc-ink / --dc-surface-2</code></li>
+        <li class="brand"><strong>Brand</strong><span>Primary action</span><code>--dc-on-brand / --dc-brand</code></li>
+        <li class="success"><strong>Success</strong><span>Changes saved</span><code>--dc-success / --dc-success-bg</code></li>
+        <li class="warning"><strong>Warning</strong><span>Review required</span><code>--dc-warning / --dc-warning-bg</code></li>
+        <li class="error"><strong>Error</strong><span>Changes could not be saved</span><code>--dc-error / --dc-error-bg</code></li>
+      </ul>
+      <details>
+        <summary>Action states and contrast</summary>
+        <p>Brand actions use <code>--dc-brand</code> at rest and <code>--dc-brand-dark</code> on hover and press, with <code>--dc-on-brand</code> in every state. Use <code>--dc-focus</code> for the offset keyboard ring. Use muted text and inactive semantics for disabled actions. Reserve the error pair for failure feedback.</p>
+        <p>Contrast target for normal text is 4.5:1 in both schemes. Keep <code>--dc-line</code> for decorative separation and use a stronger edge when a boundary identifies a control.</p>
+      </details>
+    </section>
+
+    <section aria-labelledby="shape">
+      <h2 id="shape">Shape</h2>
+      <p class="guidance">The corner radius identifies the element type. Use larger radii on larger containers and reserve pills for compact labels.</p>
+      <ul class="shapes">
+        <li><span class="shape small" aria-hidden="true">&nbsp;</span><strong>Inset</strong><code>--dc-radius-sm</code></li>
+        <li><span class="shape standard" aria-hidden="true">&nbsp;</span><strong>Control</strong><code>--dc-radius</code></li>
+        <li><span class="shape large" aria-hidden="true">&nbsp;</span><strong>Panel</strong><code>--dc-radius-lg</code></li>
+        <li><span class="shape pill" aria-hidden="true">&nbsp;</span><strong>Label</strong><code>--dc-radius-pill</code></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="elevation">
+      <h2 id="elevation">Elevation</h2>
+      <p class="guidance">The surface edge and shadow indicate depth. Use the lowest level that expresses the layer.</p>
+      <ul class="depth">
+        <li><strong>Flat</strong><span>In-flow content</span><code>--dc-line</code></li>
+        <li class="raised"><strong>Raised</strong><span>Card above canvas</span><code>--dc-shadow-1</code></li>
+        <li class="floating"><strong>Floating</strong><span>Popover above content</span><code>--dc-shadow-2</code></li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

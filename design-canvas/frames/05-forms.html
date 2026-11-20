@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forms · Design Canvas</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="05-forms.css">
+</head>
+<body>
+  <main>
+    <header class="intro">
+      <p class="eyebrow">Design canvas / 05</p>
+      <h1>Forms</h1>
+      <p>Clear labels, predictable controls, and feedback that shows how to recover.</p>
+    </header>
+
+    <section aria-labelledby="fields">
+      <h2 id="fields">Field controls</h2>
+      <p class="guide">Hover, Tab, or press an enabled control to see its interaction states.</p>
+      <div class="grid">
+        <article class="card">
+          <h3>Text input</h3>
+          <p class="anatomy">Label · input · supporting text</p>
+          <label for="name">Display name</label>
+          <input id="name" type="text" value="Alex Morgan">
+          <label for="account">Account ID <small>· Disabled</small></label>
+          <input id="account" type="text" value="AC-2048" disabled>
+          <p class="guide">Do use a visible label for every single-line field.</p>
+          <p class="tokens"><code>--dc-tap</code> <code>--dc-radius-sm</code> <code>--dc-focus</code></p>
+        </article>
+
+        <article class="card">
+          <h3>Textarea</h3>
+          <p class="anatomy">Label · multiline input · resize handle</p>
+          <label for="notes">Delivery notes</label>
+          <textarea id="notes" rows="2" maxlength="160" aria-describedby="notes-help"></textarea>
+          <p class="guide" id="notes-help">Up to 160 characters.</p>
+          <label for="archive">Archived notes <small>· Disabled</small></label>
+          <textarea id="archive" rows="1" disabled>Leave at reception.</textarea>
+          <p class="guide">Do allow vertical resizing for longer responses.</p>
+          <p class="tokens"><code>--dc-space-3</code> <code>--dc-tap</code> <code>--dc-focus</code></p>
+        </article>
+
+        <article class="card">
+          <h3>Select</h3>
+          <p class="anatomy">Label · selected value · disclosure arrow</p>
+          <label for="zone">Time zone</label>
+          <select id="zone">
+            <option value="">Choose a time zone</option>
+            <option value="utc">UTC</option>
+            <option value="sgt">Singapore (UTC+8)</option>
+          </select>
+          <label for="region">Region <small>· Disabled</small></label>
+          <select id="region" disabled><option>Asia Pacific</option></select>
+          <p class="guide">Do use a select for a compact list of fixed options.</p>
+          <p class="tokens"><code>--dc-tap</code> <code>--dc-muted</code> <code>--dc-focus</code></p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="choices">
+      <h2 id="choices">Choice controls</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Checkbox</h3>
+          <p class="anatomy">Box · check mark · label</p>
+          <fieldset>
+            <legend>Include in export</legend>
+            <label class="choice"><input type="checkbox" checked> Summary</label>
+            <label class="choice"><input type="checkbox"> Activity log</label>
+            <label class="choice"><input type="checkbox" disabled> Billing history</label>
+          </fieldset>
+          <p class="guide">Do use checkboxes for independent choices.</p>
+          <p class="tokens"><code>--dc-brand</code> <code>--dc-tap</code> <code>--dc-focus</code></p>
+        </article>
+
+        <article class="card">
+          <h3>Radio</h3>
+          <p class="anatomy">Circle · selection dot · group legend</p>
+          <fieldset>
+            <legend>Digest frequency</legend>
+            <label class="choice"><input type="radio" name="frequency" value="daily" checked> Daily</label>
+            <label class="choice"><input type="radio" name="frequency" value="weekly"> Weekly</label>
+            <label class="choice"><input type="radio" name="frequency" value="monthly" disabled> Monthly</label>
+          </fieldset>
+          <p class="guide">Do group mutually exclusive choices under one legend.</p>
+          <p class="tokens"><code>--dc-brand</code> <code>--dc-tap</code> <code>--dc-focus</code></p>
+        </article>
+
+        <article class="card">
+          <h3>Switch</h3>
+          <p class="anatomy">Track · thumb · persistent label</p>
+          <fieldset>
+            <legend>Preferences</legend>
+            <label class="choice"><input type="checkbox" role="switch" checked> Email alerts</label>
+            <label class="choice"><input type="checkbox" role="switch"> Weekly digest</label>
+            <label class="choice"><input type="checkbox" role="switch" disabled> SMS alerts</label>
+          </fieldset>
+          <p class="guide">Do use switches for settings that apply immediately.</p>
+          <p class="tokens"><code>--dc-radius-pill</code> <code>--dc-brand</code> <code>--dc-tap</code></p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="feedback">
+      <h2 id="feedback">Help and validation</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Helper and error text</h3>
+          <p class="anatomy">Field · message · correction</p>
+          <label for="link">Portfolio URL</label>
+          <input id="link" type="url" value="example.com" aria-invalid="true" aria-describedby="link-error">
+          <p class="message error" id="link-error">Error: Enter a full URL, such as https://example.com.</p>
+          <p class="guide">Do place guidance below the field. For errors, explain how to fix the value.</p>
+          <p class="tokens"><code>--dc-muted</code> <code>--dc-error</code> <code>--dc-error-bg</code></p>
+        </article>
+
+        <article class="card">
+          <h3>Try validation</h3>
+          <p class="anatomy">Required label · field · inline feedback</p>
+          <form id="validation">
+            <label for="email">Work email <small>· Required</small></label>
+            <input id="email" type="email" required aria-describedby="email-help">
+            <p class="guide" id="email-help">Try a blank value, then alex@example.com.</p>
+            <p class="message error" id="email-error" hidden></p>
+            <button type="submit">Check email</button>
+            <p class="message success" role="status" id="result"></p>
+          </form>
+          <p class="guide">Do validate on submit and keep the entered value available for correction.</p>
+          <p class="tokens"><code>--dc-focus</code> <code>--dc-success</code> <code>--dc-success-bg</code></p>
+        </article>
+      </div>
+    </section>
+  </main>
+  <script>
+    const form = document.querySelector('#validation');
+    const email = document.querySelector('#email');
+    const error = document.querySelector('#email-error');
+    const result = document.querySelector('#result');
+    const portfolio = document.querySelector('#link');
+
+    portfolio.addEventListener('input', () => {
+      const invalid = portfolio.validity.typeMismatch;
+      if (invalid) {
+        portfolio.setAttribute('aria-invalid', 'true');
+        portfolio.setAttribute('aria-describedby', 'link-error');
+      } else {
+        portfolio.removeAttribute('aria-invalid');
+        portfolio.removeAttribute('aria-describedby');
+      }
+      document.querySelector('#link-error').hidden = !invalid;
+    });
+
+    form.noValidate = true;
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const valid = email.validity.valid;
+      result.textContent = valid ? 'Email format looks good.' : '';
+      error.hidden = valid;
+      if (valid) {
+        email.removeAttribute('aria-invalid');
+        email.setAttribute('aria-describedby', 'email-help');
+        return;
+      }
+      error.textContent = email.validity.valueMissing
+        ? 'Error: Enter your work email.'
+        : 'Error: Enter an email address such as alex@example.com.';
+      email.setAttribute('aria-invalid', 'true');
+      email.setAttribute('aria-describedby', 'email-help email-error');
+      email.focus();
+    });
+
+    email.addEventListener('input', () => {
+      result.textContent = '';
+      if (!email.validity.valid) return;
+      error.hidden = true;
+      email.removeAttribute('aria-invalid');
+      email.setAttribute('aria-describedby', 'email-help');
+    });
+  </script>
+</body>
+</html>

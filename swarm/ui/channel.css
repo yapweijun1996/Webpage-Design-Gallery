@@ -1,0 +1,339 @@
+.swarm-channel {
+  --channel-bg: #13161c;
+  --channel-text: #e8eaf0;
+  --channel-border: #262b36;
+  --channel-surface: #171a21;
+  --channel-muted: #aab0bf;
+  --channel-blue: #8ab4ff;
+  --channel-green: #3ecf8e;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  color-scheme: dark;
+  background: var(--channel-bg);
+  color: var(--channel-text);
+  font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+.swarm-channel,
+.swarm-channel * {
+  box-sizing: border-box;
+}
+
+.swarm-channel [hidden] {
+  display: none !important;
+}
+
+.swarm-channel :focus-visible {
+  outline: 2px solid var(--channel-blue);
+  outline-offset: 2px;
+}
+
+.swarm-channel__timeline {
+  position: relative;
+  display: flex;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.swarm-channel__messages {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: auto;
+  overflow-anchor: none;
+  overscroll-behavior: contain;
+  scroll-behavior: auto;
+  margin: 0;
+  padding: 12px;
+  list-style: none;
+}
+
+.swarm-channel__messages:focus-visible {
+  outline-offset: -3px;
+}
+
+.swarm-channel__group {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: start;
+  gap: 9px;
+  margin-block: 0 14px;
+}
+
+.swarm-channel__avatar {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--participant-color);
+  color: #13161c;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.swarm-channel__group-body {
+  min-width: 0;
+}
+
+.swarm-channel__message-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-bottom: 2px;
+}
+
+.swarm-channel .swarm-channel__sender {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--participant-color);
+  font: inherit;
+  font-weight: 700;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.swarm-channel button.swarm-channel__sender:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+
+.swarm-channel__time {
+  color: var(--channel-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.swarm-channel__message + .swarm-channel__message {
+  margin-top: 5px;
+}
+
+.swarm-channel__text,
+.swarm-channel__task,
+.swarm-channel__system {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.swarm-channel__chip {
+  padding: 0 4px;
+  border: 1px solid var(--channel-border);
+  border-radius: 5px;
+  background: #202633;
+  color: var(--participant-color);
+  font-size: 0.92em;
+  font-weight: 650;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.swarm-channel__assignment,
+.swarm-channel__decision {
+  padding: 7px 9px;
+  border: 1px solid var(--channel-border);
+  border-radius: 8px;
+  background: var(--channel-surface);
+}
+
+.swarm-channel__assignment-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.swarm-channel__task {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--channel-border);
+  color: var(--channel-muted);
+}
+
+.swarm-channel__decision {
+  border-inline-start: 3px solid var(--channel-blue);
+}
+
+.swarm-channel__decision-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--channel-blue);
+  font-size: 11px;
+}
+
+.swarm-channel__done {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 5px;
+  color: #b2e8ce;
+}
+
+.swarm-channel__check {
+  color: var(--channel-green);
+  font-weight: 750;
+}
+
+.swarm-channel__system {
+  margin: 0 0 12px;
+  padding: 4px 0;
+  color: var(--channel-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.swarm-channel .swarm-channel__new-messages,
+.swarm-channel .swarm-channel__send {
+  min-height: 32px;
+  padding: 4px 11px;
+  border: 1px solid #405273;
+  background: #253650;
+  color: #e2edff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.swarm-channel .swarm-channel__new-messages:hover,
+.swarm-channel .swarm-channel__send:not(:disabled):hover {
+  background: #31466a;
+}
+
+.swarm-channel .swarm-channel__new-messages {
+  position: absolute;
+  inset-inline-end: 14px;
+  inset-block-end: 8px;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px #0006;
+  font-size: 12px;
+}
+
+.swarm-channel__composer {
+  position: relative;
+  flex: none;
+  padding: 8px;
+  border-top: 1px solid var(--channel-border);
+  background: var(--channel-surface);
+}
+
+.swarm-channel__composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.swarm-channel__input {
+  flex: 1 1 0;
+  min-width: 0;
+  max-height: 26vh;
+  padding: 6px 8px;
+  resize: vertical;
+  border: 1px solid #333a49;
+  border-radius: 8px;
+  background: var(--channel-bg);
+  color: inherit;
+  font: inherit;
+  font-size: 16px;
+}
+
+.swarm-channel__input::placeholder {
+  color: var(--channel-muted);
+}
+
+.swarm-channel .swarm-channel__send {
+  flex: none;
+  border-radius: 8px;
+}
+
+.swarm-channel .swarm-channel__send:disabled,
+.swarm-channel__input:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.swarm-channel__typing,
+.swarm-channel__error {
+  margin: 0 2px 6px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.swarm-channel__typing {
+  color: #f5c542;
+}
+
+.swarm-channel__error {
+  color: #ffaaa0;
+}
+
+.swarm-channel__suggestions {
+  position: absolute;
+  z-index: 1;
+  inset-inline: 8px;
+  bottom: calc(100% + 4px);
+  max-height: min(210px, 36vh);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+  border: 1px solid #333a49;
+  border-radius: 8px;
+  background: var(--channel-surface);
+  box-shadow: 0 4px 12px #0006;
+}
+
+.swarm-channel__option {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 30px;
+  padding: 5px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.swarm-channel__option:hover,
+.swarm-channel__option[aria-selected="true"] {
+  background: #293244;
+}
+
+.swarm-channel__option-name {
+  color: var(--participant-color);
+  font-weight: 700;
+}
+
+.swarm-channel__option-section {
+  color: var(--channel-muted);
+  font-size: 12px;
+  text-align: end;
+}
+
+.swarm-channel__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swarm-channel,
+  .swarm-channel * {
+    animation: none;
+    transition: none;
+    scroll-behavior: auto;
+  }
+}

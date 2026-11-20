@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>03 Layout · Design Canvas</title>
+  <link rel="stylesheet" href="../tokens.css" />
+  <link rel="stylesheet" href="03-layout.css" />
+</head>
+<body>
+  <main class="container stack">
+    <header class="masthead">
+      <p class="eyebrow">Design system / Layout</p>
+      <h1>Layout</h1>
+      <p>Space with intent. Align to a common grid and let content reflow as the viewport narrows.</p>
+    </header>
+
+    <section class="panel stack" aria-labelledby="grid-title">
+      <div>
+        <p class="eyebrow">Columns · Gutters · Spans</p>
+        <h2 id="grid-title">12-column grid</h2>
+      </div>
+      <div class="grid ruler" aria-hidden="true">
+        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+        <span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span>
+      </div>
+      <div class="grid spans">
+        <div class="primary">Main <small>12 → 8 columns</small></div>
+        <div class="secondary">Aside <small>12 → 4 columns</small></div>
+      </div>
+      <dl class="breakpoints">
+        <div><dt>Base</dt><dd>Below 36em · stacked</dd></div>
+        <div><dt>Split</dt><dd>36em and up · side by side</dd></div>
+        <div><dt>Wide</dt><dd>64em and up · larger gutters and insets</dd></div>
+      </dl>
+      <p class="rule"><strong>Do</strong> align spans to the grid. <strong>Don’t</strong> change the reading order when the layout splits.</p>
+      <p class="tokens"><code>--dc-space-1</code> ruler gap · <code>--dc-space-3</code> / <code>--dc-space-6</code> content gutter</p>
+    </section>
+
+    <section class="panel stack" aria-labelledby="spacing-title">
+      <div>
+        <p class="eyebrow">Step · Measure · Role</p>
+        <h2 id="spacing-title">4px spacing scale</h2>
+      </div>
+      <ul class="scale">
+        <li><i class="s1"></i><span>4px <code>--dc-space-1</code></span></li>
+        <li><i class="s2"></i><span>8px <code>--dc-space-2</code></span></li>
+        <li><i class="s3"></i><span>12px <code>--dc-space-3</code></span></li>
+        <li><i class="s4"></i><span>16px <code>--dc-space-4</code></span></li>
+        <li><i class="s6"></i><span>24px <code>--dc-space-6</code></span></li>
+        <li><i class="s8"></i><span>32px <code>--dc-space-8</code></span></li>
+        <li><i class="s12"></i><span>48px <code>--dc-space-12</code></span></li>
+      </ul>
+      <p class="rule"><strong>Do</strong> use 4–12px for related details and 16–48px between groups. <strong>Don’t</strong> add one-off gaps.</p>
+    </section>
+
+    <section class="panel stack" aria-labelledby="container-title">
+      <div>
+        <p class="eyebrow">Outer edge · Inline inset · Content</p>
+        <h2 id="container-title">Container</h2>
+      </div>
+      <div class="inset-demo">
+        <div>Centered content</div>
+      </div>
+      <p>Fluid below the cap, centered at the cap. Inline insets grow from 16px to 32px at 64em.</p>
+      <p class="rule"><strong>Do</strong> share one container across a page. <strong>Don’t</strong> nest insets that double the outer padding.</p>
+      <p class="tokens"><code>--dc-container</code> cap · <code>--dc-space-4</code> / <code>--dc-space-8</code> insets</p>
+    </section>
+
+    <section class="panel stack" aria-labelledby="patterns-title">
+      <h2 id="patterns-title">Stack and cluster</h2>
+      <div class="patterns">
+        <article class="stack specimen">
+          <div>
+            <p class="eyebrow">Items · Block gap</p>
+            <h3>Stack</h3>
+          </div>
+          <div class="stack sample-stack"><span>Heading</span><span>Supporting text</span></div>
+          <p>Compact stack for related items. Use the roomy stack for sections.</p>
+          <p class="rule"><strong>Do</strong> set the gap on the parent. <strong>Don’t</strong> add margins to every child.</p>
+          <p class="tokens"><code>--dc-space-2</code> compact · <code>--dc-space-6</code> roomy</p>
+        </article>
+        <article class="stack specimen">
+          <div>
+            <p class="eyebrow">Items · Gap · Wrap</p>
+            <h3>Cluster</h3>
+          </div>
+          <div class="cluster"><span>Design</span><span>Engineering</span><span>Accessibility</span></div>
+          <p>One line when items fit. Wrapped lines keep the same gap.</p>
+          <p class="rule"><strong>Do</strong> allow wrapping. <strong>Don’t</strong> squeeze labels to force one line.</p>
+          <p class="tokens"><code>--dc-space-2</code> row and column gap</p>
+        </article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

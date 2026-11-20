@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swarm · Meeting room demo</title>
+<link rel="stylesheet" href="docs.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 12px;
+    color-scheme: dark;
+    background: #0f1115;
+    color: #e8eaf0;
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  }
+  main { max-width: 393px; margin: auto; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  h1 { margin: 0; font-size: 14px; }
+  button {
+    min-height: 44px;
+    border: 1px solid #333a49;
+    border-radius: 8px;
+    padding: 0 10px;
+    background: #1f2430;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+  button:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
+  #docs { max-height: 78vh; border: 1px solid #262b36; border-radius: 10px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Swarm · Docs demo</h1>
+    <button type="button" id="update">Update Decisions</button>
+  </header>
+  <section id="docs" aria-label="Meeting room"></section>
+</main>
+<script src="docs.js"></script>
+<script>
+  const samples = new Map([
+    ['direction.md', [
+      '# Design direction',
+      '',
+      'Keep the meeting room **compact** and use *clear* labels for each handoff.',
+      '',
+      '## Priorities',
+      '- Keep the preview visible.',
+      '- Share decisions in `decisions.md`.',
+      '',
+      '| Document | Purpose |',
+      '| --- | --- |',
+      '| Direction | Design brief |',
+      '| Decisions | Agreed handoffs |',
+      '',
+      '[Open the gallery](https://example.com/design).'
+    ].join('\n')],
+    ['decisions.md', '# Decisions\n\n1. Agree on the scope.\n2. Confirm the handoff.'],
+    ['review1.md', '### First review\n\n---\n\n```html\n<section class="preview">Preview the design in the sidebar before posting a review.</section>\n```'],
+    ['review2.md', '']
+  ]);
+  const updated = new Map(Array.from(samples.keys(), file => [file, new Date().toUTCString()]));
+  const realFetch = window.fetch.bind(window);
+  const base = 'demo-docs/';
+  window.fetch = (url, options) => {
+    if (typeof url !== 'string' || !url.startsWith(base)) return realFetch(url, options);
+    const file = url.slice(base.length);
+    return Promise.resolve(samples.has(file)
+      ? new Response(samples.get(file), { headers: { 'Last-Modified': updated.get(file) } })
+      : new Response(null, { status: 404 }));
+  };
+
+  const root = document.getElementById('docs');
+  SwarmDocs.init({ root, base });
+  root.querySelector('details').open = true;
+  let revision = 0;
+  document.getElementById('update').addEventListener('click', () => {
+    samples.set('decisions.md', samples.get('decisions.md') + '\n\n### Revision ' + ++revision + '\nThe team confirmed the next handoff.');
+    updated.set('decisions.md', new Date().toUTCString());
+    SwarmDocs.refresh('decisions.md');
+  });
+</script>
+</body>
+</html>
