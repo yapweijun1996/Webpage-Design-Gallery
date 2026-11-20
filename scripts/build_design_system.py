@@ -13,6 +13,7 @@ DEMO_THEME_OUTPUTS = {
     "v21": "demos/corporate/gjh/v21/assets/theme.css",
     "v22": "demos/corporate/gjh/v22/assets/theme.css",
     "v23": "demos/corporate/gjh/v23/assets/theme.css",
+    "v24": "demos/corporate/gjh/v24/assets/theme.css",
 }
 
 
@@ -123,8 +124,9 @@ def render_themes(root=ROOT, include_version=lambda version: True):
             raise ValueError(f"Invalid theme identity: {version}")
         if not include_version(version):
             continue
-        groups = [(None, None, theme["tokens"])] + [(entry["condition"], entry.get("selector"), entry["tokens"]) for entry in theme["overrides"]]
-        for condition, selector, values in groups:
+        groups = [(None, None, None, theme["tokens"])] + [(entry.get("condition"), entry.get("state"), entry.get("selector"), entry["tokens"])
+                                                     for entry in theme["overrides"]]
+        for condition, state, selector, values in groups:
             if condition and not re.fullmatch(r"@media\s*\((?:max|min)-width\s*:\s*\d+px\)", condition):
                 raise ValueError(f"Invalid responsive theme condition: {condition}")
             merged = {**foundation, **theme["tokens"], **values}
@@ -135,6 +137,11 @@ def render_themes(root=ROOT, include_version=lambda version: True):
             if condition:
                 lines.append(condition + " {")
             scope = f'html[data-gjh-design="{version}"]'
+            # An optional root state such as [data-theme="light"] scopes a whole-page variant.
+            if state:
+                if not re.fullmatch(r'\[data-[a-z-]+="[a-z-]+"\]', state):
+                    raise ValueError(f"Invalid theme state: {state}")
+                scope += state
             if selector:
                 if any(char in selector for char in "{}<>;"):
                     raise ValueError(f"Invalid component theme selector: {selector}")

@@ -402,6 +402,18 @@ test('installed interior instance bounds contain every instance across all 17 st
     instances += shopInstances;
   }
   assert(instances > 0);
+
+  const mili = runtime.groups[1];
+  const detail = mili.getObjectByName('S02 s02-mili-details.glb');
+  const printedTin = detail.children.find(mesh => mesh.material.name === 'Printed opal');
+  const bounds = new T.Box3().setFromObject(printedTin);
+  const pose = {x:mili.position.x,y:0,z:mili.position.z};
+  runtime.update(pose,{shopVisibility:{occluded:(slot,box) => slot === 2 && box.equals(bounds)}});
+  assert.ok(detail.visible);
+  assert.equal(printedTin.visible,false);
+  assert.ok(detail.children.some(mesh => mesh.visible));
+  runtime.update(pose);
+  assert.ok(printedTin.visible);
 });
 
 test('warm registration installs all rooms, reprioritizes remaining work and commits tier changes together', async () => {

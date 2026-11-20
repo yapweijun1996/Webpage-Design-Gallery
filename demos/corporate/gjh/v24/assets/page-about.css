@@ -1,0 +1,240 @@
+.about-story {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  align-items: center;
+  gap: clamp(var(--space-8), 6vw, var(--space-20));
+}
+
+.about-story-copy > p {
+  margin: var(--space-4) 0 0;
+}
+
+.about-story-copy > p:not(.lead, .fine-print) {
+  color: var(--ivory-muted);
+}
+
+.about-story-copy .text-link {
+  min-height: var(--size-control);
+  margin-top: var(--space-3);
+}
+
+.about-story-figure {
+  margin: 0;
+}
+
+.about-story-media {
+  overflow: hidden;
+  aspect-ratio: 1100 / 733;
+  border: 1px solid var(--line-gold);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.about-story-figure figcaption {
+  margin-top: var(--space-3);
+}
+
+.about-sources a {
+  color: var(--ivory-muted);
+  text-underline-offset: .18em;
+}
+
+.about-sources a:hover {
+  color: var(--gold-bright);
+}
+
+.about-proposal {
+  margin: var(--space-3) 0 0;
+  color: var(--gold);
+}
+
+.about-principles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
+}
+
+.about-values,
+.about-offices,
+.about-markets {
+  padding: 0;
+  list-style: none;
+}
+
+.about-values,
+.about-offices {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.about-values li,
+.about-offices li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.about-values .icon,
+.about-offices .icon {
+  flex: none;
+  color: var(--gold);
+}
+
+.about-values .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.about-journey {
+  scroll-margin-top: calc(var(--header-height) + var(--space-5));
+}
+
+.about-journey .section-head {
+  justify-content: center;
+}
+
+.about-timeline {
+  position: relative;
+  max-width: 59rem;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.about-timeline::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 1px;
+  background: var(--gold-deep);
+}
+
+.about-timeline > li {
+  position: relative;
+  width: 50%;
+  padding: 0 var(--space-10) var(--space-5) 0;
+  text-align: right;
+}
+
+.about-timeline > li:nth-child(even) {
+  margin-left: 50%;
+  padding: 0 0 var(--space-5) var(--space-10);
+  text-align: left;
+}
+
+.about-timeline > li::before {
+  content: "";
+  position: absolute;
+  top: .85rem;
+  right: 0;
+  width: .625rem;
+  height: .625rem;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-round);
+  background: var(--obsidian);
+  transform: translateX(calc(50% + .5px));
+}
+
+.about-timeline > li:nth-child(even)::before {
+  right: auto;
+  left: 0;
+  transform: translateX(calc(-50% + .5px));
+}
+
+.about-year {
+  margin: 0 0 var(--space-2);
+  color: var(--gold);
+  font-family: var(--font-serif);
+  font-size: var(--type-stat);
+  line-height: 1.05;
+}
+
+.about-timeline .card-text {
+  margin-top: var(--space-2);
+}
+
+.about-journey-sources {
+  margin: var(--space-6) auto 0;
+  text-align: center;
+}
+
+.about-region {
+  margin-bottom: var(--space-12);
+}
+
+.about-region .frame {
+  padding-block: var(--space-8);
+  border-block: 1px solid var(--line-gold);
+}
+
+.about-region-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: var(--space-8);
+}
+
+.about-offices {
+  margin: var(--space-4) 0 0;
+  color: var(--ivory-muted);
+}
+
+.about-markets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+}
+
+.about-region .about-sources {
+  margin: var(--space-6) 0 0;
+}
+
+@media (max-width: 1180px) {
+  .about-principles {
+    gap: var(--space-4);
+  }
+}
+
+@media (max-width: 900px) {
+  .about-story,
+  .about-region-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .about-journey .section-head {
+    justify-content: flex-start;
+  }
+
+  .about-timeline::before {
+    left: .5rem;
+  }
+
+  .about-timeline > li,
+  .about-timeline > li:nth-child(even) {
+    width: auto;
+    margin: 0;
+    padding: 0 0 var(--space-7) var(--space-8);
+    text-align: left;
+  }
+
+  .about-timeline > li::before,
+  .about-timeline > li:nth-child(even)::before {
+    right: auto;
+    left: .5rem;
+    transform: translateX(calc(-50% + .5px));
+  }
+
+  .about-journey-sources {
+    text-align: left;
+  }
+}
+
+@media (max-width: 600px) {
+  .about-principles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .about-region {
+    margin-bottom: var(--space-8);
+  }
+}

@@ -1,13 +1,9 @@
 // Optional furniture; opaque surfaces are merged before instancing across placements.
 import {loadStaticAsset} from './static-asset.js';
 import {createInstanceVisibility, createProjectedBatch} from './packed-draw.js';
-import {opaqueBatch} from './opaque-batch.js';
+import {batchFurniture} from './opaque-batch.js';
 import {INTERIOR_PILOT} from './interior-pilot-registry.js';
-import {INTERIOR_ADDITIONS} from './interior-additions-registry.js';
-
-// Placed additions load with the pilot set; reserved ones stay registered but unmounted.
-const placedAdditions = Object.fromEntries(Object.entries(INTERIOR_ADDITIONS).filter(([, asset]) => asset.placed));
-const pilotSources = Object.freeze({...Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== 'shelf')), ...placedAdditions});
+const pilotSources = Object.fromEntries(Object.entries(INTERIOR_PILOT).filter(([kind]) => kind !== 'shelf'));
 
 const shopSources = Object.freeze({
   barStool: {
@@ -32,32 +28,6 @@ const shopSources = Object.freeze({
     sha256:'155666679065cdec42f9b1f831bcc7b67959487a6f518e36f5d06925d90d2022', dimensions_m:[0.481056, 0.5045, 0.58], rootExtras:{units:'metres'}
   }
 });
-
-// These pinned, texture-free surfaces are opaque and non-emissive. Merge them
-// once while retaining their PBR values and per-shop visibility.
-function batchFurniture(T, primitives) {
-  const parts=primitives.map(primitive=>{
-    const source=primitive.geometry;
-    const geometry=source.index?source.toNonIndexed():source.clone();
-    geometry.applyMatrix4(primitive.matrix);
-    const vertexColour = primitive.material.vertexColors && geometry.getAttribute('color');
-    for(const name of Object.keys(geometry.attributes))if(name!=='position'&&name!=='normal')geometry.deleteAttribute(name);
-    const count=geometry.attributes.position.count, colour=new Float32Array(count*3), surface=new Float32Array(count*2), material=primitive.material;
-    for(let i=0;i<count;i++){
-      colour[i*3] = material.color.r * (vertexColour ? vertexColour.getX(i) : 1);
-      colour[i*3+1] = material.color.g * (vertexColour ? vertexColour.getY(i) : 1);
-      colour[i*3+2] = material.color.b * (vertexColour ? vertexColour.getZ(i) : 1);
-      surface.set([material.roughness,material.metalness],i*2);
-    }
-    geometry.setAttribute('color',new T.BufferAttribute(colour,3));
-    geometry.setAttribute('obSurface',new T.BufferAttribute(surface,2));
-    return geometry;
-  });
-  const mesh=opaqueBatch(T,parts,false);
-  for(const geometry of new Set(primitives.map(primitive=>primitive.geometry)))geometry.dispose();
-  for(const material of new Set(primitives.map(primitive=>primitive.material)))material.dispose();
-  return [{geometry:mesh.geometry,material:mesh.material,matrix:new T.Matrix4()}];
-}
 
 // Collapse subpixel bevel steps within each finish, preserving the authored
 // normals on surviving faces. Bound the change by the measured displacement.
@@ -101,7 +71,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
     record.status = 'loading';
     Object.assign(record, await loadStaticAsset(T, definition, import.meta.url));
     record.sourcePrimitiveCount=record.primitives.length;
-    if(record.status==='loaded'&&(['bench','planter','coffeeTable','storeSign','wallLight',...Object.keys(placedAdditions)].includes(kind) || Object.hasOwn(shopSources,kind))){
+    if(record.status==='loaded'&&(['bench','planter','coffeeTable','storeSign','wallLight'].includes(kind) || Object.hasOwn(shopSources,kind))){
       const opaque=record.primitives.filter(primitive=>primitive.material.emissive?.getHex()===0);
       const emissive=record.primitives.filter(primitive=>primitive.material.emissive?.getHex()!==0);
       if(opaque.length>1)record.primitives=[...batchFurniture(T,opaque),...emissive];

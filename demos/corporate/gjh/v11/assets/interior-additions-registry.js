@@ -16,11 +16,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
       "SIT"
     ],
     "priority": "P1",
-    "placed": false,
+    "placed": true,
     "label": "Round single-seat ottoman",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_ottoman_round.glb",
     "source_sha256": "6fbcb41b0dfed91e36e129e0fdd0c73791b372e82b2374679b5f207f0869cd6c",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        -4,
+        0.016,
+        26.8
+      ],
+      "yaw_deg": 0,
+      "support": "west-lounge-rug",
+      "note": "West atrium lounge, facing the coffee table."
+    },
+    "minimum_tier": "low",
+    "triangles": 798,
+    "bounds_min": [
+      -0.3499999940395355,
+      0,
+      -0.3499999940395355
+    ],
+    "bounds_max": [
+      0.3499999940395355,
+      0.44999998807907104,
+      0.3499999940395355
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -39,11 +60,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
     ],
     "capabilities": [],
     "priority": "P1",
-    "placed": false,
+    "placed": true,
     "label": "Small round planter with a leafy plant",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_planter_round.glb",
     "source_sha256": "760f7d0813fba6471d9509922d1a9ae7ba342ba0da7db7d774729bd009f8637f",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        22,
+        0.016,
+        21.4
+      ],
+      "yaw_deg": 0,
+      "support": "east-lounge-rug",
+      "note": "East atrium lounge, inside the rug border."
+    },
+    "minimum_tier": "balanced",
+    "triangles": 1795,
+    "bounds_min": [
+      -0.375,
+      0,
+      -0.375
+    ],
+    "bounds_max": [
+      0.375,
+      1.399999976158142,
+      0.375
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -64,11 +106,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
       "USE"
     ],
     "priority": "P1",
-    "placed": false,
+    "placed": true,
     "label": "Freestanding directory column",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_sign_directory.glb",
     "source_sha256": "3411cc8230761efc2d662abb18b481cbbed332fc9c3f3248c51cddf731038299",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        4.65,
+        -0.012,
+        44.45
+      ],
+      "yaw_deg": 90,
+      "support": "concourse",
+      "note": "West side of the main entrance, clear of the arrival lane."
+    },
+    "minimum_tier": "low",
+    "triangles": 1397,
+    "bounds_min": [
+      -0.375,
+      0,
+      -0.125
+    ],
+    "bounds_max": [
+      0.375,
+      1.9500000476837158,
+      0.125
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -87,11 +150,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
     ],
     "capabilities": [],
     "priority": "P2",
-    "placed": false,
+    "placed": true,
     "label": "Arched floor lamp (closest match to the decorative lamp column)",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_lamp_floor.glb",
     "source_sha256": "5cb040bd1982017acc97b2d96cb80963516be67814c92cab49d816539c1581f2",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        26,
+        0.016,
+        21.6
+      ],
+      "yaw_deg": 180,
+      "support": "east-lounge-rug",
+      "note": "East atrium reading lounge, opposite the planter."
+    },
+    "minimum_tier": "balanced",
+    "triangles": 1498,
+    "bounds_min": [
+      -0.30000001192092896,
+      0,
+      -0.30000001192092896
+    ],
+    "bounds_max": [
+      0.30000001192092896,
+      1.7000000476837158,
+      0.30000001192092896
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -112,11 +196,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
       "USE"
     ],
     "priority": "P2",
-    "placed": false,
+    "placed": true,
     "label": "Curved information desk",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_desk_service.glb",
     "source_sha256": "d27221a7795118769a4344eec8f9ebce216dcfcffa81513358b4bd07066dbc9d",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        21.25,
+        -0.012,
+        44.6
+      ],
+      "yaw_deg": 180,
+      "support": "concourse",
+      "note": "Entrance coat-check desk, west of the existing service desk."
+    },
+    "minimum_tier": "balanced",
+    "triangles": 1798,
+    "bounds_min": [
+      -0.800000011920929,
+      0,
+      -0.3499999940395355
+    ],
+    "bounds_max": [
+      0.800000011920929,
+      1.0499999523162842,
+      0.3499999940395355
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -137,11 +242,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
       "INSPECT"
     ],
     "priority": "P1",
-    "placed": false,
+    "placed": true,
     "label": "Garment rail with hangers",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_rack_clothes.glb",
     "source_sha256": "7511bf4b5654467c27d51a363c32ece01ad625a6e6f2ca73c12246b27aa41b6b",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        21.25,
+        -0.012,
+        47.1
+      ],
+      "yaw_deg": 180,
+      "support": "concourse",
+      "note": "Coat rail behind the entrance coat-check desk."
+    },
+    "minimum_tier": "balanced",
+    "triangles": 1198,
+    "bounds_min": [
+      -0.6000000238418579,
+      0,
+      -0.22499999403953552
+    ],
+    "bounds_max": [
+      0.6000000238418579,
+      1.600000023841858,
+      0.22499999403953552
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -162,11 +288,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
       "INSPECT"
     ],
     "priority": "P1",
-    "placed": false,
+    "placed": true,
     "label": "Open end-cap display shelf",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_shelf_display.glb",
     "source_sha256": "dfb3e6fcfa385786b08298c177e44ce14433826753e757d79eb19c4ad647949f",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        -17.25,
+        0.081,
+        18
+      ],
+      "yaw_deg": 180,
+      "support": "S08",
+      "note": "Skippy front display bay for pantry merchandise."
+    },
+    "minimum_tier": "balanced",
+    "triangles": 1497,
+    "bounds_min": [
+      -0.44999998807907104,
+      0,
+      -0.17499999701976776
+    ],
+    "bounds_max": [
+      0.44999998807907104,
+      1.7999999523162842,
+      0.17499999701976776
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -187,11 +334,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
       "INSPECT"
     ],
     "priority": "P1",
-    "placed": false,
+    "placed": true,
     "label": "Island display table",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_table_display.glb",
     "source_sha256": "30234aa8ff7d21761920ee1527f374076ded2ae2d296f6499edea2e2759d4ba9",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        37.5,
+        0.081,
+        14.5
+      ],
+      "yaw_deg": -90,
+      "support": "S13",
+      "note": "Sony listening showroom, front accessory display."
+    },
+    "minimum_tier": "balanced",
+    "triangles": 997,
+    "bounds_min": [
+      -0.550000011920929,
+      0,
+      -0.30000001192092896
+    ],
+    "bounds_max": [
+      0.550000011920929,
+      0.8500000238418579,
+      0.30000001192092896
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -212,11 +380,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
       "USE"
     ],
     "priority": "P1",
-    "placed": false,
+    "placed": true,
     "label": "Cashier counter",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_counter_shop.glb",
     "source_sha256": "e07ff75ca20d92d9f7192caf7e50b6c368b8f56755fcc4f7a485025b49d513fa",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        40.5,
+        0.081,
+        41.75
+      ],
+      "yaw_deg": 0,
+      "support": "S17",
+      "note": "Gigaset side counter beside the handset showroom."
+    },
+    "minimum_tier": "balanced",
+    "triangles": 1375,
+    "bounds_min": [
+      -0.8999999761581421,
+      0,
+      -0.30000001192092896
+    ],
+    "bounds_max": [
+      0.8999999761581421,
+      1.0499999523162842,
+      0.30000001192092896
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -235,11 +424,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
     ],
     "capabilities": [],
     "priority": "P1",
-    "placed": false,
+    "placed": true,
     "label": "Framed wall art panel (closest match to the interchangeable advertising frame)",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_wall_art.glb",
     "source_sha256": "6ddc4eb7cabee2eb52a1f4a8c1e8ca965a00ca70d696551d9c41ba43273db6bc",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        21.25,
+        2.4,
+        47.85
+      ],
+      "yaw_deg": 180,
+      "support": "entrance-wall",
+      "note": "Framed print on the inside entrance wall above the coat rail."
+    },
+    "minimum_tier": "balanced",
+    "triangles": 398,
+    "bounds_min": [
+      -0.44999998807907104,
+      -0.44999998807907104,
+      0
+    ],
+    "bounds_max": [
+      0.44999998807907104,
+      0.44999998807907104,
+      0.05000000074505806
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."
@@ -258,11 +468,32 @@ export const INTERIOR_ADDITIONS = Object.freeze({
     ],
     "capabilities": [],
     "priority": "P1",
-    "placed": false,
+    "placed": true,
     "label": "Globe pendant lamp",
     "source": "models/gjh-interior-additions/sources/GJH_NEW_lamp_pendant.glb",
     "source_sha256": "b0b9fa4dadbd22e05dbbdaf774aecabec0b8a3def580ee7ac4a861496fdb9ccc",
-    "lod_policy": "Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.",
+    "placement": {
+      "xyz": [
+        18.13,
+        4.797,
+        44.75
+      ],
+      "yaw_deg": 0,
+      "support": "arcade-beam",
+      "note": "Globe suspended from the east entrance arcade soffit."
+    },
+    "minimum_tier": "balanced",
+    "triangles": 1198,
+    "bounds_min": [
+      -0.19106118381023407,
+      -0.8500000238418579,
+      -0.1900128722190857
+    ],
+    "bounds_max": [
+      0.18893881142139435,
+      0,
+      0.18998712301254272
+    ],
     "uv_policy": "No textures or baking; flat PBR materials only.",
     "collision_owner": "V11 app-owned Rapier proxies; no visual collision nodes exported.",
     "rights": "Tripo Studio output from owner reference images; redistribution confirmed by the owner on 2026-11-20 for public use in v11 and the gallery."

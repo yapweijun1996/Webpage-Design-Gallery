@@ -16,6 +16,7 @@ export function createInteriorKit(T, scene, {
 }) {
   const materials = interiorMaterials(T);
   const report = emptyInteriorReport('low'), renderedShops = new Set();
+  const visibilityParts = new WeakMap();
   let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
 
   let lastUpdate;
@@ -188,7 +189,18 @@ export function createInteriorKit(T, scene, {
       if (signal.aborted) return;
       for (const root of fresh) { root.visible = false; shop.group.add(root); }
       shop.group.updateMatrixWorld(true);
-      for (const root of fresh) root.userData.roomBounds = new T.Box3().setFromObject(root);
+      for (const root of fresh) {
+        root.userData.roomBounds = new T.Box3().setFromObject(root);
+        const parts = [];
+        root.traverse(node => {
+          if (node === root || !node.isMesh || !node.visible) return;
+          const localBounds = node.isInstancedMesh ? node.boundingBox : node.geometry.boundingBox;
+          if (localBounds && !localBounds.isEmpty()) {
+            parts.push({node,bounds:localBounds.clone().applyMatrix4(node.matrixWorld)});
+          }
+        });
+        visibilityParts.set(root,parts);
+      }
       if (freshDecoration) shop.layers[detail] = freshDecoration;
       for (const member of required) {
         const root = freshModels.get(member.file);
@@ -262,7 +274,12 @@ export function createInteriorKit(T, scene, {
         shop.group.visible = shop.shown !== null && shop.near;
         if (shop.group.visible) for (const root of shop.shown) {
           const bounds = root.userData.roomBounds;
-          root.visible = !view?.shopVisibility || bounds.isEmpty() || !view.shopVisibility.occluded(i+1,bounds);
+          const visible = box => (!view?.frustum || view.frustum.intersectsBox(box)) &&
+            !view?.shopVisibility?.occluded(i+1,box);
+          root.visible = bounds.isEmpty() || visible(bounds);
+          if (root.visible) for (const {node,bounds} of visibilityParts.get(root)) {
+            node.visible = visible(bounds);
+          }
         }
         if (!shop.group.visible || !wasNear || !shop.motion || reducedMotion?.matches) continue;
         shop.phase += delta;

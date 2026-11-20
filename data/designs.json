@@ -775,6 +775,45 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "gjh-v24",
+    "companyId": "gjh",
+    "slug": "v24",
+    "version": "v24",
+    "title": "Luxury Digital Experience",
+    "description": "Tour six pages: home, story, a filterable brand directory, business areas, the virtual mall entrance and an accessible enquiry form.",
+    "styles": [
+      "corporate",
+      "immersive"
+    ],
+    "status": "concept",
+    "order": 210,
+    "demoPath": "demos/corporate/gjh/v24/index.html",
+    "thumbnail": "demos/corporate/gjh/v24/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v24/screenshots/1440.png",
+        "width": 1440,
+        "height": 4883
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v24/screenshots/768.png",
+        "width": 768,
+        "height": 5619
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v24/screenshots/390.png",
+        "width": 390,
+        "height": 7367
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",

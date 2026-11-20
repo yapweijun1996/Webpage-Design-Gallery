@@ -173,7 +173,7 @@ test('authored moods route across all 17 shops with shared IBL and the same ligh
   atmosphere.releaseEnvironment();
 });
 
-test('bundled world starts and submits an expanded Low and Detailed frame with browser stubs', async t => {
+test('bundled world starts and submits expanded Low, Balanced and Detailed frames with browser stubs', async t => {
   const noop=()=>{};
   const gradient={addColorStop:noop};
   const context=new Proxy({createRadialGradient:()=>gradient,createLinearGradient:()=>gradient,
@@ -201,7 +201,7 @@ test('bundled world starts and submits an expanded Low and Detailed frame with b
   const R={ColliderDesc:{cuboid:descriptor,cylinder:descriptor},RigidBodyDesc:{kinematicPositionBased:descriptor},
     Cuboid:class {},QueryFilterFlags:{EXCLUDE_FIXED:1,EXCLUDE_SENSORS:2}};
   let handle=0;
-  const physics={createCollider:()=>({setRotation:noop}),createRigidBody:()=>({handle:handle++}),removeCollider:noop};
+  const physics={createCollider:()=>({setRotation:noop,setEnabled(value){this.enabled=value;}}),createRigidBody:()=>({handle:handle++}),removeCollider:noop};
   const textureRequests=[];
   class TextureLoader {
     setCrossOrigin() {return this;}
@@ -245,8 +245,11 @@ test('bundled world starts and submits an expanded Low and Detailed frame with b
     assert.equal(world.scene.getObjectByName(ceilingName).visible,tier!=='low');
     assert.equal(world.scene.getObjectByName(floorName).material.map===world.contact.map,false);
     assert.equal(world.scene.getObjectByName('Mall floor and wall light pools').visible,tier!=='low');
-    assert.equal(world.scene.getObjectByName('Restroom sliding door leaves').visible,tier==='low');
-    assert.equal(world.scene.getObjectByName('Expanded storefront trim').visible,tier==='low');
+    const trim = world.scene.getObjectByName('Expanded storefront trim');
+    assert.ok(trim.visible && trim.count > 0 && trim.geometry.hasAttribute('instanceSurface'));
+    assert.equal(world.scene.children.filter(node=>node.name.startsWith('Expanded storefront')).length,2);
+    assert.ok(world.scene.getObjectByName('Restroom sliding door leaves').count <= 6);
+    assert.equal(world.scene.children.filter(node=>node.name.startsWith('cylinder plain')).length,1);
     assert.equal(world.scene.getObjectByName('Atrium ball')?.visible ?? false,false);
     assert.equal(Boolean(world.scene.getObjectByName('Mall tram')),false);
     if (shadows) assert.ok(key.target.position.distanceTo(new T.Vector3(pose.x,pose.y,pose.z))<.012);

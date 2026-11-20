@@ -1,3 +1,4 @@
+import {instancedSurfaceMaterial} from './opaque-batch.js';
 import {registerPhysicsProps} from './physics-props.js';
 import {addTramDebug} from './tram-layout.js';
 import {buildRestrooms} from './restrooms.js';
@@ -17,6 +18,7 @@ import {addOriginalShopDetails} from './shop-anchor-details-first.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {buildUpperLevel, loadUpperLevel, deckPlanters} from './upper-level.js';
+import {createInteriorAdditions} from './interior-additions.js';
 import {createFurnishings} from './furnishings.js';
 import {createShell} from './shell.js';
 import {SHELL_LAYOUT} from './interior-shell-registry.js';
@@ -227,16 +229,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       for (const role of roles) finishForRole.set(role, finish);
     }
   }
-  const plainFinish = mat(0xffffff);
-  plainFinish.onBeforeCompile = shader => {
-    shader.vertexShader = 'attribute vec2 instanceSurface; varying vec2 vSurface;\n' + shader.vertexShader;
-    shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>',
-      '#include <begin_vertex>\nvSurface=instanceSurface;');
-    shader.fragmentShader = 'varying vec2 vSurface;\n' + shader.fragmentShader;
-    shader.fragmentShader = shader.fragmentShader
-      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor=vSurface.x;')
-      .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor=vSurface.y;');
-  };
+  const plainFinish = instancedSurfaceMaterial(T);
   function refreshInstanceColours() {
     for (const refresh of colourBatches) refresh();
   }
@@ -271,9 +264,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   const tagShopLod=mesh=>{if(expanded&&activeShopSlot!==null){mesh.userData.shopSlot=activeShopSlot;shopLodMeshes.push(mesh);}return mesh;};
   function solid(type, material, x, y, z, sx, sy, sz, ry = 0, rx = 0, order = 'XYZ', rz = 0) {
     const source = materials[material];
-    const plain = expanded && type === 'box' && source.isMeshStandardMaterial && !source.transparent && !source.map && !source.emissive.getHex() &&
+    const roleFinish = finishForRole.get(material);
+    const plainType = type === 'box' || type === 'cylinder' && roleFinish !== 'woodGrain';
+    const plain = expanded && plainType && source.isMeshStandardMaterial && !source.transparent && !source.map && !source.emissive.getHex() &&
       !['paving','shellFloor','courtStone'].includes(material);
-    const finish = plain ? 'plain' : type === 'publicLeaf' ? 'canopy' : finishForRole.get(material);
+    const finish = plain ? 'plain' : type === 'publicLeaf' ? 'canopy' : roleFinish;
     const shared = expanded && ((!source.transparent && !material.endsWith('Backdrop')) ||
       material === 'contact' || material === 'lightPool');
     const shopSlot = shared ? null : activeShopSlot;
@@ -284,7 +279,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     const batch = batches.get(key);
     batch.slots?.push(activeShopSlot);
     if (finish) batch.colours.push(source.color);
-    if (plain) batch.surfaces.push(source.roughness, source.metalness);
+    if (plain) {
+      // Cylinders formerly shared the matte finish's lighting parameters.
+      const surface = type === 'cylinder' && roleFinish === 'matte' ? finishMaterials.matte : source;
+      batch.surfaces.push(surface.roughness, surface.metalness);
+    }
     position.set(x, y, z); scale.set(sx, sy, sz); euler.set(rx, ry, rz, order); quaternion.setFromEuler(euler);
     matrix.compose(position, quaternion, scale); batch.transforms.push(matrix.clone());
   }
@@ -322,6 +321,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       map:texture, emissiveMap:texture, emissive:0xffffff, emissiveIntensity:.2
     })), -1);
     const mesh = new T.Mesh(plane, material);
+    mesh.name = name;
     mesh.position.set(x + decalClearance * Math.sin(ry), y, z + decalClearance * Math.cos(ry));
     mesh.rotation.y = ry; mesh.scale.set(width, height, 1); scene.add(mesh);
     mesh.userData.shopDecal = true;
@@ -341,6 +341,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     context.fillStyle = '#e9d6a9'; context.font = `500 ${fontSize}px Georgia`; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(text, 512, 64);
     const texture = setupArtworkTexture(T,new T.CanvasTexture(canvas),artworkTier());
     const mesh = placeDecal(new T.Mesh(plane, decalMaterial(new T.MeshBasicMaterial({map:texture,transparent:true}))));
+    mesh.name = text;
     mesh.position.set(x, y, decalHeight(z)); mesh.scale.set(width, height, 1); scene.add(mesh);
     mesh.userData.shopDecal = true;
     if (activeShopSlot !== null) queueShopUpload(activeShopSlot, mesh);
@@ -697,7 +698,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       shopVisibility.addWall(Number(store.number),x,4.7,0,9.7,1.55,.5,true);
     }
     ceilingBox('cream', x, 5.8, -5.2, 9.7, .22, 10.4, null);
-    if (expanded) shopVisibility.addCeiling(Number(store.number),x,5.8,-5.2,9.7,10.4);
+    if (expanded) {
+      shopVisibility.addWall(Number(store.number),x,2.85,-10.5,10,5.7,.25);
+      shopVisibility.addCeiling(Number(store.number),x,5.8,-5.2,9.7,10.4);
+    }
     activeShopSlot=expanded?Number(store.number):null;
     if (expanded && zone === 'newmoon') {
       // Recessed bronze-edged coffers draw the eye along the product aisle.
@@ -1471,8 +1475,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }
     // The render loop and context recovery both supply the resolved tier here.
     interactables.physicsProps?.setTier(tier);
-    restrooms?.updateDraw(tier);
-    slide?.setTier(tier);
     materials.glass.forceSinglePass = tier === 'low';
     shopVisibility.setOverheadCulling(tier === 'low');
     bakedLighting.setTier(tier);
@@ -1489,6 +1491,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       shopVisibility.setEye(eye);
       view.frustum.setFromProjectionMatrix(projection.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
     }
+    restrooms?.updateDraw(camera && view.frustum);
     productDisplay?.updateShopLods(visitor, camera && view);
     interiorKit.update(visitor, camera && view);
     const deckVisible=Math.abs(visitor.y-liftLayout.upper)<3,shopDistance=12;
@@ -1504,7 +1507,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       const slot = mesh.userData.shopSlot;
       if (!shopNear.has(slot)) continue;
       let near = shopNear.get(slot);
-      if (near && camera && tier === 'low' && mesh.userData.shopDecal) {
+      if (near && camera && mesh.userData.shopDecal) {
         mesh.geometry.boundingBox ?? mesh.geometry.computeBoundingBox();
         mesh.updateWorldMatrix(true,false);
         near = !shopVisibility.occluded(slot,decalBounds.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld));
@@ -1516,6 +1519,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     for(const mesh of deckLodMeshes)mesh.visible=deckVisible;
     for (const mesh of standalonePools) mesh.visible = tier !== 'low' && (!mesh.userData.deckLod || deckVisible);
     for (const update of shopLodUpdates) update(visitor, camera && view);
+    additions?.update(tier,camera ? view : {deckVisible},shopNear);
     furnishings.updateView(camera ? view : {deckVisible},shopNear);
     if (camera) {
       for (const update of viewUpdates) update(view);
@@ -1524,6 +1528,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       upperLevel?.updateView(view.frustum);
     }
   }
+  const additions = expanded ? createInteriorAdditions(T,{scene,collider,seats,prepareModel,tier:artworkTier}) : null;
   interactables.push(...seats.map(seat=>({id:seat.id,kind:'sit',x:seat.exitX,y:seat.floor,z:seat.exitZ,floor:seat.floor,radius:seat.clearance.interactionRadius,seat})));
   const firstFurnishing = shopLodMeshes.length;
   const furnishingState=furnishings.finish(scene,mesh=>shopLodMeshes.push(mesh),prepareModel);
@@ -1577,7 +1582,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   return {signage, defaultExposure:EVERYDAY.lighting.exposure, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
-  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: furnishingState, productAssets: Object.freeze(worldProductAssets)};
+  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: Object.freeze({...furnishingState,...additions?.state}), productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }

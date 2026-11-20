@@ -21,6 +21,9 @@ RAPIER_SPEC.loader.exec_module(rapier)
 GJH_CSS_SPEC = importlib.util.spec_from_file_location("build_gjh_css", ROOT / "scripts/build_gjh_css.py")
 gjh_css = importlib.util.module_from_spec(GJH_CSS_SPEC)
 GJH_CSS_SPEC.loader.exec_module(gjh_css)
+GJH_ADDITIONS_SPEC = importlib.util.spec_from_file_location("gjh_interior_additions", ROOT / "scripts/gjh_interior_additions.py")
+gjh_additions = importlib.util.module_from_spec(GJH_ADDITIONS_SPEC)
+GJH_ADDITIONS_SPEC.loader.exec_module(gjh_additions)
 GJH_PACK_SPEC = importlib.util.spec_from_file_location("build_gjh_startup_pack", ROOT / "scripts/build_gjh_startup_pack.py")
 gjh_pack = importlib.util.module_from_spec(GJH_PACK_SPEC)
 GJH_PACK_SPEC.loader.exec_module(gjh_pack)
@@ -262,6 +265,8 @@ def runtime_resources(catalog):
     for design in catalog["designs"]:
         directory = Path(design["demoPath"]).parent
         resources.add(directory / "index.html")
+        # Multi-page editions ship every top-level page beside index.html.
+        resources.update(p.relative_to(ROOT) for p in (ROOT / directory).glob("*.html"))
         resources.update(directory / name for name in ("style.css", "script.js") if (ROOT / directory / name).is_file())
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
@@ -386,6 +391,7 @@ def build(output=ROOT, check=False):
     build_mall_theme_copy(packs, check)
     rapier.build(check=check)
     gjh_css.build(check=check)
+    gjh_additions.build(check=check)
     gjh_pack.build(check=check)
     gjh_js.build(check=check)
     design_system.build(ROOT, check=check)

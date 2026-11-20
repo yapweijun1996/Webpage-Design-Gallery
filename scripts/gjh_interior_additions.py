@@ -52,13 +52,22 @@ def outputs():
         glb = retarget(source, asset_id, source_path.stem)
         name = asset_id.replace('-', '_') + '.glb'
         files[ASSETS / name] = glb
+        document, _ = read_glb(glb)
+        # These static exports have one untransformed mesh at the scene root.
+        node, = document['nodes']
+        if set(node) - {'name', 'mesh', 'extras'}:
+            raise ValueError(f'{asset_id}: transformed root needs evaluated bounds')
+        positions = [document['accessors'][primitive['attributes']['POSITION']]
+                     for primitive in document['meshes'][node['mesh']]['primitives']]
         entries[item['kind']] = {
             'asset_id': asset_id, 'kind': item['kind'], 'version': '1.0.0', 'file': name,
             'sha256': hashlib.sha256(glb).hexdigest(), 'bytes': len(glb),
             'dimensions_m': item['dimensions_m'], 'capabilities': item['capabilities'],
             'priority': item['priority'], 'placed': item['placed'], 'label': item['label'],
             'source': item['source'], 'source_sha256': item['source_sha256'],
-            'lod_policy': 'Single native-scale static mesh instanced per placement; simple-asset exemption. No distance LOD claim.',
+            'placement': item['placement'], 'minimum_tier': item['minimum_tier'], 'triangles': item['triangles'],
+            'bounds_min': [min(p['min'][i] for p in positions) for i in range(3)],
+            'bounds_max': [max(p['max'][i] for p in positions) for i in range(3)],
             'uv_policy': 'No textures or baking; flat PBR materials only.',
             'collision_owner': 'V11 app-owned Rapier proxies; no visual collision nodes exported.',
             'rights': item['rights'],

@@ -22,8 +22,10 @@ export function buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,mat
   const doorBatch = new T.InstancedMesh(leafShape, leafMaterial, restroomRooms.length * 2);
   doorBatch.instanceMatrix.setUsage(T.DynamicDrawUsage);
   doorBatch.name = 'Restroom sliding door leaves';
-  doorBatch.visible = false;
   scene.add(doorBatch);
+  leafShape.computeBoundingBox();
+  const doorBounds = new T.Box3(), panelBounds = new T.Box3();
+  const submitted = [];
   let doorBatchDirty = true;
   const streamShape = new T.CylinderGeometry(.020,.014,.31,8);
   const rippleShape = new T.TorusGeometry(.14,.013,5,16);
@@ -45,11 +47,9 @@ export function buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,mat
 
     const panelWidth = half-.02;
     const leaves=[-1,1].map(side=>{
-      const panel=new T.Mesh(leafShape,leafMaterial);
-      panel.name=room.id+' sliding door';
+      const panel=new T.Object3D();
       panel.scale.set(.055,2.20,panelWidth);
       panel.position.set(maxX,1.10,z+side*panelWidth/2);
-      scene.add(panel);
       doorPanels.push(panel);
       const body=physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(maxX,1.10,panel.position.z));
       physics.createCollider(R.ColliderDesc.cuboid(.028,1.10,panelWidth/2),body);
@@ -119,19 +119,25 @@ export function buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,mat
     }
   }
   return {
-    updateDraw(tier) {
-      const low = tier === 'low';
-      if (doorBatch.visible !== low) {
-        doorBatch.visible = low;
-        for (const panel of doorPanels) panel.visible = !low;
+    updateDraw(frustum) {
+      let count = 0, changed = doorBatchDirty;
+      doorBounds.makeEmpty();
+      for (const panel of doorPanels) {
+        if (doorBatchDirty) panel.updateMatrix();
+        panelBounds.copy(leafShape.boundingBox).applyMatrix4(panel.matrix);
+        if (frustum && !frustum.intersectsBox(panelBounds)) continue;
+        changed ||= submitted[count] !== panel;
+        submitted[count] = panel;
+        doorBounds.union(panelBounds);
+        count++;
       }
-      if (low && doorBatchDirty) {
-        for (const [index, panel] of doorPanels.entries()) {
-          panel.updateMatrix();
-          doorBatch.setMatrixAt(index, panel.matrix);
-        }
+      if (changed || count !== doorBatch.count) {
+        doorBatch.count = count;
+        doorBatch.visible = count > 0;
+        for (let i = 0; i < count; i++) doorBatch.setMatrixAt(i, submitted[i].matrix);
         doorBatch.instanceMatrix.needsUpdate = true;
-        doorBatch.computeBoundingSphere();
+        doorBatch.boundingSphere ??= new T.Sphere();
+        doorBounds.getBoundingSphere(doorBatch.boundingSphere);
         doorBatchDirty = false;
       }
     },

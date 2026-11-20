@@ -34,6 +34,26 @@ Phone uses Low unless a tier is supplied. The phone gate requires the 30 FPS cap
 
 The per-stop JSON includes p95, p99, ≥50 ms count, mean frame interval, renderScale, buffer size, renderer name when exposed, linked Three.js program count, visible point-light count and mean GPU elapsed time. A probe-only Three.js observer starts a WebGL2 elapsed query at the first draw and ends it after the animation callback's last pass. Results are polled asynchronously. Unsupported timers, disjoint queries and unavailable results yield zero valid samples and null GPU time when none remain. A privacy-restricted renderer name can also be null.
 
+Use the per-object draw audit for the Balanced entry and MILI stops:
+
+```sh
+python docs/mall_lap_probe.py --tier balanced --laps 1 --draw-owners --json output/balanced-draws.json
+```
+
+At entry, MILI and the upper level, the probe wraps Three.js `renderBufferDirect` and sums the actual `renderer.info.render` deltas by object ID. `drawOwners` lists the contributors to the peak audited world-scene frame, including repeat submissions for a single object. `drawCalls` is the separately sampled whole-frame peak. The default Balanced desktop viewport is 1920 × 893.
+
+The reported Chrome baseline was 93 draws at entry and 91 at MILI. A separate Node comparison loaded the real static assets and Balanced room kits on both revisions and used Three.js scene visibility, frustum tests and draw ranges at five fixed poses per stop. It gave the following static-scene maxima. Chrome verification of the full lap and frame timing remains pending.
+
+| Draw owners | Entry before → after | MILI before → after |
+|---|---:|---:|
+| Expanded storefront frame, brass and accent → instanced trim | 3 → 1 | 3 → 1 |
+| Restroom sliding leaves → one instanced draw | 6 → 1 | 0 → 0 |
+| Ground cylinders sharing the untextured instance shader | 4 → 1 | 4 → 2 |
+| Artwork and plaques rejected behind shop walls | 0 avoided | 6 avoided |
+| All static-scene draws at the peak sampled pose | 72 → 62 | 79 → 69 |
+
+The tram landing has an interaction and HUD prompt. Its carriage GLB already has one primitive per tier. The MILI mock-duck update added geometry to the existing Enamel and Printed opal meshes and kept the instanced stock draw. All 11 additions retain their two minimum-tier batches, with covered shop props removed from the packed index range while their interaction and collision state stays available.
+
 `--dsf 2` or `--dsf 3` repeats matched stops at DSF 1 and the selected DSF, printing the change in mean rendered-frame interval per unit DSF. Inspect buffer dimensions, renderScale and GPU time alongside the slope. A frame cap, pixel-ratio cap or dynamic resolution can mask fill-rate cost. `--cpu-throttle N` applies Chrome's CDP slowdown to each page before navigation. Desktop touch emulation and CPU throttling are proxies. Confirm acceptance on the actual phone, tablet and desktop.
 
 Cold early entry uses its own workload. Serve on port 8815 and run the repository's `docs/early_entry_probe.py --tier low` with Python, then repeat with `balanced` and `detailed`. The acceptance limit is zero frames ≥50 ms and zero busy callbacks ≥50 ms. This existing probe expects `GALLERY_CHROME` and the Metal backend.
@@ -57,12 +77,13 @@ python -m unittest discover -s tests -p test_mall_probes.py -v
 
 ## Gameplay verification
 
-Serve the repo from port 8830 and run these probes in foreground headed Chrome. Set `GALLERY_CHROME` to the Chrome executable. Playwright and Pillow are required for these three probes.
+Serve the repo from port 8830 and run these probes in foreground headed Chrome. Set `GALLERY_CHROME` to the Chrome executable. The probes require Playwright and Pillow.
 
 ```sh
 python docs/verify_interactions.py
 python docs/verify_physics_props.py
 python docs/verify_tram.py
+python docs/verify_upper_level.py
 ```
 
 Each command accepts `--url`, `--tier` and `--out` and exits nonzero on a failed check. The default tier is Balanced at 1440 × 900. The interaction run accepts repeated `--shop S14` filters. The full run verifies 65 playable item actions across all 17 shops, including live stools, drawer actions and the original three shops' View prompts. The interior programme also uses action verbs as authoring metadata for scenic items that have no player-facing control. The run checks the expected playable inventory before walking and keeps an item-by-item table, JSON and before/after PNGs. It also takes a screenshot with the old manual loop still active.

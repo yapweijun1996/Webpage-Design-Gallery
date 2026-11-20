@@ -54,26 +54,36 @@ S04 passed on Pages build `deaf0fd98cc414b0`. Desktop and 390 px touch-emulated 
 - [ ] **Single 3 g unit, exact retail carton.** Confirm physical dimensions, closure and current packaging art independently of the enlarged display study.
 - [ ] **GJH 10-piece format.** Verify the outer pack shape, size and relationship to the 3 g carton before modeling.
 
+S05 passed on Pages build `ef5f8f14a4d09bd5`. Both Chrome routes entered the shop, opened the carton story, continued behind the counter and returned to the atrium. The published room GLB matched the Blender export. The 40-triangle model is part of the existing room mesh, and the parsed Low shop total is 2,350 triangles. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44638720871)
+
 ## S06 Flying Wheel
 
 [Design and runtime](06-flying-wheel/README.md) · [Inventory](06-flying-wheel/model-inventory.md)
 
-- [ ] **Air-Dried Singapore Ban Mee 70 g.** Verify packet silhouette, seals and current retailer artwork.
-- [ ] **Shanghai LaMian.** Verify regional SKU, packet geometry and print edition separately from Ban Mee.
+- [ ] **Air-Dried Singapore Ban Mee 70 g.** The [5 × 70 g outer-pack front, back and side gallery](https://www.gjheshop.com/product/bundle-of-6-flying-wheel-all-natural-air-dried-singapore-ban-mee-noodles-5-x-70g/) shows five wrapped portions under a flexible seal. Obtain exact dimensions, single-sleeve views and current retailer artwork.
+- [ ] **Shanghai LaMian 70 g.** The [separate 5 × 70 g outer-pack gallery](https://www.gjheshop.com/product/flying-wheel-all-natural-air-dried-shanghai-lamian-noodles-5-x-70g/) confirms the analogous assembly. Verify regional edition, physical package and sleeve dimensions, and print independently.
+
+The unprinted Blender studies reached the visual review stage. The rendered sleeves and seal still read as stiff parts because the transparent film's continuous wrap did not carry through the side views. The production room retains the loom and catalogue story. Revisit the soft outer-film representation within the existing opaque-room rendering contract.
+
+The retained room passed Desktop and 390 px touch-emulated Chrome on Pages build `101413f9fe9fecb4`. The room GLB matched the local baseline. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44641223105)
 
 ## S07 Gu Long
 
 [Design and runtime](07-gu-long/README.md) · [Inventory](07-gu-long/model-inventory.md)
 
+- [x] **Stewed Pork Chops and Stewed Pork 256 g, unprinted form studies.** Each official photo shows rolled rims and a recessed pull-tab lid. The [editable shelf specimens](../../models/gjh-gulong-tins/README.md) share a short 90 × 75 mm display estimate.
 - [ ] **Stewed Pork Chops 256 g.** Measure can and roll seam, then verify label position on a single specimen.
 - [ ] **Stewed Pork 256 g.** Verify same-edition references and own can profile and artwork. Keep the stepped pyramid distinct.
+
+S07 passed on Pages build `81963db3c3709f95`. Both Chrome routes reached the story and left comparison shelf and returned to the atrium. The room GLB matched the Blender export and Low totals 2,798 triangles. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44643286042)
 
 ## S08 SKIPPY
 
 [Design and runtime](08-skippy/README.md) · [Inventory](08-skippy/model-inventory.md)
 
-- [ ] **Creamy Peanut Butter 500 g.** Verify lid and source-backed print details for the nominal 73 × 73 × 124 mm study.
-- [ ] **Chunky Peanut Butter 500 g.** Verify its own cap, texture and authorized front and back references. Product viewer and breakfast-chair Sit are separate interaction work.
+- [x] **Creamy and Chunky Peanut Butter 500 g, unprinted form studies.** The [editable pair](../../models/gjh-skippy-jars/README.md) uses the 73 × 73 × 124 mm nominal envelope, narrowed shoulders, rounded heels and separate ribbed lids from distinct catalogue photos.
+- [ ] **Creamy Peanut Butter 500 g.** Confirm physical lid dimensions and source-backed current print details.
+- [ ] **Chunky Peanut Butter 500 g.** Verify physical closure and current edition and obtain permission for its own front and back artwork. Product viewer and breakfast-chair Sit are separate interaction work.
 
 ## S09 SPAM
 

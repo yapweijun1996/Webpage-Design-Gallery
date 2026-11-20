@@ -1,0 +1,175 @@
+/* Virtual World layout and static preview. */
+
+.virtual-hero {
+  min-height: clamp(35rem, 79svh, 52rem);
+  padding-bottom: clamp(var(--space-16), 8vw, var(--space-20));
+}
+
+.virtual-features {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.virtual-feature-visitor .card-media {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 58%;
+}
+
+.virtual-feature-visitor .card-media::after {
+  position: absolute;
+  inset: 0;
+  background: var(--scrim-card);
+  content: "";
+}
+
+.virtual-feature-visitor .card-body {
+  position: relative;
+  padding-right: 34%;
+}
+
+.virtual-feature-visitor .card-media img {
+  object-position: 54% 40%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .virtual-feature-visitor:hover .card-media img { transform: none; }
+}
+
+.virtual-credit { margin: var(--space-4) 0 0; }
+
+.virtual-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+}
+
+.virtual-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  align-self: stretch;
+  margin: 0;
+  padding: var(--space-6) var(--space-6) var(--space-12);
+  background: radial-gradient(ellipse at 50% 58%, var(--gold-wash-strong), var(--clear) 68%);
+}
+
+.virtual-stage img {
+  width: min(100%, 27rem);
+  border-radius: var(--radius-card);
+  box-shadow: var(--glow-soft);
+}
+
+.virtual-copy,
+.virtual-checks {
+  min-width: 0;
+  padding: clamp(var(--space-8), 5vw, var(--space-16));
+}
+
+.virtual-checks {
+  align-self: stretch;
+  border-inline-start: 1px solid var(--line-gold);
+}
+
+.virtual-status {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.virtual-status li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--size-control);
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ivory-muted);
+}
+
+.virtual-status .icon { color: var(--gold); }
+.virtual-status [data-result="check"] .icon { color: var(--success); }
+.virtual-status [data-result="alert"] .icon { color: var(--danger); }
+
+.virtual-vision { gap: var(--space-10); }
+.virtual-vision .virtual-copy { padding: 0; }
+
+.virtual-credit a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-control);
+  color: var(--ivory-muted);
+  text-underline-offset: .2em;
+}
+.virtual-credit a:hover { color: var(--gold-bright); }
+
+.virtual-map {
+  margin: 0;
+  border: 1px solid var(--line-gold);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  background: var(--card-fill);
+}
+
+.virtual-map svg {
+  width: 100%;
+  fill: var(--gold-bright);
+}
+.virtual-map text {
+  font-family: var(--font-serif);
+  font-size: var(--type-title);
+}
+.virtual-map-grid { fill: none; stroke: var(--line-soft); }
+.virtual-map-route { fill: none; stroke: var(--gold); stroke-width: 1.5; }
+.virtual-map-points { fill: var(--gold-wash); stroke: var(--line-gold); }
+
+.virtual-preview {
+  width: min(58rem, 100% - 2 * var(--gutter));
+  max-height: calc(100dvh - 2 * var(--space-4));
+  padding: var(--card-pad);
+  border: 1px solid var(--line-gold);
+  border-radius: var(--radius-card);
+  background: var(--obsidian-raised);
+  color: var(--ivory);
+  box-shadow: var(--shadow-card);
+  overscroll-behavior: contain;
+}
+
+.virtual-preview::backdrop { background: var(--glass-strong); }
+
+.virtual-preview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.virtual-preview figure { margin: 0; }
+.virtual-preview img {
+  width: 100%;
+  max-height: 68dvh;
+  object-fit: contain;
+}
+.virtual-preview figcaption { margin-top: var(--space-3); }
+
+@media (max-width: 1180px) {
+  .virtual-features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .virtual-hero { min-height: clamp(33rem, 69svh, 46rem); }
+  .virtual-vision { gap: var(--space-6); }
+  .virtual-readiness { grid-template-columns: 1fr; }
+  .virtual-checks {
+    border-inline-start: 0;
+    border-top: 1px solid var(--line-gold);
+  }
+}
+
+@media (max-width: 600px) {
+  .virtual-hero { min-height: max(34rem, 78svh); }
+  .virtual-features { gap: var(--space-3); }
+  .virtual-features,
+  .virtual-split { grid-template-columns: 1fr; }
+}

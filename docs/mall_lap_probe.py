@@ -107,7 +107,7 @@ def run_lap(page, lap, draw_owners=False):
     for zone in ZONES:
         assert_teleport(page, zone)
         page.wait_for_timeout(300)
-        row = capture(page, f'L{lap} {zone}', 1500, 'w', 1500, draw_owners and zone == 'entry')
+        row = capture(page, f'L{lap} {zone}', 1500, 'w', 1500, draw_owners and zone in ('entry', 'mili'))
         rows.append(row)
     # Walk around the shaft and verify the arrival before sampling.
     reach_upper(page)
@@ -206,7 +206,7 @@ def main():
     parser.add_argument('--max-draws', type=positive_int, help='Override the draw-call budget for the selected tiers')
     parser.add_argument('--laps', type=positive_int, default=2)
     parser.add_argument('--json', default='')
-    parser.add_argument('--draw-owners', action='store_true', help='Profile draw owners at entry and upper level')
+    parser.add_argument('--draw-owners', action='store_true', help='Profile draw owners at entry, MILI and upper level')
     parser.add_argument('--refresh-hz', type=float, help='Known native refresh; overrides the detected reference')
     parser.add_argument('--cpu-throttle', type=positive_int, default=1)
     parser.add_argument('--dsf', type=int, choices=(2, 3), help='Compare a DSF 1 run with this DSF')
