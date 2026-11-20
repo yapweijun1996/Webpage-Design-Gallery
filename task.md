@@ -20,7 +20,7 @@ Status legend: [x] done and verified, [~] in progress, [ ] not started.
 - [ ] SDS migration of the GJH home page through the channel (tokens, components, `data-i18n`, `data-reveal`), ratchet baseline to 0.
 - [ ] Runner and model settings: allowlist enforcement (codex and pi only; 6.2 Sol and 6.1 Terra; medium and xhigh), runner adapters, Settings page, CLI `settings` commands. Default effort changes from low to medium.
 - [ ] Verification: browser matrix (390x844, 1440x900; themes x languages), offline reload of exported PWA, reduced motion, screenshots viewed.
-- [ ] KB-MCP write of skill `agent:live-multi-agent-design-swarm` (content in `swarm/LESSONS.md`; blocked: kb connector not responding, needs `/mcp` reconnect of `kb`).
+- [x] KB-MCP reflection (2026-11-21): new skill `agent:live-multi-agent-design-swarm` v1.0.0, `agent:parallel-coding-workers` updated to v1.4.0, 10 memories saved (project Webpage-Design-Gallery); verified by recall. Source text in `swarm/LESSONS.md`.
 
 Not verifiable headlessly (stays UNVERIFIED until a real device): iPhone gesture zoom lock, PWA install prompt on iOS, Safari service worker behaviour.
 
