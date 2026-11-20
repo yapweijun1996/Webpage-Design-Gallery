@@ -65,9 +65,10 @@ h1, h2, h3, p { margin-top: 0; }
 .palette-picker > summary::-webkit-details-marker { display: none; }
 .palette-picker > summary > .gallery-icon { width: var(--icon-sm); height: var(--icon-sm); color: var(--muted); }
 .palette-swatch { flex: none; width: var(--space-4); height: var(--space-4); border-radius: var(--radius-circle); background: linear-gradient(135deg, var(--swatch) 50%, var(--swatch-wash) 50%); border: 1px solid var(--line); }
-.palette-current { --swatch: var(--accent); --swatch-wash: var(--color-surface-subtle); }
-.palette-panel { position: absolute; inset-block-start: calc(100% + var(--space-2)); inset-inline-end: 0; z-index: var(--z-overlay); display: grid; gap: var(--space-1); min-width: 200px; margin: 0; padding: var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-raised); }
-.palette-option { display: flex; align-items: center; gap: var(--space-3); min-height: var(--size-control); padding-inline: var(--space-3); border-radius: var(--radius-sm); font-size: var(--font-size-sm); cursor: pointer; }
+.palette-current { --swatch: var(--accent); --swatch-wash: var(--color-surface-subtle); width: var(--space-5); height: var(--space-5); }
+.palette-option .palette-swatch { width: var(--space-8); height: var(--space-8); }
+.palette-panel { position: absolute; inset-block-start: calc(100% + var(--space-2)); inset-inline-end: 0; z-index: var(--z-overlay); display: grid; gap: var(--space-1); min-width: 220px; margin: 0; padding: var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-raised); }
+.palette-option { display: flex; align-items: center; gap: var(--space-3); min-height: var(--size-control); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); font-size: var(--font-size-sm); cursor: pointer; }
 .palette-option > input { position: absolute; opacity: 0; pointer-events: none; }
 .palette-option:hover { background: var(--color-surface-subtle); }
 .palette-option:has(input:checked) { background: var(--color-surface-subtle); font-weight: var(--font-weight-medium); }
