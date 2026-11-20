@@ -1,0 +1,27 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "gallery",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8000"
+      ],
+      "port": 8000
+    },
+    {
+      "name": "gjh-v24-wt",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8824",
+        "-d",
+        "/private/tmp/claude-501/-Users-yapweijun--claude-spares-spare-B1sZ2x/866d5e19-1789-48d7-9e09-87845744b2af/scratchpad/wt"
+      ],
+      "port": 8824
+    }
+  ]
+}
