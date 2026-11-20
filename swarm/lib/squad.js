@@ -32,8 +32,8 @@ const KEYWORDS = [
   ['imagery', /\b(?:images?|imagery|photos?|photography|pictures?|illustrations?|artwork|crops?|cropping|overlays?|filters?)\b/i],
   ['researcher', /\b(?:research(?:er)?|fact[- ]check(?:ing)?|citations?|sources?|brand (?:facts?|guidelines?|history))\b/i],
   ['icons', /\b(?:icons?|svgs?|pictograms?|glyphs?)\b/i],
-  ['color', /\b(?:colou?rs?|palettes?|themes?|contrast|gradients?|dark mode|light mode)\b/i],
-  ['type', /\b(?:typography|type|typefaces?|fonts?|headings?|line[- ]height|letter[- ]spacing)\b/i],
+  ['color', /\b(?:colou?rs?|palettes?|themes?|contrast|gradients?|dark mode|light mode|gold|golden|red|green|blue|warm(?:er)?|cool(?:er)?|brand colou?rs?|accents?|tint(?:ed)?|vibrant|muted)\b/i],
+  ['type', /\b(?:typography|type|typefaces?|fonts?|headings?|headline|elegant|bold|line[- ]height|letter[- ]spacing)\b/i],
   ['copy', /\b(?:copy(?:writing|writer)?|wording|rewrite|headlines?|taglines?|text|labels?|ctas?)\b/i],
   ['motion', /\b(?:motion|animat(?:e|ed|ion|ions)|transitions?|parallax|reveal)\b/i],
 ];

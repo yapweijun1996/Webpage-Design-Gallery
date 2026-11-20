@@ -206,7 +206,7 @@ function runOnce(a, label, promptText) {
       clearTimeout(timer); children.delete(a.id);
       if (before && chat) {
         try {
-          const bad = G.violations(before, G.snapshot(PROJECT), ownedGlobs(a));
+          const bad = G.violations(before, G.snapshot(PROJECT), [...ownedGlobs(a), ...everyone().filter(o => o.id !== a.id && children.has(o.id)).flatMap(ownedGlobs)]); // files of agents running at the same time are theirs, not a violation
           if (bad.length) chat.post({ from: 'system', kind: 'system', text: `${a.name} changed files outside its ownership: ${bad.slice(0, 5).join(', ')}${bad.length > 5 ? ' ...' : ''}` });
         } catch (_) { /* guard problems must not fail the turn */ }
       }

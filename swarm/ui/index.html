@@ -153,6 +153,7 @@
   <p class="fh">Work only on what you see</p>
   <button type="button" class="sw" id="swfocus" role="switch" aria-checked="false"><span class="knob"></span><span class="lbl"><b>Limit my requests to this screen</b><small>Messages you send only involve the agents of the sections on screen.</small></span></button>
   <button type="button" class="sw" id="swauto" role="switch" aria-checked="false"><span class="knob"></span><span class="lbl"><b>Autopilot</b><small>The team studies this screen, researches the brand when unsure, decides and improves it. Scroll down to move on.</small></span></button>
+  <button type="button" class="sw" id="swsquad" role="switch" aria-checked="false"><span class="knob"></span><span class="lbl"><b>Squad mode</b><small>Several specialists (layout, type, colour, motion, QA and more) work on the same screen at once, each in its own layer file.</small></span></button>
   <p class="fs" id="fstatus">Off</p>
   <p class="fn">Tip: zoom to 100% so only a few sections are on screen.</p>
 </div>
@@ -511,6 +512,10 @@
     fetch('/api/autopilot', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: autoOn }) }).then(function (r) { return r.json(); }).then(function (j) { ap = j; paintFocus(); reportFocus(true); }).catch(function () {});
     scopeNow = computeScope(); paintFocus();
   };
+  var squadOn = false;
+  function paintSquad() { $('swsquad').setAttribute('aria-checked', squadOn ? 'true' : 'false'); }
+  $('swsquad').onclick = function () { squadOn = !squadOn; paintSquad(); fetch('/api/squad', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: squadOn }) }).then(function (r) { return r.json(); }).then(function (j) { squadOn = !!j.on; paintSquad(); }).catch(function () {}); };
+  fetch('/api/squad').then(function (r) { return r.json(); }).then(function (j) { squadOn = !!j.on; paintSquad(); }).catch(function () {});
   function currentScope() { return (focusMode || autoOn) ? computeScope() : null; }
   fetch('/api/autopilot').then(function (r) { return r.json(); }).then(function (j) { ap = j; autoOn = !!j.on; if (S) paintFocus(); }).catch(function () {});
 
