@@ -8,20 +8,17 @@
     "assets/elevator-v2.js",
     "assets/mall-themes.js",
     "assets/natural-materials.js",
+    "assets/dom-projection.js",
+    "assets/products.js",
+    "assets/shelf-focus.js",
+    "assets/target-guidance.js",
+    "assets/visitor-v2-product-ui.js",
     "vendor/three.module.min.js",
     "vendor/GLTFLoader.js",
     "vendor/rapier.mjs"
   ],
   "criticalFiles": [
     "assets/concourse-marble.webp",
-    "assets/dom-projection.js",
-    "assets/gogo-brand-cover.webp",
-    "assets/mili-brand-cover.webp",
-    "assets/new-moon-brand-cover.webp",
-    "assets/products.js",
-    "assets/shelf-focus.js",
-    "assets/target-guidance.js",
-    "assets/visitor-v2-product-ui.js",
     "assets/startup-assets.pack",
     "vendor/rapier_bg.wasm",
     "../../../../assets/icons.svg",
@@ -64,7 +61,12 @@
       "trigger": "async function select"
     },
     {
-      "path": "assets/elevator/*.glb",
+      "path": "assets/elevator/balanced.glb",
+      "loader": "assets/elevator-kit.js",
+      "trigger": "async function select"
+    },
+    {
+      "path": "assets/elevator/detailed.glb",
       "loader": "assets/elevator-kit.js",
       "trigger": "async function select"
     },
@@ -85,8 +87,11 @@
     }
   ],
   "walkImagePreloads": [
+    "assets/gogo-brand-cover.webp",
     "assets/gogo-logo.jpg",
+    "assets/mili-brand-cover.webp",
     "assets/mili-logo.jpg",
+    "assets/new-moon-brand-cover.webp",
     "assets/new-moon-logo.svg",
     "assets/new-moon-au-425g-front.webp",
     "assets/new-moon-mx-454g-front.webp",

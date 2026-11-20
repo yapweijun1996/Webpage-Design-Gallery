@@ -1,4 +1,4 @@
-"""Headed desktop Chrome early-entry walk. Serve the worktree on 127.0.0.1:8815."""
+"""Headed Chrome early-entry walk. Serve the worktree on 127.0.0.1:8815."""
 import argparse
 import json
 import os
@@ -209,13 +209,18 @@ def walk(page, tier):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tier", choices=["low", "balanced", "detailed"], required=True)
+    parser.add_argument("--device", choices=["desktop", "phone"], default="desktop")
     args = parser.parse_args()
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(executable_path=os.environ["GALLERY_CHROME"],
                                              headless=False, args=["--use-angle=metal"])
         try:
-            # Owner report records a 945px viewport and an 893px drawing buffer.
-            context = browser.new_context(viewport={"width": 1189, "height": 945}, device_scale_factor=1)
+            if args.device == "phone":
+                context = browser.new_context(viewport={"width": 393, "height": 700},
+                                              device_scale_factor=2, has_touch=True, is_mobile=True)
+            else:
+                # Owner report records a 945px viewport and an 893px drawing buffer.
+                context = browser.new_context(viewport={"width": 1189, "height": 945}, device_scale_factor=1)
             context.add_init_script(f"""({OBSERVE})();
               localStorage.setItem('gjh-v11-tutorial-v1','dismissed');
               localStorage.setItem('gjh-v11-graphics-quality-v1',{json.dumps(args.tier)});""")

@@ -15,12 +15,18 @@ const packNames = await json('gjh-startup-assets.json', data);
 const entry = await readFile(new URL('index.html', root), 'utf8');
 const template = entry.match(/<template id="walk-preloads">([\s\S]+?)<\/template>/)[1];
 const preloads = [...template.matchAll(/rel="modulepreload" href="([^"]+)"/g)].map(match => match[1]);
+const imagePreloads = [...template.matchAll(/rel="preload" href="([^"]+)" as="image"/g)].map(match => match[1]);
+const mobileConcept = /<picture class="responsive-concept"><source media="\(max-width: 600px\)" srcset="([^"]+)">(<img[^>]+>)<\/picture>/g;
 
-async function firstView() {
+async function firstView(phone = false) {
   // Follow the declared walk modules through their complete static import graph.
   const files = new Set(['index.html']);
-  const queue = [...preloads, ...plan.criticalFiles];
-  for (const tag of entry.matchAll(/<(?:img|script|link)\b[^>]*>/g)) {
+  const queue = [...preloads, ...imagePreloads, ...plan.criticalFiles];
+  const html = phone ? entry.replace(
+    mobileConcept,
+    (_, src, img) => img.replace(/\bsrc="[^"]+"/, `src="${src}"`)
+  ) : entry;
+  for (const tag of html.matchAll(/<(?:img|script|link)\b[^>]*>/g)) {
     if (/loading="lazy"|rel="related"/.test(tag[0])) continue;
     const path = tag[0].match(/\b(?:src|href)="([^"#:]+)"/)?.[1];
     if (path) queue.push(path);
@@ -40,22 +46,43 @@ async function firstView() {
   return files;
 }
 
-test('the normal compact entry fits the compressed first-view budget for all graphics tiers', async t => {
+test('the declared entry dependencies fit the compressed first-view budget on phone and desktop', async t => {
   assert.deepEqual(preloads, plan.walkPreloads);
-  assert.deepEqual([...template.matchAll(/rel="preload" href="([^"]+)" as="image"/g)].map(match => match[1]),
-    plan.walkImagePreloads);
-  const files = await firstView();
-  let wire = 0, raw = 0, wireWithRawWasm = 0;
-  for (const path of files) {
-    const bytes = await readFile(new URL(path, root));
-    const encoded = /\.(?:js|mjs|html|css|svg|json|webmanifest|wasm)$/.test(path)
-      ? gzipSync(bytes, {level:6}).length : bytes.length;
-    raw += bytes.length;
-    wire += encoded;
-    wireWithRawWasm += path.endsWith('.wasm') ? bytes.length : encoded;
+  assert.deepEqual(imagePreloads, plan.walkImagePreloads);
+  for (const phone of [true, false]) {
+    const files = await firstView(phone);
+    let wire = 0, raw = 0, wireWithRawWasm = 0;
+    for (const path of files) {
+      const bytes = await readFile(new URL(path, root));
+      const encoded = /\.(?:js|mjs|html|css|svg|json|webmanifest|wasm)$/.test(path)
+        ? gzipSync(bytes, {level:6}).length : bytes.length;
+      raw += bytes.length;
+      wire += encoded;
+      wireWithRawWasm += path.endsWith('.wasm') ? bytes.length : encoded;
+    }
+    t.diagnostic(JSON.stringify({phone, requests:files.size, rawBytes:raw, gzipWireBytes:wire, gzipExceptWasmBytes:wireWithRawWasm}));
+    assert.ok(wire <= plan.maxWireBytes, `${wire} > ${plan.maxWireBytes}`);
   }
-  t.diagnostic(JSON.stringify({requests:files.size, rawBytes:raw, gzipWireBytes:wire, gzipExceptWasmBytes:wireWithRawWasm}));
-  assert.ok(wire <= plan.maxWireBytes, `${wire} > ${plan.maxWireBytes}`);
+});
+
+test('the four entry illustrations use low-priority mobile sources with full-size desktop fallbacks', async () => {
+  const responsive = [...entry.matchAll(mobileConcept)];
+  let bytes = 0;
+  for (const name of ['wayfinding', 'newmoon-hotpot', 'mili-noodles', 'gogo-toast']) {
+    const src = `assets/concept-${name}.webp`;
+    const small = `assets/concept-${name}-480.webp`;
+    const pictures = responsive.filter(([, , img]) => img.includes(`src="${src}"`));
+    const uses = entry.split(`src="${src}"`).length - 1;
+    assert.ok(uses > 0);
+    assert.equal(pictures.length, uses, src);
+    for (const [, source, img] of pictures) {
+      assert.equal(source, small);
+      assert.match(img, /decoding="async" fetchpriority="low"/);
+      if (!img.includes('alt="Illustrated wayfinding signs in the mall"')) assert.match(img, /loading="lazy"/);
+    }
+    bytes += (await readFile(new URL(small, root))).length;
+  }
+  assert.ok(bytes <= 90_000, `Phone concept illustrations total ${bytes} bytes`);
 });
 
 test('optional assets exist, have lazy entry points and stay out of the first-view downloads', async () => {
@@ -82,6 +109,8 @@ test('optional assets exist, have lazy entry points and stay out of the first-vi
     }
   }
   assert.ok(packNames.includes('gjh-tripo-entry.glb'));
+  assert.ok(packNames.includes('elevator/low.glb'));
+  assert.ok(!eager.has('assets/elevator/low.glb'));
   assert.doesNotMatch(entry, /rel="preload"[^>]+as="font"/);
 });
 

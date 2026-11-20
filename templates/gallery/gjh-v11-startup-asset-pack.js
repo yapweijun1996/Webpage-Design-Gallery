@@ -12,7 +12,7 @@ async function loadPack(report) {
   const abort = () => controller?.abort();
   let timer = setTimeout(abort, 8000);
   try {
-    const response = await fetch(packURL, {signal: controller.signal});
+    const response = await fetch(packURL, {priority:'high', signal: controller.signal});
     if (!response.ok) throw Error('pack unavailable');
     const length = Number(response.headers.get('content-length'));
     if (Number.isFinite(length) && length > MAX_BYTES) throw Error('pack too large');

@@ -102,8 +102,10 @@ async function runStartup({missingMusicControl = false} = {}) {
     ResizeObserver: class { observe() {} },
     requestAnimationFrame(callback) { frames.set(++frameId, callback); return frameId; },
     cancelAnimationFrame(id) { frames.delete(id); },
-    async fetch(url) {
-      requests.push(new URL(url).pathname.split('/').at(-1));
+    async fetch(url, options) {
+      const name = new URL(url).pathname.split('/').at(-1);
+      if (name === 'startup-assets.pack' || name === 'rapier_bg.wasm') assert.equal(options.priority, 'high');
+      requests.push(name);
       const bytes = await readFile(url);
       downloadedBytes += bytes.length;
       return new Response(bytes);
@@ -118,6 +120,7 @@ async function runStartup({missingMusicControl = false} = {}) {
   assert.equal(window.__mall, undefined);
   location.hash = '#experience';
   window.dispatchEvent(new Event('hashchange'));
+  assert.deepEqual(requests, ['rapier_bg.wasm', 'startup-assets.pack']);
   assert.match(document.getElementById('loader-count').textContent, /^0\.0 of \d+\.\d MB$/);
   const enterNow = document.getElementById('loader-enter-now');
   const overlay = document.getElementById('app-loader');

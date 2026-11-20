@@ -2,6 +2,7 @@ import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 
 import {shaftFinish} from './lift-layout.js';
+import {fetchStartupAsset} from './startup-asset-pack.js';
 
 const staticNodes = ['Portal','GoldTrim','Pilasters','Sconces','Planters','ElevatorSign','MarbleInlay','FloorIndicator'];
 const elevatorPriority = () => -10;
@@ -114,7 +115,9 @@ export function createKitLoader(T, scene, layout, prepareModel, onMount) {
     try {
       const url = new URL('./elevator/'+next+'.glb',import.meta.url);
       const signal = AbortSignal.any([controller.signal,AbortSignal.timeout(8000)]);
-      const response = await fetch(url,{signal});
+      // The first Low kit rides with the startup pack and keeps its regular
+      // GPU warmup. Other tiers and post-startup changes fetch their own kit.
+      const response = await fetchStartupAsset(url,{signal});
       if (!response.ok) throw new Error('Elevator model unavailable');
       const gltf = await new GLTFLoader().parseAsync(await response.arrayBuffer(),new URL('.',url).href);
       stage=assembleElevatorKit(T,gltf.scene,layout);
