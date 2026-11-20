@@ -90,7 +90,7 @@ export function createTramHud(parent, scene, canControl) {
     Object.assign(voice.style, {minWidth:'44px', minHeight:'44px', margin:'0', paddingInline:'8px'});
     voice.setAttribute('aria-pressed', String(mallAudio.state.voice));
     voice.addEventListener('click', () => {
-      mallAudio.unlock();
+      mallAudio.unlock({allowCreate:false});
       const enabled = !mallAudio.state.voice;
       if (enabled) narration.selectSystemVoice();
       mallAudio.setVoice(enabled);

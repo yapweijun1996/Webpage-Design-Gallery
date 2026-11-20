@@ -6,6 +6,7 @@ import {AUDIO_KEY, BEAT, createAudioManager, createTramNarration, LOOKAHEAD, SHO
 import {createShopInteractionTarget} from '../demos/corporate/gjh/v11/assets/interiors/shop-interactions.js';
 import {tramCaptions} from '../demos/corporate/gjh/v11/assets/tram-ride.js';
 import {tramCaptionCopy} from '../demos/corporate/gjh/v11/assets/tram-caption-copy.js';
+import {bindLoaderAudioGestures} from '../demos/corporate/gjh/v11/assets/loader.js';
 
 class Param {
   events = [];
@@ -16,7 +17,7 @@ class Param {
   cancelScheduledValues(time) { this.events = this.events.filter(event => event[2] < time); }
 }
 
-function rig(storage) {
+function rig(storage, constructorMs = .5) {
   const timers = new Set(), contexts = [], delays = new Map(), frames = [];
   const calls = {buffer:0, bufferSource:0, wave:0, oscillator:0, gain:0};
   let clock = 0;
@@ -33,7 +34,7 @@ function rig(storage) {
     },
     stopEvery(callback) { assert(timers.delete(callback)); },
     createContext() {
-      clock += .5;
+      clock += constructorMs;
       const oscillators = [], gains = [];
       function node(key) {
         return {
@@ -68,8 +69,11 @@ function rig(storage) {
   });
   function frame(remaining = 5) {
     assert.equal(frames.length,1,'one idle slice per frame');
+    return runFrame(remaining);
+  }
+  function runFrame(remaining = 5) {
     const start = clock;
-    frames.shift()({timeRemaining: () => remaining});
+    for (const callback of frames.splice(0)) callback({timeRemaining: () => remaining});
     return clock - start;
   }
   function advance(ms) {
@@ -78,7 +82,7 @@ function rig(storage) {
       if (at <= clock) { delays.delete(callback); callback(); }
     }
   }
-  return {audio,timers,contexts,calls,frame,advance,
+  return {audio,timers,contexts,calls,frame,runFrame,advance,
     async warm(ms = 1500) {
       await Promise.resolve();
       advance(ms);
@@ -97,7 +101,8 @@ test('first gesture only constructs and resumes the context, then setup stays wi
   assert.equal(contexts.length,0,'coefficients can be prepared before the gesture');
   audio.unlock();
   assert.deepEqual(calls,{buffer:0,bufferSource:0,wave:0,oscillator:0,gain:0});
-  assert.deepEqual(audio.performanceReport(),{audioInitMs:.75,audioInitSliceMaxMs:0});
+  assert.deepEqual(audio.performanceReport(),{audioInitMs:.75,audioInitSliceMaxMs:0,
+    audioCreateMs:.5,audioCreateDuring:'gesture',audioCreateFrame:0});
   assert.deepEqual(contexts[0].transitions,['run']);
   assert.equal(timers.size,0);
   await Promise.resolve();
@@ -124,12 +129,118 @@ function memoryStorage() {
   return {getItem:key => rows.get(key), setItem:(key,value) => rows.set(key,value)};
 }
 
+test('arrival clicks and touches and Enter now construct only during entry', () => {
+  function target() {
+    const listeners = new Map();
+    return {
+      hidden:false,
+      addEventListener: (type, listener) => listeners.set(type, listener),
+      fire: (type, isTrusted = true) => listeners.get(type)({type,isTrusted})
+    };
+  }
+  for (const [route, event] of [
+    ['arrival','click'], ['root','touchstart'], ['root','pointerdown'], ['enterNow','click']
+  ]) {
+    const {audio,contexts} = rig(undefined, 400);
+    const arrival = target(), enterNow = target(), root = target(), overlay = {hidden:true};
+    let onArrivals = false;
+    root.getElementById = id => { assert.equal(id,'arrival-walk'); return arrival; };
+    root.body = {hasAttribute: name => name === 'data-arrivals' && onArrivals};
+    bindLoaderAudioGestures(root, overlay, enterNow, audio);
+    root.fire('pointerdown');
+    enterNow.fire('click');
+    arrival.fire('click', false);
+    assert.equal(contexts.length,0);
+    onArrivals = route !== 'enterNow';
+    overlay.hidden = onArrivals;
+    const trigger = {arrival,root,enterNow}[route];
+    trigger.fire(event);
+    trigger.fire(event);
+    assert.equal(contexts.length,1,route);
+    assert.equal(contexts[0].state,'suspended');
+    assert.equal(audio.performanceReport().audioCreateDuring,'loader');
+    audio.dispose();
+  }
+});
+
+test('deep-link fallback waits for a stationary idle frame after a movement gesture', () => {
+  const {audio,contexts,runFrame} = rig(undefined, 400);
+  let stationary = true, frame = 10;
+  const isStationary = () => stationary;
+  const schedule = () => audio.scheduleCreation(isStationary, () => frame);
+  schedule();
+  runFrame();
+  assert.equal(contexts.length,0,'loader still up');
+  audio.setActive(true);
+  schedule();
+  schedule();
+  audio.sceneGesture({isTrusted:true,type:'keydown',code:'KeyW'}, isStationary, frame);
+  assert.equal(contexts.length,0,'the key arrives before movement is visible to the idle guard');
+  stationary = false;
+  runFrame();
+  assert.equal(contexts.length,0,'movement started before the idle callback');
+  stationary = true;
+  runFrame(0);
+  assert.equal(contexts.length,0,'idle callback has no time remaining');
+  frame++;
+  assert(runFrame() >= 400);
+  assert.equal(contexts.length,1);
+  assert.equal(audio.performanceReport().audioCreateMs,400);
+  assert.equal(audio.performanceReport().audioCreateDuring,'idle');
+  assert.equal(audio.performanceReport().audioCreateFrame,11);
+  assert.equal(contexts[0].state,'running');
+  audio.dispose();
+});
+
+test('Low phone scene key and pointer events leave context construction to the audio controls', async () => {
+  const {audio,contexts,calls,warm,runFrame} = rig(undefined, 400);
+  const isStationary = () => true;
+  audio.setPolicy(true,true,false);
+  audio.prepareForLoader();
+  audio.setActive(true);
+  audio.scheduleCreation(isStationary, () => 1);
+  await warm(0);
+  audio.prepareForControls(2);
+  assert.equal(contexts.length,0,'Tools opened before any sound was wanted');
+  for (const [type, code] of [['keydown','KeyW'], ['keydown','Enter'], ['pointerdown'], ['pointerup'], ['click']]) {
+    audio.sceneGesture({type, code, isTrusted:true}, isStationary, 3);
+    audio.walk(2);
+    audio.play('door');
+    assert.equal(audio.shop('listen'),undefined);
+    runFrame();
+    assert.equal(contexts.length,0,type);
+    assert.equal(calls.oscillator,0,type);
+  }
+  assert.equal(audio.performanceReport().audioCreateMs,null);
+  audio.prepareForControls(4);
+  assert.equal(contexts.length,1,'opening Tools consumes the deferred sound request');
+  assert.equal(audio.performanceReport().audioCreateMs,400);
+  assert.equal(audio.performanceReport().audioCreateDuring,'gesture');
+  assert.equal(audio.performanceReport().audioCreateFrame,4);
+  audio.dispose();
+});
+
+test('Low phone can explicitly enable music before any effect is requested', () => {
+  const {audio,contexts} = rig(undefined, 400);
+  audio.setPolicy(true,true,false);
+  audio.prepareForLoader();
+  audio.setActive(true);
+  assert.equal(contexts.length,0);
+  audio.setMusic(true);
+  assert.equal(contexts.length,0);
+  audio.prepareForControls(3, true);
+  assert.equal(contexts.length,1);
+  assert.equal(contexts[0].state,'running');
+  assert.equal(audio.performanceReport().audioCreateDuring,'gesture');
+  audio.dispose();
+});
+
 test('a Low phone can lazily play an effect before its pool is prewarmed', async () => {
   const {audio,frame,calls,warm,timers} = rig();
   audio.setPolicy(true,true,false);
   audio.setActive(true);
   await warm(0);
-  audio.unlock();
+  audio.prepareForControls(1, true);
   await Promise.resolve();
   frame(); // Master.
   frame(); // Effects bus.
@@ -143,15 +254,24 @@ test('a Low phone can lazily play an effect before its pool is prewarmed', async
   audio.dispose();
 });
 
-test('gesture creates one context, prime is silent, and mute/hidden gate the entire mixer', async () => {
-  const storage = memoryStorage(), {audio,timers,contexts,tick,warm} = rig(storage);
+test('loader creates one suspended context and the first scene gesture resumes it', async () => {
+  const storage = memoryStorage(), {audio,timers,contexts,tick,warm} = rig(storage, 400);
   audio.play('bag');
   assert.equal(contexts.length,0);
-  audio.unlock(true);
+  audio.prepareForLoader();
+  audio.prepareForLoader();
   const [ctx] = contexts;
+  assert.equal(contexts.length,1);
+  assert.deepEqual(ctx.transitions,['suspend']);
+  assert.equal(audio.performanceReport().audioCreateMs,400);
+  assert.equal(audio.performanceReport().audioCreateDuring,'loader');
+  assert.equal(audio.performanceReport().audioCreateFrame,0);
   assert.equal(timers.size,0);
   assert.equal(audio.state.musicPlaying,false);
   audio.setActive(true);
+  assert.equal(ctx.state,'suspended');
+  audio.sceneGesture({isTrusted:true,type:'keydown',code:'KeyW'}, () => false, 5);
+  assert.equal(ctx.state,'running');
   await warm();
   assert.equal(audio.state.musicPlaying,true);
   assert.equal(timers.size,1);
@@ -203,7 +323,7 @@ test('persists mute, demo mute, explicit music and independent bus levels', asyn
   assert.equal(audio.state.demoMuted,true);
   assert.equal(audio.state.voice,true);
   audio.setMuted(false);
-  audio.unlock();
+  audio.prepareForControls(1, true);
   await warm();
   assert.equal(audio.state.musicPlaying,true);
   assert.equal(audio.shop('listen'),undefined);
@@ -215,7 +335,7 @@ test('Low phone, reduced motion and data saver policy leave the music clock and 
     const {audio,timers,contexts,tick,warm} = rig();
     audio.setPolicy(...policy);
     audio.setActive(true);
-    audio.unlock();
+    audio.prepareForControls(1, true);
     await warm();
     tick(0);
     const ctx = contexts[0];
@@ -415,8 +535,12 @@ test('no-browser smoke supports absent media APIs and denied storage', () => {
   };
   const audio = createAudioManager({storage});
   assert.equal(createTramNarration(audio).available,false);
+  audio.setPolicy(true,true,false);
+  audio.prepareForLoader();
   audio.setActive(true);
-  audio.unlock();
+  audio.sceneGesture({isTrusted:true,type:'keydown',code:'KeyW'}, () => false, 1);
+  assert.equal(audio.performanceReport().audioCreateMs,null);
+  audio.prepareForControls(2, true);
   audio.setVolume('music',0);
   audio.play('floor-chime');
   audio.rail(true);

@@ -706,6 +706,20 @@ function positionTramChase(camera, distance, target) {
 
 // demos/corporate/gjh/v11/assets/movement.js
 var FIXED_STEP = 1 / 60;
+var MOVEMENT_KEYS = [
+  "KeyW",
+  "KeyA",
+  "KeyS",
+  "KeyD",
+  "KeyQ",
+  "KeyE",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "ShiftLeft",
+  "ShiftRight"
+];
 var MOVEMENT = Object.freeze({
   desktopWalk: 3.4,
   desktopRun: 5.2,
@@ -1565,7 +1579,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       setPitch(currentPitch() + (event.code === "PageUp" ? -0.12 : 0.12));
       return;
     }
-    if (["KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "ShiftLeft", "ShiftRight"].includes(event.code)) {
+    if (MOVEMENT_KEYS.includes(event.code)) {
       if (event.target === canvas || event.target === document.body)
         event.preventDefault();
       keys.add(event.code);
@@ -2539,6 +2553,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     },
     get tramState() {
       return tram?.controls.state;
+    },
+    get movementPending() {
+      return Boolean(keys.size || stick || drag || pinch || injected?.forward || injected?.right || gamepad?.forward || gamepad?.right || gamepad?.lookX || gamepad?.lookY || Math.hypot(velocity.x, velocity.z) > 0.001 || elevatorTravel || productApproach || beforeTram || seatPhase !== "idle" && seatPhase !== "seated");
     },
     get collisionTicks() {
       return collisions;

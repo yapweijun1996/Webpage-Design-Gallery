@@ -9,7 +9,7 @@ import {
   chaseDistance, clampCameraPitch, createCameraController, DEFAULT_PITCH, easeCameraValue, firstPersonFov,
   limitCameraByFloor, limitCameraByObstacles, neutralFramingWeight, positionTramChase, sweepCameraClearance
 } from './camera-controller.js';
-import {advanceVelocity, interpolate, interpolateAngle, MOVEMENT, stickStrength} from './movement.js';
+import {advanceVelocity, interpolate, interpolateAngle, MOVEMENT, MOVEMENT_KEYS, stickStrength} from './movement.js';
 import {createPlayerTram, tramBoardReason} from './tram-ride.js';
 import {seatEyeHeight} from './tram-layout.js';
 import {isInFrontOfSeat} from './seat-placements.js';
@@ -168,7 +168,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       setPitch(currentPitch() + (event.code === 'PageUp' ? -.12 : .12));
       return;
     }
-    if (['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight'].includes(event.code)) {
+    if (MOVEMENT_KEYS.includes(event.code)) {
       // Space and tab retain their native page and focus semantics.
       if (event.target === canvas || event.target === document.body) event.preventDefault();
       keys.add(event.code);
@@ -755,6 +755,12 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     setGamepadInput: input => { gamepad = input; },
     setInput: input => { injected = input; if (Number.isFinite(input?.yaw)) previousYaw = yaw = input.yaw; if (Number.isFinite(input?.pitch)) setPitch(input.pitch); },
     get tramState() { return tram?.controls.state; },
+    get movementPending() {
+      return Boolean(keys.size || stick || drag || pinch || injected?.forward || injected?.right ||
+        gamepad?.forward || gamepad?.right || gamepad?.lookX || gamepad?.lookY ||
+        Math.hypot(velocity.x, velocity.z) > .001 || elevatorTravel || productApproach ||
+        beforeTram || (seatPhase !== 'idle' && seatPhase !== 'seated'));
+    },
     get collisionTicks() { return collisions; },
     sampleMovement() {
       const {x,z} = body.translation();

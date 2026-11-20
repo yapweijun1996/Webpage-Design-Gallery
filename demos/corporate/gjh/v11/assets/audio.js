@@ -1,3 +1,5 @@
+import {MOVEMENT_KEYS} from './movement.js';
+
 // One procedural mixer shared by the mall's entry, player and lazy shop modules.
 export const AUDIO_KEY = 'gjh-v11-audio-v1';
 export const BEAT = 60 / 72;
@@ -70,7 +72,7 @@ const hz = midi => 440 * 2 ** ((midi - 69) / 12);
 const noop = () => {};
 const browserContext = () => {
   const Audio = globalThis.AudioContext ?? globalThis.webkitAudioContext;
-  return Audio ? new Audio() : null;
+  return Audio ? new Audio({latencyHint:'interactive'}) : null;
 };
 
 function nextIdleFrame(callback) {
@@ -98,20 +100,25 @@ export function createAudioManager({
   let muted = saved?.muted === true, demoMuted = saved?.demoMuted === true;
   let musicChoice = typeof saved?.music === 'boolean' ? saved.music : null;
   let voiceChoice = saved?.voice === true, narrationStop = noop;
-  let active = false, primed = false, hidden = false, activated = false, disposed = false, unavailable = false;
+  let active = false, hidden = false, activated = false, disposed = false, unavailable = false;
   let phone = false, low = false, quiet = false;
+  let pendingCreation = false, effectRequested = false;
   let context, master, timer, wanted, transitionId = 0, serial = 0;
   const buses = {}, coefficients = {}, waves = {}, voices = [];
   const timbres = Object.keys(HARMONICS);
   let prepared = 0, waveIndex = 0, pendingIdle = false, musicDelay, unlockedAt;
   let readyForMusic = false, audioInitMs = null, audioInitSliceMaxMs = 0;
+  let audioCreateMs = null, audioCreateDuring = null, audioCreateFrame = null;
   const effectLimit = () => phone ? 6 : 8;
   const listeners = new Set();
   let step = 0, next = null, zone = 'atrium', style = LOBBY, lastStyleZone = '', motif = null;
   let stride = 0, railVoice, duckUntil = 0, captionDucking = false, speechDucking = false, musicDucked = false;
   const musicEnabled = () => musicChoice ?? !(quiet || (phone && low));
-  const canResume = () => (active || primed) && activated && !muted && !hidden && !disposed;
-  const audible = () => active && canResume();
+  const canResume = () => active && activated && !muted && !hidden && !disposed;
+  const audible = canResume;
+  const deferCreation = () => phone && low;
+  const canCreate = () => !context && !muted && !hidden && !disposed && !unavailable;
+  const wantsSound = () => effectRequested || (musicEnabled() && levels.music > 0);
   const running = () => audible() && !unavailable && wanted === true && context?.state === 'running';
   const wantsMusic = () => running() && musicEnabled() && levels.music > 0;
   const musicPlaying = () => timer !== undefined;
@@ -315,7 +322,10 @@ export function createAudioManager({
   function setContextRunning(play) {
     wanted = play;
     const id = ++transitionId;
+    const firstResume = play && unlockedAt === undefined;
+    if (firstResume) unlockedAt = now();
     const transition = play ? context.resume() : context.suspend();
+    if (firstResume) audioInitMs = audioCreateMs + (now() - unlockedAt);
     void transition.then(() => {
       if (id === transitionId) audioStateChanged();
     }, () => {
@@ -360,30 +370,73 @@ export function createAudioManager({
     closeContext();
     queueMicrotask(audioStateChanged);
   }
-  function unlock(prime = false) {
-    if (disposed || unavailable || (activated && wanted === true && context?.state === 'running')) return;
-    activated = true;
-    primed ||= prime && !active && !hidden;
-    if (!canResume()) return;
+  function prepareContext(during, frame) {
     const start = now();
-    const first = !context;
+    audioCreateDuring = during;
+    audioCreateFrame = frame;
     try {
-      if (first) {
-        unlockedAt = start;
-        context = createContext();
-        if (!context) {
-          markUnavailable();
-          return;
-        }
-        context.onstatechange = audioStateChanged;
-      }
-      // Resume in the user gesture for browser autoplay policy.
-      setContextRunning(true);
+      context = createContext();
     } catch {
       markUnavailable();
     } finally {
-      if (first) audioInitMs = now() - start;
+      audioInitMs = audioCreateMs = now() - start;
     }
+    if (!context) {
+      if (!unavailable) markUnavailable();
+      return;
+    }
+    context.onstatechange = audioStateChanged;
+    if (during === 'gesture') return;
+    try {
+      // A user-activated constructor may start the context automatically.
+      setContextRunning(false);
+    } catch {
+      markUnavailable();
+    }
+  }
+  function prepareForLoader(frame = 0) {
+    if (canCreate() && (!deferCreation() || wantsSound())) prepareContext('loader', frame);
+  }
+  function scheduleCreation(isStationary, getFrame) {
+    if (pendingCreation || !active || !canCreate() || deferCreation()) return;
+    pendingCreation = true;
+    idle(deadline => {
+      pendingCreation = false;
+      if (!active || !canCreate() || deferCreation()) return;
+      if (!isStationary() || (deadline && deadline.timeRemaining() < INIT_BUDGET_MS)) {
+        scheduleCreation(isStationary, getFrame);
+        return;
+      }
+      prepareContext('idle', getFrame());
+      if (activated) unlock({allowCreate:false});
+    });
+  }
+  function unlock({allowCreate = true, frame = 0} = {}) {
+    if (disposed || unavailable || (activated && wanted === true && context?.state === 'running')) return;
+    activated = true;
+    if (!canResume()) return;
+    if (allowCreate && !deferCreation() && canCreate()) prepareContext('gesture', frame);
+    if (!context) return;
+    try {
+      // Call resume inside the user gesture for browser autoplay policy.
+      setContextRunning(true);
+    } catch {
+      markUnavailable();
+    }
+  }
+  function prepareForControls(frame, explicit = false) {
+    if (active && canCreate() && (explicit || wantsSound())) prepareContext('gesture', frame);
+    unlock({allowCreate:false});
+  }
+  function sceneGesture(event, isStationary, frame) {
+    if (!event.isTrusted || event.repeat || (event.type === 'keydown' &&
+        (event.ctrlKey || event.metaKey || event.altKey))) return;
+    const canCreateOnGesture = event.type === 'click' ||
+      (event.type === 'keydown' && !MOVEMENT_KEYS.includes(event.code));
+    unlock({allowCreate:canCreateOnGesture && isStationary(), frame});
+  }
+  function requestEffect() {
+    if (!context && active && deferCreation() && canCreate()) effectRequested = true;
   }
   function duck(seconds) {
     if (!running()) return;
@@ -391,7 +444,9 @@ export function createAudioManager({
     if (musicPlaying()) applyDuck(context.currentTime);
   }
   function play(sound, bus = 'effects', cancellable = false) {
-    if (!running() || !buses[bus] || !levels[bus] || !Object.hasOwn(SOUNDS,sound)) return;
+    if (!levels[bus] || !Object.hasOwn(SOUNDS,sound)) return;
+    requestEffect();
+    if (!running() || !buses[bus]) return;
     const [timbre, notes, duration, peak, slide] = SOUNDS[sound];
     if (Object.hasOwn(HARMONICS, timbre) && !waves[timbre]) return;
     const token = cancellable ? ++serial : 0;
@@ -415,13 +470,13 @@ export function createAudioManager({
     save(); syncClock(); publish();
   }
   return {
-    performanceReport() { return {audioInitMs, audioInitSliceMaxMs}; },
+    performanceReport() { return {audioInitMs, audioInitSliceMaxMs, audioCreateMs, audioCreateDuring, audioCreateFrame}; },
     get demoMuted() { return demoMuted; },
     get canNarrate() { return audible() && voiceChoice; },
     get state() { return {muted,demoMuted,musicEnabled:musicEnabled(),musicPlaying:musicPlaying(),
       voice:voiceChoice,levels:{...levels},available:!unavailable}; },
     subscribe(listener) { listeners.add(listener); listener(); return () => listeners.delete(listener); },
-    unlock, play, shop, duck, setVolume,
+    prepareForLoader, scheduleCreation, prepareForControls, sceneGesture, unlock, play, shop, duck, setVolume,
     setMuted(value) { muted = value; save(); sync(); },
     setMusic(value) { musicChoice = value; save(); sync(); },
     setDemoMuted(value) {
@@ -438,12 +493,12 @@ export function createAudioManager({
     },
     setSpeechDucking(value) { speechDucking = value; if (musicPlaying()) applyDuck(context.currentTime); },
     setActive(value) {
-      if (active === value && !primed) return;
-      active = value; primed = false;
+      if (active === value) return;
+      active = value;
       if (!value) captionDucking = false;
       sync();
     },
-    setHidden(value) { if (hidden !== value) { hidden = value; if (value) primed = false; sync(); } },
+    setHidden(value) { if (hidden !== value) { hidden = value; sync(); } },
     setPolicy(isPhone, isLow, prefersQuiet) {
       if (phone === isPhone && low === isLow && quiet === prefersQuiet) return;
       if (isPhone && context) for (let i = 6; i < voices.length; i++) if (voices[i]) silence(voices[i]);
@@ -451,11 +506,12 @@ export function createAudioManager({
     },
     setZone(value) { zone = value; },
     walk(distance) {
-      if (!distance || !running() || !levels.effects) return;
+      if (!distance || !levels.effects || (!running() && !(active && deferCreation() && canCreate()))) return;
       stride += distance;
       if (stride >= .79) { stride %= .79; play('step'); }
     },
     rail(moving) {
+      if (moving && levels.ambience) requestEffect();
       if (moving && !railVoice && running() && buses.ambience && levels.ambience) {
         railVoice = note('ambience','rail',context.currentTime + .009,Infinity,.023,42);
       } else if (!moving && railVoice) {

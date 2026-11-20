@@ -1,4 +1,6 @@
 export const FIXED_STEP = 1 / 60;
+export const MOVEMENT_KEYS = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE',
+  'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight'];
 export const MOVEMENT = Object.freeze({
   desktopWalk: 3.4, desktopRun: 5.2, touchWalk: 3.1, touchRun: 4.5, cart: 1.8,
   acceleration: 10, deceleration: 18, turnRate: 140 * Math.PI / 180,

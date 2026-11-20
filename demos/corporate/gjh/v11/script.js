@@ -87,31 +87,39 @@ mallAudio.subscribe(() => {
 });
 function toggleMute() {
   mallAudio.setMuted(!mallAudio.state.muted);
-  mallAudio.unlock();
+  if (!mallAudio.state.muted) mallAudio.prepareForControls(frames, true);
 }
 speaker.addEventListener('click', toggleMute);
-music.addEventListener('change', () => { mallAudio.setMusic(music.checked); mallAudio.unlock(); });
+music.addEventListener('change', () => {
+  mallAudio.setMusic(music.checked);
+  if (music.checked) mallAudio.prepareForControls(frames, true);
+});
 for (const input of mixer) input.addEventListener('input', () => {
   mallAudio.setVolume(input.dataset.audioBus, input.valueAsNumber / 100);
 });
-function unlockAudio(event) {
-  if (!event.isTrusted || event.repeat || (event.type === 'keydown' &&
-      (event.ctrlKey || event.metaKey || event.altKey))) return;
-  const inMall = document.body.classList.contains('is-3d');
-  if (inMall && startupOverlay.hidden) {
-    mallAudio.setActive(true);
-    mallAudio.unlock();
-  } else if (!startupOverlay.hidden && startupOverlay.contains(event.target) &&
-      !event.target.closest?.('#loader-directory')) mallAudio.unlock(true);
+const sceneEntered = () => startupOverlay.hidden && document.body.classList.contains('is-3d');
+const sceneStationary = () => sceneEntered() && !player?.movementPending && !testWalk?.active;
+function activateSceneAudio() {
+  mallAudio.setActive(true);
+  mallAudio.scheduleCreation(sceneStationary, () => frames);
 }
+function unlockAudio(event) {
+  if (!sceneEntered()) return;
+  activateSceneAudio();
+  mallAudio.sceneGesture(event, sceneStationary, frames);
+}
+const audioTools = document.getElementById('mall-tools');
+audioTools.addEventListener('toggle', () => {
+  if (audioTools.open && sceneEntered()) mallAudio.prepareForControls(frames);
+});
 document.addEventListener('pointerdown', event => { if (event.pointerType === 'mouse') unlockAudio(event); }, true);
 document.addEventListener('pointerup', event => { if (event.pointerType !== 'mouse') unlockAudio(event); }, true);
 document.addEventListener('click', unlockAudio);
 document.addEventListener('keydown', event => {
-  if (event.code === 'KeyM' && !event.defaultPrevented && !event.repeat &&
+  if (event.isTrusted && event.code === 'KeyM' && !event.defaultPrevented && !event.repeat &&
       !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.isContentEditable &&
       !event.target.closest?.('input, select, textarea, dialog') &&
-      document.body.classList.contains('is-3d') && startupOverlay.hidden) {
+      sceneEntered()) {
     event.preventDefault();
     toggleMute();
   } else unlockAudio(event);
@@ -751,10 +759,10 @@ function animate(now) {
     quality.resetSampling(now);
     return;
   }
-  const entered = startupOverlay.hidden && document.body.classList.contains('is-3d');
+  const entered = sceneEntered();
   if (entered && enteredAt === null) {
     enteredAt = now;
-    mallAudio.setActive(true);
+    activateSceneAudio();
   }
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
@@ -874,7 +882,8 @@ ui.onTeleport(zone => {
 });
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();requestRender();return ok;});
 ui.onView(visual => {
-  if (!visual || startupOverlay.hidden) mallAudio.setActive(visual);
+  if (!visual) mallAudio.setActive(false);
+  else if (sceneEntered()) activateSceneAudio();
   if (visual) {
     last = performance.now();
     requestRender();
@@ -932,6 +941,7 @@ window.addEventListener('pageshow', () => {
 });
 document.addEventListener('visibilitychange', () => {
   mallAudio.setHidden(document.hidden);
+  if (!document.hidden && sceneEntered()) activateSceneAudio();
   warmRunner?.visibility(document.hidden);
   if (document.hidden) { pausePerformance();if(ready)mallTheme?.cancel();hideGuidance(); shelfFocus?.close(); modes.interrupt('document hidden'); cancelAnimationFrame(frame); frame = 0; }
   else { if (ready) { quality.resetSampling(); refreshCalendarTheme(); updateHUD(); requestRender(); } else validateRestoration(); resume(); }

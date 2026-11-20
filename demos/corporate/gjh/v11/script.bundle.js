@@ -1548,7 +1548,7 @@ function createTramHud(parent, scene, canControl) {
     Object.assign(voice.style, { minWidth: "44px", minHeight: "44px", margin: "0", paddingInline: "8px" });
     voice.setAttribute("aria-pressed", String(mallAudio2.state.voice));
     voice.addEventListener("click", () => {
-      mallAudio2.unlock();
+      mallAudio2.unlock({ allowCreate: false });
       const enabled = !mallAudio2.state.voice;
       if (enabled)
         narration.selectSystemVoice();
@@ -3369,11 +3369,8 @@ function createAdaptiveQuality(targetFps) {
     }
   };
 }
-function createGraphicsQuality(onChange) {
-  const select = document.getElementById("graphics-quality");
-  const autoResolution = document.getElementById("auto-resolution");
-  const status = document.getElementById("graphics-quality-status");
-  const deviceClass = detectDeviceClass({
+function browserDeviceClass() {
+  return detectDeviceClass({
     userAgent: navigator.userAgent,
     platform: navigator.platform,
     maxTouchPoints: navigator.maxTouchPoints,
@@ -3381,14 +3378,26 @@ function createGraphicsQuality(onChange) {
     width: window.innerWidth,
     height: window.innerHeight
   });
+}
+function savedQualityPreference() {
+  try {
+    return qualityPreference(localStorage.getItem(QUALITY_KEY));
+  } catch {
+    return "auto";
+  }
+}
+function createGraphicsQuality(onChange) {
+  const select = document.getElementById("graphics-quality");
+  const autoResolution = document.getElementById("auto-resolution");
+  const status = document.getElementById("graphics-quality-status");
+  const deviceClass = browserDeviceClass();
   const cadence = createRenderCadence(deviceClass);
   const androidChrome = isAndroidChrome(navigator.userAgent);
   const adaptive = createAdaptiveQuality(cadence.targetFps);
-  let preference = "auto", recovered = false, profile, autoTier = null;
+  let preference = savedQualityPreference(), recovered = false, profile, autoTier = null;
   let tierDowngrades = 0, pendingDowngrade = null, highPerformanceWebGL2 = false;
   let autoEnabled = true;
   try {
-    preference = qualityPreference(localStorage.getItem(QUALITY_KEY));
     autoEnabled = localStorage.getItem(RESOLUTION_KEY) !== "off";
   } catch {}
   select.value = preference;
@@ -6474,27 +6483,36 @@ mallAudio3.subscribe(() => {
 });
 function toggleMute() {
   mallAudio3.setMuted(!mallAudio3.state.muted);
-  mallAudio3.unlock();
+  if (!mallAudio3.state.muted)
+    mallAudio3.prepareForControls(frames, true);
 }
 speaker.addEventListener("click", toggleMute);
 music.addEventListener("change", () => {
   mallAudio3.setMusic(music.checked);
-  mallAudio3.unlock();
+  if (music.checked)
+    mallAudio3.prepareForControls(frames, true);
 });
 for (const input of mixer)
   input.addEventListener("input", () => {
     mallAudio3.setVolume(input.dataset.audioBus, input.valueAsNumber / 100);
   });
-function unlockAudio(event) {
-  if (!event.isTrusted || event.repeat || event.type === "keydown" && (event.ctrlKey || event.metaKey || event.altKey))
-    return;
-  const inMall = document.body.classList.contains("is-3d");
-  if (inMall && startupOverlay.hidden) {
-    mallAudio3.setActive(true);
-    mallAudio3.unlock();
-  } else if (!startupOverlay.hidden && startupOverlay.contains(event.target) && !event.target.closest?.("#loader-directory"))
-    mallAudio3.unlock(true);
+var sceneEntered = () => startupOverlay.hidden && document.body.classList.contains("is-3d");
+var sceneStationary = () => sceneEntered() && !player?.movementPending && !testWalk?.active;
+function activateSceneAudio() {
+  mallAudio3.setActive(true);
+  mallAudio3.scheduleCreation(sceneStationary, () => frames);
 }
+function unlockAudio(event) {
+  if (!sceneEntered())
+    return;
+  activateSceneAudio();
+  mallAudio3.sceneGesture(event, sceneStationary, frames);
+}
+var audioTools = document.getElementById("mall-tools");
+audioTools.addEventListener("toggle", () => {
+  if (audioTools.open && sceneEntered())
+    mallAudio3.prepareForControls(frames);
+});
 document.addEventListener("pointerdown", (event) => {
   if (event.pointerType === "mouse")
     unlockAudio(event);
@@ -6505,7 +6523,7 @@ document.addEventListener("pointerup", (event) => {
 }, true);
 document.addEventListener("click", unlockAudio);
 document.addEventListener("keydown", (event) => {
-  if (event.code === "KeyM" && !event.defaultPrevented && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.isContentEditable && !event.target.closest?.("input, select, textarea, dialog") && document.body.classList.contains("is-3d") && startupOverlay.hidden) {
+  if (event.isTrusted && event.code === "KeyM" && !event.defaultPrevented && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.isContentEditable && !event.target.closest?.("input, select, textarea, dialog") && sceneEntered()) {
     event.preventDefault();
     toggleMute();
   } else
@@ -7362,10 +7380,10 @@ function animate(now) {
     quality.resetSampling(now);
     return;
   }
-  const entered = startupOverlay.hidden && document.body.classList.contains("is-3d");
+  const entered = sceneEntered();
   if (entered && enteredAt === null) {
     enteredAt = now;
-    mallAudio3.setActive(true);
+    activateSceneAudio();
   }
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
@@ -7530,8 +7548,10 @@ ui.onSeat((sit, id) => {
   return ok;
 });
 ui.onView((visual) => {
-  if (!visual || startupOverlay.hidden)
-    mallAudio3.setActive(visual);
+  if (!visual)
+    mallAudio3.setActive(false);
+  else if (sceneEntered())
+    activateSceneAudio();
   if (visual) {
     last = performance.now();
     requestRender();
@@ -7627,6 +7647,8 @@ window.addEventListener("pageshow", () => {
 });
 document.addEventListener("visibilitychange", () => {
   mallAudio3.setHidden(document.hidden);
+  if (!document.hidden && sceneEntered())
+    activateSceneAudio();
   warmRunner?.visibility(document.hidden);
   if (document.hidden) {
     pausePerformance();
