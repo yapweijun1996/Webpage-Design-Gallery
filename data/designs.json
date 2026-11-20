@@ -853,6 +853,45 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "gjh-v26",
+    "companyId": "gjh",
+    "slug": "v26",
+    "version": "v26",
+    "title": "GJH Story Studio",
+    "description": "One Mandarin page with ten modules: origins timeline, house brands, regional network, brand directory, a three-minute podcast, a ten-slide deck and a sourced fact check.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 230,
+    "demoPath": "demos/corporate/gjh/v26/index.html",
+    "thumbnail": "demos/corporate/gjh/v26/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v26/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v26/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v26/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",

@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - GJH Story Studio",
+  "version": "v26",
+  "designStyle": "A ten-module Mandarin story page in ink and champagne gold: timeline, brand flip cards, network schematic, filterable brand directory, a podcast player with synced transcript, a ten-slide deck and a fact-check ledger.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v26/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v26",
+  "companyId": "gjh",
+  "displayTitle": "GJH Story Studio",
+  "summary": "One Mandarin page with ten modules: origins timeline, house brands, regional network, brand directory, a three-minute podcast, a ten-slide deck and a sourced fact check.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 230
+}

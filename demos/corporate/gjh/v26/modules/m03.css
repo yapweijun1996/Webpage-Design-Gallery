@@ -1,0 +1,213 @@
+#m03 .m03-header {
+  max-width: 42rem;
+  margin-bottom: var(--gap);
+}
+
+#m03 .m03-header h2 {
+  color: var(--gold-2);
+}
+
+#m03 .m03-header p {
+  margin: 0;
+}
+
+#m03 .m03-header .m03-context {
+  margin-top: .65rem;
+  color: var(--paper-2);
+  font-size: var(--m03-context-size);
+}
+
+#m03 .m03-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(12px, 2vw, 24px);
+  align-items: start;
+}
+
+#m03 .m03-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--ink-2);
+}
+
+#m03 .m03-summary {
+  display: block;
+  list-style: none;
+  cursor: pointer;
+  border-radius: inherit;
+}
+
+#m03 .m03-summary::-webkit-details-marker {
+  display: none;
+}
+
+#m03 .m03-summary::marker {
+  content: "";
+}
+
+#m03 .m03-summary:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 3px;
+}
+
+#m03 .m03-art {
+  position: relative;
+  display: grid;
+  min-height: clamp(106px, 13vw, 144px);
+  place-items: center;
+  border-radius: var(--m03-art-radius);
+  border-bottom: 1px solid var(--line);
+  color: var(--gold-2);
+}
+
+#m03 .m03-art svg {
+  width: 7.5rem;
+  height: auto;
+}
+
+#m03 .m03-art-moon {
+  background: radial-gradient(ellipse at center, var(--m03-moon-glow), var(--ink) 82%);
+}
+
+#m03 .m03-art-pantry {
+  background: radial-gradient(ellipse at center, var(--m03-pantry-glow), var(--ink) 82%);
+}
+
+#m03 .m03-art-export {
+  background: radial-gradient(ellipse at center, var(--m03-export-glow), var(--ink) 82%);
+}
+
+#m03 .m03-art-wheel {
+  background: radial-gradient(ellipse at center, var(--m03-wheel-glow), var(--ink) 82%);
+}
+
+#m03 .m03-caption {
+  position: absolute;
+  right: .85rem;
+  bottom: .55rem;
+  color: var(--paper-2);
+  font-size: var(--m03-caption-size);
+  letter-spacing: .12em;
+}
+
+#m03 .m03-face {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: .25rem 1rem;
+  align-items: center;
+  padding: 1rem clamp(.9rem, 2vw, 1.5rem);
+}
+
+#m03 .m03-brand {
+  grid-column: 1;
+  color: var(--paper);
+  font: var(--m03-brand-font);
+  overflow-wrap: anywhere;
+}
+
+#m03 .m03-meta {
+  grid-column: 1;
+  color: var(--paper-2);
+  font-size: var(--m03-meta-size);
+}
+
+#m03 .m03-icon {
+  position: relative;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--gold);
+  border-radius: var(--m03-icon-radius);
+  color: var(--gold-2);
+}
+
+#m03 .m03-icon::before,
+#m03 .m03-icon::after {
+  grid-area: 1 / 1;
+  width: .72rem;
+  height: 1px;
+  background: currentColor;
+  content: "";
+}
+
+#m03 .m03-icon::after {
+  transform: rotate(90deg);
+}
+
+#m03 .m03-card[open] .m03-icon::after {
+  transform: rotate(0);
+}
+
+#m03 .m03-summary:hover .m03-icon,
+#m03 .m03-summary:focus-visible .m03-icon {
+  background: var(--gold-2);
+  color: var(--ink);
+}
+
+#m03 .m03-body {
+  padding: .95rem clamp(.9rem, 2vw, 1.5rem) 1.15rem;
+  border-top: 1px solid var(--line);
+  font-size: var(--m03-body-size);
+  overflow-wrap: anywhere;
+}
+
+#m03 .m03-body p {
+  margin: 0 0 .7rem;
+}
+
+#m03 .m03-body .m03-source {
+  margin: .85rem 0 0;
+  padding-top: .7rem;
+  border-top: 1px solid var(--line);
+  color: var(--paper-2);
+  font-size: var(--m03-reference-size);
+}
+
+#m03 .m03-tag {
+  display: inline-block;
+  margin-inline-end: .5em;
+  padding: 0 .5em;
+  border: 1px solid currentColor;
+  border-radius: var(--m03-tag-radius);
+  color: var(--m03-tag-confirmed-color);
+  font-size: var(--m03-tag-size);
+  white-space: nowrap;
+}
+
+#m03 .m03-tag-reported {
+  color: var(--gold-2);
+}
+
+#m03 .m03-tag-unverified {
+  color: var(--m03-tag-unverified-color);
+}
+
+#m03 .m03-footnote {
+  margin: 1.25rem 0 0;
+  color: var(--paper-2);
+  font-size: var(--m03-reference-size);
+}
+
+@media (min-width: 700px) {
+  #m03 .m03-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #m03 .m03-icon::after {
+    transition: transform .18s ease;
+  }
+
+  #m03 .m03-card[open] .m03-body {
+    animation: m03-reveal .22s ease-out;
+  }
+}
+
+@keyframes m03-reveal {
+  from { opacity: .65; }
+  to { opacity: 1; }
+}

@@ -1,0 +1,252 @@
+#m01 .m01-opening {
+  color: var(--paper);
+}
+
+#m01 .m01-hero {
+  position: relative;
+  display: grid;
+  align-items: center;
+  gap: 24px;
+  padding-block: clamp(18px, 3.5vw, 46px) 26px;
+}
+
+#m01 .m01-intro {
+  position: relative;
+  z-index: var(--m01-layer-intro);
+}
+
+#m01 .m01-title {
+  margin: 0 0 18px;
+  font-size: var(--m01-type-title);
+  letter-spacing: -.045em;
+  line-height: 1.12;
+}
+
+#m01 .m01-initials {
+  color: var(--gold-2);
+}
+
+#m01 .m01-subtitle {
+  margin: 0 0 10px;
+  color: var(--paper);
+  font-size: var(--m01-type-subtitle);
+}
+
+#m01 .m01-disclaimer {
+  margin: 0;
+  color: var(--paper-2);
+  font-size: var(--type-eyebrow);
+}
+
+#m01 .m01-cue {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 22px;
+  border-radius: var(--m01-radius-cue);
+  color: var(--gold-2);
+  font-size: var(--type-nav);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+#m01 .m01-cue:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 4px;
+}
+
+#m01 .m01-arrow {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--m01-radius-arrow);
+  text-decoration: none;
+}
+
+#m01 .m01-art {
+  display: block;
+  width: min(100%, 350px);
+  height: auto;
+  max-height: 180px;
+  justify-self: center;
+}
+
+#m01 .m01-guide {
+  stroke: var(--line);
+  stroke-dasharray: 2 5;
+}
+
+#m01 .m01-orbit {
+  stroke: var(--line);
+}
+
+#m01 .m01-trace {
+  stroke: var(--gold-2);
+  stroke-width: 1.5;
+}
+
+#m01 .m01-point {
+  fill: var(--gold-2);
+}
+
+#m01 .m01-milestones {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#m01 .m01-milestone {
+  padding: clamp(15px, 2vw, 23px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--ink-2);
+}
+
+#m01 .m01-date-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+}
+
+#m01 .m01-year {
+  color: var(--gold-2);
+  font: var(--m01-font-year);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+#m01 .m01-year-unit {
+  margin-inline-start: 5px;
+  font: var(--m01-font-year-unit);
+}
+
+#m01 .m01-event {
+  margin: 12px 0 4px;
+  color: var(--paper);
+  font-weight: 700;
+}
+
+#m01 .m01-detail {
+  margin: 0;
+  color: var(--paper-2);
+  font-size: var(--type-nav);
+}
+
+#m01 .m01-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-pill);
+  color: var(--gold-2);
+  font-size: var(--type-tag);
+  white-space: nowrap;
+}
+
+#m01 .m01-confirmed {
+  border-color: var(--ok-line);
+  color: var(--ok);
+}
+
+#m01 .m01-unverified {
+  border-color: var(--red);
+  color: var(--bad);
+}
+
+#m01 .m01-system {
+  display: grid;
+  gap: 14px 22px;
+  margin-top: clamp(26px, 4vw, 44px);
+  padding-top: 17px;
+  border-top: 1px solid var(--line);
+}
+
+#m01 .m01-system-title {
+  margin: 0;
+  font-size: var(--m01-type-system-title);
+}
+
+#m01 .m01-sample-label {
+  margin: 0 0 5px;
+  color: var(--paper-2);
+  font: var(--m01-font-sample-label);
+}
+
+#m01 .m01-swatches,
+#m01 .m01-type,
+#m01 .m01-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--type-eyebrow);
+}
+
+#m01 .m01-swatches li {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#m01 .m01-swatch {
+  width: 15px;
+  height: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--m01-radius-swatch);
+}
+
+#m01 .m01-swatch-ink {
+  background: var(--ink);
+}
+
+#m01 .m01-swatch-gold {
+  background: var(--gold-2);
+}
+
+#m01 .m01-swatch-paper {
+  background: var(--paper);
+}
+
+#m01 .m01-serif {
+  font: var(--m01-font-serif-sample);
+}
+
+@media (min-width: 700px) {
+  #m01 .m01-hero {
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    padding-bottom: 40px;
+  }
+
+  #m01 .m01-art {
+    max-height: none;
+  }
+
+  #m01 .m01-milestones {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #m01 .m01-system {
+    grid-template-columns: auto repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #m01 .m01-enter .m01-trace {
+    animation: m01-draw 1.25s ease-out both;
+  }
+}
+
+@keyframes m01-draw {
+  from { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+  to { stroke-dasharray: 1 1; stroke-dashoffset: 0; }
+}

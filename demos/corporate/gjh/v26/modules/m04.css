@@ -1,0 +1,190 @@
+#m04 .m04-header {
+  max-width: 62ch;
+  margin-bottom: var(--gap);
+}
+
+#m04 .m04-header p,
+#m04 .m04-source {
+  color: var(--paper-2);
+}
+
+#m04 .m04-header p,
+#m04 .m04-panel p {
+  margin: 0;
+}
+
+#m04 .m04-layout {
+  display: grid;
+  align-items: start;
+  gap: var(--gap);
+}
+
+#m04 .m04-network,
+#m04 .m04-details {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--ink-2);
+}
+
+#m04 .m04-network {
+  margin: 0;
+  overflow: hidden;
+}
+
+#m04 .m04-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+#m04 .m04-caption span,
+#m04 .m04-source {
+  font-size: var(--type-eyebrow);
+}
+
+#m04 .m04-caption span {
+  color: var(--gold-2);
+}
+
+#m04 .m04-diagram {
+  position: relative;
+  background: radial-gradient(ellipse at center, var(--m04-diagram-center), var(--ink) 75%);
+}
+
+#m04 .m04-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+#m04 .m04-grid {
+  fill: none;
+  stroke: var(--gold);
+  stroke-opacity: .16;
+  stroke-width: .5;
+}
+
+#m04 .m04-wires path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  stroke-opacity: .64;
+}
+
+#m04 .m04-wires .m04-active-wire {
+  stroke: var(--gold-2);
+  stroke-width: 2;
+  stroke-opacity: 1;
+  stroke-dasharray: 6 5;
+  animation: m04-trace .7s linear 3;
+}
+
+@keyframes m04-trace {
+  to { stroke-dashoffset: -11; }
+}
+
+#m04 .m04-hub-ring,
+#m04 .m04-hub-symbol {
+  fill: none;
+  stroke: var(--gold-2);
+}
+
+#m04 .m04-hub-ring {
+  opacity: .42;
+}
+
+#m04 .m04-hub {
+  fill: var(--ink);
+  stroke: var(--gold);
+}
+
+#m04 .m04-controls {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template: repeat(3, minmax(0, 1fr)) / repeat(2, minmax(0, 1fr));
+  place-items: center;
+}
+
+#m04 .m04-controls[hidden],
+#m04 .m04-panel[hidden] {
+  display: none;
+}
+
+#m04 .m04-node {
+  min-height: 44px;
+  max-width: 90%;
+  padding: 7px 10px;
+  border: 1px solid var(--gold);
+  border-radius: var(--m04-node-radius);
+  background: var(--ink);
+  color: var(--paper);
+  font: var(--m04-node-font);
+  cursor: pointer;
+}
+
+#m04 .m04-node:hover {
+  border-color: var(--paper);
+}
+
+#m04 .m04-node:focus-visible {
+  outline: 3px solid var(--paper);
+  outline-offset: 4px;
+}
+
+#m04 .m04-node[aria-pressed="true"] {
+  color: var(--ink);
+  background: var(--gold-2);
+}
+
+#m04 .m04-panel {
+  padding: var(--gap);
+}
+
+#m04 .m04-panel:not([hidden]) ~ .m04-panel:not([hidden]) {
+  border-top: 1px solid var(--line);
+}
+
+#m04 .m04-panel p + p {
+  margin-top: 12px;
+}
+
+#m04 .m04-stat {
+  display: block;
+  color: var(--gold-2);
+  font: var(--m04-stat-font);
+  margin-bottom: 12px;
+}
+
+#m04 .m04-stat small {
+  font-size: var(--m04-stat-unit-size);
+}
+
+#m04 .m04-evidence {
+  margin-inline-end: .3em;
+  font-size: var(--type-eyebrow);
+  color: var(--m04-evidence-color);
+  white-space: nowrap;
+}
+
+#m04 .m04-unverified {
+  color: var(--m04-unverified-color);
+}
+
+@media (min-width: 800px) {
+  #m04 .m04-layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #m04 .m04-wires .m04-active-wire {
+    animation: none;
+  }
+}

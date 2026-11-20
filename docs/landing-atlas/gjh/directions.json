@@ -154,6 +154,13 @@
     "detail": "Start at Rochor Road, tap the panels to reveal dialogue and open the chapter fact checks.", "items": ["Rochor Road", "New Moon", "MILI"]
   },
   {
+    "key": "gjh-story-studio", "version": "v26", "kind": "primary", "style": "Ink and champagne-gold Mandarin story page",
+    "headline": "GJH 故事工作室", "action": "向下阅读", "image": "demos/corporate/gjh/v26/screenshots/1440.png",
+    "composition": "poster", "background": "#14110d", "ink": "#f6efe0", "accent": "#c9a24a",
+    "notes": "The desktop capture shows the ink-black opening with a champagne-gold title, the independent-demo disclaimer and three evidence-tagged cards. A sticky bar links the ten modules below.",
+    "detail": "Jump from the opening to the podcast, the ten-slide deck or the sourced fact check.", "items": ["播客", "演示文稿", "出处与核实"]
+  },
+  {
     "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
     "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
     "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",

@@ -1,0 +1,300 @@
+#m08 .m08-heading {
+  margin-block-end: 1.45rem;
+}
+
+#m08 .m08-kicker {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  margin: 0 0 .4rem;
+  color: var(--gold-2);
+  font-size: var(--m08-type-label);
+  letter-spacing: .15em;
+}
+
+#m08 .m08-kicker::before {
+  content: "";
+  width: 1.6rem;
+  border-top: 1px solid var(--gold);
+}
+
+#m08 .m08-deck {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--line);
+}
+
+#m08 .m08-player,
+#m08 .m08-transcript {
+  min-width: 0;
+  padding: clamp(1rem, 3vw, 1.85rem);
+  background: var(--ink-2);
+}
+
+#m08 .m08-player {
+  border-radius: var(--radius) var(--radius) var(--m08-radius-square) var(--m08-radius-square);
+  background: radial-gradient(ellipse at 48% 46%, var(--line), transparent 76%), var(--ink-2);
+}
+
+#m08 .m08-transcript {
+  border-radius: var(--m08-radius-square) var(--m08-radius-square) var(--radius) var(--radius);
+}
+
+#m08 .m08-top,
+#m08 .m08-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem .75rem;
+}
+
+#m08 .m08-languages {
+  display: inline-flex;
+  gap: .2rem;
+  padding: .2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--m08-radius-pill);
+  background: var(--ink);
+}
+
+#m08 button,
+#m08 select {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+#m08 .m08-languages button {
+  min-height: 36px;
+  padding: .3rem .75rem;
+  border: 0;
+  border-radius: var(--m08-radius-pill);
+  background: transparent;
+  font-size: var(--m08-type-label);
+}
+
+#m08 .m08-languages button[aria-pressed="true"],
+#m08 .m08-play {
+  background: var(--gold-2);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+#m08 .m08-voice-note,
+#m08 .m08-clock,
+#m08 .m08-speed,
+#m08 .m08-follow,
+#m08 .m08-hint,
+#m08 .m08-status {
+  color: var(--paper-2);
+  font-size: var(--m08-type-label);
+}
+
+#m08 .m08-wave {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(2px, .55vw, 5px);
+  height: 6rem;
+  margin: 1rem 0 .55rem;
+  background: linear-gradient(var(--line), var(--line)) center / 100% 1px no-repeat;
+}
+
+#m08 .m08-bar {
+  height: var(--m08-height);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(var(--gold-2), var(--gold));
+  opacity: .45;
+}
+
+#m08 .m08-bar[data-m08-passed] {
+  opacity: 1;
+}
+
+#m08 .m08-player[data-m08-playing] .m08-bar {
+  animation: m08-pulse 740ms ease-in-out var(--m08-delay) infinite alternate;
+}
+
+@keyframes m08-pulse {
+  from { transform: scaleY(.65); }
+  to { transform: scaleY(1); }
+}
+
+#m08 #m08-seek {
+  display: block;
+  width: 100%;
+  min-height: 34px;
+  margin: 0;
+  accent-color: var(--gold-2);
+  cursor: pointer;
+}
+
+#m08 #m08-seek:disabled {
+  cursor: default;
+}
+
+#m08 .m08-clock {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+
+#m08 .m08-controls {
+  margin-block-start: 1rem;
+}
+
+#m08 .m08-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  min-height: 46px;
+  min-width: 7rem;
+  padding: .4rem .85rem;
+  border: 1px solid transparent;
+  border-radius: var(--m08-radius-pill);
+}
+
+#m08 .m08-play:hover,
+#m08 .m08-languages button[aria-pressed="true"]:hover {
+  background: var(--paper);
+}
+
+#m08 .m08-speed,
+#m08 .m08-follow {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+#m08 .m08-speed select {
+  min-height: 44px;
+  padding: .25rem .4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--m08-radius-control);
+  background: var(--ink);
+  color: var(--paper);
+  color-scheme: dark;
+  font-variant-numeric: tabular-nums;
+}
+
+#m08 .m08-follow {
+  min-height: 34px;
+  cursor: pointer;
+}
+
+#m08 .m08-follow input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--gold-2);
+}
+
+#m08 .m08-transcript h3 {
+  margin: 0;
+  font-size: var(--m08-type-transcript-heading);
+}
+
+#m08 .m08-hint {
+  margin: .15rem 0 .75rem;
+}
+
+#m08 .m08-status {
+  margin: .6rem 0 0;
+}
+
+#m08 .m08-status:empty {
+  margin: 0;
+}
+
+#m08 .m08-lines {
+  display: grid;
+  align-content: start;
+  gap: .25rem;
+  max-height: 16.25rem;
+  margin: 0;
+  padding: 4px;
+  overflow: auto;
+  list-style: none;
+  scrollbar-color: var(--gold) var(--ink-2);
+}
+
+#m08 .m08-line {
+  display: grid;
+  gap: .2rem;
+  width: 100%;
+  min-width: 0;
+  padding: .55rem .68rem;
+  border: 1px solid transparent;
+  border-radius: var(--m08-radius-control);
+  background: transparent;
+  text-align: start;
+  overflow-wrap: anywhere;
+  font-size: var(--m08-type-transcript-line);
+  line-height: 1.55;
+}
+
+#m08 .m08-line:hover {
+  border-color: var(--line);
+}
+
+#m08 .m08-line[aria-current="true"] {
+  border-color: var(--gold);
+  border-inline-start-width: 3px;
+  padding-inline-start: calc(.68rem - 2px);
+  background: var(--ink);
+}
+
+#m08 .m08-line:disabled {
+  opacity: 1;
+  cursor: default;
+}
+
+#m08 .m08-line-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .15rem .55rem;
+  color: var(--gold-2);
+  font-size: var(--m08-type-line-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+#m08 .m08-evidence {
+  padding-inline: .38rem;
+  border: 1px solid currentColor;
+  border-radius: var(--m08-radius-pill);
+}
+
+#m08 .m08-evidence[data-m08-evidence="confirmed"] {
+  color: var(--m08-evidence-confirmed);
+}
+
+#m08 .m08-evidence[data-m08-evidence="unverified"] {
+  color: var(--m08-evidence-unverified);
+}
+
+@media (min-width: 780px) {
+  #m08 .m08-deck {
+    grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr);
+  }
+
+  #m08 .m08-player {
+    border-radius: var(--radius) var(--m08-radius-square) var(--m08-radius-square) var(--radius);
+  }
+
+  #m08 .m08-transcript {
+    border-radius: var(--m08-radius-square) var(--radius) var(--radius) var(--m08-radius-square);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #m08 .m08-player[data-m08-playing] .m08-bar {
+    animation: none;
+  }
+}

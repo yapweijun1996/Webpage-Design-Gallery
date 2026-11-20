@@ -1,0 +1,182 @@
+#m09 .m09-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px 24px;
+  margin-bottom: 18px;
+}
+
+#m09 .m09-heading h2 {
+  margin: 0;
+}
+
+#m09 .m09-download {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--m09-control-size);
+  text-underline-offset: .25em;
+}
+
+#m09 .m09-viewer {
+  min-width: 0;
+}
+
+#m09 .m09-stage {
+  display: grid;
+  min-width: 0;
+  min-height: clamp(360px, 45vw, 490px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: radial-gradient(ellipse at top right, var(--m09-stage-glow), var(--m09-stage-fade) 72%), var(--ink-2);
+}
+
+#m09 .m09-slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: clamp(22px, 5vw, 64px);
+  overflow-wrap: anywhere;
+  animation: m09-enter 260ms ease-out both;
+}
+
+#m09 .m09-slide[hidden],
+#m09 .m09-message[hidden] {
+  display: none;
+}
+
+#m09 .m09-slide-title {
+  margin: 0 0 clamp(18px, 3vw, 35px);
+  color: var(--gold-2);
+  font-size: var(--m09-slide-title-size);
+}
+
+#m09 .m09-cover .m09-slide-title {
+  font-size: var(--m09-cover-title-size);
+}
+
+#m09 .m09-lead {
+  margin: 0;
+  max-width: 28em;
+  color: var(--paper-2);
+  font-size: var(--m09-lead-size);
+}
+
+#m09 .m09-records {
+  max-width: 49rem;
+  border-block-start: 1px solid var(--line);
+}
+
+#m09 .m09-records p {
+  margin: 0;
+  padding: 9px 0;
+  border-block-end: 1px solid var(--line);
+  font-size: var(--m09-record-size);
+}
+
+#m09 .m09-status {
+  display: inline-block;
+  margin-inline-end: .7em;
+  color: var(--m09-confirmed-color);
+  font-size: var(--m09-status-size);
+  white-space: nowrap;
+}
+
+#m09 .m09-reported {
+  color: var(--gold-2);
+}
+
+#m09 .m09-unverified {
+  color: var(--m09-unverified-color);
+}
+
+#m09 .m09-tools,
+#m09 .m09-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+#m09 .m09-tools {
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+#m09 .m09-button {
+  min-height: 44px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--m09-button-radius);
+  background: var(--ink-2);
+  color: var(--paper);
+  font: inherit;
+  font-size: var(--m09-control-size);
+  cursor: pointer;
+}
+
+#m09 .m09-button:hover:not([aria-disabled="true"]) {
+  border-color: var(--gold-2);
+  color: var(--gold-2);
+}
+
+#m09 .m09-button[aria-disabled="true"] {
+  color: var(--m09-disabled-color);
+  cursor: default;
+}
+
+#m09 .m09-viewer:focus-visible,
+#m09 .m09-download:focus-visible,
+#m09 .m09-button:focus-visible {
+  outline: 3px solid var(--gold-2);
+  outline-offset: 3px;
+}
+
+#m09 .m09-counter {
+  min-width: 3.4rem;
+  text-align: center;
+  color: var(--gold-2);
+  font-size: var(--m09-control-size);
+  font-variant-numeric: tabular-nums;
+}
+
+#m09 .m09-help,
+#m09 .m09-message {
+  margin: 8px 0 0;
+  color: var(--paper-2);
+  font-size: var(--m09-help-size);
+}
+
+#m09 .m09-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+#m09 .m09-viewer:fullscreen {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: clamp(16px, 4vw, 56px);
+  background: var(--ink);
+}
+
+#m09 .m09-viewer:fullscreen .m09-stage {
+  flex: 1 0 auto;
+}
+
+@keyframes m09-enter {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #m09 .m09-slide {
+    animation: none;
+  }
+}

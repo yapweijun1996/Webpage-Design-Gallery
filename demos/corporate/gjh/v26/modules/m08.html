@@ -1,0 +1,58 @@
+<div class="mod m08-studio" aria-labelledby="m08-title">
+  <header class="m08-heading">
+    <p class="m08-kicker">播客</p>
+    <h2 id="m08-title">三分钟听懂 GJH</h2>
+  </header>
+
+  <div class="m08-deck">
+    <div class="m08-player" role="group" aria-label="播客播放器">
+      <div class="m08-top">
+        <div class="m08-languages" role="group" aria-label="播客语言">
+          <button type="button" data-m08-language="zh" aria-pressed="true">普通话</button>
+          <button type="button" data-m08-language="en" aria-pressed="false">英语</button>
+        </div>
+        <span class="m08-voice-note">AI 生成语音</span>
+      </div>
+
+      <audio id="m08-audio" preload="metadata" hidden></audio>
+      <div class="m08-wave" aria-hidden="true"></div>
+
+      <div class="m08-timeline">
+        <input id="m08-seek" type="range" min="0" max="1" step="1" value="0" aria-label="播放进度" disabled>
+        <div class="m08-clock" aria-hidden="true">
+          <span id="m08-elapsed">0:00</span>
+          <span id="m08-length">0:00</span>
+        </div>
+      </div>
+
+      <div class="m08-controls">
+        <button id="m08-play" class="m08-play" type="button">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+            <path id="m08-play-icon" fill="currentColor" d="M8 5v14l11-7z"></path>
+          </svg>
+          <span id="m08-play-label">播放</span>
+        </button>
+        <label class="m08-speed">
+          倍速
+          <select id="m08-rate">
+            <option value="0.75">0.75×</option>
+            <option value="1" selected>1×</option>
+            <option value="1.25">1.25×</option>
+            <option value="1.5">1.5×</option>
+          </select>
+        </label>
+      </div>
+      <p id="m08-audio-status" class="m08-status" role="status"></p>
+    </div>
+
+    <div class="m08-transcript" role="group" aria-labelledby="m08-transcript-title">
+      <div class="m08-top">
+        <h3 id="m08-transcript-title">逐句文稿</h3>
+        <label class="m08-follow"><input id="m08-follow" type="checkbox" checked> 跟随播放</label>
+      </div>
+      <p class="m08-hint">时间为估算，选择段落可跳转。</p>
+      <p id="m08-transcript-status" class="m08-status" role="status"></p>
+      <ol id="m08-lines" class="m08-lines" aria-labelledby="m08-transcript-title"></ol>
+    </div>
+  </div>
+</div>

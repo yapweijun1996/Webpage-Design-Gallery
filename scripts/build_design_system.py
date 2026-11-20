@@ -15,6 +15,7 @@ DEMO_THEME_OUTPUTS = {
     "v23": "demos/corporate/gjh/v23/assets/theme.css",
     "v24": "demos/corporate/gjh/v24/assets/theme.css",
     "v25": "demos/corporate/gjh/v25/assets/theme.css",
+    "v26": "demos/corporate/gjh/v26/assets/theme.css",
 }
 
 

@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "Goh Joo Hin · GJH Story Studio",
+  "short_name": "GJH Story Studio",
+  "description": "One Mandarin page with ten modules: origins timeline, house brands, regional network, brand directory, a three-minute podcast, a ten-slide deck and a sourced fact check.",
+  "lang": "en-SG",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#14110d",
+  "background_color": "#14110d",
+  "icons": [
+    {
+      "src": "../../../../assets/icons/gallery-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
