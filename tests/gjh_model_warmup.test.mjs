@@ -3,6 +3,55 @@ import assert from 'node:assert/strict';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {createModelWarmup} from '../demos/corporate/gjh/v11/assets/model-warmup.js';
 
+test('a deferred bitmap is submitted in bounded strips and retains its restoration source', async t => {
+  const bitmap = {width:2048, height:34};
+  const texture = new T.Texture(bitmap);
+  texture.needsUpdate = true;
+  const copies = [], closed = [];
+  t.mock.method(performance, 'now', () => 0);
+  const original = globalThis.createImageBitmap;
+  globalThis.createImageBitmap = async (source, x, y, width, height) => {
+    assert.equal(source, bitmap);
+    assert.equal(x, 0);
+    return {width, height, close: () => closed.push(y)};
+  };
+  t.after(() => {
+    if (original) globalThis.createImageBitmap = original;
+    else delete globalThis.createImageBitmap;
+  });
+  const renderer = {
+    getContext: () => ({isContextLost: () => false}),
+    initTexture(target) {
+      assert.equal(target, texture);
+      assert.equal(target.source.dataReady, false);
+      assert.equal(target.generateMipmaps, true);
+    },
+    copyTextureToTexture(source, target, region, offset) {
+      assert.equal(target, texture);
+      assert.equal(region, null);
+      copies.push([offset.y, source.image.width, source.image.height, target.generateMipmaps]);
+    },
+  };
+  const warmup = createModelWarmup(T, renderer);
+  t.after(() => warmup.dispose());
+  const prepared = warmup.prepareBitmap(texture);
+  await new Promise(resolve => setImmediate(resolve));
+
+  warmup.runFrame(true);
+  assert.deepEqual(copies, []);
+  for (let i = 1; i <= 3; i++) {
+    warmup.runFrame(true);
+    assert.equal(copies.length, i);
+  }
+  warmup.runFrame(true);
+  warmup.runFrame(true);
+  await prepared;
+  assert.deepEqual(copies, [[0,2048,16,false], [16,2048,16,false], [32,2048,2,true]]);
+  assert.deepEqual(closed, [0,16,32]);
+  assert.equal(texture.image, bitmap);
+  assert.equal(texture.source.dataReady, true);
+});
+
 test('model warm-up stages the exact renderable and restores the renderer after a failed draw', async t => {
   // Keep the frame budget deterministic while checking exact upload steps.
   t.mock.method(performance, 'now', () => 0);

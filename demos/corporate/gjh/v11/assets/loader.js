@@ -107,8 +107,8 @@ if (typeof document !== 'undefined') {
         step.dataset.state = index < value.completed ? 'done' : index === value.completed ? 'current' : 'todo';
       });
     }
-    const transfer = value.downloads && value.completed < 2 && !value.failed;
-    const [loaded, total] = transfer || [value.completed, value.total];
+    const transfer = value.completed < 2 && !value.failed ? value.downloads : null;
+    const [loaded, total] = transfer ?? [value.completed, value.total];
     const mb = bytes => (bytes / 1_000_000).toFixed(1);
     const label = transfer ? `${mb(loaded)} of ${mb(total)} MB` : `${loaded} / ${total}`;
     if (label !== lastProgress) {

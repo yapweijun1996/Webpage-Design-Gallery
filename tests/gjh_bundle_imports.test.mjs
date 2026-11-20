@@ -8,6 +8,45 @@ import {fileURLToPath} from 'node:url';
 const root = new URL('../demos/corporate/gjh/v11/', import.meta.url);
 const bundles = ['script.bundle.js', ...readdirSync(new URL('assets/', root))
   .filter(name => name.endsWith('.bundle.js')).map(name => `assets/${name}`)];
+const lazyConsumers = [...bundles, 'assets/loader.js', 'assets/npcs.js', 'assets/tram-car.js',
+  'assets/original-tin.js', 'assets/interiors/config.js', 'assets/newmoon-detail-preview.js'];
+const lazyExports = {
+  'assets/brand-wall.js': ['addBrandWallAtlas'],
+  'assets/carry-bag.js': ['createCarryBag'],
+  'assets/character-tripo.js': ['createCharacterTripo'],
+  'assets/character-v2.bundle.js': ['createCharacterV2'],
+  'assets/christmas.js': ['prepareChristmasDecor'],
+  'assets/collection-gesture.js': ['createCollectionGesture'],
+  'assets/crowd.js': ['loadModularLooks'],
+  'assets/deepavali.js': ['prepareDeepavaliDecor'],
+  'assets/elevator-v2.js': ['createElevatorV2'],
+  'assets/interiors/action-layout.js': ['actionsBySlot:object'],
+  'assets/interiors/shop-interactions.js': ['installShopInteractions'],
+  'assets/lunar-new-year.js': ['prepareLunarDecor'],
+  'assets/mall-themes.js': ['createMallThemeCoordinator'],
+  'assets/natural-materials.js': ['createNaturalSurfaceTextures'],
+  'assets/npcs.js': ['createNpcSystem', 'loadNpcSystem'],
+  'assets/player.bundle.js': ['createPlayer'],
+  'assets/products.js': ['NEW_MOON_CANS:array'],
+  'assets/push-cart.js': ['createLazyCart'],
+  'assets/seated-pose.js': ['createSeatedPose'],
+  'assets/visitor-gltf.js': ['loadVisitorGLTF', 'disposeVisitorScene'],
+  'assets/world.bundle.js': ['createWorld'],
+  'script.bundle.js': [], // The route imports for side effects, exercised by the startup smoke.
+  'vendor/GLTFLoader.js': ['GLTFLoader'],
+  'vendor/rapier.mjs': ['default.init', 'default.World'],
+  'vendor/three.module.min.js': ['WebGLRenderer', 'Scene', 'Vector3'],
+};
+
+// Bun turns these dynamic imports into promises of internal namespaces.
+const inlineExports = {
+  exports_dom_projection: ['assets/dom-projection.js', 'createDOMProjection'],
+  exports_target_guidance: ['assets/target-guidance.js', 'createTargetGuidance'],
+  exports_shelf_focus: ['assets/shelf-focus.js', 'createShelfFocus'],
+  exports_visitor_v2_product_ui: ['assets/visitor-v2-product-ui.js', 'installPhysicalProductControl'],
+  exports_visitor_v2_controls: ['assets/visitor-v2-controls.js', 'installVisitorV2Controls'],
+  exports_products: ['assets/products.js', 'addProducts'],
+};
 
 // Use Node's bundled parser so the tests need no npm install or Bun compiler.
 if (process.execArgv.includes('--expose-internals')) {
@@ -16,28 +55,51 @@ if (process.execArgv.includes('--expose-internals')) {
   const {simple} = require('internal/deps/acorn/acorn-walk/dist/walk');
   const threePaths = new Set(['./vendor/three.module.min.js', '../vendor/three.module.min.js']);
   const problems = [];
+  const lazyPaths = new Set();
+  const inlinePaths = new Set();
 
-  for (const name of bundles) {
+  for (const name of lazyConsumers) {
     const url = new URL(name, root);
     const ast = parse(readFileSync(url, 'utf8'), {ecmaVersion: 'latest', sourceType: 'module'});
     const specifiers = new Set();
+    const namespaces = new Map();
+    const inlineImports = new Set();
     const add = ({source}) => { if (source) specifiers.add(source.value); };
     simple(ast, {
       ImportDeclaration: add,
       ExportNamedDeclaration: add,
       ExportAllDeclaration: add,
       ImportExpression({source}) {
-        if (source.type === 'Literal' && typeof source.value === 'string') {
-          specifiers.add(source.value);
-          return;
+        let path = source.value;
+        if (source.type !== 'Literal' || typeof path !== 'string') {
+          // Seasonal imports append a retry query to a fixed module path.
+          assert.ok(source.type === 'TemplateLiteral' && (source.expressions.length === 0 ||
+            (source.expressions.length === 1 && source.expressions[0].name === 'query' &&
+              source.quasis[1].value.cooked === '')), `${name} has a non-static module path`);
+          path = source.quasis[0].value.cooked;
         }
-        // Seasonal imports append a retry query to a fixed module path.
-        assert.ok(source.type === 'TemplateLiteral' && (source.expressions.length === 0 ||
-          (source.expressions.length === 1 && source.expressions[0].name === 'query' &&
-            source.quasis[1].value.cooked === '')), `${name} has a non-static module path`);
-        specifiers.add(source.quasis[0].value.cooked);
+        specifiers.add(path);
+        const resolved = new URL(path, url);
+        assert.ok(resolved.href.startsWith(root.href), `${name} imports ${path} outside V11`);
+        lazyPaths.add(resolved.href.slice(root.href.length));
+      },
+      CallExpression({callee, arguments: args}) {
+        if (callee.name === '__export') {
+          namespaces.set(args[0].name, new Set(args[1].properties.map(({key}) => key.name ?? key.value)));
+        }
+        if (callee.property?.name !== 'then' || callee.object?.callee?.object?.name !== 'Promise' ||
+            callee.object.callee.property?.name !== 'resolve') return;
+        const body = args[0]?.body;
+        const result = body?.type === 'SequenceExpression' ? body.expressions.at(-1) : body;
+        if (result?.name?.startsWith('exports_')) inlineImports.add(result.name);
       },
     });
+    for (const namespace of inlineImports) {
+      assert.ok(Object.hasOwn(inlineExports, namespace), `${name} has an unchecked lazy namespace ${namespace}`);
+      const [, ...keys] = inlineExports[namespace];
+      for (const key of keys) assert.ok(namespaces.get(namespace)?.has(key), `${name} ${namespace} lacks ${key}`);
+      inlinePaths.add(namespace);
+    }
     for (const specifier of specifiers) {
       if (specifier.endsWith('three.module.min.js') && !threePaths.has(specifier)) {
         problems.push(`${name}: unexpected Three.js path ${specifier}`);
@@ -48,8 +110,23 @@ if (process.execArgv.includes('--expose-internals')) {
     }
   }
   assert.deepEqual(problems, []);
+  assert.deepEqual([...lazyPaths].sort(), Object.keys(lazyExports).sort());
+  assert.deepEqual([...inlinePaths].sort(), Object.keys(inlineExports).sort());
+
+  globalThis.location = new URL('https://mall.test/');
+  const contracts = [...Object.entries(lazyExports), ...Object.values(inlineExports).map(([path, ...keys]) => [path, keys])];
+  for (const [path, keys] of contracts) {
+    if (!keys.length) continue;
+    const module = await import(new URL(path, root));
+    for (const contract of keys) {
+      const [key, expected = 'function'] = contract.split(':');
+      const value = key.split('.').reduce((object, member) => object?.[member], module);
+      const shape = Array.isArray(value) ? 'array' : value === null ? 'null' : typeof value;
+      assert.equal(shape, expected, `${path} must resolve with ${key} as ${expected}`);
+    }
+  }
 } else {
-  test('all v11 startup bundle imports resolve', () => {
+  test('all v11 startup bundle imports resolve with the shapes their consumers expect', () => {
     const env = {...process.env};
     delete env.NODE_TEST_CONTEXT;
     const result = spawnSync(process.execPath, ['--expose-internals', fileURLToPath(import.meta.url)], {env, encoding: 'utf8'});

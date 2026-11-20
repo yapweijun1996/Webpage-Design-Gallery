@@ -1128,6 +1128,7 @@ async function initialize() {
   const portrait = {
     highResolution:usesPortraitAtlas(quality.deviceClass, portraitProfile.tier),
     compactEntry:true, entry, detailsEnabled, canUpgrade:() => !pageEnded && !fatal,
+    prepareBitmap:modelWarmup.prepareBitmap,
     anisotropy:renderer.capabilities.getMaxAnisotropy(),
     async preload(mesh) {
       // The regular animation loop starts after the first visible draw. Drive its

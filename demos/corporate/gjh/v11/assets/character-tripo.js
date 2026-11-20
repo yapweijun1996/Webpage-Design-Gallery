@@ -132,6 +132,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
         const proxy = mesh.clone(false);
         proxy.material = material;
         try {
+          await portrait.prepareBitmap(map);
           await prepareModel(proxy, {fence:true,late:false});
           if (disposed || !portrait.canUpgrade()) return;
           portraitMaterial.map = map;

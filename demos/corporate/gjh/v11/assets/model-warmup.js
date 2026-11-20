@@ -343,7 +343,43 @@ export function createModelWarmup(T, renderer) {
     },{late:false,...options});
   }
 
-  return {prepare, initTexture, enqueueSweep, alternatesFor:mesh=>alternateBindings.get(mesh),
+  async function prepareBitmap(texture) {
+    const bitmap = texture.image;
+    const {width, height} = bitmap;
+    const rows = Math.max(1, Math.floor(131072 / (width * 4)));
+    const strips = [];
+    try {
+      for (let y = 0; y < height; y += rows) {
+        strips.push(await createImageBitmap(bitmap, 0, y, width, Math.min(rows, height - y),
+          {colorSpaceConversion:'none', premultiplyAlpha:'none'}));
+      }
+      await enqueueSweep(function* () {
+        const {generateMipmaps, source} = texture;
+        const strip = new T.Texture();
+        const offset = new T.Vector2();
+        try {
+          // Reserve storage first. Generate mipmaps only after the final strip.
+          source.dataReady = false;
+          renderer.initTexture(texture);
+          yield false;
+          for (const [index, image] of strips.entries()) {
+            strip.image = image;
+            texture.generateMipmaps = generateMipmaps && index === strips.length - 1;
+            renderer.copyTextureToTexture(strip, texture, null, offset.set(0, index * rows));
+            yield false;
+          }
+        } finally {
+          texture.generateMipmaps = generateMipmaps;
+          // A new context can recover the full image during restoration.
+          source.dataReady = true;
+        }
+      });
+    } finally {
+      for (const strip of strips) strip.close();
+    }
+  }
+
+  return {prepare, initTexture, enqueueSweep, prepareBitmap, alternatesFor:mesh=>alternateBindings.get(mesh),
     get arrivalRevision(){return arrivalRevision;},
     pendingMeshes:()=>Array.from(pendingBatches).flatMap(batch=>batch.map(entry=>entry.mesh)),
     report:scheduler.report,

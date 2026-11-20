@@ -5135,10 +5135,44 @@ function createModelWarmup(T, renderer) {
       }
     }, { late: false, ...options });
   }
+  async function prepareBitmap(texture) {
+    const bitmap = texture.image;
+    const { width, height } = bitmap;
+    const rows = Math.max(1, Math.floor(131072 / (width * 4)));
+    const strips = [];
+    try {
+      for (let y = 0;y < height; y += rows) {
+        strips.push(await createImageBitmap(bitmap, 0, y, width, Math.min(rows, height - y), { colorSpaceConversion: "none", premultiplyAlpha: "none" }));
+      }
+      await enqueueSweep(function* () {
+        const { generateMipmaps, source } = texture;
+        const strip = new T.Texture;
+        const offset = new T.Vector2;
+        try {
+          source.dataReady = false;
+          renderer.initTexture(texture);
+          yield false;
+          for (const [index, image] of strips.entries()) {
+            strip.image = image;
+            texture.generateMipmaps = generateMipmaps && index === strips.length - 1;
+            renderer.copyTextureToTexture(strip, texture, null, offset.set(0, index * rows));
+            yield false;
+          }
+        } finally {
+          texture.generateMipmaps = generateMipmaps;
+          source.dataReady = true;
+        }
+      });
+    } finally {
+      for (const strip of strips)
+        strip.close();
+    }
+  }
   return {
     prepare,
     initTexture,
     enqueueSweep,
+    prepareBitmap,
     alternatesFor: (mesh) => alternateBindings.get(mesh),
     get arrivalRevision() {
       return arrivalRevision;
@@ -8480,6 +8514,7 @@ async function initialize() {
     entry,
     detailsEnabled,
     canUpgrade: () => !pageEnded && !fatal,
+    prepareBitmap: modelWarmup.prepareBitmap,
     anisotropy: renderer.capabilities.getMaxAnisotropy(),
     async preload(mesh) {
       let frame2;
