@@ -6,7 +6,7 @@ Every published edition has one primary mockup. Alternate directions propose ano
 
 ## Goh Joo Hin
 
-[See all 25 references together](sheets/gjh.webp)
+[See all 26 references together](sheets/gjh.webp)
 
 | Edition | Art direction | Image | Live demo |
 | --- | --- | --- | --- |
@@ -31,6 +31,7 @@ Every published edition has one primary mockup. Alternate directions propose ano
 | V22 · primary | Brand chapters | [Open WebP](images/gjh/brand-chapters.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v22/index.html) |
 | V23 · primary | Full-bleed product wall | [Open WebP](images/gjh/new-moon-product-wall.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v23/index.html) |
 | V24 · primary | Black and champagne-gold corporate site | [Open WebP](images/gjh/luxury-digital-experience.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v24/index.html) |
+| V25 · primary | Black-and-white manga reader | [Open WebP](images/gjh/gjh-story-manga.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v25/index.html) |
 | V8 · alternate | Archival photographic contact sheet | [Open WebP](images/gjh/rochor-photo-contact-sheet.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v8/index.html) |
 | V16 · alternate | Packaging proof sheet | [Open WebP](images/gjh/pack-label-proof.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v16/index.html) |
 | V17 · alternate | Tabletop menu card | [Open WebP](images/gjh/sunday-menu-card.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v17/index.html) |

@@ -745,8 +745,15 @@ body > .demo-back-top { border-radius: var(--radius-pill); background: var(--gla
     transition-delay: var(--delay, 0ms);
   }
   .js [data-reveal].is-visible { opacity: 1; transform: none; }
-  .js .hero [data-reveal], .js .page-hero [data-reveal] { transform: translate3d(0, 36px, 0); filter: blur(6px); transition-property: opacity, transform, filter; }
-  .js .hero [data-reveal].is-visible, .js .page-hero [data-reveal].is-visible { opacity: 1; transform: none; filter: none; }
+  /* Heroes animate in CSS from first paint instead of waiting for script.js, so the hero text
+     (the LCP element) is not held back by deferred scripts. */
+  .js .hero [data-reveal], .js .page-hero [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+    animation: v24-hero-in var(--motion-slow) var(--ease-out) var(--delay, 0ms) both;
+  }
   .js .hero-media { animation: v24-settle 2.4s var(--ease-out) both; }
 }
 @keyframes v24-settle { from { opacity: .2; scale: 1.08; } }
+@keyframes v24-hero-in { from { opacity: 0; transform: translate3d(0, 36px, 0); filter: blur(6px); } }

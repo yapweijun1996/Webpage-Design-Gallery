@@ -14,6 +14,8 @@ Goh Joo Hin Pte Ltd (GJH) develops food brands and distributes goods across food
 | When did the business begin? | GJH traces the Goh brothers' Rochor Road provision store to the **1940s**. **23 September 1993** is the incorporation date of the present company. New Moon dates its own brand and first abalone product to **1959**. [Company history](https://www.gjhglobal.com/about-us/) · [ACRA dataset, search by UEN](https://data.gov.sg/datasets/d_b58303c68e9cf0d2ae93b73ffdbfbfa1/view) · [New Moon history](https://www.gjhglobal.com/newmoon-history/) |
 | How is it registered? | ACRA records primary SSIC **46309** (other wholesale of food, beverages and tobacco) and secondary **46436** (wholesale of audio and video equipment, excluding electrical and electronic components). These codes describe registration categories. [ACRA record](https://data.gov.sg/api/action/datastore_search?resource_id=d_b58303c68e9cf0d2ae93b73ffdbfbfa1&q=199306282E&limit=1) · [SingStat classification](https://www.singstat.gov.sg/-/media/files/standards_and_classifications/industrial_classification/ssic2025report.pdf) |
 
+> Extended research (20 November 2026): see the [GJH story research](../../../../docs/gjh-story/README.md) for the founding accounts, brand and partner chronology, regional operations and community record, each with evidence labels and unresolved conflicts.
+
 ## Business Areas
 
 - **FMCG:** Food and beverage products, including the New Moon, MILI, and GOGO product lines. [2][3][4]

@@ -147,6 +147,13 @@
     "detail": "Open the brand directory, the business areas or the virtual mall entrance from the first screen.", "items": ["Our Brands", "Our Business", "Virtual World", "About GJH"]
   },
   {
+    "key": "gjh-story-manga", "version": "v25", "kind": "primary", "style": "Black-and-white manga reader",
+    "headline": "The GJH Story", "action": "Start reading", "image": "demos/corporate/gjh/v25/assets/panel-2.webp",
+    "composition": "poster", "background": "#f4efe6", "ink": "#121212", "accent": "#c8102e",
+    "notes": "The desktop capture shows the manga cover with a full-bleed monochrome panel and a red reading button. A sticky chapter rail follows the cover.",
+    "detail": "Start at Rochor Road, tap the panels to reveal dialogue and open the chapter fact checks.", "items": ["Rochor Road", "New Moon", "MILI"]
+  },
+  {
     "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
     "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
     "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",

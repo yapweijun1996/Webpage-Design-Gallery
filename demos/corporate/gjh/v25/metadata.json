@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - The GJH Story Manga",
+  "version": "v25",
+  "designStyle": "A six-chapter black-and-white manga reader with screentone panels, tap-to-reveal speech bubbles, a red crescent accent and a fact-check drawer for every chapter.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v25/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v25",
+  "companyId": "gjh",
+  "displayTitle": "The GJH Story Manga",
+  "summary": "Read the Goh Joo Hin story as a six-chapter manga. Tap panels to reveal dialogue, then open each chapter's fact check and sources.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 220
+}

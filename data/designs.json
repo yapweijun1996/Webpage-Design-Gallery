@@ -814,6 +814,45 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "gjh-v25",
+    "companyId": "gjh",
+    "slug": "v25",
+    "version": "v25",
+    "title": "The GJH Story Manga",
+    "description": "Read the Goh Joo Hin story as a six-chapter manga. Tap panels to reveal dialogue, then open each chapter's fact check and sources.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 220,
+    "demoPath": "demos/corporate/gjh/v25/index.html",
+    "thumbnail": "demos/corporate/gjh/v25/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v25/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v25/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v25/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",

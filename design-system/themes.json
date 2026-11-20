@@ -1934,6 +1934,48 @@
           }
         }
       ]
+    },
+    "v25": {
+      "tokens": {
+        "paper": "#f4efe6",
+        "paper-2": "#e9e2d4",
+        "ink": "#121212",
+        "red": "#c8102e",
+        "gold": "#b8892b",
+        "white": "#fff",
+        "kicker-ink": "#e8d8b0",
+        "footer-ink": "#4a4339",
+        "progress-track": "#333",
+        "drama-surface": "#fbe9ec",
+        "paper-grain": "radial-gradient(rgba(18,18,18,.08) 1px,transparent 1.2px)",
+        "cover-scrim": "linear-gradient(0deg,rgba(18,18,18,.92) 0%,rgba(18,18,18,.1) 65%)",
+        "line": "3px solid var(--ink)",
+        "radius-logo": "999px",
+        "radius-bubble": "50% / 40%",
+        "radius-bubble-mobile": "18px",
+        "shadow-start": "5px 5px 0 var(--white)",
+        "shadow-panel": "8px 8px 0 var(--ink)",
+        "shadow-dialogue": "3px 3px 0 var(--ink)",
+        "font-body": "16px/1.5 system-ui,-apple-system,\"Segoe UI\",sans-serif",
+        "font-cover": "900 clamp(2.4rem,8vw,5.2rem)/.95 \"Arial Black\",Impact,system-ui,sans-serif",
+        "font-chapter": "900 clamp(1.6rem,4.5vw,2.8rem)/1.05 \"Arial Black\",Impact,system-ui,sans-serif",
+        "font-dialogue": "700 clamp(.78rem,1.45vw,1.05rem)/1.25 \"Comic Sans MS\",\"Chalkboard SE\",system-ui,sans-serif",
+        "font-sfx": "900 clamp(1.1rem,3.2vw,2.4rem)/1 Impact,\"Arial Black\",sans-serif",
+        "font-lang": "700 .8rem system-ui,sans-serif",
+        "font-finale": "900 1.6rem \"Arial Black\",Impact,sans-serif",
+        "type-cover-subtitle": ".55em",
+        "type-rail": ".7rem",
+        "type-kicker": ".8rem",
+        "type-small": ".85rem",
+        "type-hint": ".9rem",
+        "type-medium": ".95rem",
+        "type-lede": "1.15rem",
+        "type-fact-marker": "1.3rem",
+        "layer-cover-text": "1",
+        "layer-rail": "20",
+        "layer-skip": "30"
+      },
+      "overrides": []
     }
   }
 }
