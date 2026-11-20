@@ -1,9 +1,10 @@
 """Exercise the physical can transfer and atrium props through player controls."""
 import json
 import math
+import re
 
 from mall_browser_probe import assert_teleport
-from verify_interactions import PROGRAMME, await_actions, enter_shop, select_action
+from verify_interactions import PROGRAMME, await_actions, enter_shop
 from verify_mall_support import capture, face, options, press, require, run, walk
 
 
@@ -20,6 +21,39 @@ def wait_held(page, sku):
       const {id,held} = __mall.state.character.physicalProduct;
       return held && id === sku;
     }""", arg=sku)
+
+
+def nearby_prompt(page):
+    return page.evaluate("""() => {
+      const {nearby, interaction} = __mall.state;
+      return {
+        id: nearby,
+        distance: interaction?.distance ?? null,
+        context: document.querySelector('#hud-context-text').innerText,
+        name: document.querySelector('#nearby-name').innerText,
+        verb: document.querySelector('#inspect-verb').innerText,
+        button: document.querySelector('#inspect').getAttribute('aria-label'),
+      };
+    }""")
+
+
+def select_drawer(page, drawer):
+    nearest = nearby_prompt(page)
+    candidates = {}
+    prompt = nearest
+    while prompt["id"] and prompt["id"] not in candidates:
+        candidates[prompt["id"]] = prompt
+        if not press(page, "next"):
+            break
+        prompt = nearby_prompt(page)
+    print(json.dumps({"nearest": nearest, "candidates": list(candidates.values())}), flush=True)
+    require(drawer["id"] in candidates, "New Moon drawer unavailable")
+    for _ in candidates:
+        if prompt["id"] == drawer["id"]:
+            return
+        require(press(page, "next"), "Could not cycle to New Moon drawer")
+        prompt = nearby_prompt(page)
+    raise AssertionError(f"Lost New Moon drawer selection: {prompt}")
 
 
 def push_prop(page, args, name, x):
@@ -43,10 +77,14 @@ def verify(page, args):
     sku = drawer["productId"]
     shelf = page.evaluate("id => __mall.state.shelves.find(shelf => shelf.id === id).pickup", sku)
     walk(page, drawer["standing"]["x"], drawer["standing"]["z"])
-    require(select_action(page, drawer), "New Moon drawer unavailable")
+    select_drawer(page, drawer)
     require(press(page, "interact"), "Could not open the drawer")
     page.wait_for_function("id => __mall.testShopState(id)?.phase === 'done'", arg=drawer["id"])
-    page.get_by_role("button", name="Pick up product", exact=True).click()
+    prompt = nearby_prompt(page)
+    print(json.dumps({"drawerOpen": prompt}), flush=True)
+    require(prompt["id"] == drawer["id"] and prompt["verb"] == "Pick up",
+            f"Missing drawer pickup prompt: {prompt}")
+    page.get_by_role("button", name=re.compile(r"^Pick up: ")).click()
     wait_held(page, sku)
     walk(page, shelf["x"], shelf["z"] + 1.25, speed=1.5)
     face(page, shelf["x"], shelf["z"] + 3)
@@ -58,13 +96,17 @@ def verify(page, args):
       return __mall.testProps().can;
     }""")
     require(initial and initial["id"] == sku and not initial["sleeping"], f"Missing dynamic can: {initial}")
-    page.wait_for_function("y => __mall.testProps().can?.y < y - .12", arg=initial["y"])
+    falling = page.wait_for_function("""y => {
+      const sample = __mall.testProps();
+      return sample.can?.y < y - .12 && sample.activeBodies > 0 && sample.bodyStepMs > 0 && sample;
+    }""", arg=initial["y"]).json_value()
     page.wait_for_function("() => __mall.testProps().can?.sleeping", timeout=12000)
     settled = props(page)
     can = settled["can"]
     require(abs(can["y"] - can["floor"]) < can["halfHeight"] + .06,
             f"Can settled above/below the shop floor: {can}")
-    require(settled["activeBodies"] == 0 and settled["bodyStepMs"] > 0, f"Invalid solver counters: {settled}")
+    # The last sleeping tick can round down to zero on the browser timer.
+    require(settled["activeBodies"] == 0 and settled["bodyStepMs"] >= 0, f"Invalid solver counters: {settled}")
     capture(page, args.out, "can-sleeping")
 
     page.wait_for_function("() => __mall.state.nearby === 'physics-floor-can'")
@@ -82,7 +124,7 @@ def verify(page, args):
     walk(page, 10, 39)
     ball = push_prop(page, args, "ball", 11.4)
     basket = push_prop(page, args, "basket", 13)
-    result = {"initialCan": initial, "settled": settled, "ball": ball, "basket": basket,
+    result = {"initialCan": initial, "falling": falling, "settled": settled, "ball": ball, "basket": basket,
               "interiors": page.evaluate("""() => {
                 const {activeBodies, bodyStepMs} = __mall.performanceReport().interiors;
                 return {activeBodies, bodyStepMs};

@@ -247,7 +247,7 @@ test('no-browser startup wiring covers the Drop button, G, floor pickup, shelf r
   assert.equal(world.bodies.size, 0);
 });
 
-test('vendored Rapier drops the can onto a surface with one bounce and returns both atrium props', async t => {
+test('vendored Rapier settles the dropped can, pushes both atrium props and respawns them', async t => {
   t.mock.method(globalThis, 'fetch', async url => new Response(await readFile(url), {
     headers: {'content-type': 'application/wasm'}
   }));
@@ -281,29 +281,41 @@ test('vendored Rapier drops the can onto a surface with one bounce and returns b
   }
   assert.equal(bounces, 1);
   assert.ok(can.position.y >= .33 && can.position.y <= .375, JSON.stringify(can.position));
+  for (let i = 0; i < 100; i++) world.step();
+  assert.equal(props.sample().can.sleeping, true);
+  assert.equal(props.sample().activeBodies, 0);
+  assert.ok(props.sample().bodyStepMs > 0);
   props.visit('atrium', {x: 11, y: 0, z: 26});
   const ball = scene.getObjectByName('Atrium ball'), basket = scene.getObjectByName('Atrium basket');
   assert.ok(ball.visible && basket.visible);
   for (let i = 0; i < 100; i++) world.step();
   assert.equal(can.visible, false);
-  const ballX = ball.position.x;
   const controller = world.createCharacterController(.025);
   controller.enableAutostep(.18, .28, true);
   controller.enableSnapToGround(.25);
-  body.setTranslation({x: ballX - .7, y: .89, z: ball.position.z}, true);
-  world.step();
-  for (let i = 0; i < 16; i++) {
-    const point = body.translation();
-    controller.computeColliderMovement(capsule, {x: 3.4 * STEP, y: -.5 * STEP, z: 0});
-    const movement = controller.computedMovement();
-    body.setNextKinematicTranslation({x: point.x + movement.x, y: point.y + movement.y, z: point.z + movement.z});
+  const spawns = {ball: props.sample().ball, basket: props.sample().basket};
+  for (const [name, before] of Object.entries(spawns)) {
+    assert.equal(before.sleeping, true);
+    body.setTranslation({x: before.x, y: .89, z: before.z + 1.4}, true);
     world.step();
+    for (let i = 0; i < 64; i++) {
+      const point = body.translation();
+      controller.computeColliderMovement(capsule, {x: 0, y: -.5 * STEP, z: -1.5 * STEP});
+      const movement = controller.computedMovement();
+      body.setNextKinematicTranslation({x: point.x + movement.x, y: point.y + movement.y, z: point.z + movement.z});
+      world.step();
+    }
+    const after = props.sample();
+    assert.ok(after[name].z < before.z - .1, JSON.stringify({name, before, after: after[name]}));
+    assert.ok(after.activeBodies > 0 && after.bodyStepMs > 0);
   }
-  assert.ok(ball.position.x > ballX + .05);
   props.visit('gogo', visitor);
   for (let i = 0; i < 15; i++) world.step();
   assert.ok(!ball.visible && !basket.visible);
   props.visit('atrium', {x: 11, y: 0, z: 26});
   assert.ok(ball.visible && basket.visible);
-  assert.ok(Math.abs(ball.position.x - ballX) < 1e-5);
+  for (const [name, spawnX] of [['ball', 11.4], ['basket', 13]]) {
+    const {x, z} = props.sample()[name];
+    assert.ok(Math.hypot(x - spawnX, z - 26) < 1e-5, name);
+  }
 });
