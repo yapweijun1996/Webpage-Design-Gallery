@@ -34,8 +34,6 @@ for (const slot of document.querySelectorAll('[data-icon]')) {
 }
 for (const [selector, name, size] of [
   ['#mall-map > summary', 'map-pin', 22],
-  ['#keyboard-help > summary', 'help-circle', 18],
-  ['#mall-theme-open', 'theme', 18],
   ['#directory-theme-open', 'theme', 18],
 ]) {
   document.querySelector(selector).prepend(icon(name, {size}));
@@ -74,6 +72,7 @@ const speaker = document.getElementById('mall-speaker');
 const music = document.getElementById('mall-music');
 const musicStatus = document.getElementById('mall-music-status');
 const mixer = document.querySelectorAll('[data-audio-bus]');
+const masterValue = document.getElementById('menu-master-value');
 const musicTitle = document.getElementById('mall-music-title');
 const musicToggleState = document.getElementById('mall-music-state');
 const speakerState = document.getElementById('mall-speaker-state');
@@ -97,6 +96,8 @@ mallAudio.subscribe(() => {
     input.disabled = !state.available;
     input.value = Math.round(state.levels[input.dataset.audioBus] * 100);
   }
+  const percent = Math.round(state.levels.master * 100) + '%';
+  if (masterValue.textContent !== percent) masterValue.textContent = percent;
   const status = state.musicPlaying ? 'Music on' : 'Music off';
   if (lastMusicStatus !== status) musicStatus.textContent = lastMusicStatus = status;
 });
@@ -124,17 +125,14 @@ function unlockAudio(event) {
   activateSceneAudio();
   mallAudio.sceneGesture(event, sceneStationary, frames);
 }
-const audioTools = document.getElementById('mall-tools');
-audioTools.addEventListener('toggle', () => {
-  if (audioTools.open && sceneEntered()) mallAudio.prepareForControls(frames);
-});
+const menuSheet = document.getElementById('keyboard-help');
 document.addEventListener('pointerdown', event => { if (event.pointerType === 'mouse') unlockAudio(event); }, true);
 document.addEventListener('pointerup', event => { if (event.pointerType !== 'mouse') unlockAudio(event); }, true);
 document.addEventListener('click', unlockAudio);
 document.addEventListener('keydown', event => {
   if (event.isTrusted && event.code === 'KeyM' && !event.defaultPrevented && !event.repeat &&
       !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.isContentEditable &&
-      !event.target.closest?.('input, select, textarea, dialog') &&
+      !event.target.closest?.('input, select, textarea, dialog:not(#keyboard-help)') &&
       sceneEntered()) {
     event.preventDefault();
     toggleMute();
@@ -180,7 +178,9 @@ function clearTransientState(event) {
 }
 const modes = createModes({onCleanup: clearTransientState,
   onEnter(mode) { document.body.dataset.mode = mode; }});
-const ui = createUI(expanded), canvas = document.querySelector('#scene');
+const ui = createUI(expanded, () => {
+  if (sceneEntered()) mallAudio.prepareForControls(frames);
+}), canvas = document.querySelector('#scene');
 const destinations = storeDestinations(expanded).map(store => ({
   ...store, arrival: expanded ? expandedStoreArrival(store.id) : store.arrival,
 }));
@@ -228,10 +228,11 @@ function pausePerformance() {
   if (!measuringFrames) return;
   measuringFrames = false;
   performanceMonitor.pause();
-  performancePanel.reset();
+  if (!menuSheet.open) performancePanel.reset();
   lastMetricsUpdate = -Infinity;
 }
 spatialHud = createSpatialHud({expanded});
+document.getElementById('camera-controls').addEventListener('click', () => requestRender());
 const spatialTargetName = document.getElementById('nearby-name');
 const spatialInspectButton = document.getElementById('inspect');
 let lastSpatialSample = -Infinity;
@@ -920,8 +921,14 @@ document.addEventListener('keydown', event => {
     if (player?.state.seated) { player.stand(); updateHUD(); }
     player?.cancelCollection();
   }
-  if (event.repeat || event.altKey || event.ctrlKey || event.metaKey ||
+  if (event.altKey || event.ctrlKey || event.metaKey ||
       (event.target !== canvas && event.target !== document.body)) return;
+  if (event.code === 'KeyE' && nearby && !spatialInspectButton.disabled) {
+    event.preventDefault();
+    if (!event.repeat) { interactNearby(); updateHUD(); requestRender(); }
+    return;
+  }
+  if (event.repeat) return;
   if (event.code === 'BracketRight' || event.code === 'BracketLeft') {
     if (interactions?.cycle(event.code === 'BracketRight' ? 1 : -1)) {
       event.preventDefault(); updateHUD(); requestRender();

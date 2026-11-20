@@ -1,4 +1,5 @@
 """Normal-motion journeys driven by browser keyboard/touch, never simulation hooks."""
+from gjh_menu_test_helpers import close_menu, open_menu_page
 from gjh_startup_test_helpers import mall_entry_url
 import json
 import math
@@ -143,8 +144,8 @@ def product_journey(page, prefix, touch=False):
     if touch:
         page.set_viewport_size({'width':844,'height':390})
         page.wait_for_timeout(200)
-        a=page.locator('#held-product-status').bounding_box();b=page.locator('.scene-disclaimer').bounding_box()
-        assert a['y']+a['height']<=b['y'] or b['y']+b['height']<=a['y']
+        held = page.locator('#held-product-status').bounding_box()
+        assert 0 <= held['y'] < held['y']+held['height'] <= 390
         shot(page,'touch-landscape-held')
         page.set_viewport_size({'width':390,'height':844})
     check(prefix+' normal-motion pickup / side view', state(page)['cameraFocus'])
@@ -317,9 +318,9 @@ with sync_playwright() as p:
             seat=next(s for s in state(page)['seats'] if s['name']=='MILI bench 1')
             seat_journey(page,seat,'touch',True)
             assert page.evaluate('()=>document.documentElement.scrollWidth<=innerWidth')
-            page.locator('#keyboard-help summary').tap()
+            open_menu_page(page, "menu")
             shot(page,'touch-help-open')
-            controls=page.locator('#controls-copy')
+            controls=page.locator('#mall-tools-content')
             cdp=page.context.new_cdp_session(page)
             for fraction in [.5,1]:
                 for swipe in range(3):
@@ -331,8 +332,8 @@ with sync_playwright() as p:
                 assert controls.evaluate('(el)=>el.scrollTop')>0
                 shot(page,'touch-help-scroll-'+str(fraction))
             cdp.detach()
-            page.locator('#keyboard-help summary').tap()
-            page.locator('#scene-cart').wait_for(state='visible',timeout=5000)
+            close_menu(page)
+            page.locator('#mall-tools').wait_for(state='visible',timeout=5000)
             check('touch Help scroll / close / no horizontal overflow')
             context.close()
         if SUITE=='v1':
@@ -348,8 +349,9 @@ with sync_playwright() as p:
             for width,height in [(320,568),(768,1024)]:
                 context,page=start(browser,width,height,True)
                 assert page.evaluate('()=>document.documentElement.scrollWidth<=innerWidth')
-                a=page.locator('#keyboard-help summary').bounding_box()
-                b=page.locator('#scene-cart').bounding_box()
+                open_menu_page(page)
+                a=page.locator('#rail-guide').bounding_box()
+                b=page.locator('[data-menu-page=menu] [data-menu-to=help]').bounding_box()
                 assert a['x']+a['width']<=b['x'] and b['x']+b['width']<=width
                 shot(page,'tools-'+str(width))
                 check('scene tools fit '+str(width))

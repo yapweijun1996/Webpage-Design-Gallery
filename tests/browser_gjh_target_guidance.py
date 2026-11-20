@@ -93,7 +93,7 @@ def geometry(page, shelf=False, cue=True):
       return {prompt:rect(prompt),texts,controls,scene:rect(document.querySelector('#scene')),header:rect(document.querySelector('.site-header')),
         point:{hidden:point.hidden,rect:rect(point),text:point.textContent,decorative:point.getAttribute('aria-hidden'),pointer:getComputedStyle(point).pointerEvents},
         shelf:{hidden:outline.hidden,rect:rect(outline)},
-        others:[...document.querySelectorAll('#keyboard-help,#mall-map,#joystick,#run-toggle,.scene-disclaimer')].filter(visible).map(e=>({id:e.id||e.className,rect:rect(e)})),
+        others:[...document.querySelectorAll('#keyboard-help,#mall-map,#joystick,#run-toggle')].filter(visible).map(e=>({id:e.id||e.className,rect:rect(e)})),
         distance:document.querySelector('#nearby-distance').textContent,live:document.querySelector('#nearby-distance').closest('[aria-live],[role=status]'),
         overflow:document.documentElement.scrollWidth>innerWidth,viewport:[innerWidth,innerHeight]};
     }''')
@@ -332,7 +332,7 @@ def inset_target(page):
       const old=e.style.visibility;e.style.visibility='hidden';e.hidden=false;
       const r=e.getBoundingClientRect(),box={left:r.left-2,right:r.right+2,top:r.top-2,bottom:r.bottom+7};
       e.hidden=true;e.style.visibility=old;
-      const overlaps=[...document.querySelectorAll('.site-header,.inspect-prompt,.keyboard-help,.mall-map,.joystick,.run-toggle,.scene-disclaimer')]
+      const overlaps=[...document.querySelectorAll('.site-header,.inspect-prompt,.mall-menu,.mall-map,.joystick,.run-toggle')]
         .filter(e=>e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden')
         .filter(e=>{const r=e.getBoundingClientRect();return box.left<r.right+2&&box.right>r.left-2&&box.top<r.bottom+2&&box.bottom>r.top-2;})
         .map(e=>e.id||e.className);

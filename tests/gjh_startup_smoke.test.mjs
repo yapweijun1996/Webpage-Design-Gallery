@@ -160,7 +160,7 @@ async function runStartup({missingMusicControl = false} = {}) {
   assert.equal(window.__sceneReady, true);
   assert.equal(window.__mall?.ready, true);
   assert.deepEqual(mixer.map(input => [input.dataset.audioBus, input.value]),
-    [['music', 26], ['effects', 65], ['ambience', 30]]);
+    [['master', 75], ['music', 26], ['effects', 65], ['ambience', 30]]);
   const speaker = document.getElementById('mall-speaker');
   assert.equal(speaker.getAttribute('aria-pressed'), 'false');
   speaker.dispatchEvent(new Event('click'));

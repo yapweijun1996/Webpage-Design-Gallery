@@ -1,4 +1,5 @@
 """Matched four-theme courtyard observations, not physical-device performance."""
+from gjh_menu_test_helpers import open_decor_theme
 import argparse,functools,http.server,json,os,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -23,10 +24,10 @@ def run():
     def network():return page.evaluate('''()=>{const a=performance.getEntriesByType('resource');return {requests:a.length,decodedBytes:a.reduce((n,r)=>n+r.decodedBodySize,0)}}''')
     result={'viewport':[width,height],'browser':browser.version,'backend':os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'),'startupAfterNetworkIdle':network(),'themes':{}}
     for theme in THEMES:
-     page.locator('#mall-theme-open').click();page.locator('#mall-theme-select').select_option(theme);page.locator('#mall-theme-apply').click();page.wait_for_function('id=>__mall.state.theme.active===id',arg=theme);page.keyboard.press('Escape');page.wait_for_function('!document.querySelector("#mall-theme-dialog").open')
+     open_decor_theme(page);page.locator('#mall-theme-select').select_option(theme);page.locator('#mall-theme-apply').click();page.wait_for_function('id=>__mall.state.theme.active===id',arg=theme);page.keyboard.press('Escape');page.wait_for_function('!document.querySelector("#mall-theme-dialog").open')
      idle=sample();page.locator('#scene-cart').click();assert page.evaluate('__mall.state.pushing');cart=sample();page.locator('#scene-cart').click();assert not page.evaluate('__mall.state.pushing')
      result['themes'][theme]={'idle':idle,'cart':cart}
-    page.locator('#mall-theme-open').click();page.locator('#mall-theme-select').select_option('everyday');page.locator('#mall-theme-apply').click();page.wait_for_function('__mall.state.theme.active==="everyday"');page.keyboard.press('Escape');page.wait_for_function('!document.querySelector("#mall-theme-dialog").open');result['restoredEveryday']=sample();result['afterAllThemes']=network()
+    open_decor_theme(page);page.locator('#mall-theme-select').select_option('everyday');page.locator('#mall-theme-apply').click();page.wait_for_function('__mall.state.theme.active==="everyday"');page.keyboard.press('Escape');page.wait_for_function('!document.querySelector("#mall-theme-dialog").open');result['restoredEveryday']=sample();result['afterAllThemes']=network()
     assert result['restoredEveryday']['draw']==result['themes']['everyday']['idle']['draw'] and not errors,errors
     print(json.dumps(result),flush=True);results.append(result);context.close()
    browser.close()

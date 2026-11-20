@@ -6,6 +6,8 @@ import {restroomArrival, restroomRooms} from './restroom-layout.js';
 import {createActionDialog} from '../../../../../assets/onboarding/action-dialog.js';
 import {createTutorial} from './ux-tutorial.js';
 export const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+import {browserDeviceClass} from './graphics-quality.js';
+import {createMallMenu} from './mall-menu.js';
 import {createContextNavigation} from './context-navigation.js';
 import {setupDemoBag} from './demo-bag.js';
 import {setupNewMoonPreview} from './newmoon-detail-preview.js';
@@ -177,7 +179,7 @@ export function createTramHud(parent, scene, canControl) {
   return {show};
 }
 
-export function createUI(expanded = false) {
+export function createUI(expanded = false, onMenuOpen = () => {}) {
   const scene = document.getElementById('scene');
   const experience = document.getElementById('experience');
   const storeList = document.getElementById('store-list');
@@ -295,40 +297,37 @@ export function createUI(expanded = false) {
     getPreferences:()=>({locale:amenityLocale,resolvedTheme:amenityTheme==='system'?(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):amenityTheme}),
     onOpen:()=>notifyMode(),onClose:()=>notifyMode()});
   const guideReopen = document.getElementById('guide-reopen');
-  const toolsMenu = document.getElementById('mall-tools');
-  const toolsSummary = toolsMenu.querySelector('summary');
-  const objectives = document.getElementById('hud-objectives');
-  const toolNotices = [document.getElementById('graphics-quality-status'), help.querySelector('[data-mall-check-status]')];
-  const toolStatus = new MutationObserver(records => {
-    if (!toolsMenu.open || !help.open) return;
-    const last = records.at(-1).target.textContent.trim();
-    if (last) announce(last);
-  });
-  toolNotices.forEach(notice => toolStatus.observe(notice, {childList: true, characterData: true, subtree: true}));
-  toolsMenu.addEventListener('toggle', () => {
-    if (!toolsMenu.open) help.open = false;
-    else objectives.open = false;
-  });
-  objectives.addEventListener('toggle', () => { if (objectives.open) toolsMenu.open = false; });
-  document.addEventListener('pointerdown', event => {
-    if (toolsMenu.open && !toolsMenu.contains(event.target) && !event.target.closest('dialog[open]')) toolsMenu.open = false;
-  });
-  toolsMenu.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && !help.open && toolsMenu.open) {
-      event.preventDefault();
-      event.stopPropagation();
-      toolsMenu.open = false;
-      toolsSummary.focus();
-    }
-  });
   const railGuide = document.getElementById('rail-guide');
-  for (const entry of [guideReopen, railGuide]) entry?.setAttribute('aria-controls', 'guide-card');
+  const toolsMenu = document.getElementById('mall-tools');
+  const objectives = document.getElementById('hud-objectives');
+  const menu = createMallMenu(help, {
+    touch: browserDeviceClass() !== 'desktop' || matchMedia('(pointer: coarse)').matches,
+    canOpen: canUsePanels,
+    beforeOpen() {
+      shelfFocus?.close({focus: false});
+      mallMap.open = false;
+      syncMapButtons();
+      objectives.open = false;
+    },
+    onChange() {
+      document.body.classList.toggle('is-mall-menu-open', help.open);
+      if (help.open) onMenuOpen();
+      updateCompactPanels();
+      notifyMode();
+    },
+    fallbackFocus: toolsMenu,
+  });
+  menu.addOpener(toolsMenu, 'menu');
+  const headerMenu = document.getElementById('header-menu');
+  menu.addOpener(headerMenu, 'settings');
+  const mapExpand = document.getElementById('menu-map-expand');
+  mapExpand.addEventListener('click', () => openMap(toolsMenu));
   let unsubscribeInteractions = null, lastGamepadButtons = [], gamepadDirectionAt = 0;
   let modeListener = null, shelfFocus = null;
   let holdingProduct = false;
   const modeSignals = () => ({productOpen: document.getElementById('product-dialog').open || externalPaused || document.getElementById('original-tin-dialog').open,
     bagOpen: document.getElementById('bag-dialog').open, shelfOpen: Boolean(shelfFocus?.open),
-    panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || (compactMap.matches && (help.open || mallMap.open))});
+    panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || help.open || (compactMap.matches && mallMap.open)});
   function syncTutorialSuspension(signals) {
     tutorial.setActive(available && showing3D && !holdingProduct && !signals.productOpen && !signals.bagOpen && !signals.shelfOpen &&
       !signals.panelOpen && !help.open && !mallMap.open && !document.hidden);
@@ -340,7 +339,7 @@ export function createUI(expanded = false) {
     modeListener?.(modeSignals());
   };
   const compactMap = matchMedia('(max-width: 650px), (max-height: 560px) and (orientation: landscape)');
-  function updateCompactPanels(){const paused=compactMap.matches&&(mallMap.open||help.open);document.body.classList.toggle('is-panel-open',paused);}
+  function updateCompactPanels(){const paused=help.open || (compactMap.matches && mallMap.open);document.body.classList.toggle('is-panel-open',paused);}
   let mapReturnFocus=headerMap;
   // Header, kiosk and quick guide share this map owner. The map's own
   // summary is not a second permanent entry on compact screens.
@@ -356,7 +355,7 @@ export function createUI(expanded = false) {
   function openMap(opener = headerMap) {
     if (!canUsePanels()) return false;
     shelfFocus?.close({focus: false});
-    help.open = false; toolsMenu.open = false; mapReturnFocus = opener;
+    menu.close({focus: false}); mapReturnFocus = opener;
     mallMap.open = true; updateMapDot(); syncMapButtons(); updateCompactPanels(); focusMap();
     return true;
   }
@@ -366,20 +365,7 @@ export function createUI(expanded = false) {
     mapReturnFocus.focus({preventScroll: true});
   }
   function openHelp() {
-    if (!canUsePanels()) return false;
-    shelfFocus?.close({focus: false});
-    if (compactMap.matches) mallMap.open = false;
-    toolsMenu.open = true;
-    help.open = true; updateCompactPanels(); notifyMode();
-    help.querySelector('summary').focus({preventScroll: true});
-    return true;
-  }
-  function closeGamepadPanel(panel) {
-    if (panel === mallMap) closeMap();
-    else if (panel === help && canUsePanels()) {
-      help.open = false; updateCompactPanels(); notifyMode();
-      help.querySelector('summary').focus({preventScroll: true});
-    }
+    return menu.open('help', toolsMenu);
   }
   function handlePanelGamepad(pad, navigation) {
     if (!pad) { lastGamepadButtons = []; return false; }
@@ -404,19 +390,22 @@ export function createUI(expanded = false) {
     } else if (navigation && rising(0) && document.activeElement.matches('button,input[type=checkbox],a[href],summary')) {
       document.activeElement.click();
     }
-    if (navigation instanceof HTMLDialogElement && rising(1)) navigation.close('dismiss');
-    else if (navigation && rising(1)) closeGamepadPanel(navigation);
+    if (rising(1)) {
+      if (navigation === help) menu.close();
+      else if (navigation === mallMap) closeMap();
+      else if (navigation instanceof HTMLDialogElement) navigation.close('dismiss');
+    }
     if (rising(9) && !document.querySelector('dialog[open]')) openHelp();
     lastGamepadButtons = pad.buttons.map(button => button.pressed);
     return Boolean(navigation);
   }
-  help.querySelector('summary').addEventListener('click', event => { if (!canUsePanels()) event.preventDefault(); });
   document.getElementById('map-close').addEventListener('click', closeMap);
   function updateViewToggle() {
     document.getElementById('view-toggle-label').textContent = showing3D ? 'Store Directory' : 'Enter 3D Mall';
-    document.getElementById('view-toggle-icon').replaceChildren(icon(showing3D ? 'menu' : 'door', {size: 18}));
+    document.getElementById('view-toggle-icon').replaceChildren(icon('door', {size: 18}));
     viewToggle.title = showing3D ? 'Store Directory' : 'Enter 3D Mall';
     viewToggle.setAttribute('aria-label', showing3D ? 'Switch to the accessible store directory' : 'Switch to the 3D virtual mall');
+    headerMenu.hidden = !showing3D;
   }
   const resetMap = () => { mallMap.open = false; };
   resetMap();
@@ -435,11 +424,10 @@ export function createUI(expanded = false) {
     notifyMode();
   });
   mallMap.addEventListener('toggle', () => {
-    if (compactMap.matches && mallMap.open) help.open = false;
+    if (mallMap.open) menu.close({focus: false});
     syncMapButtons();updateCompactPanels();
     notifyMode();
   });
-  help.addEventListener('toggle', () => { if (compactMap.matches && help.open) mallMap.open = false; syncMapButtons(); updateCompactPanels(); notifyMode(); });
   for (const button of mapOpeners) button.addEventListener('click', () => {
     if (button.hidden || !canUsePanels()) return;
     if (mallMap.open) closeMap(); else openMap(button);
@@ -459,7 +447,7 @@ export function createUI(expanded = false) {
     onHome() {
       // Recheck readiness at activation, including synthetic stale clicks.
       if (!available) return;
-      if (compactMap.matches) { help.open = false; mallMap.open = false; }
+      if (compactMap.matches) { menu.close({focus: false}); mallMap.open = false; }
       setView(true, !bag.open);
       if (bag.open) bag.closeTo(scene);
       else scene.focus({preventScroll: true});
@@ -597,22 +585,22 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   let currentElevatorState=null,currentElevatorUpper=null;
   const cartControls=document.querySelector('#cart-controls'),cartToggle=document.querySelector('#cart-toggle'),cartStatus=document.querySelector('#cart-status');
   const sceneCart=document.querySelector('#scene-cart');
-  const cartIcon=icon('cart',{size:18});
+  const sceneCartLabel = document.getElementById('scene-cart-label');
+  const sceneCartCount = document.getElementById('scene-cart-count');
   sceneCart.setAttribute('aria-describedby','cart-status');
   const interactionIcons=new Map();
   let cartLoading = false;
   function updateCartControls() {
     const cart=cartState();
     const recoverFocus=!cart.available&&bag.open&&cartControls.contains(document.activeElement);
-    const hideCart = !cart.available || !showing3D || (compactMap.matches && (mallMap.open || help.open));
+    const hideCart = !cart.available || !showing3D;
     if (cartControls.hidden === cart.available) cartControls.hidden = !cart.available;
     if (sceneCart.hidden !== hideCart) sceneCart.hidden = hideCart;
     setHudText(cartToggle, cart.active ? 'Stow cart' : 'Use cart in 3D');
     const disabled = cartLoading || !cart.available || (!cart.active && cart.capability?.disabled === true);
     if (cartToggle.disabled !== disabled) cartToggle.disabled = disabled;
     const cartLabel=cart.active?'Stow Cart':'Shopping Cart';
-    setHudText(sceneCart, cartLabel);
-    if(sceneCart.firstChild!==cartIcon)sceneCart.prepend(cartIcon);
+    setHudText(sceneCartLabel, cartLabel);
     const pressed = String(cart.active);
     if (sceneCart.getAttribute('aria-pressed') !== pressed) sceneCart.setAttribute('aria-pressed', pressed);
     const sceneDisabled = cartLoading || !cart.available || (!cart.active && cart.capability?.sceneDisabled === true);
@@ -644,10 +632,10 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     try { ok = await cartListener?.(next); }
     catch { /* Keep the bag open so the visitor can see the failure message. */ }
     finally { cartLoading = false; updateCartControls(); }
-    if(!ok){const message=cartReason(cartState())|| (state.heldProduct?heldInstruction(state):state.seated?'Stand up before using the cart.':state.elevatorTravel?'Wait for the elevator to stop.':'Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.');cartStatus.textContent=message;announce(message);if(!bag.open)document.querySelector('#bag-open').click();return;}
+    if(!ok){const message=cartReason(cartState())|| (state.heldProduct?heldInstruction(state):state.seated?'Stand up before using the cart.':state.elevatorTravel?'Wait for the elevator to stop.':'Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.');cartStatus.textContent=message;announce(message);if(!bag.open) {menu.close({focus: false});document.querySelector('#bag-open').click();}return;}
     if(next){setView(true);bag.closeTo(scene);}
     cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';
-    toolsMenu.open=false;sceneCart.setAttribute('aria-pressed',String(next));scene.focus({preventScroll:true});
+    menu.close({focus: false});sceneCart.setAttribute('aria-pressed',String(next));scene.focus({preventScroll:true});
   }
   cartToggle.addEventListener('click',toggleCart);sceneCart.addEventListener('click',toggleCart);
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
@@ -665,9 +653,14 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   let teleportListener = null;
   let viewListener = null;
   document.addEventListener('keydown',event=>{
-    if(event.key!=='Escape'||!showing3D||document.querySelector('dialog[open]'))return;
-    const panel=mallMap.open?mallMap:help.open&&toolsMenu.open?help:null;
-    if(panel){event.preventDefault();event.stopImmediatePropagation();panel.open=false;(panel===mallMap?mapReturnFocus:panel.querySelector('summary')).focus({preventScroll:true});}
+    if (!showing3D || document.querySelector('dialog[open]')) return;
+    if (event.code === 'KeyH' && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey &&
+        (event.target === scene || event.target === document.body) && openHelp()) {
+      event.preventDefault();
+      return;
+    }
+    if (event.key !== 'Escape') return;
+    if (mallMap.open) {event.preventDefault();event.stopImmediatePropagation();closeMap();}
   },true);
 
   for (const card of document.querySelectorAll('[data-product]')) {
@@ -709,8 +702,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   }
   window.addEventListener('mall:languagechange',()=>updateMallTheme());
   function openMallTheme(event) {
-    if (themeDialog.open || document.querySelector('dialog[open]') || (showing3D && !canUsePanels())) return;
-    themeOpener=event.currentTarget;shelfFocus?.close({focus:false});
+    if (themeDialog.open || document.querySelector('dialog[open]:not(#keyboard-help)') || (showing3D && !canUsePanels())) return;
+    themeOpener=event.currentTarget;menu.close({focus: false});shelfFocus?.close({focus:false});
     themeDialog.showModal();updateMallTheme(undefined,true);notifyMode();document.getElementById('mall-theme-title').focus({preventScroll:true});
   }
   for(const button of [themeOpen,directoryThemeOpen]) button.addEventListener('click',openMallTheme);
@@ -727,6 +720,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   themeDialog.addEventListener('close',()=>{
     cancelMallTheme();notifyMode();
     if(themeOpener?.isConnected && themeOpener.getClientRects().length && (available || themeOpener===directoryThemeOpen)) themeOpener.focus({preventScroll:true});
+    else if (themeOpener === themeOpen && showing3D) toolsMenu.focus({preventScroll: true});
     themeOpener=null;
   });
   themeApply.addEventListener('click',()=>{if(mallTheme && available) void mallTheme.select(themeSelect.value);});
@@ -744,7 +738,6 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle('is-3d', next);
-    toolsMenu.open = false;
     const assetNotice = document.getElementById('loader-asset-notice');
     if (next) {
       assetNotice.removeAttribute('role');
@@ -754,7 +747,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       document.querySelector('.site-header').after(assetNotice);
     }
     updateViewToggle();
-    help.open = false;
+    menu.close({focus: false});
     for (const button of mapOpeners) button.hidden = !next;
     syncMapButtons();
     if (moveFocus) (next ? scene : document.getElementById('list-title')).focus({ preventScroll: true });
@@ -832,13 +825,11 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   function showGuide() {
     if (!canUsePanels()) return false;
     shelfFocus?.close({focus: false});
-    help.open = false; mallMap.open = false; updateCompactPanels(); notifyMode();
-    toolsMenu.open = false;
+    menu.close({focus: false}); mallMap.open = false; updateCompactPanels(); notifyMode();
     tutorial.reopen();
     return true;
   }
   guideReopen.addEventListener('click', showGuide);
-  railGuide?.addEventListener('click', showGuide);
 
   document.getElementById('loader-directory').addEventListener('click', () => { if (showing3D) setView(false, true); });
   viewToggle.addEventListener('click', () => setView(!showing3D, true));
@@ -898,6 +889,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     });
   }
   bag.subscribe(items => {
+    setHudText(sceneCartCount, String(Object.values(items).reduce((total, count) => total + count, 0)));
     for (const button of addButtons) {
       const quantity = items[button.dataset.add] || 0;
       const feedback = button.closest('.product-copy').querySelector('.product-feedback');
@@ -943,7 +935,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     document.getElementById('map-travel-status').textContent = reason;
     if (reason) announce(reason);
     if (!result?.riding && !result?.calling) return;
-    help.open = false;
+    menu.close({focus: false});
     mallMap.open = false;
     announce(result.calling ? 'Elevator called. Boarding will begin when it arrives.' : 'Elevator travelling to the other level.');
     scene.focus({preventScroll:true});
@@ -958,7 +950,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       select.value = zone;
       select.dispatchEvent(new Event('change'));
     }
-    help.open=false;mallMap.open=false;
+    menu.close({focus: false});mallMap.open=false;
     announce(`At the ${store.label} storefront.`);scene.focus({preventScroll:true});
   }
   for(const button of mapButtons)button.addEventListener('click',()=>travelToStore(button.dataset.teleport));
@@ -971,7 +963,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       return;
     }
     mallMap.open = false;
-    help.open = false;
+    menu.close({focus: false});
     announce('At the public restroom entrances.');
     scene.focus({preventScroll:true});
   }
@@ -995,7 +987,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       })});
     }else{
       const desk=id==='service-desk';
-      return amenityPanel.open({title:desk?{en:'Guest services','zh-CN':'访客服务'}:{en:'Find your store','zh-CN':'寻找店铺'},description:desk?{en:'Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.','zh-CN':'选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。'}:expanded?{en:'Choose a store to go to its entrance.','zh-CN':'选择店铺即可前往入口。'}:{en:'Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.','zh-CN':'一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。'},actions:[...storeActions,directory,...(desk&&showing3D?[{id:'help',label:{en:'How to explore','zh-CN':'如何探索'},onSelect:()=>showGuide()}]:[])]});
+      return amenityPanel.open({title:desk?{en:'Guest services','zh-CN':'访客服务'}:{en:'Find your store','zh-CN':'寻找店铺'},description:desk?{en:'Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.','zh-CN':'选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。'}:expanded?{en:'Choose a store to go to its entrance.','zh-CN':'选择店铺即可前往入口。'}:{en:'Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.','zh-CN':'一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。'},actions:[...storeActions,directory,...(desk&&showing3D?[{id:'help',label:{en:'How to explore','zh-CN':'如何探索'},onSelect:()=>openHelp()}]:[])]});
     }
   }
   for(const button of document.querySelectorAll('[data-amenity]')){button.hidden=false;button.addEventListener('click',()=>openAmenity(button.dataset.amenity));}
@@ -1053,7 +1045,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     addHeldProductToBag:bag.addHeldProduct,
     productName,
     projectMode(mode) {
-      contextNavigation.update({mode: showing3D || bag.open ? mode : null, available, destination: showing3D ? 'home' : 'shops',
+      contextNavigation.update({mode: !help.open && (showing3D || bag.open) ? mode : null, available, destination: showing3D ? 'home' : 'shops',
         host: bag.open ? document.getElementById('context-navigation-bag') : undefined});
     },
     onModeState(listener) { modeListener = listener; },
@@ -1103,7 +1095,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       // Move focus only when its current 3D control is about to disappear.
       // A user already browsing the directory or header must not be interrupted.
       const active = document.activeElement;
-      const recoverFocus = showing3D && (experience.contains(active) || themeDialog.contains(active) ||
+      const recoverFocus = showing3D && (experience.contains(active) || help.contains(active) || themeDialog.contains(active) ||
         dialog.contains(active) || amenityPanel.dialog.contains(active) || active === viewToggle || mapOpeners.includes(active));
       if (themeDialog.open) themeDialog.close('fallback');
       guideReopen.hidden = true;
@@ -1209,7 +1201,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         if (showSeatedAction) {
           setHudText(seatedShopButton,shopLabel);
           setHudAttribute(seatedShopButton,'aria-label',`${shopLabel}: ${shopAction.name}`);
-          setHudAttribute(seatedShopButton,'aria-keyshortcuts','F');
+          setHudAttribute(seatedShopButton,'aria-keyshortcuts','F E');
         }
       } else if (shopAction) {
         setHudText(nearbyName,shopState.message || shopAction.name);
@@ -1247,7 +1239,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       const inspectHidden = !nearby && (!seated || tramState?.seated);
       if ((shopAction && !seated) || tramSelected) {
         inspectButton.style.minWidth = inspectButton.style.minHeight = '44px';
-        setHudAttribute(inspectButton,'aria-keyshortcuts','F');
+        setHudAttribute(inspectButton,'aria-keyshortcuts','F E');
       } else if (inspectButton.style.minWidth) {
         inspectButton.style.minWidth = inspectButton.style.minHeight = '';
         setHudAttribute(inspectButton,'aria-keyshortcuts','');

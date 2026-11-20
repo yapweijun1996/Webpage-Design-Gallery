@@ -1,4 +1,5 @@
 """Real Christmas/Everyday/Lunar New Year transitions, clearances and failure recovery."""
+from gjh_menu_test_helpers import open_decor_theme
 from gjh_startup_test_helpers import mall_entry_url, set_off_season_date
 import argparse,functools,http.server,io,json,os,threading
 from pathlib import Path
@@ -19,7 +20,7 @@ def run():
  def ready(p,query=''):
   p.goto(mall_entry_url(url+query));p.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert p.evaluate('window.__sceneReady===true')
  def open_theme(p):
-  p.locator('#mall-theme-open').click();assert p.locator('#mall-theme-dialog').is_visible()
+  open_decor_theme(p);assert p.locator('#mall-theme-dialog').is_visible()
  def choose(p,ident):
   p.locator('#mall-theme-select').select_option(ident);p.locator('#mall-theme-apply').click()
   p.wait_for_function('id=>__mall.state.theme?.active===id',arg=ident,timeout=30000)

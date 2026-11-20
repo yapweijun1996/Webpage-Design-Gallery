@@ -4,6 +4,7 @@ Uses the existing Python Playwright installation; no Node packages are required.
 --baseline serves the three original runtime files from the pinned baseline ref without changing the
 worktree, to reproduce the pre-patch failures with the same browser and controls.
 """
+from gjh_menu_test_helpers import close_menu, open_menu_page
 from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
@@ -273,9 +274,9 @@ def run():
                     capture('seated Bag return', 'seated', False)
                     retained(before, state(page))
                     shot('seated-restored')
-                    page.locator('#keyboard-help summary').click()
-                    capture('seated help', 'menu' if width == 390 else 'seated', width == 390)
-                    page.locator('#keyboard-help summary').click()
+                    open_menu_page(page, "help")
+                    capture('seated help', 'menu', True)
+                    close_menu(page)
                     capture('seated help close', 'seated', False)
                     retained(before, state(page))
                     if width == 390:
@@ -308,9 +309,9 @@ def run():
                     page.keyboard.press('Escape')
                     capture('map Escape', 'explore', False)
                     assert page.locator('#header-map').evaluate('el => el === document.activeElement')
-                page.locator('#keyboard-help summary').click()
-                capture('help', 'menu' if compact else 'explore', compact)
-                frames('help', compact)
+                open_menu_page(page, "help")
+                capture('help', 'menu', True)
+                frames('help', True)
                 # Native control focus still blocks keyboard gameplay even when
                 # wide-screen help is intentionally nonmodal.
                 page.get_by_role('combobox', name='Hair', exact=True).focus()
@@ -319,7 +320,7 @@ def run():
                 page.wait_for_timeout(120)
                 page.keyboard.up('w')
                 assert abs(state(page)['z'] - before['z']) < .01
-                page.locator('#keyboard-help summary').click()
+                close_menu(page)
                 capture('help close', 'explore', False)
 
                 page.evaluate('__mall.teleport("atrium")')
@@ -370,11 +371,11 @@ def run():
                     page.locator('#header-map').click()
                     capture('breakpoint reopen map', 'menu', True)
                     page.keyboard.press('Escape')
-                    page.locator('#keyboard-help summary').click()
+                    open_menu_page(page, "help")
                     capture('breakpoint compact help', 'menu', True)
                     page.set_viewport_size({'width': 1440, 'height': 900})
-                    capture('breakpoint wide help still open', 'explore', False)
-                    frames('breakpoint wide help running', False)
+                    capture('breakpoint wide help still open', 'menu', True)
+                    frames('breakpoint wide help paused', True)
                     page.set_viewport_size({'width': 390, 'height': 844})
                     capture('breakpoint compact help retained', 'menu', True)
                     page.keyboard.press('Escape')

@@ -49,7 +49,7 @@ def run(out=OUT):
      run.wait_for(state='visible')
      assert run.evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}'),'Run obstructed after closing map'
      run.click();assert run.get_attribute('aria-pressed')=='true';run.click();assert run.get_attribute('aria-pressed')=='false'
-     for selector in ['#keyboard-help > summary','#header-map','#run-toggle']:
+     for selector in ['#mall-tools','#header-map','#run-toggle']:
       box=page.locator(selector).bounding_box();assert box and box['width']>=44 and box['height']>=44,(selector,box)
 
     page.locator('#view-toggle').click();page.locator('#store-list').wait_for(state='visible');before=page.evaluate('__mall.state.frames');page.wait_for_timeout(250);assert page.evaluate('__mall.state.frames')==before,'List must pause mall rendering'

@@ -144,24 +144,23 @@ test('re-enabling music waits for the native decode from the canceled load', asy
   assert.equal(sampler.ready,false);
 });
 
-test('Tools uses named pill toggles and a disclosure with the three original bus hooks', () => {
+test('Menu keeps named sound toggles and the Mix disclosure with the original bus hooks', () => {
   for (const markup of [file('index.html'),file('../templates/gallery/gjh-v11-index.html',import.meta.url)]) {
-    const controls = markup.match(/<div class="mall-audio"[\s\S]*?<\/details>/)[0];
+    const controls = markup.match(/<div class="menu-card mall-audio"[\s\S]*?<\/details>/)[0];
     assert.match(controls,/role="group" aria-labelledby="mall-sound-heading"/);
-    assert.match(controls,/<button id="mall-music"[^>]*aria-pressed="false"/);
-    assert.match(controls,/<button id="mall-speaker"[^>]*aria-pressed="false" aria-keyshortcuts="M"/);
-    assert.match(controls,/<span id="mall-music-label">Music<\/span>/);
+    assert.match(controls,/<button [^>]*id="mall-music"[^>]*aria-pressed="false"/);
+    assert.match(controls,/<button [^>]*id="mall-speaker"[^>]*aria-pressed="false" aria-keyshortcuts="M"/);
+    assert.match(controls,/<span id="mall-music-label">Background music<\/span>/);
     assert.match(controls,/<p id="mall-music-title"[^>]* hidden>/);
-    assert.match(controls,/<details><summary>Volume settings<\/summary>/);
+    assert.match(controls,/<details class="menu-mix"><summary>Mix/);
     assert.deepEqual([...controls.matchAll(/data-audio-bus="([^"]+)"/g)].map(match => match[1]),
-      ['music','effects','ambience']);
+      ['master','music','effects','ambience']);
     assert.doesNotMatch(controls,/checkbox|hud-control|mall-music-toggle/);
-    assert.match(markup,/Piano: Salamander Grand Piano V3 by Alexander Holm/);
+    assert.match(markup,/Piano samples: Salamander Grand Piano V3 by Alexander Holm/);
   }
   const css = file('style.css');
-  assert.match(css,/\.mall-audio\{[^}]*white-space:nowrap/);
-  assert.match(css,/\.mall-audio :is\(button,summary\)\{[^}]*min-width:44px;min-height:44px/);
-  assert.match(css,/#mall-speaker kbd\{display:none/);
+  assert.match(css,/\.menu-switch-row,[^{]+\{[^}]*min-height:var\(--size-control\)/);
+  assert.match(css,/\.mall-audio input\[type="range"\]\{[^}]*accent-color:var\(--gold\)/);
 });
 
 test('all 12 piano files have build-scoped runtime cache entries only', () => {

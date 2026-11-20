@@ -352,12 +352,14 @@ test('persists mute, demo mute, explicit music and independent bus levels', asyn
   original.setDemoMuted(true);
   original.setMusic(true);
   original.setVoice(true);
+  assert.equal(original.state.levels.master,.75);
+  original.setVolume('master',.55);
   original.setVolume('ambience',.13);
   original.setVolume('effects',0);
   original.setVolume('music',.37);
   const {audio,contexts,timers,warm} = rig(storage);
   assert.deepEqual(JSON.parse(storage.getItem(AUDIO_KEY)), {
-    muted:true, demoMuted:true, music:true, voice:true, levels:{music:.37,effects:0,ambience:.13}
+    muted:true, demoMuted:true, music:true, voice:true, levels:{master:.55,music:.37,effects:0,ambience:.13}
   });
   audio.setPolicy(true,true);
   audio.setActive(true);
@@ -366,10 +368,15 @@ test('persists mute, demo mute, explicit music and independent bus levels', asyn
   assert.equal(timers.size,0);
   assert.equal(audio.state.demoMuted,true);
   assert.equal(audio.state.voice,true);
+  assert.equal(audio.state.levels.master,.55);
   audio.setMuted(false);
   audio.prepareForControls(1, true);
   await warm();
   assert.equal(audio.state.musicPlaying,true);
+  const master = contexts[0].gains.find(node => node.links.has(contexts[0].destination));
+  assert.equal(master.gain.value,.55);
+  audio.setVolume('master',.23);
+  assert.deepEqual(master.gain.events.at(-1).slice(0,2), ['target',.23]);
   assert.equal(audio.shop('listen'),undefined);
   audio.dispose();
 });

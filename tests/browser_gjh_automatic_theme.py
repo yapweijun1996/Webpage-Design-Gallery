@@ -1,5 +1,6 @@
 """Verify the automatic mall theme in headed Chrome against the local server."""
 
+from gjh_menu_test_helpers import open_decor_theme
 import argparse
 import os
 import sys
@@ -67,7 +68,7 @@ def run(screens):
             assert page.evaluate('window.__firstVisibleTheme') == theme
             assert page.evaluate('(key) => localStorage.getItem(key)', STORAGE_KEY) is None
             page.screenshot(path=screens / f'{day}-mall.png')
-            page.locator('#mall-theme-open').click()
+            open_decor_theme(page)
             select = page.locator('#mall-theme-select')
             status = page.locator('#mall-theme-status')
             expect(select.locator('option').first).to_have_text('Automatic (follows the calendar)')
@@ -94,7 +95,7 @@ def run(screens):
                 page.reload(wait_until='domcontentloaded')
                 page.wait_for_function('window.__sceneReady === true', timeout=90_000)
                 expect_theme(page, 'everyday')
-                page.locator('#mall-theme-open').click()
+                open_decor_theme(page)
                 expect(select).to_have_value('everyday')
                 select.select_option('automatic')
                 page.locator('#mall-theme-apply').click()

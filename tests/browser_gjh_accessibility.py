@@ -1,4 +1,5 @@
 """V11 DOM accessibility, conservative contrast and actual keyboard journeys."""
+from gjh_menu_test_helpers import close_menu, open_menu_page
 import argparse
 import functools
 import hashlib
@@ -146,7 +147,7 @@ def run():
                     assert page.locator('#header-map').evaluate('e => e === document.activeElement')
                 else:
                     page.locator('#header-map').click()
-                page.locator('#keyboard-help summary').click()
+                open_menu_page(page, "controls")
                 scan('help')
                 hair = page.get_by_role('combobox', name='Hair', exact=True)
                 hair.focus()
@@ -165,8 +166,8 @@ def run():
                 hair.select_option('swept')
                 assert hair.input_value() == 'swept'
                 # Native select scrolling can settle after its change event.
-                page.wait_for_function('''() => {const e=document.querySelector('select[name="hair"]'),p=document.querySelector('#controls-copy'),r=e.getBoundingClientRect(),v=p.getBoundingClientRect();return e===document.activeElement&&r.top>=v.top&&r.bottom<=v.bottom&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}''', timeout=3000)
-                hair_hit = hair.evaluate('''e=>{const r=e.getBoundingClientRect(),o=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2),p=document.querySelector('#controls-copy');return {viewport:[innerWidth,innerHeight],rect:r.toJSON(),hit:e.contains(o),occluder:o?.outerHTML.slice(0,600),scrollport:p.getBoundingClientRect().toJSON(),scrollTop:p.scrollTop,active:document.activeElement.name}}''')
+                page.wait_for_function('''() => {const e=document.querySelector('select[name="hair"]'),p=document.querySelector('#mall-tools-content'),r=e.getBoundingClientRect(),v=p.getBoundingClientRect();return e===document.activeElement&&r.top>=v.top&&r.bottom<=v.bottom&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}''', timeout=3000)
+                hair_hit = hair.evaluate('''e=>{const r=e.getBoundingClientRect(),o=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2),p=document.querySelector('#mall-tools-content');return {viewport:[innerWidth,innerHeight],rect:r.toJSON(),hit:e.contains(o),occluder:o?.outerHTML.slice(0,600),scrollport:p.getBoundingClientRect().toJSON(),scrollTop:p.scrollTop,active:document.activeElement.name}}''')
                 if not hair_hit['hit']:
                     (args.output / f'hair-hit-failure-{width}.json').write_text(json.dumps(hair_hit, indent=2) + '\n')
                     page.screenshot(path=str(args.output / f'hair-hit-failure-{width}.png'))
@@ -182,9 +183,9 @@ def run():
                     assert control.evaluate('e => parseFloat(getComputedStyle(e).outlineWidth) >= 2')
                 if compact:
                     page.keyboard.press('Escape')
-                    assert page.locator('#keyboard-help summary').evaluate('e => e === document.activeElement')
+                    assert page.locator('#header-menu').evaluate('e => e === document.activeElement')
                 else:
-                    page.locator('#keyboard-help summary').click()
+                    close_menu(page)
                 page.locator('#bag-open').click()
                 scan('empty-bag')
                 tab_dialog(page, '#bag-dialog')

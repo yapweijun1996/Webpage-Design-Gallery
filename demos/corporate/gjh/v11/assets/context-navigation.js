@@ -74,14 +74,6 @@ export function createContextNavigation({globalHost, directory, onHome, onShops,
     revealCurrentFocus();
   }
   new ResizeObserver(measure).observe(nav);
-  const disclosure = document.querySelector('.scene-disclaimer');
-  let disclosureHeight = -1;
-  new ResizeObserver(() => {
-    const height = Math.ceil(disclosure.getBoundingClientRect().height);
-    if (height === disclosureHeight) return;
-    disclosureHeight = height;
-    document.documentElement.style.setProperty('--context-disclosure-height', `${height}px`);
-  }).observe(disclosure);
   return {
     update({mode, available, destination, host = globalHost}) {
       if (previous?.mode === mode && previous.available === available && previous.host === host && previous.destination === destination) return;

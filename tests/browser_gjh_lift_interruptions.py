@@ -3,6 +3,7 @@
 QA-only script exposure permits a temporary body-position fault to isolate the
 seat/cart/held safety guards. No production global or repository source changes.
 """
+from gjh_menu_test_helpers import close_menu, open_menu_page
 import argparse,functools,hashlib,http.server,json,os,tempfile,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -27,9 +28,9 @@ def still(page,before):
 def pause_checks(page,phase):
  result=[]
  page.evaluate("window.dispatchEvent(new Event('blur'));__mall.setInput(null)");before=state(page);page.wait_for_timeout(220);after=still(page,before);result.append({'signal':'synthetic-window-blur','phase':phase,'before':before,'after':after});page.evaluate("window.dispatchEvent(new Event('focus'))")
- page.locator('#keyboard-help > summary').click();page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'Help','phase':phase,'after':still(page,before)});page.locator('#keyboard-help > summary').click();page.wait_for_function('!__mall.state.paused')
+ open_menu_page(page, "help");page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'Help','phase':phase,'after':still(page,before)});close_menu(page);page.wait_for_function('!__mall.state.paused')
  page.locator('#header-map').click();page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'Map','phase':phase,'after':still(page,before)});page.locator('#map-close').click();page.wait_for_function('!__mall.state.paused')
- page.locator('#keyboard-help > summary').click();page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'Help','phase':phase,'after':still(page,before)});page.locator('#keyboard-help > summary').click();page.wait_for_function('!__mall.state.paused')
+ open_menu_page(page, "help");page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'Help','phase':phase,'after':still(page,before)});close_menu(page);page.wait_for_function('!__mall.state.paused')
  page.locator('#view-toggle').click();page.wait_for_function('__mall.state.paused');before=state(page);result.append({'signal':'List','phase':phase,'after':still(page,before)});page.locator('#view-toggle').click();page.wait_for_function('!__mall.state.paused')
  before=page.evaluate("()=>{Object.defineProperty(document,'hidden',{configurable:true,get:()=>true});document.dispatchEvent(new Event('visibilitychange'));__mall.setInput(null);return __mall.state}");page.wait_for_timeout(220);after=state(page);assert after['frames']==before['frames'] and abs(after['y']-before['y'])<1e-6 and after['elevatorPhase']==before['elevatorPhase'];result.append({'signal':'synthetic-hidden-native-clock','phase':phase,'before':before,'after':after});page.evaluate("delete document.hidden;document.dispatchEvent(new Event('visibilitychange'))")
  old=page.viewport_size;page.set_viewport_size({'width':old['width']+1,'height':old['height']});page.set_viewport_size(old);s=state(page);assert s['elevatorTravel'] or s['elevator']['calling'];result.append({'signal':'native-resize-valid-phase','phase':phase,'after':s});step(page)

@@ -4,6 +4,7 @@ Uses the experimental Chrome DevTools Protocol command before navigation:
 https://raw.githubusercontent.com/ChromeDevTools/devtools-protocol/master/json/browser_protocol.json
 This does not certify physical notches, mobile Safari or screen readers.
 """
+from gjh_menu_test_helpers import open_menu_page
 import argparse
 import functools
 import hashlib
@@ -36,8 +37,8 @@ def geometry(page):
       const nav=document.querySelector('#context-navigation'), host=nav.parentElement;
       const r=rect('#context-navigation'), root=getComputedStyle(document.documentElement);
       return {header:rect('.site-header'), experience:rect('#experience'),
-        panel:rect(document.querySelector('#mall-map').open?'.map-content':'#controls-copy'),
-        disclosure:rect('.scene-disclaimer'), nav:r, host:host.id,
+        panel:rect(document.querySelector('#mall-map').open?'.map-content':'#mall-tools-content'),
+        nav:r, host:host.id,
         globalBottom:getComputedStyle(document.querySelector('#context-navigation-global')).bottom,
         headerBase:parseFloat(getComputedStyle(document.body).getPropertyValue('--gjh-header-size')),
         scrollPaddingBottom:parseFloat(root.scrollPaddingBottom)||0,
@@ -176,8 +177,7 @@ def run():
                     assert mapping['header']['height'] == mapping['headerBase']+insets['top'], mapping
                     assert mapping['experience']['top'] == mapping['header']['bottom'], mapping
                     assert mapping['experience']['bottom'] == height-insets['bottom'], mapping
-                    assert mapping['panel']['bottom'] <= mapping['disclosure']['top'], mapping
-                    assert mapping['disclosure']['bottom'] <= mapping['nav']['top'], mapping
+                    assert mapping['panel']['bottom'] <= mapping['nav']['top'], mapping
                     assert_nav(mapping, width, height, insets, True)
                     row['mapKeyboard'] = keyboard_reach(page, '[data-teleport]', '.map-content', args.output/name)
                     page.screenshot(path=str(args.output/f'{name}-map-keyboard.png'))
@@ -217,18 +217,18 @@ def run():
                     native_action(page, '#bag-dialog', lambda: page.keyboard.press('Escape'))
                     assert page.evaluate('document.activeElement.id') == 'bag-open'
                     page.locator('#context-home').click()
-                    page.locator('#keyboard-help summary').click()
+                    open_menu_page(page, "controls")
                     page.wait_for_function('__mall.mode === "menu"')
                     settle(page)
                     help_row = geometry(page)
                     row['states'].append({'name': 'help', **help_row})
                     page.screenshot(path=str(args.output/f'{name}-help.png'))
-                    assert help_row['panel']['bottom'] <= help_row['disclosure']['top'], help_row
-                    assert help_row['disclosure']['bottom'] <= help_row['nav']['top'], help_row
-                    assert_nav(help_row, width, height, insets, True)
-                    row['helpKeyboard'] = keyboard_reach(page, '#controls-copy select, #guide-reopen', '#controls-copy')
+                    assert page.locator('#context-navigation').is_hidden()
+                    assert help_row['panel']['bottom'] <= height - insets['bottom'], help_row
+                    row['helpKeyboard'] = keyboard_reach(page, '[data-menu-page=controls] [role=radio][tabindex="0"]', '#mall-tools-content')
                     page.screenshot(path=str(args.output/f'{name}-help-keyboard.png'))
-                    page.locator('#context-shops').click()
+                    close_menu(page)
+                    page.locator('#view-toggle').click()
                     settle(page)
                     directory = geometry(page)
                     row['states'].append({'name': 'directory', **directory})

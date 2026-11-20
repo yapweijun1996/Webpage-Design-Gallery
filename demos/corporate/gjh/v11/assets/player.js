@@ -74,8 +74,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   let collisionMs = 0, cameraQueryMs = 0, collisions = 0;
   const joystick = document.querySelector('#joystick'), thumb = joystick.querySelector('.joystick-thumb'), runButton = document.querySelector('#run-toggle');
   const cameraControls = document.querySelector('#camera-controls');
+  const menu = document.querySelector('#keyboard-help');
   const zoomIn = document.querySelector('#camera-zoom-in'), zoomOut = document.querySelector('#camera-zoom-out');
   const viewToggle = document.querySelector('#camera-view-toggle');
+  const thirdPerson = document.querySelector('#camera-third-person');
   let isPaused = () => false;
   const chaseRequired = () => Boolean(actionView || (seated && !beforeTram) || pushing || elevatorTravel);
   const cameraMode = () => view.mode(chaseRequired());
@@ -84,20 +86,21 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if (actionView) actionView.pitch = clampCameraPitch(value, 'third-person');
     else view.setPitch(value, chaseRequired());
   }
-  function toggleView() {
-    if (isPaused() || !view.toggle(chaseRequired())) return;
+  function toggleView(fromMenu = false) {
+    if ((!fromMenu && isPaused()) || !view.toggle(chaseRequired())) return;
     updateCamera(0);
   }
-  function adjustZoom(delta) {
-    if (isPaused() || (beforeTram && !view.firstPerson) || !view.adjust(delta, chaseRequired())) return;
-    if (reducedMotion.matches) updateCamera(0, true);
+  function adjustZoom(delta, fromMenu = false) {
+    if ((!fromMenu && isPaused()) || (beforeTram && !view.firstPerson) || !view.adjust(delta, chaseRequired())) return;
+    if (fromMenu || reducedMotion.matches) updateCamera(0, true);
   }
-  zoomIn.addEventListener('click', () => adjustZoom(ZOOM_STEP));
-  zoomOut.addEventListener('click', () => adjustZoom(-ZOOM_STEP));
-  viewToggle.addEventListener('click', toggleView);
-  cameraControls.addEventListener('click', event => {
-    // Pointer users can walk or use the right stick immediately after changing view.
-    if (event.detail > 0 && event.target.closest('button')) canvas.focus({preventScroll: true});
+  zoomIn.addEventListener('click', () => adjustZoom(ZOOM_STEP, menu.open));
+  zoomOut.addEventListener('click', () => adjustZoom(-ZOOM_STEP, menu.open));
+  viewToggle.addEventListener('click', () => {
+    if (!view.firstPerson) toggleView(menu.open);
+  });
+  thirdPerson.addEventListener('click', () => {
+    if (view.firstPerson) toggleView(menu.open);
   });
   canvas.addEventListener('wheel', event => {
     if (isPaused() || chaseRequired() || event.metaKey) return;
@@ -145,19 +148,20 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   });
   document.addEventListener('keydown', event => {
     if (event.altKey || event.ctrlKey || event.metaKey) { clearInput(); return; }
-    if (isPaused() || event.defaultPrevented) return;
+    const menuCamera = menu.open && cameraControls.contains(event.target);
+    if ((!menuCamera && isPaused()) || event.defaultPrevented) return;
     const sceneFocused = event.target === canvas || event.target === document.body;
     if (sceneFocused || cameraControls.contains(event.target) ||
         (beforeTram && event.target.closest?.('#tram-ride-hud'))) {
       if (event.code === 'KeyV') {
         event.preventDefault();
-        if (!event.repeat) toggleView();
+        if (!event.repeat) toggleView(menuCamera);
         return;
       }
       const zoomInKey = event.key === '+' || event.key === '=' || event.code === 'NumpadAdd';
       if (zoomInKey || event.key === '-' || event.code === 'NumpadSubtract') {
         event.preventDefault();
-        adjustZoom(zoomInKey ? ZOOM_STEP : -ZOOM_STEP);
+        adjustZoom(zoomInKey ? ZOOM_STEP : -ZOOM_STEP, menuCamera);
         return;
       }
     }
@@ -475,10 +479,15 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     contact.visible = !firstPerson;
     const presentation = firstPerson ? mode : occluded ? 'close' : mode;
     if (canvas.dataset.cameraView !== presentation) canvas.dataset.cameraView = presentation;
-    if (viewToggle.disabled !== required) viewToggle.disabled = required;
+    if (viewToggle.disabled !== required) viewToggle.disabled = thirdPerson.disabled = required;
     const zoomDisabled = required || (Boolean(beforeTram) && !firstPerson);
     if (zoomIn.disabled !== zoomDisabled) zoomIn.disabled = zoomOut.disabled = zoomDisabled;
-    if (renderedMode !== mode) viewToggle.setAttribute('aria-pressed', String(firstPerson));
+    if (renderedMode !== mode) {
+      viewToggle.setAttribute('aria-checked', String(firstPerson));
+      thirdPerson.setAttribute('aria-checked', String(!firstPerson));
+      viewToggle.tabIndex = firstPerson ? 0 : -1;
+      thirdPerson.tabIndex = firstPerson ? -1 : 0;
+    }
     renderedMode = mode;
   }
   function updateCamera(dt, instant = false, alpha = 1) {

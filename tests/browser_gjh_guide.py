@@ -1,4 +1,5 @@
 """Real-browser nonmodal guidance, wayfinding, replay and persistence coverage."""
+from gjh_menu_test_helpers import open_menu_page
 from gjh_startup_test_helpers import mall_entry_url
 import functools,http.server,json,os,threading
 from pathlib import Path
@@ -18,7 +19,7 @@ def guide(page):page.locator('#guide-card').wait_for(state='visible')
 def closed(page):page.locator('#guide-card').wait_for(state='hidden')
 def state(page):return page.evaluate('window.__mall.state')
 def reopen(page):
- page.locator('#keyboard-help').evaluate('el=>el.open=true');page.locator('#guide-reopen').click();guide(page)
+ open_menu_page(page, "guide");page.locator('#guide-reopen').click();guide(page)
 
 def run():
  OUT.mkdir(parents=True,exist_ok=True)

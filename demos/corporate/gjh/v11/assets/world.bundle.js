@@ -5475,6 +5475,64 @@ var registry = Object.freeze({
   <circle cx="12" cy="12" r="5"/>
   <path d="M12 7v10M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
 </svg>
+`,
+  book: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 5C9 3 5 3 2 5v14c3-2 7-2 10 0 3-2 7-2 10 0V5c-3-2-7-2-10 0v14"/>
+  </svg>
+`,
+  gamepad: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M7 7h10c2 0 3 1 4 4l1 4c.6 3-2 4-4 2l-2-2H8l-2 2c-2 2-4.6 1-4-2l1-4c1-3 2-4 4-4Zm0 3v4m-2-2h4m7-1h.01m3 2h.01"/>
+  </svg>
+`,
+  gauge: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 19a10 10 0 1 1 16 0M12 4v2M5 8l2 2m12-2-2 2M12 14l4-5m-4 5h.01"/>
+  </svg>
+`,
+  globe: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 3c-2.6 2.5-3.9 5.5-3.9 9s1.3 6.5 3.9 9M12 3c2.6 2.5 3.9 5.5 3.9 9s-1.3 6.5-3.9 9M3 12h18"/>
+  </svg>
+`,
+  grid: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>
+  </svg>
+`,
+  layers: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m12 3 10 5-10 5L2 8zm-10 9 10 5 10-5M2 16l10 5 10-5"/>
+  </svg>
+`,
+  map: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"/>
+  </svg>
+`,
+  message: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-5 4v-4H3V5a1 1 0 0 1 1-1Z"/>
+  </svg>
+`,
+  monitor: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M3 4h18v13H3zM12 17v4M8 21h8"/>
+  </svg>
+`,
+  moon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>
+  </svg>
+`,
+  music: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M9 18V6l11-3v12M9 9l11-3M9 18c0 3-6 4-6 1s6-4 6-1Zm11-3c0 3-6 4-6 1s6-4 6-1Z"/>
+  </svg>
+`,
+  settings: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m10 3-.5 2.5-2 .9-2.2-1.2-2 2 1.2 2.2-.9 2L1 12v2l2.6.5.9 2-1.2 2.2 2 2 2.2-1.2 2 .9.5 2.6h3l.5-2.6 2-.9 2.2 1.2 2-2-1.2-2.2.9-2L22 14v-2l-2.6-.6-.9-2 1.2-2.2-2-2-2.2 1.2-2-.9L13 3zM15 13a3.5 3.5 0 1 1-7 0 3.5 3.5 0 1 1 7 0Z"/>
+  </svg>
+`,
+  speaker: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M3 9h4l5-4v14l-5-4H3zM16 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/>
+  </svg>
+`,
+  sun: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>
+  </svg>
 `
 });
 

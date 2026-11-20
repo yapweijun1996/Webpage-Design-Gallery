@@ -3,6 +3,7 @@
 --root and --prefix also exercise a generated build mounted under a project prefix.
 Only existing player test APIs steer gameplay; surface/mode visibility is never fabricated.
 """
+from gjh_menu_test_helpers import open_menu_page
 from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
@@ -207,8 +208,7 @@ def run():
                         notes:[...nav.querySelectorAll('p:not([hidden])')].filter(e=>e.getClientRects().length).map(e=>({text:e.textContent,contrast:gjhContrast(e)})),
                         overflow:document.documentElement.scrollWidth>innerWidth,
                         modal:document.querySelector('dialog[open]')?.id,
-                        focus:document.activeElement.id,
-                        disclosure:rect(document.querySelector('.scene-disclaimer'))};
+                        focus:document.activeElement.id};
                     }''')
                     assert result['count'] == result['landmarks'] == 1, result
                     assert result['illegal'] == 0 and not result['overflow'], result
@@ -231,7 +231,6 @@ def run():
                         if host == 'context-navigation-global':
                             if page.locator('#experience').is_visible():
                                 assert result['reserve'] >= result['rect']['height']
-                                assert result['disclosure']['bottom'] <= result['rect']['y'], result
                             else:
                                 assert page.locator('#context-navigation-global').evaluate('e => getComputedStyle(e).position') == 'relative'
                         else:
@@ -255,7 +254,7 @@ def run():
                     page.locator('#header-map').click()
                     result = check('map', True, 'context-navigation-global')
                     panel = page.locator('.map-content').bounding_box()
-                    assert panel['y'] + panel['height'] <= result['disclosure']['y'], (panel, result)
+                    assert panel['y'] + panel['height'] <= result['rect']['y'], (panel, result)
                     for button in page.locator('[data-teleport]').all():
                         button.focus()
                         page.evaluate('() => new Promise(requestAnimationFrame)')
@@ -286,12 +285,13 @@ def run():
                     page.locator('#header-map').click()
                     check('wide-map-live', False)
                     page.locator('#header-map').click()
-                page.locator('#keyboard-help summary').click()
-                check('help', compact, 'context-navigation-global' if compact else None)
+                open_menu_page(page, "controls")
+                check('menu covers navigation', False)
                 fields = page.locator('#controls-copy select')
                 for field in fields.all():
                     field.focus()
                     assert field.evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}')
+                open_menu_page(page, 'guide')
                 page.locator('#guide-reopen').focus()
                 assert page.locator('#guide-reopen').evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));}')
                 page.locator('#guide-reopen').click()
@@ -393,9 +393,15 @@ def run():
                         if surface == 'map':
                             page.locator('#header-map').click()
                         elif surface == 'help':
-                            page.locator('#keyboard-help summary').click()
+                            open_menu_page(page, "controls")
                         else:
                             page.locator('#bag-open').click()
+                        if surface == 'help':
+                            assert page.locator('#context-navigation').is_hidden()
+                            close_menu(page)
+                            page.wait_for_function('expected=>__mall.mode===expected', arg=base)
+                            preserved(before, state(page))
+                            continue
                         page.wait_for_function('!document.querySelector("#context-navigation").hidden')
                         assert page.locator('#context-home').get_attribute('aria-current') == 'page'
                         assert page.locator('#context-navigation [aria-current]').count() == 1

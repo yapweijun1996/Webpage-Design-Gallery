@@ -43,6 +43,50 @@
     {
       "id": "sliders",
       "source": "Original Gallery header icon drawn in design-system/icons.json (24px grid, 1.5 stroke)"
+    },
+    {
+      "id": "grid",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "book",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "speaker",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "music",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "monitor",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "gauge",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "map",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "gamepad",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "settings",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "layers",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
+    },
+    {
+      "id": "message",
+      "source": "Original GJH v11 menu icon, design-system/icons.json"
     }
   ]
 }

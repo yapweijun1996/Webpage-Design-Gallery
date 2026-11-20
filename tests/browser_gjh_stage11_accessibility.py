@@ -1,4 +1,5 @@
 """Axe, contrast, keyboard and target checks for all expanded-mall themes."""
+from gjh_menu_test_helpers import open_decor_theme
 import argparse,functools,hashlib,http.server,json,os,threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -30,7 +31,7 @@ def run():
      for item in result['contrast']:assert item.get('hidden') or (not item.get('unresolved') and item['minimumRatio']>=item['requiredRatio']),(label,item)
      assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),label
     for theme in THEMES:
-     page.locator('#mall-theme-open').click();dialog=page.locator('#mall-theme-dialog');assert dialog.is_visible() and page.evaluate('document.activeElement.id')=='mall-theme-title'
+     open_decor_theme(page);dialog=page.locator('#mall-theme-dialog');assert dialog.is_visible() and page.evaluate('document.activeElement.id')=='mall-theme-title'
      before=page.evaluate('({active:__mall.state.theme.active,frames:__mall.state.frames})')
      page.locator('#mall-theme-select').select_option(theme);page.locator('#mall-theme-apply').click();page.wait_for_function('id=>__mall.state.theme.active===id',arg=theme,timeout=30000)
      if before['active']!=theme:
@@ -44,7 +45,7 @@ def run():
      page.keyboard.press('Tab');assert page.evaluate('document.activeElement.id')=='mall-theme-close'
      scan('theme-dialog-'+theme)
      if theme=='deepavali' and width in (320,390,768,844,1440):page.screenshot(path=str(args.output/f'theme-dialog-{width}.png'))
-     page.keyboard.press('Escape');page.wait_for_function('!document.querySelector("#mall-theme-dialog").open && document.activeElement.id==="mall-theme-open"')
+     page.keyboard.press('Escape');page.wait_for_function('!document.querySelector("#mall-theme-dialog").open && document.activeElement.id==="mall-tools"')
      scan('scene-'+theme)
      if width in (390,1440):page.screenshot(path=str(args.output/f'{theme}-scene-{width}.png'))
     open_map(page);assert page.locator('.expanded-map-number').count()==17;scan('expanded-map')

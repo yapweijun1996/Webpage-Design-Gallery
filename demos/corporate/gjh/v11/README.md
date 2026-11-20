@@ -169,3 +169,19 @@ Reports include the last five seconds of individual frames, up to two minutes of
 Arrivals and the store directory share a sticky header with Home, Shops, page theme, language, Bag and Enter 3D Mall. At 650 CSS pixels and below, the tabs, theme and language controls sit in a row that scrolls with the page. The header height also sets the root anchor offset. The 3D mall uses its own HUD.
 
 The language picker offers English, 简体中文 and Bahasa Melayu. Dark is the default page theme and the selection is saved under `gjh-v11-color-scheme`. The arrivals theme also applies to the directory header. The "Check for updates" control below the arrivals board shows the release version and uses the existing update flow. The arrivals controls are covered by `check_v11_arrival_tools` in `tests/browser_gjh_demos.py`.
+
+
+## In-mall menu
+
+Tools opens the quick controls. The header hamburger opens Settings, and Help
+and Quick Guide use the same modal. Back returns within the modal. Close and
+Escape return to the scene and restore focus. The scene pauses while the menu
+is open. The existing ground-floor minimap is scaled into the Menu thumbnail.
+The Audio page and the Menu share the same master and bus controls.
+
+Graphics reports the render scale and the detected display refresh rate. The
+quality tier still controls shadows. In the scene, Q and E turn the camera.
+When a nearby action is available, E or F activates it.
+
+Run `node --test tests/gjh_v11_menu.test.mjs` for routing and graphics coverage.
+The v11 section of `tests/browser_gjh_demos.py` exercises the modal in Chrome.

@@ -46,7 +46,7 @@ export function createSpatialHud({expanded = false, root = document} = {}) {
       heading.setAttribute('fill', 'var(--green)');
       map.append(heading);
     }
-    context = root.createElement('p');
+    context = root.createElement('span');
     context.className = 'mini-map-context';
     plan.replaceChildren(map, context);
   }

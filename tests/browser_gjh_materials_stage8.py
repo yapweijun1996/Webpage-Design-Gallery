@@ -1,4 +1,5 @@
 """Matched expanded-mall material screenshots, resources, and fallback."""
+from gjh_menu_test_helpers import close_menu, open_menu_page
 from gjh_startup_test_helpers import mall_entry_url, wait_for_quality
 import argparse,functools,http.server,json,os,threading,time
 from pathlib import Path
@@ -22,12 +23,12 @@ def run():
     assert page.evaluate('window.__sceneReady===true') and not errors,errors
     page.wait_for_load_state('networkidle')
     if w==390:
-     page.locator('#keyboard-help>summary').click()
+     open_menu_page(page, "graphics")
      for tier in ['low','balanced','detailed','auto']:
       page.locator('#graphics-quality').select_option(tier)
       wait_for_quality(page,tier)
       if tier!='auto':assert page.evaluate('__mall.state.graphics.quality.tier')==tier
-     page.locator('#keyboard-help>summary').click()
+     close_menu(page)
     def capture(label):
      page.evaluate('__mall.setInput({forward:0,yaw:0});__mall.step(100)')
      state=page.evaluate('''()=>{const s=__mall.state;return {x:s.x,y:s.y,z:s.z,draw:s.drawCalls,triangles:s.renderTriangles,resources:s.rendererResources,quality:s.graphics.quality}}''')

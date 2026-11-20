@@ -126,7 +126,7 @@ def run():
                     assert page.evaluate('__mall.teleport("entry")')
                     for x,z in [(10,39),(32,39),(32,3),(-12,3),(-12,39),(10,39)]: move(page,x,z,2.65)
                     page.evaluate('__mall.setInput({forward:0});__mall.step(20)')
-                    page.locator('#mall-tools > summary').click();page.locator('#scene-cart').click();assert position(page)['pushing']
+                    page.locator('#mall-tools').click();page.locator('#scene-cart').click();assert position(page)['pushing']
                     for x,z in [(-12,39),(-12,3),(32,3),(32,39),(10,39)]: move(page,x,z,1.8)
                     print('PASS continuous loop: avatar clockwise, cart counterclockwise; end metrics:',position(page),flush=True)
                     if args.screens: page.screenshot(path=str(args.screens/'cart-1440.png'))

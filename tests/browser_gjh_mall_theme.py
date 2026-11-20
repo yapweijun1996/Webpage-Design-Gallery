@@ -1,4 +1,5 @@
 """Mall-theme settings, retained visitor state and recovery on real Chrome."""
+from gjh_menu_test_helpers import close_menu, open_decor_theme, open_menu_page
 from gjh_startup_test_helpers import mall_entry_url, set_off_season_date
 import argparse,functools,http.server,os,threading
 from pathlib import Path
@@ -18,22 +19,26 @@ def run():
   p=c.new_page();set_off_season_date(p);errors=[];p.on('pageerror',lambda e:errors.append(str(e)));return c,p,errors
  def ready(p):p.goto(mall_entry_url(url));p.wait_for_function('window.__sceneReady || window.__sceneFailed',timeout=90000);assert p.evaluate('window.__sceneReady===true')
  def open_theme(p,button='#mall-theme-open'):
-  p.locator(button).click();d=p.locator('#mall-theme-dialog');assert d.is_visible();assert p.evaluate('document.activeElement.id')=='mall-theme-title';return d
+  if button == '#mall-theme-open': open_decor_theme(p)
+  else: p.locator(button).click()
+  d=p.locator('#mall-theme-dialog');assert d.is_visible();assert p.evaluate('document.activeElement.id')=='mall-theme-title';return d
  def apply(p,ident=None):
   if ident:p.locator('#mall-theme-select').select_option(ident)
   p.locator('#mall-theme-apply').click()
   if ident:p.wait_for_function('id=>__mall.state.theme.active===id',arg=ident,timeout=30000)
   else:p.wait_for_function('document.querySelector("#mall-theme-status").textContent.includes("active")')
  def close(p,opener):
-  p.keyboard.press('Escape');p.wait_for_function('!document.querySelector("#mall-theme-dialog").open');p.wait_for_function('id=>document.activeElement.id===id',arg=opener)
+  p.keyboard.press('Escape');p.wait_for_function('!document.querySelector("#mall-theme-dialog").open');p.wait_for_function('id=>document.activeElement.id===id',arg='mall-tools' if opener == 'mall-theme-open' else opener)
  try:
   with sync_playwright() as pw:
    browser=pw.chromium.launch(executable_path=os.environ['GALLERY_CHROME'],args=['--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'),'--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
    print('Browser:',browser.version,flush=True)
    for w,h in [(320,700),(390,844),(768,1024),(844,390),(1440,900)]:
     c,p,errors=fresh(browser,w,h);ready(p)
+    open_menu_page(p, 'about')
     button=p.locator('#mall-theme-open');assert button.is_visible();r=button.bounding_box();assert r['width']>=44 and r['height']>=44 and r['x']>=0 and r['x']+r['width']<=w,r
     assert button.evaluate('e=>{const r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}')
+    close_menu(p)
     p.locator('#view-toggle').click();p.locator('[data-add]').first.click();p.locator('#view-toggle').click()
     before=p.evaluate('''()=>{let s=__mall.state;return {x:s.x,y:s.y,z:s.z,scene:s.graphics.sceneId,children:s.graphics.sceneChildren,resources:s.rendererResources}}''')
     d=open_theme(p);bounds=d.bounding_box();assert bounds['x']>=0 and bounds['y']>=0 and bounds['x']+bounds['width']<=w+.5 and bounds['y']+bounds['height']<=h+.5,bounds
@@ -106,7 +111,7 @@ def run():
    print('PASS Visitor v1 expanded theme settings',flush=True);c.close()
    # The expanded default exposes its theme settings; the static fallback keeps the control hidden.
    c,p,errors=fresh(browser);p.goto(mall_entry_url(url.replace('?layout=expanded','')));p.wait_for_function('window.__sceneReady',timeout=90000)
-   assert p.locator('#mall-theme-open').is_visible() and p.locator('#directory-theme-open').is_visible();assert p.locator('[data-space-id]').count()==14;c.close()
+   open_menu_page(p, 'about');assert p.locator('#mall-theme-open').is_visible();close_menu(p);assert p.locator('[data-space-id]').count()==14;c.close()
    c=browser.new_context(java_script_enabled=False,service_workers='block');p=c.new_page();p.goto(url.replace('?layout=expanded',''));assert p.locator('#directory-theme-open').is_hidden() and p.locator('[data-store]').count()==3;c.close()
    print('PASS expanded default and no-JavaScript directory',flush=True);browser.close()
  finally:server.shutdown();server.server_close()

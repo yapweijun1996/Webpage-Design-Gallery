@@ -1,4 +1,5 @@
 """Bounded visual/DOM evidence for the V11 nonmodal welcome card layout."""
+from gjh_menu_test_helpers import open_menu_page
 import argparse, functools, http.server, json, os, threading
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -36,7 +37,7 @@ def main():
                 if not page.locator("#guide-card").is_visible():
                     page.locator('#directory-enter-3d').click()
                 if not page.locator("#guide-card").is_visible():
-                    page.locator('#keyboard-help').evaluate('el=>el.open=true')
+                    open_menu_page(page, "guide")
                     page.locator("#guide-reopen").click()
                 dialog = page.locator("#guide-card")
                 dialog.wait_for(state="visible")

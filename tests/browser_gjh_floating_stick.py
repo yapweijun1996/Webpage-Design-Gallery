@@ -1,4 +1,5 @@
 """Focused real touch evidence for anywhere-origin movement and independent look."""
+from gjh_menu_test_helpers import close_menu, open_menu_page
 from browser_gjh_guide import *
 import argparse
 
@@ -33,8 +34,7 @@ def run():
     assert px>w/2 and page.locator('#run-toggle').get_attribute('aria-pressed')=='true'
     before=state(page);down(1,px,py);move(1,px,py-40);after=tick();up(1)
     assert after['animation']=='run' and after['z']<before['z']-.5
-    page.locator('#mall-tools > summary').click()
-    page.locator('#keyboard-help > summary').click()
+    open_menu_page(page, "controls")
     switch.check()
     page.reload()
     page.wait_for_function('window.__mall?.ready && window.__sceneReady')
@@ -55,8 +55,8 @@ def run():
     page.evaluate('window.lastTouchPointer=null;document.querySelector("#scene").addEventListener("pointerdown",e=>window.lastTouchPointer=e.pointerId,{once:true})');down(1,x,y);move(1,x,y-40);tick();page.evaluate('document.querySelector("#scene").releasePointerCapture(window.lastTouchPointer)');move(1,x,y-50);stopped(state(page));up(1)
     # HUD clicks remain HUD actions, and a modal absorbs new touches.
     s=state(page);page.locator('#run-toggle').tap();stopped(s);assert page.locator('#run-toggle').get_attribute('aria-pressed')=='false';page.locator('#run-toggle').tap()
-    page.locator('#mall-tools > summary').click();page.locator('#keyboard-help > summary').click();s=state(page);down(1,5,5);move(1,35,25);up(1);stopped(s)
-    page.locator('#keyboard-help').evaluate('e=>e.open=false');page.locator('#mall-tools').evaluate('e=>e.open=false');page.locator('#scene').focus();page.evaluate('__mall.step(0)')
+    open_menu_page(page, "controls");s=state(page);down(1,5,5);move(1,35,25);up(1);stopped(s)
+    close_menu(page);page.locator('#scene').focus();page.evaluate('__mall.step(0)')
     down(1,x,y);move(1,x,y-40);tick();page.set_viewport_size({'width':w,'height':h-30});page.wait_for_function('!document.querySelector("#joystick").classList.contains("is-floating")');stopped(state(page));points.clear();send('touchCancel')
     records.append({'viewport':[w,h],'leftCenterRightOrigins':'PASS','tapDeadzone':'PASS','twoTouchRolesAndThirdIgnored':'PASS','releaseCancelLostCaptureResize':'PASS','runAndModalIsolation':'PASS'});page.close()
    b.close()

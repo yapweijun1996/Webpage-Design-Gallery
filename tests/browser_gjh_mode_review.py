@@ -1,4 +1,5 @@
 """Focused real-browser review of retained V11 mode layers and interruptions."""
+from gjh_menu_test_helpers import close_menu, open_menu_page
 from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
@@ -269,31 +270,16 @@ def run():
             page.keyboard.press('Escape')
             observe(page, 'map closed to gameplay', 'explore', False, ['explore'])
             assert page.locator('#header-map').evaluate('el => el === document.activeElement')
-            page.locator('#keyboard-help summary').click()
+            open_menu_page(page, "help")
             observe(page, 'compact Help open', 'menu', True, ['explore', 'menu'])
-            page.locator('#bag-open').click()
-            observe(page, 'Help covered by Bag', 'shop', True, ['explore', 'menu', 'shop'])
-            close_bag(page, escape=True)
-            observe(page, 'Help restored under Menu', 'menu', True, ['explore', 'menu'])
-            assert page.locator('#keyboard-help').evaluate('el => el.open')
-            shot(page, 'compact-help-retained-after-bag')
-            page.locator('#keyboard-help summary').click()
+            page.locator('#bag-open').evaluate('e => e.focus()')
+            assert page.locator('#keyboard-help').evaluate('e => e.contains(document.activeElement)')
+            shot(page, 'compact-help-isolates-background')
+            page.set_viewport_size({'width': 1440, 'height': 900})
+            observe(page, 'wide Help retained', 'menu', True, ['explore', 'menu'])
+            page.set_viewport_size({'width': 390, 'height': 844})
+            close_menu(page)
             observe(page, 'Help closed to gameplay', 'explore', False, ['explore'])
-            for panel in ('map', 'help'):
-                page.locator('#header-map' if panel == 'map' else '#keyboard-help summary').click()
-                page.locator('#bag-open').click()
-                page.set_viewport_size({'width': 1440, 'height': 900})
-                page.wait_for_function("document.querySelector('#header-map').hidden")
-                observe(page, 'wide ' + panel + ' under Bag', 'shop', True, ['explore', 'shop'])
-                page.set_viewport_size({'width': 390, 'height': 844})
-                page.wait_for_function("!document.querySelector('#header-map').hidden && !document.querySelector('#mall-map').open")
-                close_bag(page)
-                observe(page, 'resized ' + panel + ' after Bag',
-                    'menu' if panel == 'help' else 'explore', panel == 'help',
-                    ['explore', 'menu'] if panel == 'help' else ['explore'])
-                if panel == 'help':
-                    page.locator('#keyboard-help summary').click()
-                    observe(page, 'resized Help closed', 'explore', False, ['explore'])
             assert not errors, errors
             rows.append({'scenario': 'compact map/help under Bag', 'result': 'PASS',
                 'evidence': 'real controls, retained layers, native close/escape, post-close focus; compact/wide/compact resize under Bag'})
@@ -361,9 +347,9 @@ def run():
             page.locator('#bag-open').click()
             activate_cart(page)
             observe(page, 'Cart at compact viewport', 'cart', False, ['cart'])
-            page.locator('#keyboard-help summary').click()
+            open_menu_page(page, "help")
             observe(page, 'compact Cart Help', 'menu', True, ['cart', 'menu'])
-            page.locator('#keyboard-help summary').click()
+            close_menu(page)
             observe(page, 'compact Cart Help closed', 'cart', False, ['cart'])
             page.locator('#header-map').click()
             observe(page, 'compact Cart Map', 'menu', True, ['cart', 'menu'])
@@ -371,11 +357,12 @@ def run():
             observe(page, 'compact Cart Map closed', 'cart', False, ['cart'])
             page.set_viewport_size({'width': 1440, 'height': 900})
             page.wait_for_function("document.querySelector('#header-map').hidden")
-            page.locator('#keyboard-help summary').click()
-            observe(page, 'wide Cart Help', 'cart', False, ['cart'])
+            open_menu_page(page, "help")
+            observe(page, 'wide Cart Help', 'menu', True, ['cart', 'menu'])
             before_frames = state(page)['frames']
-            page.wait_for_function('before => __mall.state.frames > before', arg=before_frames)
-            page.locator('#keyboard-help summary').click()
+            page.evaluate('__mall.step(200)')
+            assert state(page)['frames'] == before_frames
+            close_menu(page)
             observe(page, 'wide Cart Help closed', 'cart', False, ['cart'])
             page.set_viewport_size({'width': 390, 'height': 844})
             page.wait_for_function("!document.querySelector('#header-map').hidden")

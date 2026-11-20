@@ -44,7 +44,7 @@ def run():
     ready(page,url);s=state(page)
     if width==390:
      assert page.locator('.ob-help:visible').count()==0
-     assert page.locator('#keyboard-help>summary').is_visible()
+     assert page.locator('#mall-tools').is_visible()
     assert s['amenities']['displayedProducts']==4,s['amenities']
     assert counts['startup-assets.pack']==1,counts
     for kind,file in FILES.items():assert s['amenities'][kind]['status']=='loaded' and counts[file]==0,s['amenities']
@@ -112,7 +112,7 @@ def run():
     ready(page,url);s=state(page)
     if width==390:
      assert page.locator('.ob-help:visible').count()==0
-     assert page.locator('#keyboard-help>summary').is_visible()
+     assert page.locator('#mall-tools').is_visible()
     assert s['amenities'][kind]['status']=='fallback',s['amenities']
     assert all(s['amenities'][other]['status']=='loaded' for other in FILES if other!=kind)
     approach(page,kind);assert page.locator('#amenity-dialog').is_visible()

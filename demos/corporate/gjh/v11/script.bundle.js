@@ -494,16 +494,6 @@ function createPerformancePanel({ snapshot, report = snapshot }) {
       renderDetails(snapshot());
   });
   document.getElementById("performance-close").addEventListener("click", close);
-  panel.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && panel.open) {
-      event.stopPropagation();
-      close();
-    }
-  });
-  document.addEventListener("pointerdown", (event) => {
-    if (panel.open && !panel.contains(event.target))
-      panel.open = false;
-  });
   document.getElementById("performance-download").addEventListener("click", () => {
     const blob = new Blob([JSON.stringify(report(), null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob), link = document.createElement("a");
@@ -1099,141 +1089,357 @@ function createTutorial({ parent, onDismiss = () => {}, onBrowseProducts, touch 
   return { card, ...state };
 }
 
-// demos/corporate/gjh/v11/assets/context-navigation.js
-var ITEMS = Object.freeze([
-  { id: "home", label: "Home" },
-  { id: "shops", label: "Shops" },
-  { id: "events", label: "Events", unavailable: true },
-  { id: "rewards", label: "Rewards", unavailable: true },
-  { id: "profile", label: "Profile", unavailable: true }
-]);
-function createContextNavigation({ globalHost, directory, onHome, onShops, recoverFocus }) {
-  const nav = document.createElement("nav");
-  nav.id = "context-navigation";
-  nav.className = "context-navigation";
-  nav.setAttribute("aria-label", "Mall navigation");
-  nav.hidden = true;
-  const actions2 = document.createElement("div");
-  actions2.className = "context-navigation-actions";
-  const note = document.createElement("p");
-  note.id = "context-navigation-note";
-  note.textContent = "Events, Rewards and Profile are unavailable in this demo.";
-  const homeNote = document.createElement("p");
-  homeNote.id = "context-home-note";
-  homeNote.textContent = "Home is unavailable while the 3D mall is not ready. Use Shops to browse the directory.";
-  homeNote.hidden = true;
-  let visible = false, ready = false;
-  const buttons = new Map(ITEMS.map((item) => {
-    const button2 = document.createElement("button");
-    button2.type = "button";
-    button2.id = `context-${item.id}`;
-    button2.textContent = item.label;
-    button2.disabled = Boolean(item.unavailable);
-    if (item.unavailable)
-      button2.setAttribute("aria-describedby", note.id);
-    if (item.id === "home") {
-      button2.addEventListener("click", () => {
-        if (visible && ready)
-          onHome();
-      });
-    } else if (item.id === "shops") {
-      button2.addEventListener("click", () => {
-        if (visible)
-          onShops();
-      });
-    }
-    actions2.append(button2);
-    return [item.id, button2];
-  }));
-  nav.append(actions2, homeNote, note);
-  globalHost.append(nav);
-  let reservedHeight = -1, previous = null;
-  let visibilityFrame = 0;
-  function revealCurrentFocus() {
-    if (visibilityFrame)
-      return;
-    visibilityFrame = requestAnimationFrame(() => {
-      visibilityFrame = 0;
-      const target = document.activeElement;
-      if (!(target instanceof HTMLElement) || !target.isConnected || !visible || previous?.destination !== "shops" || nav.parentElement !== globalHost || globalHost.hidden || directory.hidden || !directory.contains(target) || nav.contains(target) || document.querySelector("dialog[open]") || !target.getClientRects().length)
-        return;
-      if (getComputedStyle(globalHost).position !== "fixed")
-        return;
-      const rect = target.getBoundingClientRect(), footer = globalHost.getBoundingClientRect();
-      const rootStyle = getComputedStyle(document.documentElement);
-      const safeTop = parseFloat(rootStyle.scrollPaddingTop) || 0;
-      const safeBottom = Math.min(footer.top, innerHeight - (parseFloat(rootStyle.scrollPaddingBottom) || 0));
-      if (target === document.activeElement && (rect.top < safeTop || rect.bottom > safeBottom))
-        target.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
-    });
-  }
-  document.addEventListener("focusin", revealCurrentFocus);
-  window.addEventListener("resize", revealCurrentFocus);
-  function measure() {
-    const height = visible && nav.parentElement === globalHost && getComputedStyle(globalHost).position === "fixed" ? Math.ceil(globalHost.getBoundingClientRect().height) : 0;
-    if (height === reservedHeight)
-      return;
-    reservedHeight = height;
-    document.documentElement.style.setProperty("--context-navigation-height", `${height}px`);
-    revealCurrentFocus();
-  }
-  new ResizeObserver(measure).observe(nav);
-  const disclosure = document.querySelector(".scene-disclaimer");
-  let disclosureHeight = -1;
-  new ResizeObserver(() => {
-    const height = Math.ceil(disclosure.getBoundingClientRect().height);
-    if (height === disclosureHeight)
-      return;
-    disclosureHeight = height;
-    document.documentElement.style.setProperty("--context-disclosure-height", `${height}px`);
-  }).observe(disclosure);
+// demos/corporate/gjh/v11/assets/graphics-quality.js
+var AVATAR_ANISOTROPY = Object.freeze({ phone: 2, tablet: 4, desktop: 4 });
+var QUALITY_KEY = "gjh-v11-graphics-quality-v1";
+var RESOLUTION_KEY = "gjh-v11-auto-resolution-v1";
+var MALL_FRAME_BUDGETS = Object.freeze({
+  low: Object.freeze({ triangles: 220000, calls: 70 }),
+  balanced: Object.freeze({ triangles: 300000, calls: 90 }),
+  detailed: Object.freeze({ triangles: 420000, calls: 110 })
+});
+var TIERS = ["low", "balanced", "detailed"];
+var REFRESH_SAMPLE_COUNT = 120;
+var WINDOW_SIZE = 90;
+var MIN_SCALE = 60;
+var SCALE_STEP = 5;
+var RECOVERY_MS = 1e4;
+function usesPortraitAtlas(deviceClass, tier) {
+  return deviceClass !== "phone" && (tier === "balanced" || tier === "detailed");
+}
+var qualityPreference = (value) => TIERS.includes(value) ? value : "auto";
+var positive = (value) => Number.isFinite(value) && value > 0;
+function detectDeviceClass({
+  userAgent = "",
+  platform = "",
+  maxTouchPoints = 0,
+  coarsePointer = false,
+  width = Infinity,
+  height = Infinity
+} = {}) {
+  if (/iPad|Tablet|PlayBook|Silk/i.test(userAgent) || /^Mac/i.test(platform) && maxTouchPoints > 1)
+    return "tablet";
+  if (/iPhone|iPod|Windows Phone/i.test(userAgent))
+    return "phone";
+  if (/Android/i.test(userAgent))
+    return /Mobile/i.test(userAgent) ? "phone" : "tablet";
+  if (coarsePointer && maxTouchPoints > 0)
+    return Math.min(width, height) < 600 ? "phone" : "tablet";
+  return "desktop";
+}
+var isAndroidChrome = (userAgent) => /Android/i.test(userAgent) && /Chrome\//i.test(userAgent);
+function estimateRefreshHz(intervals) {
+  const sorted = intervals.filter(positive).sort((a, b) => a - b);
+  if (sorted.length < REFRESH_SAMPLE_COUNT)
+    return null;
+  const middle = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+  return Math.round(1000 / median);
+}
+function resolveRenderCadence(deviceClass, refreshHz) {
+  const phone = deviceClass === "phone";
+  const hz = positive(refreshHz) ? refreshHz : 60;
+  const divisor = phone ? Math.ceil(hz / 30) : hz >= 100 ? Math.max(2, Math.round(hz / 60)) : 1;
+  return { divisor, targetFps: hz / divisor };
+}
+function resolveQuality({
+  preference = "auto",
+  width,
+  dpr = 1,
+  cores,
+  memory,
+  recovered = false,
+  autoTier = null,
+  deviceClass = "desktop",
+  androidChrome = false,
+  highPerformanceWebGL2 = false
+}) {
+  const constrained = positive(cores) && cores <= 2 || positive(memory) && memory <= 2;
+  const lowEnd = positive(cores) && cores <= 4 || positive(memory) && memory <= 4 || androidChrome && !highPerformanceWebGL2;
+  const choice = qualityPreference(preference);
+  const phone = deviceClass === "phone";
+  const initialTier = constrained || phone ? "low" : width < 1000 ? "balanced" : "detailed";
+  const tier = recovered ? "low" : choice !== "auto" ? choice : TIERS.includes(autoTier) ? autoTier : initialTier;
+  let cap = 2;
+  if (tier === "low")
+    cap = 1;
+  else if (tier === "balanced")
+    cap = 1.25;
+  else if (phone)
+    cap = lowEnd ? 1.25 : 1.5;
+  return Object.freeze({
+    preference: choice,
+    tier,
+    pixelRatio: Math.min(positive(dpr) ? dpr : 1, cap),
+    shadows: tier === "detailed" && width >= 1000,
+    recovered
+  });
+}
+function createRenderCadence(deviceClass) {
+  const intervals = [];
+  let refreshHz = null, lastSample = null, lastDraw = null;
+  let policy = resolveRenderCadence(deviceClass, refreshHz);
   return {
-    update({ mode, available, destination, host = globalHost }) {
-      if (previous?.mode === mode && previous.available === available && previous.host === host && previous.destination === destination)
-        return;
-      previous = { mode, available, host, destination };
-      for (const [id, button2] of buttons) {
-        if ((id === "home" || id === "shops") && id === destination) {
-          if (!button2.hasAttribute("aria-current"))
-            button2.setAttribute("aria-current", "page");
-        } else if (button2.hasAttribute("aria-current"))
-          button2.removeAttribute("aria-current");
+    get refreshHz() {
+      return refreshHz;
+    },
+    get targetFps() {
+      return policy.targetFps;
+    },
+    get capped() {
+      return policy.divisor > 1;
+    },
+    reset() {
+      lastDraw = lastSample = null;
+      intervals.length = 0;
+    },
+    observe(now, active) {
+      if (refreshHz !== null)
+        return false;
+      if (!active) {
+        lastSample = null;
+        intervals.length = 0;
+        return false;
       }
-      const active = document.activeElement, ownedFocus = nav.contains(active);
-      visible = mode === "menu" || mode === "shop";
-      ready = available;
-      const home = buttons.get("home");
-      if (home.disabled === ready) {
-        home.disabled = !ready;
-        if (ready)
-          home.removeAttribute("aria-describedby");
-        else
-          home.setAttribute("aria-describedby", homeNote.id);
+      if (lastSample !== null && now > lastSample)
+        intervals.push(now - lastSample);
+      lastSample = now;
+      if (intervals.length < REFRESH_SAMPLE_COUNT)
+        return false;
+      refreshHz = estimateRefreshHz(intervals);
+      policy = resolveRenderCadence(deviceClass, refreshHz);
+      intervals.length = 0;
+      return true;
+    },
+    take(now) {
+      const elapsed = lastDraw === null ? 1000 / policy.targetFps : now - lastDraw;
+      if (refreshHz) {
+        const refreshes = Math.max(1, Math.round(elapsed * refreshHz / 1000));
+        if (refreshes < policy.divisor)
+          return 0;
+        lastDraw = now;
+        return refreshes * 1000 / refreshHz;
       }
-      if (homeNote.hidden === !ready)
-        homeNote.hidden = ready;
-      if (nav.hidden === visible)
-        nav.hidden = !visible;
-      if (globalHost.hidden === (visible && host === globalHost))
-        globalHost.hidden = !(visible && host === globalHost);
-      if (nav.parentElement !== host) {
-        host.append(nav);
-        if (ownedFocus && visible && !active.disabled)
-          active.focus({ preventScroll: true });
-      }
-      if (ownedFocus && visible && active === home && !ready)
-        buttons.get("shops").focus({ preventScroll: true });
-      else if (ownedFocus && !visible)
-        recoverFocus();
-      measure();
-      revealCurrentFocus();
+      if (policy.divisor > 1 && elapsed + 0.8 < 1000 / policy.targetFps)
+        return 0;
+      lastDraw = now;
+      return elapsed;
     }
   };
 }
-
-// demos/corporate/gjh/v11/assets/ui.js
-import { setupDemoBag } from "./assets/demo-bag.js";
-import { setupNewMoonPreview } from "./assets/newmoon-detail-preview.js";
+function decideAdaptiveQuality(state, samples, { now, targetFps, tier, allowTierDowngrade }) {
+  const budget = 1000 / targetFps;
+  const percentile80 = (key) => samples.map((sample) => sample[key]).sort((a, b) => a - b)[Math.ceil(samples.length * 0.8) - 1];
+  const cadence = percentile80("frameMs");
+  const mean = samples.reduce((total, { frameMs }) => total + Math.min(frameMs, budget * 2), 0) / samples.length;
+  const overloaded = cadence > budget * 1.06 || mean > budget * 1.04;
+  const headroom = mean <= budget * 1.01 && cadence <= budget * 1.01 && percentile80("callbackMs") <= budget * 0.8;
+  const slowSince = overloaded ? state.slowSince ?? now : null;
+  const fastSince = headroom ? state.fastSince ?? now : null;
+  const next = { ...state, slowSince, fastSince };
+  const { scale, raisedAt, recoveryDelay } = state;
+  if (slowSince !== null) {
+    const slowMs = now - slowSince;
+    if (scale > MIN_SCALE && slowMs >= 750) {
+      return {
+        ...next,
+        scale: scale - SCALE_STEP,
+        recoveryDelay: now - raisedAt < 15000 ? Math.min(60000, recoveryDelay * 3) : recoveryDelay
+      };
+    }
+    if (scale === MIN_SCALE && allowTierDowngrade && slowMs >= 5000 && TIERS.indexOf(tier) > 0) {
+      return { ...next, lowerTier: TIERS[TIERS.indexOf(tier) - 1] };
+    }
+  }
+  if (scale < 100 && fastSince !== null && now - fastSince >= recoveryDelay) {
+    return { ...next, scale: scale + SCALE_STEP, raisedAt: now };
+  }
+  return next;
+}
+function createAdaptiveQuality(targetFps) {
+  const samples = [];
+  let cursor = 0, firstSample, nextCheck, ignoreUntil = 0;
+  let state = { scale: 100, raisedAt: -Infinity, recoveryDelay: RECOVERY_MS, slowSince: null, fastSince: null };
+  function reset(now, settleMs = 500) {
+    samples.length = 0;
+    cursor = 0;
+    firstSample = nextCheck = null;
+    ignoreUntil = now + settleMs;
+    state.slowSince = state.fastSince = null;
+  }
+  return {
+    reset,
+    restoreScale(now) {
+      state.scale = 100;
+      state.raisedAt = -Infinity;
+      state.recoveryDelay = RECOVERY_MS;
+      reset(now);
+    },
+    get renderScale() {
+      return state.scale / 100;
+    },
+    sample(now, frameMs, callbackMs, tier, allowTierDowngrade, currentTargetFps = targetFps) {
+      if (now < ignoreUntil || !positive(frameMs))
+        return null;
+      firstSample ??= now;
+      samples[cursor] = { frameMs, callbackMs };
+      cursor = (cursor + 1) % WINDOW_SIZE;
+      if (now < nextCheck || samples.length < WINDOW_SIZE && (samples.length < 8 || now - firstSample < 3000))
+        return null;
+      nextCheck = now + 250;
+      const { lowerTier, ...next } = decideAdaptiveQuality(state, samples, { now, targetFps: currentTargetFps, tier, allowTierDowngrade });
+      const scaleChanged = next.scale !== state.scale;
+      state = next;
+      if (!scaleChanged && !lowerTier)
+        return null;
+      reset(now);
+      return lowerTier ? { tier: lowerTier } : { renderScale: state.scale / 100 };
+    }
+  };
+}
+function browserDeviceClass() {
+  return detectDeviceClass({
+    userAgent: navigator.userAgent,
+    platform: navigator.platform,
+    maxTouchPoints: navigator.maxTouchPoints,
+    coarsePointer: window.matchMedia("(pointer: coarse)").matches,
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+}
+function savedQualityPreference() {
+  try {
+    return qualityPreference(localStorage.getItem(QUALITY_KEY));
+  } catch {
+    return "auto";
+  }
+}
+function createGraphicsQuality(onChange) {
+  const select = document.getElementById("graphics-quality");
+  const autoResolution = document.getElementById("auto-resolution");
+  const status = document.getElementById("graphics-quality-status");
+  const resolution = document.getElementById("menu-resolution");
+  const refresh = document.getElementById("menu-refresh-rate");
+  const deviceClass = browserDeviceClass();
+  const cadence = createRenderCadence(deviceClass);
+  const androidChrome = isAndroidChrome(navigator.userAgent);
+  const adaptive = createAdaptiveQuality(cadence.targetFps);
+  let preference = savedQualityPreference(), recovered = false, profile, autoTier = null;
+  let tierDowngrades = 0, pendingDowngrade = null, highPerformanceWebGL2 = false;
+  let autoEnabled = true;
+  try {
+    autoEnabled = localStorage.getItem(RESOLUTION_KEY) !== "off";
+  } catch {}
+  select.value = preference;
+  autoResolution.checked = autoEnabled;
+  select.addEventListener("change", () => {
+    preference = qualityPreference(select.value);
+    recovered = false;
+    pendingDowngrade = null;
+    adaptive.reset(performance.now());
+    try {
+      localStorage.setItem(QUALITY_KEY, preference);
+    } catch {}
+    onChange();
+  });
+  autoResolution.addEventListener("change", () => {
+    autoEnabled = autoResolution.checked;
+    adaptive.restoreScale(performance.now());
+    try {
+      localStorage.setItem(RESOLUTION_KEY, autoEnabled ? "on" : "off");
+    } catch {}
+    onChange("resolution");
+  });
+  function updateStatus() {
+    const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
+    const rate = Number(cadence.targetFps.toFixed(1));
+    if (resolution) {
+      resolution.hidden = false;
+      resolution.querySelector("output").value = Math.round(profile.renderScale * 100) + "%";
+    }
+    if (refresh && cadence.refreshHz) {
+      refresh.hidden = false;
+      refresh.querySelector("output").value = cadence.refreshHz + " Hz";
+    }
+    const pacing = cadence.capped ? `${rate} FPS cap.` : cadence.refreshHz ? `${cadence.refreshHz} Hz native refresh.` : "Native refresh.";
+    status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${pacing} ${Math.round(profile.renderScale * 100)}% resolution. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."}`;
+  }
+  function apply(next) {
+    const renderScale = adaptive.renderScale;
+    profile = Object.freeze({ ...next, renderScale, pixelRatio: next.basePixelRatio * renderScale });
+    if (preference === "auto" && pendingDowngrade === profile.tier) {
+      tierDowngrades++;
+      pendingDowngrade = null;
+    }
+    updateStatus();
+    return profile;
+  }
+  return {
+    deviceClass,
+    androidChrome,
+    cadence,
+    get targetFps() {
+      return cadence.targetFps;
+    },
+    get refreshHz() {
+      return cadence.refreshHz;
+    },
+    observeRefresh(now, active) {
+      if (cadence.observe(now, active)) {
+        adaptive.reset(now);
+        if (profile)
+          updateStatus();
+      }
+    },
+    setWebGLHint(value) {
+      highPerformanceWebGL2 = value;
+    },
+    recover() {
+      recovered = true;
+      preference = select.value = "low";
+      pendingDowngrade = null;
+      adaptive.reset(performance.now());
+    },
+    resetSampling(now = performance.now()) {
+      adaptive.reset(now);
+    },
+    sample(now, frameMs, callbackMs, active) {
+      if (!active || !autoEnabled || !profile) {
+        adaptive.reset(now);
+        return;
+      }
+      const next = adaptive.sample(now, frameMs, callbackMs, profile.tier, preference === "auto" && !recovered, cadence.targetFps);
+      if (next?.tier)
+        autoTier = pendingDowngrade = next.tier;
+      if (next)
+        onChange(next.tier ? "tier" : "resolution");
+    },
+    resolve(width) {
+      const next = resolveQuality({
+        preference,
+        width,
+        dpr: window.devicePixelRatio,
+        cores: navigator.hardwareConcurrency,
+        memory: navigator.deviceMemory,
+        recovered,
+        autoTier,
+        deviceClass,
+        androidChrome,
+        highPerformanceWebGL2
+      });
+      if (preference === "auto")
+        autoTier ??= next.tier;
+      return Object.freeze({ ...next, basePixelRatio: next.pixelRatio, pixelRatio: next.pixelRatio * adaptive.renderScale });
+    },
+    apply,
+    get tierDowngrades() {
+      return tierDowngrades;
+    },
+    get state() {
+      return profile;
+    }
+  };
+}
 
 // demos/corporate/gjh/v11/assets/icons.js
 var registry = Object.freeze({
@@ -1399,6 +1605,64 @@ var registry = Object.freeze({
   <circle cx="12" cy="12" r="5"/>
   <path d="M12 7v10M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/>
 </svg>
+`,
+  book: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M12 5C9 3 5 3 2 5v14c3-2 7-2 10 0 3-2 7-2 10 0V5c-3-2-7-2-10 0v14"/>
+  </svg>
+`,
+  gamepad: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M7 7h10c2 0 3 1 4 4l1 4c.6 3-2 4-4 2l-2-2H8l-2 2c-2 2-4.6 1-4-2l1-4c1-3 2-4 4-4Zm0 3v4m-2-2h4m7-1h.01m3 2h.01"/>
+  </svg>
+`,
+  gauge: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 19a10 10 0 1 1 16 0M12 4v2M5 8l2 2m12-2-2 2M12 14l4-5m-4 5h.01"/>
+  </svg>
+`,
+  globe: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="9"/>
+    <path d="M12 3c-2.6 2.5-3.9 5.5-3.9 9s1.3 6.5 3.9 9M12 3c2.6 2.5 3.9 5.5 3.9 9s-1.3 6.5-3.9 9M3 12h18"/>
+  </svg>
+`,
+  grid: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>
+  </svg>
+`,
+  layers: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m12 3 10 5-10 5L2 8zm-10 9 10 5 10-5M2 16l10 5 10-5"/>
+  </svg>
+`,
+  map: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"/>
+  </svg>
+`,
+  message: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M4 4h16a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H9l-5 4v-4H3V5a1 1 0 0 1 1-1Z"/>
+  </svg>
+`,
+  monitor: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M3 4h18v13H3zM12 17v4M8 21h8"/>
+  </svg>
+`,
+  moon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/>
+  </svg>
+`,
+  music: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M9 18V6l11-3v12M9 9l11-3M9 18c0 3-6 4-6 1s6-4 6-1Zm11-3c0 3-6 4-6 1s6-4 6-1Z"/>
+  </svg>
+`,
+  settings: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="m10 3-.5 2.5-2 .9-2.2-1.2-2 2 1.2 2.2-.9 2L1 12v2l2.6.5.9 2-1.2 2.2 2 2 2.2-1.2 2 .9.5 2.6h3l.5-2.6 2-.9 2.2 1.2 2-2-1.2-2.2.9-2L22 14v-2l-2.6-.6-.9-2 1.2-2.2-2-2-2.2 1.2-2-.9L13 3zM15 13a3.5 3.5 0 1 1-7 0 3.5 3.5 0 1 1 7 0Z"/>
+  </svg>
+`,
+  speaker: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M3 9h4l5-4v14l-5-4H3zM16 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/>
+  </svg>
+`,
+  sun: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>
+  </svg>
 `
 });
 function icon(name, { size = 24, label } = {}) {
@@ -1419,6 +1683,293 @@ function icon(name, { size = 24, label } = {}) {
   }
   return svg;
 }
+
+// demos/corporate/gjh/v11/assets/mall-menu.js
+var focusOptions = { preventScroll: true };
+function selectMenuRadio(buttons, selected) {
+  for (const button2 of buttons) {
+    const checked = button2 === selected;
+    button2.setAttribute("aria-checked", String(checked));
+    button2.tabIndex = checked ? 0 : -1;
+  }
+}
+function createMallMenu(dialog, { touch, canOpen, beforeOpen, onChange, fallbackFocus }) {
+  const pages = new Map([...dialog.querySelectorAll("[data-menu-page]")].map((page) => [page.dataset.menuPage, page]));
+  const headerIcon = dialog.querySelector("#menu-heading-icon");
+  const title = dialog.querySelector("#menu-title");
+  const titleText = dialog.querySelector("#menu-heading-text");
+  const subtitle = dialog.querySelector("#menu-subtitle");
+  const backButton = dialog.querySelector("#menu-back");
+  const closeButton = dialog.querySelector("#menu-close");
+  const body = dialog.querySelector(".mall-tools-content");
+  const sound = dialog.querySelector("#menu-sound-card");
+  const performance2 = dialog.querySelector("#performance-panel");
+  const minimap = dialog.querySelector("#menu-minimap-toggle");
+  const preview = dialog.querySelector("#mini-map");
+  const deviceOptions = [...dialog.querySelectorAll("[data-menu-device]")];
+  const guides = [...dialog.querySelectorAll("[data-menu-guide]")];
+  const openers = new Set;
+  const history = [];
+  let current, opener;
+  function selectDevice(device) {
+    selectMenuRadio(deviceOptions, deviceOptions.find((button2) => button2.dataset.menuDevice === device));
+    for (const guide of guides)
+      guide.hidden = guide.dataset.menuGuide !== device;
+  }
+  function show(name) {
+    if (current)
+      current.hidden = true;
+    current = pages.get(name);
+    current.hidden = false;
+    const [heading, description] = current.querySelector("template").content.children;
+    titleText.textContent = heading.textContent;
+    subtitle.textContent = description.textContent;
+    headerIcon.replaceChildren(icon(current.dataset.menuIcon, { size: 24 }));
+    backButton.hidden = history.length === 0;
+    current.querySelector('[data-menu-slot="sound"]')?.append(sound);
+    current.querySelector('[data-menu-slot="performance"]')?.append(performance2);
+    body.scrollTop = 0;
+    if (dialog.open)
+      title.focus(focusOptions);
+  }
+  function go(name, trigger) {
+    if (!pages.has(name) || current === pages.get(name))
+      return;
+    history.push({ name: current.dataset.menuPage, trigger, scroll: body.scrollTop });
+    show(name);
+  }
+  function back() {
+    const previous = history.pop();
+    if (!previous)
+      return;
+    show(previous.name);
+    body.scrollTop = previous.scroll;
+    previous.trigger?.focus(focusOptions);
+  }
+  function open(name, trigger) {
+    if (!pages.has(name))
+      return false;
+    if (dialog.open) {
+      go(name, trigger);
+      return true;
+    }
+    if (!canOpen())
+      return false;
+    beforeOpen();
+    opener = trigger;
+    history.length = 0;
+    performance2.open = false;
+    selectDevice(touch ? "touch" : "keyboard");
+    show("menu");
+    if (name !== "menu")
+      go(name);
+    dialog.showModal();
+    for (const entry of openers)
+      entry.setAttribute("aria-expanded", "true");
+    title.focus(focusOptions);
+    onChange();
+    return true;
+  }
+  function close({ focus = true } = {}) {
+    if (!dialog.open)
+      return;
+    dialog.close();
+    for (const entry of openers)
+      entry.setAttribute("aria-expanded", "false");
+    if (focus) {
+      const target = opener?.getClientRects().length ? opener : fallbackFocus;
+      target?.focus(focusOptions);
+    }
+    opener = null;
+    onChange();
+  }
+  const routes = [...dialog.querySelectorAll("[data-menu-to]")];
+  for (const button2 of routes)
+    button2.addEventListener("click", () => go(button2.dataset.menuTo, button2));
+  for (const button2 of deviceOptions)
+    button2.addEventListener("click", () => selectDevice(button2.dataset.menuDevice));
+  minimap.addEventListener("change", () => {
+    preview.hidden = !minimap.checked;
+  });
+  backButton.addEventListener("click", back);
+  closeButton.addEventListener("click", () => close());
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog)
+      close();
+  });
+  dialog.addEventListener("change", (event) => {
+    if (event.target.matches("select") && event.target === dialog.ownerDocument.activeElement) {
+      event.target.scrollIntoView({ block: "nearest", behavior: "instant" });
+    }
+  });
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    close();
+  });
+  dialog.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      close();
+      return;
+    }
+    const group = event.target.closest('[role="radiogroup"]');
+    if (group && ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) {
+      const radios = [...group.querySelectorAll('[role="radio"]:not(:disabled)')];
+      const index = radios.indexOf(event.target);
+      const step = ["ArrowLeft", "ArrowUp"].includes(event.key) ? -1 : 1;
+      const next = event.key === "Home" ? radios[0] : event.key === "End" ? radios.at(-1) : radios[(index + step + radios.length) % radios.length];
+      event.preventDefault();
+      next?.click();
+      next?.focus(focusOptions);
+    }
+    if (event.key !== "Tab")
+      return;
+    const controls = [...dialog.querySelectorAll("button, input, select, a[href], summary")].filter((control) => !control.disabled && control.getAttribute("tabindex") !== "-1" && control.getClientRects().length);
+    const first = controls[0], last = controls.at(-1);
+    const active = dialog.ownerDocument.activeElement;
+    const wrap = event.shiftKey ? active === first || active === title && backButton.hidden : active === last;
+    if (wrap) {
+      event.preventDefault();
+      (event.shiftKey ? last : first)?.focus(focusOptions);
+    }
+  });
+  return {
+    open,
+    close,
+    addOpener(button2, page) {
+      openers.add(button2);
+      button2.addEventListener("click", () => open(page, button2));
+    }
+  };
+}
+
+// demos/corporate/gjh/v11/assets/context-navigation.js
+var ITEMS = Object.freeze([
+  { id: "home", label: "Home" },
+  { id: "shops", label: "Shops" },
+  { id: "events", label: "Events", unavailable: true },
+  { id: "rewards", label: "Rewards", unavailable: true },
+  { id: "profile", label: "Profile", unavailable: true }
+]);
+function createContextNavigation({ globalHost, directory, onHome, onShops, recoverFocus }) {
+  const nav = document.createElement("nav");
+  nav.id = "context-navigation";
+  nav.className = "context-navigation";
+  nav.setAttribute("aria-label", "Mall navigation");
+  nav.hidden = true;
+  const actions2 = document.createElement("div");
+  actions2.className = "context-navigation-actions";
+  const note = document.createElement("p");
+  note.id = "context-navigation-note";
+  note.textContent = "Events, Rewards and Profile are unavailable in this demo.";
+  const homeNote = document.createElement("p");
+  homeNote.id = "context-home-note";
+  homeNote.textContent = "Home is unavailable while the 3D mall is not ready. Use Shops to browse the directory.";
+  homeNote.hidden = true;
+  let visible = false, ready = false;
+  const buttons = new Map(ITEMS.map((item) => {
+    const button2 = document.createElement("button");
+    button2.type = "button";
+    button2.id = `context-${item.id}`;
+    button2.textContent = item.label;
+    button2.disabled = Boolean(item.unavailable);
+    if (item.unavailable)
+      button2.setAttribute("aria-describedby", note.id);
+    if (item.id === "home") {
+      button2.addEventListener("click", () => {
+        if (visible && ready)
+          onHome();
+      });
+    } else if (item.id === "shops") {
+      button2.addEventListener("click", () => {
+        if (visible)
+          onShops();
+      });
+    }
+    actions2.append(button2);
+    return [item.id, button2];
+  }));
+  nav.append(actions2, homeNote, note);
+  globalHost.append(nav);
+  let reservedHeight = -1, previous = null;
+  let visibilityFrame = 0;
+  function revealCurrentFocus() {
+    if (visibilityFrame)
+      return;
+    visibilityFrame = requestAnimationFrame(() => {
+      visibilityFrame = 0;
+      const target = document.activeElement;
+      if (!(target instanceof HTMLElement) || !target.isConnected || !visible || previous?.destination !== "shops" || nav.parentElement !== globalHost || globalHost.hidden || directory.hidden || !directory.contains(target) || nav.contains(target) || document.querySelector("dialog[open]") || !target.getClientRects().length)
+        return;
+      if (getComputedStyle(globalHost).position !== "fixed")
+        return;
+      const rect = target.getBoundingClientRect(), footer = globalHost.getBoundingClientRect();
+      const rootStyle = getComputedStyle(document.documentElement);
+      const safeTop = parseFloat(rootStyle.scrollPaddingTop) || 0;
+      const safeBottom = Math.min(footer.top, innerHeight - (parseFloat(rootStyle.scrollPaddingBottom) || 0));
+      if (target === document.activeElement && (rect.top < safeTop || rect.bottom > safeBottom))
+        target.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
+    });
+  }
+  document.addEventListener("focusin", revealCurrentFocus);
+  window.addEventListener("resize", revealCurrentFocus);
+  function measure() {
+    const height = visible && nav.parentElement === globalHost && getComputedStyle(globalHost).position === "fixed" ? Math.ceil(globalHost.getBoundingClientRect().height) : 0;
+    if (height === reservedHeight)
+      return;
+    reservedHeight = height;
+    document.documentElement.style.setProperty("--context-navigation-height", `${height}px`);
+    revealCurrentFocus();
+  }
+  new ResizeObserver(measure).observe(nav);
+  return {
+    update({ mode, available, destination, host = globalHost }) {
+      if (previous?.mode === mode && previous.available === available && previous.host === host && previous.destination === destination)
+        return;
+      previous = { mode, available, host, destination };
+      for (const [id, button2] of buttons) {
+        if ((id === "home" || id === "shops") && id === destination) {
+          if (!button2.hasAttribute("aria-current"))
+            button2.setAttribute("aria-current", "page");
+        } else if (button2.hasAttribute("aria-current"))
+          button2.removeAttribute("aria-current");
+      }
+      const active = document.activeElement, ownedFocus = nav.contains(active);
+      visible = mode === "menu" || mode === "shop";
+      ready = available;
+      const home = buttons.get("home");
+      if (home.disabled === ready) {
+        home.disabled = !ready;
+        if (ready)
+          home.removeAttribute("aria-describedby");
+        else
+          home.setAttribute("aria-describedby", homeNote.id);
+      }
+      if (homeNote.hidden === !ready)
+        homeNote.hidden = ready;
+      if (nav.hidden === visible)
+        nav.hidden = !visible;
+      if (globalHost.hidden === (visible && host === globalHost))
+        globalHost.hidden = !(visible && host === globalHost);
+      if (nav.parentElement !== host) {
+        host.append(nav);
+        if (ownedFocus && visible && !active.disabled)
+          active.focus({ preventScroll: true });
+      }
+      if (ownedFocus && visible && active === home && !ready)
+        buttons.get("shops").focus({ preventScroll: true });
+      else if (ownedFocus && !visible)
+        recoverFocus();
+      measure();
+      revealCurrentFocus();
+    }
+  };
+}
+
+// demos/corporate/gjh/v11/assets/ui.js
+import { setupDemoBag } from "./assets/demo-bag.js";
+import { setupNewMoonPreview } from "./assets/newmoon-detail-preview.js";
 
 // demos/corporate/gjh/v11/assets/feature-kiosk.js
 var FEATURE_KIOSK_ID = "gjh-feature-kiosk";
@@ -1654,7 +2205,7 @@ function createTramHud(parent, scene, canControl) {
   }
   return { show };
 }
-function createUI(expanded = false) {
+function createUI(expanded = false, onMenuOpen = () => {}) {
   const scene = document.getElementById("scene");
   const experience = document.getElementById("experience");
   const storeList = document.getElementById("store-list");
@@ -1806,43 +2357,32 @@ function createUI(expanded = false) {
     onClose: () => notifyMode()
   });
   const guideReopen = document.getElementById("guide-reopen");
-  const toolsMenu = document.getElementById("mall-tools");
-  const toolsSummary = toolsMenu.querySelector("summary");
-  const objectives = document.getElementById("hud-objectives");
-  const toolNotices = [document.getElementById("graphics-quality-status"), help.querySelector("[data-mall-check-status]")];
-  const toolStatus = new MutationObserver((records2) => {
-    if (!toolsMenu.open || !help.open)
-      return;
-    const last = records2.at(-1).target.textContent.trim();
-    if (last)
-      announce(last);
-  });
-  toolNotices.forEach((notice) => toolStatus.observe(notice, { childList: true, characterData: true, subtree: true }));
-  toolsMenu.addEventListener("toggle", () => {
-    if (!toolsMenu.open)
-      help.open = false;
-    else
-      objectives.open = false;
-  });
-  objectives.addEventListener("toggle", () => {
-    if (objectives.open)
-      toolsMenu.open = false;
-  });
-  document.addEventListener("pointerdown", (event) => {
-    if (toolsMenu.open && !toolsMenu.contains(event.target) && !event.target.closest("dialog[open]"))
-      toolsMenu.open = false;
-  });
-  toolsMenu.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !help.open && toolsMenu.open) {
-      event.preventDefault();
-      event.stopPropagation();
-      toolsMenu.open = false;
-      toolsSummary.focus();
-    }
-  });
   const railGuide = document.getElementById("rail-guide");
-  for (const entry of [guideReopen, railGuide])
-    entry?.setAttribute("aria-controls", "guide-card");
+  const toolsMenu = document.getElementById("mall-tools");
+  const objectives = document.getElementById("hud-objectives");
+  const menu = createMallMenu(help, {
+    touch: browserDeviceClass() !== "desktop" || matchMedia("(pointer: coarse)").matches,
+    canOpen: canUsePanels,
+    beforeOpen() {
+      shelfFocus?.close({ focus: false });
+      mallMap.open = false;
+      syncMapButtons();
+      objectives.open = false;
+    },
+    onChange() {
+      document.body.classList.toggle("is-mall-menu-open", help.open);
+      if (help.open)
+        onMenuOpen();
+      updateCompactPanels();
+      notifyMode();
+    },
+    fallbackFocus: toolsMenu
+  });
+  menu.addOpener(toolsMenu, "menu");
+  const headerMenu = document.getElementById("header-menu");
+  menu.addOpener(headerMenu, "settings");
+  const mapExpand = document.getElementById("menu-map-expand");
+  mapExpand.addEventListener("click", () => openMap(toolsMenu));
   let unsubscribeInteractions = null, lastGamepadButtons = [], gamepadDirectionAt = 0;
   let modeListener = null, shelfFocus = null;
   let holdingProduct = false;
@@ -1850,7 +2390,7 @@ function createUI(expanded = false) {
     productOpen: document.getElementById("product-dialog").open || externalPaused || document.getElementById("original-tin-dialog").open,
     bagOpen: document.getElementById("bag-dialog").open,
     shelfOpen: Boolean(shelfFocus?.open),
-    panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || compactMap.matches && (help.open || mallMap.open)
+    panelOpen: themeDialog.open || amenityPanel.dialog.open || !showing3D || help.open || compactMap.matches && mallMap.open
   });
   function syncTutorialSuspension(signals) {
     tutorial.setActive(available && showing3D && !holdingProduct && !signals.productOpen && !signals.bagOpen && !signals.shelfOpen && !signals.panelOpen && !help.open && !mallMap.open && !document.hidden);
@@ -1864,7 +2404,7 @@ function createUI(expanded = false) {
   };
   const compactMap = matchMedia("(max-width: 650px), (max-height: 560px) and (orientation: landscape)");
   function updateCompactPanels() {
-    const paused = compactMap.matches && (mallMap.open || help.open);
+    const paused = help.open || compactMap.matches && mallMap.open;
     document.body.classList.toggle("is-panel-open", paused);
   }
   let mapReturnFocus = headerMap;
@@ -1882,8 +2422,7 @@ function createUI(expanded = false) {
     if (!canUsePanels())
       return false;
     shelfFocus?.close({ focus: false });
-    help.open = false;
-    toolsMenu.open = false;
+    menu.close({ focus: false });
     mapReturnFocus = opener;
     mallMap.open = true;
     updateMapDot();
@@ -1902,27 +2441,7 @@ function createUI(expanded = false) {
     mapReturnFocus.focus({ preventScroll: true });
   }
   function openHelp() {
-    if (!canUsePanels())
-      return false;
-    shelfFocus?.close({ focus: false });
-    if (compactMap.matches)
-      mallMap.open = false;
-    toolsMenu.open = true;
-    help.open = true;
-    updateCompactPanels();
-    notifyMode();
-    help.querySelector("summary").focus({ preventScroll: true });
-    return true;
-  }
-  function closeGamepadPanel(panel) {
-    if (panel === mallMap)
-      closeMap();
-    else if (panel === help && canUsePanels()) {
-      help.open = false;
-      updateCompactPanels();
-      notifyMode();
-      help.querySelector("summary").focus({ preventScroll: true });
-    }
+    return menu.open("help", toolsMenu);
   }
   function handlePanelGamepad(pad, navigation) {
     if (!pad) {
@@ -1948,25 +2467,26 @@ function createUI(expanded = false) {
     } else if (navigation && rising(0) && document.activeElement.matches("button,input[type=checkbox],a[href],summary")) {
       document.activeElement.click();
     }
-    if (navigation instanceof HTMLDialogElement && rising(1))
-      navigation.close("dismiss");
-    else if (navigation && rising(1))
-      closeGamepadPanel(navigation);
+    if (rising(1)) {
+      if (navigation === help)
+        menu.close();
+      else if (navigation === mallMap)
+        closeMap();
+      else if (navigation instanceof HTMLDialogElement)
+        navigation.close("dismiss");
+    }
     if (rising(9) && !document.querySelector("dialog[open]"))
       openHelp();
     lastGamepadButtons = pad.buttons.map((button2) => button2.pressed);
     return Boolean(navigation);
   }
-  help.querySelector("summary").addEventListener("click", (event) => {
-    if (!canUsePanels())
-      event.preventDefault();
-  });
   document.getElementById("map-close").addEventListener("click", closeMap);
   function updateViewToggle() {
     document.getElementById("view-toggle-label").textContent = showing3D ? "Store Directory" : "Enter 3D Mall";
-    document.getElementById("view-toggle-icon").replaceChildren(icon(showing3D ? "menu" : "door", { size: 18 }));
+    document.getElementById("view-toggle-icon").replaceChildren(icon("door", { size: 18 }));
     viewToggle.title = showing3D ? "Store Directory" : "Enter 3D Mall";
     viewToggle.setAttribute("aria-label", showing3D ? "Switch to the accessible store directory" : "Switch to the 3D virtual mall");
+    headerMenu.hidden = !showing3D;
   }
   const resetMap = () => {
     mallMap.open = false;
@@ -1988,15 +2508,8 @@ function createUI(expanded = false) {
     notifyMode();
   });
   mallMap.addEventListener("toggle", () => {
-    if (compactMap.matches && mallMap.open)
-      help.open = false;
-    syncMapButtons();
-    updateCompactPanels();
-    notifyMode();
-  });
-  help.addEventListener("toggle", () => {
-    if (compactMap.matches && help.open)
-      mallMap.open = false;
+    if (mallMap.open)
+      menu.close({ focus: false });
     syncMapButtons();
     updateCompactPanels();
     notifyMode();
@@ -2026,7 +2539,7 @@ function createUI(expanded = false) {
       if (!available)
         return;
       if (compactMap.matches) {
-        help.open = false;
+        menu.close({ focus: false });
         mallMap.open = false;
       }
       setView(true, !bag.open);
@@ -2206,14 +2719,15 @@ function createUI(expanded = false) {
   let currentElevatorState = null, currentElevatorUpper = null;
   const cartControls = document.querySelector("#cart-controls"), cartToggle = document.querySelector("#cart-toggle"), cartStatus = document.querySelector("#cart-status");
   const sceneCart = document.querySelector("#scene-cart");
-  const cartIcon = icon("cart", { size: 18 });
+  const sceneCartLabel = document.getElementById("scene-cart-label");
+  const sceneCartCount = document.getElementById("scene-cart-count");
   sceneCart.setAttribute("aria-describedby", "cart-status");
   const interactionIcons = new Map;
   let cartLoading = false;
   function updateCartControls() {
     const cart = cartState();
     const recoverFocus = !cart.available && bag.open && cartControls.contains(document.activeElement);
-    const hideCart = !cart.available || !showing3D || compactMap.matches && (mallMap.open || help.open);
+    const hideCart = !cart.available || !showing3D;
     if (cartControls.hidden === cart.available)
       cartControls.hidden = !cart.available;
     if (sceneCart.hidden !== hideCart)
@@ -2223,9 +2737,7 @@ function createUI(expanded = false) {
     if (cartToggle.disabled !== disabled)
       cartToggle.disabled = disabled;
     const cartLabel = cart.active ? "Stow Cart" : "Shopping Cart";
-    setHudText(sceneCart, cartLabel);
-    if (sceneCart.firstChild !== cartIcon)
-      sceneCart.prepend(cartIcon);
+    setHudText(sceneCartLabel, cartLabel);
     const pressed = String(cart.active);
     if (sceneCart.getAttribute("aria-pressed") !== pressed)
       sceneCart.setAttribute("aria-pressed", pressed);
@@ -2281,8 +2793,10 @@ function createUI(expanded = false) {
       const message = cartReason(cartState()) || (state.heldProduct ? heldInstruction(state) : state.seated ? "Stand up before using the cart." : state.elevatorTravel ? "Wait for the elevator to stop." : "Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.");
       cartStatus.textContent = message;
       announce(message);
-      if (!bag.open)
+      if (!bag.open) {
+        menu.close({ focus: false });
         document.querySelector("#bag-open").click();
+      }
       return;
     }
     if (next) {
@@ -2290,7 +2804,7 @@ function createUI(expanded = false) {
       bag.closeTo(scene);
     }
     cartStatus.textContent = next ? "Cart active. Slower walking; stow before sitting. Your bag selection is unchanged." : "Cart stowed. Your bag selection is unchanged.";
-    toolsMenu.open = false;
+    menu.close({ focus: false });
     sceneCart.setAttribute("aria-pressed", String(next));
     scene.focus({ preventScroll: true });
   }
@@ -2316,14 +2830,18 @@ function createUI(expanded = false) {
   let teleportListener = null;
   let viewListener = null;
   document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape" || !showing3D || document.querySelector("dialog[open]"))
+    if (!showing3D || document.querySelector("dialog[open]"))
       return;
-    const panel = mallMap.open ? mallMap : help.open && toolsMenu.open ? help : null;
-    if (panel) {
+    if (event.code === "KeyH" && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && (event.target === scene || event.target === document.body) && openHelp()) {
+      event.preventDefault();
+      return;
+    }
+    if (event.key !== "Escape")
+      return;
+    if (mallMap.open) {
       event.preventDefault();
       event.stopImmediatePropagation();
-      panel.open = false;
-      (panel === mallMap ? mapReturnFocus : panel.querySelector("summary")).focus({ preventScroll: true });
+      closeMap();
     }
   }, true);
   for (const card of document.querySelectorAll("[data-product]")) {
@@ -2364,9 +2882,10 @@ function createUI(expanded = false) {
   }
   window.addEventListener("mall:languagechange", () => updateMallTheme());
   function openMallTheme(event) {
-    if (themeDialog.open || document.querySelector("dialog[open]") || showing3D && !canUsePanels())
+    if (themeDialog.open || document.querySelector("dialog[open]:not(#keyboard-help)") || showing3D && !canUsePanels())
       return;
     themeOpener = event.currentTarget;
+    menu.close({ focus: false });
     shelfFocus?.close({ focus: false });
     themeDialog.showModal();
     updateMallTheme(undefined, true);
@@ -2400,6 +2919,8 @@ function createUI(expanded = false) {
     notifyMode();
     if (themeOpener?.isConnected && themeOpener.getClientRects().length && (available || themeOpener === directoryThemeOpen))
       themeOpener.focus({ preventScroll: true });
+    else if (themeOpener === themeOpen && showing3D)
+      toolsMenu.focus({ preventScroll: true });
     themeOpener = null;
   });
   themeApply.addEventListener("click", () => {
@@ -2424,7 +2945,6 @@ function createUI(expanded = false) {
     experience.hidden = !next;
     storeList.hidden = next;
     document.body.classList.toggle("is-3d", next);
-    toolsMenu.open = false;
     const assetNotice = document.getElementById("loader-asset-notice");
     if (next) {
       assetNotice.removeAttribute("role");
@@ -2434,7 +2954,7 @@ function createUI(expanded = false) {
       document.querySelector(".site-header").after(assetNotice);
     }
     updateViewToggle();
-    help.open = false;
+    menu.close({ focus: false });
     for (const button2 of mapOpeners)
       button2.hidden = !next;
     syncMapButtons();
@@ -2533,16 +3053,14 @@ function createUI(expanded = false) {
     if (!canUsePanels())
       return false;
     shelfFocus?.close({ focus: false });
-    help.open = false;
+    menu.close({ focus: false });
     mallMap.open = false;
     updateCompactPanels();
     notifyMode();
-    toolsMenu.open = false;
     tutorial.reopen();
     return true;
   }
   guideReopen.addEventListener("click", showGuide);
-  railGuide?.addEventListener("click", showGuide);
   document.getElementById("loader-directory").addEventListener("click", () => {
     if (showing3D)
       setView(false, true);
@@ -2619,6 +3137,7 @@ function createUI(expanded = false) {
     });
   }
   bag.subscribe((items) => {
+    setHudText(sceneCartCount, String(Object.values(items).reduce((total, count) => total + count, 0)));
     for (const button2 of addButtons) {
       const quantity = items[button2.dataset.add] || 0;
       const feedback = button2.closest(".product-copy").querySelector(".product-feedback");
@@ -2681,7 +3200,7 @@ function createUI(expanded = false) {
       announce(reason);
     if (!result?.riding && !result?.calling)
       return;
-    help.open = false;
+    menu.close({ focus: false });
     mallMap.open = false;
     announce(result.calling ? "Elevator called. Boarding will begin when it arrives." : "Elevator travelling to the other level.");
     scene.focus({ preventScroll: true });
@@ -2703,7 +3222,7 @@ function createUI(expanded = false) {
       select.value = zone;
       select.dispatchEvent(new Event("change"));
     }
-    help.open = false;
+    menu.close({ focus: false });
     mallMap.open = false;
     announce(`At the ${store.label} storefront.`);
     scene.focus({ preventScroll: true });
@@ -2723,7 +3242,7 @@ function createUI(expanded = false) {
       return;
     }
     mallMap.open = false;
-    help.open = false;
+    menu.close({ focus: false });
     announce("At the public restroom entrances.");
     scene.focus({ preventScroll: true });
   }
@@ -2758,7 +3277,7 @@ function createUI(expanded = false) {
       }) });
     } else {
       const desk = id === "service-desk";
-      return amenityPanel.open({ title: desk ? { en: "Guest services", "zh-CN": "访客服务" } : { en: "Find your store", "zh-CN": "寻找店铺" }, description: desk ? { en: "Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.", "zh-CN": "选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。" } : expanded ? { en: "Choose a store to go to its entrance.", "zh-CN": "选择店铺即可前往入口。" } : { en: "Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.", "zh-CN": "一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。" }, actions: [...storeActions, directory, ...desk && showing3D ? [{ id: "help", label: { en: "How to explore", "zh-CN": "如何探索" }, onSelect: () => showGuide() }] : []] });
+      return amenityPanel.open({ title: desk ? { en: "Guest services", "zh-CN": "访客服务" } : { en: "Find your store", "zh-CN": "寻找店铺" }, description: desk ? { en: "Choose a store, browse the directory, or review the controls. This is a self-service guide, not a staffed service desk.", "zh-CN": "选择店铺、浏览目录或查看操作帮助。此处提供自助指引，并非真人服务台。" } : expanded ? { en: "Choose a store to go to its entrance.", "zh-CN": "选择店铺即可前往入口。" } : { en: "Ground floor: New Moon on the west, MILI in the centre, GOGO on the east. Choose a store to go to its entrance.", "zh-CN": "一楼：New Moon 位于西侧，MILI 位于中央，GOGO 位于东侧。选择店铺即可前往入口。" }, actions: [...storeActions, directory, ...desk && showing3D ? [{ id: "help", label: { en: "How to explore", "zh-CN": "如何探索" }, onSelect: () => openHelp() }] : []] });
     }
   }
   for (const button2 of document.querySelectorAll("[data-amenity]")) {
@@ -2846,7 +3365,7 @@ function createUI(expanded = false) {
     productName,
     projectMode(mode) {
       contextNavigation.update({
-        mode: showing3D || bag.open ? mode : null,
+        mode: !help.open && (showing3D || bag.open) ? mode : null,
         available,
         destination: showing3D ? "home" : "shops",
         host: bag.open ? document.getElementById("context-navigation-bag") : undefined
@@ -2913,7 +3432,7 @@ function createUI(expanded = false) {
     },
     fallback(message) {
       const active = document.activeElement;
-      const recoverFocus = showing3D && (experience.contains(active) || themeDialog.contains(active) || dialog.contains(active) || amenityPanel.dialog.contains(active) || active === viewToggle || mapOpeners.includes(active));
+      const recoverFocus = showing3D && (experience.contains(active) || help.contains(active) || themeDialog.contains(active) || dialog.contains(active) || amenityPanel.dialog.contains(active) || active === viewToggle || mapOpeners.includes(active));
       if (themeDialog.open)
         themeDialog.close("fallback");
       guideReopen.hidden = true;
@@ -3036,7 +3555,7 @@ function createUI(expanded = false) {
         if (showSeatedAction) {
           setHudText(seatedShopButton, shopLabel);
           setHudAttribute(seatedShopButton, "aria-label", `${shopLabel}: ${shopAction.name}`);
-          setHudAttribute(seatedShopButton, "aria-keyshortcuts", "F");
+          setHudAttribute(seatedShopButton, "aria-keyshortcuts", "F E");
         }
       } else if (shopAction) {
         setHudText(nearbyName, shopState.message || shopAction.name);
@@ -3081,7 +3600,7 @@ function createUI(expanded = false) {
       const inspectHidden = !nearby && (!seated || tramState?.seated);
       if (shopAction && !seated || tramSelected) {
         inspectButton.style.minWidth = inspectButton.style.minHeight = "44px";
-        setHudAttribute(inspectButton, "aria-keyshortcuts", "F");
+        setHudAttribute(inspectButton, "aria-keyshortcuts", "F E");
       } else if (inspectButton.style.minWidth) {
         inspectButton.style.minWidth = inspectButton.style.minHeight = "";
         setHudAttribute(inspectButton, "aria-keyshortcuts", "");
@@ -3175,348 +3694,6 @@ function createUI(expanded = false) {
     onView(listener) {
       viewListener = listener;
       listener(showing3D);
-    }
-  };
-}
-
-// demos/corporate/gjh/v11/assets/graphics-quality.js
-var AVATAR_ANISOTROPY = Object.freeze({ phone: 2, tablet: 4, desktop: 4 });
-var QUALITY_KEY = "gjh-v11-graphics-quality-v1";
-var RESOLUTION_KEY = "gjh-v11-auto-resolution-v1";
-var MALL_FRAME_BUDGETS = Object.freeze({
-  low: Object.freeze({ triangles: 220000, calls: 70 }),
-  balanced: Object.freeze({ triangles: 300000, calls: 90 }),
-  detailed: Object.freeze({ triangles: 420000, calls: 110 })
-});
-var TIERS = ["low", "balanced", "detailed"];
-var REFRESH_SAMPLE_COUNT = 120;
-var WINDOW_SIZE = 90;
-var MIN_SCALE = 60;
-var SCALE_STEP = 5;
-var RECOVERY_MS = 1e4;
-function usesPortraitAtlas(deviceClass, tier) {
-  return deviceClass !== "phone" && (tier === "balanced" || tier === "detailed");
-}
-var qualityPreference = (value) => TIERS.includes(value) ? value : "auto";
-var positive = (value) => Number.isFinite(value) && value > 0;
-function detectDeviceClass({
-  userAgent = "",
-  platform = "",
-  maxTouchPoints = 0,
-  coarsePointer = false,
-  width = Infinity,
-  height = Infinity
-} = {}) {
-  if (/iPad|Tablet|PlayBook|Silk/i.test(userAgent) || /^Mac/i.test(platform) && maxTouchPoints > 1)
-    return "tablet";
-  if (/iPhone|iPod|Windows Phone/i.test(userAgent))
-    return "phone";
-  if (/Android/i.test(userAgent))
-    return /Mobile/i.test(userAgent) ? "phone" : "tablet";
-  if (coarsePointer && maxTouchPoints > 0)
-    return Math.min(width, height) < 600 ? "phone" : "tablet";
-  return "desktop";
-}
-var isAndroidChrome = (userAgent) => /Android/i.test(userAgent) && /Chrome\//i.test(userAgent);
-function estimateRefreshHz(intervals) {
-  const sorted = intervals.filter(positive).sort((a, b) => a - b);
-  if (sorted.length < REFRESH_SAMPLE_COUNT)
-    return null;
-  const middle = Math.floor(sorted.length / 2);
-  const median = sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
-  return Math.round(1000 / median);
-}
-function resolveRenderCadence(deviceClass, refreshHz) {
-  const phone = deviceClass === "phone";
-  const hz = positive(refreshHz) ? refreshHz : 60;
-  const divisor = phone ? Math.ceil(hz / 30) : hz >= 100 ? Math.max(2, Math.round(hz / 60)) : 1;
-  return { divisor, targetFps: hz / divisor };
-}
-function resolveQuality({
-  preference = "auto",
-  width,
-  dpr = 1,
-  cores,
-  memory,
-  recovered = false,
-  autoTier = null,
-  deviceClass = "desktop",
-  androidChrome = false,
-  highPerformanceWebGL2 = false
-}) {
-  const constrained = positive(cores) && cores <= 2 || positive(memory) && memory <= 2;
-  const lowEnd = positive(cores) && cores <= 4 || positive(memory) && memory <= 4 || androidChrome && !highPerformanceWebGL2;
-  const choice = qualityPreference(preference);
-  const phone = deviceClass === "phone";
-  const initialTier = constrained || phone ? "low" : width < 1000 ? "balanced" : "detailed";
-  const tier = recovered ? "low" : choice !== "auto" ? choice : TIERS.includes(autoTier) ? autoTier : initialTier;
-  let cap = 2;
-  if (tier === "low")
-    cap = 1;
-  else if (tier === "balanced")
-    cap = 1.25;
-  else if (phone)
-    cap = lowEnd ? 1.25 : 1.5;
-  return Object.freeze({
-    preference: choice,
-    tier,
-    pixelRatio: Math.min(positive(dpr) ? dpr : 1, cap),
-    shadows: tier === "detailed" && width >= 1000,
-    recovered
-  });
-}
-function createRenderCadence(deviceClass) {
-  const intervals = [];
-  let refreshHz = null, lastSample = null, lastDraw = null;
-  let policy = resolveRenderCadence(deviceClass, refreshHz);
-  return {
-    get refreshHz() {
-      return refreshHz;
-    },
-    get targetFps() {
-      return policy.targetFps;
-    },
-    get capped() {
-      return policy.divisor > 1;
-    },
-    reset() {
-      lastDraw = lastSample = null;
-      intervals.length = 0;
-    },
-    observe(now, active) {
-      if (refreshHz !== null)
-        return false;
-      if (!active) {
-        lastSample = null;
-        intervals.length = 0;
-        return false;
-      }
-      if (lastSample !== null && now > lastSample)
-        intervals.push(now - lastSample);
-      lastSample = now;
-      if (intervals.length < REFRESH_SAMPLE_COUNT)
-        return false;
-      refreshHz = estimateRefreshHz(intervals);
-      policy = resolveRenderCadence(deviceClass, refreshHz);
-      intervals.length = 0;
-      return true;
-    },
-    take(now) {
-      const elapsed = lastDraw === null ? 1000 / policy.targetFps : now - lastDraw;
-      if (refreshHz) {
-        const refreshes = Math.max(1, Math.round(elapsed * refreshHz / 1000));
-        if (refreshes < policy.divisor)
-          return 0;
-        lastDraw = now;
-        return refreshes * 1000 / refreshHz;
-      }
-      if (policy.divisor > 1 && elapsed + 0.8 < 1000 / policy.targetFps)
-        return 0;
-      lastDraw = now;
-      return elapsed;
-    }
-  };
-}
-function decideAdaptiveQuality(state, samples, { now, targetFps, tier, allowTierDowngrade }) {
-  const budget = 1000 / targetFps;
-  const percentile80 = (key) => samples.map((sample) => sample[key]).sort((a, b) => a - b)[Math.ceil(samples.length * 0.8) - 1];
-  const cadence = percentile80("frameMs");
-  const mean = samples.reduce((total, { frameMs }) => total + Math.min(frameMs, budget * 2), 0) / samples.length;
-  const overloaded = cadence > budget * 1.06 || mean > budget * 1.04;
-  const headroom = mean <= budget * 1.01 && cadence <= budget * 1.01 && percentile80("callbackMs") <= budget * 0.8;
-  const slowSince = overloaded ? state.slowSince ?? now : null;
-  const fastSince = headroom ? state.fastSince ?? now : null;
-  const next = { ...state, slowSince, fastSince };
-  const { scale, raisedAt, recoveryDelay } = state;
-  if (slowSince !== null) {
-    const slowMs = now - slowSince;
-    if (scale > MIN_SCALE && slowMs >= 750) {
-      return {
-        ...next,
-        scale: scale - SCALE_STEP,
-        recoveryDelay: now - raisedAt < 15000 ? Math.min(60000, recoveryDelay * 3) : recoveryDelay
-      };
-    }
-    if (scale === MIN_SCALE && allowTierDowngrade && slowMs >= 5000 && TIERS.indexOf(tier) > 0) {
-      return { ...next, lowerTier: TIERS[TIERS.indexOf(tier) - 1] };
-    }
-  }
-  if (scale < 100 && fastSince !== null && now - fastSince >= recoveryDelay) {
-    return { ...next, scale: scale + SCALE_STEP, raisedAt: now };
-  }
-  return next;
-}
-function createAdaptiveQuality(targetFps) {
-  const samples = [];
-  let cursor = 0, firstSample, nextCheck, ignoreUntil = 0;
-  let state = { scale: 100, raisedAt: -Infinity, recoveryDelay: RECOVERY_MS, slowSince: null, fastSince: null };
-  function reset(now, settleMs = 500) {
-    samples.length = 0;
-    cursor = 0;
-    firstSample = nextCheck = null;
-    ignoreUntil = now + settleMs;
-    state.slowSince = state.fastSince = null;
-  }
-  return {
-    reset,
-    restoreScale(now) {
-      state.scale = 100;
-      state.raisedAt = -Infinity;
-      state.recoveryDelay = RECOVERY_MS;
-      reset(now);
-    },
-    get renderScale() {
-      return state.scale / 100;
-    },
-    sample(now, frameMs, callbackMs, tier, allowTierDowngrade, currentTargetFps = targetFps) {
-      if (now < ignoreUntil || !positive(frameMs))
-        return null;
-      firstSample ??= now;
-      samples[cursor] = { frameMs, callbackMs };
-      cursor = (cursor + 1) % WINDOW_SIZE;
-      if (now < nextCheck || samples.length < WINDOW_SIZE && (samples.length < 8 || now - firstSample < 3000))
-        return null;
-      nextCheck = now + 250;
-      const { lowerTier, ...next } = decideAdaptiveQuality(state, samples, { now, targetFps: currentTargetFps, tier, allowTierDowngrade });
-      const scaleChanged = next.scale !== state.scale;
-      state = next;
-      if (!scaleChanged && !lowerTier)
-        return null;
-      reset(now);
-      return lowerTier ? { tier: lowerTier } : { renderScale: state.scale / 100 };
-    }
-  };
-}
-function browserDeviceClass() {
-  return detectDeviceClass({
-    userAgent: navigator.userAgent,
-    platform: navigator.platform,
-    maxTouchPoints: navigator.maxTouchPoints,
-    coarsePointer: window.matchMedia("(pointer: coarse)").matches,
-    width: window.innerWidth,
-    height: window.innerHeight
-  });
-}
-function savedQualityPreference() {
-  try {
-    return qualityPreference(localStorage.getItem(QUALITY_KEY));
-  } catch {
-    return "auto";
-  }
-}
-function createGraphicsQuality(onChange) {
-  const select = document.getElementById("graphics-quality");
-  const autoResolution = document.getElementById("auto-resolution");
-  const status = document.getElementById("graphics-quality-status");
-  const deviceClass = browserDeviceClass();
-  const cadence = createRenderCadence(deviceClass);
-  const androidChrome = isAndroidChrome(navigator.userAgent);
-  const adaptive = createAdaptiveQuality(cadence.targetFps);
-  let preference = savedQualityPreference(), recovered = false, profile, autoTier = null;
-  let tierDowngrades = 0, pendingDowngrade = null, highPerformanceWebGL2 = false;
-  let autoEnabled = true;
-  try {
-    autoEnabled = localStorage.getItem(RESOLUTION_KEY) !== "off";
-  } catch {}
-  select.value = preference;
-  autoResolution.checked = autoEnabled;
-  select.addEventListener("change", () => {
-    preference = qualityPreference(select.value);
-    recovered = false;
-    pendingDowngrade = null;
-    adaptive.reset(performance.now());
-    try {
-      localStorage.setItem(QUALITY_KEY, preference);
-    } catch {}
-    onChange();
-  });
-  autoResolution.addEventListener("change", () => {
-    autoEnabled = autoResolution.checked;
-    adaptive.restoreScale(performance.now());
-    try {
-      localStorage.setItem(RESOLUTION_KEY, autoEnabled ? "on" : "off");
-    } catch {}
-    onChange("resolution");
-  });
-  function updateStatus() {
-    const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
-    const rate = Number(cadence.targetFps.toFixed(1));
-    const pacing = cadence.capped ? `${rate} FPS cap.` : cadence.refreshHz ? `${cadence.refreshHz} Hz native refresh.` : "Native refresh.";
-    status.textContent = `${recovered ? "Low after graphics recovery" : preference === "auto" ? `Auto: ${name}` : name}. ${pacing} ${Math.round(profile.renderScale * 100)}% resolution. ${profile.shadows ? "Real-time shadows on." : "Real-time shadows off."}`;
-  }
-  function apply(next) {
-    const renderScale = adaptive.renderScale;
-    profile = Object.freeze({ ...next, renderScale, pixelRatio: next.basePixelRatio * renderScale });
-    if (preference === "auto" && pendingDowngrade === profile.tier) {
-      tierDowngrades++;
-      pendingDowngrade = null;
-    }
-    updateStatus();
-    return profile;
-  }
-  return {
-    deviceClass,
-    androidChrome,
-    cadence,
-    get targetFps() {
-      return cadence.targetFps;
-    },
-    get refreshHz() {
-      return cadence.refreshHz;
-    },
-    observeRefresh(now, active) {
-      if (cadence.observe(now, active)) {
-        adaptive.reset(now);
-        if (profile)
-          updateStatus();
-      }
-    },
-    setWebGLHint(value) {
-      highPerformanceWebGL2 = value;
-    },
-    recover() {
-      recovered = true;
-      preference = select.value = "low";
-      pendingDowngrade = null;
-      adaptive.reset(performance.now());
-    },
-    resetSampling(now = performance.now()) {
-      adaptive.reset(now);
-    },
-    sample(now, frameMs, callbackMs, active) {
-      if (!active || !autoEnabled || !profile) {
-        adaptive.reset(now);
-        return;
-      }
-      const next = adaptive.sample(now, frameMs, callbackMs, profile.tier, preference === "auto" && !recovered, cadence.targetFps);
-      if (next?.tier)
-        autoTier = pendingDowngrade = next.tier;
-      if (next)
-        onChange(next.tier ? "tier" : "resolution");
-    },
-    resolve(width) {
-      const next = resolveQuality({
-        preference,
-        width,
-        dpr: window.devicePixelRatio,
-        cores: navigator.hardwareConcurrency,
-        memory: navigator.deviceMemory,
-        recovered,
-        autoTier,
-        deviceClass,
-        androidChrome,
-        highPerformanceWebGL2
-      });
-      if (preference === "auto")
-        autoTier ??= next.tier;
-      return Object.freeze({ ...next, basePixelRatio: next.pixelRatio, pixelRatio: next.pixelRatio * adaptive.renderScale });
-    },
-    apply,
-    get tierDowngrades() {
-      return tierDowngrades;
-    },
-    get state() {
-      return profile;
     }
   };
 }
@@ -6063,7 +6240,7 @@ function createSpatialHud({ expanded = false, root = document } = {}) {
       heading.setAttribute("fill", "var(--green)");
       map.append(heading);
     }
-    context = root.createElement("p");
+    context = root.createElement("span");
     context.className = "mini-map-context";
     plan.replaceChildren(map, context);
   }
@@ -6440,8 +6617,6 @@ for (const slot2 of document.querySelectorAll("[data-icon]")) {
 }
 for (const [selector, name, size] of [
   ["#mall-map > summary", "map-pin", 22],
-  ["#keyboard-help > summary", "help-circle", 18],
-  ["#mall-theme-open", "theme", 18],
   ["#directory-theme-open", "theme", 18]
 ]) {
   document.querySelector(selector).prepend(icon(name, { size }));
@@ -6519,6 +6694,7 @@ var speaker = document.getElementById("mall-speaker");
 var music = document.getElementById("mall-music");
 var musicStatus = document.getElementById("mall-music-status");
 var mixer = document.querySelectorAll("[data-audio-bus]");
+var masterValue = document.getElementById("menu-master-value");
 var musicTitle = document.getElementById("mall-music-title");
 var musicToggleState = document.getElementById("mall-music-state");
 var speakerState = document.getElementById("mall-speaker-state");
@@ -6545,6 +6721,9 @@ mallAudio3.subscribe(() => {
     input.disabled = !state.available;
     input.value = Math.round(state.levels[input.dataset.audioBus] * 100);
   }
+  const percent = Math.round(state.levels.master * 100) + "%";
+  if (masterValue.textContent !== percent)
+    masterValue.textContent = percent;
   const status = state.musicPlaying ? "Music on" : "Music off";
   if (lastMusicStatus !== status)
     musicStatus.textContent = lastMusicStatus = status;
@@ -6577,11 +6756,7 @@ function unlockAudio(event) {
   activateSceneAudio();
   mallAudio3.sceneGesture(event, sceneStationary, frames);
 }
-var audioTools = document.getElementById("mall-tools");
-audioTools.addEventListener("toggle", () => {
-  if (audioTools.open && sceneEntered())
-    mallAudio3.prepareForControls(frames);
-});
+var menuSheet = document.getElementById("keyboard-help");
 document.addEventListener("pointerdown", (event) => {
   if (event.pointerType === "mouse")
     unlockAudio(event);
@@ -6592,7 +6767,7 @@ document.addEventListener("pointerup", (event) => {
 }, true);
 document.addEventListener("click", unlockAudio);
 document.addEventListener("keydown", (event) => {
-  if (event.isTrusted && event.code === "KeyM" && !event.defaultPrevented && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.isContentEditable && !event.target.closest?.("input, select, textarea, dialog") && sceneEntered()) {
+  if (event.isTrusted && event.code === "KeyM" && !event.defaultPrevented && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !event.target.isContentEditable && !event.target.closest?.("input, select, textarea, dialog:not(#keyboard-help)") && sceneEntered()) {
     event.preventDefault();
     toggleMute();
   } else
@@ -6662,7 +6837,10 @@ var modes = createModes({
     document.body.dataset.mode = mode;
   }
 });
-var ui = createUI(expanded);
+var ui = createUI(expanded, () => {
+  if (sceneEntered())
+    mallAudio3.prepareForControls(frames);
+});
 var canvas = document.querySelector("#scene");
 var destinations = storeDestinations(expanded).map((store) => ({
   ...store,
@@ -6726,10 +6904,12 @@ function pausePerformance() {
     return;
   measuringFrames = false;
   performanceMonitor.pause();
-  performancePanel.reset();
+  if (!menuSheet.open)
+    performancePanel.reset();
   lastMetricsUpdate = -Infinity;
 }
 spatialHud = createSpatialHud({ expanded });
+document.getElementById("camera-controls").addEventListener("click", () => requestRender());
 var spatialTargetName = document.getElementById("nearby-name");
 var spatialInspectButton = document.getElementById("inspect");
 var lastSpatialSample = -Infinity;
@@ -7654,7 +7834,18 @@ document.addEventListener("keydown", (event) => {
     }
     player?.cancelCollection();
   }
-  if (event.repeat || event.altKey || event.ctrlKey || event.metaKey || event.target !== canvas && event.target !== document.body)
+  if (event.altKey || event.ctrlKey || event.metaKey || event.target !== canvas && event.target !== document.body)
+    return;
+  if (event.code === "KeyE" && nearby && !spatialInspectButton.disabled) {
+    event.preventDefault();
+    if (!event.repeat) {
+      interactNearby();
+      updateHUD();
+      requestRender();
+    }
+    return;
+  }
+  if (event.repeat)
     return;
   if (event.code === "BracketRight" || event.code === "BracketLeft") {
     if (interactions?.cycle(event.code === "BracketRight" ? 1 : -1)) {

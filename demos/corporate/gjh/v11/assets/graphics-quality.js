@@ -187,6 +187,8 @@ export function createGraphicsQuality(onChange) {
   const select = document.getElementById('graphics-quality');
   const autoResolution = document.getElementById('auto-resolution');
   const status = document.getElementById('graphics-quality-status');
+  const resolution = document.getElementById('menu-resolution');
+  const refresh = document.getElementById('menu-refresh-rate');
   const deviceClass = browserDeviceClass();
   const cadence = createRenderCadence(deviceClass);
   const androidChrome = isAndroidChrome(navigator.userAgent);
@@ -217,6 +219,14 @@ export function createGraphicsQuality(onChange) {
   function updateStatus() {
     const name = profile.tier[0].toUpperCase() + profile.tier.slice(1);
     const rate = Number(cadence.targetFps.toFixed(1));
+    if (resolution) {
+      resolution.hidden = false;
+      resolution.querySelector('output').value = Math.round(profile.renderScale * 100) + '%';
+    }
+    if (refresh && cadence.refreshHz) {
+      refresh.hidden = false;
+      refresh.querySelector('output').value = cadence.refreshHz + ' Hz';
+    }
     const pacing = cadence.capped ? `${rate} FPS cap.` : cadence.refreshHz ? `${cadence.refreshHz} Hz native refresh.` : 'Native refresh.';
     status.textContent = `${recovered ? 'Low after graphics recovery' : preference === 'auto' ? `Auto: ${name}` : name}. ${pacing} ${Math.round(profile.renderScale * 100)}% resolution. ${profile.shadows ? 'Real-time shadows on.' : 'Real-time shadows off.'}`;
   }

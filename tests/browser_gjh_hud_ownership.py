@@ -1,4 +1,5 @@
 """Real-browser single Help/Map ownership, shortcuts, focus and retained controls."""
+from gjh_menu_test_helpers import close_menu, open_menu_page
 from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
@@ -48,7 +49,7 @@ def run():
                 page.locator('#guide-card').wait_for(state='visible')
                 page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
                 compact = width <= 650 or (height <= 560 and width > height)
-                expected = 'menu' if compact else 'explore'
+                expected = 'menu'
                 stem = f'{index}-{width}x{height}'
                 frames = []
 
@@ -61,43 +62,43 @@ def run():
                     page.wait_for_function('document.querySelector("#keyboard-help").open')
                     page.wait_for_function('m=>__mall.mode===m', arg=expected)
                     assert page.locator('#guide-card').is_hidden()
-                    assert page.locator('#keyboard-help>summary').inner_text() == 'Help'
-                    assert page.evaluate('__mall.state.paused') == compact
+                    assert page.locator('#menu-heading-text').inner_text() == 'Help'
+                    assert page.evaluate('__mall.state.paused')
 
-                page.locator('#keyboard-help>summary').click()
+                open_menu_page(page, "help")
                 help_open()
-                assert page.locator('#keyboard-help>summary').evaluate('e=>e===document.activeElement')
+                assert page.locator('#menu-title').evaluate('e=>e===document.activeElement')
                 assert page.locator('#graphics-quality').count() == 1
-                expected = {'?visitor=v1': 'gjh-mall-visitor', '?visitor=v2': 'gjh-mall-visitor-v2'}.get(query, 'gjh-tripo-visitor')
-                assert page.evaluate('__mall.state.character.model') == expected
+                model = {'?visitor=v1': 'gjh-mall-visitor', '?visitor=v2': 'gjh-mall-visitor-v2'}.get(query, 'gjh-tripo-visitor')
+                assert page.evaluate('__mall.state.character.model') == model
                 assert page.locator('.visitor-v2-controls select').count() == (7 if query == '?visitor=v2' else 0)
-                assert 'second finger' in page.locator('#controls-copy').inner_text()
                 bounds = []
                 for fraction in [0, .5, 1]:
-                    page.locator('#controls-copy').evaluate('(e,f)=>e.scrollTop=(e.scrollHeight-e.clientHeight)*f', fraction)
-                    summary = page.locator('#keyboard-help>summary').bounding_box()
+                    page.locator('#mall-tools-content').evaluate('(e,f)=>e.scrollTop=(e.scrollHeight-e.clientHeight)*f', fraction)
+                    summary = page.locator('#menu-close').bounding_box()
                     assert summary['y'] >= 0 and summary['y'] + summary['height'] <= height
                     assert summary['height'] >= 44 and summary['width'] >= 44
                     bounds.append(summary)
                     shot('help-' + str(fraction))
                 assert bounds[0] == bounds[1] == bounds[2]
+                open_menu_page(page, 'graphics')
                 page.locator('#graphics-quality').select_option('low')
                 assert page.locator('#graphics-quality').input_value() == 'low'
-                page.locator('#keyboard-help>summary').click()
+                close_menu(page)
                 assert page.locator('#header-map').is_visible()
                 header_controls = page.locator('.site-header a,.site-header button').evaluate_all('''els=>els.filter(e=>e.checkVisibility()).map(e=>{const r=e.getBoundingClientRect();return {id:e.id,text:e.textContent.trim(),rect:r.toJSON(),hit:e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}})''')
                 for control in header_controls:
                     rect = control['rect']
                     assert rect['left'] >= 0 and rect['right'] <= width and rect['top'] >= 0 and rect['bottom'] <= height, control
                     assert rect['width'] >= 44 and rect['height'] >= 44 and control['hit'], control
-                assert page.locator('#view-toggle').inner_text() == ('Stores' if compact else 'Store directory')
+                assert page.locator('#header-menu').get_attribute('aria-label') == 'Open mall settings'
                 assert page.locator('#view-toggle').get_attribute('aria-label') == 'Switch to the accessible store directory'
                 shot('idle')
                 # Keyboard and synthetic standard-controller Menu share that owner.
                 page.locator('#scene').focus()
                 page.keyboard.press('h')
                 help_open()
-                page.locator('#keyboard-help>summary').click()
+                close_menu(page)
                 page.locator('#scene').focus()
                 page.evaluate('hudPad={connected:true,mapping:"standard",axes:[0,0,0,0],buttons:Array.from({length:16},()=>({pressed:false}))};hudPad.buttons[9].pressed=true')
                 help_open()
@@ -105,7 +106,7 @@ def run():
                 page.wait_for_timeout(50)
                 page.evaluate('hudPad.buttons[1].pressed=true')
                 page.wait_for_function('!document.querySelector("#keyboard-help").open')
-                page.wait_for_function('document.activeElement.matches("#keyboard-help>summary")')
+                page.wait_for_function('document.activeElement.id==="mall-tools"')
                 page.evaluate('hudPad.buttons[1].pressed=false;hudPad=null')
                 if compact:
                     page.locator('#header-map').click()
@@ -125,8 +126,8 @@ def run():
                         page.locator('[data-teleport=' + zone + ']').click()
                         page.wait_for_function('x=>Math.abs(__mall.state.x-x)<.01', arg=x)
                         page.wait_for_function('__mall.mode==="explore"')
-                    page.locator('#keyboard-help>summary').click()
-                    page.locator('#header-map').click()
+                    open_menu_page(page, "menu")
+                    page.locator('#menu-map-expand').click()
                     assert not page.locator('#keyboard-help').evaluate('e=>e.open')
                     page.locator('#map-close').click()
                 else:
@@ -142,7 +143,7 @@ def run():
                 page.locator('#bag-open').click()
                 page.locator('#bag-dialog').wait_for(state='visible')
                 old_map = page.locator('#mall-map').evaluate('e=>e.open')
-                page.evaluate('document.querySelector("#header-map").click();document.querySelector("#guide-reopen").click();document.querySelector("#keyboard-help>summary").click()')
+                page.evaluate('document.querySelector("#header-map").click();document.querySelector("#guide-reopen").click();document.querySelector("#mall-tools").click()')
                 assert page.locator('#mall-map').evaluate('e=>e.open') == old_map
                 assert page.locator('#guide-card').is_hidden()
                 assert not page.locator('#keyboard-help').evaluate('e=>e.open')

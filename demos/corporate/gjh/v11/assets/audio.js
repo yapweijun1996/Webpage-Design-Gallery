@@ -5,7 +5,7 @@ export const AUDIO_KEY = 'gjh-v11-audio-v1';
 export const LOOKAHEAD = .18;
 const INIT_BUDGET_MS = 1.5;
 const MUSIC_DELAY_MS = 1500;
-const DEFAULT_LEVELS = {music:.26, effects:.65, ambience:.30};
+const DEFAULT_LEVELS = {master:.75, music:.26, effects:.65, ambience:.30};
 const SHOP_SOUNDS = Object.freeze({
   tea:'pour', drink:'pour', water:'pour', plate:'plate', bell:'bell', drawer:'drawer',
   leaf:'paper', open:'drawer', spin:'swish', sample:'pickup', lid:'lid', spread:'swish',
@@ -279,7 +279,7 @@ export function createAudioManager({
     if (!running()) return;
     if (!master) return () => {
       master = context.createGain();
-      master.gain.value = .75;
+      master.gain.value = canResume() ? levels.master : 0;
       master.connect(context.destination);
     };
     if (!buses.effects) return () => createBus('effects');
@@ -376,7 +376,7 @@ export function createAudioManager({
     if (context) {
       const play = canResume();
       if (wanted !== play || (play && context.state === 'interrupted')) {
-        if (master) master.gain.value = play ? .75 : 0;
+        if (master) master.gain.value = play ? levels.master : 0;
         if (!play) for (const voice of voices) if (voice) silence(voice);
         setContextRunning(play);
       }
@@ -508,6 +508,7 @@ export function createAudioManager({
   function setVolume(bus, value) {
     if (!Object.hasOwn(levels,bus) || !Number.isFinite(value)) return;
     levels[bus] = Math.min(1,Math.max(0,value));
+    if (master && bus === 'master') gain(master, canResume() ? levels.master : 0);
     if (context && buses[bus]) gain(buses[bus], levels[bus] * (bus === 'music' && musicDucked ? .32 : 1));
     save(); audioStateChanged();
   }
@@ -620,7 +621,7 @@ export function createTramNarration(audio, getSpeech, Utterance) {
         const family = locale.split('-')[0];
         utterance.voice = voices.find(voice => voice.lang.toLowerCase() === locale) ??
           voices.find(voice => voice.lang.toLowerCase().split('-')[0] === family) ?? null;
-        utterance.volume = .75;
+        utterance.volume = audio.state.levels.master;
         utterance.rate = .93;
         utterance.onend = utterance.onerror = () => {
           if (current !== utterance) return;

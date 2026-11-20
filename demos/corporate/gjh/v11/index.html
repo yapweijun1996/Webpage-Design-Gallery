@@ -13,7 +13,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="assets/mall-icon-192.png">
   <link rel="modulepreload" href="assets/loader.js">
-  <script>try{var c=localStorage.getItem("gjh-v11-color-scheme");if(c==="light"||c==="dark")document.documentElement.dataset.colorScheme=c}catch(e){}</script>
+  <script>try{var c=localStorage.getItem("gjh-v11-color-scheme");if(c==="light"||c==="dark")document.documentElement.dataset.colorScheme=c;else if(c==="system")document.documentElement.dataset.colorScheme=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}catch(e){}</script>
   <script>
     // Recovery stays available if either the stylesheet or the module graph fails.
     (() => {
@@ -98,6 +98,7 @@
   <button id="header-map" class="header-map" type="button" aria-label="Open mall map" aria-controls="mall-map" aria-expanded="false" title="Open mall map" hidden><span data-icon="map-pin" aria-hidden="true"></span><span class="hud-nav-label">Map</span></button>
   <button id="bag-open" class="bag-open" type="button" aria-controls="bag-dialog" hidden>Bag (0)</button>
   <button id="view-toggle" class="view-toggle" type="button" aria-controls="experience store-list" hidden><span id="view-toggle-icon" aria-hidden="true"></span><span id="view-toggle-label" class="hud-nav-label">Enter 3D Mall</span></button>
+  <button id="header-menu" class="header-menu" type="button" aria-label="Open mall settings" aria-haspopup="dialog" aria-controls="keyboard-help" aria-expanded="false" hidden><span data-icon="menu" aria-hidden="true"></span></button>
   <a class="site-enter" href="#experience">Enter 3D Mall</a>
 </header>
 <div class="site-secondary">
@@ -235,7 +236,7 @@
 
   <main id="main" tabindex="-1">
     <section id="experience" class="experience" aria-label="Walkable 3D virtual mall" hidden>
-      <canvas id="scene" tabindex="0" aria-label="Interactive 3D mall. Use WASD or arrow keys to walk, Shift to run, and Q/E to turn. Press V to switch view, plus or minus to zoom, and F to interact. The store directory also has product information." aria-describedby="controls-copy camera-help"></canvas>
+      <canvas id="scene" tabindex="0" aria-label="Interactive 3D mall. Use WASD or arrow keys to walk, Shift to run, and Q/E to turn. Press V to switch view, plus or minus to zoom, and F or E when an action is nearby to interact. The store directory also has product information."></canvas>
       <div class="mall-overlay">
         <div class="scene-readouts">
           <p id="floor-indicator" class="sr-only">Floor 01 - Atrium</p>
@@ -251,72 +252,7 @@
           <p id="hud-objective-toast" hidden></p>
         </div>
         <aside id="hud-rail" class="hud-rail" aria-label="Mall tools">
-          <details id="mall-tools"><summary><span data-icon="theme" aria-hidden="true"></span><span>Tools</span></summary>
-          <div id="mall-tools-content" class="mall-tools-content">
-          <div class="mall-audio" role="group" aria-labelledby="mall-sound-heading">
-            <p id="mall-sound-heading">Sound</p>
-            <div class="mall-sound-actions">
-              <button id="mall-music" type="button" aria-labelledby="mall-music-label" aria-describedby="mall-music-title" aria-pressed="false">
-                <span id="mall-music-label">Music</span><span id="mall-music-state" aria-hidden="true">Off</span>
-              </button>
-              <button id="mall-speaker" type="button" aria-label="Mute sound" aria-pressed="false" aria-keyshortcuts="M">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3z"/><path class="speaker-waves" d="M16 9a4 4 0 0 1 0 6m2-9a8 8 0 0 1 0 12"/><path class="speaker-mute" d="m16 10 4 4m0-4-4 4"/></svg>
-                <span id="mall-speaker-state">Sound on</span><kbd aria-hidden="true">M</kbd>
-              </button>
-            </div>
-            <p id="mall-music-title" translate="no" hidden></p>
-            <details><summary>Volume settings</summary>
-              <label><span>Music volume</span><input type="range" data-audio-bus="music" min="0" max="100" value="26"></label>
-              <label><span>Effects volume</span><input type="range" data-audio-bus="effects" min="0" max="100" value="65"></label>
-              <label><span>Ambience volume</span><input type="range" data-audio-bus="ambience" min="0" max="100" value="30"></label>
-            </details>
-          </div>
-          <button id="rail-guide" type="button" aria-controls="guide-card" title="Replay the Getting Started tutorial"><span data-icon="help-circle"></span>Guide</button>
-        <div class="scene-tools"><details id="keyboard-help" class="keyboard-help">
-          <summary title="Movement, camera, graphics and visitor settings">Help</summary>
-          <div id="controls-copy"><label class="mall-language-picker"><span>Language</span><select id="scene-language" data-mall-language><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select></label><button type="button" id="mall-scene-check" data-mall-check disabled><span>Check for updates</span> <bdi data-mall-version></bdi></button><p data-mall-check-status></p><div class="graphics-settings"><label for="graphics-quality">Graphics quality</label><select id="graphics-quality" aria-describedby="graphics-quality-status"><option value="auto">Auto</option><option value="low">Low</option><option value="balanced">Balanced</option><option value="detailed">Detailed</option></select><label class="graphics-resolution-setting"><input id="auto-resolution" type="checkbox" checked> Auto resolution</label><p id="graphics-quality-status">Auto resolution adjusts the 3D scene to maintain the device's frame rate.</p><p id="npc-appearance-status" hidden>Some visitor outfits are unavailable. You can still explore the mall.</p></div><label class="touch-input-setting"><input id="fullscreen-joystick" type="checkbox"> Full-screen joystick</label><p class="compact-panel-note">Scene paused. Close this panel to continue.</p><p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys to walk.<br><kbd>Shift</kbd> to run. <kbd>Q</kbd> / <kbd>E</kbd> to turn left / right. Drag the scene to look around.<br><kbd>F</kbd> to interact with a nearby target.</p><div id="camera-help"><p>Press V or use First person in Tools to switch views. Drag the scene or use the right stick to look around.</p><p>Use the mouse wheel, pinch on the trackpad or screen, or use + and − on the keyboard or in Tools to zoom. For touch zoom, start both fingers on the scene away from the joystick and move them together or apart.</p></div><p>On touch screens, drag the right joystick to move and drag the scene to look around. Turn on Full-screen joystick to move from anywhere and look with a second finger. Walking is the default. Tap Run to toggle running. Buttons and panels keep their own actions. All benches support Sit / Stand. Shop benches face the entrance; approach the open seat side. Use Shopping Cart in Tools to start or stow the demo push cart. Leave about 3 metres of clear floor around you to start pushing. Inventory Bag contains collected demo items, not purchases. Neither Bag nor Shopping Cart creates an order. While seated, walking is locked; use Stand or Escape to leave. A sit/stand transition plays with walking locked. The seat camera moves back to frame the visitor. Standing restores your previous view. Escape reverses entry; reduced-motion uses an immediate pose. <span id="visitor-motion-help">The original visitor uses a procedural sitting pose and a generic carried bag.</span></p><p>Piano: Salamander Grand Piano V3 by Alexander Holm, <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a></p><p id="interaction-distance-description">Distances are approximate horizontal metres to fictional demo interaction points, not physical store measurements. The outline marks a whole shelf; other labels mark an interaction point.</p><p>Choose any store on the map to go to its entrance. Prefer a page? Choose Store Directory above.</p><button id="guide-reopen" type="button" aria-controls="guide-card" hidden>Show quick guide</button></div>
-        </details><button id="scene-cart" type="button" aria-pressed="false" hidden>Cart</button><button id="mall-theme-open" type="button" aria-controls="mall-theme-dialog" hidden>Theme</button></div>
-          <details id="performance-panel">
-            <summary title="Performance details"><span>Performance</span><span id="performance-fps">—</span> FPS</summary>
-            <section class="performance-details" aria-labelledby="performance-heading">
-              <label class="performance-setting" id="performance-visible"><input id="show-fps" type="checkbox"><span>Show FPS counter</span></label>
-              <header><h2 id="performance-heading">Performance</h2><button id="performance-close" type="button" aria-label="Close performance details">Close</button></header>
-              <dl class="performance-metrics">
-                <div><dt>Frame time</dt><dd data-performance="frameMs">—</dd></div>
-                <div><dt>95th percentile</dt><dd data-performance="p95Ms">—</dd></div>
-                <div><dt>Simulation time</dt><dd data-performance="simulationMs">—</dd></div>
-                <div><dt>Render submission</dt><dd data-performance="renderMs">—</dd></div>
-                <div><dt>Draw calls</dt><dd data-performance="drawCalls">—</dd></div>
-                <div><dt>Triangles</dt><dd data-performance="triangles">—</dd></div>
-              </dl>
-              <figure><figcaption><span>Recent frame times</span><span><span>Peak</span> <span id="performance-peak">—</span></span></figcaption>
-                <svg class="performance-trace" viewBox="0 0 240 42" preserveAspectRatio="none" aria-hidden="true"><polyline id="performance-line" fill="none" vector-effect="non-scaling-stroke"/></svg>
-              </figure>
-              <h3 id="performance-log-heading">Recent slow frames</h3>
-              <p id="performance-log-empty">No slow frames in the last minute.</p>
-              <ol id="performance-log" aria-labelledby="performance-log-heading"></ol>
-              <button id="performance-download" type="button">Download report (JSON)</button>
-            </section>
-          </details>
-          <details class="hud-mini-map"><summary>Mini Map</summary>
-        <div id="mini-map" class="mini-map" aria-label="Mini Map">
-          <div class="mini-map-heading"><span data-icon="map-pin"></span><strong>Mini Map</strong><span>North</span></div>
-          <div id="mini-map-plan"></div>
-          <p id="nearest-target">Explore the courtyard</p>
-        </div>
-          </details>
-          <div id="camera-tools" class="hud-tool-controls">
-            <div id="camera-controls" role="group" aria-label="Camera">
-              <button id="camera-view-toggle" type="button" aria-pressed="false" aria-keyshortcuts="V">First person</button>
-              <div class="camera-zoom">
-                <button id="camera-zoom-out" type="button" aria-label="Zoom out" title="Zoom out">−</button>
-                <button id="camera-zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
-              </div>
-            </div>
-          </div>
-        <p class="scene-disclaimer">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
-          </div>
-          </details>
+          <button id="mall-tools" type="button" aria-haspopup="dialog" aria-controls="keyboard-help" aria-expanded="false"><span data-icon="theme" aria-hidden="true"></span><span>Tools</span></button>
         </aside>
         <p id="fps-corner" hidden><span>—</span> FPS</p>
 
@@ -434,6 +370,187 @@
   <details class="mall-app-settings"><summary>App &amp; offline help</summary><div><label class="mall-language-picker"><span>Language</span><select id="directory-language" data-mall-language><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select></label><p>Install this mall from your browser menu. On iPhone or iPad, open Share and choose Add to Home Screen.</p><p>The mall and products need a connection. Offline, this app shows a reconnect screen. The demo bag stays in this browser tab only.</p><div class="mall-app-actions"><button id="mall-install" type="button" hidden>Install mall</button><button id="mall-check-update" data-mall-check type="button" disabled><span>Check for updates</span> <bdi data-mall-version></bdi></button></div><p id="mall-app-status" role="status" aria-live="polite">Checking offline support…</p></div></details>
   <div id="mall-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
   <p id="mall-music-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true">Music off</p>
+  <dialog id="keyboard-help" class="mall-menu" aria-labelledby="menu-title" aria-describedby="menu-subtitle">
+    <header class="menu-header">
+      <button class="menu-round" id="menu-back" type="button" aria-label="Back" hidden><span data-icon="arrow-left" aria-hidden="true"></span></button>
+      <h2 id="menu-title" tabindex="-1"><span id="menu-heading-icon"></span><span id="menu-heading-text"></span></h2>
+      <button class="menu-round" id="menu-close" type="button" aria-label="Close menu"><span data-icon="close" aria-hidden="true"></span></button>
+      <p id="menu-subtitle"></p>
+    </header>
+    <div id="mall-tools-content" class="mall-tools-content">
+    <section data-menu-page="menu" data-menu-icon="grid" hidden>
+      <template><span>Menu</span><span>Quick controls for the mall.</span></template>
+      <div data-menu-slot="sound">
+      <div class="menu-card mall-audio" id="menu-sound-card" role="group" aria-labelledby="mall-sound-heading">
+        <h3 id="mall-sound-heading"><span data-icon="speaker" aria-hidden="true"></span>Sound</h3>
+        <button class="menu-toggle menu-switch-row" id="mall-speaker" type="button" aria-pressed="false" aria-keyshortcuts="M">
+          <span data-icon="speaker" aria-hidden="true"></span><span>Mute sound</span><span id="mall-speaker-state" hidden></span><span class="menu-switch" aria-hidden="true"></span>
+        </button>
+        <button class="menu-toggle menu-switch-row" id="mall-music" type="button" aria-labelledby="mall-music-label" aria-describedby="mall-music-title" aria-pressed="false">
+          <span data-icon="music" aria-hidden="true"></span><span id="mall-music-label">Background music</span><span id="mall-music-state" hidden></span><span class="menu-switch" aria-hidden="true"></span>
+        </button>
+        <p id="mall-music-title" translate="no" hidden></p>
+        <label class="menu-volume"><span data-icon="speaker" aria-hidden="true"></span><span class="sr-only">Master volume</span><input type="range" data-audio-bus="master" min="0" max="100" value="75"><output id="menu-master-value" aria-hidden="true">75%</output></label>
+        <details class="menu-mix"><summary>Mix<span data-icon="chevron-down" aria-hidden="true"></span></summary>
+          <label><span>Music volume</span><input type="range" data-audio-bus="music" min="0" max="100" value="26"></label>
+          <label><span>Effects volume</span><input type="range" data-audio-bus="effects" min="0" max="100" value="65"></label>
+          <label><span>Ambience volume</span><input type="range" data-audio-bus="ambience" min="0" max="100" value="30"></label>
+        </details>
+      </div>
+      </div>
+      <div class="menu-grid">
+        <button id="rail-guide" class="menu-card menu-tile" type="button" data-menu-to="guide"><span data-icon="book" aria-hidden="true"></span>Guide</button>
+        <button class="menu-card menu-tile" type="button" data-menu-to="help"><span data-icon="help-circle" aria-hidden="true"></span>Help</button>
+        <button id="scene-cart" class="menu-card menu-tile" type="button" aria-pressed="false" hidden><span data-icon="cart" aria-hidden="true"></span><span id="scene-cart-label">Shopping Cart</span><span id="scene-cart-count" class="menu-count">0</span></button>
+        <div class="menu-card menu-theme"><h3><span data-icon="sun" aria-hidden="true"></span>Theme</h3>
+          <div class="menu-segments" role="radiogroup" aria-label="Theme" id="menu-theme-options">
+          <button type="button" role="radio" aria-checked="false" tabindex="-1" data-menu-theme="light" aria-label="Light"><span data-icon="sun" aria-hidden="true"></span></button>
+          <button type="button" role="radio" aria-checked="false" tabindex="-1" data-menu-theme="dark" aria-label="Dark"><span data-icon="moon" aria-hidden="true"></span></button>
+          <button type="button" role="radio" aria-checked="false" tabindex="-1" data-menu-theme="system" aria-label="System"><span data-icon="monitor" aria-hidden="true"></span></button>
+        </div>
+        </div>
+      </div>
+      <div data-menu-slot="performance">
+          <details id="performance-panel" class="menu-card">
+            <summary title="Performance details"><span data-icon="gauge" aria-hidden="true"></span><strong>Performance</strong><span class="menu-fps"><b id="performance-fps">—</b> FPS<span data-icon="chevron-down" aria-hidden="true"></span></span></summary>
+            <section class="performance-details" aria-labelledby="performance-heading">
+              <label class="menu-switch-row" id="performance-visible"><input id="show-fps" type="checkbox" role="switch"><span>Show FPS counter</span></label>
+              <header><h2 id="performance-heading">Performance</h2><button id="performance-close" type="button" aria-label="Close performance details">Close</button></header>
+              <dl class="performance-metrics">
+                <div><dt>Frame time</dt><dd data-performance="frameMs">—</dd></div>
+                <div><dt>95th percentile</dt><dd data-performance="p95Ms">—</dd></div>
+                <div><dt>Simulation time</dt><dd data-performance="simulationMs">—</dd></div>
+                <div><dt>Render submission</dt><dd data-performance="renderMs">—</dd></div>
+                <div><dt>Draw calls</dt><dd data-performance="drawCalls">—</dd></div>
+                <div><dt>Triangles</dt><dd data-performance="triangles">—</dd></div>
+              </dl>
+              <figure><figcaption><span>Recent frame times</span><span><span>Peak</span> <span id="performance-peak">—</span></span></figcaption>
+                <svg class="performance-trace" viewBox="0 0 240 42" preserveAspectRatio="none" aria-hidden="true"><polyline id="performance-line" fill="none" vector-effect="non-scaling-stroke"/></svg>
+              </figure>
+              <h3 id="performance-log-heading">Recent slow frames</h3>
+              <p id="performance-log-empty">No slow frames in the last minute.</p>
+              <ol id="performance-log" aria-labelledby="performance-log-heading"></ol>
+              <button id="performance-download" type="button">Download report (JSON)</button>
+            </section>
+          </details>
+      </div>
+      <div class="menu-card menu-map">
+        <label class="menu-switch-row"><span data-icon="map" aria-hidden="true"></span><strong>Mini Map</strong><input id="menu-minimap-toggle" type="checkbox" role="switch" aria-controls="mini-map" checked></label>
+        <button id="menu-map-expand" type="button" aria-label="Open full mall map" aria-controls="mall-map"><span id="mini-map" class="menu-map-preview"><span id="mini-map-plan"></span></span><span data-icon="arrow-up-right" aria-hidden="true"></span></button>
+      </div>
+      <div id="camera-tools" class="menu-card">
+        <h3><span data-icon="camera" aria-hidden="true"></span>View Mode</h3>
+        <div id="camera-controls">
+          <div class="menu-segments" role="radiogroup" aria-label="View mode" >
+          <button type="button" role="radio" aria-checked="false" tabindex="-1" id="camera-view-toggle" aria-keyshortcuts="V">First person</button>
+          <button type="button" role="radio" aria-checked="true" tabindex="0" id="camera-third-person">Third person</button>
+        </div>
+          <div class="camera-zoom">
+            <button class="menu-round" id="camera-zoom-out" type="button" aria-label="Zoom out"><span data-icon="minus" aria-hidden="true"></span></button>
+            <button class="menu-round" id="camera-zoom-in" type="button" aria-label="Zoom in"><span data-icon="plus" aria-hidden="true"></span></button>
+          </div>
+        </div>
+      </div>
+      <button class="menu-card menu-link" type="button" data-menu-to="settings"><span data-icon="settings" aria-hidden="true"></span><strong>Settings</strong><span data-icon="chevron-right" aria-hidden="true"></span></button>
+      <p class="menu-disclaimer"><span data-icon="info" aria-hidden="true"></span><span>Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</span></p>
+    </section>
+    <section data-menu-page="help" data-menu-icon="help-circle" hidden>
+      <template><span>Help</span><span>Get started and make the most of GJH Virtual Mall.</span></template>
+        <button class="menu-card menu-link" type="button" data-menu-to="guide"><span data-icon="book" aria-hidden="true"></span><span><strong>Quick Guide</strong><small>Get started with the mall</small></span><span data-icon="chevron-right" aria-hidden="true"></span></button>
+        <button class="menu-card menu-link" type="button" data-menu-to="controls"><span data-icon="gamepad" aria-hidden="true"></span><span><strong>How to Play</strong><small>Movement, camera and interaction</small></span><span data-icon="chevron-right" aria-hidden="true"></span></button>
+        <button class="menu-card menu-link" type="button" data-menu-to="features"><span data-icon="layers" aria-hidden="true"></span><span><strong>Features</strong><small>Stores, collections and activities</small></span><span data-icon="chevron-right" aria-hidden="true"></span></button>
+        <button class="menu-card menu-link" type="button" data-menu-to="faq"><span data-icon="help-circle" aria-hidden="true"></span><span><strong>FAQ</strong><small>Answers to common questions</small></span><span data-icon="chevron-right" aria-hidden="true"></span></button>
+        <button class="menu-card menu-link" type="button" data-menu-to="report"><span data-icon="message" aria-hidden="true"></span><span><strong>Report an Issue</strong><small>Bugs, feedback and suggestions</small></span><span data-icon="chevron-right" aria-hidden="true"></span></button>
+    </section>
+    <section data-menu-page="settings" data-menu-icon="settings" hidden>
+      <template><span>Settings</span><span>Customize your mall experience.</span></template>
+      <div class="menu-grid menu-settings">
+        <button class="menu-card menu-tile" type="button" data-menu-to="audio"><span data-icon="speaker" aria-hidden="true"></span><strong>Audio</strong><small>Sound, music and volume</small></button>
+        <button class="menu-card menu-tile" type="button" data-menu-to="graphics"><span data-icon="monitor" aria-hidden="true"></span><strong>Graphics</strong><small>Visual quality and performance</small></button>
+        <button class="menu-card menu-tile" type="button" data-menu-to="controls"><span data-icon="gamepad" aria-hidden="true"></span><strong>Controls</strong><small>Movement and camera</small></button>
+        <button class="menu-card menu-tile" type="button" data-menu-to="language"><span data-icon="globe" aria-hidden="true"></span><strong>Language</strong><small>Interface language</small></button>
+        <button class="menu-card menu-tile" type="button" data-menu-to="updates"><span data-icon="refresh" aria-hidden="true"></span><strong>Updates</strong><small>Check for new versions</small><span id="menu-update-current" class="menu-current" role="img" aria-label="Up to date" hidden></span></button>
+        <button class="menu-card menu-tile" type="button" data-menu-to="about"><span data-icon="info" aria-hidden="true"></span><strong>About</strong><small>Credits and licences</small></button>
+      </div>
+    </section>
+    <section data-menu-page="audio" data-menu-icon="speaker" hidden>
+      <template><span>Audio</span><span>Adjust sound, music and volume.</span></template>
+      <div data-menu-slot="sound"></div>
+    </section>
+    <section data-menu-page="graphics" data-menu-icon="monitor" hidden>
+      <template><span>Graphics</span><span>Adjust visual quality and performance.</span></template>
+      <figure class="menu-preview"><img src="assets/concept-wayfinding.webp" alt="Concept illustration of mall wayfinding" width="1600" height="900"><figcaption>Concept preview</figcaption></figure>
+      <div class="menu-card menu-graphics">
+        <label class="menu-field" for="graphics-quality"><span data-icon="monitor" aria-hidden="true"></span><strong>Graphics Quality</strong><select id="graphics-quality" aria-describedby="graphics-quality-status"><option value="auto">Auto</option><option value="low">Low</option><option value="balanced">Balanced</option><option value="detailed">Detailed</option></select></label>
+        <div class="menu-field" id="menu-resolution" hidden><span data-icon="monitor" aria-hidden="true"></span><strong>Resolution</strong><output></output></div>
+        <div class="menu-field" id="menu-refresh-rate" hidden><span data-icon="refresh" aria-hidden="true"></span><strong>Refresh rate</strong><output></output></div>
+        <label class="menu-switch-row"><span data-icon="settings" aria-hidden="true"></span><strong>Auto resolution</strong><input id="auto-resolution" type="checkbox" role="switch" checked></label>
+        <p id="graphics-quality-status" role="status">Auto resolution adjusts the 3D scene to maintain the device's frame rate.</p>
+        <p id="npc-appearance-status" hidden>Some visitor outfits are unavailable. You can still explore the mall.</p>
+      </div>
+      <div data-menu-slot="performance"></div>
+    </section>
+    <section data-menu-page="controls" data-menu-icon="gamepad" hidden>
+      <template><span>Controls</span><span>Learn to move, look around and interact.</span></template>
+      <div class="menu-segments" role="radiogroup" aria-label="Input guide" >
+          <button type="button" role="radio" aria-checked="false" tabindex="-1" data-menu-device="touch"><span data-icon="smartphone" aria-hidden="true"></span>Mobile (Touch)</button>
+          <button type="button" role="radio" aria-checked="true" tabindex="0" data-menu-device="keyboard"><span data-icon="keyboard" aria-hidden="true"></span>Desktop (Keyboard)</button>
+        </div>
+      <div class="menu-card menu-control-guide" data-menu-guide="touch" hidden>
+        <h3><span data-icon="gamepad" aria-hidden="true"></span>Touch guide</h3>
+        <dl><div><dt>Move</dt><dd>Drag the virtual joystick to walk.</dd></div><div><dt>Look around</dt><dd>Drag the scene outside the joystick.</dd></div><div><dt>Run</dt><dd>Tap Run to switch between walking and running.</dd></div><div><dt>Interact</dt><dd>Tap the action shown near an object or store entrance.</dd></div></dl>
+        <label class="menu-switch-row"><strong>Full-screen joystick</strong><input id="fullscreen-joystick" type="checkbox" role="switch"></label>
+      </div>
+      <div class="menu-card menu-control-guide" data-menu-guide="keyboard" hidden>
+        <h3><span data-icon="keyboard" aria-hidden="true"></span>Keyboard guide</h3>
+        <dl><div><dt>Move</dt><dd><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys</dd></div><div><dt>Run</dt><dd><kbd>Shift</kbd></dd></div><div><dt>Look around</dt><dd><kbd>Q</kbd> / <kbd>E</kbd> to turn when there is no nearby action, or drag the scene</dd></div><div><dt>Interact</dt><dd><kbd>E</kbd> or <kbd>F</kbd> when an action is nearby</dd></div><div><dt>Mute sound</dt><dd><kbd>M</kbd></dd></div></dl>
+      </div>
+      <div id="controls-copy"><p id="camera-help">Use View Mode to switch cameras and zoom.</p></div>
+    </section>
+    <section data-menu-page="language" data-menu-icon="globe" hidden>
+      <template><span>Language</span><span>Choose the interface language.</span></template>
+      <select class="menu-card menu-languages" id="scene-language" data-mall-language aria-label="Language" size="3">
+        <option value="en" lang="en">English</option>
+        <option value="zh-Hans" lang="zh-Hans">简体中文</option>
+        <option value="ms" lang="ms">Bahasa Melayu</option>
+      </select>
+    </section>
+    <section data-menu-page="updates" data-menu-icon="refresh" hidden>
+      <template><span>Updates</span><span>Check for the latest verified version.</span></template>
+      <div class="menu-card menu-update-row">
+        <bdi data-mall-version>—</bdi><p data-mall-check-status role="status">Checking for updates…</p><button id="mall-scene-check" data-mall-check type="button" disabled aria-label="Check for updates">Check</button>
+      </div>
+    </section>
+    <section data-menu-page="about" data-menu-icon="info" hidden>
+      <template><span>About</span><span>Credits and licences for GJH Virtual Mall.</span></template>
+      <div class="menu-card menu-copy">
+        <p>Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
+        <p>Virtual mall concept and design by Yap Wei Jun.</p>
+        <p>Piano samples: Salamander Grand Piano V3 by Alexander Holm, <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</p>
+        <p><a href="vendor/three.LICENSE">Three.js licence (MIT)</a> · <a href="vendor/rapier.LICENSE">Rapier licence (Apache 2.0)</a></p>
+      </div>
+      <button id="mall-theme-open" class="menu-card menu-link" type="button" aria-controls="mall-theme-dialog" hidden><span data-icon="theme" aria-hidden="true"></span><strong>Mall décor themes</strong><span data-icon="chevron-right" aria-hidden="true"></span></button>
+    </section>
+    <section data-menu-page="guide" data-menu-icon="book" hidden>
+      <template><span>Quick Guide</span><span>Find a shop, explore and collect demo items.</span></template>
+      <div class="menu-card menu-copy"><p>Use the mall map to find a storefront. Explore a shop and use the nearby actions to inspect products or add them to your demo bag.</p><p>Open Objectives to see what else you can try.</p><button id="guide-reopen" type="button" aria-controls="guide-card" hidden>Replay interactive guide</button></div>
+    </section>
+    <section data-menu-page="features" data-menu-icon="layers" hidden>
+      <template><span>Features</span><span>Explore the mall at your own pace.</span></template>
+      <div class="menu-card menu-copy"><p>Explore shops, browse product collections, ride the lift or take a seat on a bench.</p><p><span id="visitor-motion-help">The original visitor uses a procedural sitting pose and a generic carried bag.</span></p></div>
+    </section>
+    <section data-menu-page="faq" data-menu-icon="help-circle" hidden>
+      <template><span>FAQ</span><span>Answers to common questions.</span></template>
+      <div class="menu-card menu-copy"><h3>Can I place an order?</h3><p>The inventory bag holds demo items. The bag and push cart never place orders.</p><h3>How do I reach a store?</h3><p>Choose a destination from the mall map or browse the Store Directory.</p></div>
+    </section>
+    <section data-menu-page="report" data-menu-icon="message" hidden>
+      <template><span>Report an Issue</span><span>Share bugs, feedback or suggestions.</span></template>
+      <div class="menu-card menu-copy"><p>Include your device, browser and the steps that led to the issue.</p><a href="https://github.com/yapweijun1996/Webpage-Design-Gallery/issues">Open the project issue tracker</a></div>
+    </section>
+    </div>
+  </dialog>
+  <p id="interaction-distance-description" class="sr-only">Distances are approximate horizontal metres to fictional demo interaction points. The outline marks a whole shelf. Other labels mark an interaction point.</p>
+  <span id="nearest-target" class="sr-only" hidden></span>
   <dialog id="mall-theme-dialog" class="mall-theme-dialog" aria-labelledby="mall-theme-title" aria-describedby="mall-theme-description mall-theme-status">
     <div class="mall-theme-top"><div><p class="eyebrow">Mall appearance</p><h2 id="mall-theme-title" tabindex="-1">Mall theme</h2></div><button id="mall-theme-close" type="button">Close</button></div>
     <p id="mall-theme-description">Follow the festival calendar or choose a theme manually.</p>

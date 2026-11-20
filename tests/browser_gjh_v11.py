@@ -1,4 +1,5 @@
 """Exercise free walking, physical boundaries and accessible mall fallbacks in Chrome."""
+from gjh_menu_test_helpers import open_menu_page
 import argparse
 import functools
 import http.server
@@ -54,7 +55,7 @@ def targets(page):
 
 
 def mobile_hud(page):
-    overlaps = page.locator('.site-header,#mall-tools>summary,#mall-map>summary,.map-content,#joystick,#run-toggle,#inspect-prompt,#guide-card,.control-bar').evaluate_all('''els => {
+    overlaps = page.locator('.site-header,#mall-tools,#mall-map>summary,.map-content,#joystick,#run-toggle,#inspect-prompt,#guide-card,.control-bar').evaluate_all('''els => {
       // Closed details retain descendant layout boxes in current Chrome; those
       // boxes are not painted map content. Mode-suppressed walking controls also
       // retain boxes. Check every painted open-map/control rectangle.
@@ -100,11 +101,11 @@ def ux_hud_coverage(browser, url):
         assert bounds['y'] >= height / 2, bounds
         assert not page.locator('#control-interact').is_visible()
         assert page.locator('#floor-indicator').inner_text() == 'Floor 01 - Atrium'
-        assert page.locator('#mini-map').is_visible() == (width > 650)
+        assert page.locator('#mini-map').is_hidden()
         assert page.locator('#header-map').is_visible()
         assert not page.locator('#mall-map').evaluate('el=>el.open')
-        assert page.locator('#mall-tools > summary').is_visible()
-        assert page.locator('#keyboard-help summary').is_hidden()
+        assert page.locator('#mall-tools').is_visible()
+        assert page.locator('#keyboard-help').is_hidden()
         assert page.locator('.control-bar').is_hidden()
         assert 'inventory' in page.locator('#bag-open').get_attribute('aria-label')
         if width == 390:
@@ -143,8 +144,9 @@ def ux_hud_coverage(browser, url):
         page.wait_for_function('window.__sceneReady && window.__mall?.ready')
         page.locator('#app-loader').wait_for(state='hidden', timeout=90000)
         assert card.is_hidden()
-        page.locator('#mall-tools > summary').click()
+        page.locator('#mall-tools').click()
         page.locator('#rail-guide').click()
+        page.locator('#guide-reopen').click()
         card.wait_for(state='visible')
         page.locator('#guide-next').click()
         page.locator('#guide-skip').click()
@@ -648,7 +650,7 @@ def room_signs(page):
         page.wait_for_timeout(150)
         assert state(page)['frames'] == frames
         return
-    rectangles = page.locator('.site-header,#mall-tools>summary,#mall-map').evaluate_all(
+    rectangles = page.locator('.site-header,#mall-tools,#mall-map').evaluate_all(
         'els=>els.map(el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom}})')
     for sign in state(page)['roomSigns']:
         if not sign['visible']:
@@ -822,8 +824,8 @@ def run(capture=False):
                             mall_map = page.locator('#mall-map')
                             mobile_hud(page)
                             assert not mall_map.evaluate('el=>el.open')
-                            page.locator('#mall-tools > summary').click()
-                            page.locator('#keyboard-help summary').click()
+                            page.locator('#mall-tools').click()
+                            open_menu_page(page, "help")
                             page.locator('#header-map').click()
                             page.wait_for_function('!document.querySelector("#keyboard-help").open')
                             assert mall_map.evaluate('el=>el.open')

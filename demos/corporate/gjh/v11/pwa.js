@@ -10,6 +10,7 @@ import {icon} from './assets/icons.js';
   const checks = [...document.querySelectorAll('[data-mall-check]')];
   const setChecking = disabled => checks.forEach(button => { button.disabled = disabled; });
   const sceneStatus = document.querySelector('[data-mall-check-status]');
+  const currentBadge = document.querySelector('#menu-update-current');
   const arrivalStatus = document.querySelector('#arrival-update-status');
   const status = document.querySelector('#mall-app-status');
   const connection = document.querySelector('#mall-connection-notice');
@@ -22,7 +23,7 @@ import {icon} from './assets/icons.js';
   update.prepend(updateIcon);
   const workerURL = new URL('./pwa-sw.js', location.href).href;
   let registration, prompt, checking = false, applying = false, lastCheck = 0, nextWorker = null;
-  let failedWorker = null;
+  let failedWorker = null, noUpdateFound = false;
   const updateFailed = 'Update failed, retry.';
   let hadMallController = navigator.serviceWorker?.controller?.scriptURL === workerURL;
 
@@ -35,8 +36,14 @@ import {icon} from './assets/icons.js';
     sceneStatus.textContent = text;
     if (arrivalStatus) arrivalStatus.textContent = text;
   }
+  function showCurrent() {
+    const current = noUpdateFound && Boolean(registration?.active) && notice.hidden && connection.hidden;
+    currentBadge.hidden = !current;
+    if (current) sceneStatus.textContent = 'Up to date.';
+  }
   function connectionState(connected) {
     connection.hidden = connected;
+    if (!connected) currentBadge.hidden = true;
     if (!applying) update.disabled = !connected;
   }
 
@@ -57,6 +64,9 @@ import {icon} from './assets/icons.js';
     // The first install can briefly be "waiting" before it becomes active.
     if (!otherTab && (!registration?.active || registration.active === worker)) return;
     nextWorker = worker;
+    noUpdateFound = false;
+    currentBadge.hidden = true;
+    sceneStatus.textContent = 'Update available.';
     message.textContent = otherTab ? 'The mall was updated in another tab. Reload when you are ready.' : 'A mall update is ready. Your demo bag stays in this tab.';
     update.textContent = otherTab ? 'Reload' : 'Update now';
     update.prepend(updateIcon);
@@ -94,8 +104,14 @@ import {icon} from './assets/icons.js';
       }
       if (registration.waiting) offer(registration.waiting);
       else if (failedWorker) setCheckStatus(updateFailed);
-      else if (manual) setCheckStatus('No verified update is waiting.');
+      else {
+        noUpdateFound = true;
+        showCurrent();
+        if (manual) setCheckStatus('No verified update is waiting.');
+      }
     } catch {
+      noUpdateFound = false;
+      currentBadge.hidden = true;
       setCheckStatus(failedWorker || connection.hidden ? updateFailed : 'Connection unavailable. Reconnect and try again.');
     } finally { checking = false; setChecking(false); }
   }
@@ -195,6 +211,8 @@ import {icon} from './assets/icons.js';
           if (worker.state === 'installed' && value.waiting) offer(value.waiting);
           if (worker.state === 'redundant') {
             failedWorker = worker;
+            noUpdateFound = false;
+            currentBadge.hidden = true;
             setCheckStatus(value.active ? updateFailed : 'Offline support is unavailable. You can continue browsing online.');
           }
         });
@@ -204,10 +222,11 @@ import {icon} from './assets/icons.js';
       navigator.serviceWorker.ready.then(ready => {
         if (ready.scope === value.scope && ready.active) {
           version(ready.active).then(showVersion).catch(() => {});
+          showCurrent();
           status.textContent = 'The mall requires a connection. An offline reconnect screen is saved on this device.';
         }
       }).catch(() => { status.textContent = 'Offline support is unavailable. You can continue browsing online.'; });
       checkForUpdates();
-    }).catch(() => { status.textContent = 'Offline support is unavailable. You can continue browsing online.'; });
-  } else status.textContent = 'Use HTTPS and a supported browser to enable offline support.';
+    }).catch(() => { setCheckStatus('Offline support is unavailable. You can continue browsing online.'); });
+  } else setCheckStatus('Use HTTPS and a supported browser to enable offline support.');
 })();

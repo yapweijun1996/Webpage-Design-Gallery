@@ -3,6 +3,7 @@
 Native WEBGL_lose_context is used only here. Hardware/hidden/validation-fault
 fixtures are explicitly labelled. Raw evidence defaults outside the checkout.
 """
+from gjh_menu_test_helpers import close_menu, open_menu_page
 from gjh_startup_test_helpers import mall_entry_url
 import argparse
 import functools
@@ -269,8 +270,8 @@ def run():
             # Repeated epochs and real texture/shelf frames at Low, with no scene/asset/listener growth.
             for width,height in [(390,844),(1440,900)]:
                 c,page=context(browser,width,height,fixture="localStorage.setItem('gjh-v11-graphics-quality-v1','low')");ready(page)
-                page.locator('#keyboard-help>summary').click();page.select_option('#graphics-quality','low')
-                page.locator('#keyboard-help>summary').click();freeze(page)
+                open_menu_page(page, "graphics");page.select_option('#graphics-quality','low')
+                close_menu(page);freeze(page)
                 images={}
                 for sku in ['nz-425g','au-425g','sa-425g','mx-454g']:
                     approach(page,sku);page.locator('#inspect').click();page.wait_for_function('__mall.mode==="shelf"')
@@ -481,7 +482,7 @@ def run():
                     c,page=context(browser,width,height,fixture=init);ready(page)
                     expected='low' if label.startswith('constrained') or label=='stored-low' else 'balanced' if width<1000 or label=='missing' else 'detailed'
                     g=state(page)['graphics'];assert g['quality']['tier']==expected,(label,g)
-                    page.locator('#keyboard-help>summary').click()
+                    open_menu_page(page, "graphics")
                     profile_frames={}; profile_metrics={}
                     for choice in ['low','detailed','low','balanced','auto']:
                         page.select_option('#graphics-quality',choice);settle(page)
@@ -503,8 +504,8 @@ def run():
                         shadow_delta=sum(ImageStat.Stat(ImageChops.difference(balanced.crop(box),detailed_full.crop(box))).mean)/3
                         assert shadow_delta>.1,shadow_delta
                         row('actual-profile-frames',meanRGBDifference=delta,sameDPRCentralSceneShadowDifference=shadow_delta,metrics=profile_metrics)
-                    page.locator('#keyboard-help>summary').click();freeze(page)
-                    loss(page);restore(page);enter(page);page.locator('#keyboard-help>summary').click()
+                    close_menu(page);freeze(page)
+                    loss(page);restore(page);enter(page);open_menu_page(page, "graphics")
                     assert page.locator('#graphics-quality').input_value()=='low'
                     # Native macOS select typeahead works in this Chrome; Home/End and popup
                     # arrows did not commit even in a standalone select diagnostic.
@@ -515,7 +516,7 @@ def run():
                     c.close()
             if not args.smoke:
                 c,page=context(browser);ready(page)
-                page.locator('#keyboard-help>summary').click();page.select_option('#graphics-quality','low')
+                open_menu_page(page, "graphics");page.select_option('#graphics-quality','low')
                 assert page.evaluate("localStorage.getItem('gjh-v11-graphics-quality-v1')")=='low'
                 page.reload();page.wait_for_function('__mall.ready && __sceneReady',timeout=60000)
                 assert state(page)['graphics']['quality']['tier']=='low'
@@ -524,7 +525,7 @@ def run():
                 for width,height in [(390,844),(1440,900)]:
                     for dpr in [1,1.5,3]:
                         c,page=context(browser,width,height,dpr=dpr);ready(page)
-                        page.locator('#keyboard-help>summary').click()
+                        open_menu_page(page, "graphics")
                         values=[]
                         for choice in ['low','balanced','detailed']:
                             page.select_option('#graphics-quality',choice);settle(page)
@@ -536,14 +537,14 @@ def run():
                         row('native-browser-DPR-fixture',viewport=[width,height],emulatedDPR=dpr,profiles=values);c.close()
             for width,height in (SIZES[:2] if args.smoke else SIZES):
                 c,page=context(browser,width,height);ready(page);shot(page,f'layout-{width}x{height}-collapsed')
-                page.locator('#keyboard-help>summary').click();page.locator('#graphics-quality').focus()
+                open_menu_page(page, "graphics");page.locator('#graphics-quality').focus()
                 page.keyboard.press('ArrowDown');page.keyboard.press('Tab');page.keyboard.press('Shift+Tab');settle(page)
                 geo=page.locator('#graphics-quality').evaluate("""e=>{const r=e.getBoundingClientRect(),s=getComputedStyle(e);return {rect:r.toJSON(),focus:e===document.activeElement,focusVisible:e.matches(':focus-visible'),outline:s.outlineWidth,overflow:document.documentElement.scrollWidth>innerWidth,label:e.labels[0].textContent};}""")
                 r=geo['rect'];assert r['width']>=44 and r['height']>=44 and not geo['overflow'] and geo['focus'] and geo['focusVisible']
                 assert r['left']>=0 and r['right']<=width and r['top']>=0 and r['bottom']<=height,geo
                 shot(page,f'layout-{width}x{height}-quality-focus')
-                for fraction in [0,.5,1]:page.locator('#controls-copy').evaluate('(e,f)=>e.scrollTop=(e.scrollHeight-e.clientHeight)*f',fraction)
-                page.locator('#keyboard-help>summary').click();loss(page);restore(page)
+                for fraction in [0,.5,1]:page.locator('#mall-tools-content').evaluate('(e,f)=>e.scrollTop=(e.scrollHeight-e.clientHeight)*f',fraction)
+                close_menu(page);loss(page);restore(page)
                 page.locator('#graphics-return').focus();page.keyboard.press('Tab');page.keyboard.press('Shift+Tab')
                 for selector in ['#graphics-return','#graphics-reload']:
                     page.locator(selector).scroll_into_view_if_needed();r=page.locator(selector).bounding_box();assert r['width']>=44 and r['height']>=44
@@ -552,12 +553,12 @@ def run():
             for label,(width,height),insets in ([] if args.smoke else PROFILES):
                 c,page=context(browser,width,height);cdp=c.new_cdp_session(page)
                 cdp.send('Emulation.setSafeAreaInsetsOverride',{'insets':insets});ready(page)
-                page.locator('#keyboard-help>summary').click();page.locator('#graphics-quality').focus();settle(page)
+                open_menu_page(page, "graphics");page.locator('#graphics-quality').focus();settle(page)
                 r=page.locator('#graphics-quality').bounding_box()
                 assert r['x']>=insets['left'] and r['y']>=insets['top'] and r['x']+r['width']<=width-insets['right'] and r['y']+r['height']<=height-insets['bottom']
                 shot(page,'inset-'+label);row('software-insets',profile=label,insets=insets,qualityControl=r);c.close()
             if args.axe:
-                c,page=context(browser);ready(page);page.locator('#keyboard-help>summary').click();page.add_script_tag(path=str(args.axe))
+                c,page=context(browser);ready(page);open_menu_page(page, "graphics");page.add_script_tag(path=str(args.axe))
                 for surface in ['help','recovery']:
                     if surface=='recovery':loss(page);restore(page)
                     violations=page.evaluate('async()=> (await axe.run(document,{runOnly:{type:"tag",values:["wcag2a","wcag2aa","wcag21aa"]}})).violations')

@@ -4,6 +4,7 @@ Requires Python Playwright and a local Chrome. Optional --axe-script accepts a
 locally reviewed axe-core browser bundle; this runner never downloads code.
 """
 
+from gjh_menu_test_helpers import open_menu_page
 import argparse
 import functools
 import hashlib
@@ -151,8 +152,33 @@ def check_v11_crowd(browser, base):
         }
         return advanced;
     }""", timeout=45000)
-    page.locator("#mall-tools > summary").click()
-    page.locator("#keyboard-help summary").click()
+    page.locator("#mall-tools").click()
+    assert page.locator("#menu-heading-text").inner_text() == "Menu"
+    assert page.locator("#menu-back").is_hidden()
+    assert page.locator("#context-navigation-global").is_hidden()
+    assert page.locator("#mini-map-plan svg").count() == 1
+    page.locator("#menu-minimap-toggle").uncheck()
+    assert page.locator("#mini-map").is_hidden()
+    page.locator("#menu-minimap-toggle").check()
+    page.locator("#mall-speaker").click()
+    assert page.locator("#mall-speaker").get_attribute("aria-pressed") == "true"
+    page.keyboard.press("m")
+    assert page.locator("#mall-speaker").get_attribute("aria-pressed") == "false"
+    open_menu_page(page, "help")
+    assert page.locator("#menu-heading-text").inner_text() == "Help"
+    assert page.locator("dialog:modal").count() == 1
+    page.locator("#menu-back").click()
+    assert page.locator("#menu-heading-text").inner_text() == "Menu"
+    page.keyboard.press("Escape")
+    assert page.locator("#keyboard-help").is_hidden()
+    assert page.evaluate("document.activeElement.id") == "mall-tools"
+    page.locator("#header-menu").click()
+    assert page.locator("#menu-heading-text").inner_text() == "Settings"
+    open_menu_page(page, "controls")
+    assert page.locator('[data-menu-guide="touch"]').is_visible()
+    assert page.locator('[data-menu-guide="keyboard"]').is_hidden()
+    page.locator("#menu-back").click()
+    open_menu_page(page, "graphics")
     page.wait_for_function("__mall.state.paused")
     position = page.evaluate("() => [__mall.state.x, __mall.state.y, __mall.state.z]")
     page.locator("#graphics-quality").select_option("low")

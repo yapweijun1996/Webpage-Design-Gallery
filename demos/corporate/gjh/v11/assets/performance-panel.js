@@ -88,16 +88,6 @@ export function createPerformancePanel({snapshot, report = snapshot}) {
   }
   panel.addEventListener('toggle', () => { if (panel.open) renderDetails(snapshot()); });
   document.getElementById('performance-close').addEventListener('click', close);
-  panel.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && panel.open) {
-      event.stopPropagation();
-      close();
-    }
-  });
-  document.addEventListener('pointerdown', event => {
-    if (panel.open && !panel.contains(event.target)) panel.open = false;
-  });
-
   document.getElementById('performance-download').addEventListener('click', () => {
     const blob = new Blob([JSON.stringify(report(), null, 2)], {type:'application/json'});
     const url = URL.createObjectURL(blob), link = document.createElement('a');

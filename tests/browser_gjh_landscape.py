@@ -13,7 +13,7 @@ def run():
     if not page.locator('#mall-map').evaluate('e=>e.open'):page.locator('#mall-map>summary').click()
     button=page.locator('#run-toggle');box=button.bounding_box();assert box['width']>=44 and box['height']>=44
     assert box['x']>=18 and box['x']+box['width']<=width-18 and box['y']>=18 and box['y']+box['height']<=height-18,box
-    for selector in ['#joystick','#keyboard-help>summary','#mall-map']:
+    for selector in ['#joystick','#mall-tools','#mall-map']:
      assert not overlap(box,page.locator(selector).bounding_box()),(width,height,selector,box)
     assert button.evaluate('e=>{let r=e.getBoundingClientRect();return e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}')
     button.focus();page.keyboard.press('Space');assert button.get_attribute('aria-pressed')=='true';page.keyboard.press('Space');assert button.get_attribute('aria-pressed')=='false'

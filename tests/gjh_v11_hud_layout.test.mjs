@@ -20,10 +20,10 @@ function pixels(token) {
   return Number(value[1]);
 }
 
-const headerControls = '.is-3d .site-header :is(.header-location,.header-map,.bag-open,.view-toggle)';
-const cornerControls = '#mall-tools>summary,#hud-objectives>summary,.hud-rail :is(button,summary),#hud-more-actions';
-const cornerChips = '#mall-tools>summary,#hud-objectives>summary';
-const chrome = '.is-3d :is(.site-header button,#mall-tools>summary,#hud-objectives>summary)';
+const headerControls = '.is-3d .site-header :is(.header-location,.header-map,.bag-open,.view-toggle,.header-menu)';
+const cornerControls = '#mall-tools,#hud-objectives>summary,.hud-rail :is(button,summary),#hud-more-actions';
+const cornerChips = '#mall-tools,#hud-objectives>summary';
+const chrome = '.is-3d :is(.site-header button,#mall-tools,#hud-objectives>summary)';
 
 test('compact header and corner chips paint at 36px inside 44px or larger touch targets', () => {
   const hud = rule('html[data-gjh-design="v11"] body.is-3d');
@@ -127,7 +127,7 @@ test('the Tools icon and label fit on one row without sharing a grid cell', () =
   assert.match(rule(cornerChips), /width:max-content;.*gap:var\(--space-2\);/s);
   assert.match(rule(cornerChips), /padding-inline:var\(--space-3\);white-space:nowrap/);
   for (const [, selector, declarations] of css.matchAll(/([^{}]+)\{([^{}]+)\}/g)) {
-    if (selector.includes('#mall-tools>summary')) {
+    if (selector.includes('#mall-tools')) {
       assert.doesNotMatch(declarations, /display:grid|grid-area:|(?:^|;)width:var\(--size-control\)/);
     }
   }
@@ -152,8 +152,8 @@ test('interaction and held-product cards share a padded flex row with nonwrappin
 test('the HUD centers its icons and resting joystick knob independently of badges and labels', () => {
   const center = /display:grid;.*place-items:center/;
   const compactHeader = css.split('@media(max-width:999px){')[1];
-  assert.match(rule('.is-3d .site-header :is(.header-map,.bag-open,.view-toggle)', compactHeader), center);
-  assert.match(rule('.is-3d :is(.site-header button,#mall-tools>summary) svg'), /display:block;margin:0/);
+  assert.match(rule('.is-3d .site-header :is(.header-map,.bag-open,.view-toggle,.header-menu)', compactHeader), center);
+  assert.match(rule('.is-3d :is(.site-header button,#mall-tools) svg'), /display:block;margin:0/);
   assert.match(rule('.is-3d .hud-bag-count'), /position:absolute/);
   assert.match(rule('#hud-more-actions'), center);
   assert.match(rule('body.is-3d .mall-overlay :is(#inspect,#run-toggle,.hud-pickup-action)'), center);

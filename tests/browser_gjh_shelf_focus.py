@@ -146,7 +146,7 @@ def nearby_geometry(page):
       return {fullPrompt:rect(prompt),identityRow:rect(identity),accessibleName:identity.getAttribute('aria-label'),
         visibleName:document.querySelector('#nearby-name').textContent,buttons,
         notice:[...prompt.querySelectorAll('p')].filter(e=>!e.hidden).map(e=>({text:e.textContent,rect:rect(e)})),
-        controls:['#keyboard-help>summary','#mall-map>summary','#joystick','#run-toggle','.scene-disclaimer'].map(s=>document.querySelector(s)).filter(e=>e.getClientRects().length).map(e=>({id:e.id||e.parentElement.id||e.className,rect:rect(e)})),
+        controls:['#mall-tools','#mall-map>summary','#joystick','#run-toggle'].map(s=>document.querySelector(s)).filter(e=>e.getClientRects().length).map(e=>({id:e.id||e.parentElement.id||e.className,rect:rect(e)})),
         viewport:[innerWidth,innerHeight],overflow:document.documentElement.scrollWidth>innerWidth};
     }""")
     w,h=result['viewport'];r=result['fullPrompt']
