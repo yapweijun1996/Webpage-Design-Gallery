@@ -114,7 +114,8 @@
     root.lang = meta.lang;
     document.querySelectorAll('.lang-code').forEach(code => { code.textContent = meta.code; });
     document.querySelectorAll('.lang-toggle').forEach(button => {
-      button.setAttribute('aria-label', `Language: ${meta.name}`);
+      // Start with the visible code so the accessible name contains the visible label (WCAG 2.5.3).
+      button.setAttribute('aria-label', `${meta.code} · Language: ${meta.name}`);
       button.dataset.noTranslate = '';
     });
     document.querySelectorAll('[data-lang]').forEach(button => {

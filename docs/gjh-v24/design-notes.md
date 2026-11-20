@@ -53,10 +53,12 @@ Codex CLI's built-in image tool generated eight images: six page heroes, an illu
 | No critical console errors | None on any page. Before generation, the only error was the missing `sw.js`. |
 | Reduced motion and keyboard | Reduced-motion captures show all content. The first Tab reaches "Skip to content". Dialogs trap focus and restore it. The menu closes on Escape. |
 | 3D does not slow corporate pages | No 3D requests before the user enters. |
+| Lighthouse (2026-11-20) | All six live pages, mobile: Accessibility, Best Practices and SEO all 100 after the fixes. The light theme in Chinese also scored 100. Before the fixes, every page failed one audit: the language button's accessible name ("Language: English") left out its visible text "EN". Brands also failed one more: the brand dialog's links had no `href` until a brand was opened, so they were not crawlable. The button name now starts with the visible code ("EN · Language: English"), and the dialog links fall back to GJH's brand directory. |
+| Load speed, lab (2026-11-20) | Home page cold load, 390 px phone, Slow 4G, 4× CPU: LCP fell from 3.1 s to 2.3 s, and CLS stayed at 0. The LCP element is the hero lead paragraph. Two causes were fixed. The body font was found only after `style.css` had loaded, so both fonts are now preloaded on every page. The hero text waited for deferred `script.js` before revealing, so the hero reveal is now a CSS animation that starts at first paint. Other sections still reveal on scroll. |
 
 ## Remaining limitations
 
-- No physical-device, screen-reader or field Core Web Vitals measurement has been made yet. The checks above use desktop Chrome with phone-width emulation.
+- No physical-device testing, screen-reader testing or field Core Web Vitals (from real visitors) yet. All checks above, including Lighthouse and the lab traces, ran in desktop Chrome, with phone-width emulation for the phone checks.
 - The Senai office street address, a phone number and an email address are not in the verified research, so the page links to the official contact page instead.
 - Brand photographs are AI concept imagery from the shared library, not GJH photography. Logos come from low-resolution official files.
 - The mission, vision and values wording is a proposal that needs GJH's approval.
