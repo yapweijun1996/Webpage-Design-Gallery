@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101219">
+  <title>Tuning Bench — Goh Joo Hin Pte Ltd</title>
+  <link rel="preload" as="image" href="dial.jpg">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main>
+    <section class="stage" id="entry" aria-labelledby="headline">
+      <figure class="visual">
+        <img id="still" src="dial.jpg" width="1024" height="1536" alt="Brushed silver tuning dial with four amber notches and a blue reflection along its rim." draggable="false">
+        <figcaption>AI concept illustration</figcaption>
+      </figure>
+      <header class="mast">
+        <span class="mark" aria-hidden="true">GJH</span>
+        <span class="company">Goh Joo Hin Pte Ltd</span>
+      </header>
+      <div class="copy" aria-live="polite" aria-atomic="true">
+        <p class="eyebrow">Tuning bench</p>
+        <h1 id="headline">What will you tune into?</h1>
+        <p class="category" id="category" hidden></p>
+      </div>
+      <div class="console">
+        <a class="fallback-link" href="#activities">Select activity <span aria-hidden="true">↓</span></a>
+        <fieldset hidden>
+          <legend class="sr-only">Select activity</legend>
+          <div class="readout" aria-hidden="true">
+            <span class="mini-dial"></span>
+            <span>Select activity</span>
+            <span class="scale"></span>
+          </div>
+          <div class="stops">
+            <label><input type="radio" name="activity" value="listen"><span>Listen</span></label>
+            <label><input type="radio" name="activity" value="watch"><span>Watch</span></label>
+            <label><input type="radio" name="activity" value="play"><span>Play</span></label>
+            <label><input type="radio" name="activity" value="connect"><span>Connect</span></label>
+          </div>
+        </fieldset>
+        <a class="destination" hidden></a>
+      </div>
+    </section>
+    <article id="activities" aria-label="Activities">
+      <figure class="fallback-still">
+        <img src="plinth.jpg" width="1024" height="1536" loading="lazy" alt="An empty charcoal plinth on a studio bench, edged with blue and amber light.">
+        <figcaption>AI concept illustration</figcaption>
+      </figure>
+      <section id="listen" aria-labelledby="listen-title">
+        <h2 id="listen-title">Listen up close</h2><p>Sony portable speakers</p>
+        <a href="https://www.gjh.com.sg/sony/">Explore Sony</a>
+      </section>
+      <section id="watch" aria-labelledby="watch-title">
+        <h2 id="watch-title">Watch the room go dark</h2><p>LG televisions</p>
+        <a href="https://www.gjheshop.com/brand/lg/">Explore LG televisions</a>
+      </section>
+      <section id="play" aria-labelledby="play-title">
+        <h2 id="play-title">Play the first note</h2><p>Casio musical instruments</p>
+        <a href="https://casiomusic.sg/">Explore Casio Music</a>
+      </section>
+      <section id="connect" aria-labelledby="connect-title">
+        <h2 id="connect-title">Connect across the room</h2><p>Gigaset cordless phones</p>
+        <a href="https://www.gjhglobal.com/gigaset/">Explore Gigaset</a>
+      </section>
+    </article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en-SG">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' file: data:; font-src 'self' file:; style-src 'self' file:; script-src 'self' file:; base-uri 'none'; form-action 'none'">
+  <title>Gouache Pantry · Goh Joo Hin</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" as="image" href="opt5-gouache-pantry-a.jpg">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+<main>
+  <section id="cover" class="screen cover" aria-labelledby="question">
+    <figure class="art">
+      <img src="opt5-gouache-pantry-a.jpg" width="1024" height="1536" fetchpriority="high" alt="A single pineapple half painted in gold and olive gouache on rough indigo paper.">
+      <figcaption>AI concept illustration</figcaption>
+    </figure>
+    <div class="leaf">
+      <header class="mast"><span>Goh Joo Hin <small>Pte Ltd</small></span><span class="place">Singapore</span></header>
+      <div class="title-block">
+        <p class="eyebrow">Gouache Pantry</p>
+        <h1 id="question">What do you<br>remember?</h1>
+      </div>
+      <nav class="actions" aria-label="Explore the pantry">
+        <a class="primary" href="#finder" id="find-trigger">Find a brand <span aria-hidden="true">→</span></a>
+        <a class="secondary" href="#ingredients" id="ingredient-trigger">Browse ingredients <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </section>
+  <section id="finder" class="screen finder" aria-labelledby="finder-heading">
+    <figure class="art">
+      <img src="opt5-gouache-pantry-b.jpg" width="1024" height="1536" loading="lazy" alt="Light reflects across the rounded lip of a celadon tile above a warm ivory surface.">
+      <figcaption>AI concept illustration</figcaption>
+    </figure>
+    <div class="leaf">
+      <a class="back" href="#cover" aria-label="Back to the pantry cover">← Back</a>
+      <div class="form-panel">
+        <p class="eyebrow">Brand finder</p>
+        <h2 id="finder-heading" tabindex="-1">Type what you remember</h2>
+        <div id="search" hidden>
+          <label for="query">Brand or ingredient</label>
+          <input id="query" type="text" placeholder="Try “moon”" autocomplete="off" autocapitalize="none" spellcheck="false" role="combobox" aria-autocomplete="list" aria-controls="matches" aria-expanded="false">
+          <p id="status" role="status" aria-live="polite"></p>
+          <ul id="matches" role="listbox" aria-label="Matching brands" hidden></ul>
+        </div>
+        <details id="brand-index" open>
+          <summary>Alphabetical brand index</summary>
+          <ul>
+            <li><a href="https://www.gjh.com.sg/newmoon/" data-name="New Moon" data-ingredients="abalone|canned abalone" data-evidence="docs/gjh-multibrand-directory.md, New Moon">New Moon <span aria-hidden="true">↗</span></a></li>
+            <li><a href="https://www.gjh.com.sg/sony/" data-name="Sony">Sony <span aria-hidden="true">↗</span></a></li>
+          </ul>
+        </details>
+      </div>
+    </div>
+  </section>
+  <section id="ingredients" class="ingredients" aria-labelledby="ingredient-heading">
+    <div class="ingredient-copy">
+      <a class="back" href="#cover" aria-label="Back to the pantry cover">← Back</a>
+      <div>
+        <p class="eyebrow">Ingredient index</p>
+        <h2 id="ingredient-heading" tabindex="-1">Abalone</h2>
+        <p class="pack-name">New Moon Premium Wild Caught New Zealand Abalone 425g</p>
+        <a class="primary" href="https://www.gjh.com.sg/newmoon/">See matching brand <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+    <figure class="pack"><img src="new-moon-nz-425g-front.webp" width="190" height="306" loading="lazy" alt="The New Moon tin with a red band and New Zealand abalone on the label."></figure>
+  </section>
+</main>
+</body>
+</html>

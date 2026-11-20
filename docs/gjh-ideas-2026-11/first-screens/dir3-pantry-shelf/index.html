@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#191713">
+  <title>The Pantry Shelf · Goh Joo Hin</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" as="image" href="opt3-pantry-shelf-a.jpg">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+<main>
+  <section class="scene" id="pantry" aria-labelledby="pantry-title">
+    <div class="masthead"><span class="wordmark" aria-hidden="true">GJH</span><span>Goh Joo Hin Pte Ltd</span></div>
+    <div class="intro">
+      <p class="eyebrow">New Moon <span class="divider"></span> 425g</p>
+      <h1 id="pantry-title" tabindex="-1">Pull the<br><em>pantry shelf.</em></h1>
+    </div>
+    <figure class="picture" aria-label="Pantry shelf">
+      <div class="plate">
+        <img class="wood" src="opt3-pantry-shelf-a.jpg" width="1024" height="1536" alt="A worn brass cup pull catches the light beneath a dark walnut pantry shelf.">
+        <span class="moving-shelf" aria-hidden="true"></span>
+        <a class="handle" href="#open" aria-label="Pull shelf to reveal the New Moon tin">
+          <span class="handle-label"><span aria-hidden="true">↓</span> Pull shelf</span>
+        </a>
+      </div>
+      <figcaption>AI concept illustration</figcaption>
+    </figure>
+    <div class="foot"><a class="text-link" href="#label">Read label <span aria-hidden="true">↗</span></a></div>
+  </section>
+
+  <section class="scene open" id="open" aria-labelledby="open-title">
+    <div class="masthead"><span class="wordmark" aria-hidden="true">GJH</span><span>Goh Joo Hin Pte Ltd</span></div>
+    <div class="intro">
+      <p class="eyebrow">New Moon <span class="divider"></span> 425g</p>
+      <h2 id="open-title" tabindex="-1">Recognise<br><em>this tin?</em></h2>
+    </div>
+    <figure class="picture">
+      <div class="plate">
+        <img class="wood" src="opt3-pantry-shelf-b.jpg" width="1024" height="1536" loading="lazy" alt="The open walnut shelf extends into a warm patch of light.">
+        <div class="tin">
+          <img id="tin-front" src="new-moon-nz-425g-front.jpg" width="1000" height="1000" loading="lazy" alt="Pink and blue New Moon abalone tin with a yellow crescent moon on the front.">
+          <img id="tin-back" hidden src="new-moon-nz-425g-back.jpg" width="1000" height="1000" loading="lazy" alt="The other side of the New Moon tin shows an illustration of an abalone.">
+        </div>
+      </div>
+      <figcaption>AI concept illustration</figcaption>
+    </figure>
+    <div class="foot">
+      <p class="pack-name">New Moon Premium Wild Caught New Zealand Abalone 425g</p>
+      <div class="links"><button id="turn" type="button" hidden aria-controls="tin-front tin-back">Turn tin <span aria-hidden="true">↻</span></button>
+        <a class="text-link" href="#label">Read label <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </section>
+
+  <section id="label" class="label" aria-labelledby="label-title">
+    <div>
+      <p class="eyebrow">New Moon <span class="divider"></span> 425g</p>
+      <h2 id="label-title" tabindex="-1">Read the <em>label.</em></h2>
+      <p class="pack-name">New Moon Premium Wild Caught New Zealand Abalone 425g</p>
+      <a class="text-link" href="#pantry"><span aria-hidden="true">←</span> Return to shelf</a>
+    </div>
+    <div class="label-photo"><img src="new-moon-nz-425g-nutrition.jpg" width="1000" height="1000" loading="lazy" alt="The printed New Moon pack label, showing the nutrition panel, ingredients and allergen information."></div>
+  </section>
+</main>
+</body>
+</html>
