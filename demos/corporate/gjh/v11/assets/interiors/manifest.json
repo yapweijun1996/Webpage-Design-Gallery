@@ -3313,8 +3313,8 @@
       {
         "store": "S15",
         "file": "s15-recital-details.glb",
-        "bytes": 58748,
-        "sha256": "6ea7e2308380383067b81651f3d29de442f10624481aeb2c88263c1819b00e4c",
+        "bytes": 58676,
+        "sha256": "900a6b76adde5ae7d02cfe744a5ed5c31f8414a505f47d6353d0f9c5ff1af3d6",
         "triangles": 748,
         "draws": 2,
         "instances": 0,

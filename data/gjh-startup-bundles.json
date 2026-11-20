@@ -40,7 +40,7 @@
     "demos/corporate/gjh/v11/assets/interiors/baked-layout.js": "7ab3732000e4d3b22e75ce179042e9f6f7cfe3ec30f9d44653ecbedbd4476e47",
     "demos/corporate/gjh/v11/assets/interiors/config.js": "9e0beadd8b154f862ddc658777149fd98ba2673fdba839f0ab810b575159aa5b",
     "demos/corporate/gjh/v11/assets/interiors/decoration.js": "7ff4b5ca9736af48725b68adbd73828936cf4919c76861934a033d57dc2b7837",
-    "demos/corporate/gjh/v11/assets/interiors/detail-files.js": "40d4eeb3e20fcd82dcb8bc921fa92ec8a880192e1a15aea739209a3fefce102a",
+    "demos/corporate/gjh/v11/assets/interiors/detail-files.js": "2e258c5633b02dbef5956a4cd542ed0a94f3da11a2a55afeaa687b294dbca105",
     "demos/corporate/gjh/v11/assets/interiors/gogo-seats.js": "8ea6e9f124d72bb04b906750276251d080f401b80a9e92033b96afde793dd0e4",
     "demos/corporate/gjh/v11/assets/interiors/layout.js": "62f00ac969d4aad9a86ea480ae68753edf5280eeb45f3b3c87b4e3e35e5842d4",
     "demos/corporate/gjh/v11/assets/interiors/mili-seats.js": "38b88c3992f14da18745a253c83e850f4033a2cef610ca0368027fcb57b5f753",
@@ -117,7 +117,7 @@
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "74f1a2b2c4dec62ae049023dd1f18cf442d8136cbc5522cfd4026de53fd466d5",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "4529d75a883f3ef70fc172af00c49b4bf7fb3f0452a2c47adcd871d8877b99d0",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "553084f9625975615d97402c11e79b8e4ad3c625195bf9259fd46c577f902e9b",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "6b19d1400dbf821f6f9ec10cde8f7ec1ecba1c999e88241673f4c7341873a899",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "47baec7837deb630e46cb0bc58041d6d98e5e9cb7d841c3c7126eb3d81d5ec87"
   }

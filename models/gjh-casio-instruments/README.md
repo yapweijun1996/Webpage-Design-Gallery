@@ -23,7 +23,7 @@ The CT-S1BK rests on the teaching stand. The GP-510BP sits separately in the rea
 ## Casio references
 
 - CT-S1BK dimensions and supplied black-model support photograph. [Casio Singapore product page](https://www.casio.com/sg/electronic-musical-instruments/product.CT-S1BK/) · [Casio Singapore support](https://www.casio.com/sg/electronic-musical-instruments/support.CT-S1BK/)
-- CT-S1 control strip and first and last keys, EN-4–5. [Casio CT-S1 User’s Guide](https://www.casio.com/content/dam/casio/global/support/manuals/electronic-musical-instruments/pdf/008-en/c/CTS1_usersguide_EN.pdf#page=5)
+- CT-S1 control strip and first and last keys, EN-4–5. The original model uses the manual's control grouping and approximate placements cross-checked against Casio's CT-S1BK AR reference. The caps use simple unmarked geometry. Exact cap shapes, LEDs, markings and measured spacing remain open. [Casio CT-S1 User’s Guide](https://www.casio.com/content/dam/casio/global/support/manuals/electronic-musical-instruments/pdf/008-en/c/CTS1_usersguide_EN.pdf#page=5) · [Casio AR references](https://www.casio.com/us/electronic-musical-instruments/web-ar/)
 - GP-510BP dimensions, finish, pedal count and supplied exact-model product side photograph. [Casio Singapore product page](https://www.casio.com/sg/electronic-musical-instruments/product.GP-510BP/)
 - Stand panels, rear and pedal crosspiece, EN-61. [Casio GP-510 User’s Guide](https://www.casio.com/content/dam/casio/global/support/manuals/electronic-musical-instruments/pdf/008-en/g/GP510_usersguide_A_EN.pdf#page=63)
 

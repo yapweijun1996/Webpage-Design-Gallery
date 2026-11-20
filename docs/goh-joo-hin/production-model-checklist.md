@@ -141,7 +141,7 @@ S12 passed both Chrome routes with matching live asset bytes across the same Pag
 [Design and runtime](14-lg/README.md) · [Inventory](14-lg/model-inventory.md)
 
 - [x] **OLED55C5PSA stand-free cabinet.** The [editable model](../../models/gjh-lg-oled/README.md) uses the 1,222 × 703 × 45.1 mm envelope, stepped rear housing, vent and four VESA mounts. The enlarged gallery screen retains its own content.
-- [ ] **Exact OLED55C5PSA.ATC jack panel.** Obtain a sharp Singapore rear and side connector view for layout, socket orientation and casing details.
+- [ ] **Exact OLED55C5PSA.ATC jack panel.** LG Singapore specifies four HDMI inputs, with eARC on HDMI 2, three USB ports, Ethernet, optical out and RF. Its support page supplies a C5 family setup guide that shows the rear cable routing and individual plug types. It leaves the exact Singapore jack order, orientation and placement open. Obtain a sharp connector photo or labeled jack diagram for the ATC unit. [Singapore specifications](https://www.lg.com/sg/tvs-soundbars/oled-evo/oled55c5psa/) · [ATC support and setup guide](https://www.lg.com/sg/support/product-support/cs-OLED55C5PSA.ATC/)
 
 S13 and S14 passed both Chrome routes on Pages build `e41e09428bb8f71f` with matching live GLB hashes. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44653176777)
 
@@ -150,8 +150,9 @@ S13 and S14 passed both Chrome routes on Pages build `e41e09428bb8f71f` with mat
 [Design and runtime](15-casio/README.md) · [Inventory](15-casio/model-inventory.md)
 
 - [x] **Casiotone CT-S1BK.** Published envelope, 61-key arrangement, dark speaker deck and top controls in the [editable model](../../models/gjh-casio-instruments/README.md).
+- [x] **CT-S1BK control layout, unprinted exhibit detail.** The power button, offset volume knob, four utility buttons, seven main tone buttons and separately spaced tone variation button follow the manufacturer manual and AR reference. [CT-S1 guide, EN-4](https://www.casio.com/content/dam/casio/global/support/manuals/electronic-musical-instruments/pdf/008-en/c/CTS1_usersguide_EN.pdf#page=5) · [Casio AR references](https://www.casio.com/us/electronic-musical-instruments/web-ar/)
 - [x] **CELVIANO Grand Hybrid GP-510BP.** Separate closed-lid, closed-cover cabinet with three pedals on the rear wall. The recital grand stays in the centre.
-- [ ] **Detailed controls and finishes.** Use measured component views for exact switch spacing, materials and key detail. Instrument audio and Sit are separate interaction work.
+- [ ] **Detailed controls and finishes.** Obtain measured views for exact cap and switch dimensions, materials, indicators and key detail. Casio's AR references are simulations. The GP-510BP's open control panel is documented in the catalogue for a separate open-state study. Instrument audio and Sit are separate interaction work. [Casio AR references](https://www.casio.com/us/electronic-musical-instruments/web-ar/) · [Grand Hybrid catalogue](https://www.casio.com/content/dam/casio/global/emi/catalog/pdf/ja/celviano-grand-hybrid.pdf)
 
 ## S16 GP Batteries
 
