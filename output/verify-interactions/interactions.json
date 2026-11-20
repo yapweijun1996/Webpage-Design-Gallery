@@ -1,5 +1,309 @@
 [
   {
+    "shop": "S01",
+    "item": "S01-focal",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-focal-before.png, output/verify-interactions/S01-focal-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-shelves1",
+    "label": "Open drawer",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-shelves1-before.png, output/verify-interactions/S01-shelves1-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-shelves2",
+    "label": "Open drawer",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-shelves2-before.png, output/verify-interactions/S01-shelves2-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-shelves3",
+    "label": "Open drawer",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-shelves3-before.png, output/verify-interactions/S01-shelves3-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-shelves4",
+    "label": "Open drawer",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-shelves4-before.png, output/verify-interactions/S01-shelves4-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-kettle",
+    "label": "Pour tea",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-kettle-before.png, output/verify-interactions/S01-kettle-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-cups1",
+    "label": "Pour tea",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-cups1-before.png, output/verify-interactions/S01-cups1-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-cups2",
+    "label": "Pour tea",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-cups2-before.png, output/verify-interactions/S01-cups2-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-cups3",
+    "label": "Pour tea",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-cups3-before.png, output/verify-interactions/S01-cups3-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-pend1",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-pend1-before.png, output/verify-interactions/S01-pend1-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-plant1",
+    "label": "Water plant",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-plant1-before.png, output/verify-interactions/S01-plant1-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-rearLights",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-rearLights-before.png, output/verify-interactions/S01-rearLights-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-photo1",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-photo1-before.png, output/verify-interactions/S01-photo1-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-focal",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-focal-before.png, output/verify-interactions/S02-focal-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-cookbase",
+    "label": "Serve tasting plate",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-cookbase-before.png, output/verify-interactions/S02-cookbase-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-boiler",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-boiler-before.png, output/verify-interactions/S02-boiler-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-miliwall",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-miliwall-before.png, output/verify-interactions/S02-miliwall-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-chop",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-chop-before.png, output/verify-interactions/S02-chop-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-plate",
+    "label": "Serve tasting plate",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-plate-before.png, output/verify-interactions/S02-plate-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-rearLights1",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-rearLights1-before.png, output/verify-interactions/S02-rearLights1-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-rearLights2",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-rearLights2-before.png, output/verify-interactions/S02-rearLights2-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-plant2",
+    "label": "Water herbs",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-plant2-before.png, output/verify-interactions/S02-plant2-after.png"
+  },
+  {
+    "shop": "S02",
+    "item": "S02-tasting-plate",
+    "label": "Serve tasting plate",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S02-tasting-plate-before.png, output/verify-interactions/S02-tasting-plate-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-focal",
+    "label": "Ring bell",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-focal-before.png, output/verify-interactions/S03-focal-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-drink",
+    "label": "Pour drink",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-drink-before.png, output/verify-interactions/S03-drink-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-gbar",
+    "label": "Pour drink",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-gbar-before.png, output/verify-interactions/S03-gbar-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-pend3",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-pend3-before.png, output/verify-interactions/S03-pend3-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-cold",
+    "label": "View",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-cold-before.png, output/verify-interactions/S03-cold-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-fern3",
+    "label": "Water plant",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-fern3-before.png, output/verify-interactions/S03-fern3-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-tray3",
+    "label": "Pour drink",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-tray3-before.png, output/verify-interactions/S03-tray3-after.png"
+  },
+  {
+    "shop": "S04",
+    "item": "S04-focal",
+    "label": "Turn a patch folio page",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S04-focal-before.png, output/verify-interactions/S04-focal-after.png"
+  },
+  {
+    "shop": "S04",
+    "item": "S04-backright",
+    "label": "Water the orchid",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S04-backright-before.png, output/verify-interactions/S04-backright-after.png"
+  },
+  {
+    "shop": "S05",
+    "item": "S05-focal",
+    "label": "Open a specimen drawer",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S05-focal-before.png, output/verify-interactions/S05-focal-after.png"
+  },
+  {
+    "shop": "S05",
+    "item": "S05-leftmid",
+    "label": "Open the display case",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S05-leftmid-before.png, output/verify-interactions/S05-leftmid-after.png"
+  },
+  {
+    "shop": "S06",
+    "item": "S06-focal",
+    "label": "Turn the ship wheel",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S06-focal-before.png, output/verify-interactions/S06-focal-after.png"
+  },
+  {
+    "shop": "S06",
+    "item": "S06-onleft",
+    "label": "Serve a noodle sample",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S06-onleft-before.png, output/verify-interactions/S06-onleft-after.png"
+  },
+  {
+    "shop": "S07",
+    "item": "S07-focal",
+    "label": "Take a tower sample",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S07-focal-before.png, output/verify-interactions/S07-focal-after.png"
+  },
+  {
+    "shop": "S07",
+    "item": "S07-onleft",
+    "label": "Plate a banquet sample",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S07-onleft-before.png, output/verify-interactions/S07-onleft-after.png"
+  },
+  {
     "shop": "S08",
     "item": "S08-focal",
     "label": "Lift the jar lid",
@@ -14,6 +318,70 @@
     "reachable": true,
     "triggered": true,
     "screenshot": "output/verify-interactions/S08-onleft-before.png, output/verify-interactions/S08-onleft-after.png"
+  },
+  {
+    "shop": "S09",
+    "item": "S09-focal",
+    "label": "Press the conveyor button",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S09-focal-before.png, output/verify-interactions/S09-focal-after.png"
+  },
+  {
+    "shop": "S09",
+    "item": "S09-onleft",
+    "label": "Scan a display tin",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S09-onleft-before.png, output/verify-interactions/S09-onleft-after.png"
+  },
+  {
+    "shop": "S10",
+    "item": "S10-focal",
+    "label": "Open the clam",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S10-focal-before.png, output/verify-interactions/S10-focal-after.png"
+  },
+  {
+    "shop": "S10",
+    "item": "S10-backright",
+    "label": "Water the orchid",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S10-backright-before.png, output/verify-interactions/S10-backright-after.png"
+  },
+  {
+    "shop": "S11",
+    "item": "S11-focal",
+    "label": "Unbox a deli parcel",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S11-focal-before.png, output/verify-interactions/S11-focal-after.png"
+  },
+  {
+    "shop": "S11",
+    "item": "S11-onleft",
+    "label": "Weigh the parcel",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S11-onleft-before.png, output/verify-interactions/S11-onleft-after.png"
+  },
+  {
+    "shop": "S12",
+    "item": "S12-focal",
+    "label": "Pair the herb with its leaf print",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S12-focal-before.png, output/verify-interactions/S12-focal-after.png"
+  },
+  {
+    "shop": "S12",
+    "item": "S12-backright",
+    "label": "Water the garden orchid",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S12-backright-before.png, output/verify-interactions/S12-backright-after.png"
   },
   {
     "shop": "S13",
@@ -40,6 +408,62 @@
     "screenshot": "output/verify-interactions/S13-leftfront-before.png, output/verify-interactions/S13-leftfront-after.png"
   },
   {
+    "shop": "S14",
+    "item": "S14-focal",
+    "label": "Change the TV channel",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S14-focal-before.png, output/verify-interactions/S14-focal-after.png"
+  },
+  {
+    "shop": "S14",
+    "item": "S14-backleft",
+    "label": "Open the refrigerator",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S14-backleft-before.png, output/verify-interactions/S14-backleft-after.png"
+  },
+  {
+    "shop": "S15",
+    "item": "S15-focal",
+    "label": "Play the piano phrase",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S15-focal-before.png, output/verify-interactions/S15-focal-after.png"
+  },
+  {
+    "shop": "S15",
+    "item": "S15-leftfront",
+    "label": "Play the keyboard phrase",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S15-leftfront-before.png, output/verify-interactions/S15-leftfront-after.png"
+  },
+  {
+    "shop": "S15",
+    "item": "S15-pianoback",
+    "label": "Toggle demo audio",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S15-pianoback-before.png, output/verify-interactions/S15-pianoback-after.png"
+  },
+  {
+    "shop": "S16",
+    "item": "S16-focal",
+    "label": "Switch the torch",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S16-focal-before.png, output/verify-interactions/S16-focal-after.png"
+  },
+  {
+    "shop": "S16",
+    "item": "S16-leftfront",
+    "label": "Test the battery cells",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S16-leftfront-before.png, output/verify-interactions/S16-leftfront-after.png"
+  },
+  {
     "shop": "S17",
     "item": "S17-handset",
     "label": "Lift the receiver",
@@ -54,5 +478,45 @@
     "reachable": true,
     "triggered": true,
     "screenshot": "output/verify-interactions/S17-onleft-before.png, output/verify-interactions/S17-onleft-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-stools11",
+    "label": "Sit",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-stools11-before.png, output/verify-interactions/S01-stools11-after.png"
+  },
+  {
+    "shop": "S01",
+    "item": "S01-stools12",
+    "label": "Sit",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S01-stools12-before.png, output/verify-interactions/S01-stools12-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-stools31",
+    "label": "Sit",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-stools31-before.png, output/verify-interactions/S03-stools31-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-stools32",
+    "label": "Sit",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-stools32-before.png, output/verify-interactions/S03-stools32-after.png"
+  },
+  {
+    "shop": "S03",
+    "item": "S03-stools33",
+    "label": "Sit",
+    "reachable": true,
+    "triggered": true,
+    "screenshot": "output/verify-interactions/S03-stools33-before.png, output/verify-interactions/S03-stools33-after.png"
   }
 ]
