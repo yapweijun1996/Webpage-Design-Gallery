@@ -17,14 +17,14 @@ const SECTION_BASE = /^\d{2}-[\w-]+$/;
 const REQUIRED_IDS = ['layout', 'qa'];
 const MAX_SQUAD = 8;
 const NON_LAYER_WRITES = new Map([
-  ['image-gen', ['assets/generated/{base}-*.png']],
+  ['image-gen', ['assets/generated/{base}-*.png', 'assets/generated/{base}-*.webp', 'assets/generated/{base}-*.jpg']],
   ['copy', []],
   ['researcher', ['research.md']],
 ]);
 
 const IMAGE_GENERATION = [
   /\b(?:image[- ]gen(?:eration|erator)?|text[- ]to[- ]image)\b/i,
-  /\b(?:new|generate|create|replace|swap(?:\s+out)?)\s+(?:(?:an?|the|our|old|existing|new|custom|hero|background)\s+)*(?:images?|artwork|photos?|pictures?|illustrations?)\b/i,
+  /\b(?:new|generate|regenerate|re-?create|create|make|draw|produce|replace|swap(?:\s+out)?)\s+(?:(?:an?|the|our|old|existing|new|custom|hero|background)\s+)*(?:images?|artwork|photos?|pictures?|illustrations?)\b/i,
 ];
 
 // Pair new assets with their CSS treatment before filling the remaining specialist slots.

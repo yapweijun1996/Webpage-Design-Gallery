@@ -6,7 +6,10 @@
     "role": "workers",
     "runner": "pi",
     "mission": "Own semantic HTML, responsive structure and spacing. Integrate copy proposals and specialist handoffs in the focused section.",
-    "writes": ["sections/{base}.html", "sections/{base}.layout.css"]
+    "writes": [
+      "sections/{base}.html",
+      "sections/{base}.layout.css"
+    ]
   },
   {
     "id": "type",
@@ -15,7 +18,9 @@
     "role": "workers",
     "runner": "pi",
     "mission": "Refine font choices, hierarchy, scale, line lengths and rhythm using the design system.",
-    "writes": ["sections/{base}.type.css"]
+    "writes": [
+      "sections/{base}.type.css"
+    ]
   },
   {
     "id": "color",
@@ -24,7 +29,9 @@
     "role": "workers",
     "runner": "pi",
     "mission": "Refine palette, contrast and interactive colour states using the design system's theme tokens.",
-    "writes": ["sections/{base}.color.css"]
+    "writes": [
+      "sections/{base}.color.css"
+    ]
   },
   {
     "id": "imagery",
@@ -33,7 +40,9 @@
     "role": "workers",
     "runner": "pi",
     "mission": "Art-direct the section's visuals with responsive crops, overlays and filters. Coordinate asset placement with Layout.",
-    "writes": ["sections/{base}.imagery.css"]
+    "writes": [
+      "sections/{base}.imagery.css"
+    ]
   },
   {
     "id": "image-gen",
@@ -41,8 +50,12 @@
     "layer": null,
     "role": "image",
     "runner": "codex",
-    "mission": "Use Codex image generation to create new PNG assets for the section. Share the file paths and suggested placement with Imagery and Layout through chat.",
-    "writes": ["assets/generated/{base}-*.png"]
+    "mission": "Use Codex image generation to create new image assets for the section. Wide hero backgrounds must be at least 1600 px wide: generate at full size, then convert with `cwebp -q 78` (or `sips` to JPEG) so the final file is under 200 KB, and delete the heavy original. Share the file paths and suggested placement with Imagery and Layout through chat.",
+    "writes": [
+      "assets/generated/{base}-*.png",
+      "assets/generated/{base}-*.webp",
+      "assets/generated/{base}-*.jpg"
+    ]
   },
   {
     "id": "icons",
@@ -51,7 +64,9 @@
     "role": "workers",
     "runner": "pi",
     "mission": "Make icon styling consistent and legible. Send any inline SVG markup or accessibility labels to Layout through chat.",
-    "writes": ["sections/{base}.icons.css"]
+    "writes": [
+      "sections/{base}.icons.css"
+    ]
   },
   {
     "id": "copy",
@@ -69,7 +84,9 @@
     "role": "workers",
     "runner": "pi",
     "mission": "Refine transitions and animation timings. Keep the section usable with reduced motion enabled.",
-    "writes": ["sections/{base}.motion.css"]
+    "writes": [
+      "sections/{base}.motion.css"
+    ]
   },
   {
     "id": "qa",
@@ -78,7 +95,9 @@
     "role": "workers",
     "runner": "pi",
     "mission": "Review the integrated section across viewports and check keyboard access, contrast and reduced motion. Report findings and apply small CSS fixes in the polish layer.",
-    "writes": ["sections/{base}.polish.css"]
+    "writes": [
+      "sections/{base}.polish.css"
+    ]
   },
   {
     "id": "researcher",
@@ -87,6 +106,8 @@
     "role": "research",
     "runner": "codex",
     "mission": "Use Codex web search to verify relevant brand facts and collect references. Record source links and practical guidance in research.md.",
-    "writes": ["research.md"]
+    "writes": [
+      "research.md"
+    ]
   }
 ]

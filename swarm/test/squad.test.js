@@ -130,7 +130,7 @@ test('the file guard permits only the assigned output paths for each specialist'
     type: ['sections/02-hero.type.css'],
     color: ['sections/02-hero.color.css'],
     imagery: ['sections/02-hero.imagery.css'],
-    'image-gen': ['assets/generated/02-hero-illustration.png'],
+    'image-gen': ['assets/generated/02-hero-illustration.png', 'assets/generated/02-hero-illustration.webp', 'assets/generated/02-hero-illustration.jpg'],
     icons: ['sections/02-hero.icons.css'],
     copy: [],
     motion: ['sections/02-hero.motion.css'],
@@ -142,7 +142,7 @@ test('the file guard permits only the assigned output paths for each specialist'
     'sections/02-hero.css', 'sections/03-news.html', 'sections/02-hero-alternate.type.css',
     ...SPECIALISTS.filter(spec => spec.layer).map(spec => `sections/03-news.${spec.layer}.css`),
     'assets/generated/03-news-illustration.png', 'assets/generated/02-hero-nested/asset.png',
-    'assets/generated/02-hero-illustration.jpg', 'assets/02-hero-illustration.png',
+    'assets/02-hero-illustration.png', 'assets/generated/02-hero-illustration.gif',
   ];
   const changed = new Map(candidates.map(file => [file, { size: 1 }]));
   for (const spec of SPECIALISTS) {
