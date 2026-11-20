@@ -65,10 +65,13 @@ S05 passed on Pages build `ef5f8f14a4d09bd5`. Both Chrome routes entered the sho
 
 The unprinted Blender studies reached the visual review stage. The rendered sleeves and seal still read as stiff parts because the transparent film's continuous wrap did not carry through the side views. The production room retains the loom and catalogue story. Revisit the soft outer-film representation within the existing opaque-room rendering contract.
 
+The retained room passed Desktop and 390 px touch-emulated Chrome on Pages build `101413f9fe9fecb4`. The room GLB matched the local baseline. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44641223105)
+
 ## S07 Gu Long
 
 [Design and runtime](07-gu-long/README.md) · [Inventory](07-gu-long/model-inventory.md)
 
+- [x] **Stewed Pork Chops and Stewed Pork 256 g, unprinted form studies.** Each official photo shows rolled rims and a recessed pull-tab lid. The [editable shelf specimens](../../models/gjh-gulong-tins/README.md) share a short 90 × 75 mm display estimate.
 - [ ] **Stewed Pork Chops 256 g.** Measure can and roll seam, then verify label position on a single specimen.
 - [ ] **Stewed Pork 256 g.** Verify same-edition references and own can profile and artwork. Keep the stepped pyramid distinct.
 

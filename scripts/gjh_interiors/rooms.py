@@ -3,6 +3,7 @@ from math import cos, pi, radians, sin, tau
 
 from mesh import CRAFT, PRINT, PULSE, SCROLL, Room, library_profile, logo
 from borsch_packs import add_borsch_lingzhi_pair, add_borsch_patch_pack
+from gulong_tins import SAMPLES as GULONG_SAMPLES, SHELF_TOP as GULONG_SHELF_TOP, add_gulong_tin
 from mili_mock_duck import add_mili_mock_duck
 from pzh_carton import add_pzh_carton
 
@@ -199,8 +200,16 @@ def dragon(r,profiles):
         silhouette([(dx,dy),(dx-.055,dy+.14),(dx+.093,dy+.018)],"feb46c")
     for side in (-1,1):
         for i in range(3):
-            lantern(r,side*(2.51+.08*i),3.27+.07*(i%2),1.5-i*1.38,.16,.33,"e64b37",profiles["lantern"],4.05,7)
-    for i in range(3): r.ring(-1.1+i*.78,r.floor,2.25,.38,.38,.045,GOLD,PRINT,True)
+            lantern(r,side*(2.51+.08*i),3.27+.07*(i%2),1.5-i*1.38,.16,.33,"e64b37",profiles["lantern"],4.05,5)
+    for i in range(3): r.ring(-1.1+i*.78,r.floor,2.25,.38,.38,.045,GOLD,PRINT,True,n=10)
+    # The rack sides reach the stock datum, but the highest interior ledge is lower.
+    # Bridge the gap between the two rack sides with a flush comparison surface.
+    thickness = .036
+    r.box(-2.65,GULONG_SHELF_TOP-thickness/2,-1.95,.792,thickness,1.18048,"c4b098")
+    r.gulong_tin_bands = [
+        add_gulong_tin(r.batches[CRAFT], colour, x, GULONG_SHELF_TOP, z, include_base=False)
+        for _, colour, x, z in GULONG_SAMPLES
+    ]
     r.tag(-.52,.73,.009,.32)
 
 

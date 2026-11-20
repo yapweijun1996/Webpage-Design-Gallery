@@ -21,5 +21,5 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| GuLong Stewed Pork Chops 256g | Primary pyramid and one front inspection sample | Pending matched cylinder and label mapping. The existing pyramid is a reusable fixture. |
-| GuLong Stewed Pork 256g | Separate rear shelf bay | Pending same-era product references and model. |
+| GuLong Stewed Pork Chops 256g | Visitor edge of the left provision shelf | Short unprinted cylindrical sample with rolled seams, recessed lid and open pull ring. Estimated 90 × 75 mm. [Source and official references](../../../models/gjh-gulong-tins/README.md) |
+| GuLong Stewed Pork 256g | Left provision shelf beside the chops specimen | Separate unprinted sample with the shared estimated cylinder profile. Exact measurements and label mapping remain open. [Source and official references](../../../models/gjh-gulong-tins/README.md) |

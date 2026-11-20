@@ -3172,9 +3172,9 @@
       {
         "store": "S07",
         "file": "s07-dragon-details.glb",
-        "bytes": 79092,
-        "sha256": "1ae48f02ea806483a1d06df471d2178a8a8875b91318ba8b03beeb44a75da66f",
-        "triangles": 1182,
+        "bytes": 86224,
+        "sha256": "d18e284965ce043fa438a547e4aef9b842dba1aa7666117a1c25ef99011e2d57",
+        "triangles": 1250,
         "draws": 3,
         "instances": 4,
         "motion": [],
