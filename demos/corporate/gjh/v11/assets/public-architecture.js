@@ -80,7 +80,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
 
   // Ground paving and the upper deck share one marble draw. Project UVs in
   // metres so the veining keeps its scale on both the court and clipped deck.
-  materials.paving = new T.MeshStandardMaterial({color:0xded8ce,roughness:.28,metalness:.16});
+  materials.paving = new T.MeshStandardMaterial({color:0xb7a891,roughness:.30,metalness:.10});
   const stone = [new T.BoxGeometry(49.85,.002,47.85).translate(10,-.013,24)];
   if (daylightSkylight) for (const {minX,maxX,minZ,maxZ} of cutRectangle(liftLayout.slab,liftLayout.shaft)) {
     stone.push(new T.PlaneGeometry(maxX-minX,maxZ-minZ).rotateX(-Math.PI/2)
@@ -119,7 +119,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     map.wrapS=map.wrapT=T.RepeatWrapping;map.repeat.set(4,15);map.anisotropy=4;
     materials.courtStone.map=map;
   }
-  materials.courtStone.color.set(0xc9cbc0);
+  materials.courtStone.color.set(0xb8af99);
   materials.courtStone.metalness = .07;
   materials.courtStone.roughness = .33;
   box('courtStone',10,-.006,33,6.05,.009,29.6);

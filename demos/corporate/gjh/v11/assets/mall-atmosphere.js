@@ -20,8 +20,8 @@ const SURFACES = {
 // Fixture tints are in display sRGB. Kelvin and focus coordinates still come
 // from the shop programme. These tints describe the light, not the brand paint.
 const SHOP_LAMPS = {
-  S01:0xffd9a7, S02:0xf3edc1, S03:0xe0fbe4,
-  S13:0xe3f1ff, S14:0xf6efe8, S15:0xffc47d
+  S01:0xffd193, S02:0xf5dfa5, S03:0xe9eab8,
+  S13:0xe3f1ff, S14:0xf8e3c2, S15:0xffc47d
 };
 
 export function shopLampTint(T, id) {
@@ -106,9 +106,9 @@ export function createMallSurfaceAtmosphere(T, scene, {
 }
 
 const STUDIO_LIGHTING = {
-  atrium: {walls:0x675f5d, panels:0xffdcb7, ceiling:0xe0e9f0, width:7, intensity:.52, ceilingGain:2.0},
-  corridor: {walls:0x66615b, panels:0xf5e6d4, ceiling:0xd7cbbb, width:5, intensity:.58},
-  shop: {walls:0x9e9184, panels:0xffefe0, ceiling:0xffefe1, width:3, intensity:.94}
+  atrium: {walls:0x766754, panels:0xf7ca96, ceiling:0xe8dcc8, width:7, intensity:.52, ceilingGain:1.35},
+  corridor: {walls:0x6e6251, panels:0xf5debf, ceiling:0xd7c4a8, width:5, intensity:.58},
+  shop: {walls:0x9e8a72, panels:0xffe5c6, ceiling:0xffe8cc, width:3, intensity:.94}
 };
 
 const CLASSIC_STUDIO_LIGHTING = {
@@ -154,13 +154,14 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       ? (expanded ? .91 : .74) + .20*(mood.kelvin-2700)/1300 + .10*accentLuminance
       : studioLighting.shop.intensity;
     const lamp = expanded && SHOP_LAMPS[store?.id] ? new T.Color(shopLampTint(T,store.id)) : null;
+    const newMoon = expanded && store?.id === 'S01';
     const gogo = expanded && store?.id === 'S03', lg = expanded && store?.id === 'S14';
     return {slot,x,z,mood,keyPosition,accentPosition,accent,lamp,
       environmentIntensity:environmentIntensity * (gogo ? .92 : lg ? .94 : 1),
-      keyGain:gogo ? .91 : lg ? .81 : 1, doorFill:gogo ? .90 : lg ? 1.38 : 1,
-      shadowFill:lg ? .075 : 0,
+      keyGain:gogo ? .91 : lg ? .81 : newMoon ? .92 : 1, doorFill:gogo ? .90 : lg ? 1.38 : 1,
       temperature:mood ? kelvinColour(T,mood.kelvin) : interiorWarm, colors:[new T.Color(),new T.Color()]};
   });
+  const lgSlot = expanded && bays.find(bay => bay.slot.number === '14')?.slot;
   const lights = Array.from({length:2}, (_, index) => {
     const light = new T.PointLight(0xffe5c1, 0, 11, 2);
     light.name = `Shop focus accent ${index + 1}`;
@@ -230,12 +231,17 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     const inside = Math.abs(y) < 4 ? bays.find(bay => insideBay(x,z,bay.slot)) : null;
     const publicZone = publicEnvironmentZone(position,atrium);
     if (expanded) setPortraitFill(inside,publicZone);
-    let shadowFill = tier === 'low' && publicZone === 'atrium' ? .08 : 0;
+    let shadowFill = tier === 'low' && publicZone === 'atrium' ? .16 : 0;
+    if (lgSlot && Math.abs(y) < 4) {
+      // Include the arcade in front of LG, where its navigation shortcut arrives.
+      const dx = Math.max(lgSlot.minX-x,x-lgSlot.maxX,0);
+      const dz = Math.max(lgSlot.minZ-z,z-lgSlot.maxZ,0);
+      shadowFill += .18 * Math.max(0,1-Math.hypot(dx,dz)/7);
+    }
     if (inside?.mood) {
       const {minX,maxX,minZ,maxZ} = inside.slot;
       const edge = Math.min(x-minX,maxX-x,z-minZ,maxZ-z);
       const weight = Math.min(1,edge/1.6);
-      shadowFill += weight*(inside.shadowFill-shadowFill);
       const outside = studioLighting[publicZone].intensity;
       selectEnvironment('shop',outside + weight*(inside.environmentIntensity-outside));
     } else selectEnvironment(inside ? 'shop' : publicZone);
@@ -305,7 +311,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     for (const [x,z,w] of [[-2,-4,3],[2,4,2]]) {
       const panel = new T.Mesh(geometry,materials[1]); panel.position.set(x,2,z); panel.scale.set(w,.2,2); studio.add(panel);
     }
-    // Warm vertical returns and a cool skylight share the existing atrium PMREM.
+    // Warm vertical returns and softer overhead light share the existing atrium PMREM.
     // On the polished stone their narrow highlights stretch at grazing angles.
     let pierHighlights;
     if (expanded) {

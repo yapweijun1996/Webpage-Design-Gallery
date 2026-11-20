@@ -1822,7 +1822,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       }
     }
   }
-  materials.paving = new T.MeshStandardMaterial({ color: 14604494, roughness: 0.28, metalness: 0.16 });
+  materials.paving = new T.MeshStandardMaterial({ color: 12036241, roughness: 0.3, metalness: 0.1 });
   const stone = [new T.BoxGeometry(49.85, 0.002, 47.85).translate(10, -0.013, 24)];
   if (daylightSkylight)
     for (const { minX, maxX, minZ, maxZ } of cutRectangle(liftLayout.slab, liftLayout.shaft)) {
@@ -1872,7 +1872,7 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
     map.anisotropy = 4;
     materials.courtStone.map = map;
   }
-  materials.courtStone.color.set(13224896);
+  materials.courtStone.color.set(12103577);
   materials.courtStone.metalness = 0.07;
   materials.courtStone.roughness = 0.33;
   box("courtStone", 10, -0.006, 33, 6.05, 0.009, 29.6);
@@ -8783,11 +8783,11 @@ var SURFACES = {
   detailed: { roughness: 0.85, emission: 1.1, washOpacity: 0.94 }
 };
 var SHOP_LAMPS = {
-  S01: 16767399,
-  S02: 15986113,
-  S03: 14744548,
+  S01: 16765331,
+  S02: 16113573,
+  S03: 15329976,
   S13: 14938623,
-  S14: 16183272,
+  S14: 16311234,
   S15: 16761981
 };
 function shopLampTint(T, id) {
@@ -9113,7 +9113,7 @@ var EVERYDAY = Object.freeze({
     liftGate: 11901794,
     liftGlassOpacity: 0.24
   }),
-  lighting: Object.freeze({ sky: 16183011, ground: 9536632, ambient: 0.52, key: 16760464, keyIntensity: 1.6, fog: 6707789, exposure: 0.72 }),
+  lighting: Object.freeze({ sky: 16379096, ground: 10192236, ambient: 0.52, key: 16760464, keyIntensity: 1.6, fog: 6707789, exposure: 0.72 }),
   decorationRefs: Object.freeze([])
 });
 var LUNAR_NEW_YEAR = Object.freeze({
@@ -10685,7 +10685,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         const [px, py, pz] = worldInteriorPoint(store2, [(fx + standingX) / 2, floorY, (fz + standingZ) / 2]);
         const width = id === "S01" ? 7.8 : 3.25;
         const intensity = id === "S03" ? 1.1 : 1.42;
-        lightWash(px, py, pz, width, 2.75, store2.frame.yaw_world_deg * Math.PI / 180, -Math.PI / 2, activeShopSlot, id === "S01" ? 16769462 : 16771267, intensity);
+        lightWash(px, py, pz, width, 2.75, store2.frame.yaw_world_deg * Math.PI / 180, -Math.PI / 2, activeShopSlot, id === "S01" ? 16764561 : 16768942, intensity);
         if (id === "S04") {
           for (const [storyId, [x, z]] of [
             ["borsch-patch-story", store2.anchor.standing],

@@ -5,7 +5,7 @@ import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {createMallAtmosphere} from '../demos/corporate/gjh/v11/assets/mall-atmosphere.js';
 import {createMallBakedLighting, createSkylightDapple} from '../demos/corporate/gjh/v11/assets/mall-baked-lighting.js';
 import {createPlayerShadow} from '../demos/corporate/gjh/v11/assets/mall-player-shadow.js';
-import {expandedLayout} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
+import {expandedLayout, expandedStoreArrival} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
 import {interiorStores, worldInteriorBox} from '../demos/corporate/gjh/v11/assets/interiors/config.js';
 import {liftLayout} from '../demos/corporate/gjh/v11/assets/lift-layout.js';
 import {createWarmReport, prepareTier} from '../demos/corporate/gjh/v11/assets/scene-warmup.js';
@@ -221,6 +221,13 @@ test('bundled world starts and submits expanded Low, Balanced and Detailed frame
     render(scene){scene.traverseVisible(node=>{if(node.isMesh)info.render.calls++;});}
   };
   const atmosphere=createMallAtmosphere(three,renderer,world.scene,expandedLayout.slots);
+  const ambient=world.scene.children.find(node=>node.isHemisphereLight);
+  const ambientBase=ambient.intensity;
+  const lgArrival={...expandedStoreArrival('planned-space-14'),y:.89};
+  atmosphere.update(lgArrival,0,'balanced');
+  assert.ok(ambient.intensity > ambientBase,'LG fill reaches the standard entrance pose');
+  atmosphere.update({...lgArrival,y:7.2},0,'balanced');
+  assert.equal(ambient.intensity,ambientBase,'LG fill stays on the ground level');
   assert.equal(world.scene.getObjectByName(floorName).visible,false);
   const dapple=world.scene.getObjectByName('Atrium skylight tree shadow');
   assert.ok(dapple?.isInstancedMesh && !dapple.visible && !dapple.castShadow && !dapple.receiveShadow);

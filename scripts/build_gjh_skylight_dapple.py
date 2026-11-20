@@ -11,8 +11,9 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 SIZE = 512
 TILES = 4
 PANES_X, PANES_Z = 10, 5
-SUN = (255, 229, 183)
-MAX_ALPHA = 49
+# Display sRGB approximation of a 3200 K source.
+SUN = (255, 184, 123)
+MAX_ALPHA = 44
 OUTPUT = (Path(__file__).resolve().parents[1]
           / 'demos/corporate/gjh/v11/assets/mall-skylight-dapple-512.png')
 

@@ -25,7 +25,7 @@ def marble_tile():
             cloud = 3.3 * math.cos(u - v) + 2.2 * math.sin(2*u + v) + 1.1 * math.sin(11*u - 7*v)
             vein = 16 * math.exp(-75*main**2) + 6 * math.exp(-145*striation**2)
             pixels.extend(round(value + cloud - vein*strength) for value,strength in
-                          ((225,1.13),(220,1.03),(210,.88)))
+                          ((233,1.06),(220,1.02),(192,.94)))
     return Image.frombytes('RGB', (size, size), bytes(pixels))
 
 

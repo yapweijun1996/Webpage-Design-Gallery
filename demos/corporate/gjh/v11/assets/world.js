@@ -1204,7 +1204,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       const width = id === 'S01' ? 7.8 : 3.25;
       const intensity = id === 'S03' ? 1.10 : 1.42;
       lightWash(px,py,pz,width,2.75,store.frame.yaw_world_deg*Math.PI/180,-Math.PI/2,
-        activeShopSlot,id === 'S01' ? 0xffe1b6 : 0xffe8c3,intensity);
+        activeShopSlot,id === 'S01' ? 0xffce91 : 0xffdfae,intensity);
       if (id === 'S04') {
         for (const [storyId, [x, z]] of [
           ['borsch-patch-story', store.anchor.standing],

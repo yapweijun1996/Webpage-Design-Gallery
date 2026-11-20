@@ -1,43 +1,45 @@
 # GJH v11 lighting pass 6
 
-Base revision: `b48e4715`, the worktree's local `origin/main` at the start of this pass. The reference is the modern premium courtyard concept. [Reference image](references/gjh-mall-modern-premium-concept.png)
+The original pass at `c0454662` added a shared marble batch for the courtyard and upper deck, a brighter skylight backing, crisp projected mullions, and focal pools at the shops' authored fixtures. The headed Chrome review confirmed clear veins and pane edges and measured a brighter, cooler render than the warm ivory concept. [Concept reference](references/gjh-mall-modern-premium-concept.png)
 
-The courtyard and upper deck share one ivory marble draw. The seamless 512 px tile repeats in world metres, and the lift kit's existing atlas uses the same pattern. Marble roughness is 0.28 on Low, 0.255 on Balanced and 0.238 on Detailed. The fitted lift uses 0.282. The atrium environment now includes a cooler overhead reflection and narrow warm vertical highlights for the piers. The brighter blue canopy backing shows darker tree silhouettes through the existing ribs. Balanced and Detailed retain the projected sunlight layer with tighter mullion edges, warmer sun and less leaf modulation. Low uses the shared marble, skylight and environment reflections with its existing projection draw disabled.
+## Colour correction
 
-Warm focal pools use each shop's authored light and standing positions. The New Moon cabinet wall gets a wider wash, and MILI and GOGO get tighter pools near the island and cart. The existing wash batch culls these instances using shop proximity, frustum and shop occlusion. Everyday key intensity is slightly lower, the New Moon lamp is less saturated, and GOGO and LG have dimmer focal peaks. The Low atrium and LG get a small lift from the existing hemisphere light. LG fill tapers toward the doorway.
+The marble tile uses an ivory `#e9dcc0` base and low-contrast grey-brown veins. The world-metre UVs and vein shapes remain as authored. The paving material lowers diffuse reflectance and softens the brightest specular streaks with roughness of 0.30 on Low, 0.273 on Balanced and 0.255 on Detailed, alongside reduced metalness. The lift uses the revised tile in the stone region of its existing atlas. The sage terrazzo runner retains its aggregate with a warmer material tint.
+
+The projected sun uses approximately 3200 K gold with a lower peak alpha. Pane outlines, shear, dapple pattern and edge fade are preserved. The visible skylight stays bright, while the atrium reflection uses a softer, warm-neutral ceiling with a lower gain. Low retains its existing projection culling. The two shop focus lights and existing wash batch carry the warmer tints, with a slightly lower New Moon spotlight peak. The everyday directional key and exposure retain their previous values. The existing hemisphere light adds fill on Low near the atrium and tapers across the LG entrance, including the standard pose 2.4 m outside the shop.
 
 ## Scorecard
 
-The scorer measured the reference at 0.420 mean, 0.216 standard deviation, 0.097 P5, 0.796 P95, 1.572 R/B, 0.412 saturation and 0.261 dark share. [Scorer and tolerances](../scripts/lighting_score.py)
+The values below come from the owner's headed Chrome capture of the original pass 6. A dash denotes an unavailable reading. The previous New Moon baseline was R/B 1.56 and saturation 0.457. The correction has no fresh screenshot scores: the sandbox rejected the localhost bind and Chrome's Mach bootstrap. [Scorer](../scripts/lighting_score.py)
 
-Only the supplied pass 5 values appear below. The supplied New Moon saturation was 0.457, with its tier unspecified. A dash marks unavailable candidate measurements. The shot runner was attempted on both revisions. Chrome exited at Mach bootstrap and the sandbox rejected the local HTTP bind, so no matching frames were available for candidate scoring.
+| Tier | Pose | Mean | P95 | R/B | Sat | Dark | Correction |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| Balanced | Atrium | 0.547 | 0.892 | 1.214 | 0.302 | — | Awaiting capture |
+| Balanced | New Moon | — | 0.851 | 1.408 | — | — | Awaiting capture |
+| Balanced | MILI | 0.525 | — | 1.264 | 0.348 | — | Awaiting capture |
+| Balanced | GOGO | 0.533 | — | 1.242 | — | — | Awaiting capture |
+| Balanced | LG (`planned-space-14`) | — | — | 1.305 | 0.353 | 0.335 | Awaiting capture |
+| Low | Atrium | — | — | 1.253 | 0.350 | 0.364 | Awaiting capture |
+| Low | New Moon | — | — | — | — | — | Awaiting capture |
+| Low | MILI | — | — | — | — | — | Awaiting capture |
+| Low | GOGO | — | — | — | — | — | Awaiting capture |
+| Low | LG (`planned-space-14`) | — | — | — | — | — | Awaiting capture |
 
-| Tier | Pose | Supplied pass 5 readings | Mean | Std | P5 | P95 | R/B | Sat | Dark |
-| --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Balanced | Atrium | Mean 0.499, R/B 1.446 | — | — | — | — | — | — | — |
-| Balanced | New Moon | — | — | — | — | — | — | — | — |
-| Balanced | MILI | — | — | — | — | — | — | — | — |
-| Balanced | GOGO | Mean 0.502, R/B 1.416 | — | — | — | — | — | — | — |
-| Balanced | LG (`planned-space-14`) | P95 0.861, R/B 1.424, dark 0.335 | — | — | — | — | — | — | — |
-| Low | Atrium | Dark 0.360 | — | — | — | — | — | — | — |
-| Low | New Moon | — | — | — | — | — | — | — | — |
-| Low | MILI | — | — | — | — | — | — | — | — |
-| Low | GOGO | — | — | — | — | — | — | — | — |
-| Low | LG (`planned-space-14`) | — | — | — | — | — | — | — | — |
+At an atrium target of 0.45 mean, the required drop is 0.097. P95 needs a drop of at least 0.042. Relative to the reported R/B values, a midpoint of 1.55 requires increases of 28% for Balanced atrium, 23% for MILI, 25% for GOGO, 19% for LG, 10% for New Moon and 24% for Low atrium. Saturation needs increases of at least 0.078 in Balanced atrium, 0.032 in MILI, 0.027 in LG and 0.030 in Low atrium. LG and Low atrium need dark-share reductions of more than 1.5 and 4.4 percentage points, respectively.
 
-Run the standard five-pose capture with the same Chrome, theme, viewport, NPC settings and crop for both revisions. The capture script writes full viewports at 1440 × 900 for Balanced and 393 × 700 for Low at DPR 2. Match the scoring crop to the baseline before comparing values. [Five-pose capture](lighting_shots.py)
+Multiplying the linearised tile RGB by the linearised paving tint and the diffuse fraction gives channel multipliers of approximately 0.75, 0.61 and 0.40 against the original marble under the same light. That is 0.63× diffuse luma before tone mapping. The overhead reflection gain is 0.68× its previous value, and the projected layer's peak alpha is 44/49 of its previous value. These calculations size the material and lighting changes. Scene coverage, tone mapping, and the distribution of pixels near the dark threshold still require matching renders.
+
+Capture the five standard poses with the same Chrome backend, theme, NPC settings, viewport and scoring crop as the baseline. Balanced uses 1440 × 900 CSS pixels. Low uses 393 × 700 at DPR 2. Score against atrium mean 0.42–0.48 and P95 ≤ 0.85, R/B 1.45–1.65 and saturation ≥ 0.38 across the five views, and dark share < 0.32 at LG and Low atrium. [Five-pose capture](lighting_shots.py)
 
 ```sh
 python -m http.server 8830 --bind 127.0.0.1
 # In another terminal with GALLERY_CHROME set:
-python docs/lighting_shots.py 8830 pass6
-python scripts/lighting_score.py --check light_pass6_*.png
+python docs/lighting_shots.py 8830 pass6-warm
+python scripts/lighting_score.py light_pass6-warm_*.png
 ```
 
 ## Verification
 
-The gallery build check, Python gallery suite (15 passes), lighting scorer suite (5 passes) and both procedural texture checks passed. The Node suite had 376 passes and one skip for the optional Studio checkout. The bundled world test verifies the shared marble batch leaves the shaft open and the skylight faces into the atrium. A byte comparison verified the three lift tiers changed only the stone regions of their embedded base and surface textures.
+The regenerated gallery passed its freshness check. The full Node suite had 376 passes and one optional Studio skip. The Python gallery and scorer suites had 15 and five passes, respectively. Both procedural texture checks passed. The three repository browser suites stopped at the local server bind.
 
-The stock material layouts, three PMREM zones and live light count are retained. The courtyard and deck marble reuse the paving batch, and the shop decals reuse the wash batch. A visible wash can contribute one draw in a view where the batch was previously empty. The lift GLBs keep their existing mesh data and material bindings, with the stone region updated in the base and surface sheets. The source tool can regenerate the sheets with `python scripts/build_elevator_atlas.py <sheet-directory>`.
-
-Runtime acceptance remains open for the new scores, visual match, Low's 70-draw cap and +1 delta, tier triangle ceilings, linked shader program parity, zero early-entry frames at or above 50 ms, 65 shop interactions and 20 upper POIs. The browser suites were blocked at localhost bind. [Performance probes](gjh-v11-probes.md) · [Interactions](verify_interactions.py) · [Upper level](verify_upper_level.py)
+The bundled-world check exercises tier switching, the shared marble batch, the opening at the lift shaft, the visible skylight, and LG fill at its entrance. The colour pass uses the same draw batches, stock material program variants, three environment zones and live light count. The atlas update changes only the stone regions in the three lift GLBs. The actual Low peak of ≤70 draws, linked program counts and early entry with zero frames ≥50 ms still require headed Chrome. [Performance probes](gjh-v11-probes.md)

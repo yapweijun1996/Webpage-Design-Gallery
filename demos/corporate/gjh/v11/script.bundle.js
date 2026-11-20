@@ -3585,11 +3585,11 @@ function allowMallLightWash(deviceClass, context) {
   return /GeForce|Quadro|NVIDIA RTX|Radeon RX (?!Vega |[0-9]+M Graphics)/i.test(adapter ?? "");
 }
 var SHOP_LAMPS = {
-  S01: 16767399,
-  S02: 15986113,
-  S03: 14744548,
+  S01: 16765331,
+  S02: 16113573,
+  S03: 15329976,
   S13: 14938623,
-  S14: 16183272,
+  S14: 16311234,
   S15: 16761981
 };
 function shopLampTint(T, id) {
@@ -3597,9 +3597,9 @@ function shopLampTint(T, id) {
   return SHOP_LAMPS[id] ?? (mood ? kelvinColour(T, mood.kelvin).getHex() : 16777215);
 }
 var STUDIO_LIGHTING = {
-  atrium: { walls: 6774621, panels: 16768183, ceiling: 14739952, width: 7, intensity: 0.52, ceilingGain: 2 },
-  corridor: { walls: 6709595, panels: 16115412, ceiling: 14142395, width: 5, intensity: 0.58 },
-  shop: { walls: 10391940, panels: 16773088, ceiling: 16773089, width: 3, intensity: 0.94 }
+  atrium: { walls: 7759700, panels: 16239254, ceiling: 15260872, width: 7, intensity: 0.52, ceilingGain: 1.35 },
+  corridor: { walls: 7234129, panels: 16113343, ceiling: 14140584, width: 5, intensity: 0.58 },
+  shop: { walls: 10390130, panels: 16770502, ceiling: 16771276, width: 3, intensity: 0.94 }
 };
 var CLASSIC_STUDIO_LIGHTING = {
   atrium: { walls: 11969420, panels: 16772825, ceiling: 16774631, width: 8, intensity: 1 },
@@ -3635,6 +3635,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     const accentLuminance = 0.2126 * accent.r + 0.7152 * accent.g + 0.0722 * accent.b;
     const environmentIntensity = mood ? (expanded ? 0.91 : 0.74) + 0.2 * (mood.kelvin - 2700) / 1300 + 0.1 * accentLuminance : studioLighting.shop.intensity;
     const lamp = expanded && SHOP_LAMPS[store?.id] ? new T.Color(shopLampTint(T, store.id)) : null;
+    const newMoon = expanded && store?.id === "S01";
     const gogo = expanded && store?.id === "S03", lg = expanded && store?.id === "S14";
     return {
       slot: slot2,
@@ -3646,13 +3647,13 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       accent,
       lamp,
       environmentIntensity: environmentIntensity * (gogo ? 0.92 : lg ? 0.94 : 1),
-      keyGain: gogo ? 0.91 : lg ? 0.81 : 1,
+      keyGain: gogo ? 0.91 : lg ? 0.81 : newMoon ? 0.92 : 1,
       doorFill: gogo ? 0.9 : lg ? 1.38 : 1,
-      shadowFill: lg ? 0.075 : 0,
       temperature: mood ? kelvinColour(T, mood.kelvin) : interiorWarm,
       colors: [new T.Color, new T.Color]
     };
   });
+  const lgSlot = expanded && bays.find((bay) => bay.slot.number === "14")?.slot;
   const lights = Array.from({ length: 2 }, (_, index) => {
     const light = new T.PointLight(16770497, 0, 11, 2);
     light.name = `Shop focus accent ${index + 1}`;
@@ -3730,12 +3731,16 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     const publicZone = publicEnvironmentZone(position, atrium);
     if (expanded)
       setPortraitFill(inside, publicZone);
-    let shadowFill = tier === "low" && publicZone === "atrium" ? 0.08 : 0;
+    let shadowFill = tier === "low" && publicZone === "atrium" ? 0.16 : 0;
+    if (lgSlot && Math.abs(y) < 4) {
+      const dx = Math.max(lgSlot.minX - x, x - lgSlot.maxX, 0);
+      const dz = Math.max(lgSlot.minZ - z, z - lgSlot.maxZ, 0);
+      shadowFill += 0.18 * Math.max(0, 1 - Math.hypot(dx, dz) / 7);
+    }
     if (inside?.mood) {
       const { minX, maxX, minZ, maxZ } = inside.slot;
       const edge = Math.min(x - minX, maxX - x, z - minZ, maxZ - z);
       const weight = Math.min(1, edge / 1.6);
-      shadowFill += weight * (inside.shadowFill - shadowFill);
       const outside = studioLighting[publicZone].intensity;
       selectEnvironment("shop", outside + weight * (inside.environmentIntensity - outside));
     } else
