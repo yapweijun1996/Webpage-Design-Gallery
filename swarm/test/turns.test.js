@@ -333,3 +333,35 @@ test('without a scope every assigned section still runs', async () => {
   assert.deepEqual([...ids].sort(), ['01', '02']);
   assert.doesNotMatch(calls[0].prompt, /OWNER SCOPE/);
 });
+
+test('fast lane: an autopilot or small-scope request runs only Triage and Work', async () => {
+  const { chat, turns, calls } = setup(({ label }, chat) => {
+    if (label === 'Triage') for (const target of ['01', '02']) assign(chat, target);
+  });
+  await turns.onOwnerMessage(chat.post({ from: 'claude', text: 'Autopilot cycle', scope: { sections: ['01', '02'], mode: 'autopilot' } }));
+  assert.deepEqual(runLabels(calls), ['Triage:00', 'Work:01', 'Work:02']);
+  assert.ok(notices(chat).some(text => /Fast lane/.test(text)));
+});
+
+test('three or more sections in scope still use the full flow', async () => {
+  const { chat, turns, calls } = setup(({ label }, chat) => {
+    if (label === 'Triage') for (const target of ['01', '02', '03']) assign(chat, target);
+  });
+  await turns.onOwnerMessage(chat.post({ from: 'owner', text: 'Rework this area', scope: { sections: ['01', '02', '03'] } }));
+  const labels = new Set(calls.map(call => call.label));
+  assert.ok(labels.has('Discuss') && labels.has('Decide') && labels.has('Work') && labels.has('Summary'));
+});
+
+test('an assignment without a recipient is inferred from its text, or from a single-section scope', async () => {
+  const { chat, turns, calls } = setup(({ label }, chat) => {
+    if (label === 'Triage') chat.post({ from: '00', to: [], kind: 'assign', text: 'Please recolour 02 hero image', task: 'Make the hero picture Chinese red' });
+  });
+  await turns.onOwnerMessage(chat.post({ from: 'owner', text: 'chinese red', scope: { sections: ['02'] } }));
+  assert.ok(runLabels(calls).includes('Work:02'), `the in-scope worker must run, got ${runLabels(calls)}`);
+
+  const second = setup(({ label }, chat) => {
+    if (label === 'Triage') chat.post({ from: '00', to: [], kind: 'assign', text: 'Tighten this', task: 'Tighten the spacing' });
+  });
+  await second.turns.onOwnerMessage(second.chat.post({ from: 'owner', text: 'tighten', scope: { sections: ['03'] } }));
+  assert.ok(runLabels(second.calls).includes('Work:03'), 'a single-section scope receives an assignment with no recipient');
+});

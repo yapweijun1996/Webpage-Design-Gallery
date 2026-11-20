@@ -28,7 +28,7 @@ function buildPrompt(agent, label, owner, assignment, isManager) {
   });
   const instructions = [
     `STEP: ${label} | AGENT: ${id}`,
-    `You are ${(name ?? id).slice(0, 100)}, agent ${id}. Your lane: ${(lane || section || 'Manager and team coordinator').slice(0, 300)}.`,
+    `You are ${(name ?? id).slice(0, 100)}${agent.title ? ', job title: ' + String(agent.title).slice(0, 80) : ''}, agent ${id}. Your lane: ${(lane || section || 'Manager and team coordinator').slice(0, 300)}.`,
     'Read CONTRACT.md, brief.md, direction.md, decisions.md (if non-empty), and channel.md.',
     `To post, append exactly one JSON object per line to chat/${id}.jsonl. Example:`,
     example,
@@ -70,7 +70,14 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
     const assignments = new Map();
     for (const message of chat.history(since)) {
       if (message.from !== managerId || message.kind !== 'assign') continue;
-      for (const id of message.to) {
+      // The Manager sometimes omits the recipient ("everyone"); infer it from the text, else from a single-section scope.
+      let targets = message.to.filter(id => workers.has(id));
+      if (!targets.length) {
+        const text = `${message.text || ''} ${message.task || ''}`;
+        targets = [...new Set([...text.matchAll(/(?<![\d.#])(0[1-9]|[1-9]\d)(?!\d)/g)].map(m => m[1]))].filter(id => workers.has(id));
+        if (!targets.length && currentScope && currentScope.size === 1) targets = [...currentScope];
+      }
+      for (const id of targets) {
         if (workers.has(id) && (!currentScope || currentScope.has(id))) assignments.set(id, message);
       }
     }
@@ -88,6 +95,15 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
     await run(manager, 'Triage', owner);
     const initialAssignments = getAssignments(since);
     if (!initialAssignments.size) return;
+
+    // Fast lane: autopilot cycles and small scopes (two sections or fewer) skip discussion, decision, review and summary.
+    // The next autopilot cycle starts by inspecting the result, so it acts as the review.
+    const sc = owner.scope;
+    if (sc && (sc.mode === 'autopilot' || (Array.isArray(sc.sections) && sc.sections.length <= 2))) {
+      notice('Fast lane: Work starts now (discussion and review skipped for a small scope)');
+      await Promise.all([...initialAssignments].map(([id, assignment]) => run(workers.get(id), 'Work', owner, assignment)));
+      return;
+    }
 
     let roundStart = notice('Discuss started').id;
     let participants = [...initialAssignments.keys()];

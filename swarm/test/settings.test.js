@@ -11,7 +11,7 @@ const DEFAULT_SELECTION = { runner: 'codex', model: 'gpt-6.2-sol', effort: 'medi
 const DEFAULT_SETTINGS = {
   version: 1,
   defaults: DEFAULT_SELECTION,
-  roles: { manager: {}, workers: {} },
+  roles: { manager: {}, workers: {}, research: {} },
   concurrency: { maxParallel: 12 },
   timeouts: { turnMinutes: 20 },
   channel: { language: 'zh-Hans', standingRules: '' },
@@ -270,7 +270,7 @@ test('drops extra keys from a file at every schema level', t => {
     settings: {
       ...DEFAULT_SETTINGS,
       defaults: { ...DEFAULT_SELECTION, model: 'gpt-6.1-terra' },
-      roles: { manager: { runner: 'pi' }, workers: {} },
+      roles: { manager: { runner: 'pi' }, workers: {}, research: {} },
       concurrency: { maxParallel: 8 },
       research: { web: false },
       autopilot: { maxCyclesPerScreen: 1 },
@@ -284,7 +284,7 @@ test('warns about individual invalid fields while preserving valid role override
   const raw = {
     version: 2,
     defaults: { model: 'gpt-6.1-terra', effort: 'xhigh' },
-    roles: { manager: { runner: 'pi', effort: 'high' }, workers: { runner: false, model: 'gpt-6.2-sol' } },
+    roles: { manager: { runner: 'pi', effort: 'high' }, workers: { runner: false, model: 'gpt-6.2-sol' }, research: {} },
     concurrency: { maxParallel: 0 },
     channel: { language: 'en', standingRules: 'a'.repeat(1001) },
     research: { web: 'false' },
@@ -298,7 +298,7 @@ test('warns about individual invalid fields while preserving valid role override
   assert.deepEqual(result.settings, {
     ...DEFAULT_SETTINGS,
     defaults: { runner: 'codex', model: 'gpt-6.1-terra', effort: 'xhigh' },
-    roles: { manager: { runner: 'pi' }, workers: { model: 'gpt-6.2-sol' } },
+    roles: { manager: { runner: 'pi' }, workers: { model: 'gpt-6.2-sol' }, research: {} },
     channel: { language: 'en', standingRules: '' },
   });
   assert.deepEqual(settings.resolve(raw, '00'), { runner: 'pi', model: 'gpt-6.1-terra', effort: 'xhigh' });
@@ -309,7 +309,7 @@ test('resolves named roles and agent IDs with and without overrides', () => {
   for (const role of ['manager', 'worker', '00', '01', '12', 'A']) {
     assert.deepEqual(settings.resolve({}, role), DEFAULT_SELECTION);
   }
-  const raw = { defaults: { model: 'gpt-6.1-terra' }, roles: { manager: { runner: 'pi' }, workers: { effort: 'xhigh' } } };
+  const raw = { defaults: { model: 'gpt-6.1-terra' }, roles: { manager: { runner: 'pi' }, workers: { effort: 'xhigh' }, research: {} } };
   for (const role of ['manager', '00']) {
     assert.deepEqual(settings.resolve(raw, role), { runner: 'pi', model: 'gpt-6.1-terra', effort: 'medium' });
   }
@@ -433,4 +433,15 @@ test('filters out nonallowlisted test environment values', () => {
     { model: 'gpt-6.2-sol' });
   assert.deepEqual(settings.envOverrides({ SWARM_TEST: '1', SWARM_MODEL: ['gpt-6.1-terra'], SWARM_EFFORT: 'medium' }),
     { effort: 'medium' });
+});
+
+test('the research role can use a different runner than the workers', () => {
+  const input = { roles: { workers: { runner: 'pi' }, research: { runner: 'codex', model: 'gpt-6.1-terra', effort: 'xhigh' } } };
+  const checked = settings.validate(input);
+  assert.equal(checked.ok, true);
+  assert.deepEqual(settings.resolve(input, 'worker'), { runner: 'pi', model: 'gpt-6.2-sol', effort: 'medium' });
+  assert.deepEqual(settings.resolve(input, 'research'), { runner: 'codex', model: 'gpt-6.1-terra', effort: 'xhigh' });
+  assert.deepEqual(settings.resolve(input, 'manager'), { runner: 'codex', model: 'gpt-6.2-sol', effort: 'medium' });
+  assert.equal(settings.validate({ roles: { research: { runner: 'omp' } } }).ok, false);
+  assert.equal(settings.validate({ roles: { research: { effort: 'low' } } }).ok, false);
 });

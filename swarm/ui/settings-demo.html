@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Runner settings demo</title>
+  <title>Swarm settings demo</title>
   <link rel="stylesheet" href="./settings.css">
   <style>
     * { box-sizing: border-box; }
@@ -24,10 +24,16 @@
       padding: 8px 10px;
       border-block-end: 1px solid #262b36;
     }
-    .demo-widths { display: flex; flex-wrap: wrap; gap: 6px; }
-    .demo-widths button {
-      min-block-size: 40px;
-      padding: 0 10px;
+    .demo-widths { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; }
+    .demo-simulations { display: grid; gap: 2px; }
+    .demo-simulations label { display: flex; align-items: center; gap: 5px; min-block-size: 22px; }
+    @media (min-width: 700px) {
+      .demo-simulations { grid-auto-flow: column; gap: 16px; }
+    }
+    .demo-tools button,
+    .demo-header button {
+      min-block-size: 44px;
+      padding: 0 8px;
       border: 1px solid #3a4356;
       border-radius: 7px;
       background: #171a21;
@@ -39,40 +45,107 @@
       border-color: #8ab4ff;
       background: #23324b;
     }
-    .demo-widths button:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
-    .demo-tools p { margin: 0; color: #aab0bf; text-align: center; font-size: 12px; }
-    #settings-demo {
+    button:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
+    .demo-drawer {
       --settings-max-height: 100%;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
       justify-self: center;
-      inline-size: min(100%, var(--demo-width, 329px));
+      inline-size: min(100%, var(--demo-width, 1100px));
       min-block-size: 0;
+      background: #13161c;
       box-shadow: 0 0 0 1px #262b36;
     }
+    .demo-drawer[hidden],
+    .demo-tools [hidden] { display: none; }
+    .demo-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px 0 16px;
+      border-block-end: 1px solid #262b36;
+      font-size: 16px;
+    }
+    .demo-header button {
+      display: grid;
+      place-items: center;
+      inline-size: 44px;
+      border-color: transparent;
+      background: transparent;
+    }
+    .demo-header button:hover { background: #171a21; }
+    .demo-header svg {
+      inline-size: 16px;
+      block-size: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+    }
+    #settings-demo > .swarm-settings { block-size: 100%; }
   </style>
   <script defer src="./settings.js"></script>
 </head>
 <body>
   <header class="demo-tools">
     <div class="demo-widths" role="group" aria-label="Preview width">
-      <button type="button" aria-pressed="true" data-width="329">329 px</button>
+      <button type="button" aria-pressed="false" data-width="329">329 px</button>
       <button type="button" aria-pressed="false" data-width="393">393 px</button>
       <button type="button" aria-pressed="false" data-width="360">360 px</button>
+      <button type="button" aria-pressed="false" data-width="700">700 px</button>
+      <button type="button" aria-pressed="false" data-width="1100">1100 px</button>
+      <button type="button" aria-pressed="true" data-width="auto">Auto</button>
     </div>
-    <label><input type="checkbox" id="demo-save-errors"> Simulate research and autopilot errors</label>
-    <p>Save Terra with xhigh to see a field error. Test pi twice to see both failure states.</p>
+    <div class="demo-simulations" role="group" aria-label="Simulations">
+      <label><input type="checkbox" id="demo-save-errors"> Simulate settings field errors</label>
+      <label><input type="checkbox" id="demo-team-errors"> Simulate team field errors (400)</label>
+      <label><input type="checkbox" id="demo-team-busy"> Simulate a busy team (409)</label>
+    </div>
+    <button type="button" id="demo-open" hidden>Open settings</button>
   </header>
-  <main id="settings-demo" aria-label="Runner settings demo"></main>
+  <div class="demo-drawer" role="dialog" aria-labelledby="demo-title">
+    <header class="demo-header">
+      <strong id="demo-title">Settings</strong>
+      <button type="button" id="demo-close" aria-label="Close settings">
+        <svg viewBox="0 0 12 12" aria-hidden="true"><path d="m2.5 2.5 7 7m-7 0 7-7"/></svg>
+      </button>
+    </header>
+    <main id="settings-demo" aria-label="Swarm settings demo"></main>
+  </div>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const root = document.getElementById('settings-demo');
+      const drawer = root.closest('.demo-drawer');
+      const open = document.getElementById('demo-open');
+      const close = document.getElementById('demo-close');
       const simulateErrors = document.getElementById('demo-save-errors');
+      const simulateTeamErrors = document.getElementById('demo-team-errors');
+      const simulateBusy = document.getElementById('demo-team-busy');
+      simulateBusy.addEventListener('change', () => window.SwarmSettings.refresh());
       const widths = document.querySelectorAll('[data-width]');
       for (const button of widths) {
         button.addEventListener('click', () => {
-          root.style.setProperty('--demo-width', button.dataset.width + 'px');
+          if (button.dataset.width === 'auto') drawer.style.removeProperty('--demo-width');
+          else drawer.style.setProperty('--demo-width', button.dataset.width + 'px');
           for (const choice of widths) choice.setAttribute('aria-pressed', String(choice === button));
         });
       }
+      function closeDrawer() {
+        window.SwarmSettings.close();
+        drawer.hidden = true;
+        open.hidden = false;
+        open.focus();
+      }
+      close.addEventListener('click', closeDrawer);
+      drawer.addEventListener('keydown', event => {
+        if (event.key === 'Escape') closeDrawer();
+      });
+      open.addEventListener('click', () => {
+        drawer.hidden = false;
+        open.hidden = true;
+        window.SwarmSettings.open();
+        close.focus();
+      });
 
       const allowlist = {
         runners: { codex: 'codex', pi: 'pi' },
@@ -82,13 +155,21 @@
       let settings = {
         version: 1,
         defaults: { runner: 'codex', model: 'gpt-6.2-sol', effort: 'medium' },
-        roles: { manager: {}, workers: {} },
+        roles: { manager: {}, workers: { runner: 'pi', model: 'gpt-6.1-terra' }, research: {} },
         concurrency: { maxParallel: 12 },
         timeouts: { turnMinutes: 20 },
         channel: { language: 'zh-Hans', standingRules: '' },
         research: { web: true },
         autopilot: { maxCyclesPerScreen: 2 }
       };
+      let agents = [
+        { id: '02', name: 'Agent 2', title: 'Hero Designer', section: 'hero',
+          lane: 'Own the main heading and primary action in the hero section.', color: '#f76b15',
+          runner: 'pi', model: 'gpt-6.2-sol', effort: 'medium', position: 'hero-designer' },
+        { id: '07', name: 'Agent 7', section: 'footer',
+          lane: 'Own the footer, partner links and legal copy.', color: '#60a5fa' }
+      ];
+      const titles = ['Hero Designer', 'Footer and Compliance Designer', 'Motion and Performance Reviewer'];
       const status = {};
       let piTests = 0;
 
@@ -119,6 +200,25 @@
           }
           settings = structuredClone(draft);
           return { ok: true, settings: structuredClone(settings) };
+        },
+        team: {
+          async load() {
+            return structuredClone({ agents, titles, maxParallel: settings.concurrency.maxParallel, busy: simulateBusy.checked });
+          },
+          async save(draft) {
+            if (simulateBusy.checked) return { ok: false, error: 'busy' };
+            if (!draft.length) {
+              return { ok: false, errors: [{ path: 'agents', message: 'Keep at least one worker.' }] };
+            }
+            if (simulateTeamErrors.checked) {
+              return { ok: false, errors: [
+                { path: 'agents[0].title', message: 'Simulated job title error.' },
+                { path: `agents[${draft.length - 1}].lane`, message: 'Simulated lane error.' }
+              ] };
+            }
+            agents = structuredClone(draft);
+            return { ok: true, agents: structuredClone(agents) };
+          }
         },
         async test({ runner }) {
           await new Promise(resolve => setTimeout(resolve, 800));

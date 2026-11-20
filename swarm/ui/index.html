@@ -206,7 +206,7 @@
       c.innerHTML = '<div class="in"><svg viewBox="0 0 18 22"><path d="M1 1l15 8-6.5 1.8L7 17z" fill="' + a.color + '" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg><div class="who"><span class="name" style="background:' + a.color + '">' + a.name + '</span><span class="act"></span><div class="bub"></div></div></div>';
       layer.appendChild(c); cur[id] = { el: c, t: 0 }; seed[id] = i * 7;
       var k = document.createElement('div'); k.className = 'card'; k.style.setProperty('--c', a.color);
-      k.innerHTML = '<div class="h"><b>' + a.name + '</b><span class="sec">' + a.section + '</span><span class="st">queued</span></div><div class="th"></div><div class="ac"></div>';
+      k.innerHTML = '<div class="h"><b>' + a.name + '</b><span class="sec">' + (a.title ? a.title : a.section) + '</span><span class="st">queued</span></div><div class="th"></div><div class="ac"></div>';
       k.onclick = function () { hosts[id].el.scrollIntoView({ behavior: 'smooth', block: 'start' }); pulse(id); };
       $('agents').appendChild(k); cards[id] = k;
       refreshCard(id);
@@ -400,7 +400,7 @@
 
   function onEvent(e) {
     if (e.type === 'state') return build(e.state);
-    if (e.type === 'autopilot') { ap = e; autoOn = !!e.on; paintFocus(); return; }
+    if (e.type === 'autopilot') { ap = e; autoOn = !!e.on; paintFocus(); if (e.on && !e.primary) { lastReport = ''; reportFocus(true); } return; }
     if (e.type === 'settings') { $('model').textContent = e.model; if (S) S.model = e.model; return; }
     if (!S) return;
     var a = e.id && S.agents[e.id];
@@ -576,7 +576,11 @@
       SwarmSettings.init({ root: $('setroot'),
         load: function () { return api('/api/settings').then(function (r) { return r.json; }); },
         save: function (st) { return api('/api/settings', 'PUT', st).then(function (r) { return r.ok ? { ok: true, settings: r.json.settings } : { ok: false, errors: r.json.errors || [{ path: '', message: 'Save failed' }] }; }); },
-        test: function (q) { return api('/api/settings/test', 'POST', q).then(function (r) { return r.json; }); } });
+        test: function (q) { return api('/api/settings/test', 'POST', q).then(function (r) { return r.json; }); },
+        team: {
+          load: function () { return api('/api/team').then(function (r) { return r.json; }); },
+          save: function (agents) { return api('/api/team', 'PUT', { agents: agents }).then(function (r) { return r.ok ? { ok: true, agents: r.json.agents } : { ok: false, errors: r.json.errors || [{ path: '', message: r.json.error === 'busy' ? 'The team is working. Try again when it finishes.' : 'Save failed' }] }; }); }
+        } });
       settingsReady = true;
     } else if (SwarmSettings.refresh) SwarmSettings.refresh();
     $('setclose').focus();

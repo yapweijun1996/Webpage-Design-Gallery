@@ -13,7 +13,7 @@ const ALLOWLIST = Object.freeze({
 const DEFAULTS = Object.freeze({
   version: 1,
   defaults: Object.freeze({ runner: 'codex', model: 'gpt-6.2-sol', effort: 'medium' }),
-  roles: Object.freeze({ manager: Object.freeze({}), workers: Object.freeze({}) }),
+  roles: Object.freeze({ manager: Object.freeze({}), workers: Object.freeze({}), research: Object.freeze({}) }),
   concurrency: Object.freeze({ maxParallel: 12 }),
   timeouts: Object.freeze({ turnMinutes: 20 }),
   channel: Object.freeze({ language: 'zh-Hans', standingRules: '' }),
@@ -106,6 +106,7 @@ function validate(input) {
     roles: {
       manager: selection(record(roles, 'manager', 'roles.manager'), 'roles.manager'),
       workers: selection(record(roles, 'workers', 'roles.workers'), 'roles.workers'),
+      research: selection(record(roles, 'research', 'roles.research'), 'roles.research'),
     },
     concurrency: { maxParallel: maxParallel ?? DEFAULTS.concurrency.maxParallel },
     timeouts: { turnMinutes: turnMinutes ?? DEFAULTS.timeouts.turnMinutes },
@@ -175,7 +176,7 @@ function save(filePath, input) {
 
 function resolve(settings, role) {
   const { value } = validate(settings);
-  const override = role === 'manager' || role === '00' ? value.roles.manager : value.roles.workers;
+  const override = role === 'manager' || role === '00' ? value.roles.manager : role === 'research' ? value.roles.research : value.roles.workers;
   return { ...value.defaults, ...override };
 }
 

@@ -42,6 +42,8 @@ const USAGE = `Usage: node swarm/cli.js <command> [--port 8800]
   settings set effort medium|xhigh
   settings set lang zh-Hans|en
   settings set parallel <1-16>
+  settings set <manager|workers|research>.<runner|model|effort> <value>   per-role override, e.g. workers.runner pi, research.runner codex
+  settings set reset-roles x                  clear all per-role overrides
   settings test [codex|pi]                  readiness check, no model call`;
 
 async function request(path, options) {
@@ -226,7 +228,9 @@ async function waitForIdle(idleMs, timeoutMs) {
       else if (key === 'effort') next.defaults.effort = value;
       else if (key === 'lang') next.channel.language = value;
       else if (key === 'parallel') next.concurrency.maxParallel = Number(value);
-      else throw new Error('settings set: key must be runner, model, effort, lang or parallel');
+      else if (/^(manager|workers|research)\.(runner|model|effort)$/.test(key)) { const [role, field] = key.split('.'); next.roles[role] = { ...(next.roles[role] || {}), [field]: value }; }
+      else if (key === 'reset-roles') next.roles = { manager: {}, workers: {}, research: {} };
+      else throw new Error('settings set: key must be runner, model, effort, lang, parallel, <manager|workers|research>.<runner|model|effort> or reset-roles');
       try { await api('/api/settings', 'PUT', next); console.log(`saved: ${key}=${value} (applies from the next agent turn)`); }
       catch (e) { throw new Error(`rejected by the server: ${e.message}`); }
     } else if (sub === 'test') {

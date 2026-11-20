@@ -3,7 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const KINDS = new Set(['msg', 'assign', 'decision', 'done', 'system']);
+const KINDS = new Set(['msg', 'assign', 'decision', 'done', 'system', 'research']);
 
 function parseMentions(text, agents) {
   const aliases = new Map([
@@ -95,7 +95,7 @@ function createChat({ projectDir, agents, emit }) {
       text: truncate(String(e?.text ?? '').replace(/\s+/g, ' ').trim(), 60),
       path: truncate(String(e?.path ?? ''), 120),
     })).filter((e) => sections.includes(e.section));
-    return { sections, elements };
+    return scope.mode === 'autopilot' ? { sections, elements, mode: 'autopilot' } : { sections, elements };
   }
 
   function append({ from, to, kind, text, task, reply, scope }, source) {

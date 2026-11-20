@@ -8,8 +8,13 @@
   --ss-accent: #8ab4ff;
   --ss-selection: #23324b;
   --ss-error: #ffaaa0;
+  --ss-team-accent: #80dfc2;
+  --ss-control-height: 40px;
+  --ss-content-inset: max(16px, calc((100% - 960px) / 2));
+  --ss-select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23aab0bf' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E");
   display: flex;
   flex-direction: column;
+  container-type: inline-size;
   inline-size: 100%;
   min-inline-size: 0;
   max-block-size: var(--settings-max-height, 86dvh);
@@ -18,6 +23,11 @@
   background: var(--ss-bg);
   color: var(--ss-text);
   font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+#setroot > .swarm-settings {
+  block-size: 100%;
+  max-block-size: 100%;
 }
 
 .swarm-settings,
@@ -35,7 +45,7 @@
   outline-offset: 2px;
 }
 
-.swarm-settings :where(h2, p, fieldset) {
+.swarm-settings :where(h2, h3, h4, p, fieldset) {
   margin: 0;
 }
 
@@ -46,13 +56,13 @@
 .swarm-settings .ss-header {
   flex: none;
   display: grid;
-  gap: 3px;
-  padding: 13px 14px;
+  gap: 8px;
+  padding: 16px var(--ss-content-inset) 8px;
   border-block-end: 1px solid var(--ss-border);
   background: var(--ss-surface);
 }
 
-.swarm-settings h2 {
+.swarm-settings .ss-header h2 {
   justify-self: start;
   font-size: 20px;
   line-height: 1.2;
@@ -64,29 +74,80 @@
   font-size: 12px;
 }
 
+.swarm-settings .ss-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.swarm-settings .ss-nav a {
+  display: grid;
+  place-items: center;
+  min-block-size: 32px;
+  padding-inline: 8px;
+  border: 1px solid var(--ss-border);
+  border-radius: 8px;
+  color: var(--ss-muted);
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.swarm-settings .ss-nav a:hover {
+  color: var(--ss-text);
+  background: var(--ss-bg);
+}
+
+.swarm-settings .ss-nav a[aria-current] {
+  border-color: #5477ab;
+  background: var(--ss-selection);
+  color: var(--ss-text);
+}
+
 .swarm-settings .ss-form {
+  flex: 1;
   display: flex;
   flex-direction: column;
   min-block-size: 0;
 }
 
 .swarm-settings .ss-body {
+  flex: 1 1 auto;
   min-block-size: 0;
   overflow: auto;
   overscroll-behavior: contain;
-  padding: 12px 12px 16px;
-  scroll-padding-block: 8px;
+  padding: 16px var(--ss-content-inset);
+  scroll-padding-block: 16px;
+  scrollbar-width: thin;
 }
 
 .swarm-settings .ss-controls {
   display: grid;
-  gap: 12px;
+  gap: 16px;
   padding: 0;
   border: 0;
 }
 
+.swarm-settings .ss-body > .ss-controls {
+  gap: 24px;
+}
+
+.swarm-settings .ss-group {
+  display: grid;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.swarm-settings .ss-group-title {
+  justify-self: start;
+  font-size: 17px;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+
 .swarm-settings .ss-card {
-  padding: 8px 10px 10px;
+  min-inline-size: 0;
+  padding: 8px 16px 16px;
   border: 1px solid var(--ss-border);
   border-radius: 10px;
   background: var(--ss-surface);
@@ -99,7 +160,7 @@
 
 .swarm-settings .ss-runners {
   display: grid;
-  gap: 7px;
+  gap: 8px;
 }
 
 .swarm-settings .ss-options,
@@ -120,7 +181,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
-  gap: 3px 8px;
+  gap: 4px 8px;
   padding: 4px;
 }
 
@@ -137,9 +198,9 @@
 .swarm-settings .ss-radio-label {
   display: flex;
   align-items: center;
-  gap: 7px;
-  min-block-size: 42px;
-  padding: 3px 8px;
+  gap: 8px;
+  min-block-size: var(--ss-control-height);
+  padding: 4px 8px;
   font-weight: 640;
   cursor: pointer;
 }
@@ -186,8 +247,8 @@
   display: grid;
   grid-template-columns: 7px minmax(0, 1fr);
   align-items: baseline;
-  gap: 7px;
-  padding: 0 8px 5px;
+  gap: 8px;
+  padding: 0 8px 8px;
   color: var(--ss-muted);
   font-size: 12px;
   overflow-wrap: anywhere;
@@ -220,7 +281,7 @@
 
 .swarm-settings .ss-card > .ss-help,
 .swarm-settings .ss-error {
-  margin-block-start: 6px;
+  margin-block-start: 8px;
 }
 
 .swarm-settings .ss-error,
@@ -233,18 +294,18 @@
 }
 
 .swarm-settings .ss-feedback:not(:empty) {
-  margin-block-end: 6px;
+  margin-block-end: 8px;
 }
 
 .swarm-settings .ss-advanced {
-  padding: 0 10px;
+  padding: 0 16px;
 }
 
 .swarm-settings .ss-advanced summary {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-block-size: 42px;
+  min-block-size: max(44px, var(--ss-control-height));
   font-weight: 700;
   list-style: none;
   cursor: pointer;
@@ -260,13 +321,13 @@
 
 .swarm-settings .ss-overrides {
   display: grid;
-  gap: 10px;
-  padding-block-end: 12px;
+  gap: 16px;
+  padding-block-end: 16px;
 }
 
 .swarm-settings .ss-role {
   display: grid;
-  gap: 7px;
+  gap: 8px;
   padding: 8px 0 0;
   border: 0;
   border-block-start: 1px solid var(--ss-border);
@@ -299,9 +360,8 @@
   font-weight: 600;
 }
 
-.swarm-settings .ss-automation {
-  display: grid;
-  gap: 12px;
+.swarm-settings .ss-group > .ss-card {
+  padding-block: 16px;
 }
 
 .swarm-settings .ss-switch-label {
@@ -309,7 +369,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-block-size: 40px;
+  min-block-size: var(--ss-control-height);
   cursor: pointer;
 }
 
@@ -360,13 +420,10 @@
   }
 }
 
-.swarm-settings .ss-automation .ss-stepper {
-  max-inline-size: 160px;
-}
-
 .swarm-settings .ss-stepper {
+  max-inline-size: 160px;
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) 40px;
+  grid-template-columns: var(--ss-control-height) minmax(0, 1fr) var(--ss-control-height);
 }
 
 .swarm-settings .ss-stepper input {
@@ -411,22 +468,40 @@
   stroke-linejoin: round;
 }
 
-.swarm-settings :where(.ss-button, input[type="number"], select, textarea) {
+.swarm-settings :where(.ss-button, input[type="number"], .ss-team input, select, textarea) {
   min-inline-size: 0;
-  min-block-size: 40px;
+  min-block-size: var(--ss-control-height);
   border: 1px solid var(--ss-line);
   border-radius: 7px;
   color: inherit;
   font: inherit;
 }
 
-.swarm-settings :is(input[type="number"], select, textarea) {
-  background: var(--ss-bg);
+.swarm-settings :is(input[type="number"], .ss-team input, select, textarea) {
+  background-color: var(--ss-bg);
 }
 
-.swarm-settings :is(select, textarea) {
+.swarm-settings :where(.ss-team input, select, textarea) {
   inline-size: 100%;
-  padding: 6px 8px;
+  padding: 8px;
+}
+
+.swarm-settings select {
+  appearance: none;
+  padding-inline-end: 28px;
+  cursor: pointer;
+  background-image: var(--ss-select-caret);
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 12px;
+}
+
+@media (forced-colors: active) {
+  .swarm-settings select {
+    appearance: auto;
+    background-image: none;
+    padding-inline-end: 8px;
+  }
 }
 
 .swarm-settings textarea {
@@ -439,8 +514,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 2px 8px;
-  padding-block-start: 6px;
+  gap: 4px 8px;
+  padding-block-start: 8px;
 }
 
 .swarm-settings .ss-counter {
@@ -456,7 +531,7 @@
 .swarm-settings .ss-button {
   display: inline-grid;
   place-items: center;
-  padding-inline: 10px;
+  padding-inline: 16px;
   background: #202633;
   font-size: 13px;
   font-weight: 650;
@@ -474,7 +549,7 @@
 
 .swarm-settings .ss-runners .ss-button {
   min-inline-size: 56px;
-  min-block-size: 42px;
+  padding-inline: 8px;
 }
 
 .swarm-settings .ss-primary,
@@ -488,23 +563,34 @@
   background: #aecbff;
 }
 
-.swarm-settings .ss-footer {
+.swarm-settings .ss-dock {
   flex: none;
-  padding: 8px 12px 9px;
+}
+
+.swarm-settings .ss-dock[data-section="team"] > .ss-footer,
+.swarm-settings .ss-dock:not([data-section="team"]) > .ss-team-bar {
+  display: none;
+}
+
+.swarm-settings :is(.ss-footer, .ss-team-bar) {
+  padding: 8px var(--ss-content-inset);
   border-block-start: 1px solid var(--ss-border);
   background: var(--ss-surface);
+}
+
+.swarm-settings .ss-footer .ss-actions {
+  margin-block-end: 8px;
 }
 
 .swarm-settings .ss-actions {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-block-end: 5px;
+  gap: 8px;
 }
 
 .swarm-settings .ss-action-buttons {
   display: flex;
-  gap: 7px;
+  gap: 8px;
 }
 
 .swarm-settings .ss-state {
@@ -513,6 +599,262 @@
   color: var(--ss-text);
   font-size: 12px;
   font-weight: 650;
+}
+
+.swarm-settings .ss-team,
+.swarm-settings .ss-team-list,
+.swarm-settings .ss-team-worker,
+.swarm-settings .ss-team-fields {
+  display: grid;
+  min-inline-size: 0;
+  gap: 8px;
+}
+
+.swarm-settings .ss-team {
+  --ss-accent: var(--ss-team-accent);
+  --ss-selection: #18362f;
+}
+
+.swarm-settings .ss-team-bar {
+  --ss-accent: var(--ss-team-accent);
+  border-block-start-color: #3d665b;
+  background: var(--ss-surface);
+}
+
+.swarm-settings .ss-team-bar .ss-primary:not(:disabled):hover {
+  background: #a4efd9;
+}
+
+.swarm-settings .ss-team-notice {
+  padding: 8px;
+  border: 1px solid #3d665b;
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--ss-team-accent);
+}
+
+.swarm-settings :is(.ss-team-notice, .ss-notice, .ss-team-add-actions .ss-help):empty {
+  display: none;
+}
+
+.swarm-settings .ss-team-worker {
+  padding: 16px;
+}
+
+.swarm-settings .ss-team-identity {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+}
+
+.swarm-settings .ss-team-identity > :is(.ss-team-dot, .ss-team-section) {
+  margin-block-start: calc((var(--ss-control-height) - var(--ss-identity-height)) / 2);
+}
+
+.swarm-settings .ss-team-section {
+  --ss-identity-height: 24px;
+  min-inline-size: 0;
+  max-inline-size: min(26cqi, 208px);
+  min-block-size: var(--ss-identity-height);
+  padding-inline: 8px;
+  border: 1px solid var(--ss-border);
+  border-radius: 6px;
+  background: var(--ss-bg);
+  color: var(--ss-muted);
+  font: 600 12px/22px ui-monospace, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.swarm-settings .ss-team-section:has(input) {
+  display: flex;
+  align-items: center;
+}
+
+.swarm-settings .ss-team-section .ss-team-section-placeholder {
+  min-block-size: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+}
+
+.swarm-settings .ss-team-name label,
+.swarm-settings .ss-team-action-link:not(:focus) {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.swarm-settings .ss-team-action-link {
+  justify-self: start;
+  color: var(--ss-team-accent);
+}
+
+.swarm-settings .ss-team-action-link:focus {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--ss-control-height);
+}
+
+.swarm-settings .ss-team-remove {
+  inline-size: var(--ss-control-height);
+  padding: 0;
+  border-color: var(--ss-border);
+  background: var(--ss-bg);
+  color: var(--ss-muted);
+}
+
+.swarm-settings .ss-team-remove:not(:disabled):hover,
+.swarm-settings .ss-team-remove[aria-expanded="true"] {
+  color: var(--ss-error);
+}
+
+.swarm-settings .ss-team-dot {
+  --ss-identity-height: 8px;
+  inline-size: var(--ss-identity-height);
+  block-size: var(--ss-identity-height);
+  border-radius: 50%;
+  background: var(--ss-muted);
+}
+
+.swarm-settings .ss-team-new {
+  justify-self: start;
+  color: var(--ss-accent);
+  font-size: 12px;
+}
+
+.swarm-settings .ss-team-confirm {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--ss-line);
+  border-radius: 7px;
+  background: var(--ss-bg);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.swarm-settings .ss-team-card-error {
+  margin-block-start: 0;
+}
+
+.swarm-settings .ss-team-overrides {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.swarm-settings .ss-team-fields label {
+  color: var(--ss-muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.swarm-settings .ss-team-textarea {
+  border: 1px solid var(--ss-line);
+  border-radius: 8px;
+  background: var(--ss-bg);
+}
+
+.swarm-settings .ss-team-textarea:has(textarea:focus-visible) {
+  outline: 2px solid var(--ss-accent);
+  outline-offset: 2px;
+}
+
+.swarm-settings .ss-team-textarea:has([aria-invalid="true"]) {
+  border-color: var(--ss-error);
+}
+
+.swarm-settings .ss-team textarea {
+  min-block-size: 56px;
+  border: 0;
+  background: transparent;
+  outline: none;
+}
+
+@supports (field-sizing: content) {
+  .swarm-settings .ss-team textarea {
+    field-sizing: content;
+    resize: none;
+  }
+}
+
+.swarm-settings .ss-field-footer {
+  padding: 0 8px 8px;
+  text-align: end;
+}
+
+.swarm-settings ::placeholder {
+  color: var(--ss-muted);
+  opacity: 1;
+}
+
+.swarm-settings .ss-team-add-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (pointer: coarse), (width < 480px) {
+  .swarm-settings {
+    --ss-control-height: 44px;
+  }
+
+  .swarm-settings .ss-nav a {
+    min-block-size: 44px;
+  }
+
+  .swarm-settings :is(.ss-team input, .ss-team select) {
+    font-size: 16px;
+  }
+}
+
+@container (width < 480px) {
+  .swarm-settings :is(.ss-header, .ss-body, .ss-footer, .ss-team-bar) {
+    padding-inline: 8px;
+  }
+}
+
+@container (min-width: 480px) {
+  .swarm-settings .ss-team-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .swarm-settings :is(.ss-team-overrides, .ss-team-lane, .ss-team-add-section, .ss-team-add-actions, .ss-team-fields > .ss-field:has(textarea)) {
+    grid-column: 1 / -1;
+  }
+}
+
+@container (min-width: 640px) {
+  .swarm-settings .ss-defaults,
+  .swarm-settings .ss-runners {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .swarm-settings .ss-defaults > .ss-card:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .swarm-settings .ss-team form .ss-team-fields,
+  .swarm-settings .ss-role {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .swarm-settings :is(.ss-team-add-section, .ss-role .ss-error) {
+    grid-column: auto;
+  }
+
+  .swarm-settings .ss-role .ss-field {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
