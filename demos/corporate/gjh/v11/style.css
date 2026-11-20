@@ -1157,6 +1157,10 @@ body.is-3d .mall-overlay :is(#inspect,#run-toggle,.hud-pickup-action)>*{
 body.is-3d .mall-overlay :is(#inspect,#run-toggle,.hud-pickup-action)>span:last-child{
   align-self:end;
 }
+body.is-3d .mall-overlay #run-toggle{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
+body.is-3d .mall-overlay #run-toggle>*{grid-area:auto}
+body.is-3d .mall-overlay #run-toggle>[data-icon]{display:inline-flex;align-items:center;justify-content:center;width:var(--space-4);height:var(--space-4);margin:0}
+body.is-3d .mall-overlay #run-toggle>span:last-child{align-self:center}
 body.is-3d .mall-overlay #inspect[data-action-icon="sit"]{
   display:flex;gap:var(--space-1);
 }
