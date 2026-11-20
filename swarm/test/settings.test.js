@@ -15,6 +15,8 @@ const DEFAULT_SETTINGS = {
   concurrency: { maxParallel: 12 },
   timeouts: { turnMinutes: 20 },
   channel: { language: 'zh-Hans', standingRules: '' },
+  research: { web: true },
+  autopilot: { maxCyclesPerScreen: 2 },
 };
 
 function settingsPath(t) {
@@ -34,6 +36,8 @@ test('exports the exact immutable allowlist and medium defaults', () => {
   assert.throws(() => { settings.ALLOWLIST.models.custom = 'Custom'; }, TypeError);
   assert.throws(() => { settings.ALLOWLIST.efforts.push('low'); }, TypeError);
   assert.throws(() => { settings.DEFAULTS.defaults.effort = 'low'; }, TypeError);
+  assert.throws(() => { settings.DEFAULTS.research.web = false; }, TypeError);
+  assert.throws(() => { settings.DEFAULTS.autopilot.maxCyclesPerScreen = 5; }, TypeError);
   assert.deepEqual(settings.validate({}), { ok: true, errors: [], value: DEFAULT_SETTINGS });
 });
 
@@ -179,6 +183,38 @@ test('enforces both integer bounds for concurrency and timeouts', () => {
   }
 });
 
+test('validates web research and each allowed autopilot cycle count', () => {
+  for (const web of [true, false]) {
+    for (const maxCyclesPerScreen of [1, 2, 3, 4, 5]) {
+      const research = { web };
+      const autopilot = { maxCyclesPerScreen };
+      assert.deepEqual(settings.validate({ research, autopilot }), {
+        ok: true, errors: [], value: { ...DEFAULT_SETTINGS, research, autopilot },
+      });
+    }
+  }
+});
+
+test('rejects wrong research and autopilot types and out-of-range cycle counts', () => {
+  for (const group of [null, undefined, [], true, 2, 'object']) {
+    const result = settings.validate({ research: group, autopilot: group });
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.errors.map(error => error.path), ['research', 'autopilot']);
+    assert.deepEqual(result.value, DEFAULT_SETTINGS);
+  }
+  for (const [group, key, invalidValues] of [
+    ['research', 'web', [null, undefined, 'true', 'false', 0, 1, [], {}]],
+    ['autopilot', 'maxCyclesPerScreen', [null, undefined, '2', false, [], {}, -1, 0, 6, 2.5, NaN, Infinity]],
+  ]) {
+    for (const value of invalidValues) {
+      const result = settings.validate({ [group]: { [key]: value } });
+      assert.equal(result.ok, false);
+      assert.deepEqual(result.errors.map(error => error.path), [`${group}.${key}`]);
+      assert.deepEqual(result.value, DEFAULT_SETTINGS);
+    }
+  }
+});
+
 test('loads missing files with fresh defaults and no warnings', t => {
   const file = settingsPath(t);
   const result = settings.load(file);
@@ -186,6 +222,18 @@ test('loads missing files with fresh defaults and no warnings', t => {
   result.settings.defaults.effort = 'xhigh';
   assert.deepEqual(settings.load(file), { settings: DEFAULT_SETTINGS, warnings: [] });
   assert.equal(fs.existsSync(file), false);
+});
+
+test('loads older files with research and autopilot defaults and no warnings', t => {
+  const file = settingsPath(t);
+  const legacy = { ...DEFAULT_SETTINGS, defaults: { ...DEFAULT_SELECTION, runner: 'pi' } };
+  delete legacy.research;
+  delete legacy.autopilot;
+  fs.writeFileSync(file, JSON.stringify(legacy));
+  assert.deepEqual(settings.load(file), {
+    settings: { ...DEFAULT_SETTINGS, ...legacy },
+    warnings: [],
+  });
 });
 
 test('loads corrupt JSON with default settings and a warning', t => {
@@ -215,6 +263,8 @@ test('drops extra keys from a file at every schema level', t => {
     concurrency: { maxParallel: 8, extra: true },
     timeouts: { extra: true },
     channel: { extra: true },
+    research: { web: false, extra: true },
+    autopilot: { maxCyclesPerScreen: 1, extra: true },
   }));
   assert.deepEqual(settings.load(file), {
     settings: {
@@ -222,6 +272,8 @@ test('drops extra keys from a file at every schema level', t => {
       defaults: { ...DEFAULT_SELECTION, model: 'gpt-6.1-terra' },
       roles: { manager: { runner: 'pi' }, workers: {} },
       concurrency: { maxParallel: 8 },
+      research: { web: false },
+      autopilot: { maxCyclesPerScreen: 1 },
     },
     warnings: [],
   });
@@ -235,11 +287,14 @@ test('warns about individual invalid fields while preserving valid role override
     roles: { manager: { runner: 'pi', effort: 'high' }, workers: { runner: false, model: 'gpt-6.2-sol' } },
     concurrency: { maxParallel: 0 },
     channel: { language: 'en', standingRules: 'a'.repeat(1001) },
+    research: { web: 'false' },
+    autopilot: { maxCyclesPerScreen: 12 },
   };
   fs.writeFileSync(file, JSON.stringify(raw));
   const result = settings.load(file);
   assert.deepEqual(result.warnings.map(warning => warning.split(':')[0]).sort(),
-    ['channel.standingRules', 'concurrency.maxParallel', 'roles.manager.effort', 'roles.workers.runner', 'version']);
+    ['autopilot.maxCyclesPerScreen', 'channel.standingRules', 'concurrency.maxParallel', 'research.web',
+      'roles.manager.effort', 'roles.workers.runner', 'version']);
   assert.deepEqual(result.settings, {
     ...DEFAULT_SETTINGS,
     defaults: { runner: 'codex', model: 'gpt-6.1-terra', effort: 'xhigh' },
@@ -286,6 +341,14 @@ test('rejects invalid saves and preserves the existing file', t => {
   assert.deepEqual(result.errors.map(error => error.path), ['defaults.effort']);
   assert.equal(result.settings, null);
   assert.equal(fs.readFileSync(file, 'utf8'), original);
+});
+
+test('preserves nondefault research and autopilot settings through a save and load', t => {
+  const file = settingsPath(t);
+  const input = { research: { web: false }, autopilot: { maxCyclesPerScreen: 5 } };
+  const expected = { ...DEFAULT_SETTINGS, ...input };
+  assert.deepEqual(settings.save(file, input), { ok: true, errors: [], settings: expected });
+  assert.deepEqual(settings.load(file), { settings: expected, warnings: [] });
 });
 
 test('keeps the old bytes and removes the temporary file when rename fails', t => {
@@ -340,10 +403,10 @@ test('labels, sanitizes, and caps owner standing rules in prompts', () => {
 });
 
 test('exposes normalized settings, the allowlist, and labels in the public view', () => {
-  const raw = { defaults: { runner: 'pi', extra: true }, extra: true };
+  const raw = { defaults: { runner: 'pi', extra: true }, research: { web: false }, extra: true };
   const view = settings.publicView(raw);
   assert.deepEqual(view, {
-    settings: { ...DEFAULT_SETTINGS, defaults: { ...DEFAULT_SELECTION, runner: 'pi' } },
+    settings: { ...DEFAULT_SETTINGS, defaults: { ...DEFAULT_SELECTION, runner: 'pi' }, research: { web: false } },
     allowlist: settings.ALLOWLIST,
     labels: {
       runners: { codex: 'Codex CLI (OpenAI)', pi: 'pi (pi.dev)' },

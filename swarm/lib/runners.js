@@ -9,6 +9,8 @@ const SECTION_PATH = /(?:^|[\s/"'`=():<>;&|])(?:sections|notes|discussion)\/(\d{
 const SHELL_WRAPPER = /^(?:\S*\/)?(?:zsh|bash|sh)\s+-l?c\s+["']?/;
 const WRITES = /(?:^|[\s;&|(])(?:tee\b|apply_patch\b|python3?\b.*write|perl\s+-pi\b|sed\s+-i\b)|>\s*\S|<<\s*["']?EOF/;
 const READS = /(?:^|[;&|(])\s*(?:cat|sed|rg|grep|head|tail|less|more|ls|find|wc|stat|nl|awk)\b/;
+const WEB_URL = /(?<=["'])https?:\/\/[^\s"'`<>|]+|https?:\/\/[^\s"'`<>|;&()]+/i;
+const WEB_COMMAND = /(?:^|[^\w.-])(?:curl|wget)\s/;
 const PI_TOOL_VERBS = new Map([
   ['read', 'reading'], ['write', 'editing'], ['edit', 'editing'], ['bash', 'running'],
 ]);
@@ -17,6 +19,10 @@ function action(verb, target) {
   const sections = new Set();
   for (const match of target.matchAll(SECTION_PATH)) sections.add(match[1]);
   return { kind: 'action', verb, target, sections: [...sections] };
+}
+
+function researchAction(target) {
+  return { kind: 'action', verb: 'researching', target, sections: [] };
 }
 
 function thought(text) {
@@ -28,13 +34,22 @@ function errorText(value, fallback) {
   return typeof text === 'string' && text.trim() ? text.trim() : fallback;
 }
 
-function codexEvent(event) {
+function codexEvent(event, completedSearches) {
   const item = event.item;
   if (event.type === 'item.started' && item?.type === 'command_execution') {
     if (typeof item.command !== 'string') return;
     const command = item.command.trim().replace(SHELL_WRAPPER, '');
-    const verb = WRITES.test(command) ? 'editing' : READS.test(command) ? 'reading' : 'running';
+    // A network fetch (curl/wget) that does not touch project files is research, even when it redirects output elsewhere.
+    const fetchesWeb = /(?:^|[\s;&|(])(?:curl|wget)\s/.test(command) && !/(?:sections|notes|discussion|chat)\/\d\d/.test(command);
+    const verb = fetchesWeb ? 'researching' : WRITES.test(command) ? 'editing' : READS.test(command) ? 'reading' : 'running';
     return action(verb, item.command);
+  }
+  if (event.type === 'item.completed' && item?.type === 'web_search') {
+    const query = typeof item.query === 'string' && item.query.trim();
+    const target = query || (typeof item.text === 'string' && item.text.trim());
+    if (!target || completedSearches.has(item.id)) return;
+    if (typeof item.id === 'string') completedSearches.add(item.id);
+    return researchAction(target);
   }
   if (event.type === 'item.completed' && item?.type === 'agent_message') return thought(item.text);
   if (event.type === 'item.completed' && item?.type === 'error') {
@@ -75,7 +90,12 @@ function piEventParser() {
     if (event.type === 'tool_execution_start') {
       const verb = PI_TOOL_VERBS.get(event.toolName);
       const target = event.toolName === 'bash' ? event.args?.command : event.args?.path;
-      if (verb && typeof target === 'string') return action(verb, target);
+      if (!verb || typeof target !== 'string') return;
+      if (event.toolName === 'bash') {
+        const url = target.match(WEB_URL)?.[0];
+        if (url || WEB_COMMAND.test(target)) return researchAction(url || target);
+      }
+      return action(verb, target);
     }
 
     if (event.type === 'agent_settled') {
@@ -127,15 +147,20 @@ function probe(command, args, deadline) {
 
 const adapters = {
   codex: {
-    args: ({ model, effort, projectDir }) => [
+    args: ({ model, effort, projectDir, research }) => [
       'exec', '--json', '-m', model, '-c', `model_reasoning_effort=${effort}`,
+      ...(research === true ? ['-c', 'web_search="live"'] : []),
       '-s', 'workspace-write', '--skip-git-repo-check', '-C', projectDir, '-',
     ],
-    parser: () => jsonLines(codexEvent),
+    parser() {
+      const completedSearches = new Set();
+      return jsonLines(event => codexEvent(event, completedSearches));
+    },
     authArgs: () => ['login', 'status'],
     loggedIn: ({ stdout, stderr }) => !/\bnot logged in\b/i.test(`${stdout}\n${stderr}`),
   },
   pi: {
+    // pi has no sandbox and can access the network through its bash tool without extra flags.
     args: ({ model, effort }) => [
       '-p', '--mode', 'json', '--model', `openai-codex/${model}`, '--thinking', effort,
       '--no-session', '--no-extensions', '--no-skills', '--no-context-files',
@@ -163,10 +188,11 @@ function get(name) {
   return {
     name,
     binary,
-    buildCommand({ model, effort, projectDir }) {
+    buildCommand({ model, effort, projectDir, research }) {
       assertModel(model);
       if (!ALLOWLIST.efforts.includes(effort)) throw new Error('Unsupported reasoning effort');
-      return { command: binary(), args: adapter.args({ model, effort, projectDir }), cwd: projectDir, input: 'stdin' };
+      const args = adapter.args({ model, effort, projectDir, research });
+      return { command: binary(), args, cwd: projectDir, input: 'stdin' };
     },
     createParser: adapter.parser,
     async readiness({ model, timeoutMs = READINESS_LIMIT_MS }) {

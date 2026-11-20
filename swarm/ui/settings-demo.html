@@ -58,12 +58,14 @@
       <button type="button" aria-pressed="false" data-width="393">393 px</button>
       <button type="button" aria-pressed="false" data-width="360">360 px</button>
     </div>
+    <label><input type="checkbox" id="demo-save-errors"> Simulate research and autopilot errors</label>
     <p>Save Terra with xhigh to see a field error. Test pi twice to see both failure states.</p>
   </header>
   <main id="settings-demo" aria-label="Runner settings demo"></main>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const root = document.getElementById('settings-demo');
+      const simulateErrors = document.getElementById('demo-save-errors');
       const widths = document.querySelectorAll('[data-width]');
       for (const button of widths) {
         button.addEventListener('click', () => {
@@ -83,7 +85,9 @@
         roles: { manager: {}, workers: {} },
         concurrency: { maxParallel: 12 },
         timeouts: { turnMinutes: 20 },
-        channel: { language: 'zh-Hans', standingRules: '' }
+        channel: { language: 'zh-Hans', standingRules: '' },
+        research: { web: true },
+        autopilot: { maxCyclesPerScreen: 2 }
       };
       const status = {};
       let piTests = 0;
@@ -98,6 +102,15 @@
           return structuredClone({ settings, allowlist, resolved, status });
         },
         async save(draft) {
+          if (simulateErrors.checked) {
+            return {
+              ok: false,
+              errors: [
+                { path: 'research.web', message: 'Simulated web research error.' },
+                { path: 'autopilot.maxCyclesPerScreen', message: 'Simulated autopilot cycles error.' }
+              ]
+            };
+          }
           if (draft.defaults.model === 'gpt-6.1-terra' && draft.defaults.effort === 'xhigh') {
             return {
               ok: false,

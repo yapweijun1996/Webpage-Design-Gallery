@@ -1,0 +1,42 @@
+[
+ {
+  "id": "01",
+  "section": "header"
+ },
+ {
+  "id": "02",
+  "section": "hero"
+ },
+ {
+  "id": "03",
+  "section": "newmoon"
+ },
+ {
+  "id": "04",
+  "section": "miligogo"
+ },
+ {
+  "id": "05",
+  "section": "healthtech"
+ },
+ {
+  "id": "06",
+  "section": "morebrands"
+ },
+ {
+  "id": "07",
+  "section": "about"
+ },
+ {
+  "id": "08",
+  "section": "mall"
+ },
+ {
+  "id": "09",
+  "section": "enquiry"
+ },
+ {
+  "id": "10",
+  "section": "footer"
+ }
+]

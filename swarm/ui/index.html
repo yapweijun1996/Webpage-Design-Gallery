@@ -54,6 +54,17 @@
   #askpop textarea:focus-visible{outline:2px solid #8ab4ff;outline-offset:1px}
   #askpop .ab{display:flex;gap:8px;margin-top:8px}#askpop .ab button{flex:1;min-height:36px;border-radius:8px;border:1px solid #333a49;background:#1f2430;color:#e8eaf0;font:inherit;cursor:pointer}
   #askpop .ab .pri{background:#8ab4ff;border-color:#8ab4ff;color:#0b0d11;font-weight:700}
+  #focuspop{position:fixed;top:48px;right:10px;z-index:300;width:min(360px,calc(100vw - 20px));padding:10px 12px;border:1px solid #333a49;border-radius:12px;background:#171a21;box-shadow:0 12px 32px rgba(0,0,0,.55);font:13px/1.45 system-ui,sans-serif;color:#e8eaf0}
+  #focuspop[hidden]{display:none}
+  #focuspop .fh{margin:0 0 8px;font-weight:700}#focuspop .fs{margin:8px 0 2px;color:#8ab4ff;font-size:12px}#focuspop .fn{margin:0;color:#8b93a7;font-size:12px}
+  #focuspop .sw{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;padding:8px;margin-bottom:6px;border:1px solid #333a49;border-radius:10px;background:#1f2430;color:#e8eaf0;font:inherit;cursor:pointer;min-height:44px}
+  #focuspop .sw[aria-checked=true]{border-color:#8ab4ff;background:#222b45}
+  #focuspop .knob{flex:none;width:34px;height:20px;margin-top:2px;border-radius:999px;background:#3a4152;position:relative;transition:background .15s}
+  #focuspop .knob:after{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+  #focuspop .sw[aria-checked=true] .knob{background:#4c8dff}#focuspop .sw[aria-checked=true] .knob:after{transform:translateX(14px)}
+  #focuspop .lbl{display:grid;gap:2px}#focuspop .lbl small{color:#aab0bf;font-size:12px}
+  #focuschip{position:fixed;left:12px;bottom:12px;z-index:90;max-width:min(560px,calc(100vw - 24px));padding:6px 12px;border-radius:999px;background:#0b0d11;border:1px solid #3a4152;color:#e8eaf0;font:12px/1.4 system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+  #focuschip[hidden]{display:none}#focuschip b{color:#8ab4ff}
   #tip{position:fixed;left:0;top:0;z-index:1000;max-width:240px;padding:7px 10px;border-radius:8px;background:#0b0d11;border:1px solid #333a49;color:#e8eaf0;font:12px/1.45 system-ui,sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.5);pointer-events:none;opacity:0;transition:opacity .12s;white-space:normal}
   #tip.on{opacity:1}#tip b{display:block;margin-bottom:2px;color:#fff;font-size:12px}#tip span{color:#aab0bf}
   @media (max-width:1100px){#top #rtxt{display:none}}
@@ -124,6 +135,7 @@
   <div id="rounds" aria-label="rounds"></div><span class="chip" id="rtxt" data-tip-title="Round" data-tip="The step the team is on, for example build or improve together."></span>
   <span class="chip" id="model" data-tip-title="Model" data-tip="The AI model and reasoning effort the agents use. Change it in Settings."></span>
   <span class="sp"></span>
+  <button class="ibtn" id="focusbtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-pressed="false" aria-label="Screen focus" data-tip-title="Screen focus" data-tip="Make the team work only on the screen you are looking at. Turn on Autopilot and they study it, research the brand on the web, and improve it by themselves."></button>
   <button class="ibtn" id="pick" type="button" aria-pressed="false" aria-label="Pick an element" data-tip-title="Pick an element" data-tip="Click any part of the page to ask the agent who owns that section to change it, or to explain why it is designed that way."></button>
   <button class="ibtn" id="setbtn" type="button" aria-haspopup="dialog" aria-label="Settings" data-tip-title="Settings" data-tip="Choose which CLI runs the agents (codex or pi), the model and the reasoning effort. Changes apply from the next agent turn."></button>
   <button class="ibtn" id="lookbtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Appearance" data-tip-title="Appearance" data-tip="Preview the page in light or dark, in another brand colour theme, or in another language. This changes only your preview."></button>
@@ -137,6 +149,14 @@
   <div class="lg"><b>Language</b><span><button type="button" data-sds-lang="en">English</button><button type="button" data-sds-lang="zh-Hans">简体中文</button><button type="button" data-sds-lang="ms">Melayu</button></span></div>
   <p>Preview only. Sections show a theme or language once they use SDS tokens and <code>data-i18n</code>.</p>
 </div>
+<div id="focuspop" role="dialog" aria-label="Screen focus" hidden>
+  <p class="fh">Work only on what you see</p>
+  <button type="button" class="sw" id="swfocus" role="switch" aria-checked="false"><span class="knob"></span><span class="lbl"><b>Limit my requests to this screen</b><small>Messages you send only involve the agents of the sections on screen.</small></span></button>
+  <button type="button" class="sw" id="swauto" role="switch" aria-checked="false"><span class="knob"></span><span class="lbl"><b>Autopilot</b><small>The team studies this screen, researches the brand when unsure, decides and improves it. Scroll down to move on.</small></span></button>
+  <p class="fs" id="fstatus">Off</p>
+  <p class="fn">Tip: zoom to 100% so only a few sections are on screen.</p>
+</div>
+<div id="focuschip" hidden></div>
 <div id="pickbox" hidden><span></span></div>
 <form id="askpop" role="dialog" aria-label="Ask about this element" hidden>
   <div class="ah"><i></i><b></b><button type="button" class="ibtn" id="askx" aria-label="Cancel"></button></div>
@@ -371,7 +391,7 @@
     var list = order.map(function (id) { var a = S.agents[id]; return { id: id, name: a.name, section: a.section, color: a.color }; });
     if (window.SwarmChannel) {
       $('chan').innerHTML = '';
-      SwarmChannel.init({ root: $('chan'), agents: list, onJump: jump, send: function (text) { return fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ from: 'owner', text: text }) }); } });
+      SwarmChannel.init({ root: $('chan'), agents: list, onJump: jump, send: function (text) { var sc = currentScope(); return fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ from: 'owner', text: text, scope: sc ? { sections: sc.sections, elements: sc.elements } : undefined }) }); } });
       fetch('/api/chat?since=0', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) { SwarmChannel.setHistory(j.messages || []); }).catch(function () {});
       order.forEach(function (id) { SwarmChannel.setStatus(id, S.agents[id].status || ''); });
     }
@@ -380,6 +400,7 @@
 
   function onEvent(e) {
     if (e.type === 'state') return build(e.state);
+    if (e.type === 'autopilot') { ap = e; autoOn = !!e.on; paintFocus(); return; }
     if (e.type === 'settings') { $('model').textContent = e.model; if (S) S.model = e.model; return; }
     if (!S) return;
     var a = e.id && S.agents[e.id];
@@ -413,6 +434,7 @@
     panel: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M15 3v18"/>',
     gear: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
     close: '<path d="M18 6 6 18M6 6l12 12"/>',
+    scan: '<path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="1"/><path d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0"/>',
     pick: '<path d="M14 4.1 12 6M5.1 8l-2.9-.8M6 12l-1.9 2M7.2 2.2 8 5.1M9.037 9.69a.498.498 0 0 1 .653-.653l11 4.5a.5.5 0 0 1-.074.949l-4.349 1.041a1 1 0 0 0-.74.739l-1.04 4.35a.5.5 0 0 1-.95.074z"/>',
     look: '<circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.7-.8 1.7-1.7 0-.4-.2-.8-.5-1.1-.3-.3-.5-.7-.5-1.1 0-.9.8-1.7 1.7-1.7H16c3.3 0 6-2.7 6-6 0-4.9-4.5-8.4-10-8.4Z"/>'
   };
@@ -435,8 +457,63 @@
   function paintUnread() { var b = $('unread'); b.textContent = unread > 99 ? '99+' : String(unread); b.classList.toggle('on', unread > 0); }
   $('panel').onclick = function () { setChat(document.body.dataset.chat === 'on' ? 'off' : 'on', true); };
   addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.body.dataset.chat === 'on' && innerWidth <= 760) setChat('off', false); });
-  setIcon($('pick'), 'pick');
+  setIcon($('pick'), 'pick'); setIcon($('focusbtn'), 'scan');
   setIcon($('lookbtn'), 'look'); setIcon($('setbtn'), 'gear'); setIcon($('setclose'), 'close');
+  // ---- screen focus and autopilot: the team works only on the sections that are on screen
+  var focusMode = false, autoOn = false, scopeNow = null, ap = null, reportTimer = 0, lastReport = '';
+  try { focusMode = localStorage.getItem('swarm.focusMode') === '1'; } catch (_) {}
+  var SCOPE_TAGS = { H1: 1, H2: 1, H3: 1, A: 1, BUTTON: 1, IMG: 1, P: 1, LI: 1, LABEL: 1, INPUT: 1, FIGCAPTION: 1 };
+  function computeScope() {
+    if (!S) return null;
+    var vr = view.getBoundingClientRect(), found = [], els = [];
+    order.forEach(function (id) {
+      var h = hosts[id]; if (!h) return;
+      var r = h.el.getBoundingClientRect(), vis = Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top);
+      if (vis >= 60 && r.height > 0) found.push({ id: id, vis: vis, host: h.el });
+    });
+    if (!found.length) return null;
+    found.sort(function (a, b) { return b.vis - a.vis; });
+    found.forEach(function (f) {
+      var n = 0;
+      f.host.querySelectorAll('.body *').forEach(function (el) {
+        if (n >= 6 || !SCOPE_TAGS[el.tagName]) return;
+        var r = el.getBoundingClientRect(), vv = Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top);
+        if (r.height > 0 && vv >= r.height * 0.5 && els.length < 14) { n++; els.push({ section: f.id, tag: el.tagName.toLowerCase(), text: (el.textContent || el.getAttribute('alt') || '').replace(/\s+/g, ' ').trim().slice(0, 60), path: pathOf(el) }); }
+      });
+    });
+    return { primary: found[0].id, sections: found.map(function (f) { return f.id; }), elements: els };
+  }
+  function scopeLabel(sc) { return sc.sections.map(function (id) { return id + ' ' + (S.agents[id].section || ''); }).join(', '); }
+  function paintFocus() {
+    var on = focusMode || autoOn, chip = $('focuschip');
+    $('focusbtn').setAttribute('aria-pressed', on ? 'true' : 'false');
+    $('swfocus').setAttribute('aria-checked', focusMode || autoOn ? 'true' : 'false');
+    $('swauto').setAttribute('aria-checked', autoOn ? 'true' : 'false');
+    var txt = '';
+    if (autoOn) txt = '<b>Autopilot</b> \u00b7 ' + (ap && ap.primary ? ap.primary + ' ' + (S.agents[ap.primary] ? S.agents[ap.primary].section : '') + ' \u00b7 round ' + (ap.cycle || 0) + '/' + (ap.max || 2) + ' \u00b7 ' + (ap.status || '') : 'watching your screen');
+    else if (focusMode) txt = '<b>Focus</b> \u00b7 ' + (scopeNow ? scopeLabel(scopeNow) : 'your requests only involve the sections on screen');
+    chip.hidden = !on; if (on) chip.innerHTML = txt.replace(/&/g, '&amp;').replace(/<(?!\/?b>)/g, '&lt;');
+    $('fstatus').textContent = autoOn ? (ap ? ap.status : 'on') : (focusMode ? 'Focus is on: ' + (scopeNow ? scopeLabel(scopeNow) : '') : 'Off');
+  }
+  function reportFocus(force) {
+    if (!autoOn || !S) return;
+    var sc = computeScope(); if (!sc) return;
+    var key = sc.sections.join(',') + '|' + sc.primary; if (!force && key === lastReport) return; lastReport = key;
+    fetch('/api/focus', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(sc) }).catch(function () {});
+  }
+  function onViewChange() { if (!(focusMode || autoOn)) return; scopeNow = computeScope(); paintFocus(); clearTimeout(reportTimer); reportTimer = setTimeout(function () { reportFocus(false); }, 1500); }
+  view.addEventListener('scroll', onViewChange, { passive: true }); addEventListener('resize', onViewChange);
+  $('focusbtn').onclick = function (e) { e.stopPropagation(); var open = $('focuspop').hidden; $('focuspop').hidden = !open; this.setAttribute('aria-expanded', open ? 'true' : 'false'); if (open) { scopeNow = computeScope(); paintFocus(); } };
+  document.addEventListener('click', function (e) { if (!$('focuspop').hidden && !$('focuspop').contains(e.target) && e.target !== $('focusbtn')) { $('focuspop').hidden = true; $('focusbtn').setAttribute('aria-expanded', 'false'); } });
+  $('swfocus').onclick = function () { if (autoOn) return; focusMode = !focusMode; try { localStorage.setItem('swarm.focusMode', focusMode ? '1' : '0'); } catch (_) {} scopeNow = computeScope(); paintFocus(); };
+  $('swauto').onclick = function () {
+    autoOn = !autoOn; lastReport = '';
+    fetch('/api/autopilot', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: autoOn }) }).then(function (r) { return r.json(); }).then(function (j) { ap = j; paintFocus(); reportFocus(true); }).catch(function () {});
+    scopeNow = computeScope(); paintFocus();
+  };
+  function currentScope() { return (focusMode || autoOn) ? computeScope() : null; }
+  fetch('/api/autopilot').then(function (r) { return r.json(); }).then(function (j) { ap = j; autoOn = !!j.on; if (S) paintFocus(); }).catch(function () {});
+
   // ---- pick an element on the page and tell its owner agent what to change, or ask why it is designed that way
   var picking = false, picked = null, hoverEl = null;
   function pathOf(el) {
@@ -479,7 +556,7 @@
     var text = kind === 'change'
       ? head + 'Change request for ' + where + ': ' + t
       : head + 'Question, do not change anything, about ' + where + ': ' + (t || 'Why is it designed this way?') + ' Please answer in the channel.';
-    fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ from: 'owner', text: text.slice(0, 780) }) });
+    fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ from: 'owner', text: text.slice(0, 780), scope: { sections: [picked.agent.id], elements: [{ section: picked.agent.id, tag: picked.el.tagName.toLowerCase(), text: (picked.el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60), path: picked.path }] } }) });
     closeAsk();
     if (document.body.dataset.chat === 'off') setChat('on', false);
     if (S && S.agents) tab('chan');
@@ -487,7 +564,7 @@
   $('askpop').addEventListener('submit', function (e) { e.preventDefault(); sendAsk('change'); });
   $('askwhy').onclick = function () { sendAsk('why'); };
   $('askx').onclick = closeAsk; setIcon($('askx'), 'close');
-  addEventListener('keydown', function (e) { if (e.key === 'Escape') { if (!$('askpop').hidden) closeAsk(); else if (picking) setPicking(false); } });
+  addEventListener('keydown', function (e) { if (e.key === 'Escape') { if (!$('focuspop').hidden) { $('focuspop').hidden = true; $('focusbtn').setAttribute('aria-expanded', 'false'); } else if (!$('askpop').hidden) closeAsk(); else if (picking) setPicking(false); } });
 
   // ---- settings dialog (runner, model, effort): the SwarmSettings module renders the form, the server validates
   var settingsReady = false;

@@ -1,0 +1,205 @@
+.s-03 {
+  --newmoon-forest: #101C16;
+  --newmoon-ink: #080A09;
+  --newmoon-ivory: #F4EFE4;
+  --newmoon-gold: #E0BD6A;
+  --newmoon-gold-hover: #F0D487;
+  --newmoon-screentone: color-mix(in srgb, var(--newmoon-ink) 38%, var(--newmoon-ivory));
+  --newmoon-frame: var(--dc-space-1) solid var(--newmoon-ink);
+  --newmoon-line: calc(var(--dc-space-1) / 2) solid var(--newmoon-ink);
+  --newmoon-gutter: var(--dc-space-4);
+  /* Reserve the fixed actions and a 16px gap on phones. */
+  --newmoon-clearance: calc(var(--dc-tap) + 2 * var(--dc-space-4) + env(safe-area-inset-bottom, 0px));
+
+  display: grid;
+  align-items: center;
+  min-block-size: 100svh;
+  padding-block: var(--dc-space-4) var(--newmoon-clearance);
+  background: var(--newmoon-forest);
+  color: var(--newmoon-ink);
+  font-family: var(--dc-font);
+}
+
+.s-03 .newmoon-panels {
+  display: grid;
+  gap: var(--dc-space-3);
+  inline-size: min(100%, var(--dc-container));
+  margin-inline: auto;
+  padding-inline: var(--newmoon-gutter);
+}
+
+.s-03 .newmoon-scene {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  min-inline-size: 0;
+  margin: 0;
+  border: var(--newmoon-frame);
+  background: var(--newmoon-ink);
+}
+
+.s-03 .newmoon-scene img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  min-block-size: 0;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+  object-position: center 48%;
+}
+
+.s-03 .newmoon-credit {
+  padding: var(--dc-space-1) var(--dc-space-3);
+  border-block-start: var(--newmoon-frame);
+  background: var(--newmoon-ivory);
+  font-size: var(--dc-text-sm);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-03 .newmoon-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-inline-size: 0;
+  padding: var(--dc-space-4);
+  border: var(--newmoon-frame);
+  background: var(--newmoon-ivory);
+}
+
+.s-03 .newmoon-content > :is(p, h2) {
+  margin: 0;
+}
+
+.s-03 .newmoon-eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dc-space-2);
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-bold);
+  letter-spacing: .08em;
+  line-height: var(--dc-leading-tight);
+  text-transform: uppercase;
+}
+
+.s-03 .newmoon-eyebrow::after {
+  content: "";
+  flex: 0 0 var(--dc-space-12);
+  block-size: var(--dc-space-4);
+  background: radial-gradient(circle, var(--newmoon-screentone) 22%, transparent 31%)
+    0 0 / var(--dc-space-1) var(--dc-space-1);
+}
+
+.s-03 .newmoon-content h2 {
+  margin-block-start: var(--dc-space-2);
+  font-size: clamp(var(--dc-text-display), 15vw, calc(1.5 * var(--dc-text-display)));
+  font-weight: var(--dc-weight-bold);
+  letter-spacing: -.07em;
+  line-height: 1;
+}
+
+.s-03 .newmoon-description,
+.s-03 .newmoon-product {
+  max-inline-size: 36ch;
+  font-size: var(--dc-text-base);
+}
+
+.s-03 .newmoon-content .newmoon-description {
+  position: relative;
+  margin-block-start: var(--dc-space-4);
+  padding: var(--dc-space-2) var(--dc-space-3);
+  border: var(--newmoon-line);
+  border-radius: var(--dc-radius-lg);
+  background: var(--newmoon-ivory);
+  line-height: var(--dc-leading);
+}
+
+.s-03 .newmoon-description::after {
+  content: "";
+  position: absolute;
+  inset-block-end: calc(-1 * var(--dc-space-2));
+  inset-inline-start: var(--dc-space-6);
+  inline-size: var(--dc-space-3);
+  block-size: var(--dc-space-3);
+  transform: rotate(45deg);
+  border-inline-end: var(--newmoon-line);
+  border-block-end: var(--newmoon-line);
+  background: var(--newmoon-ivory);
+}
+
+.s-03 .newmoon-content .newmoon-product {
+  margin-block-start: var(--dc-space-4);
+  font-weight: var(--dc-weight-bold);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-03 .newmoon-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dc-space-3);
+  margin-block-start: var(--dc-space-6);
+}
+
+.s-03 .newmoon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--dc-tap);
+  min-inline-size: var(--dc-tap);
+  padding-inline: var(--dc-space-4);
+  scroll-margin-block-end: var(--newmoon-clearance);
+  border: var(--newmoon-line);
+  color: var(--newmoon-forest);
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-bold);
+  line-height: var(--dc-leading-tight);
+  text-decoration: none;
+}
+
+.s-03 .newmoon-action-primary {
+  background: var(--newmoon-gold);
+  box-shadow: var(--dc-space-1) var(--dc-space-1) var(--newmoon-ink);
+}
+
+.s-03 .newmoon-action-primary:hover {
+  background: var(--newmoon-gold-hover);
+}
+
+.s-03 .newmoon-action-secondary:hover {
+  background: var(--newmoon-forest);
+  color: var(--newmoon-ivory);
+}
+
+.s-03 .newmoon-action:focus-visible {
+  outline: medium solid var(--dc-focus);
+  outline-offset: var(--dc-space-1);
+}
+
+@media (prefers-color-scheme: dark) {
+  .s-03 .newmoon-action:focus-visible {
+    box-shadow: 0 0 0 var(--dc-space-1) var(--newmoon-ink);
+  }
+}
+
+@media (min-width: 48rem) {
+  .s-03 {
+    --newmoon-clearance: calc(var(--dc-tap) + var(--dc-space-12) + env(safe-area-inset-bottom, 0px));
+    --newmoon-gutter: var(--dc-space-8);
+  }
+
+  .s-03 .newmoon-panels {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: var(--dc-space-4);
+  }
+
+  .s-03 .newmoon-scene img {
+    aspect-ratio: 6 / 5;
+  }
+
+  .s-03 .newmoon-content {
+    padding: clamp(var(--dc-space-4), 2.5vw, var(--dc-space-8));
+  }
+
+  .s-03 .newmoon-content h2 {
+    font-size: clamp(var(--dc-text-display), 5.8vw, calc(1.8 * var(--dc-text-display)));
+  }
+}

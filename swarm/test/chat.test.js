@@ -188,3 +188,20 @@ test('rewrites the last 80 messages using the transcript format', (t) => {
   assert.equal(lines[0], '#18 [Owner -> Everyone] (msg) Message 18');
   assert.equal(lines.at(-1), expected.trimEnd());
 });
+
+test('owner scope is kept, sanitized and ignored on agent outbox lines', async (t) => {
+  const { projectDir, chat, events } = setup(t);
+  chat.start();
+  const msg = chat.post({
+    from: 'owner', text: 'Focus here',
+    scope: { sections: ['02', '02', '99', '00', 'x'], elements: [{ section: '02', tag: 'h1!!', text: ' A   long  text ', path: 'a > b' }, { section: '03', tag: 'p', text: 'not in scope', path: 'p' }] }
+  });
+  assert.deepEqual(msg.scope.sections, ['02']);
+  assert.equal(msg.scope.elements.length, 1);
+  assert.equal(msg.scope.elements[0].tag, 'h1');
+  assert.equal(msg.scope.elements[0].text, 'A long text');
+  assert.equal(chat.post({ from: 'owner', text: 'No scope', scope: { sections: ['99'] } }).scope, undefined);
+  fs.writeFileSync(path.join(projectDir, 'chat', '02.jsonl'), JSON.stringify({ text: 'agent tries a scope', scope: { sections: ['02'] } }) + '\n');
+  await waitFor(() => events.length >= 3);
+  assert.equal(chat.history().find((m) => m.from === '02').scope, undefined);
+});

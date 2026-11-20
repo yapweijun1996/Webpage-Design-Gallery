@@ -1,0 +1,168 @@
+.s-06 {
+  --gjh-directory: #192a20;
+  --gjh-forest-ink: #101c16;
+  --gjh-panel-ink: #070a08;
+  --gjh-ivory: #f4efe4;
+  --gjh-gold: #e0bd6a;
+  --gjh-gold-hover: #f0d487;
+  --morebrands-panel-line: var(--dc-space-1);
+  --morebrands-screentone: color-mix(in srgb, var(--gjh-panel-ink) 48%, var(--gjh-ivory));
+  --morebrands-focus-width: calc(var(--dc-space-1) / 2);
+  --morebrands-fixed-clearance: calc(var(--dc-tap) + var(--dc-space-8) + env(safe-area-inset-bottom, 0px));
+
+  background: var(--gjh-directory);
+  color: var(--gjh-ivory);
+  color-scheme: dark;
+  font: var(--dc-text-base) / var(--dc-leading) var(--dc-font);
+  padding-block: var(--dc-space-12);
+}
+
+.s-06 .morebrands-inner {
+  max-width: var(--dc-container);
+  margin-inline: auto;
+  padding-inline: var(--dc-space-4);
+}
+
+.s-06 h2 {
+  margin: 0;
+  font-size: clamp(var(--dc-text-2xl), 5vw, var(--dc-text-display));
+  line-height: var(--dc-leading-tight);
+  font-weight: var(--dc-weight-bold);
+  letter-spacing: -.035em;
+}
+
+.s-06 .morebrands-hint {
+  margin-block: var(--dc-space-2) var(--dc-space-4);
+  font-size: var(--dc-text-sm);
+}
+
+.s-06 .morebrands-rail {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: var(--gjh-ivory) var(--gjh-directory);
+  scroll-margin-block-end: var(--morebrands-fixed-clearance);
+}
+
+.s-06 .morebrands-list {
+  display: flex;
+  align-items: stretch;
+  gap: var(--dc-space-3);
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--dc-space-3);
+}
+
+.s-06 .morebrands-list > li {
+  border: var(--morebrands-panel-line) solid var(--gjh-panel-ink);
+  background: var(--gjh-ivory);
+  color: var(--gjh-forest-ink);
+  scroll-snap-align: start;
+}
+
+.s-06 .morebrands-list > li:last-child {
+  scroll-snap-align: end;
+}
+
+.s-06 .morebrands-lead {
+  flex: 0 0 76%;
+  min-width: 0;
+}
+
+.s-06 .morebrands-lead figure {
+  margin: 0;
+}
+
+.s-06 .morebrands-lead img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 4;
+  object-fit: cover;
+}
+
+.s-06 .morebrands-lead figcaption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dc-space-1) var(--dc-space-2);
+  border-block-start: var(--morebrands-panel-line) solid var(--gjh-panel-ink);
+  padding: var(--dc-space-2) var(--dc-space-3);
+}
+
+.s-06 .morebrands-name,
+.s-06 .morebrands-wordmark {
+  font-size: var(--dc-text-xl);
+  font-weight: var(--dc-weight-bold);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-06 .morebrands-caption {
+  font-size: var(--dc-text-xs);
+}
+
+.s-06 .morebrands-wordmark {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: var(--dc-space-8) var(--dc-space-6) var(--dc-space-8) var(--dc-space-3);
+}
+
+.s-06 .morebrands-wordmark::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: var(--dc-space-12);
+  block-size: var(--dc-space-6);
+  background-image: radial-gradient(circle closest-side, var(--morebrands-screentone) 52%, transparent 74%);
+  background-size: var(--dc-space-1) var(--dc-space-1);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  pointer-events: none;
+}
+
+.s-06 .morebrands-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dc-space-2);
+  min-height: var(--dc-tap);
+  margin-top: var(--dc-space-6);
+  scroll-margin-block-end: var(--morebrands-fixed-clearance);
+  padding-inline: var(--dc-space-4);
+  background: var(--gjh-gold);
+  color: var(--gjh-forest-ink);
+  font-weight: var(--dc-weight-medium);
+  text-decoration: none;
+}
+
+.s-06 .morebrands-link:hover {
+  background: var(--gjh-gold-hover);
+}
+
+.s-06 .morebrands-rail:focus-visible,
+.s-06 .morebrands-link:focus-visible {
+  outline: var(--morebrands-focus-width) solid var(--dc-focus);
+  outline-offset: calc(2 * var(--morebrands-focus-width));
+  box-shadow: 0 0 0 var(--morebrands-focus-width) var(--gjh-directory),
+    0 0 0 calc(2 * var(--morebrands-focus-width)) var(--gjh-ivory);
+}
+
+@media (min-width: 48rem) {
+  .s-06 .morebrands-inner {
+    padding-inline: var(--dc-space-8);
+  }
+
+  .s-06 .morebrands-lead {
+    flex-basis: 44%;
+  }
+
+  .s-06 .morebrands-lead img {
+    aspect-ratio: 3 / 2;
+  }
+
+  .s-06 .morebrands-wordmark {
+    padding-inline: var(--dc-space-6) var(--dc-space-8);
+  }
+}

@@ -38,6 +38,15 @@ const fixtureCases = [
       output_tokens: 65, reasoning_output_tokens: 0,
     } },
   ]],
+  ['codex', 'codex-json-search-sample.jsonl', [
+    { kind: 'thought', text: '我会查找公司创立年份的来源。' },
+    { kind: 'action', verb: 'researching', target: 'Goh Joo Hin Singapore founded 1940 1945 company official', sections: [] },
+    { kind: 'thought', text: 'Goh Joo Hin was founded in **1940**, according to its [company profile on LinkedIn](https://sg.linkedin.com/company/goh-joo-hin).' },
+    { kind: 'done', ok: true, usage: {
+      input_tokens: 62358, cached_input_tokens: 29056, cache_write_input_tokens: 0,
+      output_tokens: 103, reasoning_output_tokens: 0,
+    } },
+  ]],
   ['pi', 'pi-json-tool-sample.jsonl', [
     { kind: 'action', verb: 'editing', target: 'hello.txt', sections: [] },
     { kind: 'thought', text: 'done' },
@@ -46,7 +55,7 @@ const fixtureCases = [
 ];
 
 for (const [name, file, expected] of fixtureCases) {
-  test(`${name} fixture emits the same events for line-by-line and seeded chunk replay`, () => {
+  test(`${file} emits the same events for line-by-line and seeded chunk replay`, () => {
     const fixture = fs.readFileSync(path.join(__dirname, 'fixtures', file), 'utf8');
     const lineEvents = replay(name, fixture.match(/[^\n]*\n|[^\n]+$/g));
     assert.deepEqual(lineEvents, expected);
@@ -104,6 +113,18 @@ test('codex classifies command verbs and collects section references in order', 
   }
 });
 
+test('codex emits each completed search once and falls back to the item text', () => {
+  const parser = runners.get('codex').createParser();
+  const item = { id: 'search-1', type: 'web_search', query: '', text: ' references for notes/03.md ' };
+  const completed = { type: 'item.completed', item };
+  const expected = [{ kind: 'action', verb: 'researching', target: 'references for notes/03.md', sections: [] }];
+  assert.deepEqual(pushEvent(parser, { type: 'item.started', item: { ...item, query: 'draft query' } }), []);
+  assert.deepEqual(pushEvent(parser, completed), expected);
+  assert.deepEqual(pushEvent(parser, completed), []);
+  assert.deepEqual(pushEvent(parser, { ...completed, item: { ...item, id: 'search-2' } }), expected);
+  assert.deepEqual(pushEvent(parser, { ...completed, item: { type: 'web_search', query: '' } }), []);
+});
+
 test('pi normalizes read, write, edit, and bash actions from execution starts', () => {
   const parser = runners.get('pi').createParser();
   const cases = [
@@ -117,6 +138,25 @@ test('pi normalizes read, write, edit, and bash actions from execution starts', 
       { kind: 'action', verb, target, sections },
     ]);
   }
+});
+
+test('pi classifies web-related bash starts as research and uses the first URL', () => {
+  const parser = runners.get('pi').createParser();
+  for (const [command, target] of [
+    ["curl -fsSL 'https://example.test/notes/03.md?a=1&b=2' https://other.test", 'https://example.test/notes/03.md?a=1&b=2'],
+    ['wget http://example.test/resource', 'http://example.test/resource'],
+    ['wget http://example.test/resource&&echo done', 'http://example.test/resource'],
+    ['python fetch.py https://example.test/doc', 'https://example.test/doc'],
+    ['curl --version', 'curl --version'],
+    ['command wget --help', 'command wget --help'],
+  ]) {
+    const event = { type: 'tool_execution_start', toolName: 'bash', args: { command } };
+    assert.deepEqual(pushEvent(parser, event), [{ kind: 'action', verb: 'researching', target, sections: [] }]);
+  }
+  const event = { type: 'tool_execution_start', toolName: 'bash', args: { command: 'node wget-helper.js' } };
+  assert.deepEqual(pushEvent(parser, event), [
+    { kind: 'action', verb: 'running', target: 'node wget-helper.js', sections: [] },
+  ]);
 });
 
 test('codex drops the known config warning and emits fatal item and turn errors', () => {
@@ -183,6 +223,14 @@ for (const name of RUNNERS) {
         assert.deepEqual(runner.buildCommand({ model, effort, projectDir: PROJECT }), {
           command: name, args, cwd: PROJECT, input: 'stdin',
         });
+        for (const research of [false, 'true', true]) {
+          const expectedArgs = name === 'codex' && research === true
+            ? args.toSpliced(6, 0, '-c', 'web_search="live"')
+            : args;
+          assert.deepEqual(runner.buildCommand({ model, effort, projectDir: PROJECT, research }), {
+            command: name, args: expectedArgs, cwd: PROJECT, input: 'stdin',
+          });
+        }
       });
     }
   }
@@ -192,10 +240,13 @@ test('non-allowlisted runners, models and reasoning efforts are rejected', async
   for (const name of ['bash', 'constructor', '__proto__']) assert.throws(() => runners.get(name), /Unsupported runner/);
   for (const name of RUNNERS) {
     const runner = runners.get(name);
-    for (const model of ['other-model', 'constructor', [MODELS[0]]]) {
-      assert.throws(() => runner.buildCommand({ model, effort: 'medium', projectDir: PROJECT }), /Unsupported model/);
+    for (const research of [undefined, true]) {
+      for (const model of ['other-model', 'constructor', [MODELS[0]]]) {
+        assert.throws(() => runner.buildCommand({ model, effort: 'medium', projectDir: PROJECT, research }), /Unsupported model/);
+      }
+      assert.throws(() => runner.buildCommand({ model: MODELS[0], effort: 'low', projectDir: PROJECT, research }),
+        /Unsupported reasoning effort/);
     }
-    assert.throws(() => runner.buildCommand({ model: MODELS[0], effort: 'low', projectDir: PROJECT }), /Unsupported reasoning effort/);
     await assert.rejects(runner.readiness({ model: 'other-model' }), /Unsupported model/);
   }
 });
@@ -283,4 +334,12 @@ test('readiness shares one timeout budget across both probes', async t => {
   assert.equal(result.version, 'codex 1.2.3');
   assert.equal(result.ok, false);
   assert.match(result.detail, /timed out after 8000 ms/i);
+});
+
+test('codex classifies a curl fetch that does not touch project files as researching', () => {
+  const parser = runners.get('codex').createParser();
+  const ev = parser.push(JSON.stringify({ type: 'item.started', item: { type: 'command_execution', command: '/bin/zsh -lc "curl -Ls https://example.com/x | rg -o logo > /tmp/out.txt"' } }) + '\n');
+  assert.equal(ev[0].verb, 'researching');
+  const own = parser.push(JSON.stringify({ type: 'item.started', item: { type: 'command_execution', command: "/bin/zsh -lc 'curl -s https://example.com > sections/02-hero.html'" } }) + '\n');
+  assert.equal(own[0].verb, 'editing');
 });

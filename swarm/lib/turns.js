@@ -3,6 +3,13 @@
 const PROMPT_LIMIT = 3600;
 const REQUEST_LIMIT = 1200;
 
+// When the owner looks at only part of the page, every agent must stay inside that part.
+function scopeLine(scope) {
+  if (!scope || !Array.isArray(scope.sections) || !scope.sections.length) return '';
+  const els = (scope.elements || []).slice(0, 10).map(e => `${e.section}:${e.tag} "${e.text}"`).join('; ');
+  return `OWNER SCOPE: the owner is looking at only part of the page. In-scope sections: ${scope.sections.join(', ')}. On-screen elements: ${els || 'not listed'}. Work, review and discuss ONLY these sections and elements. Do not change any other section, and assign no agent outside this scope: everything else stays exactly as it is.`.slice(0, 700);
+}
+
 function buildPrompt(agent, label, owner, assignment, isManager) {
   const { id, name, section, lane } = agent;
   const sectionOwnership = `Edit only sections/${id}-${section}.html, sections/${id}-${section}.css, and notes/${id}.md.`;
@@ -28,6 +35,7 @@ function buildPrompt(agent, label, owner, assignment, isManager) {
     'The server maintains channel.md and channel.jsonl. Use your outbox for channel posts.',
     'Live narration rule: before each major step, write one short sentence of intent (max 20 words) in your live commentary.',
     isManager && 'For channel turns, edit only direction.md, decisions.md, and review.md. Append channel posts to your outbox.',
+    scopeLine(owner.scope),
     task,
     assignment && `Your manager assignment (#${assignment.id}): ${(assignment.task || assignment.text).slice(0, 800)}`,
     `Current request #${owner.id} from ${owner.from}:`
@@ -57,18 +65,24 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
     notice(`Agent ${agent.id} failed in ${label}`);
   }
 
+  let currentScope = null; // Set of section ids the owner is looking at, or null for the whole page
   function getAssignments(since) {
     const assignments = new Map();
     for (const message of chat.history(since)) {
       if (message.from !== managerId || message.kind !== 'assign') continue;
       for (const id of message.to) {
-        if (workers.has(id)) assignments.set(id, message);
+        if (workers.has(id) && (!currentScope || currentScope.has(id))) assignments.set(id, message);
       }
     }
     return assignments;
   }
 
   async function handle(owner) {
+    currentScope = Array.isArray(owner.scope?.sections) && owner.scope.sections.length ? new Set(owner.scope.sections) : null;
+    try { await handleScoped(owner); } finally { currentScope = null; }
+  }
+
+  async function handleScoped(owner) {
     // A queued owner message can precede assignments made for the previous turn.
     const since = Math.max(owner.id, notice('Triage started').id);
     await run(manager, 'Triage', owner);

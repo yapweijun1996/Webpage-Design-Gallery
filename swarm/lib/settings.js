@@ -17,6 +17,8 @@ const DEFAULTS = Object.freeze({
   concurrency: Object.freeze({ maxParallel: 12 }),
   timeouts: Object.freeze({ turnMinutes: 20 }),
   channel: Object.freeze({ language: 'zh-Hans', standingRules: '' }),
+  research: Object.freeze({ web: true }),
+  autopilot: Object.freeze({ maxCyclesPerScreen: 2 }),
 });
 
 const LABELS = Object.freeze({
@@ -80,6 +82,8 @@ function validate(input) {
   const concurrency = record(input, 'concurrency');
   const timeouts = record(input, 'timeouts');
   const channel = record(input, 'channel');
+  const research = record(input, 'research');
+  const autopilot = record(input, 'autopilot');
   const version = field(input, 'version', 'version', value => value === DEFAULTS.version,
     `Expected version ${DEFAULTS.version}.`);
   const maxParallel = field(concurrency, 'maxParallel', 'concurrency.maxParallel',
@@ -91,6 +95,10 @@ function validate(input) {
   const standingRules = field(channel, 'standingRules', 'channel.standingRules',
     value => typeof value === 'string' && value.length <= MAX_RULES_LENGTH,
     `Expected a string of at most ${MAX_RULES_LENGTH} characters.`);
+  const web = field(research, 'web', 'research.web',
+    value => typeof value === 'boolean', 'Expected a boolean.');
+  const maxCyclesPerScreen = field(autopilot, 'maxCyclesPerScreen', 'autopilot.maxCyclesPerScreen',
+    value => Number.isInteger(value) && value >= 1 && value <= 5, 'Expected an integer from 1 to 5.');
 
   const value = {
     version: version ?? DEFAULTS.version,
@@ -105,6 +113,8 @@ function validate(input) {
       language: language ?? DEFAULTS.channel.language,
       standingRules: stripControls(standingRules ?? DEFAULTS.channel.standingRules),
     },
+    research: { web: web ?? DEFAULTS.research.web },
+    autopilot: { maxCyclesPerScreen: maxCyclesPerScreen ?? DEFAULTS.autopilot.maxCyclesPerScreen },
   };
   return { ok: errors.length === 0, errors, value };
 }

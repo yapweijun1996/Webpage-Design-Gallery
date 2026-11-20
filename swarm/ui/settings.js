@@ -169,7 +169,7 @@
       parent.append(box);
     }
 
-    function stepper(parent, path, label, min, max, help) {
+    function stepper(parent, path, label, min, max, { descriptionId, description }) {
       const box = el('div', 'ss-field');
       const caption = el('label', '', label);
       const row = el('div', 'ss-stepper');
@@ -196,6 +196,7 @@
       increase.append(icon('plus'));
       row.append(decrease, input, increase);
       box.append(caption, row);
+      const help = description ? helpText(box, path, description) : descriptionId;
       field(box, path, [input], () => input.valueAsNumber, value => {
         input.value = value;
       }, help);
@@ -235,9 +236,29 @@
       const limitInputs = el('div', 'ss-limits');
       limits.append(el('legend', '', 'Run limits'), limitInputs);
       const limitHelp = helpText(limits, 'limits', 'Run 1 to 16 agents at once and allow 1 to 60 minutes per turn.');
-      stepper(limitInputs, 'concurrency.maxParallel', 'Max parallel', 1, 16, limitHelp);
-      stepper(limitInputs, 'timeouts.turnMinutes', 'Timeout (min)', 1, 60, limitHelp);
+      stepper(limitInputs, 'concurrency.maxParallel', 'Max parallel', 1, 16, { descriptionId: limitHelp });
+      stepper(limitInputs, 'timeouts.turnMinutes', 'Timeout (min)', 1, 60, { descriptionId: limitHelp });
       controls.append(limits);
+
+      const automation = el('div', 'ss-card ss-automation');
+      const research = el('div', 'ss-field');
+      const researchLabel = el('label', 'ss-switch-label', 'Allow web research');
+      const researchSwitch = el('input', 'ss-switch');
+      researchSwitch.id = id + '-research.web';
+      researchSwitch.type = 'checkbox';
+      researchSwitch.setAttribute('role', 'switch');
+      researchLabel.append(researchSwitch);
+      research.append(researchLabel);
+      const researchHelp = helpText(research, 'research.web',
+        'Agents can search the web, for example to learn what a brand is and which colours it uses. Web pages are treated as untrusted data.');
+      field(research, 'research.web', [researchSwitch], () => researchSwitch.checked, value => {
+        researchSwitch.checked = value;
+      }, researchHelp);
+      automation.append(research);
+      stepper(automation, 'autopilot.maxCyclesPerScreen', 'Autopilot cycles per screen', 1, 5, {
+        description: 'How many improvement rounds the team runs on the screen you are looking at before waiting for you to scroll.'
+      });
+      controls.append(automation);
 
       radioGroup(controls, 'channel.language', 'Channel language', [['zh-Hans', 'Mandarin'], ['en', 'English']],
         'Sets the language agents use in the channel.', 'ss-options ss-segments');

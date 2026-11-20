@@ -84,7 +84,21 @@ function createChat({ projectDir, agents, emit }) {
     }).join('');
   }
 
-  function append({ from, to, kind, text, task, reply }, source) {
+  // Owner scope: which sections and on-screen elements the owner is looking at (only owner/claude messages may carry it).
+  function sanitizeScope(scope) {
+    if (!scope || typeof scope !== 'object' || !Array.isArray(scope.sections)) return null;
+    const sections = [...new Set(scope.sections.map(String).filter((id) => names.has(id) && id !== '00'))].slice(0, 12);
+    if (!sections.length) return null;
+    const elements = (Array.isArray(scope.elements) ? scope.elements : []).slice(0, 14).map((e) => ({
+      section: String(e?.section ?? '').slice(0, 2),
+      tag: String(e?.tag ?? '').replace(/[^a-z0-9]/gi, '').slice(0, 12),
+      text: truncate(String(e?.text ?? '').replace(/\s+/g, ' ').trim(), 60),
+      path: truncate(String(e?.path ?? ''), 120),
+    })).filter((e) => sections.includes(e.section));
+    return { sections, elements };
+  }
+
+  function append({ from, to, kind, text, task, reply, scope }, source) {
     const truncatedText = truncate(text, 800);
     const recipients = Array.isArray(to) ? to.filter((id) => names.has(id)) : [];
     const msg = {
@@ -97,6 +111,7 @@ function createChat({ projectDir, agents, emit }) {
     };
     if (msg.kind === 'assign' && typeof task === 'string') msg.task = truncate(task, 400);
     if (Number.isSafeInteger(reply) && reply > 0) msg.reply = reply;
+    if (!source) { const sc = sanitizeScope(scope); if (sc) msg.scope = sc; }
 
     if (source) {
       // Prepare the cursor before appending so a restart can recover either outcome.

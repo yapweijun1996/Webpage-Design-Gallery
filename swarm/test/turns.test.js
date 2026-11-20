@@ -304,3 +304,32 @@ test('false and rejected runs post failure notices and preserve the rest of the 
   assert.equal(calls.at(-1).label, 'Summary');
   assert.equal(turns.busy(), false);
 });
+
+test('owner scope limits assignments and prompts to the sections the owner is looking at', async () => {
+  const { chat, turns, calls } = setup(({ id, label }, chat) => {
+    if (label === 'Triage') for (const target of ['01', '02', '03']) assign(chat, target); // the manager tries to involve three sections
+  });
+  const owner = chat.post({
+    from: 'owner', text: 'Make this part bolder',
+    scope: { sections: ['01'], elements: [{ section: '01', tag: 'h1', text: 'Explore our brands', path: 'section > h1' }] }
+  });
+  await turns.onOwnerMessage(owner);
+  const workers = calls.filter(call => call.id !== '00').map(call => `${call.label}:${call.id}`);
+  assert.ok(workers.length > 0, 'the in-scope worker still runs');
+  assert.ok(workers.every(entry => entry.endsWith(':01')), `only section 01 may run, got ${workers}`);
+  const prompt = calls.find(call => call.id === '01').prompt;
+  assert.match(prompt, /OWNER SCOPE/);
+  assert.match(prompt, /In-scope sections: 01/);
+  assert.match(prompt, /Explore our brands/);
+  assert.match(calls[0].prompt, /OWNER SCOPE/, 'the manager sees the scope in Triage too');
+});
+
+test('without a scope every assigned section still runs', async () => {
+  const { chat, turns, calls } = setup(({ label }, chat) => {
+    if (label === 'Triage') for (const target of ['01', '02']) assign(chat, target);
+  });
+  await turns.onOwnerMessage(chat.post({ from: 'owner', text: 'Update the whole page' }));
+  const ids = new Set(calls.filter(call => call.label === 'Work').map(call => call.id));
+  assert.deepEqual([...ids].sort(), ['01', '02']);
+  assert.doesNotMatch(calls[0].prompt, /OWNER SCOPE/);
+});

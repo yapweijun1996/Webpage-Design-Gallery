@@ -299,6 +299,71 @@
   font-weight: 600;
 }
 
+.swarm-settings .ss-automation {
+  display: grid;
+  gap: 12px;
+}
+
+.swarm-settings .ss-switch-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-block-size: 40px;
+  cursor: pointer;
+}
+
+.swarm-settings .ss-switch {
+  appearance: none;
+  display: grid;
+  align-items: center;
+  flex: none;
+  inline-size: 42px;
+  block-size: 24px;
+  margin: 0;
+  padding-inline: 4px;
+  border: 1px solid var(--ss-line);
+  border-radius: 999px;
+  background: var(--ss-bg);
+  color: var(--ss-muted);
+  cursor: inherit;
+}
+
+.swarm-settings .ss-switch::before {
+  content: "";
+  inline-size: 14px;
+  block-size: 14px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.swarm-settings .ss-switch:checked {
+  justify-items: end;
+  border-color: var(--ss-accent);
+  background: var(--ss-accent);
+  color: var(--ss-bg);
+}
+
+.swarm-settings .ss-switch:disabled {
+  opacity: 0.65;
+}
+
+@media (forced-colors: active) {
+  .swarm-settings .ss-switch {
+    appearance: auto;
+    inline-size: 20px;
+    block-size: 20px;
+  }
+
+  .swarm-settings .ss-switch::before {
+    display: none;
+  }
+}
+
+.swarm-settings .ss-automation .ss-stepper {
+  max-inline-size: 160px;
+}
+
 .swarm-settings .ss-stepper {
   display: grid;
   grid-template-columns: 40px minmax(0, 1fr) 40px;
@@ -383,6 +448,7 @@
 }
 
 .swarm-settings .ss-choice:has([aria-invalid="true"]),
+.swarm-settings .ss-switch[aria-invalid="true"],
 .swarm-settings :is(input, select, textarea)[aria-invalid="true"] {
   border-color: var(--ss-error);
 }

@@ -1,0 +1,206 @@
+.s-05 {
+  --healthtech-forest: #101C16;
+  --healthtech-directory: #192A20;
+  --healthtech-ink: #101010;
+  --healthtech-ivory: #F4EFE4;
+  --healthtech-gold: #E0BD6A;
+  --healthtech-gold-hover: #F0D487;
+  --healthtech-tone: color-mix(in srgb, var(--healthtech-forest) 45%, var(--healthtech-ivory));
+  --healthtech-gutter: var(--dc-space-4);
+  --healthtech-frame: var(--dc-space-1);
+  --healthtech-clearance: calc(var(--dc-tap) + var(--dc-space-8) + env(safe-area-inset-bottom, 0px));
+  background: var(--healthtech-forest);
+  color: var(--healthtech-ivory);
+  font: var(--dc-weight-regular) var(--dc-text-base) / var(--dc-leading) var(--dc-font);
+}
+
+.s-05 .healthtech-chapter {
+  padding-block: var(--dc-space-6) var(--healthtech-clearance);
+}
+
+.s-05 .healthtech-chapter--sony {
+  background: var(--healthtech-directory);
+}
+
+.s-05 .healthtech-inner {
+  display: grid;
+  gap: var(--dc-space-3);
+  max-inline-size: var(--dc-container);
+  margin-inline: auto;
+  padding-inline: var(--healthtech-gutter);
+}
+
+.s-05 .healthtech-scene,
+.s-05 .healthtech-content {
+  min-inline-size: 0;
+  margin: 0;
+  border: var(--healthtech-frame) solid var(--healthtech-ink);
+}
+
+.s-05 .healthtech-picture,
+.s-05 .healthtech-picture img {
+  display: block;
+  inline-size: 100%;
+}
+
+.s-05 .healthtech-picture img {
+  block-size: auto;
+}
+
+@media (width < 48rem) {
+  .s-05 .healthtech-chapter--borsch .healthtech-picture img {
+    aspect-ratio: 11 / 12;
+    object-fit: contain;
+    background: var(--healthtech-ink);
+  }
+}
+
+.s-05 .healthtech-caption {
+  padding: var(--dc-space-1) var(--dc-space-3);
+  border-block-start: var(--healthtech-frame) solid var(--healthtech-ink);
+  background: var(--healthtech-forest);
+  color: var(--healthtech-ivory);
+  font-size: var(--dc-text-sm);
+}
+
+.s-05 .healthtech-content {
+  padding: var(--dc-space-4);
+  background: var(--healthtech-ivory);
+  color: var(--healthtech-forest);
+}
+
+.s-05 .healthtech-content :is(h2, p) {
+  margin: 0;
+}
+
+.s-05 .healthtech-content h2 {
+  margin-block-start: var(--dc-space-1);
+  font-size: clamp(var(--dc-text-2xl), 12vw, calc(2 * var(--dc-text-display)));
+  font-weight: var(--dc-weight-bold);
+  line-height: var(--dc-leading-tight);
+  letter-spacing: -.055em;
+}
+
+.s-05 .healthtech-eyebrow {
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-bold);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.s-05 .healthtech-content .healthtech-description {
+  max-inline-size: 34ch;
+  margin-block-start: var(--dc-space-3);
+}
+
+.s-05 .healthtech-chapter--borsch .healthtech-content {
+  border-start-end-radius: var(--dc-radius-lg);
+  border-end-start-radius: var(--dc-radius-lg);
+}
+
+.s-05 .healthtech-masthead {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--dc-space-2);
+  margin-block-end: var(--dc-space-3);
+}
+
+.s-05 .healthtech-masthead::before {
+  content: "";
+  background: radial-gradient(circle, var(--healthtech-tone) 24%, transparent 30%) 0 0 / var(--dc-space-2) var(--dc-space-2);
+}
+
+.s-05 .healthtech-masthead img {
+  display: block;
+  inline-size: calc(var(--dc-space-12) + var(--dc-space-8));
+  block-size: auto;
+  align-self: center;
+}
+
+.s-05 .healthtech-chapter--borsch .healthtech-description {
+  position: relative;
+  padding: var(--dc-space-2) var(--dc-space-3);
+  border: calc(var(--healthtech-frame) / 2) solid var(--healthtech-ink);
+  border-radius: var(--dc-radius-lg);
+}
+
+.s-05 .healthtech-chapter--borsch .healthtech-description::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: var(--dc-space-6);
+  inline-size: var(--dc-space-3);
+  block-size: var(--dc-space-2);
+  border-inline-start: calc(var(--healthtech-frame) / 2) solid var(--healthtech-ink);
+  border-block-end: calc(var(--healthtech-frame) / 2) solid var(--healthtech-ink);
+  background: var(--healthtech-ivory);
+  transform: translateY(-50%) skewY(-36deg);
+}
+
+.s-05 .healthtech-chapter--sony .healthtech-scene {
+  margin-inline-start: var(--dc-space-6);
+}
+
+.s-05 .healthtech-chapter--sony .healthtech-content {
+  margin-inline-end: var(--dc-space-6);
+}
+
+.s-05 .healthtech-action {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--dc-tap);
+  min-inline-size: var(--dc-tap);
+  margin-block-start: var(--dc-space-6);
+  padding-inline: var(--dc-space-4);
+  scroll-margin-block-end: var(--healthtech-clearance);
+  border: var(--healthtech-frame) solid var(--healthtech-ink);
+  background: var(--healthtech-gold);
+  color: var(--healthtech-forest);
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-bold);
+  text-decoration: none;
+}
+
+.s-05 .healthtech-action:hover {
+  background: var(--healthtech-gold-hover);
+}
+
+.s-05 .healthtech-action:focus-visible {
+  box-shadow: 0 0 0 var(--dc-space-2) var(--healthtech-ink);
+  outline: var(--dc-space-1) solid var(--dc-focus);
+  outline-offset: var(--dc-space-1);
+}
+
+@media (min-width: 48rem) {
+  .s-05 {
+    --healthtech-gutter: var(--dc-space-8);
+    --healthtech-clearance: var(--dc-space-12);
+  }
+
+  .s-05 .healthtech-chapter {
+    padding-block-start: var(--dc-space-12);
+  }
+
+  .s-05 .healthtech-inner {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+    gap: var(--dc-space-4);
+  }
+
+  .s-05 .healthtech-content h2 {
+    font-size: clamp(var(--dc-text-2xl), 5vw, calc(2 * var(--dc-text-display)));
+  }
+
+  .s-05 .healthtech-masthead img {
+    inline-size: calc(2 * var(--dc-space-12));
+  }
+
+  .s-05 .healthtech-chapter--sony .healthtech-scene {
+    margin-inline-start: 0;
+  }
+
+  .s-05 .healthtech-chapter--sony .healthtech-content {
+    margin-block-start: var(--dc-space-12);
+    margin-inline-end: 0;
+  }
+}

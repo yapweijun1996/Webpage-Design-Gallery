@@ -1,0 +1,236 @@
+.s-04 {
+  --s-04-forest: #101c16;
+  --s-04-panel: #192a20;
+  --s-04-ink: #080a08;
+  --s-04-ivory: #f4efe4;
+  --s-04-gold: #e0bd6a;
+  --s-04-gold-hover: #f0d487;
+  --s-04-rule: var(--dc-space-1);
+  --s-04-gutter: var(--dc-space-4);
+  --s-04-action-clearance: calc(var(--dc-tap) + 2 * var(--dc-space-2) + var(--dc-space-4) + env(safe-area-inset-bottom, 0px));
+  background: var(--s-04-forest);
+  color: var(--s-04-ivory);
+  font-family: var(--dc-font);
+}
+
+.s-04 .s-04__chapter {
+  display: grid;
+  align-content: start;
+  gap: var(--dc-space-3);
+  inline-size: min(100%, var(--dc-container));
+  min-block-size: 100svh;
+  margin-inline: auto;
+  padding: var(--dc-space-6) var(--s-04-gutter) var(--s-04-action-clearance);
+}
+
+.s-04 .s-04__panel {
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.s-04 .s-04__frame {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  aspect-ratio: 1;
+  inline-size: 100%;
+  max-block-size: 45svh;
+  padding: var(--s-04-rule);
+  background: var(--s-04-ink);
+}
+
+.s-04 .s-04__scene {
+  position: absolute;
+  inset: var(--s-04-rule);
+  display: block;
+}
+
+.s-04 .s-04__scene img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: center 48%;
+}
+
+.s-04 .s-04__caption {
+  padding: var(--dc-space-1) var(--dc-space-3);
+  border: var(--s-04-rule) solid var(--s-04-ink);
+  border-block-start: 0;
+  background: var(--s-04-ivory);
+  color: var(--s-04-ink);
+  font-size: var(--dc-text-sm);
+  line-height: var(--dc-leading-tight);
+}
+
+.s-04 .s-04__content {
+  position: relative;
+  min-inline-size: 0;
+  padding: var(--dc-space-4);
+  border: var(--s-04-rule) solid transparent;
+}
+
+.s-04 .s-04__content :is(h2, p) {
+  margin: 0;
+}
+
+.s-04 .s-04__eyebrow {
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-bold);
+  line-height: var(--dc-leading-tight);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.s-04 .s-04__content h2 {
+  margin-block: var(--dc-space-2) var(--dc-space-4);
+  font-size: clamp(var(--dc-text-display), 21vw, calc(2.5 * var(--dc-text-display)));
+  font-weight: var(--dc-weight-bold);
+  line-height: .9;
+  letter-spacing: -.065em;
+}
+
+.s-04 .s-04__description {
+  max-inline-size: 34ch;
+  font-size: var(--dc-text-base);
+  line-height: var(--dc-leading);
+}
+
+.s-04 .s-04__chapter--mili .s-04__content {
+  border-color: var(--s-04-ink);
+  background: var(--s-04-panel);
+}
+
+.s-04 .s-04__chapter--mili h2 {
+  color: var(--s-04-gold);
+}
+
+.s-04 .s-04__chapter--mili .s-04__description {
+  position: relative;
+  inline-size: fit-content;
+  padding: var(--dc-space-2) var(--dc-space-3);
+  border: var(--s-04-rule) solid var(--s-04-ink);
+  border-radius: var(--dc-radius-lg);
+  background: var(--s-04-ivory);
+  color: var(--s-04-ink);
+}
+
+.s-04 .s-04__chapter--mili .s-04__description::before {
+  content: "";
+  position: absolute;
+  inset: auto auto calc(-1 * var(--dc-space-2)) var(--dc-space-4);
+  inline-size: var(--dc-space-3);
+  block-size: var(--dc-space-3);
+  transform: rotate(45deg);
+  border-inline-end: calc(var(--s-04-rule) / 2) solid var(--s-04-ink);
+  border-block-end: calc(var(--s-04-rule) / 2) solid var(--s-04-ink);
+  background: var(--s-04-ivory);
+}
+
+.s-04 .s-04__chapter--gogo .s-04__frame {
+  --s-04-cut: var(--dc-space-8);
+  clip-path: polygon(0 0, calc(100% - var(--s-04-cut)) 0, 100% 100%, 0 100%);
+}
+
+.s-04 .s-04__chapter--gogo .s-04__scene {
+  clip-path: polygon(0 0, calc(100% - var(--s-04-cut)) 0, 100% 100%, 0 100%);
+}
+
+.s-04 .s-04__chapter--gogo .s-04__frame::after {
+  content: "";
+  position: absolute;
+  inset: var(--s-04-rule) var(--s-04-rule) var(--s-04-rule) auto;
+  inline-size: 39%;
+  background: repeating-linear-gradient(
+    152deg,
+    transparent 0 var(--dc-space-3),
+    var(--s-04-ivory) var(--dc-space-3) var(--dc-space-4),
+    var(--s-04-ink) var(--dc-space-4) calc(var(--dc-space-4) + var(--s-04-rule)),
+    transparent calc(var(--dc-space-4) + var(--s-04-rule)) var(--dc-space-8)
+  );
+  clip-path: polygon(62% 0, 100% 0, 100% 100%, 0 100%, 38% 64%);
+  pointer-events: none;
+}
+
+.s-04 .s-04__chapter--gogo .s-04__caption {
+  border-block-start: var(--s-04-rule) solid var(--s-04-ink);
+}
+
+.s-04 .s-04__chapter--gogo .s-04__content {
+  border-block-start-color: var(--s-04-ivory);
+}
+
+.s-04 .s-04__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--dc-tap);
+  margin-block-start: var(--dc-space-6);
+  padding-inline: var(--dc-space-4);
+  scroll-margin-block-end: var(--s-04-action-clearance);
+  border: calc(var(--s-04-rule) / 2) solid var(--s-04-ink);
+  background: var(--s-04-gold);
+  color: var(--s-04-forest);
+  font-size: var(--dc-text-sm);
+  font-weight: var(--dc-weight-bold);
+  text-decoration: none;
+}
+
+.s-04 .s-04__action:hover {
+  background: var(--s-04-gold-hover);
+}
+
+.s-04 .s-04__action:focus-visible {
+  box-shadow: 0 0 0 var(--s-04-rule) var(--s-04-ivory);
+  outline: var(--s-04-rule) solid var(--dc-focus);
+  outline-offset: var(--s-04-rule);
+}
+
+@media (36rem <= width < 48rem) {
+  .s-04 .s-04__chapter--gogo .s-04__scene img {
+    object-position: center 20%;
+  }
+}
+
+@media (min-width: 48rem) {
+  .s-04 {
+    --s-04-gutter: var(--dc-space-8);
+    --s-04-action-clearance: calc(var(--dc-tap) + var(--dc-space-8));
+  }
+
+  .s-04 .s-04__chapter {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    align-items: center;
+    align-content: center;
+    gap: var(--dc-space-4);
+    padding-block-start: var(--dc-space-12);
+  }
+
+  .s-04 .s-04__panel {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .s-04 .s-04__frame {
+    aspect-ratio: 4 / 3;
+    max-block-size: none;
+  }
+
+  .s-04 .s-04__chapter--gogo .s-04__scene img {
+    object-position: right center;
+  }
+
+  .s-04 .s-04__chapter--gogo .s-04__frame::after {
+    inset-inline: var(--s-04-rule) auto;
+    transform: scaleX(-1);
+  }
+
+  .s-04 .s-04__content {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .s-04 .s-04__content h2 {
+    font-size: clamp(var(--dc-text-display), 11vw, calc(2.5 * var(--dc-text-display)));
+  }
+}
