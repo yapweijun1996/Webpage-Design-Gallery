@@ -1,0 +1,200 @@
+{
+  "locale": "ms",
+  "reviewStatus": "draft_pending_fluent_review",
+  "meta": {
+    "title": "Goh Joo Hin — Konsep Corporate Clarity (Draf Bahasa Melayu)",
+    "description": "Konsep laman web korporat bebas bagi Goh Joo Hin (draf Bahasa Melayu menunggu semakan): perniagaan makanan, elektronik serta kesihatan dan pemakanan bersama jenama portfolio.",
+    "designReferenceTitle": "Rujukan reka bentuk halaman pendaratan"
+  },
+  "skip": {
+    "label": "Langkau ke kandungan utama"
+  },
+  "notice": {
+    "heading": "Konsep reka bentuk bebas",
+    "affiliation": "Tidak bersekutu dengan atau disahkan oleh Goh Joo Hin Pte Ltd.",
+    "galleryExit": "Semua reka bentuk GJH"
+  },
+  "draft": {
+    "banner": "Draf Bahasa Melayu · Menunggu semakan penutur fasih dan istilah perniagaan; belum diaktifkan pada halaman utama Bahasa Inggeris.",
+    "pendingBadge": "Draf",
+    "pendingHint": "Draf terjemahan {language} sedang menunggu semakan penutur fasih dan belum diaktifkan pada halaman Bahasa Inggeris lalai."
+  },
+  "header": {
+    "homeAriaLabel": "Halaman utama konsep Goh Joo Hin",
+    "logoAlt": "GJH — Sejak 1940",
+    "subtitle": "Singapura · Pengedaran serantau",
+    "menuButton": "Menu",
+    "navAriaLabel": "Navigasi utama",
+    "localeNavAriaLabel": "Pilihan bahasa",
+    "navBusinesses": "Perniagaan",
+    "navBrands": "Jenama",
+    "navStory": "Kisah kami",
+    "navReach": "Rangkaian kami",
+    "navPartner": "Rakan niaga GJH"
+  },
+  "hero": {
+    "kicker": "Goh Joo Hin · Sejak 1940",
+    "heading": "Kebaikan harian. Saling terhubung.",
+    "lead": "Terokai perniagaan makanan, elektronik serta kesihatan dan pemakanan Goh Joo Hin.",
+    "cta": "Terokai perniagaan kami",
+    "imageAlt": "Foto gaya hidup rasmi keluarga di Singapura meluangkan masa bersama",
+    "imageFallback": "Foto gaya hidup rasmi GJH tidak tersedia buat masa ini. Terokai tiga bahagian perniagaan di bawah.",
+    "indexAriaLabel": "Indeks bahagian perniagaan",
+    "foodTag": "01 · FMCG",
+    "foodLabel": "Makanan",
+    "electronicsTag": "02 · Gaya hidup",
+    "electronicsLabel": "Elektronik",
+    "healthTag": "03 · Penjagaan",
+    "healthLabel": "Kesihatan & pemakanan"
+  },
+  "businesses": {
+    "eyebrow": "01 / Perniagaan",
+    "heading": "Keperluan berbeza. Satu perniagaan terhubung.",
+    "lead": "Goh Joo Hin beroperasi merentasi tiga bahagian, memenuhi keperluan harian melalui produk makanan, elektronik pengguna serta kesihatan dan pemakanan.",
+    "food": {
+      "number": "01 — FMCG",
+      "heading": "Makanan untuk kehidupan seharian.",
+      "body": "Produk makanan dan minuman, daripada keperluan dapur harian hingga rangkaian abalon dan khasiat New Moon.",
+      "action": "Terokai jenama makanan"
+    },
+    "electronics": {
+      "number": "02 — Elektronik",
+      "heading": "Kehidupan yang terhubung.",
+      "body": "Elektronik pengguna dan produk gaya hidup, termasuk pengedaran untuk Sony seperti yang diterangkan di laman jenama rasmi GJH.",
+      "action": "Kenali Sony"
+    },
+    "health": {
+      "number": "03 — Kesihatan & Pemakanan",
+      "heading": "Penjagaan dalam rutin harian.",
+      "body": "Penawaran kesihatan dan pemakanan, termasuk rangkaian suplemen Perubatan Tradisional Cina Borsch Med.",
+      "action": "Kenali Borsch Med"
+    }
+  },
+  "brands": {
+    "eyebrow": "02 / Jenama",
+    "heading": "Jenama tersendiri. Relevan setiap hari.",
+    "lead": "Kenali jenama terpilih dalam portfolio GJH. Setiap satu mengekalkan identiti, produk dan kisahnya sendiri.",
+    "assetNote": "Fotografi jenama asal daripada laman web rasmi GJH. Setiap jenama mengekalkan identiti tersendiri.",
+    "brandFallback": "Foto jenama rasmi bagi {brand} tidak tersedia buat masa ini.",
+    "new-moon": {
+      "category": "Makanan & khasiat",
+      "body": "Abalon, sarang burung, beras, sos dan banyak lagi. Jenama pengguna yang diurus dan diedarkan oleh GJH.",
+      "action": "Kenali New Moon",
+      "imageAlt": "Logo New Moon dan foto makanan rasmi hidangan steambot keluarga"
+    },
+    "mili": {
+      "category": "Dapur & bahan masakan",
+      "body": "Rangkaian sayur-sayuran, buah-buahan, daging dan makanan laut dalam tin untuk penyediaan hidangan harian.",
+      "action": "Kenali MILI",
+      "imageAlt": "Logo MILI dan foto rasmi semangkuk mi"
+    },
+    "gogo": {
+      "category": "Minuman & pencuci mulut sejuk beku",
+      "body": "Minuman dan aiskrim Potong yang membawa kesegaran untuk suasana harian.",
+      "action": "Kenali GOGO",
+      "imageAlt": "Logo GOGO dan foto rasmi rakan-rakan berkongsi minuman"
+    }
+  },
+  "partnership": {
+    "eyebrow": "03 / Bekerjasama",
+    "heading": "Produk memerlukan rangkaian yang tepat.",
+    "lead": "Untuk pemilik jenama dan rakan niaga, GJH menerangkan gabungan keupayaan penyumberan, pergudangan, pengedaran dan khidmat pelanggan.",
+    "cta": "Mulakan perbincangan perniagaan",
+    "sourcing": {
+      "heading": "Penyumberan & portfolio",
+      "body": "Perniagaan yang beroperasi merentasi produk makanan, elektronik dan kategori berkaitan kesihatan."
+    },
+    "warehousing": {
+      "heading": "Pergudangan & pengedaran",
+      "body": "Sistem pengedaran serantau seperti yang diterangkan dalam profil rasmi syarikat GJH."
+    },
+    "service": {
+      "heading": "Hubungan & perkhidmatan",
+      "body": "Bekerjasama dengan pembekal dan pelanggan dengan penekanan pada perkhidmatan yang pantas dan boleh dipercayai."
+    }
+  },
+  "story": {
+    "eyebrow": "04 / Kisah kami",
+    "heading": "Sebuah kedai kecil. Kisah yang terus berkembang.",
+    "lead": "GJH menjejaki permulaannya kepada sebuah kedai runcit di Rochor Road, Singapura pada tahun 1940-an.",
+    "action": "Baca sejarah rasmi GJH",
+    "m1940s": {
+      "heading": "Permulaan di Rochor Road",
+      "body": "Adik-beradik Goh memulakan sebuah kedai runcit yang membekalkan barangan makanan keperluan harian."
+    },
+    "m1959": {
+      "heading": "Asal-usul jenama New Moon",
+      "body": "Sejarah rasmi New Moon mencatatkan produk abalon pertamanya pada tahun 1959."
+    },
+    "m1981": {
+      "heading": "MILI menyertai perjalanan",
+      "body": "Garis masa GJH mengenal pasti MILI sebagai jenama rumah keduanya."
+    },
+    "m2004": {
+      "heading": "Bab baharu dalam kesihatan",
+      "body": "Borsch Med memperluaskan portfolio ke dalam suplemen kesihatan."
+    }
+  },
+  "reach": {
+    "eyebrow": "05 / Rangkaian kami",
+    "heading": "Berakar di Singapura. Terhubung di seluruh rantau.",
+    "lead": "Profil syarikat GJH menerangkan rangkaian pengedar Asia Pasifik yang disokong oleh keupayaan pergudangan dan pengedaran.",
+    "panelEyebrow": "Pasaran terpilih yang disebut oleh GJH",
+    "disclaimer": "Rujukan profil syarikat; ketersediaan produk dan terma pengedaran berbeza mengikut pasaran.",
+    "markets": {
+      "singapore": "Singapura · Ibu Pejabat",
+      "malaysia": "Malaysia",
+      "indonesia": "Indonesia",
+      "china": "China",
+      "hong_kong": "Hong Kong",
+      "thailand": "Thailand",
+      "brunei": "Brunei",
+      "vietnam": "Vietnam",
+      "cambodia": "Kemboja",
+      "philippines": "Filipina"
+    }
+  },
+  "contact": {
+    "eyebrow": "Rakan niaga GJH",
+    "heading": "Perbincangan perniagaan anda yang seterusnya bermula di sini.",
+    "body": "Bincangkan pengedaran jenama, pertanyaan produk atau peluang kerjasama dengan GJH melalui saluran rasmi mereka.",
+    "cta": "Hubungi GJH secara rasmi",
+    "externalNote": "Membuka laman web rasmi GJH dalam tab baharu (kandungan rasmi dalam Bahasa Inggeris)."
+  },
+  "footer": {
+    "divisionsSummary": "FMCG · Elektronik · Kesihatan & Pemakanan",
+    "location": "Singapura",
+    "exploreHeading": "Terokai",
+    "connectHeading": "Hubungi",
+    "utilityHeading": "Utiliti",
+    "officialWebsite": "Laman web rasmi",
+    "officialEshop": "eShop rasmi",
+    "galleryExit": "Semua reka bentuk GJH",
+    "offlineLink": "Akses luar talian & pasang",
+    "disclaimer": "Konsep reka bentuk bebas dan tidak rasmi. Tiada kaitan atau pengesahan rasmi.",
+    "attribution": "Fakta syarikat dan aset jenama asal: GJH / GJH eShop.",
+    "designReference": "Lihat rujukan reka bentuk",
+    "offlineNoJsNote": "Kawalan pemasangan luar talian memerlukan pelayar moden dengan JavaScript dan service worker diaktifkan."
+  },
+  "external": {
+    "newTabSrOnly": "membuka laman web rasmi GJH dalam tab baharu, dalam Bahasa Inggeris"
+  },
+  "pwa": {
+    "summary": "Pasang / luar talian",
+    "preparing": "Menyediakan akses luar talian…",
+    "installButton": "Pasang demo ini",
+    "checkButton": "Semak kemas kini",
+    "applyButton": "Kemas kini dan muat semula",
+    "updateNotice": "Kemas kini tersedia",
+    "checking": "Menyemak fail luar talian…",
+    "availableOffline": "Tersedia di luar talian · {release}",
+    "readyToUpdate": "Sedia untuk dikemas kini kepada {release}. Muat semula apabila anda bersedia.",
+    "applying": "Membuka kemas kini yang disahkan…",
+    "updateSlow": "Kemas kini mengambil masa lebih lama daripada jangkaan. Cuba lagi apabila bersedia.",
+    "installed": "Dipasang pada peranti ini.",
+    "installInstructions": "Pada iPhone atau iPad, buka dalam Safari dan pilih Kongsi → Tambah ke Skrin Utama. Dalam pelayar lain yang disokong, buka menu pelayar dan pilih Pasang atau Tambah ke Skrin Utama.",
+    "failOnline": "Fail luar talian tidak dapat disahkan. Semak kemas kini untuk mencuba lagi.",
+    "failOffline": "Di luar talian. Sambung semula untuk menyemak kemas kini.",
+    "backToTopLabel": "Kembali ke atas"
+  }
+}

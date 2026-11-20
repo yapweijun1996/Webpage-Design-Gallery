@@ -17,17 +17,17 @@
       "desktop": {
         "path": "demos/corporate/gjh/v1/screenshots/1440.png",
         "width": 1440,
-        "height": 5407
+        "height": 4668
       },
       "tablet": {
         "path": "demos/corporate/gjh/v1/screenshots/768.png",
         "width": 768,
-        "height": 6506
+        "height": 5625
       },
       "mobile": {
         "path": "demos/corporate/gjh/v1/screenshots/390.png",
         "width": 390,
-        "height": 8181
+        "height": 8043
       }
     },
     "devices": [

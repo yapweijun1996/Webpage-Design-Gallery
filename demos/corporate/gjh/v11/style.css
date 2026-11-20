@@ -1272,11 +1272,6 @@ dialog.mall-menu[open]{
   --menu-gap:var(--space-3);
   --menu-top:max(var(--space-3),env(safe-area-inset-top));
   --menu-bottom:max(var(--space-3),env(safe-area-inset-bottom));
-  --menu-line:color-mix(in srgb,var(--gold) 54%,var(--green));
-  --menu-glow:color-mix(in srgb,var(--paper) 11%,var(--green));
-  --menu-ink:color-mix(in srgb,var(--paper) 86%,var(--gold));
-  --menu-deep:color-mix(in srgb,var(--green) 69%,black);
-  --menu-card-bg:radial-gradient(ellipse at top left,var(--menu-glow),transparent 72%),linear-gradient(150deg,var(--green),var(--menu-deep));
   position:fixed;
   inset-block:var(--menu-top) auto;height:fit-content;
   inset-inline:auto max(var(--space-3),env(safe-area-inset-right));
@@ -1297,7 +1292,7 @@ dialog.mall-menu[open]{
 }
 .menu-header h2{
   grid-column:2;grid-row:1;display:flex;align-items:center;gap:var(--space-2);margin:0;
-  font:700 var(--font-size-xl)/1.15 var(--sans);letter-spacing:normal;
+  font:var(--gjh-font-mall-menu-title);letter-spacing:normal;
 }
 .menu-header h2:focus{outline:0}
 .menu-header h2 span:first-child{display:flex;color:var(--gold)}
@@ -1340,11 +1335,11 @@ dialog.mall-menu[open]{
 .menu-settings .menu-tile svg{width:28px;height:28px;color:var(--gold)}
 .menu-current{
   position:absolute;inset-block-start:var(--space-2);inset-inline-end:var(--space-2);
-  width:var(--space-2);height:var(--space-2);border-radius:50%;background:var(--palette-night-success);
+  width:var(--space-2);height:var(--space-2);border-radius:var(--radius-circle);background:var(--palette-night-success);
 }
 .menu-round{
   width:var(--size-control);height:var(--size-control);padding:0;
-  border:1px solid var(--menu-line);border-radius:50%;color:var(--paper);background:var(--menu-card-bg);
+  border:1px solid var(--menu-line);border-radius:var(--radius-circle);color:var(--paper);background:var(--menu-card-bg);
 }
 .menu-segments{
   display:flex;min-width:0;border:1px solid var(--menu-line);border-radius:var(--radius-pill);background:var(--menu-deep);
@@ -1359,7 +1354,7 @@ dialog.mall-menu[open]{
   display:flex;align-items:center;gap:var(--space-2);min-height:var(--size-control);
 }
 .menu-card :is(.menu-switch-row,.menu-field)+:is(.menu-switch-row,.menu-field){border-top:1px solid var(--menu-line)}
-.menu-toggle{width:100%;padding:0;border:0;border-radius:0;text-align:start}
+.menu-toggle{width:100%;padding:0;border:0;border-radius:var(--radius-none);text-align:start}
 .menu-toggle:is(:hover,:focus-visible),.menu-link:hover,.menu-tile:hover,.menu-round:hover{color:var(--gold)}
 .menu-switch-row :is(input,.menu-switch){margin-inline-start:auto;flex:none}
 .menu-switch,.menu-switch-row input[type="checkbox"]{
@@ -1372,7 +1367,7 @@ dialog.mall-menu[open]{
 }
 .menu-switch::after,.menu-switch-row input[type="checkbox"]::after{
   content:"";position:absolute;inset-inline-start:4px;width:16px;height:16px;
-  border-radius:50%;background:var(--paper);
+  border-radius:var(--radius-circle);background:var(--paper);
 }
 .menu-toggle[aria-pressed="true"] .menu-switch::before,.menu-switch-row input:checked::before{background:var(--gold)}
 .menu-toggle[aria-pressed="true"] .menu-switch::after,.menu-switch-row input:checked::after{inset-inline-start:24px;background:var(--menu-deep)}

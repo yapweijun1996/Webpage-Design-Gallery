@@ -61,7 +61,7 @@ def check_concept_receipts(assets, sources, official_hashes):
 def check_entry_action(page, version):
     action = page.locator(".entry .entry-action")
     target = {
-        "v1": "#business-food", "v5": "https://www.gjh.com.sg/newmoon/",
+        "v1": "#business", "v5": "https://www.gjh.com.sg/newmoon/",
         "v6": "#new-moon", "v7": "#partnership",
     }[version]
     assert action.is_visible() and action.get_attribute("href") == target, (version, target)
@@ -74,6 +74,12 @@ def check_entry_action(page, version):
         action.press("Enter")
         page.wait_for_function("target => location.hash === target", arg=target)
         assert page.locator(target).is_visible(), (version, target)
+        if version == "v1":
+            food_link = page.locator('.division-index a[href="#business-food"]')
+            assert food_link.is_visible(), "v1 Food division index link"
+            food_link.click()
+            page.wait_for_function("() => location.hash === '#business-food'")
+            assert page.locator("#business-food").is_visible(), "v1 #business-food destination"
 
 
 def check_v11_arrival_tools(browser, base):

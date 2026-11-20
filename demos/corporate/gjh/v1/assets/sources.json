@@ -47,5 +47,84 @@
     "licenseFile": "OFL-Manrope.txt",
     "licenseSource": "https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt",
     "note": "Open-source font observed in the corporate website CSS, self-hosted for this concept. No formal brand-manual approval is implied."
-  }
+  },
+  "derivatives": [
+    {
+      "file": "family-lifestyle-480.webp",
+      "sourceFile": "family-lifestyle.jpg",
+      "sourceSha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "sha256": "eca7ad6afdcf1feb89cb4e51b00088fb24ab2744deb33277c90cd4bf65d95c25",
+      "width": 480,
+      "height": 212,
+      "bytes": 15008,
+      "format": "image/webp",
+      "note": "Responsive 480w WebP derivative of the authorized official hero photograph without altering subjects."
+    },
+    {
+      "file": "family-lifestyle-480.jpg",
+      "sourceFile": "family-lifestyle.jpg",
+      "sourceSha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "sha256": "84a05dc7daf58fbab1e680872c2d1146f62ed7013c35332c7a9ca41bc836f914",
+      "width": 480,
+      "height": 212,
+      "bytes": 22190,
+      "format": "image/jpeg",
+      "note": "Responsive 480w JPEG fallback derivative of the authorized official hero photograph without altering subjects."
+    },
+    {
+      "file": "family-lifestyle-768.webp",
+      "sourceFile": "family-lifestyle.jpg",
+      "sourceSha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "sha256": "4380fedd48ffbf0a727ea47da498fe29c3f617428cfcf485a35ec944e5ad995f",
+      "width": 768,
+      "height": 340,
+      "bytes": 28252,
+      "format": "image/webp",
+      "note": "Responsive 768w WebP derivative of the authorized official hero photograph without altering subjects."
+    },
+    {
+      "file": "family-lifestyle-768.jpg",
+      "sourceFile": "family-lifestyle.jpg",
+      "sourceSha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "sha256": "fcca913f76bd35f5b2377fb43e23a35a7f7e463b45ec1921539628d04a965a5f",
+      "width": 768,
+      "height": 340,
+      "bytes": 46485,
+      "format": "image/jpeg",
+      "note": "Responsive 768w JPEG fallback derivative of the authorized official hero photograph without altering subjects."
+    },
+    {
+      "file": "family-lifestyle-1200.webp",
+      "sourceFile": "family-lifestyle.jpg",
+      "sourceSha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "sha256": "6340a20664a77b537387e55b6a7a3f583277c87991c55621899d01b184f49d2a",
+      "width": 1200,
+      "height": 531,
+      "bytes": 53824,
+      "format": "image/webp",
+      "note": "Responsive 1200w WebP derivative of the authorized official hero photograph without altering subjects."
+    },
+    {
+      "file": "family-lifestyle-1200.jpg",
+      "sourceFile": "family-lifestyle.jpg",
+      "sourceSha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "sha256": "e122ec72727eefce0c0332839f48ab549dd691276ca7fbbc3ba26255eb55b109",
+      "width": 1200,
+      "height": 531,
+      "bytes": 94289,
+      "format": "image/jpeg",
+      "note": "Responsive 1200w JPEG fallback derivative of the authorized official hero photograph without altering subjects."
+    },
+    {
+      "file": "family-lifestyle-1920.webp",
+      "sourceFile": "family-lifestyle.jpg",
+      "sourceSha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "sha256": "a17b84016d2ccd9665af64b528f1123359201b07b521af83cbbdf93187d0f0dd",
+      "width": 1920,
+      "height": 850,
+      "bytes": 99424,
+      "format": "image/webp",
+      "note": "Responsive 1920w WebP derivative of the authorized official hero photograph without altering subjects."
+    }
+  ]
 }

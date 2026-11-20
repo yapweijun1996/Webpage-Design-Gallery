@@ -2,24 +2,84 @@
 (() => {
   if (window.top !== window.self || !window.isSecureContext || !('serviceWorker' in navigator)) return;
   const scriptURL = document.currentScript.src;
-  const scope = new URL('./', document.querySelector('link[rel="manifest"]').href);
+  const manifestLink = document.querySelector('link[rel="manifest"]');
+  if (!manifestLink) return;
+  const scope = new URL('./', manifestLink.href);
   const stylesheet = document.createElement('link');
   stylesheet.rel = 'stylesheet';
   stylesheet.href = new URL('../assets/demo-pwa.css', scriptURL);
   document.head.append(stylesheet);
 
+  const defaultCopy = {
+    summary: 'Install / offline',
+    preparing: 'Preparing offline access…',
+    installButton: 'Install this demo',
+    checkButton: 'Check for updates',
+    applyButton: 'Update and reload',
+    updateNotice: 'Update available',
+    checking: 'Checking offline files…',
+    availableOffline: 'Available offline · {release}',
+    readyToUpdate: 'Ready to update to {release}. Reload when you are ready.',
+    applying: 'Opening the verified update…',
+    updateSlow: 'The update is taking longer than expected. Try again when ready.',
+    installed: 'Installed on this device.',
+    installInstructions: 'On iPhone or iPad, open in Safari and choose Share → Add to Home Screen. In other supported browsers, open the browser menu and choose Install or Add to Home screen.',
+    failOnline: 'Offline files could not be verified. Check for updates to retry.',
+    failOffline: 'Offline. Reconnect to check for updates.',
+    backToTopLabel: 'Back to top',
+  };
+  let customCopy = {};
+  const copyElement = document.getElementById('demo-pwa-copy');
+  if (copyElement) {
+    try {
+      const parsed = JSON.parse(copyElement.textContent || '{}');
+      if (parsed && typeof parsed === 'object') customCopy = parsed;
+    } catch { /* Fall back to default English strings. */ }
+  }
+  const copy = Object.assign({}, defaultCopy, customCopy);
+  const format = (template, release) => String(template).replace('{release}', release);
+
   const panel = document.createElement('details');
   panel.className = 'demo-install';
-  panel.innerHTML = '<summary>Install / offline</summary><div class="demo-install-body">' +
-    '<p role="status" aria-live="polite">Preparing offline access…</p>' +
-    '<div class="demo-install-actions"><button type="button" data-install>Install this demo</button>' +
-    '<button type="button" data-check>Check for updates</button>' +
-    '<button type="button" data-apply hidden>Update and reload</button></div></div>';
-  document.body.append(panel);
+  const summaryEl = document.createElement('summary');
+  summaryEl.textContent = copy.summary;
+  const bodyEl = document.createElement('div');
+  bodyEl.className = 'demo-install-body';
+  const status = document.createElement('p');
+  status.setAttribute('role', 'status');
+  status.setAttribute('aria-live', 'polite');
+  status.textContent = copy.preparing;
+  const actionsEl = document.createElement('div');
+  actionsEl.className = 'demo-install-actions';
+  const installButton = document.createElement('button');
+  installButton.type = 'button';
+  installButton.dataset.install = '';
+  installButton.textContent = copy.installButton;
+  const check = document.createElement('button');
+  check.type = 'button';
+  check.dataset.check = '';
+  check.textContent = copy.checkButton;
+  const apply = document.createElement('button');
+  apply.type = 'button';
+  apply.dataset.apply = '';
+  apply.hidden = true;
+  apply.textContent = copy.applyButton;
+  actionsEl.append(installButton, check, apply);
+  bodyEl.append(status, actionsEl);
+  panel.append(summaryEl, bodyEl);
+
+  const mount = document.querySelector('[data-demo-pwa-mount]');
+  if (mount) {
+    mount.textContent = '';
+    mount.append(panel);
+  } else {
+    document.body.append(panel);
+  }
+
   const notice = document.createElement('button');
   notice.className = 'demo-update-notice';
   notice.type = 'button';
-  notice.textContent = 'Update available';
+  notice.textContent = copy.updateNotice;
   notice.hidden = true;
   document.body.append(notice);
   notice.addEventListener('click', () => {
@@ -27,16 +87,15 @@
     notice.hidden = true;
     apply.focus();
   });
-  const status = panel.querySelector('[role=status]');
-  const installButton = panel.querySelector('[data-install]');
-  const check = panel.querySelector('[data-check]');
-  const apply = panel.querySelector('[data-apply]');
-  const trigger = panel.querySelector('summary');
+  const trigger = summaryEl;
   let registration, installPrompt, pageWorker, target, timer;
   let applying = false;
   let lastCheck = Date.now();
   const owned = worker => worker && new URL(worker.scriptURL).href === new URL('sw.js', scope).href;
   const describe = info => 'v' + info.version + ' · ' + info.build.slice(0, 8);
+  const setStatus = message => {
+    if (status.textContent !== message) status.textContent = message;
+  };
 
   function identify(worker) {
     return new Promise((resolve, reject) => {
@@ -53,8 +112,7 @@
   }
 
   function fail() {
-    status.textContent = navigator.onLine ? 'Offline files could not be verified. Check for updates to retry.' :
-      'Offline. Reconnect to check for updates.';
+    setStatus(navigator.onLine ? copy.failOnline : copy.failOffline);
   }
 
   async function showState() {
@@ -67,11 +125,12 @@
         target = worker;
         apply.hidden = false;
         notice.hidden = panel.open;
-        trigger.textContent = 'Update available';
-        status.textContent = 'Ready to update to ' + describe(info) + '. Reload when you are ready.';
+        trigger.textContent = copy.updateNotice;
+        setStatus(format(copy.readyToUpdate, describe(info)));
       } else {
         pageWorker = registration.active;
-        status.textContent = 'Available offline · ' + describe(info);
+        trigger.textContent = copy.summary;
+        setStatus(format(copy.availableOffline, describe(info)));
       }
     } catch { fail(); }
   }
@@ -101,7 +160,7 @@
     if (check.disabled || applying) return;
     check.disabled = true;
     lastCheck = Date.now();
-    status.textContent = 'Checking offline files…';
+    setStatus(copy.checking);
     try {
       if (!registration?.active) await register();
       else await registration.update();
@@ -120,14 +179,14 @@
     if (!target || applying) return;
     applying = true;
     apply.disabled = check.disabled = true;
-    status.textContent = 'Opening the verified update…';
+    setStatus(copy.applying);
     if (target.state === 'activated') { reloadOnce(); return; }
     const worker = target;
     worker.addEventListener('statechange', () => { if (worker.state === 'activated') reloadOnce(); });
     timer = setTimeout(() => {
       applying = false;
       apply.disabled = check.disabled = false;
-      status.textContent = 'The update is taking longer than expected. Try again when ready.';
+      setStatus(copy.updateSlow);
     }, 15000);
     worker.postMessage({type: 'SKIP_WAITING'});
   });
@@ -147,7 +206,7 @@
   window.addEventListener('appinstalled', () => {
     installPrompt = undefined;
     installButton.hidden = true;
-    status.textContent = 'Installed on this device.';
+    setStatus(copy.installed);
   });
   installButton.addEventListener('click', async () => {
     if (installPrompt) {
@@ -155,7 +214,7 @@
       installPrompt = undefined;
       try { await prompt.prompt(); await prompt.userChoice; } catch { fail(); }
     } else {
-      status.textContent = 'On iPhone or iPad, open in Safari and choose Share → Add to Home Screen. In other supported browsers, open the browser menu and choose Install or Add to Home screen.';
+      setStatus(copy.installInstructions);
     }
   });
 
@@ -163,7 +222,7 @@
   topButton.className = 'demo-back-top';
   topButton.type = 'button';
   topButton.textContent = '↑';
-  topButton.setAttribute('aria-label', 'Back to top');
+  topButton.setAttribute('aria-label', copy.backToTopLabel);
   topButton.hidden = true;
   document.body.append(topButton);
   topButton.addEventListener('click', () => {
@@ -178,7 +237,7 @@
   // Keep navigation reachable while reading on phones. Full-screen scenes own their HUD.
   const header = document.querySelector('body > header');
   const mobile = matchMedia('(max-width: 650px)');
-  const contentHeader = header?.querySelector('nav') && !document.querySelector('canvas');
+  const contentHeader = header?.querySelector('nav') && !document.querySelector('canvas') && !header.hasAttribute('data-static-header');
   let previousY = window.scrollY;
   if (contentHeader) {
     const background = getComputedStyle(header).backgroundColor;

@@ -1,0 +1,200 @@
+{
+  "locale": "en",
+  "reviewStatus": "approved",
+  "meta": {
+    "title": "Goh Joo Hin — Corporate Clarity Concept",
+    "description": "An independent Goh Joo Hin corporate website concept: food, electronics, and health and nutrition businesses with authentic portfolio brands.",
+    "designReferenceTitle": "Landing design reference"
+  },
+  "skip": {
+    "label": "Skip to content"
+  },
+  "notice": {
+    "heading": "Independent design concept",
+    "affiliation": "Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+    "galleryExit": "All GJH designs"
+  },
+  "draft": {
+    "banner": "",
+    "pendingBadge": "Draft",
+    "pendingHint": "{language} translation draft is pending fluent review and is not yet active on the default English entry."
+  },
+  "header": {
+    "homeAriaLabel": "Goh Joo Hin concept home",
+    "logoAlt": "GJH — Since 1940",
+    "subtitle": "Singapore · Regional distribution",
+    "menuButton": "Menu",
+    "navAriaLabel": "Main navigation",
+    "localeNavAriaLabel": "Language selection",
+    "navBusinesses": "Businesses",
+    "navBrands": "Brands",
+    "navStory": "Our story",
+    "navReach": "Our reach",
+    "navPartner": "Partner with GJH"
+  },
+  "hero": {
+    "kicker": "Goh Joo Hin · Est. 1940",
+    "heading": "Good things. Every day. Connected.",
+    "lead": "Explore Goh Joo Hin’s food, electronics, and health and nutrition businesses.",
+    "cta": "Explore our businesses",
+    "imageAlt": "A Singapore household sharing time together",
+    "imageFallback": "Official GJH lifestyle photograph unavailable right now. Browse the three divisions below.",
+    "indexAriaLabel": "Division index",
+    "foodTag": "01 · FMCG",
+    "foodLabel": "Food",
+    "electronicsTag": "02 · Lifestyle",
+    "electronicsLabel": "Electronics",
+    "healthTag": "03 · Care",
+    "healthLabel": "Health & nutrition"
+  },
+  "businesses": {
+    "eyebrow": "01 / Businesses",
+    "heading": "Different needs. One connected business.",
+    "lead": "Goh Joo Hin operates across three divisions, serving everyday needs through food, lifestyle electronics, and health and nutrition.",
+    "food": {
+      "number": "01 — FMCG",
+      "heading": "Food for everyday life.",
+      "body": "Food and beverage products, from pantry essentials to New Moon’s abalone and nourishment ranges.",
+      "action": "Explore food brands"
+    },
+    "electronics": {
+      "number": "02 — Electronics",
+      "heading": "Living, connected.",
+      "body": "Consumer electronics and lifestyle products, including distribution for Sony described on GJH’s official brand pages.",
+      "action": "Discover Sony"
+    },
+    "health": {
+      "number": "03 — Health & Nutrition",
+      "heading": "Care, in the everyday.",
+      "body": "Health and nutrition offerings, including the Borsch Med range of Traditional Chinese Medicine supplements.",
+      "action": "Discover Borsch Med"
+    }
+  },
+  "brands": {
+    "eyebrow": "02 / Brands",
+    "heading": "Distinct brands. Shared everyday relevance.",
+    "lead": "Meet selected brands in GJH’s portfolio. Each retains its own identity, products, and story.",
+    "assetNote": "Original brand photography from GJH’s official website. Brands retain their own identities.",
+    "brandFallback": "Official brand photograph for {brand} is currently unavailable.",
+    "new-moon": {
+      "category": "Food & nourishment",
+      "body": "Abalone, bird’s nest, rice, sauces, and more. A consumer brand managed and distributed by GJH.",
+      "action": "Discover New Moon",
+      "imageAlt": "New Moon logo and official food photograph of a family hotpot"
+    },
+    "mili": {
+      "category": "Pantry & ingredients",
+      "body": "A range of canned vegetables, fruits, meats, and seafood for everyday meal preparation.",
+      "action": "Discover MILI",
+      "imageAlt": "MILI logo and official photograph of a noodle bowl"
+    },
+    "gogo": {
+      "category": "Drinks & frozen treats",
+      "body": "Drinks and Potong ice cream, bringing refreshment to everyday occasions.",
+      "action": "Discover GOGO",
+      "imageAlt": "GOGO logo and official photograph of friends sharing drinks"
+    }
+  },
+  "partnership": {
+    "eyebrow": "03 / Working together",
+    "heading": "Products need the right connections.",
+    "lead": "For brands and business partners, GJH describes a combination of sourcing, warehousing, distribution, and customer service.",
+    "cta": "Start a business conversation",
+    "sourcing": {
+      "heading": "Sourcing & portfolio",
+      "body": "A business working across food, electronics, and health-related products."
+    },
+    "warehousing": {
+      "heading": "Warehousing & distribution",
+      "body": "A regional distribution system described in GJH’s official company profile."
+    },
+    "service": {
+      "heading": "Relationships & service",
+      "body": "Working with suppliers and customers, with an emphasis on prompt, reliable service."
+    }
+  },
+  "story": {
+    "eyebrow": "04 / Our story",
+    "heading": "A small store. A story still unfolding.",
+    "lead": "GJH traces its beginnings to a provision store on Singapore’s Rochor Road in the 1940s.",
+    "action": "Read GJH’s official history",
+    "m1940s": {
+      "heading": "Rochor Road beginnings",
+      "body": "The Goh brothers began with a provision store supplying daily food essentials."
+    },
+    "m1959": {
+      "heading": "New Moon’s brand origin",
+      "body": "New Moon’s own history dates its first abalone product to 1959."
+    },
+    "m1981": {
+      "heading": "MILI joins the story",
+      "body": "GJH’s timeline identifies MILI as its second house brand."
+    },
+    "m2004": {
+      "heading": "A chapter in health",
+      "body": "Borsch Med extends the portfolio into health supplements."
+    }
+  },
+  "reach": {
+    "eyebrow": "05 / Our reach",
+    "heading": "Rooted in Singapore. Connected across the region.",
+    "lead": "GJH’s company profile describes an Asia Pacific distributor network supported by warehousing and distribution capabilities.",
+    "panelEyebrow": "Selected markets mentioned by GJH",
+    "disclaimer": "Company-profile references; product availability and distribution terms vary by market.",
+    "markets": {
+      "singapore": "Singapore · HQ",
+      "malaysia": "Malaysia",
+      "indonesia": "Indonesia",
+      "china": "China",
+      "hong_kong": "Hong Kong",
+      "thailand": "Thailand",
+      "brunei": "Brunei",
+      "vietnam": "Vietnam",
+      "cambodia": "Cambodia",
+      "philippines": "Philippines"
+    }
+  },
+  "contact": {
+    "eyebrow": "Partner with GJH",
+    "heading": "Your next business conversation starts here.",
+    "body": "Discuss brand distribution, product enquiries, or a potential partnership with GJH through its official contact channel.",
+    "cta": "Contact GJH officially",
+    "externalNote": "Opens the official GJH website in a new tab."
+  },
+  "footer": {
+    "divisionsSummary": "FMCG · Electronics · Health & Nutrition",
+    "location": "Singapore",
+    "exploreHeading": "Explore",
+    "connectHeading": "Connect",
+    "utilityHeading": "Utilities",
+    "officialWebsite": "Official website",
+    "officialEshop": "Official eShop",
+    "galleryExit": "All GJH designs",
+    "offlineLink": "Offline access & install",
+    "disclaimer": "Independent, unofficial design concept. No affiliation or endorsement.",
+    "attribution": "Company facts and original brand assets: GJH / GJH eShop.",
+    "designReference": "View design reference",
+    "offlineNoJsNote": "Offline installation controls require a modern browser with JavaScript and service workers enabled."
+  },
+  "external": {
+    "newTabSrOnly": "opens official GJH site in a new tab"
+  },
+  "pwa": {
+    "summary": "Install / offline",
+    "preparing": "Preparing offline access…",
+    "installButton": "Install this demo",
+    "checkButton": "Check for updates",
+    "applyButton": "Update and reload",
+    "updateNotice": "Update available",
+    "checking": "Checking offline files…",
+    "availableOffline": "Available offline · {release}",
+    "readyToUpdate": "Ready to update to {release}. Reload when you are ready.",
+    "applying": "Opening the verified update…",
+    "updateSlow": "The update is taking longer than expected. Try again when ready.",
+    "installed": "Installed on this device.",
+    "installInstructions": "On iPhone or iPad, open in Safari and choose Share → Add to Home Screen. In other supported browsers, open the browser menu and choose Install or Add to Home screen.",
+    "failOnline": "Offline files could not be verified. Check for updates to retry.",
+    "failOffline": "Offline. Reconnect to check for updates.",
+    "backToTopLabel": "Back to top"
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "edition": "v1",
+  "publicPrefix": "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v1/",
+  "themeColor": "#eff2e8",
+  "company": {
+    "name": "Goh Joo Hin",
+    "legalName": "Goh Joo Hin Pte Ltd",
+    "shortName": "GJH"
+  },
+  "routes": {
+    "galleryCompany": "companies/gjh/index.html",
+    "styleAtlas": "style-atlas/index.html#gjh-v1",
+    "officialWebsite": "https://www.gjh.com.sg/",
+    "officialEshop": "https://www.gjheshop.com/",
+    "officialContact": "https://www.gjh.com.sg/contact-us/",
+    "officialHistory": "https://www.gjh.com.sg/about-us/"
+  },
+  "locales": [
+    {
+      "code": "en",
+      "htmlLang": "en",
+      "nativeLabel": "English",
+      "path": "index.html",
+      "depth": 0,
+      "reviewStatus": "approved",
+      "reviewer": "English baseline approved"
+    },
+    {
+      "code": "zh-Hans",
+      "htmlLang": "zh-Hans",
+      "nativeLabel": "简体中文",
+      "path": "zh-Hans/index.html",
+      "depth": 1,
+      "reviewStatus": "draft_pending_fluent_review",
+      "reviewer": null
+    },
+    {
+      "code": "ms",
+      "htmlLang": "ms",
+      "nativeLabel": "Bahasa Melayu",
+      "path": "ms/index.html",
+      "depth": 1,
+      "reviewStatus": "draft_pending_fluent_review",
+      "reviewer": null
+    }
+  ],
+  "assets": {
+    "logo": {
+      "file": "assets/gjh-logo.png",
+      "width": 167,
+      "height": 73
+    },
+    "hero": {
+      "fallback": "assets/family-lifestyle.jpg",
+      "width": 1920,
+      "height": 850,
+      "sizes": "(max-width: 767px) 100vw, (max-width: 1199px) 92vw, 85vw",
+      "webpSrcset": [
+        ["assets/family-lifestyle-480.webp", 480],
+        ["assets/family-lifestyle-768.webp", 768],
+        ["assets/family-lifestyle-1200.webp", 1200],
+        ["assets/family-lifestyle-1920.webp", 1920]
+      ],
+      "jpegSrcset": [
+        ["assets/family-lifestyle-480.jpg", 480],
+        ["assets/family-lifestyle-768.jpg", 768],
+        ["assets/family-lifestyle-1200.jpg", 1200],
+        ["assets/family-lifestyle.jpg", 1920]
+      ]
+    },
+    "brands": [
+      {
+        "id": "new-moon",
+        "name": "New Moon",
+        "image": "assets/new-moon-brand-cover.jpg",
+        "width": 438,
+        "height": 438,
+        "url": "https://www.gjh.com.sg/newmoon/"
+      },
+      {
+        "id": "mili",
+        "name": "MILI",
+        "image": "assets/mili-brand-cover.jpg",
+        "width": 500,
+        "height": 500,
+        "url": "https://www.gjh.com.sg/mili/"
+      },
+      {
+        "id": "gogo",
+        "name": "GOGO",
+        "image": "assets/gogo-brand-cover.jpg",
+        "width": 438,
+        "height": 438,
+        "url": "https://www.gjh.com.sg/gogo/"
+      }
+    ]
+  },
+  "divisions": [
+    {
+      "id": "business-food",
+      "key": "food",
+      "index": "01",
+      "url": "https://www.gjh.com.sg/explore-our-brand/"
+    },
+    {
+      "id": "business-electronics",
+      "key": "electronics",
+      "index": "02",
+      "url": "https://www.gjh.com.sg/sony/"
+    },
+    {
+      "id": "business-health",
+      "key": "health",
+      "index": "03",
+      "url": "https://www.gjh.com.sg/borsch-med/"
+    }
+  ],
+  "capabilities": [
+    {"index": "01", "key": "sourcing"},
+    {"index": "02", "key": "warehousing"},
+    {"index": "03", "key": "service"}
+  ],
+  "milestones": [
+    {"year": "1940s", "key": "m1940s"},
+    {"year": "1959", "key": "m1959"},
+    {"year": "1981", "key": "m1981"},
+    {"year": "2004", "key": "m2004"}
+  ],
+  "markets": [
+    {"key": "singapore", "hq": true},
+    {"key": "malaysia", "hq": false},
+    {"key": "indonesia", "hq": false},
+    {"key": "china", "hq": false},
+    {"key": "hong_kong", "hq": false},
+    {"key": "thailand", "hq": false},
+    {"key": "brunei", "hq": false},
+    {"key": "vietnam", "hq": false},
+    {"key": "cambodia", "hq": false},
+    {"key": "philippines", "hq": false}
+  ]
+}

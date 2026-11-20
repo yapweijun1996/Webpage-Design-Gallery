@@ -1,0 +1,200 @@
+{
+  "locale": "zh-Hans",
+  "reviewStatus": "draft_pending_fluent_review",
+  "meta": {
+    "title": "Goh Joo Hin — Corporate Clarity 企业清晰概念（简体中文译稿）",
+    "description": "Goh Joo Hin 独立企业网站概念（简体中文译稿，待审校）：涵盖食品、电子产品以及健康与营养业务及原厂品牌摄影。",
+    "designReferenceTitle": "落地页设计参考图"
+  },
+  "skip": {
+    "label": "跳至主要内容"
+  },
+  "notice": {
+    "heading": "独立设计概念",
+    "affiliation": "本页面为独立设计概念，与 Goh Joo Hin Pte Ltd 无隶属关系，亦未获其官方认可。",
+    "galleryExit": "浏览全部 GJH 设计"
+  },
+  "draft": {
+    "banner": "简体中文译稿 · 待母语及业务术语审校；在审校完成前暂未于默认英文主页激活公开入口。",
+    "pendingBadge": "译稿",
+    "pendingHint": "{language}译稿正在等待流利审校，尚未在英文默认页面中启用。"
+  },
+  "header": {
+    "homeAriaLabel": "Goh Joo Hin 概念页面顶部",
+    "logoAlt": "GJH — 始于 1940 年",
+    "subtitle": "新加坡 · 区域分销",
+    "menuButton": "菜单",
+    "navAriaLabel": "主导航",
+    "localeNavAriaLabel": "语言选择",
+    "navBusinesses": "业务板块",
+    "navBrands": "旗下品牌",
+    "navStory": "品牌历程",
+    "navReach": "区域网络",
+    "navPartner": "商务合作"
+  },
+  "hero": {
+    "kicker": "Goh Joo Hin · 始于 1940 年",
+    "heading": "日常好物，紧密相连。",
+    "lead": "探索 Goh Joo Hin 的食品、电子产品以及健康与营养三大业务板块。",
+    "cta": "探索我们的业务",
+    "imageAlt": "新加坡家庭欢聚一堂的官方生活场景摄影",
+    "imageFallback": "官方生活摄影暂时无法加载，您仍可直接浏览下方的三大业务板块。",
+    "indexAriaLabel": "业务板块索引",
+    "foodTag": "01 · 快速消费品",
+    "foodLabel": "食品",
+    "electronicsTag": "02 · 生活方式",
+    "electronicsLabel": "电子产品",
+    "healthTag": "03 · 健康养护",
+    "healthLabel": "健康与营养"
+  },
+  "businesses": {
+    "eyebrow": "01 / 业务板块",
+    "heading": "多元日常所需，汇聚同一事业。",
+    "lead": "Goh Joo Hin 布局三大业务领域，以食品、消费电子以及健康与营养产品服务日常所需。",
+    "food": {
+      "number": "01 — 快速消费品",
+      "heading": "融入日常的食品。",
+      "body": "涵盖日常厨房食材以至 New Moon 鲍鱼与滋补系列等食品及饮料产品。",
+      "action": "浏览官方食品品牌"
+    },
+    "electronics": {
+      "number": "02 — 电子产品",
+      "heading": "互联生活体验。",
+      "body": "消费电子与生活方式产品，包括 GJH 官方网站所介绍的 Sony 品牌分销合作。",
+      "action": "了解 Sony（官方英文页）"
+    },
+    "health": {
+      "number": "03 — 健康与营养",
+      "heading": "细水长流的日常照护。",
+      "body": "健康与营养产品组合，包括 Borsch Med 传统中医药保健品系列。",
+      "action": "了解 Borsch Med（官方英文页）"
+    }
+  },
+  "brands": {
+    "eyebrow": "02 / 旗下品牌",
+    "heading": "各具特色的品牌，共筑日常信赖。",
+    "lead": "认识 GJH 品牌组合中的代表性品牌。每个品牌均保留其独立形象、产品线与品牌故事。",
+    "assetNote": "品牌摄影取自 GJH 官方网站原图。各品牌均保留其原有标识与形象。",
+    "brandFallback": "{brand} 官方品牌图片暂时无法加载。",
+    "new-moon": {
+      "category": "食品与滋补",
+      "body": "涵盖鲍鱼、燕窝、香米、酱料等产品，由 GJH 管理并分销的消费品牌。",
+      "action": "了解 New Moon",
+      "imageAlt": "New Moon 标识与家庭火锅官方食品摄影"
+    },
+    "mili": {
+      "category": "厨房常备与食材",
+      "body": "提供罐装蔬菜、水果、肉类与海产系列，满足日常备餐需求。",
+      "action": "了解 MILI",
+      "imageAlt": "MILI 标识与面条料理官方摄影"
+    },
+    "gogo": {
+      "category": "饮品与冷冻甜点",
+      "body": "饮品及 Potong 传统雪条系列，为日常片刻带来清爽滋味。",
+      "action": "了解 GOGO",
+      "imageAlt": "GOGO 标识与亲友分享饮品官方摄影"
+    }
+  },
+  "partnership": {
+    "eyebrow": "03 / 携手合作",
+    "heading": "好产品需要稳健的渠道连接。",
+    "lead": "面向品牌方与商业伙伴，GJH 在其官方简介中结合采购、仓储、分销与客户服务能力。",
+    "cta": "开启商务洽谈",
+    "sourcing": {
+      "heading": "采购与产品组合",
+      "body": "横跨食品、电子产品与健康相关品类的多元业务组合。"
+    },
+    "warehousing": {
+      "heading": "仓储与分销",
+      "body": "GJH 官方企业简介所阐述的区域分销与仓储物流体系。"
+    },
+    "service": {
+      "heading": "伙伴关系与服务",
+      "body": "与供应商及客户紧密协作，注重及时、可靠的服务支持。"
+    }
+  },
+  "story": {
+    "eyebrow": "04 / 品牌历程",
+    "heading": "始于一间小店，故事仍在延续。",
+    "lead": "GJH 的历史可追溯至 20 世纪 40 年代位于新加坡梧槽路（Rochor Road）的一家杂货店。",
+    "action": "阅读 GJH 官方历史",
+    "m1940s": {
+      "heading": "梧槽路启航",
+      "body": "吴氏兄弟创办杂货店，供应日常食品与生活必需品。"
+    },
+    "m1959": {
+      "heading": "New Moon 品牌起源",
+      "body": "根据 New Moon 品牌历史记载，其首款鲍鱼产品问世于 1959 年。"
+    },
+    "m1981": {
+      "heading": "MILI 加入版图",
+      "body": "GJH 企业年表将 MILI 列为旗下第二个自有品牌。"
+    },
+    "m2004": {
+      "heading": "拓展健康篇章",
+      "body": "Borsch Med 将品牌组合延伸至健康保健品领域。"
+    }
+  },
+  "reach": {
+    "eyebrow": "05 / 区域网络",
+    "heading": "立足新加坡，连接亚太市场。",
+    "lead": "GJH 官方企业简介阐述了以仓储和分销能力为支撑的亚太区分销商网络。",
+    "panelEyebrow": "GJH 官方简介提及的部分市场",
+    "disclaimer": "以上信息摘自企业官方简介；实际产品供应与分销条款因市场而异。",
+    "markets": {
+      "singapore": "新加坡 · 总部",
+      "malaysia": "马来西亚",
+      "indonesia": "印度尼西亚",
+      "china": "中国大陆",
+      "hong_kong": "香港",
+      "thailand": "泰国",
+      "brunei": "文莱",
+      "vietnam": "越南",
+      "cambodia": "柬埔寨",
+      "philippines": "菲律宾"
+    }
+  },
+  "contact": {
+    "eyebrow": "商务合作",
+    "heading": "从这里开启下一次商务对话。",
+    "body": "如需洽谈品牌分销、产品咨询或潜在合作，请通过 GJH 官方联系渠道对接。",
+    "cta": "前往 GJH 官方联系页",
+    "externalNote": "将在新标签页打开 GJH 官方网站（页面内容以英文为主）。"
+  },
+  "footer": {
+    "divisionsSummary": "快速消费品 · 电子产品 · 健康与营养",
+    "location": "新加坡",
+    "exploreHeading": "站内导航",
+    "connectHeading": "官方链接",
+    "utilityHeading": "实用工具",
+    "officialWebsite": "GJH 官方网站",
+    "officialEshop": "GJH 官方网店",
+    "galleryExit": "浏览全部 GJH 设计",
+    "offlineLink": "离线访问与安装",
+    "disclaimer": "独立非官方设计概念，与企业无隶属或认可关系。",
+    "attribution": "企业资料与原始品牌素材来源：GJH / GJH eShop。",
+    "designReference": "查看设计参考图",
+    "offlineNoJsNote": "离线安装与更新控件需要支持 JavaScript 与 Service Worker 的现代浏览器。"
+  },
+  "external": {
+    "newTabSrOnly": "将在新标签页打开 GJH 官方网站（内容可能为英文）"
+  },
+  "pwa": {
+    "summary": "安装 / 离线访问",
+    "preparing": "正在准备离线访问…",
+    "installButton": "安装此演示",
+    "checkButton": "检查更新",
+    "applyButton": "更新并重新加载",
+    "updateNotice": "有可用更新",
+    "checking": "正在检查离线文件…",
+    "availableOffline": "可离线浏览 · {release}",
+    "readyToUpdate": "已准备好更新至 {release}，准备就绪后即可重新加载。",
+    "applying": "正在打开已验证的更新…",
+    "updateSlow": "更新耗时超出预期，请稍后重试。",
+    "installed": "已安装到此设备。",
+    "installInstructions": "在 iPhone 或 iPad 上，请使用 Safari 打开并选择“共享”→“添加到主屏幕”。在其他支持的浏览器中，请打开浏览器菜单并选择“安装”或“添加到主屏幕”。",
+    "failOnline": "无法验证离线文件，请点击“检查更新”重试。",
+    "failOffline": "当前处于离线状态，重新联网后可检查更新。",
+    "backToTopLabel": "返回顶部"
+  }
+}

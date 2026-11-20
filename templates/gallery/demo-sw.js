@@ -41,7 +41,7 @@ self.addEventListener('message', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== BASE.origin) return;
-  if (url.pathname === BASE.pathname) url.pathname += 'index.html';
+  if (url.pathname.endsWith('/')) url.pathname += 'index.html';
   // The document keeps its query and fragment. Only the saved file key is canonical.
   url.search = '';
   url.hash = '';

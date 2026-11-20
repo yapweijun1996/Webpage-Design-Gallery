@@ -43,6 +43,10 @@ ATLAS_SPEC = importlib.util.spec_from_file_location("build_style_atlas", ROOT / 
 style_atlas = importlib.util.module_from_spec(ATLAS_SPEC)
 ATLAS_SPEC.loader.exec_module(style_atlas)
 
+GJH_V1_SPEC = importlib.util.spec_from_file_location("build_gjh_v1", ROOT / "scripts/build_gjh_v1.py")
+gjh_v1 = importlib.util.module_from_spec(GJH_V1_SPEC)
+GJH_V1_SPEC.loader.exec_module(gjh_v1)
+
 
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8-sig"))
@@ -269,6 +273,11 @@ def runtime_resources(catalog):
         resources.add(directory / "index.html")
         # Multi-page editions ship every top-level page beside index.html.
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory).glob("*.html"))
+        # Scoped static locale subdirectories (e.g. v1/zh-Hans/index.html, v1/ms/index.html).
+        for locale_dir in ("zh-Hans", "ms"):
+            localized = ROOT / directory / locale_dir / "index.html"
+            if localized.is_file():
+                resources.add(localized.relative_to(ROOT))
         resources.update(directory / name for name in ("style.css", "script.js") if (ROOT / directory / name).is_file())
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
@@ -420,6 +429,7 @@ def build(output=ROOT, check=False):
     gjh_additions.build(check=check)
     gjh_pack.build(check=check)
     gjh_js.build(check=check)
+    gjh_v1.build(ROOT, check=check)
     design_system.build(ROOT, check=check)
     catalog = load_catalog()
     style_atlas.build(ROOT, catalog, check)
