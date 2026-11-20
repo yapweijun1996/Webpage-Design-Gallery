@@ -1,0 +1,2 @@
+LENS 1 — Audience, business and content strategy. Research who actually visits a Singapore multi-brand distributor site (retail buyers/NTUC-style grocers, restaurants, consumers hunting brand info, recruiters, heritage-curious locals), what Singapore distributors/heritage F&B groups (e.g. Pfinest, Sin Hoe Huat style, Pokka, Yeo's, Sheng Siong suppliers) do well/badly, bilingual EN/中文 needs, trust signals, SG PDPA/regulatory considerations. Ideas should be driven by visitor jobs-to-be-done.
+Output file: docs/gjh-ideas-2026-11/worker1-audience.md

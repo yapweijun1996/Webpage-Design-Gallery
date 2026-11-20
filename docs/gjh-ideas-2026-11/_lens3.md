@@ -1,0 +1,2 @@
+LENS 3 — Interaction, storytelling and technology. Research mobile-first scroll storytelling, tactile/gesture UI, lightweight WebGL/CSS 3D, view-transitions, scroll-driven animations, PWA/offline, audio, with strict performance (hero <=150KB, LCP<=2.5s on midrange phone). Consider reusing existing GJH assets: the 3D mall (v11), the story manga (v25), docs/gjh-story chapters. Propose concepts built around ONE signature interaction each (e.g. aisle walk, pantry shelf, tram ride, receipt/ledger, radio dial).
+Output file: docs/gjh-ideas-2026-11/worker3-interaction.md
