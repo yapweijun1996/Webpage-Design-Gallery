@@ -6,6 +6,8 @@ from borsch_packs import add_borsch_lingzhi_pair, add_borsch_patch_pack
 from gulong_tins import SAMPLES as GULONG_SAMPLES, SHELF_TOP as GULONG_SHELF_TOP, add_gulong_tin
 from mili_mock_duck import add_mili_mock_duck
 from pzh_carton import add_pzh_carton
+from skippy_jars import SAMPLES as SKIPPY_SAMPLES
+from skippy_jars import SHELF_DEPTH as SKIPPY_SHELF_DEPTH, SHELF_TOP as SKIPPY_SHELF_TOP, add_skippy_jar
 
 GOLD, BONE, INK = "d7a95b", "f6ecd2", "203545"
 MINT, RED, SEA = "70cdb9", "c34339", "357675"
@@ -224,19 +226,17 @@ def skippy(r,_):
         x=(-1)**i*.23+.72;z=.58+i*.61
         # Two lobes with a narrow waist, one continuous stamped outline.
         pts=[]
-        for k in range(25):
-            a=k*tau/24
+        for k in range(21):
+            a=k*tau/20
             pts.append((x+.17*cos(a)*(1-.45*cos(2*a)),r.floor,z+.24*sin(a)))
         r.ribbon(pts,.037,"cf9d58",PRINT,True)
     for x in (-2.54,2.54):
-        r.ring(x,3.91,.72,.53,.53,.059,"efb94f",PRINT,True)
+        r.ring(x,3.91,.72,.53,.53,.059,"efb94f",PRINT,True,n=16)
     r.tag(-3.02,1.045,-1.26,.26)
-    # Both 500 g listings use the same 73 × 73 × 124 mm envelope.
-    body=((.85,0),(.98,.065),(1,.24),(1,.72),(.92,.82),(.87,.86))
-    lid=((.9,.842),(1,.876),(1,1))
-    for x,fill in [(-2.55,"b87d44"),(-1.37,"c58a4b")]:
-        r.lathe(x,2.113,-3.98,.0365,.124,body,[fill],10)
-        r.lathe(x,2.113,-3.98,.0365,.124,lid,["2f8188"],10)
+    r.skippy_heel_bands = [
+        add_skippy_jar(r.batches[CRAFT], lid, groove, x, SKIPPY_SHELF_TOP, SKIPPY_SHELF_DEPTH)
+        for _, lid, groove, x in SKIPPY_SAMPLES
+    ]
 
 
 def spam(r,_):

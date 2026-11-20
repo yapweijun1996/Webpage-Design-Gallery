@@ -24,10 +24,12 @@ World origin (-20, 0, 20), yaw 90°. Dimensions are authored metres. The [floor 
 
 ## Display products and model work
 
+The [editable 500 g jar pair](../../../models/gjh-skippy-jars/README.md) carries curved heels, narrowed shoulders and distinct ribbed caps on the upper shelf.
+
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| SKIPPY Creamy Peanut Butter 500g | One front shelf facing on the left half of the display | Installed unprinted jar form in the comparative rear-shelf pair. GJH lists 73 × 73 × 124 mm. |
-| SKIPPY Chunky Peanut Butter 500g | Separate adjacent facing | Installed unprinted companion jar with the same nominal dimensions. The separate catalog front and back views remain the reference for label work. |
+| SKIPPY Creamy Peanut Butter 500g | Left position on the upper rear shelf | Installed unprinted jar form in the comparative rear-shelf pair. GJH lists 73 × 73 × 124 mm. |
+| SKIPPY Chunky Peanut Butter 500g | Right position beside Creamy | Installed unprinted companion jar with the same nominal dimensions. The separate catalog front and back views remain the reference for label work. |
 
 Link to the GJH regional pack instead of substituting a different market edition.
 
