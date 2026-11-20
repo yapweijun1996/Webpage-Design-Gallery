@@ -3329,9 +3329,9 @@
       {
         "store": "S16",
         "file": "s16-power-details.glb",
-        "bytes": 107220,
-        "sha256": "00fbe25bb18db35b5e40eb71af732e3867f1ef64e095bcb8aab076e037006969",
-        "triangles": 1406,
+        "bytes": 109620,
+        "sha256": "0bdfb50e514f69ba5fef1b4058c975433b0d2fb1dac51a6614cb78b655be81fe",
+        "triangles": 1446,
         "draws": 3,
         "instances": 0,
         "motion": [

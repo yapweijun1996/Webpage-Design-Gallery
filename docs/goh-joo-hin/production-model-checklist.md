@@ -160,7 +160,8 @@ S13 and S14 passed both Chrome routes on Pages build `e41e09428bb8f71f` with mat
 
 - [x] **GP Ultra+ AA, white eTag and CR2032.** Three [editable models](../../models/gjh-gp-power/README.md) use manufacturer envelopes. The AA shows its stepped terminal and the eTag shows the cover seam.
 - [ ] **GP Ultra+ AA and GP CR2032 packaging.** Confirm the intended sales revision and obtain authorized art before applying pack or cell markings.
-- [ ] **GP eTag case apertures.** Confirm the physical lanyard opening, cover pinhole and seam against a close-up. Singapore market availability remains separate.
+- [x] **GP eTag cover-release aperture, exhibit detail.** GP Malaysia's white-unit FAQ photo supports a rounded recess on the sidewall below the cover seam. The [editable model](../../models/gjh-gp-power/README.md) retains the Malaysia-listed envelope and uses an estimated recessed opening. [Official close-up](https://cdn.shopify.com/s/files/1/0728/4939/1936/files/FAQ_eTag_location_not_updating_img_8_v2.png?v=1750657965)
+- [ ] **GP eTag precise apertures.** Measure the pinhole, seam and lanyard opening on an identified white unit. Confirm the lanyard routing and the Singapore market variant. GP's Nordic TAGA drawing specifies a different envelope. [TAGA specification](https://www.gpbmnordic.com/Product/Files/Global/Product%20Specification%20eTag.pdf)
 
 ## S17 Gigaset
 

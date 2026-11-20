@@ -1,5 +1,5 @@
 {
-  "scope": "Exact modeled AA, eTag and CR2032 outer envelopes from published bounds. Exact eTag apertures and current packaging/markings remain open.",
+  "scope": "AA, Malaysia white eTag and CR2032 exterior studies. The white eTag adds an estimated recessed cover-release aperture based on first-party photos. Exact cut dimensions, lanyard routing and print remain open.",
   "referenceImages": [
     {
       "url": "https://docs.gpbmnordic.se/Product/Files/Global/DataSheet_UltraPlus_GP15AUP.pdf",
@@ -16,6 +16,14 @@
     {
       "url": "https://my.gpbatteries.com/cdn/shop/products/160218_CON-SB-BL-CR2032_PS-STP_INT_C1_web_600x502.jpg?v=1664906053",
       "sha256": "c225b04d22b1fb6fe88779769f6cb68c09928b7b9cc6e92e4457c897e4c92115"
+    },
+    {
+      "url": "https://cdn.shopify.com/s/files/1/0728/4939/1936/files/FAQ_eTag_location_not_updating_img_8_v2.png?v=1750657965",
+      "sha256": "d135bb221169f8b65d97eeaa00e8529592f6b6e67771d8a6384c5b114e1bfd0f"
+    },
+    {
+      "url": "https://www.gpbmnordic.com/Product/Files/Global/Product%20Specification%20eTag.pdf",
+      "sha256": "862f908f580dc5c6c40f27ba051a236ca981049799e2d37ca0d5decc5c9374d2"
     }
   ],
   "blender": {
@@ -23,33 +31,34 @@
     "buildMethod": "Blender MCP background export",
     "editableSource": {
       "file": "models/gjh-gp-power/gp-power.blend",
-      "sha256": "14b0d1caca17c7a1ec9a73699889281872816ee264030eab611d3c2bac469f36"
+      "sha256": "fae4022a469337d0426f6b9d440e59c2edb8393a9fcb7a84e026e1a59ff18f55"
     },
-    "reviewGlbSha256": "13513679d12dcb3eefa09efaa91426d0d2f189deae9ea46d004b79e9ba4da910"
+    "reviewGlbSha256": "c2c4488f8d40674a8130bb77d30848ac539b3784384a683bbffc1496f17d234e"
   },
   "runtime": {
     "file": "demos/corporate/gjh/v11/assets/interiors/s16-power-details.glb",
-    "sha256": "00fbe25bb18db35b5e40eb71af732e3867f1ef64e095bcb8aab076e037006969",
-    "detailTriangles": 1406,
+    "sha256": "0bdfb50e514f69ba5fef1b4058c975433b0d2fb1dac51a6614cb78b655be81fe",
+    "detailTriangles": 1446,
     "wholeRoomTriangles": {
-      "low": 2492,
-      "balanced": 3196,
-      "detailed": 3740
+      "low": 2532,
+      "balanced": 3236,
+      "detailed": 3780
     }
   },
   "verification": {
-    "localBuild": "2a5c452460ef78fd",
+    "localBuild": "25977eae2adf9e59",
     "views": {
-      "1440-S16-aa-tracker-coin.jpg": "feb4dbe15556703bac5d6785a2db319d6923d63a61563e0bf593ab643f90409b",
-      "1440-S16-focal.jpg": "7ac04ddb0d1c20127e8810c9ec7c6b15f23c991db7451c076e133650b55a55da",
-      "1440-S16-story.jpg": "3fc9f3ec539deedf69f1e4ed22f1a8a772be31d6f7b5a93e45ecebcd9b802d1a",
-      "390-S16-aa-tracker-coin.jpg": "fba4034a1e40688d97b2d86f1b07f0f83fa2a4f20312c481c73fe58d9acbde1e",
-      "390-S16-story.jpg": "c5d4d5d4f38ed1b7f6ac1708a271a764dd8cad5a351bfb0ab79563ddec8a5d86",
-      "specimen-aa.png": "29da311916e2ffe8e191fa8dd8b8e5f8f003335df23042a0841eb343ad1bf672",
-      "specimen-cr2032.png": "ffc1dae7839540b0b17eb52329fc0e01fd515b5ab5404fd0e1096cf8503a464a",
-      "specimen-etag.png": "ba6f659deda3bdbdca1164612e38e7ceb593109b0500a4546730b741fc5434c4"
+      "1440-S16-aa-tracker-coin.jpg": "70030a4996193ba0b344b835156fb7a5010655cd488fff61517ba824a0f3dce3",
+      "1440-S16-focal.jpg": "64a909623e7f4954b6a6345d6cf79e1f7de62ab28fa82d72d1203671434e3593",
+      "1440-S16-story.jpg": "ca1a20e58890dd86b5b82cd589569f75f96b41198941464d23803bc54fb7ba2b",
+      "390-S16-aa-tracker-coin.jpg": "640050431aa7f0a663bdf5f338cc800fb8318e0cd44dddc4e71b41234b27c18d",
+      "390-S16-story.jpg": "a0f1a32801ceea0422462607acf4b0cef159406dff415951e2649d0c8b524723",
+      "specimen-aa.png": "2218e0f56d2152a0bb24089b08ce6a4234d231b68c587e16504dbbe565333207",
+      "specimen-cr2032.png": "db5aa6e27c4a1befc575eb3bb7bdcf5ab375103e73f9a790a8e9e40efa1c4508",
+      "specimen-etag-port.png": "6c43c882623cde9fe7916c5580a63551b8888de4ee9a38d5f927211643a5783c",
+      "specimen-etag-side.png": "a4f9f7c6387d2820457e33268ad9e7959f6675978f051278654bef3e91e10435"
     },
     "chrome": "1440\u00d7900 desktop and 390\u00d7844 touch-emulated Chrome passed map entry, story, model view, exit and GLB response.",
-    "visualReview": "GPT-6.2 Astra passed the round AA and raised contact, white eTag shell and seam, and thin coin-cell form."
+    "visualReview": "Independent GPT-6.2 Astra passed the visible eTag release-hole shape, sidewall position below the cover seam, and preservation of the case silhouette."
   }
 }

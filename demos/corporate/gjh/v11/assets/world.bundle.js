@@ -8082,7 +8082,7 @@ var roomDetails = {
   },
   S16: {
     file: "s16-power-details.glb",
-    bytes: 107220,
+    bytes: 109620,
     roomDetail: true
   },
   S17: {
