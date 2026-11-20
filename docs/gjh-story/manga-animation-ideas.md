@@ -1,6 +1,6 @@
 # GJH Story Manga: animation ideas for review
 
-Three Codex workers (gpt-6.2-sol, read-only) each proposed eight ideas from a different angle: page and panel choreography, manga micro-animation, and cinematic polish. This file merges the 24 ideas into one ranked shortlist. Nothing here is built yet. Source files: `demos/corporate/gjh/v25/`.
+Three Codex workers (gpt-6.2-sol, read-only) each proposed eight ideas from a different angle: page and panel choreography, manga micro-animation, and cinematic polish. This file merges the 24 ideas into one ranked shortlist. Status: Pack A is built (20 November 2026); Pack B and the optional items are not. Source files: `demos/corporate/gjh/v25/`.
 
 ## Ground rules every idea must keep
 

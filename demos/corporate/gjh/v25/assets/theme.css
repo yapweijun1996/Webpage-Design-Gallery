@@ -25,6 +25,11 @@ html[data-gjh-design="v25"] {
   --font-dialogue: 700 clamp(.78rem,1.45vw,1.05rem)/1.25 "Comic Sans MS","Chalkboard SE",system-ui,sans-serif;
   --font-sfx: 900 clamp(1.1rem,3.2vw,2.4rem)/1 Impact,"Arial Black",sans-serif;
   --font-lang: 700 .8rem system-ui,sans-serif;
+  --paper-aged: #dccfae;
+  --grain-coarse: radial-gradient(rgb(18 18 18 / 16%) 1.2px, transparent 1.7px);
+  --shadow-wear: inset 0 0 38px rgb(90 66 30 / 55%);
+  --radius-round: 50%;
+  --shadow-tick: 0 9px 0 var(--ink);
   --font-finale: 900 1.6rem "Arial Black",Impact,sans-serif;
   --type-cover-subtitle: .55em;
   --type-rail: .7rem;

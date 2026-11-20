@@ -25,7 +25,7 @@ h1 span{display:block;color:var(--red);-webkit-text-stroke:1px var(--white);font
 
 .rail{position:sticky;top:0;z-index:var(--layer-rail);background:var(--ink);color:var(--white)}
 .rail a.on{opacity:1;background:var(--red)}
-.bar{height:4px;background:var(--progress-track)}.bar i{display:block;height:100%;width:0;background:var(--gold)}
+.bar{height:4px;background:var(--progress-track)}.bar i{display:block;height:100%;width:calc(var(--ch,0) / 6 * 100%);background:var(--gold);transition:width .6s ease}
 
 main{max-width:1180px;margin:0 auto;padding:0 clamp(12px,3vw,32px)}
 .page{padding:clamp(28px,6vw,64px) 0;border-bottom:var(--line)}
@@ -57,7 +57,7 @@ h2{margin:0;font:var(--font-chapter);text-transform:uppercase}
   .bubble,.sfx{position:relative;left:auto;top:auto;width:auto;margin:10px 12px;border-radius:var(--radius-bubble-mobile);font-size:var(--type-medium);scale:1}
   .bubble::after{display:none}
   .sfx{align-self:flex-start;transform:rotate(var(--r))}
-  .panel img{order:-1}.panel figcaption{order:5}
+  .panel .art{order:-1}.panel figcaption{order:5}
 }
 @media (prefers-reduced-motion:reduce){.js .bubble,.js .sfx,.start{transition:none}}
 
@@ -83,3 +83,49 @@ html[data-lang="zh"] .bubble{font-family:"PingFang SC","Hiragino Sans GB","Micro
   .lang{flex:1 1 100%;border-left:0;border-top:1px solid var(--progress-track)}
   .lang button{flex:1;min-height:32px}
 }
+
+/* Pack A: motion. Every effect plays once, on transform, opacity and clip-path only. */
+.art{position:relative;overflow:hidden}
+.art img{transform-origin:var(--fx,50%) var(--fy,50%)}
+
+/* A2 paper ages: coarse worn stock in 1940, crisp white today. Each article sets --era from 1 (old) to 0 (new). */
+.page{background:color-mix(in srgb,var(--paper-aged) calc(var(--era,0) * 60%),transparent)}
+.art::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:var(--grain-coarse);background-size:5px 5px;box-shadow:var(--shadow-wear);opacity:var(--era,0)}
+.js .art::after{opacity:0;transition:opacity 1.2s ease}
+.js .page.is-in .art::after{opacity:var(--era,0)}
+
+/* A3 push-in toward each chapter's focal point (--fx, --fy, --push on the article), once. */
+.js .page.is-in .art img{transform:scale(var(--push,1));transition:transform 6s ease-out}
+
+/* A4 timeline thread: chapters already read stay lit. */
+.rail a.done{opacity:.9}
+
+/* A5 SFX that lands: slam in, one small shake. Thinner outline for Han strokes. */
+@keyframes slam{0%{scale:1.7;opacity:0}35%{scale:.94;opacity:1}50%{translate:-2px 1px}65%{translate:2px -1px}80%{translate:-1px 0}100%{scale:1;translate:0 0}}
+.js .sfx.on{animation:slam .5s ease-out}
+html[data-lang="zh"] .sfx{-webkit-text-stroke:1px var(--ink)}
+
+/* A6 bubbles with character: a laughing bounce, and a two-beat call across the table. */
+@keyframes laugh{0%{scale:.96;rotate:0deg}40%{scale:1.04;rotate:1.2deg}70%{scale:.99;rotate:-1deg}100%{scale:1;rotate:0deg}}
+.js .bubble[data-motion="laugh"].on{animation:laugh .45s ease-out}
+.bubble[data-motion="laugh"]::before{content:"";position:absolute;left:-12px;top:6px;width:14px;border-top:3px solid var(--ink);transform:rotate(-28deg);box-shadow:var(--shadow-tick);opacity:0}
+.js .bubble[data-motion="laugh"].on::before{opacity:1;transition:opacity .3s .15s}
+.js .beat:last-child{opacity:0}
+.js .bubble.on .beat:last-child{opacity:1;transition:opacity .3s .5s}
+
+/* A1 the red crescent thread: a sparkle catches the tin in 1959, a small crescent returns at the table. */
+.spark{position:absolute;left:var(--x);top:var(--y);width:26px;height:26px;background:var(--gold);clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);pointer-events:none;opacity:0;scale:.2}
+@keyframes twinkle{0%{opacity:0;scale:.2;rotate:0deg}50%{opacity:1;scale:1.2}100%{opacity:0;scale:.6;rotate:45deg}}
+.js .sfx.on ~ .spark{animation:twinkle .9s ease-out .2s}
+.crescent{position:relative;display:block;width:36px;height:36px;margin:0 auto 10px;overflow:hidden;border-radius:var(--radius-round);background:var(--red)}
+.crescent::after{content:"";position:absolute;left:9px;top:-3px;width:34px;height:34px;border-radius:var(--radius-round);background:var(--paper)}
+.js .crescent{opacity:0;scale:.5;rotate:-30deg}
+.js .page.is-in .crescent{opacity:1;scale:1;rotate:0deg;transition:opacity .6s ease .8s,scale .6s ease .8s,rotate .6s ease .8s}
+
+@media (prefers-reduced-motion:reduce){
+  .js .sfx.on,.js .bubble[data-motion="laugh"].on,.js .sfx.on ~ .spark{animation:none}
+  .js .art::after,.js .page.is-in .art img,.js .page.is-in .crescent,.js .bubble.on .beat:last-child,.js .bubble[data-motion="laugh"].on::before,.bar i{transition:none}
+  .js .page.is-in .art img{transform:none}
+}
+
+@media (max-width:640px){.bubble[data-motion="laugh"]::before{display:none}}
