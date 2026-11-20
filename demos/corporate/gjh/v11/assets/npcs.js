@@ -1,3 +1,4 @@
+import {paintVisitorFace} from './visitor-v2-face.js';
 import {prepareCrowdMaterial, prepareTripoMaterial} from './character-tripo-material.js';
 import {DoubleSide,PropertyBinding} from '../vendor/three.module.min.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
@@ -229,7 +230,7 @@ export async function loadNpcSystem(T, options) {
   }
 }
 
-export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,tram=false,mobile=false,tier='balanced',enabled=true,drawCallBudget=200,disposeSource,prepareModel,onModularFallback,onAvatarEvent}) {
+export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollider,playerBody,expanded=false,tram=false,mobile=false,tier='balanced',highResolution=false,enabled=true,drawCallBudget=200,disposeSource,prepareModel,onModularFallback,onAvatarEvent}) {
   let settings={mobile,tier,enabled,drawCallBudget}, disposed=false, serial=0, seatCooldown=0, showing=true, hasPlayer=false;
   let admission=nextNpcAdmission();
   const admissionOptions={}, lastPlayer={x:0,z:0}, nextPosition={x:0,z:0};
@@ -267,12 +268,13 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     ownedGeometry=optimizeNpcTemplate(template,protectedNodes);
     const compact=mergeVisitorColours(T,template,protectedNodes);
     ownedGeometry.push(...compact.geometries);ownedMaterials=compact.materials;
+    paintVisitorFace(T,template,compact,ownedGeometry,ownedMaterials);
   }
   const visitorCalls=template?visibleDrawCalls(template):0;
   let callsPerNpc=visitorCalls;
   const limitForSettings=()=>available && !disposed ? npcLimit(settings) : 0;
   const allowModular=()=>limitForSettings()>0 && !(settings.mobile && settings.tier==='low');
-  function enableModular(loader=async signal=>(await import('./crowd.js')).loadModularLooks(signal)) {
+  function enableModular(loader=async signal=>(await import('./crowd.js')).loadModularLooks(signal,{compact:!highResolution})) {
     modularLoader=loader;
   }
   function reportModularFallback() {
@@ -292,7 +294,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
       reportModularFallback();
     });
   }
-  async function loadBoy(loader=loadTripoNpc) {
+  async function loadBoy(loader=signal=>loadTripoNpc(signal,undefined,highResolution)) {
     if (!limitForSettings() || boyLoad) return boyLoad;
     boyController=new AbortController();
     boyLoading=true;

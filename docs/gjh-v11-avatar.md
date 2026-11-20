@@ -40,9 +40,13 @@ node scripts/bake_tripo_candidate.mjs "$SOURCE_GLB" "$out/2k.glb" "$SIMPLIFIER" 
 
 Blender packs the face charts at 4.00 times the texels per square metre of the remaining charts. The desktop bake integrates four vector-layer samples per destination texel and compensates for bilinear sampling on painted edges. The phone bake protects the front of the head during simplification. The desktop, phone and far meshes have 13,997, 11,763 and 3,921 triangles respectively.
 
-The bake validates each GLB before writing it. Use fresh output paths. The [matched camera renders and measurement commands](evidence/gjh-v11-face-redraw/README.md) use the previous shipped 2K mesh as the baseline. The Tripo boy has a different head mesh and UV layout and retains his existing artwork.
+The bake validates each GLB before writing it. Use fresh output paths. The [matched camera renders and measurement commands](evidence/gjh-v11-face-redraw/README.md) use the previous shipped 2K mesh as the baseline. The Tripo boy uses a separate registration for his head mesh and shared LOD atlas.
 
 For a browser-free smoke test, run `node --test tests/gjh_tripo_visitor.test.mjs tests/gjh_model_warmup.test.mjs`. The tests parse the shipped rigs, inspect atlas dimensions and exercise the loading and warmup paths. Early-entry frame counts require a live browser.
+
+## Redrawn NPC faces
+
+The Tripo boy and modular walkers use independently registered versions of the player artwork. The boy preserves his shared LOD UVs. The modular body uses Blender's face-weighted packer. The textureless V2 fallback shades its existing facial geometry. Tier selection happens once at startup and the existing sliced uploader prepares each rig before admission. [NPC inventory, tier budgets, rebuild and matched portraits](evidence/gjh-v11-npc-face/README.md)
 
 ## Round 2 player portrait (historical baseline)
 

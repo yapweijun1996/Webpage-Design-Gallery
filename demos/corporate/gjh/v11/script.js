@@ -961,7 +961,7 @@ function validateRestoration() {
     fallback('The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.');
   }
 }
-async function installNpcs(T, R, prepareModel, source) {
+async function installNpcs(T, R, prepareModel, highResolution, source) {
   if (pageEnded || fatal) return;
   const enabled = new URLSearchParams(location.search).get('npcs') !== 'off';
   if (!source && !enabled) return;
@@ -970,6 +970,7 @@ async function installNpcs(T, R, prepareModel, source) {
     const options = {onAvatarEvent:programTrace?.event,scene:world.scene,seats:world.seats,physics,R,playerCollider:player.capsule,
       playerBody:player.body,expanded,tram:tramEnabled(expanded,location.search),
       mobile:innerWidth<1000,tier:quality.state?.tier||'balanced',enabled,prepareModel,
+      highResolution,
       onModularFallback() { document.getElementById('npc-appearance-status').hidden=false; }};
     const system = source ? createNpcSystem(T, {...options, source}) : await loadNpcSystem(T, options);
     if (pageEnded || fatal) system.dispose();
@@ -1137,8 +1138,8 @@ async function initialize() {
   const {createPlayer} = await import('./assets/player.js');
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,
     world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);
-  if (player.npcSource) await installNpcs(T, R, prepareAvatar, player.npcSource);
-  else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareAvatar));
+  if (player.npcSource) await installNpcs(T, R, prepareAvatar, portrait.highResolution, player.npcSource);
+  else if (player.state.character.model === 'gjh-tripo-visitor') void firstFrame.then(() => installNpcs(T, R, prepareAvatar, portrait.highResolution));
   const {createDOMProjection} = await import('./assets/dom-projection.js');
   const projection = createDOMProjection(T, canvas);
   const {createTargetGuidance} = await import('./assets/target-guidance.js');

@@ -1,0 +1,38 @@
+{
+  "face": [
+    936,
+    391,
+    982,
+    426
+  ],
+  "skin": [
+    [
+      964,
+      387,
+      969,
+      391
+    ]
+  ],
+  "before": {
+    "size": [
+      1920,
+      900
+    ],
+    "laplacian_variance": 2020.4404123305953,
+    "mean_skin_luminance": 0.6270310127905943,
+    "mean_skin_srgb_luma": 0.7958958823529411
+  },
+  "after": {
+    "size": [
+      1920,
+      900
+    ],
+    "laplacian_variance": 3476.71163237619,
+    "mean_skin_luminance": 0.6235789739831074,
+    "mean_skin_srgb_luma": 0.7949929019607842
+  },
+  "sharpness_ratio": 1.7207692001991652,
+  "features": {},
+  "skin_not_darker": false,
+  "skin_in_range": true
+}

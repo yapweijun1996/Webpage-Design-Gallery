@@ -107,6 +107,7 @@ class GalleryTests(unittest.TestCase):
         precache = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", worker, re.S)[1])
         expected = {folder / "manifest.json", *(folder / entry["file"] for entry in entries
                                                 if entry["status"] == "verified")}
+        expected.update(folder / entry["compact"]["file"] for entry in entries if "compact" in entry)
         self.assertEqual({Path(entry["path"]) for entry in cache}, expected)
         self.assertTrue({scope / path for path in expected} <= published)
         self.assertTrue(expected.isdisjoint(Path(entry["path"]) for entry in precache))

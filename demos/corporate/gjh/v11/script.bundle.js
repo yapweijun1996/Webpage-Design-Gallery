@@ -7674,7 +7674,7 @@ function validateRestoration() {
     fallback("The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.");
   }
 }
-async function installNpcs(T, R, prepareModel, source) {
+async function installNpcs(T, R, prepareModel, highResolution, source) {
   if (pageEnded || fatal)
     return;
   const enabled = new URLSearchParams(location.search).get("npcs") !== "off";
@@ -7696,6 +7696,7 @@ async function installNpcs(T, R, prepareModel, source) {
       tier: quality.state?.tier || "balanced",
       enabled,
       prepareModel,
+      highResolution,
       onModularFallback() {
         document.getElementById("npc-appearance-status").hidden = false;
       }
@@ -7905,9 +7906,9 @@ async function initialize() {
   const { createPlayer } = await import("./assets/player.bundle.js");
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);
   if (player.npcSource)
-    await installNpcs(T, R, prepareAvatar, player.npcSource);
+    await installNpcs(T, R, prepareAvatar, portrait.highResolution, player.npcSource);
   else if (player.state.character.model === "gjh-tripo-visitor")
-    firstFrame.then(() => installNpcs(T, R, prepareAvatar));
+    firstFrame.then(() => installNpcs(T, R, prepareAvatar, portrait.highResolution));
   const { createDOMProjection } = await import("./assets/dom-projection.js");
   const projection = createDOMProjection(T, canvas);
   const { createTargetGuidance } = await import("./assets/target-guidance.js");

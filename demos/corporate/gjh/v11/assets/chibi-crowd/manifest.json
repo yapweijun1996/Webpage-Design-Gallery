@@ -13,14 +13,19 @@
       "id": "neutral-body",
       "file": "base_body.glb",
       "status": "verified",
-      "bytes": 489252,
-      "sha256": "9ada782f1919f7f6a63d570ded64af45c6802c53b4aa2029276715a9a4a46fa7",
+      "bytes": 716064,
+      "sha256": "47ccec1671164bf63ec97aa835bf39bb4dddd8bf8a5ad1982f1d52a81192a4e7",
       "source": "models/chibi-dressup/base_body.glb",
       "slot": "body",
       "authoringSource": "output/modular-chibi-parts/hand-gestures-astra/base_body.glb",
       "upstreamSha256": "f6a979565d81171a1606a37776e755192744ec1415a8b65e6e68ee537824453f",
       "upstreamBytes": 829248,
-      "optimization": "Embedded colour texture reduced from 2048\u00d72048 to 1024 px maximum using Lanczos resampling. Geometry, rig and material definitions are unchanged."
+      "optimization": "Registered facial vector projection. Both atlas sizes preserve the original skin and topology. Blender packs face islands at twice the linear texel density.",
+      "compact": {
+        "file": "base_body-512.glb",
+        "bytes": 511712,
+        "sha256": "5d3203859d1bf041d245553f8bafec9cf230e42379f4d50e6ca9b1d859a3621d"
+      }
     },
     {
       "id": "hair-bob",

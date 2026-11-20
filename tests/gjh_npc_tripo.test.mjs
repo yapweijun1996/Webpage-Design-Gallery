@@ -1,3 +1,6 @@
+import {createSeatAnchor,createSeatPlacements} from "../demos/corporate/gjh/v11/assets/seat-placements.js";
+import {atlasDimensions} from './gjh_atlas_dimensions.mjs';
+import {usesPortraitAtlas} from '../demos/corporate/gjh/v11/assets/graphics-quality.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -214,18 +217,23 @@ async function installVisitorAssets(t) {
   const assets = new URL('../demos/corporate/gjh/v11/assets/',import.meta.url);
   const wardrobe = JSON.parse(await readFile(new URL('chibi-crowd/manifest.json',assets),'utf8'));
   const files = ['visitor-carry-hand.glb','gjh-tripo-visitor.glb','gjh-tripo-visitor-lod1.glb','gjh-mall-visitor-v2.glb',
-    'gjh-tripo-npc-boy.glb','gjh-tripo-npc-boy-lod1.glb',
-    ...['manifest.json','hand_gestures.glb','motion-clips.glb',...wardrobe.modules.map(module=>module.file)].map(file=>'chibi-crowd/'+file)];
+    'gjh-tripo-npc-boy.glb','gjh-tripo-npc-boy-1k.glb','gjh-tripo-npc-boy-lod1.glb',
+    ...['manifest.json','base_body-512.glb','hand_gestures.glb','motion-clips.glb',...wardrobe.modules.map(module=>module.file)].map(file=>'chibi-crowd/'+file)];
   const models = new Map(await Promise.all(files.map(async name=>[name,await readFile(new URL(name,assets))])));
+  const fetchBlob = globalThis.fetch;
   const globals = {
     fetch: async url=>{
+      if(new URL(url).protocol === "blob:") return fetchBlob(url);
       const data = models.get(new URL(url).pathname.split('/assets/').at(-1));
       return data ? new Response(data) : new Response(null,{status:404});
     },
     self: globalThis,
     matchMedia: ()=>({matches:false}),
     // Node decodes the GLBs and their animations with placeholder image data.
-    createImageBitmap: async ()=>({width:1,height:1})
+    createImageBitmap: async blob=>{
+      const [width,height]=atlasDimensions(Buffer.from(await blob.arrayBuffer()),blob.type);
+      return {width,height};
+    }
   };
   const originals = Object.fromEntries(Object.keys(globals).map(key=>[key,Object.getOwnPropertyDescriptor(globalThis,key)]));
   Object.assign(globalThis,globals);
@@ -345,7 +353,8 @@ test('invalid or unavailable modular assets keep existing visitors in service',a
   system.dispose();
 });
 
-test('background warm plan covers every live avatar material key and both shipped LOD bindings', async t => {
+for (const [device,tier,expectedSize] of [['desktop','detailed',1024],['tablet','balanced',1024],
+  ['phone','detailed',512],['desktop','low',512]]) test(`sliced warm plan covers ${device} ${tier} NPC atlases and both LODs`, async t => {
   await installVisitorAssets(t);
   const scene = new T.Scene(), planned = new Set();
   function key(mesh, material) {
@@ -404,7 +413,7 @@ test('background warm plan covers every live avatar material key and both shippe
   }
   const visitor = await createCharacterTripo(T, createLocomotionContinuity, prepareModel);
   t.after(() => visitor.dispose());
-  const system = await loadNpcSystem(T, {scene, prepareModel, tier:'detailed',
+  const system = await loadNpcSystem(T, {scene, prepareModel, tier, mobile:device!=='desktop', highResolution:usesPortraitAtlas(device,tier),
     R:{Capsule:class {}}, physics:{intersectionWithShape:()=>null}});
   t.after(() => system.dispose());
   await system.loadBoy();
@@ -421,6 +430,13 @@ test('background warm plan covers every live avatar material key and both shippe
   }
   await waitFor(() => visitor.state.lod.available && visitor.visual.getObjectByName('ChibiGrip') &&
     scene.getObjectByName('tripo_node_1c818c0d') && system.state.modular.active.length);
+  const boyMesh=scene.getObjectByName('tripo_node_1c818c0d');
+  const crowdMesh=scene.getObjectByName('Base_Body');
+  for (const mesh of [boyMesh,crowdMesh]) {
+    const {width,height}=mesh.material.map.image;
+    assert.deepEqual([width,height],[expectedSize,expectedSize]);
+    assert.ok(uploaded.has(mesh.material.map));
+  }
   covered(visitor.visual.getObjectByName('FirstPersonCarryHand'));
   for (const [z, level] of [[0,0],[20,1],[0,0]]) {
     camera.position.z = z;
@@ -433,5 +449,36 @@ test('background warm plan covers every live avatar material key and both shippe
     system.update(.016, {x:boy.position.x+distance,y:0,z:boy.position.z});
     assert.equal(boy.getObjectByName('tripo_node_1c818c0d').geometry.index.count/3, triangles);
     covered(scene);
+  }
+});
+
+test('expanded mall admits seated and walking face rigs at the courtyard, MILI and GOGO',async t=>{
+  await installVisitorAssets(t);
+  const placements=createSeatPlacements(true);
+  const seats=placements.map(p=>createSeatAnchor(p,null));
+  for (const [group,x,z] of [['atrium',-5,20],['mili',-6,-4],['gogo',23,-5]]) {
+    const scene=new T.Scene(), pose={x,y:0,z};
+    const system=await loadNpcSystem(T,{scene,seats,expanded:true,tier:'detailed',highResolution:true,
+      R:{Capsule:class{}},physics:{intersectionWithShape:()=>null}});
+    try {
+      system.update(.016,pose);
+      admit(system,20);
+      const seatIds=placements.filter(p=>p.group===group).map(p=>p.id);
+      assert.ok(system.occupiedSeatIds.some(id=>seatIds.includes(id)),group+' seats');
+      assert.ok(scene.children.some(root=>root.visible && root.getObjectByName('V2_body_Glasses_and_eyes')));
+      await system.enableModular();
+      await system.loadBoy();
+      const deadline=performance.now()+5000;
+      while (!system.state.modular.active.length) {
+        assert.ok(performance.now()<deadline,group+' wardrobe');
+        system.update(.016,pose);
+        await new Promise(resolve=>setTimeout(resolve,5));
+      }
+      admit(system,20);
+      for (const name of ['tripo_node_1c818c0d','V2_body_Glasses_and_eyes','Base_Body'])
+        assert.ok(scene.children.some(root=>root.visible && root.getObjectByName(name)),group+' '+name);
+    } finally {
+      system.dispose();
+    }
   }
 });

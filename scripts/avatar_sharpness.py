@@ -72,6 +72,9 @@ def main():
     parser.add_argument("--sheet", type=Path)
     parser.add_argument("--context", type=region, help="Larger portrait region to show in the sheet")
     parser.add_argument("--label", default="")
+    gate = parser.add_mutually_exclusive_group()
+    gate.add_argument("--target", type=float, default=2, help="Required full-face variance ratio")
+    gate.add_argument("--measure-only", action="store_true", help="Report a distance with no acceptance threshold")
     args = parser.parse_args()
     args.skin = args.skin or [(290, 385, 324, 408), (285, 468, 297, 484),
                               (255, 489, 272, 497), (311, 489, 331, 497)]
@@ -96,8 +99,9 @@ def main():
                                  "ratio": redraw / baseline if baseline else None}
     if args.sheet:
         contact_sheet(images, args.context or args.face, args.sheet, args.label)
+    gate_result = {} if args.measure_only else {"target": args.target, "sharpness_pass": ratio >= args.target}
     print(json.dumps({"face": args.face, "skin": args.skin, "before": before, "after": after,
-                      "sharpness_ratio": ratio, "sharpness_pass": ratio >= 2, "features": features,
+                      "sharpness_ratio": ratio, **gate_result, "features": features,
                       "skin_not_darker": after["mean_skin_luminance"] >= before["mean_skin_luminance"],
                       "skin_in_range": .55 <= after["mean_skin_luminance"] <= .70}, indent=2))
 

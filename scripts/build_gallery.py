@@ -369,6 +369,7 @@ def pwa_outputs(pages, catalog, release):
                         if entry["status"] == "verified"]
     mall_lazy = [{"path": wardrobe_manifest.relative_to(mall_root).as_posix(),
                   "sha256": hashlib.sha256(source_bytes(wardrobe_manifest)).hexdigest()}]
+    wardrobe_entries += [entry["compact"] for entry in wardrobe_entries if "compact" in entry]
     for entry in wardrobe_entries:
         if not re.fullmatch(r"[a-z0-9_-]+\.glb", entry["file"]):
             raise ValueError(f"Invalid mall NPC asset path: {entry['file']}")

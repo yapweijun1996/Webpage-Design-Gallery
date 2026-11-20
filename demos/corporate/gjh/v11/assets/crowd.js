@@ -25,10 +25,12 @@ function rng(seed) {
   };
 }
 
-export function validateManifest(data) {
+export function validateManifest(data, compact = false) {
   if (data?.version !== 1 || !Number.isInteger(data.seed) || !Array.isArray(data.modules))
     throw new Error('Invalid crowd manifest');
-  const entries = data.modules.filter(item => item?.status === 'verified');
+  const entries = data.modules.filter(item => item?.status === 'verified').map(entry =>
+    compact && entry.slot === 'body' && entry.compact
+      ? {...entry, file:entry.compact.file, bytes:entry.compact.bytes, sha256:entry.compact.sha256} : entry);
   const motion = data.animation?.motion, gestures = data.animation?.gestures;
   const ids = new Set(), files = new Set();
   if (!entries.some(item => item.slot === 'body') || entries.some(item => !SLOTS.includes(item.slot)))
@@ -108,7 +110,7 @@ function describeBody(parts, motion, gestures) {
 
 // This library owns immutable source buffers. Only skeletons and tinted materials
 // are per visitor. It has no scene, simulation, visibility or admission of its own.
-export async function loadModularLooks(signal, {requireClothing = true} = {}) {
+export async function loadModularLooks(signal, {requireClothing = true, compact = false} = {}) {
   const controller = new AbortController(), abort = () => controller.abort();
   const timer = setTimeout(abort, 8000);
   signal.addEventListener('abort', abort, {once:true});
@@ -121,7 +123,7 @@ export async function loadModularLooks(signal, {requireClothing = true} = {}) {
   try {
     const response = await fetch(MANIFEST, {signal:controller.signal, redirect:'error'});
     if (!response.ok) throw new Error('Modular NPC manifest unavailable');
-    const {seed, entries, motion, gestures} = validateManifest(await response.json());
+    const {seed, entries, motion, gestures} = validateManifest(await response.json(), compact);
     // The bare body wears only shorts. Without a verified top the crowd must keep the clothed legacy visitors.
     if (requireClothing && !entries.some(entry => entry.slot === 'top')) throw new Error('Modular NPC wardrobe has no clothing');
     const loader = new GLTFLoader();

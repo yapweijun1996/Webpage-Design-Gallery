@@ -10,7 +10,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 
-def capture(glb, prefix, engine, yaw, distances):
+def capture(glb, prefix, engine, yaw, distances, model_scale=None):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.ops.import_scene.gltf(filepath=str(glb))
     scene = bpy.context.scene
@@ -21,7 +21,8 @@ def capture(glb, prefix, engine, yaw, distances):
     bpy.context.view_layer.update()
     mesh, = (obj for obj in scene.objects if obj.type == 'MESH' and obj.find_armature() == rig)
     heights = [(mesh.matrix_world @ v.co).z for v in mesh.data.vertices]
-    native_per_metre = (max(heights) - min(heights)) / 1.7
+    native_height = max(heights) - min(heights)
+    native_per_metre = 1 / model_scale if model_scale else native_height / 1.7
 
     def joint(suffix):
         bone, = (b for b in rig.data.bones if b.name.endswith(suffix))
@@ -67,7 +68,7 @@ def capture(glb, prefix, engine, yaw, distances):
     scene.render.image_settings.color_mode = 'RGB'
     manifest = {'asset_sha256': hashlib.sha256(glb.read_bytes()).hexdigest(),
                 'renderer': engine, 'blender': bpy.app.version_string, 'size': [width, height],
-                'vertical_fov_degrees': 64, 'normalized_height_m': 1.7,
+                'vertical_fov_degrees': 64, 'normalized_height_m': native_height / native_per_metre,
                 'pose': 'bind', 'focus': list(focus), 'forward': list(forward),
                 'native_units_per_metre': native_per_metre, 'images': {}}
     if yaw:
@@ -86,7 +87,8 @@ if __name__ == '__main__':
     parser.add_argument('glb', type=Path)
     parser.add_argument('prefix', type=Path)
     parser.add_argument('--engine', choices=['BLENDER_EEVEE', 'CYCLES'], default='BLENDER_EEVEE')
+    parser.add_argument("--model-scale", type=float, help="Runtime metres per native model unit")
     parser.add_argument('--yaw', type=float, default=0.0)
     parser.add_argument('--distance', type=float, choices=[2.5, 5.2], action='append')
     args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
-    capture(args.glb.resolve(), args.prefix.resolve(), args.engine, args.yaw, args.distance or [2.5, 5.2])
+    capture(args.glb.resolve(), args.prefix.resolve(), args.engine, args.yaw, args.distance or [2.5, 5.2], args.model_scale)

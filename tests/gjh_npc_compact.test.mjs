@@ -19,11 +19,31 @@ test('real visitor shares compact colour-preserving skinned geometry without cha
   const scene=new T.Scene(), system=createNpcSystem(T,{scene,source,seats:[],physics:{intersectionWithShape:()=>null},R:{Capsule:class{}},playerCollider:{},playerBody:{},tier:'balanced'});
   system.update(.1,{x:0,y:0,z:10});
   assert.equal(system.state.callsPerNpc,3);assert.ok(scene.children.length>0);
-  let combined;scene.children[0].traverse(node=>{if(node.isSkinnedMesh && node.material?.vertexColors)combined=node;});
+  let combined;scene.children[0].traverse(node=>{if(node.isSkinnedMesh && node.material?.vertexColors && names.has(node.material.name))combined=node;});
   assert.ok(combined,'compact skinned mesh should use vertex colours');
   const colors=combined.geometry.attributes.color,actual=new Map();
   for(let i=0;i<colors.count;i++){const k=key(colors.getX(i),colors.getY(i),colors.getZ(i));actual.set(k,(actual.get(k)||0)+1);}
+  const skin=source.scene.getObjectByName('V2_body_Warm_peach_skin').material.color;
+  const skinKey=key(skin.r,skin.g,skin.b);
+  // Painted colours belong only to the existing cheek and nose vertices.
+  const pos=combined.geometry.attributes.position;
+  const hair=source.scene.getObjectByName('V2_body_Swept_chestnut_hair').material.color;
+  const hairKey=key(hair.r,hair.g,hair.b);
+  let painted=0,brows=0;
+  for(let i=0;i<colors.count;i++) {
+    const k=key(colors.getX(i),colors.getY(i),colors.getZ(i));
+    if(expected.has(k))continue;
+    assert.ok(pos.getY(i)>1.26 && pos.getY(i)<1.51 && pos.getZ(i)>.1);
+    actual.delete(k);
+    if(colors.getX(i)<.25)brows++;else painted++;
+  }
+  assert.ok(painted>0 && brows>0);
+  actual.set(hairKey,actual.get(hairKey)+brows);
+  actual.set(skinKey,actual.get(skinKey)+painted);
   assert.deepEqual(actual,expected);
+  const eyes=scene.children[0].getObjectByName('V2_body_Glasses_and_eyes');
+  assert.ok(eyes.geometry.attributes.color);
+  assert.equal(source.scene.getObjectByName(eyes.name).geometry.attributes.color,undefined);
   assert.ok(!sourceResources.some(({geometry})=>geometry===combined.geometry));
   assert.ok(!sourceResources.some(({material})=>material===combined.material));
   for(const record of sourceResources){assert.equal(record.node.geometry,record.geometry);assert.equal(record.node.material,record.material);}

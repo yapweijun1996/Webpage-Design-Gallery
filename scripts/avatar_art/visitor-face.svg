@@ -105,13 +105,17 @@
     <ellipse cx="188" cy="296.5" rx="8.1" ry="8.4"/><circle cx="171" cy="329" r="3.85"/>
     <ellipse cx="308" cy="296.5" rx="8.1" ry="8.4"/><circle cx="325" cy="329" r="3.85"/>
   </g>
+  <g id="nose">
   <path d="M238 352 Q240 355 243 355 Q241 358 239 356Z" fill="#ce917e"/>
   <path d="M239 353 Q245 357 253 353 Q250 360 244 359 Q241 358 239 353Z" fill="#d9927b"/>
   <ellipse cx="244" cy="350" rx="2.9" ry="1.45" fill="#fff0d8"/>
+  </g>
+  <g id="mouth">
   <path d="M221 369 C234 382 257 385 275 368 C271 381 259 389 246 389 C234 388 225 380 221 369Z" fill="#671629"/>
   <path d="M229 378 Q248 388 269 376 Q253 394 234 384Z" fill="#ed4854"/>
   <path d="M230 377 Q244 385 260 379 Q249 386 239 383 Q234 382 230 377Z" fill="#ffd5c1"/>
   <path d="M234 390 Q247 394 262 389 Q255 396 245 395 Q237 394 234 390Z" fill="#fff0df"/>
+  </g>
   <use xlink:href="#spectacle"/><use xlink:href="#spectacle" transform="translate(496 0) scale(-1 1)"/>
   <g class="rim">
   <path d="M230 300 Q247 286 266 300" fill="none" stroke="#4c225e" stroke-width="6.1" stroke-linecap="round"/>

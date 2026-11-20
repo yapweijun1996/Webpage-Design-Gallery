@@ -146,6 +146,26 @@ def project_face(source, positions, uv, triangles, face_vertices, art, skin_art,
     return Image.fromarray(image)
 
 
+def repack_image(source, uv, packed, charts, size):
+    atlas = Image.new("RGB", (size, size))
+    for chart in np.unique(charts):
+        members = charts == chart
+        old, new = uv[members]*source.width, packed[members]*size
+        extent = np.ptp(new, axis=0)
+        if np.min(extent) <= 1e-6:
+            continue
+        scale = np.ptp(old, axis=0) / extent
+        # Rotation disabled in Blender. Source coordinates and packed coordinates
+        # share the glTF top-left convention through the entire offline operation.
+        shift = old.min(axis=0) - new.min(axis=0)*scale
+        start = np.maximum(0, np.floor(new.min(axis=0)).astype(int)-2)
+        stop = np.minimum(size, np.ceil(new.max(axis=0)).astype(int)+2)
+        box = (*tuple(start*scale+shift), *tuple(stop*scale+shift))
+        patch = source.transform(tuple(stop-start), Image.Transform.EXTENT, box, Image.Resampling.BICUBIC)
+        atlas.paste(patch, tuple(start))
+    return atlas
+
+
 def main(directory, overlay, skin_overlay):
     positions, uv, indices = json.loads((directory / "geometry.json").read_text())
     positions, uv = np.array(positions), np.array(uv)
@@ -169,22 +189,7 @@ def main(directory, overlay, skin_overlay):
             if "BLENDER_METAL_GUARD" in os.environ else {})})
     packed = np.load(directory / "packed-uv.npy")
     size = 2048
-    atlas = Image.new("RGB", (size, size))
-    for chart in np.unique(charts):
-        members = charts == chart
-        old, new = uv[members]*4096, packed[members]*size
-        extent = np.ptp(new, axis=0)
-        if np.min(extent) <= 1e-6:
-            continue
-        scale = np.ptp(old, axis=0) / extent
-        # Rotation disabled in Blender. Source coordinates and packed coordinates
-        # share the glTF top-left convention through the entire offline operation.
-        shift = old.min(axis=0) - new.min(axis=0)*scale
-        start = np.maximum(0, np.floor(new.min(axis=0)).astype(int)-2)
-        stop = np.minimum(size, np.ceil(new.max(axis=0)).astype(int)+2)
-        box = (*tuple(start*scale+shift), *tuple(stop*scale+shift))
-        patch = source.transform(tuple(stop-start), Image.Transform.EXTENT, box, Image.Resampling.BICUBIC)
-        atlas.paste(patch, tuple(start))
+    atlas = repack_image(source, uv, packed, charts, size)
     # Sample the vector projection in the final UV layout. Sampling a second
     # time from the 4K composite would filter the eyelids and lips twice.
     atlas = project_face(atlas, positions, packed, triangles, face, art, skin_art, compensate=True)

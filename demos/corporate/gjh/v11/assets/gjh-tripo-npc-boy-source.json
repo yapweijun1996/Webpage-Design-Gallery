@@ -6,7 +6,7 @@
   "ownership": "Original asset from the owner's Blender 3D Gallery.",
   "originalClips": ["run", "sit"],
   "clips": ["idle", "walk", "run", "sit", "wave", "nod"],
-  "runtimeFiles": ["gjh-tripo-npc-boy.glb", "gjh-tripo-npc-boy-lod1.glb"],
+  "runtimeFiles": ["gjh-tripo-npc-boy-1k.glb", "gjh-tripo-npc-boy.glb", "gjh-tripo-npc-boy-lod1.glb"],
   "notes": [
     "The SHA-256 identifies the raw development copy before replacement with the optimized export.",
     "The optimized exports retain the same 65-joint Mixamo skeleton. Idle, walk, wave and nod were retargeted from the owner's girl visitor by joint name and shipped in the high-detail GLB.",
