@@ -1808,8 +1808,8 @@
         "shadow-card": "0 24px 60px rgb(0 0 0 / 50%)",
         "shadow-none": "none",
         "text-glow": "0 2px 24px rgb(0 0 0 / 60%)",
-        "font-serif": "\"GJH Serif\", \"Instrument Serif\", Georgia, \"Times New Roman\", serif",
-        "font-sans": "\"GJH Sans\", Manrope, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Arial, sans-serif",
+        "font-serif": "\"GJH Serif\", \"Instrument Serif\", Georgia, \"Songti SC\", \"Noto Serif SC\", \"Times New Roman\", serif",
+        "font-sans": "\"GJH Sans\", Manrope, -apple-system, BlinkMacSystemFont, \"PingFang SC\", \"Hiragino Sans GB\", \"Noto Sans SC\", \"Segoe UI\", Roboto, Arial, sans-serif",
         "type-display": "clamp(3.25rem, 7.2vw, 7rem)",
         "type-page": "clamp(2.75rem, 5.6vw, 5.25rem)",
         "type-section": "clamp(2.125rem, 3.8vw, 3.5rem)",
@@ -1837,7 +1837,9 @@
         "layer-base": "1",
         "layer-header": "20",
         "layer-menu": "30",
-        "layer-skip": "40"
+        "layer-skip": "40",
+        "plate": "#f5f0e8",
+        "scheme": "dark"
       },
       "overrides": [
         {
@@ -1853,6 +1855,63 @@
             "type-page": "clamp(2.5rem, 11vw, 3.25rem)",
             "type-section": "clamp(2rem, 9vw, 2.5rem)",
             "gutter": "clamp(16px, 5vw, 22px)"
+          }
+        },
+        {
+          "state": "[data-theme=\"light\"]",
+          "tokens": {
+            "obsidian": "#f5f0e8",
+            "obsidian-raised": "#ece4d6",
+            "obsidian-card": "#fbf8f2",
+            "obsidian-line": "#d9cfbd",
+            "gold": "#7a5a26",
+            "gold-bright": "#6a4d1f",
+            "ivory": "#1a1712",
+            "ivory-muted": "#554d42",
+            "ivory-faint": "#665e52",
+            "line-gold": "rgb(122 90 38 / 32%)",
+            "line-soft": "rgb(26 23 18 / 12%)",
+            "glass": "rgb(245 240 232 / 82%)",
+            "glass-strong": "rgb(245 240 232 / 96%)",
+            "veil": "rgb(245 240 232 / 60%)",
+            "gold-wash": "rgb(122 90 38 / 8%)",
+            "gold-wash-strong": "rgb(122 90 38 / 16%)",
+            "scrim-card": "linear-gradient(90deg, #fbf8f2 0%, rgb(251 248 242 / 92%) 42%, rgb(251 248 242 / 0%) 100%)",
+            "scrim-card-mobile": "linear-gradient(0deg, #fbf8f2 0%, rgb(251 248 242 / 90%) 48%, rgb(251 248 242 / 10%) 100%)",
+            "card-fill": "linear-gradient(160deg, #fffdf9 0%, #f3ece0 60%)",
+            "shadow-card": "0 18px 44px rgb(60 44 20 / 12%)",
+            "success": "#2f6b3a",
+            "danger": "#a3321f",
+            "scheme": "light"
+          }
+        },
+        {
+          "state": "[data-theme=\"light\"]",
+          "selector": ".hero, .page-hero, .site-header:not(.is-scrolled):not(.is-open), .virtual-band, .cta-band",
+          "tokens": {
+            "obsidian": "#080808",
+            "obsidian-raised": "#100f0d",
+            "obsidian-card": "#16140f",
+            "obsidian-line": "#2a261e",
+            "gold": "#d9b477",
+            "gold-bright": "#ecd3a0",
+            "ivory": "#f5f0e8",
+            "ivory-muted": "#bdb5a8",
+            "ivory-faint": "#8f887d",
+            "line-gold": "rgb(217 180 119 / 28%)",
+            "line-soft": "rgb(245 240 232 / 12%)",
+            "glass": "rgb(8 8 8 / 78%)",
+            "glass-strong": "rgb(8 8 8 / 94%)",
+            "veil": "rgb(8 8 8 / 55%)",
+            "gold-wash": "rgb(217 180 119 / 8%)",
+            "gold-wash-strong": "rgb(217 180 119 / 16%)",
+            "scrim-card": "linear-gradient(90deg, #16140f 0%, rgb(22 20 15 / 92%) 42%, rgb(22 20 15 / 0%) 100%)",
+            "scrim-card-mobile": "linear-gradient(0deg, #16140f 0%, rgb(22 20 15 / 88%) 48%, rgb(22 20 15 / 10%) 100%)",
+            "card-fill": "linear-gradient(160deg, #1b1812 0%, #100f0d 60%)",
+            "shadow-card": "0 24px 60px rgb(0 0 0 / 50%)",
+            "success": "#9fd3a6",
+            "danger": "#f0a090",
+            "scheme": "dark"
           }
         }
       ]

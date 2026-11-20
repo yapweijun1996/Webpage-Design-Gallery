@@ -15,7 +15,7 @@
     const toggle = header.querySelector('.menu-toggle');
     const nav = header.querySelector('#site-nav');
     if (!toggle || !nav) return;
-    const compact = matchMedia('(max-width: 900px)');
+    const compact = matchMedia('(max-width: 1100px)');
     const setOpen = (open, returnFocus = false) => {
       header.classList.toggle('is-open', open);
       toggle.setAttribute('aria-expanded', String(open));

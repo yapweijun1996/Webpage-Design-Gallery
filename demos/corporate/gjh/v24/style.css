@@ -31,7 +31,7 @@
 
 html {
   background: var(--obsidian);
-  color-scheme: dark;
+  color-scheme: var(--scheme);
   scroll-behavior: smooth;
   scroll-padding-top: var(--header-height);
   -webkit-text-size-adjust: 100%;
@@ -97,6 +97,64 @@ button, input, select, textarea { font: inherit; color: inherit; }
   transform: translateY(-200%);
 }
 .skip-link:focus { transform: none; }
+
+/* Cinematic regions keep the dark palette in the light theme (see themes.json); re-resolve inherited text colour. */
+.hero, .page-hero, .virtual-band, .cta-band, .site-header { color: var(--ivory); }
+[data-theme] body { transition: background-color var(--motion-med) ease, color var(--motion-med) ease; }
+
+/* ---------- Preferences: language menu and theme toggle ---------- */
+
+html:not(.js) .pref-control { display: none; }
+.lang-menu { position: relative; }
+.icon-button.lang-toggle { display: inline-flex; white-space: nowrap; align-items: center; width: auto; gap: var(--space-1); padding-inline: var(--space-3); border-radius: var(--radius-pill); }
+.lang-toggle .icon { width: 20px; height: 20px; }
+.lang-toggle .lang-chevron { width: 14px; height: 14px; transition: transform var(--motion-fast) ease; }
+.lang-toggle[aria-expanded="true"] .lang-chevron { transform: rotate(180deg); }
+.lang-code { font-size: var(--type-small); font-weight: 600; letter-spacing: .04em; }
+.lang-list {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: var(--layer-menu);
+  min-width: 12rem;
+  margin: 0;
+  padding: var(--space-2);
+  list-style: none;
+  border: 1px solid var(--line-gold);
+  border-radius: var(--radius-card);
+  background: var(--obsidian-card);
+  box-shadow: var(--shadow-card);
+}
+.lang-list[hidden] { display: none; }
+.lang-list button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: var(--size-control);
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--clear);
+  color: var(--ivory);
+  font-size: var(--type-small);
+  text-align: left;
+  cursor: pointer;
+}
+.lang-list button:hover, .lang-list button:focus-visible { background: var(--gold-wash-strong); color: var(--gold-bright); }
+.lang-list button .icon { width: 16px; height: 16px; color: var(--gold); visibility: hidden; }
+.lang-list button[aria-pressed="true"] .icon { visibility: visible; }
+.theme-toggle .icon-sun { display: none; }
+[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+@media (max-width: 420px) {
+  .lang-toggle .lang-chevron { display: none; }
+  .header-tools { gap: 0; }
+}
+@media (max-width: 380px) {
+  .header-tools > a.icon-button[href*="brand-search"] { display: none; }
+}
 
 /* ---------- Typography ---------- */
 
@@ -365,11 +423,11 @@ body > .site-header.demo-reading-header.is-open { background-color: var(--glass-
 .menu-toggle[aria-expanded="true"] .icon-open { display: none; }
 .menu-toggle[aria-expanded="true"] .icon-close { display: block; }
 
-@media (max-width: 1080px) {
+@media (max-width: 1240px) {
   .brand-name { display: none; }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .menu-toggle { display: inline-grid; }
   .header-cta { display: none; }
   .site-nav {
@@ -508,6 +566,7 @@ body > .site-header.demo-reading-header.is-open { background-color: var(--glass-
 @media (prefers-reduced-motion: no-preference) {
   .card.is-link:hover { transform: translateY(-4px); }
 }
+.card-media { overflow: clip; }
 .card-media img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--motion-slow) var(--ease-out); }
 .card:hover .card-media img { transform: scale(1.04); }
 .card-body { padding: var(--card-pad); }
@@ -611,6 +670,70 @@ body > .site-header.demo-reading-header.is-open { background-color: var(--glass-
 @media (max-width: 520px) {
   .footer-grid { grid-template-columns: 1fr; }
 }
+
+/* ---------- Shared install / update controls (src/demo-pwa.js), skinned for this edition ---------- */
+
+body > .demo-install {
+  z-index: auto;
+  padding-inline: max(var(--gutter), env(safe-area-inset-left)) max(var(--gutter), env(safe-area-inset-right));
+  border-top: 1px solid var(--line-soft);
+  background: var(--obsidian);
+  color: var(--ivory-muted);
+  font-family: var(--font-sans);
+  font-size: var(--type-small);
+}
+.demo-install > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: min(100%, var(--frame-max));
+  margin-inline: auto;
+  padding: var(--space-4) 0;
+  color: var(--ivory-muted);
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  font-size: var(--type-eyebrow);
+  list-style: none;
+}
+.demo-install > summary::-webkit-details-marker { display: none; }
+.demo-install > summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 1px solid var(--gold);
+  border-bottom: 1px solid var(--gold);
+  flex: none;
+  transform: rotate(-45deg);
+  transition: transform var(--motion-fast) ease;
+}
+.demo-install[open] > summary::before { transform: rotate(45deg); }
+.demo-install > summary:hover { color: var(--gold-bright); }
+.demo-install-body {
+  width: min(100%, var(--frame-max));
+  max-width: none;
+  margin-inline: auto;
+  padding: 0 0 var(--space-8);
+}
+.demo-install-body p { color: var(--ivory-muted); }
+.demo-install-actions button, body > .demo-back-top, body > .demo-update-notice {
+  min-height: var(--size-control);
+  padding: var(--space-2) var(--space-5);
+  border: 1px solid var(--line-gold);
+  border-radius: var(--radius-control);
+  background: var(--obsidian-card);
+  color: var(--ivory);
+  font-family: var(--font-sans);
+  font-size: var(--type-small);
+  font-weight: 600;
+  transition: border-color var(--motion-fast) ease, color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+.demo-install-actions button:hover, body > .demo-back-top:hover, body > .demo-update-notice:hover {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  box-shadow: var(--glow-soft);
+}
+body > .demo-update-notice { background: var(--gold-fill); color: var(--on-gold); border-color: var(--clear); }
+body > .demo-back-top { border-radius: var(--radius-pill); background: var(--glass-strong); }
 
 /* ---------- Motion: cinematic reveal (JS adds .js and .is-visible) ---------- */
 

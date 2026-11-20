@@ -15,11 +15,13 @@
   <link rel="preload" as="image" type="image/webp" media="(max-width: 700px)" href="assets/home-hero-story.webp" fetchpriority="high">
   <link rel="preload" as="image" type="image/webp" media="(min-width: 701px)" imagesrcset="assets/home-hero-medium.webp 960w, assets/home-hero-wide.webp 1600w" imagesizes="100vw" fetchpriority="high">
   <link rel="preload" as="font" type="font/ttf" href="assets/instrument-serif.ttf" crossorigin>
+  <script src="assets/boot.js"></script>
   <link rel="stylesheet" href="../../../../assets/tokens.css">
   <link rel="stylesheet" href="assets/theme.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="assets/page-home.css">
   <script defer src="script.js"></script>
+  <script defer src="assets/preferences.js"></script>
   <script defer src="../../../../src/demo-pwa.js"></script>
 </head>
 <body>
@@ -42,6 +44,15 @@
         </ul>
       </nav>
       <div class="header-tools">
+        <div class="lang-menu pref-control">
+          <button class="icon-button lang-toggle" type="button" aria-expanded="false" aria-controls="lang-list" aria-label="Language: English"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#globe"/></svg><span class="lang-code">EN</span><svg class="icon lang-chevron" aria-hidden="true"><use href="assets/icons.svg#chevron-down"/></svg></button>
+          <ul class="lang-list" id="lang-list" hidden data-no-translate>
+            <li><button type="button" data-lang="en" lang="en" aria-pressed="true">English <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#check"/></svg></button></li>
+            <li><button type="button" data-lang="zh-Hans" lang="zh-Hans" aria-pressed="false">简体中文 <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#check"/></svg></button></li>
+            <li><button type="button" data-lang="ms" lang="ms" aria-pressed="false">Bahasa Melayu <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#check"/></svg></button></li>
+          </ul>
+        </div>
+        <button class="icon-button theme-toggle pref-control" type="button" aria-pressed="false" aria-label="Switch to light theme"><svg class="icon icon-moon" aria-hidden="true"><use href="assets/icons.svg#moon"/></svg><svg class="icon icon-sun" aria-hidden="true"><use href="assets/icons.svg#sun"/></svg></button>
         <a class="icon-button" href="brands.html#brand-search" aria-label="Search brands"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#search"/></svg></a>
         <a class="btn btn-gold header-cta" href="contact.html">Contact Us</a>
         <button class="icon-button menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
