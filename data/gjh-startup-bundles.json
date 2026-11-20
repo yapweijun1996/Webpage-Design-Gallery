@@ -64,7 +64,7 @@
     "demos/corporate/gjh/v11/assets/packed-draw.js": "cc71167115666e1ba3b68c5959e5ac154ef2a8859e5c1608fd70de72fe52fc03",
     "demos/corporate/gjh/v11/assets/performance-monitor.js": "1687b2edc5e53e2f0cdeab5a51c9bcf2dd9d91ad283c5a922225884a5b3a3ef6",
     "demos/corporate/gjh/v11/assets/performance-panel.js": "9b7e56353cc226c97e6ef718b3e0dc43316617cda4db172895ae15cf218b0148",
-    "demos/corporate/gjh/v11/assets/physics-props.js": "93712448bc13aa7689df33bd1ef35becfdf302d2114bd315d1ff6334f385b523",
+    "demos/corporate/gjh/v11/assets/physics-props.js": "4ee4fe1a7f1912b4f552a6ae756c2cb0183a81645765244784dc74bbe809d996",
     "demos/corporate/gjh/v11/assets/player.js": "aeb4a0b44630cf4e8890c690015d9f5a16b092e3b6570a45bc27c062e0694019",
     "demos/corporate/gjh/v11/assets/public-architecture.js": "f0cf994f4c7e570bafb2c1f8a701f0bed36e054a9de5039b4c4efffbd8bf9820",
     "demos/corporate/gjh/v11/assets/push-cart.js": "856186d719c584769675e35e482795c1b97fd82fdf5ac90b47dfa916daa40175",
@@ -119,7 +119,7 @@
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "cbd6010d186644ec147e281ee4de3929ade3508048243d8c97ddafa44236b615",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "704015ca74e5f827afaee12620f7bfcce958d9364531f383d969c3bdde5d6e23",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "a834e02da3e3ed8a74d01d6a1cacde906ac26882f673b189f70cd9e32eac2204",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "2619ac8dc90ac39f3b89fe5212fe7c607d9b23d53cefb97605063f43f19ffcc5",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "b18efd12f25e03780f0f282fadb99001750a86ee53b56da89f5ee63b413a1a93"
   }

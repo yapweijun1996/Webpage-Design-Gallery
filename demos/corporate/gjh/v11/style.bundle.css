@@ -2798,6 +2798,9 @@ body.is-3d .mall-overlay #run-toggle{display:flex;flex-direction:column;align-it
 body.is-3d .mall-overlay #run-toggle>*{grid-area:auto}
 body.is-3d .mall-overlay #run-toggle>[data-icon]{display:inline-flex;align-items:center;justify-content:center;width:var(--space-4);height:var(--space-4);margin:0}
 body.is-3d .mall-overlay #run-toggle>span:last-child{align-self:center}
+body.is-3d .mall-overlay :is(#inspect:not([data-action-icon="sit"]),.hud-pickup-action){display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-block:6px}
+body.is-3d .mall-overlay :is(#inspect:not([data-action-icon="sit"]),.hud-pickup-action)>*{grid-area:auto}
+body.is-3d .mall-overlay :is(#inspect:not([data-action-icon="sit"]),.hud-pickup-action)>span:last-child{align-self:center;text-align:center}
 body.is-3d .mall-overlay #inspect[data-action-icon="sit"]{
   display:flex;gap:var(--space-1);
 }

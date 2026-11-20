@@ -270,7 +270,39 @@ function createPhysicsPropPool(world, { phone = false } = {}) {
     }
   };
 }
-function makeProp(T, R, world, scene, geometry, { name, radius, halfHeight, mass, color, ball, bounce, ccd }) {
+function footballTexture(T) {
+  if (typeof document === "undefined" || typeof T.CanvasTexture !== "function")
+    return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 128;
+  const ctx = typeof canvas.getContext === "function" ? canvas.getContext("2d") : null;
+  if (!ctx)
+    return null;
+  ctx.fillStyle = "#f4f1ea";
+  ctx.fillRect(0, 0, 256, 128);
+  ctx.fillStyle = "#1b1b1b";
+  const patch = (cx, cy, r) => {
+    ctx.beginPath();
+    for (let i = 0;i < 5; i++) {
+      const a = -Math.PI / 2 + i * 2 * Math.PI / 5;
+      ctx[i ? "lineTo" : "moveTo"](cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+    }
+    ctx.closePath();
+    ctx.fill();
+  };
+  for (let i = 0;i < 6; i++)
+    patch(21 + i * 43, 64, 15);
+  for (let i = 0;i < 6; i++) {
+    patch(42 + i * 43, 22, 11);
+    patch(42 + i * 43, 106, 11);
+  }
+  const texture = new T.CanvasTexture(canvas);
+  if (T.SRGBColorSpace)
+    texture.colorSpace = T.SRGBColorSpace;
+  return texture;
+}
+function makeProp(T, R, world, scene, geometry, { name, radius, halfHeight, mass, color, ball, bounce, ccd, football }) {
   let mesh;
   return {
     radius,
@@ -280,7 +312,8 @@ function makeProp(T, R, world, scene, geometry, { name, radius, halfHeight, mass
     detach: false,
     get mesh() {
       if (!mesh) {
-        mesh = new T.Mesh(geometry(), new T.MeshStandardMaterial({ color, roughness: 0.78, transparent: true }));
+        const map = football ? footballTexture(T) : null;
+        mesh = new T.Mesh(geometry(), new T.MeshStandardMaterial(map ? { color: 16777215, map, roughness: 0.55, transparent: true } : { color, roughness: 0.78, transparent: true }));
         mesh.name = name;
         mesh.visible = false;
       }
@@ -315,7 +348,7 @@ function registerPhysicsProps(T, R, world, {
 }) {
   const pool = createPhysicsPropPool(world, { phone });
   const can = makeProp(T, R, world, scene, () => new T.CylinderGeometry(0.03875, 0.03875, 0.124, 12), { name: "Dropped can", radius: 0.03875, halfHeight: 0.062, mass: 0.16, color: 12690541, bounce: 0.32, ccd: true });
-  const ball = makeProp(T, R, world, scene, () => new T.IcosahedronGeometry(0.16, 1), { name: "Atrium ball", radius: 0.16, halfHeight: 0.16, mass: 0.28, color: 10962484, ball: true, bounce: 0.26, ccd: true });
+  const ball = makeProp(T, R, world, scene, () => new T.SphereGeometry(0.16, 18, 12), { name: "Atrium ball", radius: 0.16, halfHeight: 0.16, mass: 0.28, color: 16052714, football: true, ball: true, bounce: 0.26, ccd: true });
   const basket = makeProp(T, R, world, scene, () => new T.LatheGeometry([
     new T.Vector2(0, -0.14),
     new T.Vector2(0.16, -0.14),
