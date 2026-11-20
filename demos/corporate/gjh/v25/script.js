@@ -21,17 +21,22 @@
       item.classList.add('on');
       live.textContent = item.textContent;
     };
+    const lead = Number(page.dataset.lead || 0);
+    const stop = () => { clearTimeout(timer); clearInterval(timer); timer = 0; };
     page.play = () => {
       page.classList.add('is-in');
       if (timer || shown >= items.length) return;
-      reveal();
-      timer = setInterval(() => {
+      // Let the chapter's own entrance (shutter lift, wide table) land before the first line.
+      timer = setTimeout(() => {
         reveal();
-        if (shown >= items.length) { clearInterval(timer); timer = 0; }
-      }, LINE_DELAY);
+        timer = setInterval(() => {
+          reveal();
+          if (shown >= items.length) stop();
+        }, LINE_DELAY);
+      }, shown === 0 ? lead : 0);
     };
-    page.pause = () => { clearInterval(timer); timer = 0; };
-    page.showAll = () => { page.classList.add('is-in'); page.pause(); while (shown < items.length) reveal(); };
+    page.pause = stop;
+    page.showAll = () => { page.classList.add('is-in'); stop(); while (shown < items.length) reveal(); };
   });
   if (calm || params.get('lines') === 'all') pages.forEach((page) => page.showAll());
 
@@ -43,6 +48,18 @@
     });
   }, { threshold: .55 });
   pages.forEach((page) => panels.observe(page.querySelector('.panel')));
+
+  // Gutter flourishes (page-turn fold, quiet gap) play once as they scroll into view.
+  const gutters = [...document.querySelectorAll('[data-reveal]')];
+  if (calm || params.get('lines') === 'all') gutters.forEach((node) => node.classList.add('is-in'));
+  const reveals = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-in');
+      reveals.unobserve(entry.target);
+    });
+  }, { threshold: .5 });
+  gutters.forEach((node) => reveals.observe(node));
 
   // Timeline thread: the rail line fills up to the chapter in view and stays filled behind it.
   const rail = document.querySelector('.rail');

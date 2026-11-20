@@ -129,3 +129,29 @@ html[data-lang="zh"] .sfx{-webkit-text-stroke:1px var(--ink)}
 }
 
 @media (max-width:640px){.bubble[data-motion="laugh"]::before{display:none}}
+
+/* Pack B: B1 shutter lift (ch. 1), B2 page-turn fold and quiet gutter (ch. 3 to 5), B3 the table opens wide (ch. 6). */
+.js .page[data-ch="1"] .art{clip-path:inset(100% 0 0 0)}
+.js .page[data-ch="1"].is-in .art{clip-path:inset(0);transition:clip-path .7s cubic-bezier(.2,.7,.2,1)}
+.page[data-ch="1"] .art::before{content:"";position:absolute;inset:0;border-top:6px solid var(--white);opacity:0;pointer-events:none}
+@keyframes edge-rise{0%{opacity:1;transform:translateY(100%)}85%{opacity:1}100%{opacity:0;transform:translateY(0)}}
+.js .page[data-ch="1"].is-in .art::before{animation:edge-rise .7s cubic-bezier(.2,.7,.2,1)}
+
+.turn{position:relative;height:clamp(56px,14svh,120px);overflow:hidden}
+.turn::before{content:"";position:absolute;inset:0;background:var(--fold-gradient)}
+.js .turn::before{transform:translateX(-100%)}
+.js .turn.is-in::before{transform:translateX(0);transition:transform .8s ease-out}
+.hush{position:relative;height:clamp(24px,8svh,64px)}
+.hush::after{content:"";position:absolute;left:25%;right:25%;top:50%;border-top:2px solid var(--ink);opacity:.5}
+.js .hush::after{opacity:0}
+.js .hush.is-in::after{opacity:.5;transition:opacity 1s ease .2s}
+
+.js .page[data-ch="6"] .art{clip-path:inset(14% 10% 14% 10%)}
+.js .page[data-ch="6"].is-in .art{clip-path:inset(0);transition:clip-path 1.2s cubic-bezier(.2,.7,.2,1)}
+
+@media (prefers-reduced-motion:reduce){
+  .js .page[data-ch="1"] .art,.js .page[data-ch="6"] .art{clip-path:none;transition:none}
+  .js .page[data-ch="1"].is-in .art::before{animation:none}
+  .js .turn::before{transform:none;transition:none}
+  .js .hush::after{opacity:.5;transition:none}
+}
