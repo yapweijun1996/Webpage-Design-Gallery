@@ -125,6 +125,7 @@ export function createTramHud(parent, scene, canControl) {
     const active = Boolean(state?.active);
     const restoreFocus = wasActive && !active && card.contains(document.activeElement);
     wasActive = active;
+    mallAudio.setTram(active);
     card.hidden = !active && !boardReason;
     const shop = active ? tramCaptions[state.caption] : null;
     if ((!shop && lastShop) || (state?.paused && !wasPaused)) narration.stop();

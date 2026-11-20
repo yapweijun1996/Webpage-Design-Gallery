@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
-import {AUDIO_KEY, BEAT, createAudioManager, createTramNarration, LOOKAHEAD, SHOP_SOUNDS} from
+import {AUDIO_KEY, createAudioManager, createTramNarration, LOOKAHEAD, SHOP_SOUNDS} from
   '../demos/corporate/gjh/v11/assets/audio.js';
+import {composePianoPhrase, createPianoPiece} from '../demos/corporate/gjh/v11/assets/piano-composer.js';
 import {createShopInteractionTarget} from '../demos/corporate/gjh/v11/assets/interiors/shop-interactions.js';
 import {tramCaptions} from '../demos/corporate/gjh/v11/assets/tram-ride.js';
 import {tramCaptionCopy} from '../demos/corporate/gjh/v11/assets/tram-caption-copy.js';
@@ -17,12 +18,12 @@ class Param {
   cancelScheduledValues(time) { this.events = this.events.filter(event => event[2] < time); }
 }
 
-function rig(storage, constructorMs = .5) {
+function rig(storage, constructorMs = .5, fetchSample) {
   const timers = new Set(), contexts = [], delays = new Map(), frames = [];
   const calls = {buffer:0, bufferSource:0, wave:0, oscillator:0, gain:0};
-  let clock = 0;
+  let clock = 0, prefetched = false;
   const audio = createAudioManager({
-    storage,
+    storage, fetchSample, seed: 'test visitor',
     now: () => clock,
     idle: callback => frames.push(callback),
     later(callback, ms) { delays.set(callback, clock + ms); return callback; },
@@ -52,7 +53,11 @@ function rig(storage, constructorMs = .5) {
         async suspend() { this.transitions.push('suspend'); this.state = 'suspended'; },
         async close() { this.transitions.push('close'); this.state = 'closed'; },
         createBuffer() { calls.buffer++; clock += .8; },
-        createBufferSource() { calls.bufferSource++; clock += .8; },
+        ...(fetchSample && {async decodeAudioData() { return {}; }}),
+        createBufferSource() {
+          calls.bufferSource++;
+          return {...node('playbackRate')};
+        },
         createOscillator() {
           calls.oscillator++; clock += .45;
           const source = node('frequency'); oscillators.push(source); return source;
@@ -84,6 +89,12 @@ function rig(storage, constructorMs = .5) {
   }
   return {audio,timers,contexts,calls,frame,runFrame,advance,
     async warm(ms = 1500) {
+      if (audio.state.musicEnabled && !prefetched) {
+        const prefetch = audio.prefetchMusic();
+        assert(runFrame() <= 1.5);
+        await prefetch;
+        prefetched = true;
+      }
       await Promise.resolve();
       advance(ms);
       for (let count = 0; frames.length; count++) {
@@ -96,6 +107,7 @@ function rig(storage, constructorMs = .5) {
 
 test('first gesture only constructs and resumes the context, then setup stays within the idle slice budget', async () => {
   const {audio,calls,contexts,timers,frame,advance,warm} = rig();
+  audio.setMusic(true);
   audio.setActive(true);
   await warm(0);
   assert.equal(contexts.length,0,'coefficients can be prepared before the gesture');
@@ -195,7 +207,7 @@ test('deep-link fallback waits for a stationary idle frame after a movement gest
 test('Low phone scene key and pointer events leave context construction to the audio controls', async () => {
   const {audio,contexts,calls,warm,runFrame} = rig(undefined, 400);
   const isStationary = () => true;
-  audio.setPolicy(true,true,false);
+  audio.setPolicy(true,true);
   audio.prepareForLoader();
   audio.setActive(true);
   audio.scheduleCreation(isStationary, () => 1);
@@ -222,7 +234,7 @@ test('Low phone scene key and pointer events leave context construction to the a
 
 test('Low phone can explicitly enable music before any effect is requested', () => {
   const {audio,contexts} = rig(undefined, 400);
-  audio.setPolicy(true,true,false);
+  audio.setPolicy(true,true);
   audio.prepareForLoader();
   audio.setActive(true);
   assert.equal(contexts.length,0);
@@ -235,9 +247,40 @@ test('Low phone can explicitly enable music before any effect is requested', () 
   audio.dispose();
 });
 
+test('Low phone prepares a suspended context behind the loader without requesting piano samples', async () => {
+  let requests = 0;
+  const {audio,contexts,warm,tick,runFrame} = rig(undefined, 400, () => {
+    requests++;
+    return {ok:false};
+  });
+  audio.setPolicy(true,true);
+  audio.primeLowContext(2);
+  assert.equal(contexts.length,1);
+  assert.equal(contexts[0].state,'suspended');
+  assert.equal(audio.performanceReport().audioCreateDuring,'loader');
+  audio.setActive(true);
+  const prefetch = audio.prefetchMusic();
+  runFrame();
+  await prefetch;
+  await warm(0);
+  assert.equal(audio.state.musicEnabled,false);
+  audio.sceneGesture({isTrusted:true,type:'click'}, () => true, 3);
+  audio.prepareForControls(3);
+  assert.equal(contexts[0].state,'suspended','opening Tools alone keeps audio suspended');
+  audio.setMusic(true);
+  audio.prepareForControls(4,true);
+  assert.equal(contexts.length,1);
+  assert.equal(contexts[0].state,'running');
+  await warm();
+  assert.equal(requests,0,'music prepares the oscillator graph first');
+  tick(0);
+  assert.equal(requests,12);
+  audio.dispose();
+});
+
 test('a Low phone can lazily play an effect before its pool is prewarmed', async () => {
   const {audio,frame,calls,warm,timers} = rig();
-  audio.setPolicy(true,true,false);
+  audio.setPolicy(true,true);
   audio.setActive(true);
   await warm(0);
   audio.prepareForControls(1, true);
@@ -268,6 +311,7 @@ test('loader creates one suspended context and the first scene gesture resumes i
   assert.equal(audio.performanceReport().audioCreateFrame,0);
   assert.equal(timers.size,0);
   assert.equal(audio.state.musicPlaying,false);
+  audio.setMusic(true);
   audio.setActive(true);
   assert.equal(ctx.state,'suspended');
   audio.sceneGesture({isTrusted:true,type:'keydown',code:'KeyW'}, () => false, 5);
@@ -315,7 +359,7 @@ test('persists mute, demo mute, explicit music and independent bus levels', asyn
   assert.deepEqual(JSON.parse(storage.getItem(AUDIO_KEY)), {
     muted:true, demoMuted:true, music:true, voice:true, levels:{music:.37,effects:0,ambience:.13}
   });
-  audio.setPolicy(true,true,true);
+  audio.setPolicy(true,true);
   audio.setActive(true);
   audio.unlock();
   assert.equal(contexts.length,0);
@@ -330,73 +374,100 @@ test('persists mute, demo mute, explicit music and independent bus levels', asyn
   audio.dispose();
 });
 
-test('Low phone, reduced motion and data saver policy leave the music clock and graph idle', async () => {
-  for (const policy of [[true,true,false],[false,false,true]]) {
-    const {audio,timers,contexts,tick,warm} = rig();
+test('all device policies start with Music off and load samples only after opt-in', async () => {
+  for (const policy of [[true,true],[true,false],[false,false]]) {
+    const requests = [];
+    const {audio,timers,contexts,tick,warm,calls} = rig(undefined,.5, async url => {
+      requests.push(url);
+      return {ok:false};
+    });
     audio.setPolicy(...policy);
     audio.setActive(true);
     audio.prepareForControls(1, true);
     await warm();
-    tick(0);
     const ctx = contexts[0];
+    assert.equal(audio.state.musicEnabled,false);
     assert.equal(timers.size,0);
     assert.equal(ctx.gains.length,policy[0] ? 5 : 7);
-    assert(ctx.oscillators.every(voice => voice.frequency.events.length === 0));
+    assert.equal(requests.length,0);
     audio.setMusic(true);
     await warm();
     const musicBus = ctx.gains.find(bus => bus.gain.value === .26);
     tick(.075);
+    assert.equal(requests.length,12);
     assert.equal(timers.size,1);
     assert.equal(musicBus.links.size,1);
+    assert.equal(calls.bufferSource,0);
+    assert(ctx.oscillators.some(voice => voice.frequency.events.length),'fallback plays after fetch failure');
     audio.setMusic(false);
     assert.equal(timers.size,0);
     assert.equal(musicBus.links.size,0);
     audio.dispose();
   }
-  const {audio,contexts,timers,tick,warm} = rig();
-  audio.setPolicy(true,false,false);
-  audio.setActive(true);
-  audio.unlock();
-  await warm();
-  tick(0);
-  assert.equal(timers.size,1);
-  audio.setPolicy(true,true,false);
-  assert.equal(timers.size,0);
-  assert.equal(contexts[0].gains.find(bus => bus.gain.value === .26).links.size,0);
-  audio.dispose();
 });
 
-test('72 BPM lookahead maintains the swung grid across the eight-bar seam', async () => {
+test('lookahead keeps the beat grid across generated phrases without looping the score', async () => {
   const {audio,contexts,tick,warm} = rig();
-  audio.setPolicy(true,false,false);
+  audio.setPolicy(true,false);
+  audio.setMusic(true);
   audio.setActive(true);
   audio.unlock();
   await warm();
-  const ctx = contexts[0];
-  tick(0);
-  const bass = ctx.oscillators[2].frequency;
-  const hats = () => ctx.oscillators[5]?.frequency.events;
-  assert.equal(bass.events[0][2],.026);
-  assert.deepEqual(hats(),[]);
-  for (let time = .075; time < 29; time += .075) {
+  const musicVoices = contexts[0].oscillators.slice(2);
+  const piece = createPianoPiece('test visitor','courtyard');
+  const seconds = 60 / piece.bpm;
+  const phrases = [composePianoPhrase(piece,0),composePianoPhrase(piece,1)].flat();
+  const planned = new Set(phrases.flatMap((bar,index) => [...bar.bass,...bar.melody]
+    .filter(event => event.note !== null)
+    .map(event => Math.round((.026 + (index * 4 + event.beat) * seconds) * 1e6))));
+  const seen = new Set();
+  let time = 0;
+  for (; time < 56 * seconds; time += .075) {
     tick(time);
-    for (const oscillator of ctx.oscillators) {
+    for (const oscillator of musicVoices) {
       for (const [kind,,at] of oscillator.frequency.events) {
-        if (kind === 'set') assert(at <= time + LOOKAHEAD + .0121, at);
+        if (kind !== 'set') continue;
+        const rounded = Math.round(at * 1e6);
+        assert(at <= time + LOOKAHEAD + 1e-8, at);
+        assert(planned.has(rounded), at);
+        seen.add(rounded);
       }
     }
   }
-  assert(Math.abs(hats()[0][2] - (.026 + .58 * BEAT)) < 1e-8);
-  assert(bass.events.length > 32);
-  for (let i = 1; i < bass.events.length; i++) {
-    assert(Math.abs(bass.events[i][2] - bass.events[i-1][2] - BEAT) < 1e-8);
+  assert(seen.has(Math.round((.026 + 32 * seconds) * 1e6)), 'phrase boundary stays on the audio clock');
+  const cutoff = Math.round((time - .075 + LOOKAHEAD) * 1e6);
+  assert.deepEqual(seen,new Set([...planned].filter(at => at <= cutoff)));
+  audio.dispose();
+});
+
+test('the sampler takes over at the next bar after all samples decode', async () => {
+  let respond;
+  const response = new Promise(resolve => { respond = resolve; });
+  const {audio,tick,warm,runFrame,calls} = rig(undefined,.5, () => response);
+  audio.setActive(true);
+  audio.setMusic(true);
+  audio.unlock();
+  await warm();
+  tick(0);
+  assert.equal(calls.bufferSource,0,'undecoded score uses oscillators');
+  respond({ok:true,arrayBuffer:async () => new ArrayBuffer(1)});
+  const flush = () => new Promise(resolve => setImmediate(resolve));
+  for (let i = 0; i < 12; i++) {
+    await flush();
+    runFrame();
   }
-  assert.equal(bass.events[0][1],bass.events[32][1]);
+  await flush();
+  const boundary = .026 + 4 * 60 / createPianoPiece('test visitor','courtyard').bpm;
+  for (let time = .075; time < boundary - LOOKAHEAD; time += .075) tick(time);
+  assert.equal(calls.bufferSource,0,'readiness does not alter a bar already scheduled');
+  tick(boundary - LOOKAHEAD / 2);
+  assert(calls.bufferSource > 0, 'the next downbeat uses samples');
   audio.dispose();
 });
 
 test('shop effects and narration duck the same music bus, then restore its volume', async () => {
   const {audio,contexts,tick,warm} = rig();
+  audio.setMusic(true);
   audio.setActive(true);
   audio.unlock();
   await warm();
@@ -422,7 +493,8 @@ test('shop effects and narration duck the same music bus, then restore its volum
 
 test('phone caps the pool at six voices, cancels effects and disconnects every node on disposal', async () => {
   const {audio,contexts,tick,warm} = rig();
-  audio.setPolicy(true,false,false);
+  audio.setPolicy(true,false);
+  audio.setMusic(true);
   audio.setActive(true);
   audio.unlock();
   await warm();
@@ -535,7 +607,7 @@ test('no-browser smoke supports absent media APIs and denied storage', () => {
   };
   const audio = createAudioManager({storage});
   assert.equal(createTramNarration(audio).available,false);
-  audio.setPolicy(true,true,false);
+  audio.setPolicy(true,true);
   audio.prepareForLoader();
   audio.setActive(true);
   audio.sceneGesture({isTrusted:true,type:'keydown',code:'KeyW'}, () => false, 1);

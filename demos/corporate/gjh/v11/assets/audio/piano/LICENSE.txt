@@ -1,0 +1,7 @@
+Piano: Salamander Grand Piano V3 by Alexander Holm, CC BY 3.0
+License: https://creativecommons.org/licenses/by/3.0/
+Original collection: https://archive.org/details/SalamanderGrandPianoV3
+MP3 distribution: https://github.com/Tonejs/audio/tree/master/salamander
+
+These 12 MP3s come from the Tone.js mirror. The mall repitches and envelopes
+them during playback and layers them in a generated piano score.

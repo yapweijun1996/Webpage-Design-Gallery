@@ -74,13 +74,25 @@ const speaker = document.getElementById('mall-speaker');
 const music = document.getElementById('mall-music');
 const musicStatus = document.getElementById('mall-music-status');
 const mixer = document.querySelectorAll('[data-audio-bus]');
-const connection = navigator.connection;
-let lastMusicStatus;
+const musicTitle = document.getElementById('mall-music-title');
+const musicToggleState = document.getElementById('mall-music-state');
+const speakerState = document.getElementById('mall-speaker-state');
+let lastMusicStatus, lastMusicEnabled, lastMuted;
 mallAudio.subscribe(() => {
   const state = mallAudio.state;
   music.disabled = !state.available;
   speaker.setAttribute('aria-pressed', String(state.muted));
-  music.checked = state.musicEnabled;
+  music.setAttribute('aria-pressed', String(state.musicEnabled));
+  if (lastMusicEnabled !== state.musicEnabled) {
+    lastMusicEnabled = state.musicEnabled;
+    musicToggleState.textContent = state.musicEnabled ? 'On' : 'Off';
+  }
+  if (lastMuted !== state.muted) {
+    lastMuted = state.muted;
+    speakerState.textContent = state.muted ? 'Sound off' : 'Sound on';
+  }
+  musicTitle.hidden = !state.musicTitle;
+  if (musicTitle.textContent !== state.musicTitle) musicTitle.textContent = state.musicTitle;
   for (const input of mixer) {
     input.disabled = !state.available;
     input.value = Math.round(state.levels[input.dataset.audioBus] * 100);
@@ -93,9 +105,10 @@ function toggleMute() {
   if (!mallAudio.state.muted) mallAudio.prepareForControls(frames, true);
 }
 speaker.addEventListener('click', toggleMute);
-music.addEventListener('change', () => {
-  mallAudio.setMusic(music.checked);
-  if (music.checked) mallAudio.prepareForControls(frames, true);
+music.addEventListener('click', () => {
+  const enabled = !mallAudio.state.musicEnabled;
+  mallAudio.setMusic(enabled);
+  if (enabled) mallAudio.prepareForControls(frames, true);
 });
 for (const input of mixer) input.addEventListener('input', () => {
   mallAudio.setVolume(input.dataset.audioBus, input.valueAsNumber / 100);
@@ -136,12 +149,9 @@ const quality = createGraphicsQuality(change => {
   } else resize();
 });
 function syncAudioPolicy(tier = quality.state?.tier ?? quality.resolve(innerWidth).tier) {
-  mallAudio.setPolicy(quality.deviceClass === 'phone', tier === 'low',
-    reducedMotion.matches || connection?.saveData === true);
+  mallAudio.setPolicy(quality.deviceClass === 'phone', tier === 'low');
 }
 syncAudioPolicy();
-reducedMotion.addEventListener('change', () => syncAudioPolicy());
-connection?.addEventListener?.('change', () => syncAudioPolicy());
 const floorChime = () => mallAudio.play('floor-chime');
 let renderRequested = false, forceRender = false, enteredAt = null;
 let simulationMs = 0, simulationSteps = 0;
@@ -761,6 +771,7 @@ function animate(now) {
     enteredAt = now;
     markEntered();
     activateSceneAudio();
+    void mallAudio.prefetchMusic();
   }
   quality.observeRefresh(now, entered && !windowBlurred);
   const advancing = !manual && !modes.paused() && !(expanded && windowBlurred);
@@ -1197,11 +1208,13 @@ async function initialize() {
           stage?.setTier?.(quality.state?.tier);
           stage?.mount?.();
           themeStage = stage;
+          mallAudio.setTheme(next.id);
         }
         catch(error) { world.applyMallTheme(previous);elevator?.applyMallTheme?.(previous);atmosphere.applyTheme(previous);throw error; }
       }});
       if(!world.applyMallTheme(mallTheme.definition())) throw new Error('Invalid initial theme');
       atmosphere.applyTheme(mallTheme.definition());
+      mallAudio.setTheme(mallTheme.definition().id);
       if(contextLost || interrupted) mallTheme.suspend();
     } catch { mallTheme?.destroy();mallTheme=null; }
     ui.configureMallTheme(mallTheme);
@@ -1336,6 +1349,8 @@ async function initialize() {
   render(true);
   if (contextLost || context.isContextLost()) return;
   if (!renderer.info.render.calls) throw new Error('First scene frame unavailable');
+  // Keep potentially blocking native audio setup behind the loader, including on Low.
+  if (!startupOverlay.hidden) mallAudio.primeLowContext(frames);
   window.mallLoader?.complete('frame');
   window.__sceneReady = true; ui.offerFirstGuide(); resume(); scheduleThemeMidnight();
 }

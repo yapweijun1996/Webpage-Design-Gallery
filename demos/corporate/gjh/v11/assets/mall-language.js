@@ -3,7 +3,12 @@ import {MALL_THEME_COPY} from './mall-theme-copy.js';
 // Keep the gallery's saved language when entering the standalone mall.
 const messages = new Map([
   ['Mute sound','静音','Senyapkan bunyi'],
-  ['Background music','背景音乐','Muzik latar'],
+  ['Sound','声音','Bunyi'],
+  ['Music','音乐','Muzik'],
+  ['On','开','Hidup'],
+  ['Off','关','Mati'],
+  ['Sound on','声音已开启','Bunyi hidup'],
+  ['Sound off','声音已关闭','Bunyi mati'],
   ['Volume settings','音量设置','Tetapan kelantangan'],
   ['Effects volume','音效音量','Kelantangan kesan'],
   ['Music volume','音乐音量','Kelantangan muzik'],
