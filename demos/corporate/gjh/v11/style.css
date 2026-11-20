@@ -1025,7 +1025,9 @@ body.is-3d .mall-overlay #hud-context-stack{
   max-height:calc(100% - var(--hud-context-top) - var(--hud-context-bottom));
   display:flex;flex-direction:column-reverse;align-items:flex-start;gap:var(--space-2);
 }
-#skip-lift-ride{pointer-events:auto;min-height:44px;padding-inline:var(--space-3);cursor:pointer}
+#skip-lift-ride{pointer-events:auto;min-height:44px;padding-inline:var(--space-4);cursor:pointer;justify-content:center;font-family:inherit}
+#skip-lift-ride:active{background:var(--gold);color:var(--green)}
+#skip-lift-ride:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 body.is-3d .mall-overlay #hud-context{
   display:flex;flex:none;align-items:center;
   width:max-content;max-width:min(27rem,100%);
@@ -1068,12 +1070,13 @@ body.is-3d .mall-overlay #hud-context #nearby-name{
 #hud-context .brand-story-nearby{
   position:absolute;width:1px;height:1px;padding:0;margin:0;overflow:hidden;clip-path:inset(50%);
 }
-#hud-context .hud-context-chip,#hud-lift-hint{
+#hud-context .hud-context-chip,#hud-lift-hint,#skip-lift-ride{
   display:flex;align-items:center;gap:var(--space-1);margin:0;padding:var(--space-1) var(--space-2);
   min-height:var(--space-8);min-width:0;white-space:nowrap;
   background:var(--green);color:var(--paper);border:1px solid var(--gold);border-radius:var(--radius-pill);
   font-size:var(--font-size-xs);font-weight:700;pointer-events:none;
 }
+#skip-lift-ride{pointer-events:auto}
 #hud-lift-hint{max-width:100%;white-space:normal}
 #hud-context-text{overflow:hidden;text-overflow:ellipsis}
 #hud-nearby-arrow{flex:none;display:inline-flex;color:var(--gold)}

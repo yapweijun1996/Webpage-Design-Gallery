@@ -1,6 +1,7 @@
+import {rideTime} from './elevator-ride.js';
 import {mallAudio} from './audio.js';
 import {createKitLoader} from './elevator-kit.js';
-import {liftLayout,cutRectangle} from './lift-layout.js';
+import {liftLayout,shaftFinish,cutRectangle} from './lift-layout.js';
 import {opaqueBatch} from './opaque-batch.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 // Experimental two-level test space. The static slabs own collision; during
@@ -54,7 +55,7 @@ function createExpandedElevator(T,R,physics,scene,motion) {
   function geometry(kind,x,y,z,sx,sy,sz) {
     const g=new T.BoxGeometry(sx,sy,sz).toNonIndexed();g.translate(x,y,z);
     const n=g.attributes.position.count,c=palette[kind],colors=new Float32Array(n*3),surface=new Float32Array(n*2);
-    for(let i=0;i<n;i++){colors.set([c.r,c.g,c.b],i*3);surface.set(kind==='rail'?[.35,.55]:kind==='stone'?[.28,.16]:[.8,0],i*2);}
+    for(let i=0;i<n;i++){colors.set([c.r,c.g,c.b],i*3);surface.set(kind==='rail'?[.35,.55]:kind==='stone'?[.28,.16]:[.32,.14],i*2);}
     g.setAttribute('color',new T.BufferAttribute(colors,3));g.setAttribute('obSurface',new T.BufferAttribute(surface,2));return g;
   }
   function collider(x,y,z,sx,sy,sz) {return physics.createCollider(R.ColliderDesc.cuboid(sx/2,sy/2,sz/2).setTranslation(x,y,z));}
@@ -70,9 +71,11 @@ function createExpandedElevator(T,R,physics,scene,motion) {
   const doorwayZ=(t.minZ+t.maxZ)/2,doorwayDepth=t.maxZ-t.minZ;
   // The fitted header and jambs extend above the physics guard. Stop the
   // chase camera at their visible faces while keeping the doorway open.
-  for(const [z,width,bottom,top] of [[L.z,4.2,2.94,3.80],[L.z-1.54,1.04,0,2.94],[L.z+1.54,1.04,0,2.94]]){
-    obstacles.push({min:{x:shaft.minX-.39,y:L.upper+bottom,z:z-width/2},
-      max:{x:shaft.minX+.29,y:L.upper+top,z:z+width/2}});
+  for(const floor of floors){
+    for(const [z,width,bottom,top] of [[L.z,4.2,2.94,3.80],[L.z-1.54,1.04,0,2.94],[L.z+1.54,1.04,0,2.94]]){
+      obstacles.push({min:{x:shaftFinish.west-.39,y:floor+bottom,z:z-width/2},
+        max:{x:shaftFinish.west+.29,y:floor+top,z:z+width/2}});
+    }
   }
   const guardHeight=1.1,wallThickness=.1;
   for(const r of cutRectangle(slab,shaft))fixed('stone',(r.minX+r.maxX)/2,L.upper-.2,(r.minZ+r.maxZ)/2,r.maxX-r.minX,.4,r.maxZ-r.minZ);
@@ -105,9 +108,20 @@ function createExpandedElevator(T,R,physics,scene,motion) {
     for(const offset of [-.46,.46])staticParts.push(geometry('rail',x+(alongX?offset*length:0),floor+guardHeight/2,
       z+(alongX?0:offset*length),.055,guardHeight,.055));
   }
+  // Solid ground elevations follow the upper lacquer finish and leave the west threshold clear.
+  const {west,east,north,south,height:wallHeight}=shaftFinish;
+  const wallX=(west+east)/2;
+  for(const [x,z,w,d] of [[east,L.z,wallThickness,south-north],
+    [wallX,north,east-west,wallThickness],[wallX,south,east-west,wallThickness]]){
+    fixed('panel',x,wallHeight/2,z,w,wallHeight,d);
+    for(const y of [.10,wallHeight-.05])
+      staticParts.push(geometry('rail',x,y,z,w+.02,.08,d+.02));
+  }
   for(const floor of floors){
-    shaftGuard(floor,shaft.maxX,shaftZ,wallThickness,sz);
-    for(const z of [shaft.minZ,shaft.maxZ])shaftGuard(floor,shaftX,z,sx,wallThickness);
+    if(floor===L.upper){
+      shaftGuard(floor,shaft.maxX,shaftZ,wallThickness,sz);
+      for(const z of [shaft.minZ,shaft.maxZ])shaftGuard(floor,shaftX,z,sx,wallThickness);
+    }
     for(const [minZ,maxZ] of [[shaft.minZ,t.minZ],[t.maxZ,shaft.maxZ]])shaftGuard(floor,shaft.minX,(minZ+maxZ)/2,wallThickness,maxZ-minZ);
     const gateShape=[shaft.minX,floor+guardHeight/2,doorwayZ,wallThickness,guardHeight,doorwayDepth];
     const gateParts=floor===0?[geometry('rail',...gateShape)]:[
@@ -182,7 +196,7 @@ function createExpandedElevator(T,R,physics,scene,motion) {
 
 // The fixed gates and threshold colliders remain authoritative in both the
 // model and fallback paths. Door leaves are a visual follower of the ride.
-export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel) {
+export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel,initialTier='low') {
   const motion=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
   const lift=expanded ? createExpandedElevator(T,R,physics,scene,motion) : createLegacyElevator(T,R,physics,scene);
   const kit=prepareModel ? createKitLoader(T,scene,lift,prepareModel,lift.replaceCabin) : null;
@@ -196,6 +210,7 @@ export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel) 
     kit?.update(y,ground,upper,(y>=lift.upper/2?2:0)+(down?1:0));
   }
   lift.kit=kit;
+  void kit?.select(initialTier);
   lift.setHeight=height=>{setHeight(height);y=height;};
   lift.pose=(trip)=>{
     lift.setHeight(trip.height);
@@ -204,7 +219,7 @@ export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel) 
     soundDoors(oldGround,oldUpper);
     paint();
   };
-  lift.finishRide=()=>{dwell=1.1;};
+  lift.finishRide=()=>{dwell=rideTime.cycle-rideTime.exit-rideTime.open;};
   lift.update=(dt,p)=>{
     if (p.elevatorTravel) return;
     const wasCalling=lift.calling, oldY=y;
@@ -221,7 +236,7 @@ export function createElevatorV2(T,R,physics,scene,expanded=false,prepareModel) 
     const atDoor=expanded ? Math.abs(p.z-lift.z)<1.03 && p.x>lift.shaft.minX-.65 && p.x<lift.x+.15 :
       Math.abs(p.x-lift.x)<.77 && Math.abs(p.z-(lift.z-1.36))<.65;
     const open=!lift.calling && (dwell>0 || atDoor && Math.abs(p.y-y)<.45);
-    const step=motion?.matches?1:dt/.22;
+    const step=motion?.matches?1:dt/rideTime.open;
     const oldGround=ground, oldUpper=upper;
     ground=Math.max(0,Math.min(1,ground+(open&&y===0?step:-step)));
     upper=Math.max(0,Math.min(1,upper+(open&&y===lift.upper?step:-step)));

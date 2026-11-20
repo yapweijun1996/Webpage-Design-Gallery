@@ -54,7 +54,7 @@ class Part:
         bpy.context.collection.objects.link(obj)
         return obj
 
-def materials(sheets):
+def material(sheets):
     maps = {}
     for name in ("base","emission","surface"):
         image = bpy.data.images.load(str(sheets / (name+".png")))
@@ -62,29 +62,23 @@ def materials(sheets):
             image.colorspace_settings.name = "Non-Color"
         image.pack()
         maps[name] = image
-    result = []
-    for is_door in (False, True):
-        mat = bpy.data.materials.new("LiftSteelGlass" if is_door else "LiftFinishes")
-        mat.use_nodes = True
-        mat.use_backface_culling = True
-        nodes, links = mat.node_tree.nodes, mat.node_tree.links
-        bsdf = nodes.get("Principled BSDF")
-        tex = {}
-        for key,image in maps.items():
-            tex[key] = nodes.new("ShaderNodeTexImage")
-            tex[key].image = image
-        links.new(tex["base"].outputs["Color"],bsdf.inputs["Base Color"])
-        if is_door:
-            links.new(tex["base"].outputs["Alpha"],bsdf.inputs["Alpha"])
-            mat.surface_render_method = "BLENDED"
-        links.new(tex["emission"].outputs["Color"],bsdf.inputs["Emission Color"])
-        bsdf.inputs["Emission Strength"].default_value = 1.65
-        split = nodes.new("ShaderNodeSeparateColor")
-        links.new(tex["surface"].outputs["Color"],split.inputs["Color"])
-        links.new(split.outputs["Green"],bsdf.inputs["Roughness"])
-        links.new(split.outputs["Blue"],bsdf.inputs["Metallic"])
-        result.append(mat)
-    return result
+    mat = bpy.data.materials.new("LiftFinishes")
+    mat.use_nodes = True
+    mat.use_backface_culling = True
+    nodes, links = mat.node_tree.nodes, mat.node_tree.links
+    bsdf = nodes.get("Principled BSDF")
+    tex = {}
+    for key,image in maps.items():
+        tex[key] = nodes.new("ShaderNodeTexImage")
+        tex[key].image = image
+    links.new(tex["base"].outputs["Color"],bsdf.inputs["Base Color"])
+    links.new(tex["emission"].outputs["Color"],bsdf.inputs["Emission Color"])
+    bsdf.inputs["Emission Strength"].default_value = 1.65
+    split = nodes.new("ShaderNodeSeparateColor")
+    links.new(tex["surface"].outputs["Color"],split.inputs["Color"])
+    links.new(split.outputs["Green"],bsdf.inputs["Roughness"])
+    links.new(split.outputs["Blue"],bsdf.inputs["Metallic"])
+    return mat
 
 def planter(p,side,lod):
     x,z = side*1.86,.46
@@ -110,7 +104,7 @@ def planter(p,side,lod):
             p.face(face,"darkleaf" if i%3==0 else "leaf")
             p.face(tuple(reversed(face)),"darkleaf")
 
-def build(tier, mats):
+def build(tier, finish):
     lod=TIERS.index(tier)
     portal,trim,wood,lamps,plants,sign,floor,panel,car,door = [
         Part(name) for name in ("Portal","GoldTrim","Pilasters","Sconces","Planters","ElevatorSign",
@@ -165,7 +159,7 @@ def build(tier, mats):
     car.box(0,1.43,-3.48,3.12,2.86,.12,"green")
     for j in range(3):
         x=(j-1)*.94
-        car.box(x,1.64,-3.392,.89,1.94,.034,"mirror")
+        car.box(x,1.64,-3.392,.92,1.94,.034,"mirror")
         car.box(x,.45,-3.392,.89,.40,.034,"wood")
     for side in (-1,1):
         car.box(side*1.54,1.43,-1.95,.10,2.86,3.08,"green")
@@ -186,10 +180,11 @@ def build(tier, mats):
     # Both leaves share this mesh, in local coordinates at their closed centres.
     for x in (-.468,.468):
         door.box(x,1.44,0,.067,2.88,.084,"steel")
+        door.rect(x*1.045,1.44,.043,.021,2.88,"black")
     for y,h in ((.088,.168),(1.06,.042),(2.81,.14)):
         door.box(0,y,0,.882,h,.082,"steel")
-    door.rect(0,1.457,0,.882,2.58,"glass")
-    door.face([(.441,.167,-.001),(-.441,.167,-.001),(-.441,2.747,-.001),(.441,2.747,-.001)],"glass")
+    door.rect(0,1.457,0,.882,2.58,"satin")
+    door.face([(.441,.167,-.001),(-.441,.167,-.001),(-.441,2.747,-.001),(.441,2.747,-.001)],"satin")
     if lod:
         for x in (-.432,.432):
             door.box(x,1.459,.034,.012,2.57,.018,"brass")
@@ -197,8 +192,8 @@ def build(tier, mats):
         for x in (-.466,.466):
             door.box(x,1.44,.048,.015,2.83,.012,"mirror")
     for part in (portal,trim,wood,lamps,plants,sign,floor,panel,car):
-        part.make(mats[0])
-    left=door.make(mats[1])
+        part.make(finish)
+    left=door.make(finish)
     left.location.x=-.505
     right=left.copy()
     right.name="DoorRight"
@@ -236,8 +231,8 @@ def main():
     OUTPUT.mkdir(parents=True,exist_ok=True)
     for tier in TIERS:
         bpy.ops.wm.read_factory_settings(use_empty=True)
-        mats=materials(options.sheets)
-        build(tier,mats)
+        finish=material(options.sheets)
+        build(tier,finish)
         if options.source and tier=="detailed":
             options.source.parent.mkdir(parents=True,exist_ok=True)
             bpy.ops.wm.save_as_mainfile(filepath=str(options.source),compress=True)

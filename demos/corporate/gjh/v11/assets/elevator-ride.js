@@ -1,6 +1,6 @@
 // Fixed-step choreography in seconds. Kinematic positions and collider
 // ownership continue to come from the existing player and stop controllers.
-export const rideTime = Object.freeze({open:.22, board:.55, close:.78, arrive:1.36, reopen:1.58, exit:1.84});
+export const rideTime = Object.freeze({open:.22, board:.55, close:.78, arrive:1.36, reopen:1.58, exit:1.84, cycle:5});
 export function easedInterval(time,start,end) {
   const t=Math.max(0,Math.min(1,(time-start)/(end-start)));
   return t*t*(3-2*t);

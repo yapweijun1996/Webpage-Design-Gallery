@@ -392,6 +392,7 @@ const testAPI = testEnabled ? {
   testShopActions: () => shopActionsLoad ?? null,
   testShopState: id => interactions?.shopState(id),
   testProps: () => world?.interactables.physicsProps?.sample(),
+  testSceneNames(pattern){const re=new RegExp(pattern,'i'),out=[];world?.scene.traverse(o=>{if(re.test(o.name||''))out.push({n:o.name,type:o.type,vis:o.visible,kids:o.children.length,p:o.parent?.name||''})});return out.slice(0,80)},
   testTramRouteLength: () => tramRoute.length,
   testTramState: () => player?.tramState,
   testTramCarVisible() {
@@ -867,7 +868,6 @@ function fallback(message, {terminal = true, error} = {}) {
 function rideElevator(options) {
   if (!ready || !elevator) return {reason:'The elevator is unavailable right now. Please try again.'};
   world.prepareUpperFurniture();
-  void elevator.kit?.select(quality.state?.tier ?? 'low');
   manual = false;
   player.setInput(null);
   const result = player.useElevator(elevator, floorChime, options);
@@ -1228,7 +1228,8 @@ async function initialize() {
   }
   if (liftEnabled) {
     const {createElevatorV2} = await elevatorTask;
-    elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel);
+    const tier = quality.state?.tier ?? quality.resolve(innerWidth).tier;
+    elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel, tier);
     world.prepareUpperLevel();
     if(mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {mallTheme.destroy();mallTheme=null;ui.configureMallTheme(null);}
     world.interactables.push(...elevator.interactables);
