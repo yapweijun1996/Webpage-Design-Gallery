@@ -151,9 +151,18 @@ def walk(page, tier):
     page.locator("#arrival-walk").click()
     page.wait_for_function("performance.now() >= earlyProbe.loadAt + 1500")
     enter_now = page.locator("#loader-enter-now")
-    enter_now.wait_for(state="visible", timeout=90000)
+    page.wait_for_function("window.__mallFailure || !document.getElementById('loader-enter-now').hidden",
+                           timeout=90000)
+    failure = page.evaluate("window.__mallFailure")
+    if failure:
+        print(json.dumps({"tier": tier, "failure": failure}), flush=True)
+        return False
     enter_now.click(force=True)
-    page.wait_for_function("earlyProbe.start && window.__sceneReady", timeout=90000)
+    page.wait_for_function("window.__mallFailure || (earlyProbe.start && window.__sceneReady)", timeout=90000)
+    failure = page.evaluate("window.__mallFailure")
+    if failure:
+        print(json.dumps({"tier": tier, "failure": failure}), flush=True)
+        return False
     page.locator("#scene").focus()
     page.evaluate(STEER, {"route": ROUTE, "target": TARGET})
     page.keyboard.down("w")

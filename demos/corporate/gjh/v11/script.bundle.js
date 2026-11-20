@@ -7517,9 +7517,9 @@ function resume() {
     frame = requestAnimationFrame(animate);
   }
 }
-function fallback(message, terminal = true) {
+function fallback(message, { terminal = true, error } = {}) {
   if (terminal)
-    window.mallLoader?.fail(message);
+    window.mallLoader?.fail(message, error);
   if (terminal) {
     fatal = true;
     graphicsStatus = "failed";
@@ -7736,7 +7736,7 @@ canvas.addEventListener("webglcontextlost", (event) => {
   elevator?.interrupt?.();
   if (!fatal)
     graphicsStatus = "lost";
-  fallback(fatal ? "The 3D mall is unavailable. All stores and verified products remain available in list view. Reload the page to retry 3D." : "The 3D graphics context was interrupted. All stores and verified products remain available in list view. You can reload to retry, or wait for graphics recovery.", false);
+  fallback(fatal ? "The 3D mall is unavailable. All stores and verified products remain available in list view. Reload the page to retry 3D." : "The 3D graphics context was interrupted. All stores and verified products remain available in list view. You can reload to retry, or wait for graphics recovery.", { terminal: false });
 });
 canvas.addEventListener("webglcontextrestored", () => {
   window.mallLoader?.context(false);
@@ -7850,8 +7850,8 @@ function validateRestoration() {
     resume();
     mallTheme?.restore();
     scheduleThemeMidnight();
-  } catch {
-    fallback("The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.");
+  } catch (error) {
+    fallback("The 3D mall could not recover its graphics. All stores and verified products remain available below. Reload the page to retry 3D.", { error });
   }
 }
 function waitForParseSlice(signal) {
@@ -7934,8 +7934,8 @@ async function initialize() {
     const [rapier, bytes] = await physicsTask;
     R = rapier.default;
     await R.init(bytes);
-  } catch {
-    fallback("The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.");
+  } catch (error) {
+    fallback("The WebAssembly physics engine could not start. Walking is unavailable; all stores and verified products are available in list view.", { error });
     return;
   }
   physics = new R.World({ x: 0, y: -24, z: 0 });
@@ -8256,8 +8256,7 @@ async function initialize() {
 }
 if (document.body.dataset.entryMode !== "directory")
   initialize().catch((error) => {
-    console.error("3D mall initialization failed:", error);
-    fallback("The 3D mall could not load. All stores and verified products remain available in the accessible list below.");
+    fallback("The 3D mall could not load. All stores and verified products remain available in the accessible list below.", { error });
   });
 window.addEventListener("pagehide", (event) => {
   if (event.persisted) {

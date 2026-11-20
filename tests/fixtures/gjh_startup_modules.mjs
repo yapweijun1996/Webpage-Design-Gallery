@@ -1,14 +1,6 @@
 // Supply a small scene and the hardware boundaries. Keep the loader, generated
 // entry bundle, its bundled UI and the transfer implementations under test.
 const stubs = {
-  '/vendor/rapier.mjs': `
-    export default {
-      async init(bytes) {
-        if (!(bytes instanceof Uint8Array) || bytes.length !== 3082103) throw Error('Expected Rapier bytes');
-      },
-      World: class { step() {} }
-    };
-  `,
   '/vendor/three.module.min.js': `
     export * from './three.module.min.js?real';
     export class PMREMGenerator {

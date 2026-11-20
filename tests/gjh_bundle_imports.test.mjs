@@ -10,6 +10,11 @@ const bundles = ['script.bundle.js', ...readdirSync(new URL('assets/', root))
   .filter(name => name.endsWith('.bundle.js')).map(name => `assets/${name}`)];
 const lazyConsumers = [...bundles, 'assets/loader.js', 'assets/npcs.js', 'assets/tram-car.js',
   'assets/original-tin.js', 'assets/interiors/config.js', 'assets/newmoon-detail-preview.js'];
+const startupExports = {
+  'assets/audio.js': ['mallAudio.subscribe', 'mallAudio.prepareForLoader'],
+  'assets/startup-physics.js': ['startPhysics', 'physicsBytes:number'],
+  'assets/startup-asset-pack.js': ['startStartupPack', 'releaseStartupAssetPack', 'startupPackBytes:number'],
+};
 const lazyExports = {
   'assets/brand-wall.js': ['addBrandWallAtlas'],
   'assets/carry-bag.js': ['createCarryBag'],
@@ -112,7 +117,8 @@ if (process.execArgv.includes('--expose-internals')) {
   assert.deepEqual([...inlinePaths].sort(), Object.keys(inlineExports).sort());
 
   globalThis.location = new URL('https://mall.test/');
-  const contracts = [...Object.entries(lazyExports), ...Object.values(inlineExports).map(([path, ...keys]) => [path, keys])];
+  const contracts = [...Object.entries({...startupExports, ...lazyExports}),
+    ...Object.values(inlineExports).map(([path, ...keys]) => [path, keys])];
   for (const [path, keys] of contracts) {
     if (!keys.length) continue;
     const module = await import(new URL(path, root));

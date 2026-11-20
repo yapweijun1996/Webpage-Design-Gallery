@@ -7,7 +7,10 @@ import {fileURLToPath} from 'node:url';
 
 const root = new URL('../demos/corporate/gjh/v11/', import.meta.url);
 
-async function runStartup() {
+async function runStartup({missingMusicControl = false} = {}) {
+  const markup = await readFile(new URL('index.html', root), 'utf8');
+  const ids = new Set([...markup.matchAll(/\sid="([^"]+)"/g)].map(([, id]) => id));
+  if (missingMusicControl) ids.delete('mall-music');
   const noop = () => {};
   const gl = {isContextLost: () => false, fenceSync: () => null, getExtension: () => null};
   class Element extends EventTarget {
@@ -50,6 +53,11 @@ async function runStartup() {
     getContext() { return gl; }
   }
   const document = new Element();
+  const mixer = [...markup.matchAll(/\sdata-audio-bus="([^"]+)"/g)].map(([, audioBus]) => {
+    const input = new Element();
+    input.dataset.audioBus = audioBus;
+    return input;
+  });
   const steps = ['physics', 'scene', 'models', 'frame', 'warm'].map(stage => {
     const step = new Element();
     step.dataset.stage = stage;
@@ -57,6 +65,7 @@ async function runStartup() {
   });
   document.querySelectorAll = selector => {
     if (selector === '.app-loader-steps li') return steps;
+    if (selector === '[data-audio-bus]') return mixer;
     if (selector === '.hud-objective-dots i') return Array.from({length: 4}, () => new Element());
     if (selector === '[data-teleport]') return ['newmoon', 'mili', 'gogo'].map(teleport => {
       const button = new Element();
@@ -66,7 +75,7 @@ async function runStartup() {
     return [];
   };
   document.querySelector('.list-summary').querySelectorAll = () => [new Element(), new Element()];
-  document.getElementById = id => id === 'walk-preloads' ? null : document.querySelector('#' + id);
+  document.getElementById = id => ids.has(id) && id !== 'walk-preloads' ? document.querySelector('#' + id) : null;
   document.createElement = () => new Element();
   document.createElementNS = document.createElement;
   document.importNode = node => node;
@@ -100,7 +109,7 @@ async function runStartup() {
       return new Response(bytes);
     },
   });
-  Object.assign(window, {innerWidth, innerHeight, devicePixelRatio: 1, matchMedia});
+  Object.assign(window, {innerWidth, innerHeight, devicePixelRatio: 1, matchMedia, performance});
   if (!globalThis.navigator) globalThis.navigator = {userAgent: '', platform: ''};
   // The test has no HTML preload template. The loader itself drives the
   // walk route, both streamed downloads and the real generated bundle import.
@@ -112,9 +121,11 @@ async function runStartup() {
   assert.match(document.getElementById('loader-count').textContent, /^0\.0 of \d+\.\d MB$/);
   const enterNow = document.getElementById('loader-enter-now');
   const overlay = document.getElementById('app-loader');
-  for (let turn = 0; turn < 1000 && !window.mallLoader.ready; turn++) {
+  for (let turn = 0; turn < 1000; turn++) {
     const state = window.mallLoader.snapshot();
-    assert.equal(state.failed, false);
+    if (state.failed && missingMusicControl) break;
+    assert.equal(state.failed, false, JSON.stringify(window.__mallFailure ?? state.message));
+    if (state.ready) break;
     if (state.stage === 'warm' && !window.mallLoader.skipSignal.aborted) {
       assert.equal(enterNow.hidden, false);
       assert.equal(overlay.hidden, false);
@@ -130,6 +141,17 @@ async function runStartup() {
     await delay(5);
   }
   const state = window.mallLoader.snapshot();
+  if (missingMusicControl) {
+    assert.equal(state.failed, 'The 3D mall could not start. Retry or browse the store directory.');
+    assert.equal(state.completed, 0);
+    assert.equal(window.__mall, undefined);
+    assert.equal(window.__mallFailure?.stage, 'module');
+    assert.match(window.__mallFailure.message, /null/);
+    assert.match(window.__mallFailure.stack, /script\.bundle\.js/);
+    assert.equal(document.getElementById('loader-retry').hidden, false);
+    return;
+  }
+  assert.equal(window.__mallFailure, undefined);
   assert.equal(state.ready, true, state.message);
   assert.equal(window.mallLoader.skipSignal.reason, 'enter-now');
   assert.equal(enterNow.hidden, true);
@@ -137,6 +159,12 @@ async function runStartup() {
   assert.equal(overlay.hidden, true);
   assert.equal(window.__sceneReady, true);
   assert.equal(window.__mall?.ready, true);
+  assert.deepEqual(mixer.map(input => [input.dataset.audioBus, input.value]),
+    [['music', 26], ['effects', 65], ['ambience', 30]]);
+  const speaker = document.getElementById('mall-speaker');
+  assert.equal(speaker.getAttribute('aria-pressed'), 'false');
+  speaker.dispatchEvent(new Event('click'));
+  assert.equal(speaker.getAttribute('aria-pressed'), 'true');
   assert.equal(state.message, 'The mall is ready.');
   assert.deepEqual(state.downloads, [downloadedBytes, downloadedBytes]);
   assert.equal(document.getElementById('loader-count').textContent, '5 / 5');
@@ -146,16 +174,25 @@ async function runStartup() {
 }
 
 if (process.argv.includes('--startup-fixture')) {
-  await runStartup();
+  await runStartup({missingMusicControl: process.argv.includes('--missing-music-control')});
 } else {
-  test('the walk loader streams assets and runs the generated bundle to ready in Node', () => {
+  function runFixture(...args) {
     const env = {...process.env};
     delete env.NODE_TEST_CONTEXT;
     const fixture = new URL('fixtures/gjh_startup_modules.mjs', import.meta.url);
     const result = spawnSync(process.execPath, [
-      '--experimental-loader', fileURLToPath(fixture), fileURLToPath(import.meta.url), '--startup-fixture'
-    ], {env, encoding: 'utf8', timeout: 10_000});
+      '--experimental-loader', fileURLToPath(fixture), fileURLToPath(import.meta.url), '--startup-fixture', ...args
+    ], {env, encoding: 'utf8', timeout: 20_000});
     assert.ifError(result.error);
-    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    return result.stderr;
+  }
+
+  test('the walk loader streams assets and runs the generated bundle to ready in Node', () => {
+    runFixture();
+  });
+
+  test('a startup module exception surfaces its original error and leaves Retry available', () => {
+    assert.match(runFixture('--missing-music-control'), /3D mall startup failed at module TypeError/);
   });
 }

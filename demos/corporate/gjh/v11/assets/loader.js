@@ -30,7 +30,7 @@ export function loaderLabels(state, language) {
   };
 }
 
-export function createLoaderState(onChange = () => {}) {
+export function createLoaderState(onChange = () => {}, onFailure = () => {}) {
   let completed = 0, hidden = false, contextLost = false, failed = false, dismissed = false, immediate = false;
   const skip = new AbortController();
   let downloads = null;
@@ -55,7 +55,13 @@ export function createLoaderState(onChange = () => {}) {
     download(value) { downloads = value; return notify(); },
     visibility(value) { hidden = Boolean(value); return notify(); },
     context(value) { contextLost = Boolean(value); return notify(); },
-    fail(message) { if (completed < stages.length) failed = message; return notify(); },
+    fail(message, error = new Error(message), stage = stages[completed] ?? 'graphics') {
+      if (!failed) {
+        onFailure(stage, error);
+        if (completed < stages.length) failed = message;
+      }
+      return notify();
+    },
     dismiss() { dismissed = true; skip.abort('directory'); return notify(); }
   };
 }
@@ -160,6 +166,11 @@ if (typeof document !== 'undefined') {
       clearTimeout(fadeTimer);
       overlay.classList.remove('is-fading');
     }
+  }, (stage, error) => {
+    const message = error?.message ?? String(error);
+    const stack = error?.stack ?? new Error(message).stack;
+    window.__mallFailure = {stage, message, stack};
+    console.error(`3D mall startup failed at ${stage}`, error, stack);
   });
   state.visibility(document.hidden);
   motionLabel();
@@ -309,8 +320,8 @@ if (typeof document !== 'undefined') {
       if (mode === 'directory') directoryMounted = true;
       if (entryMode === 'directory' && (document.activeElement === document.body || document.activeElement === target))
         target.focus({preventScroll:true});
-    }).catch(() => {
-      state.fail('The 3D mall could not start. Retry or browse the store directory.');
+    }).catch(error => {
+      state.fail('The 3D mall could not start. Retry or browse the store directory.', error, 'module');
       if (overlay.hidden) window.dispatchEvent(new Event('mall-loader-failed'));
     });
   }

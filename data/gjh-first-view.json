@@ -13,6 +13,7 @@
     "vendor/rapier.mjs"
   ],
   "criticalFiles": [
+    "assets/concourse-marble.webp",
     "assets/dom-projection.js",
     "assets/gogo-brand-cover.webp",
     "assets/mili-brand-cover.webp",
@@ -84,7 +85,6 @@
     }
   ],
   "walkImagePreloads": [
-    "assets/concourse-marble.webp",
     "assets/gogo-logo.jpg",
     "assets/mili-logo.jpg",
     "assets/new-moon-logo.svg",

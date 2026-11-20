@@ -60,14 +60,16 @@ def measure(browser, url, profile, tier, device, timeout):
         page.goto(url, wait_until='domcontentloaded', timeout=timeout)
         if not url.endswith(('#experience', '#scene')):
             page.locator('#arrival-walk').click(timeout=timeout)
-        page.wait_for_function('window.__loadProbe.enter || window.__loadProbe.playable || window.mallLoader?.snapshot().failed',
+        page.wait_for_function('window.__mallFailure || window.mallLoader?.snapshot().failed || '
+                               'window.__loadProbe.enter || window.__loadProbe.playable',
                                timeout=timeout)
         if page.locator('#loader-enter-now').is_visible():
             page.locator('#loader-enter-now').evaluate('(button) => button.click()')
-        page.wait_for_function('window.__loadProbe.playable || window.mallLoader?.snapshot().failed', timeout=timeout)
+        page.wait_for_function('window.__mallFailure || window.mallLoader?.snapshot().failed || window.__loadProbe.playable',
+                               timeout=timeout)
         result = page.evaluate("""() => ({
             ...window.__loadProbe, origin:performance.timeOrigin / 1000,
-            failure:window.mallLoader?.snapshot().failed || undefined,
+            failure:window.__mallFailure ?? (window.mallLoader?.snapshot().failed || undefined),
             protocol:performance.getEntriesByType('navigation')[0]?.nextHopProtocol,
         })""")
 
