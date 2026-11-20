@@ -40,3 +40,8 @@ See `CHANNEL_SPEC.md`. Agents post by appending JSON lines to `chat/NN.jsonl`; o
 - A worker inlined a 190 KB image as a `data:` URI because the server did not serve the V11 mall images. Mount asset routes (`/gjh/`, `/gjh-v11/`) before the run; the linter now warns on inline data URIs over 20 KB.
 - The exporter only knew `/gjh/` and still reported "Images missing: 0" for an unresolved `/gjh-v11/` path. It now has a prefix table and reports unresolved root-relative references.
 - A server restarted with `--keep` loaded the default template team instead of the project's team. The project now stores `agents.json` and the server reloads it.
+
+## UI workers and the live viewer (2026-11-21)
+- The viewer serves `swarm/ui/*` straight from disk, so a worker that rewrites `channel.js` before `channel.css` leaves the owner looking at a half-updated panel (an unsized SVG became a 329px black circle). Have UI workers build in a staging directory (for example `swarm/ui/staging/<name>/`) and let the manager copy the files into place after verification.
+- Pi (pi.dev) accepts the prompt on stdin (`pi -p --mode json ...`), so both runners can share one spawn path; pi has no filesystem sandbox, so the server compares the project tree before and after each pi turn (`lib/guard.js`).
+- Agent effort `low` is no longer allowed by the owner; the allowlist is GPT 6.2 Sol and GPT 6.1 Terra with `medium` or `xhigh`.

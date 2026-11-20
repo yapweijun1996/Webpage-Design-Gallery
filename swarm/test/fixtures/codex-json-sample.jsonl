@@ -1,0 +1,9 @@
+{"type":"thread.started","thread_id":"01a1f994-6cc1-76a3-b241-061df73611fe"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Codex is ignoring 3 unrecognized configuration settings. Check for typos or deprecated settings.\n  user (/Users/x/.codex/config.toml): `agent` is ignored.\n  user (/Users/x/.codex/config.toml): `file_system` is ignored."}}
+{"type":"item.completed","item":{"id":"item_1","type":"error","message":"Codex is ignoring 3 unrecognized configuration settings. Check for typos or deprecated settings.\n  user (/Users/x/.codex/config.toml): `agent` is ignored.\n  user (/Users/x/.codex/config.toml): `file_system` is ignored."}}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"I’ll create `hello.txt` containing `hi`."}}
+{"type":"item.started","item":{"id":"item_3","type":"command_execution","command":"/bin/zsh -lc \"printf '%s' hi > hello.txt\"","aggregated_output":"","exit_code":null,"status":"in_progress"}}
+{"type":"item.completed","item":{"id":"item_3","type":"command_execution","command":"/bin/zsh -lc \"printf '%s' hi > hello.txt\"","aggregated_output":"","exit_code":0,"status":"completed"}}
+{"type":"item.completed","item":{"id":"item_4","type":"agent_message","text":"done"}}
+{"type":"turn.completed","usage":{"input_tokens":59352,"cached_input_tokens":29568,"cache_write_input_tokens":0,"output_tokens":65,"reasoning_output_tokens":0}}

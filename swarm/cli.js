@@ -34,7 +34,15 @@ const USAGE = `Usage: node swarm/cli.js <command> [--port 8800]
   chat "text" [--from claude|owner]
   tail [--since N] [--limit N]
   watch
-  wait [--idle 20] [--timeout 600]  (seconds)`;
+  wait [--idle 20] [--timeout 600]  (seconds)
+  sync                                      copy staff handbook, design system and the new contract into the current project (keeps sections)
+  settings                                  show runner, model, effort and the allowlist
+  settings set runner codex|pi
+  settings set model gpt-6.2-sol|gpt-6.1-terra
+  settings set effort medium|xhigh
+  settings set lang zh-Hans|en
+  settings set parallel <1-16>
+  settings test [codex|pi]                  readiness check, no model call`;
 
 async function request(path, options) {
   try {
@@ -199,6 +207,34 @@ async function waitForIdle(idleMs, timeoutMs) {
       if (flag('say')) { const sent = await api('/api/chat', 'POST', { from: 'claude', text: flag('say') }); console.log(`sent #${sent.id}`); }
       console.log(`channel ready. Watch live: ${BASE}/`);
     }
+  } else if (cmd === 'sync') {
+    await api('/api/sync', 'POST', {});
+    console.log('project synced: staff, design-system and CONTRACT.md updated, sections untouched');
+  } else if (cmd === 'settings') {
+    const sub = args[1];
+    const view = await api('/api/settings');
+    if (!sub) {
+      const d = view.settings.defaults;
+      console.log(`runner=${d.runner} model=${d.model} effort=${d.effort} parallel=${view.settings.concurrency.maxParallel} timeout=${view.settings.timeouts.turnMinutes}min language=${view.settings.channel.language}`);
+      console.log(`allowed: runners=${Object.keys(view.allowlist.runners).join(',')} models=${Object.entries(view.allowlist.models).map(([id, label]) => `${id} (${label})`).join(', ')} efforts=${view.allowlist.efforts.join(',')}`);
+      for (const [name, st] of Object.entries(view.status || {})) console.log(`${name}: ${st.ok ? 'ready' : 'not ready'} ${st.version || ''} ${st.detail || ''}`.trim());
+    } else if (sub === 'set') {
+      const [key, value] = [args[2], args[3]];
+      const next = JSON.parse(JSON.stringify(view.settings));
+      if (key === 'runner') next.defaults.runner = value;
+      else if (key === 'model') next.defaults.model = value;
+      else if (key === 'effort') next.defaults.effort = value;
+      else if (key === 'lang') next.channel.language = value;
+      else if (key === 'parallel') next.concurrency.maxParallel = Number(value);
+      else throw new Error('settings set: key must be runner, model, effort, lang or parallel');
+      try { await api('/api/settings', 'PUT', next); console.log(`saved: ${key}=${value} (applies from the next agent turn)`); }
+      catch (e) { throw new Error(`rejected by the server: ${e.message}`); }
+    } else if (sub === 'test') {
+      const runner = args[2] || view.settings.defaults.runner;
+      const r = await api('/api/settings/test', 'POST', { runner });
+      console.log(`${runner}: ${r.ok ? 'ready' : 'NOT ready'} version=${r.version || '?'} login=${r.login || '?'} ${r.detail || ''} (${r.ms || 0} ms)`);
+      if (!r.ok) process.exitCode = 2;
+    } else throw new Error('settings: expected set or test');
   } else if (cmd === 'status') {
     const s = await api('/api/state');
     console.log(`phase=${s.phase} round=${s.round}/${s.rounds} model=${s.model}`);

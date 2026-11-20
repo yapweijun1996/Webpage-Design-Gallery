@@ -35,7 +35,7 @@ function fixture(t) {
       fs.writeFileSync(file, content);
     },
     run(...args) {
-      const result = spawnSync(process.execPath, [exporter, ...args], { cwd: os.tmpdir(), encoding: 'utf8' });
+      const result = spawnSync(process.execPath, [exporter, '--no-pwa', ...args], { cwd: os.tmpdir(), encoding: 'utf8' });
       assert.ifError(result.error);
       return result;
     },
@@ -71,6 +71,42 @@ test('exports sections in order with inline styles, defaults and byte counts', t
   assert.ok(result.stdout.includes(`02-hero.html: ${Buffer.byteLength(hero)} HTML bytes, ${Buffer.byteLength(heroCss)} CSS bytes`));
   assert.ok(result.stdout.includes(`(${Buffer.byteLength(page)} bytes)`));
   assert.match(result.stdout, /Images copied: 0.*\nImages missing: 0/);
+});
+
+test('--no-pwa preserves the previous page bytes and writes no PWA files', t => {
+  const f = fixture(t);
+  f.section('01-hero', '<h1>Legacy {{VERSION}}</h1>', '.s-01 { color: blue; }');
+  const result = f.run(f.project, '--title', 'A & B <C>');
+  assert.equal(result.status, 0, result.stderr);
+  assert.deepEqual(fs.readdirSync(f.dist), ['index.html']);
+  assert.equal(fs.readFileSync(path.join(f.dist, 'index.html'), 'utf8'), `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A &amp; B &lt;C&gt;</title>
+<style>
+${TOKENS}
+</style>
+<style>
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--dc-bg);color:var(--dc-ink);font-family:var(--dc-font);font-size:var(--dc-text-base);line-height:var(--dc-leading)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+</style>
+<style>
+.s-01 { color: blue; }
+</style>
+</head>
+<body>
+<main>
+<h1>Legacy {{VERSION}}</h1>
+</main>
+</body>
+</html>
+`);
 });
 
 test('copies and rewrites image URLs, preserving descriptors and unique flat names', t => {

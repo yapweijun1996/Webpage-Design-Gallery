@@ -13,8 +13,8 @@ Independent design concept for Goh Joo Hin Pte Ltd (GJH), Singapore. Multi-brand
 ## Direction (owner-approved bar)
 Dark, cinematic, calm. ONE dominant full-bleed image per screen, huge tight type, minimal copy, one idea per viewport. Colour comes from the photography. Rejected: card-grid templates, collages of many small images, equal-weight tile grids. Mobile first: the owner tests on iPhone 393x844, so every section must be excellent at 393px, then scale up.
 
-## Palette and type (this brief overrides the "no hard-coded colors" rule for brand colors only)
-Near-black ink #0f1115 and #171a21 for dark bands, ivory text #f4efe4, ONE action accent GJH red #d9261c (hover #b81f16). Declare any color you need as a custom property at the top of your own `.s-NN` rule (for example `--gjh-red`). Spacing, radius, type scale and motion still come from `--dc-*` tokens. System font stack only (the tokens already provide it); large display type may use `clamp()`.
+## Palette and type (SDS)
+The page uses the SDS brand theme `forest-gold` (deep forest green surfaces, ivory text, warm gold primary actions; the owner's stated preference) with `gjh-classic` (ink and GJH red #d9261c) as the previous look. Both are defined in `design-system/tokens.json`; a section never contains a colour literal, it uses `var(--sds-color-*)`. Spacing, radius, type scale and motion also come from `--sds-*` tokens. System font stack only.
 
 ## Imagery (real library, read only)
 Images are served at `/gjh/...`:

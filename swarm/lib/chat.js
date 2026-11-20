@@ -151,6 +151,10 @@ function createChat({ projectDir, agents, emit }) {
         } catch (error) {
           if (!(error instanceof SyntaxError)) throw error;
         }
+        // An assign line may carry only `task` (agents often omit `text`); use the task as the visible text.
+        if (candidate && typeof candidate.text !== 'string' && typeof candidate.task === 'string' && candidate.task.trim()) {
+          candidate = { ...candidate, text: candidate.task };
+        }
         const message = typeof candidate?.text === 'string'
           ? { ...candidate, from: agentId }
           : { from: 'system', kind: 'system', text: `Malformed outbox line from ${names.get(agentId)} (${agentId})` };

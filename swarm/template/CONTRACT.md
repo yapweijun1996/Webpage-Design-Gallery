@@ -1,6 +1,6 @@
 # Swarm contract: ONE page (home), 10 agents, live
 
-A viewer stacks 10 section fragments into ONE page and hot-swaps each one whenever its files change. A manager (Claude) is watching live and may leave you instructions. Read `brief.md` for the business. Design tokens are in `tokens.css` (read only, `--dc-*` variables). Never hard-code colors, sizes, spacing, radii or durations.
+A viewer stacks 10 section fragments into ONE page and hot-swaps each one whenever its files change. A manager (Claude) is watching live and may leave you instructions. Read `brief.md` for the business. Design tokens and components come from the Swarm Design System (SDS, folder `design-system/`, rules in `design-system/STANDARD.md`, API in `design-system/SDS_SPEC.md`). Never hard-code colors, font sizes, spacing, radii, durations or easings.
 
 ## Ownership (strict)
 - You own exactly: `sections/NN-name.html`, `sections/NN-name.css`, and `notes/NN.md`. Touch nothing else. Never edit another agent's files. You may READ everything, including `inbox/NN.md` (manager messages for you).
@@ -8,6 +8,11 @@ A viewer stacks 10 section fragments into ONE page and hot-swaps each one whenev
 - All CSS must be scoped under `.s-NN`. Assume `*{box-sizing:border-box}` and page background `var(--dc-bg)` are already set. Sections are full width; center content with `max-width: var(--dc-container)`.
 - Anchors: every section root has id `NN-section` (see `sections/` file names, e.g. `#02-hero`). Link to other sections only with those ids.
 - Placeholder imagery: inline SVG or CSS shapes only. Mark all sample data as "sample".
+
+## SDS rules (checked by `node swarm/tools/check-sections.js <projectDir>`)
+- Style only with `var(--sds-*)` tokens and `.sds-*` components. Colours come from the active theme (light, dark, auto) and brand (`forest-gold`, `gjh-classic`); a section never defines a colour. Need a new token? Say so in the channel, do not invent a literal.
+- Every visible text node carries `data-i18n="<section>.<element>"` (English text stays inline). Reveal-on-scroll uses `data-reveal="fade|rise|scale"`. No `<script>`, no `!important`, no text in CSS.
+- Your position, playbook and skill packs: read `staff/playbooks/<your-position>.md` and the handbook packs listed in your prompt (`staff/handbook/*.md`). Tool kit: `staff/tools.md`.
 
 ## Quality
 Semantic HTML, one h1 on the whole page (only in hero), then h2 per section, visible focus (`--dc-focus`), tap targets >= `--dc-tap`, AA contrast in light and dark, reduced motion respected, works at 320px (mobile first), no horizontal scroll.

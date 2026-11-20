@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const net = require('node:net');
+const os = require('node:os');
 const path = require('node:path');
 const { setTimeout: delay } = require('node:timers/promises');
 
@@ -129,7 +130,9 @@ async function runScenario(failingAgent = '') {
       ...process.env,
       SWARM_PORT: String(port),
       SWARM_PROJECT: 'e2e-test',
+      SWARM_TEST: '1', // test mode: lets SWARM_CODEX and SWARM_SETTINGS override the real binary and settings file
       SWARM_CODEX: path.join(__dirname, 'fake-codex.js'),
+      SWARM_SETTINGS: path.join(os.tmpdir(), `swarm-e2e-settings-${process.pid}.json`), // missing file = defaults (codex)
       FAKE_FAIL_AGENT: failingAgent
     },
     stdio: ['ignore', 'pipe', 'pipe']

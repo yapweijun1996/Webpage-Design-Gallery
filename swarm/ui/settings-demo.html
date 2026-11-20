@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Runner settings demo</title>
+  <link rel="stylesheet" href="./settings.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      block-size: 100dvh;
+      margin: 0;
+      background: #0f1115;
+      color: #e8eaf0;
+      font: 13px/1.4 system-ui, sans-serif;
+      color-scheme: dark;
+    }
+    .demo-tools {
+      display: grid;
+      justify-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-block-end: 1px solid #262b36;
+    }
+    .demo-widths { display: flex; flex-wrap: wrap; gap: 6px; }
+    .demo-widths button {
+      min-block-size: 40px;
+      padding: 0 10px;
+      border: 1px solid #3a4356;
+      border-radius: 7px;
+      background: #171a21;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+    }
+    .demo-widths button[aria-pressed="true"] {
+      border-color: #8ab4ff;
+      background: #23324b;
+    }
+    .demo-widths button:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
+    .demo-tools p { margin: 0; color: #aab0bf; text-align: center; font-size: 12px; }
+    #settings-demo {
+      --settings-max-height: 100%;
+      justify-self: center;
+      inline-size: min(100%, var(--demo-width, 329px));
+      min-block-size: 0;
+      box-shadow: 0 0 0 1px #262b36;
+    }
+  </style>
+  <script defer src="./settings.js"></script>
+</head>
+<body>
+  <header class="demo-tools">
+    <div class="demo-widths" role="group" aria-label="Preview width">
+      <button type="button" aria-pressed="true" data-width="329">329 px</button>
+      <button type="button" aria-pressed="false" data-width="393">393 px</button>
+      <button type="button" aria-pressed="false" data-width="360">360 px</button>
+    </div>
+    <p>Save Terra with xhigh to see a field error. Test pi twice to see both failure states.</p>
+  </header>
+  <main id="settings-demo" aria-label="Runner settings demo"></main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const root = document.getElementById('settings-demo');
+      const widths = document.querySelectorAll('[data-width]');
+      for (const button of widths) {
+        button.addEventListener('click', () => {
+          root.style.setProperty('--demo-width', button.dataset.width + 'px');
+          for (const choice of widths) choice.setAttribute('aria-pressed', String(choice === button));
+        });
+      }
+
+      const allowlist = {
+        runners: { codex: 'codex', pi: 'pi' },
+        models: { 'gpt-6.2-sol': 'GPT 6.2 Sol', 'gpt-6.1-terra': 'GPT 6.1 Terra' },
+        efforts: ['medium', 'xhigh']
+      };
+      let settings = {
+        version: 1,
+        defaults: { runner: 'codex', model: 'gpt-6.2-sol', effort: 'medium' },
+        roles: { manager: {}, workers: {} },
+        concurrency: { maxParallel: 12 },
+        timeouts: { turnMinutes: 20 },
+        channel: { language: 'zh-Hans', standingRules: '' }
+      };
+      const status = {};
+      let piTests = 0;
+
+      window.SwarmSettings.init({
+        root,
+        async load() {
+          const resolved = {
+            manager: { ...settings.defaults, ...settings.roles.manager },
+            worker: { ...settings.defaults, ...settings.roles.workers }
+          };
+          return structuredClone({ settings, allowlist, resolved, status });
+        },
+        async save(draft) {
+          if (draft.defaults.model === 'gpt-6.1-terra' && draft.defaults.effort === 'xhigh') {
+            return {
+              ok: false,
+              errors: [{ path: 'defaults.effort', message: 'For this demo, choose Medium with GPT 6.1 Terra.' }]
+            };
+          }
+          settings = structuredClone(draft);
+          return { ok: true, settings: structuredClone(settings) };
+        },
+        async test({ runner }) {
+          await new Promise(resolve => setTimeout(resolve, 800));
+          let result;
+          if (runner === 'codex') {
+            result = { ok: true, version: 'codex-cli 1.0.0', login: true, detail: '', ms: 800 };
+          } else if (++piTests % 2 === 1) {
+            result = { ok: false, version: 'pi 1.0.0', login: false, detail: '', ms: 800 };
+          } else {
+            result = { ok: false, version: null, login: null, detail: 'pi binary not found.', ms: 800 };
+          }
+          status[runner] = result;
+          return result;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

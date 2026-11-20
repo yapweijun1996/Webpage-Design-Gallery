@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "lang": "zh-Hans",
+    "status": "machine-draft",
+    "generated": "2026-11-20T16:41:59.818Z"
+  },
+  "messages": {
+    "sds.brand": "品牌",
+    "sds.language": "语言",
+    "sds.loader": "正在加载…",
+    "sds.offline.body": "请重新连接互联网后再试。",
+    "sds.offline.status": "你已离线",
+    "sds.offline.title": "离线",
+    "sds.skip": "跳转到主要内容",
+    "sds.theme": "主题",
+    "sds.theme.auto": "自动",
+    "sds.theme.dark": "深色",
+    "sds.theme.light": "浅色",
+    "sds.update.available": "有可用更新",
+    "sds.update.check": "检查更新",
+    "sds.update.now": "立即更新",
+    "sds.version": "版本"
+  }
+}

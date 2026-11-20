@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Swarm channel demo</title>
   <link rel="stylesheet" href="./channel.css">
   <style>
@@ -12,56 +12,70 @@
       display: grid;
       place-items: center;
       min-height: 100vh;
-      padding: 0;
       background: #0f1115;
       color: #e8eaf0;
-      font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+      color-scheme: dark;
+      font: 13px/1.45 system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
     }
     main {
       display: grid;
       grid-template-rows: auto minmax(0, 1fr);
-      width: min(100%, 480px);
+      width: min(100%, var(--demo-width, 329px));
+      min-width: 0;
       height: 100vh;
       height: 100dvh;
-      overflow: hidden;
-      border: 1px solid #262b36;
+      outline: 1px solid #262b36;
       background: #13161c;
     }
     header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 4px 12px;
-      padding: 10px 12px;
+      display: grid;
+      gap: 6px;
+      padding: 9px 8px;
       border-bottom: 1px solid #262b36;
       background: #171a21;
     }
-    h1 { flex: 1; margin: 0; font-size: 14px; }
-    #replay {
-      min-height: 32px;
-      padding: 4px 10px;
+    h1 { margin: 0; font-size: 14px; font-weight: 675; }
+    .controls { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+    .controls label { display: flex; align-items: center; gap: 4px; color: #aab2c4; }
+    .controls :is(button, select) {
+      min-height: 28px;
+      padding: 3px 7px;
       border: 1px solid #333a49;
-      border-radius: 8px;
+      border-radius: 6px;
       background: #1f2430;
-      color: inherit;
+      color: #e8eaf0;
       font: inherit;
+      font-size: 12px;
       cursor: pointer;
     }
-    #replay:hover { background: #2a3040; }
-    #replay:disabled { opacity: .55; cursor: default; }
-    #replay:focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
-    #selected { flex-basis: 100%; color: #aab0bf; font-size: 12px; }
+    .controls :is(button, select):hover { background: #2a3040; }
+    .controls button:disabled { opacity: .6; cursor: default; }
+    .controls :focus-visible { outline: 2px solid #8ab4ff; outline-offset: 2px; }
+    #selected { color: #aab2c4; font-size: 12px; }
     #channel { min-width: 0; min-height: 0; }
-    @media (min-width: 520px) {
-      main { height: min(780px, 94vh); border-radius: 12px; }
+    @media (min-width: 760px) {
+      main { height: min(860px, 94vh); border-radius: 10px; overflow: clip; }
+    }
+    @media (max-width: 760px), (pointer: coarse) {
+      .controls :is(button, select) { min-height: 40px; }
     }
   </style>
 </head>
 <body>
   <main>
     <header>
-      <h1>Swarm · team channel</h1>
-      <button type="button" id="replay">Replay conversation</button>
+      <h1>Swarm channel demo</h1>
+      <div class="controls">
+        <label>Width
+          <select id="width">
+            <option value="329">329 px</option>
+            <option value="393">393 px</option>
+            <option value="360">360 px</option>
+          </select>
+        </label>
+        <button type="button" id="load">Load 1,500</button>
+        <button type="button" id="replay">Replay</button>
+      </div>
       <div id="selected" role="status" hidden></div>
     </header>
     <div id="channel"></div>
@@ -80,48 +94,43 @@
         section, color: colors[i]
       }));
       const agents = [{ id: '00', name: 'Manager', section: 'Direction', color: '#f4f4f5' }].concat(workers);
+      const longNote = ('窄屏测试记录。' + ('先确认手机上的导航、焦点顺序和按钮间距。打开菜单后，页面标题仍应清楚可读。' +
+        '长段落会在窄屏上换行，中文标点应尽量留在上一行。完成测试后，请记录复现步骤和截图。').repeat(10)).slice(0, 600);
       const script = [
-        ['owner', 'msg', 'The launch page needs a final pass at phone width. @Manager, can you coordinate the handoffs?', ['00']],
+        ['owner', 'msg', '@Manager 请协调最后一轮检查。优先看手机上的导航、版面和键盘操作。', ['00']],
         ['system', 'system', 'Triage started'],
-        ['00', 'msg', 'Let’s keep the launch story and make the small-screen path easier to follow.'],
-        ['00', 'assign', 'Own the first screen.', ['01', '02'], 'Align the hero headline with the compact navigation.'],
-        ['00', 'assign', 'Review the path from proof to pricing.', ['03', '04', '05'], 'Keep feature and testimonial cards readable and carry the primary action into pricing.'],
-        ['00', 'assign', 'Check the rest of the page and report back.', ['06', '07', '08', '09', '10'], 'Verify disclosure labels, contact, footer links, keyboard focus, and narrow widths.'],
+        ['00', 'msg', '先核对 329 px 侧栏和两个手机宽度。'],
+        ['00', 'assign', 'First-screen review.', ['03'], '校对首屏标题，确认菜单打开时依然可读。'],
+        ['00', 'assign', 'Check keyboard paths.', ['02', '09'], 'Verify menu focus and the return path.'],
         ['system', 'system', 'Discuss started'],
-        ['01', 'msg', '@2 I’ll keep the headline to two lines if the nav stays compact.', ['02']],
-        ['02', 'msg', '@hero Agreed. I’ll keep the menu button visible at 330px.', ['01']],
-        ['03', 'msg', '@Agent 4 I’ll match your card spacing.', ['04']],
-        ['04', 'msg', '@agent5 I’ll keep the two shortest quotes ahead of pricing.', ['05']],
-        ['05', 'msg', '@FAQ Please keep billing questions next to the plans.', ['06']],
-        ['06', 'msg', 'Billing questions can open with the keyboard.'],
-        ['07', 'msg', '@08 The contact link will point to the form heading.', ['08']],
-        ['08', 'msg', 'I’ll preserve the same link order in the footer.'],
-        ['09', 'msg', '@10 Flag any clipped focus rings during your width check.', ['10']],
-        ['10', 'msg', 'I’ll test 330px and 393px with the menu open.'],
+        ['03', 'msg', '@Agent 2 我会先用 360 px 检查标题和首屏留白。', ['02']],
+        ['03', 'msg', '也会留一张 393 px 的图，方便对照。'],
+        ['02', 'msg', '@hero The menu stays visible at 329 px.', ['01']],
+        ['claude', 'msg', 'I’ll review the keyboard path when the three widths are ready.'],
+        ['06', 'msg', 'Wrap check ' + 'LongUnbrokenString'.repeat(22)],
+        ['09', 'msg', 'Keyboard checklist\n1. Open\n2. Tab\n3. Next\n4. Back\n5. Escape\n6. Return\n7. Repeat'],
+        ...Array.from({ length: 40 }, () => ['system', 'system', 'Malformed outbox line']),
         ['system', 'system', 'Decide started'],
-        ['00', 'decision', '@everyone Use the compact nav, maintain equal card spacing, and keep pricing beside its billing FAQ.', workers.map(agent => agent.id)],
+        ['00', 'decision', '@everyone Keep the compact menu. Verify focus return and capture all three widths.', workers.map(agent => agent.id)],
         ['system', 'system', 'Work started'],
-        ['01', 'done', 'Tightened the first-screen copy.'],
-        ['02', 'done', 'Kept the menu button visible at 330px.'],
-        ['03', 'done', 'Aligned the feature cards with the quote grid.'],
-        ['04', 'done', 'Moved the two shortest quotes before pricing.'],
-        ['05', 'done', 'Kept the primary action visible for every plan.'],
-        ['06', 'done', 'Moved billing questions under the plans.'],
-        ['07', 'done', 'Linked contact to the form heading.'],
-        ['08', 'done', 'Aligned footer and header link order.'],
-        ['09', 'done', 'Verified keyboard order and focus visibility.'],
-        ['10', 'done', 'Checked the open menu at 330px and 393px.'],
+        ['03', 'msg', longNote],
+        ['03', 'msg', '下一步我会把截图发给 @Manager。', ['00']],
+        ['02', 'done', 'Verified the menu at 329 px and 393 px.', ['owner']],
+        ['09', 'done', '键盘焦点已验证，按 Esc 后回到菜单按钮。', ['claude']],
         ['system', 'system', 'Summary started'],
-        ['00', 'msg', 'The page is ready for the launch review. The team verified the menu and keyboard path at both phone widths.']
+        ['00', 'msg', 'Ready for launch review. @everyone Thanks for checking all three widths.', workers.map(agent => agent.id)]
       ];
-      const start = new Date().setHours(9, 30, 0, 0);
+      const start = Date.now() - script.length * 18000;
       const history = script.map(([from, kind, text, to = [], task], i) => ({
-        id: i + 1, ts: start + i * 40000, from, kind, text, to, task
+        id: i + 1, ts: start + i * 18000, from, kind, text, to, task
       }));
       const channel = window.SwarmChannel;
+      const width = document.getElementById('width');
       const replay = document.getElementById('replay');
+      const load = document.getElementById('load');
       const selected = document.getElementById('selected');
       let id = history.length;
+      let loaded = false;
 
       function post(from, kind, text) {
         channel.add({ id: ++id, ts: Date.now(), from, kind, text, to: [] });
@@ -131,52 +140,82 @@
         agents.forEach(agent => channel.setStatus(agent.id, ids.includes(agent.id) ? 'working · Demo' : 'idle'));
       }
 
+      function lockControls() {
+        replay.disabled = true;
+        load.disabled = true;
+        channel.setBusy(true);
+      }
+
       function finish() {
-        setWorking([]);
         channel.setBusy(false);
+        setWorking([]);
         replay.disabled = false;
+        load.disabled = loaded;
       }
 
       channel.init({
         root: document.getElementById('channel'),
         agents,
         send(text) {
-          replay.disabled = true;
           post('owner', 'msg', text);
-          setWorking(['00']);
-          channel.setBusy(true);
+          lockControls();
+          setWorking(['00', '03', '09']);
           window.setTimeout(() => {
             post('00', 'msg', 'I’ve added your note to the demo conversation.');
             finish();
-          }, 1000);
+          }, 1800);
         },
         onJump(agentId) {
           const agent = agents.find(item => item.id === agentId);
           selected.hidden = false;
-          selected.textContent = agent ? agent.name + ' · ' + agent.section : 'Selected ' + agentId;
+          selected.textContent = agent ? agent.name + ' · ' + agent.section :
+            'Selected ' + (agentId === 'owner' ? 'Owner' : 'Claude');
         }
       });
       channel.setHistory(history);
 
+      function setWidth() {
+        document.querySelector('main').style.setProperty('--demo-width', width.value + 'px');
+      }
+      width.addEventListener('change', setWidth);
+      setWidth();
+
+      load.addEventListener('click', () => {
+        const timestamp = Date.now() - 15000;
+        const updates = [
+          'Checked the narrow layout and saved the result.',
+          '手机宽度已复核，菜单可以用键盘打开。',
+          'Confirmed the follow-up with @Manager.'
+        ];
+        for (let i = 0; i < 1500; i += 1) {
+          channel.add({
+            id: ++id, ts: timestamp + i * 10, from: workers[Math.floor(i / 3) % workers.length].id,
+            kind: i % 17 === 0 ? 'done' : 'msg',
+            text: 'Update ' + (i + 1) + ' · ' + updates[i % updates.length],
+            to: i % updates.length === 2 ? ['00'] : []
+          });
+        }
+        loaded = true;
+        load.disabled = true;
+      });
+
       replay.addEventListener('click', () => {
-        replay.disabled = true;
-        channel.setBusy(true);
+        loaded = false;
+        id = history.length;
+        lockControls();
+        setWorking(['00']);
         channel.setHistory([]);
         let index = 0;
         const timer = window.setInterval(() => {
           const msg = history[index++];
-          if (msg.text === 'Discuss started' || msg.text === 'Work started') {
-            setWorking(workers.map(agent => agent.id));
-          }
-          if (msg.text === 'Triage started' || msg.text === 'Decide started' ||
-              msg.text === 'Summary started') setWorking(['00']);
+          if (msg.text === 'Work started') setWorking(['02', '03', '09']);
           if (msg.kind === 'done') channel.setStatus(msg.from, 'done');
           channel.add(msg);
           if (index === history.length) {
             window.clearInterval(timer);
             finish();
           }
-        }, 400);
+        }, 85);
       });
     }());
   </script>

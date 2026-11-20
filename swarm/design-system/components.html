@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en" data-theme="auto" data-brand="none">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SDS component sheet</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="themes.css">
+  <link rel="stylesheet" href="components.css">
+  <style>
+    [data-component-sheet] {
+      margin: 0;
+      background: var(--sds-color-bg);
+      color: var(--sds-color-text);
+      font: var(--sds-weight-regular) var(--sds-text-base) / var(--sds-leading-body) var(--sds-font-sans);
+    }
+
+    [data-sheet-section] { padding-block: var(--sds-space-8); }
+    [data-sheet-section] :where(h1, h2, h3, p, fieldset) { margin: 0; }
+    [data-sheet-section] h1 { font-size: clamp(var(--sds-text-2xl), 6vw, var(--sds-text-3xl)); }
+    [data-sheet-section] h2 { font-size: var(--sds-text-xl); }
+    [data-sheet-section] h3 { font-size: var(--sds-text-lg); }
+    [data-sheet-section] fieldset { border: 1px solid var(--sds-color-border); }
+    [data-sheet-caption] { color: var(--sds-color-text-muted); }
+    [data-sheet-error] { color: var(--sds-color-danger); background: var(--sds-color-danger-bg); }
+    [data-sheet-pair] > * { min-inline-size: 0; }
+
+    [data-sheet-loading] { display: grid; }
+    [data-sheet-loading] > * { grid-area: 1 / 1; }
+    [data-sheet-loading][aria-busy="true"] > :first-child { visibility: hidden; }
+
+    @media (min-width: 48rem) {
+      [data-sheet-pair] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body id="top" data-component-sheet>
+  <nav class="sds-nav" aria-label="Component sheet" lang="en">
+    <div class="sds-container">
+      <a class="sds-visually-hidden" href="#main">Skip to examples</a>
+      <a class="sds-nav__brand" href="#top">Swarm Design System</a>
+      <details class="sds-nav__menu">
+        <summary>Menu</summary>
+        <ul class="sds-nav__links">
+          <li><a href="#controls">Controls</a></li>
+          <li><a href="#forms">Forms</a></li>
+          <li><a href="#feedback">Feedback</a></li>
+        </ul>
+      </details>
+      <ul class="sds-nav__links">
+        <li><a href="#controls">Controls</a></li>
+        <li><a href="#forms">Forms</a></li>
+        <li><a href="#feedback">Feedback</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main id="main" tabindex="-1">
+    <section class="sds-container sds-stack" data-sheet-section aria-labelledby="sheet-title">
+      <header class="sds-stack" lang="en">
+        <p class="sds-eyebrow">Interface reference</p>
+        <h1 id="sheet-title">SDS component sheet</h1>
+      </header>
+      <div class="sds-prefs" role="group" aria-label="Preview preferences" lang="en">
+        <label>Theme
+          <select data-sds-select="theme">
+            <option value="auto">Auto (system)</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </label>
+        <label>Brand
+          <select data-sds-select="brand">
+            <option value="none">None</option>
+            <option value="forest-gold">Forest Gold</option>
+            <option value="gjh-classic">GJH Classic</option>
+          </select>
+        </label>
+        <label>Language
+          <select data-sds-select="lang">
+            <option value="en" lang="en">English</option>
+            <option value="zh-Hans" lang="zh-Hans">简体中文</option>
+            <option value="ms" lang="ms">Bahasa Melayu</option>
+          </select>
+        </label>
+      </div>
+      <article class="sds-card sds-stack" aria-labelledby="language-preview">
+        <h2 id="language-preview" data-sheet-language="title">Pickup preview</h2>
+        <p data-sheet-language="copy">Check the pickup window and confirm the address before placing your order.</p>
+        <div class="sds-cluster">
+          <a class="sds-btn sds-btn--secondary" href="#forms" data-sheet-language="action">View pickup options</a>
+        </div>
+      </article>
+    </section>
+
+    <section id="controls" class="sds-container sds-stack" data-sheet-section aria-labelledby="controls-title" lang="en">
+      <h2 id="controls-title">Buttons and chips</h2>
+      <div class="sds-card sds-stack">
+        <h3>Button variants</h3>
+        <div class="sds-cluster">
+          <button class="sds-btn" type="button">Default</button>
+          <button class="sds-btn sds-btn--primary" type="button">Primary</button>
+          <button class="sds-btn sds-btn--secondary" type="button">Secondary</button>
+          <button class="sds-btn sds-btn--ghost" type="button">Ghost</button>
+          <button class="sds-btn sds-btn--danger" type="button">Danger</button>
+          <button class="sds-btn sds-btn--secondary sds-btn--sm" type="button">Small</button>
+          <button class="sds-btn sds-btn--primary sds-btn--lg" type="button">Large</button>
+        </div>
+        <h3>Disabled and busy</h3>
+        <div class="sds-cluster">
+          <button class="sds-btn sds-btn--primary" type="button" disabled>Unavailable</button>
+          <button class="sds-btn sds-btn--primary" type="button" aria-busy="true" aria-disabled="true">Saving order</button>
+          <button class="sds-btn sds-btn--secondary" type="button" aria-busy="false" data-sheet-toggle-busy>Toggle busy state</button>
+        </div>
+        <h3>Filter chips</h3>
+        <div class="sds-cluster">
+          <button class="sds-chip" type="button" aria-pressed="false" data-sheet-chip>Delivery</button>
+          <button class="sds-chip sds-chip--selected" type="button" aria-pressed="true" data-sheet-chip>Pickup</button>
+          <button class="sds-chip" type="button" disabled>Preorder</button>
+        </div>
+      </div>
+    </section>
+
+    <figure class="sds-chapter" aria-labelledby="chapter-title" lang="en">
+      <img class="sds-chapter__media" src="../../assets/companies/gjh/landing-concepts/images/001.webp"
+        alt="A hand sets a platter of braised abalone on a reunion table" width="1664" height="936" loading="lazy">
+      <div class="sds-chapter__scrim" aria-hidden="true"></div>
+      <div class="sds-chapter__body">
+        <p class="sds-chapter__eyebrow">Chapter example</p>
+        <h2 class="sds-chapter__title" id="chapter-title">A shared table</h2>
+        <p class="sds-chapter__text">Choose a collection window for the meal, then share the pickup details with your guests.</p>
+        <div class="sds-chapter__actions">
+          <a class="sds-btn sds-btn--primary" href="#forms">Choose a window</a>
+          <a class="sds-btn sds-btn--ghost" href="#cards">Browse examples</a>
+        </div>
+      </div>
+      <figcaption class="sds-chapter__caption">New Moon editorial concept</figcaption>
+    </figure>
+
+    <section id="cards" class="sds-container sds-stack" data-sheet-section aria-labelledby="cards-title" lang="en">
+      <h2 id="cards-title">Cards and scrolling rail</h2>
+      <div class="sds-stack" data-sheet-pair>
+        <article class="sds-card sds-stack">
+          <h3>Long text</h3>
+          <p id="long-copy">Review the saved delivery address and opening hours before choosing a pickup point. Bring your order confirmation and keep the collection window available.</p>
+        </article>
+        <article class="sds-card sds-stack">
+          <h3>40 percent longer text</h3>
+          <p id="expanded-copy">Review the saved delivery address and opening hours before choosing a pickup point. Bring your order confirmation and keep the collection window available. Ask staff about alternate pickup options if your plans shift.</p>
+        </article>
+      </div>
+      <article class="sds-card sds-stack" lang="zh-Hans">
+        <h3>自提须知</h3>
+        <p>请在确认订单前核对自提地点、营业时间与可选时段。如需更改取货时间，请联系门店并提供订单编号。到达后请向工作人员出示订单确认信息。</p>
+      </article>
+      <ul class="sds-rail" tabindex="0" aria-label="Pickup places">
+        <li class="sds-rail__item sds-card sds-stack">
+          <h3>Central</h3>
+          <p><span class="sds-badge">Pickup today</span></p>
+          <a class="sds-btn sds-btn--ghost" href="#forms">Central pickup</a>
+        </li>
+        <li class="sds-rail__item sds-card sds-stack">
+          <h3>North</h3>
+          <p><span class="sds-badge">Pickup tomorrow</span></p>
+          <a class="sds-btn sds-btn--ghost" href="#forms">North pickup</a>
+        </li>
+        <li class="sds-rail__item sds-card sds-stack">
+          <h3>East</h3>
+          <p><span class="sds-badge">Pickup today</span></p>
+          <a class="sds-btn sds-btn--ghost" href="#forms">East pickup</a>
+        </li>
+        <li class="sds-rail__item sds-card sds-stack">
+          <h3>West</h3>
+          <p><span class="sds-badge">Pickup tomorrow</span></p>
+          <a class="sds-btn sds-btn--ghost" href="#forms">West pickup</a>
+        </li>
+        <li class="sds-rail__item sds-card sds-stack">
+          <h3>South</h3>
+          <p><span class="sds-badge">Pickup today</span></p>
+          <a class="sds-btn sds-btn--ghost" href="#forms">South pickup</a>
+        </li>
+      </ul>
+      <div class="sds-stack" data-sheet-pair>
+        <article class="sds-card sds-stack">
+          <h3>No reservations</h3>
+          <p>Choose a pickup window to create your first reservation.</p>
+        </article>
+        <article class="sds-card sds-stack">
+          <h3>Reservations unavailable</h3>
+          <p data-sheet-error>The pickup list could not be loaded. Try loading the form again.</p>
+          <a class="sds-btn sds-btn--secondary" href="#forms">Open the pickup form</a>
+        </article>
+      </div>
+    </section>
+
+    <section id="forms" class="sds-container sds-stack" data-sheet-section aria-labelledby="forms-title" lang="en">
+      <h2 id="forms-title">Fields, radio chips, and disclosure</h2>
+      <div class="sds-card sds-stack" data-sheet-pair>
+        <div class="sds-field">
+          <label for="pickup-name">Pickup name</label>
+          <input id="pickup-name" type="text" autocomplete="name" aria-describedby="pickup-help">
+          <p id="pickup-help" data-sheet-caption>Use the name on your order confirmation.</p>
+        </div>
+        <div class="sds-field">
+          <label for="pickup-email">Email address</label>
+          <input id="pickup-email" type="email" autocomplete="email" value="pickup" aria-invalid="true" aria-describedby="email-error" required>
+          <p id="email-error" data-sheet-error>Enter an email address that includes an @ sign.</p>
+        </div>
+        <div class="sds-field">
+          <label for="pickup-reference">Confirmation reference</label>
+          <input id="pickup-reference" type="text" value="Pending" disabled>
+        </div>
+        <div class="sds-field">
+          <label for="pickup-notes">Pickup notes</label>
+          <textarea id="pickup-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <fieldset class="sds-cluster sds-card">
+        <legend>Pickup window</legend>
+        <label class="sds-radio-chip"><input type="radio" name="window" value="am" checked> Morning</label>
+        <label class="sds-radio-chip"><input type="radio" name="window" value="pm"> Afternoon</label>
+        <label class="sds-radio-chip"><input type="radio" name="window" value="eve" disabled> Evening (full)</label>
+      </fieldset>
+      <details class="sds-disclosure" open>
+        <summary>What do I bring to pickup?</summary>
+        <p>Bring your order confirmation.</p>
+      </details>
+      <details class="sds-disclosure">
+        <summary>Can someone collect my order?</summary>
+        <p>Yes. Share your confirmation and the pickup window with them.</p>
+      </details>
+      <details class="sds-disclosure">
+        <summary aria-disabled="true">Holiday pickup hours (unavailable)</summary>
+        <p>Holiday pickup hours will be published when confirmed.</p>
+      </details>
+    </section>
+
+    <section id="feedback" class="sds-container sds-stack" data-sheet-section aria-labelledby="feedback-title" lang="en">
+      <h2 id="feedback-title">Loading and feedback</h2>
+      <div class="sds-stack" data-sheet-pair>
+        <article class="sds-card sds-stack">
+          <h3>Skeleton</h3>
+          <div id="pickup-loading" data-sheet-loading aria-busy="true">
+            <p>Central pickup is available from 10 am to 2 pm.</p>
+            <div class="sds-skeleton" aria-hidden="true"></div>
+          </div>
+          <button class="sds-btn sds-btn--secondary" type="button" data-sheet-toggle-load aria-controls="pickup-loading">Show loaded content</button>
+        </article>
+        <article class="sds-card sds-stack">
+          <h3>Spinner and progress</h3>
+          <p class="sds-cluster" role="status"><span class="sds-spinner" aria-hidden="true"></span> Checking availability</p>
+          <label>Order processed (60 percent)
+            <progress class="sds-progress" max="100" value="60">60 percent</progress>
+          </label>
+          <label>Checking pickup windows
+            <progress class="sds-progress"></progress>
+          </label>
+        </article>
+      </div>
+      <div class="sds-card sds-stack">
+        <h3>Update toast</h3>
+        <div class="sds-cluster">
+          <button class="sds-btn sds-btn--secondary" type="button" data-sheet-show-toast aria-controls="update-toast">Show update toast</button>
+          <p role="status" data-sheet-toast-status></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="sds-container sds-stack" data-sheet-section aria-labelledby="reveal-title" lang="en">
+      <h2 id="reveal-title">Reveal on scroll</h2>
+      <p class="sds-card" data-reveal="fade" data-reveal-delay="1">Fade</p>
+      <p class="sds-card" data-reveal="rise" data-reveal-delay="2">Rise</p>
+      <p class="sds-card" data-reveal="scale" data-reveal-delay="3">Scale</p>
+      <p class="sds-card" data-reveal="rise" data-reveal-delay="4" data-revealed>Rise with the runtime fallback hook</p>
+    </section>
+  </main>
+
+  <footer class="sds-footer" lang="en">
+    <div class="sds-container sds-cluster">
+      <span>Swarm Design System</span>
+      <a href="#top">Back to top</a>
+    </div>
+  </footer>
+  <div class="sds-actionbar" role="group" aria-label="Quick links" lang="en">
+    <a class="sds-btn sds-btn--secondary" href="#forms">Forms</a>
+    <a class="sds-btn sds-btn--primary" href="#feedback">Feedback</a>
+  </div>
+  <aside class="sds-toast" id="update-toast" aria-labelledby="update-title" lang="en" hidden>
+    <strong id="update-title">Update available</strong>
+    <div class="sds-cluster">
+      <button class="sds-btn sds-btn--primary" type="button" data-sheet-update>Update now</button>
+      <button class="sds-btn sds-btn--ghost" type="button" data-sheet-dismiss>Dismiss</button>
+    </div>
+  </aside>
+
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const translations = {
+        en: ['Pickup preview', 'Check the pickup window and confirm the address before placing your order.', 'View pickup options'],
+        'zh-Hans': ['自提预览', '下单前，请检查自提时段并确认取货地址。', '查看自提选项'],
+        ms: ['Pratonton ambilan', 'Semak waktu ambilan dan sahkan alamat sebelum membuat pesanan.', 'Lihat pilihan ambilan'],
+      };
+      const labels = ['title', 'copy', 'action'].map(key => document.querySelector(`[data-sheet-language="${key}"]`));
+      root.addEventListener('change', event => {
+        const { sdsSelect } = event.target.dataset;
+        const { value } = event.target;
+        if (sdsSelect === 'lang' && Object.prototype.hasOwnProperty.call(translations, value)) {
+          root.lang = value;
+          labels.forEach((label, index) => { label.textContent = translations[value][index]; });
+        }
+        if (sdsSelect === 'theme' && ['auto', 'light', 'dark'].includes(value)) root.dataset.theme = value;
+        if (sdsSelect === 'brand' && ['none', 'forest-gold', 'gjh-classic'].includes(value)) root.dataset.brand = value;
+      });
+
+      const find = selector => document.querySelector(selector);
+      const toast = find('#update-toast');
+      const showToast = find('[data-sheet-show-toast]');
+      const toastStatus = find('[data-sheet-toast-status]');
+      const load = find('[data-sheet-loading]');
+      root.addEventListener('click', event => {
+        const control = event.target.closest('button, summary');
+        if (!control) return;
+        if (control.getAttribute('aria-disabled') === 'true') {
+          event.preventDefault();
+        } else if (control.matches('[data-sheet-chip]')) {
+          const selected = control.getAttribute('aria-pressed') !== 'true';
+          control.setAttribute('aria-pressed', String(selected));
+          control.classList.toggle('sds-chip--selected', selected);
+        } else if (control.matches('[data-sheet-toggle-busy]')) {
+          control.setAttribute('aria-busy', String(control.getAttribute('aria-busy') !== 'true'));
+        } else if (control.matches('[data-sheet-toggle-load]')) {
+          const loading = load.getAttribute('aria-busy') !== 'true';
+          load.setAttribute('aria-busy', String(loading));
+          load.lastElementChild.hidden = !loading;
+          control.textContent = loading ? 'Show loaded content' : 'Show skeleton';
+        } else if (control === showToast) {
+          toastStatus.textContent = '';
+          toast.hidden = false;
+          find('[data-sheet-update]').focus();
+        } else if (control.matches('[data-sheet-update], [data-sheet-dismiss]')) {
+          toast.hidden = true;
+          toastStatus.textContent = control.matches('[data-sheet-update]') ? 'Example update accepted.' : 'Update dismissed.';
+          showToast.focus();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

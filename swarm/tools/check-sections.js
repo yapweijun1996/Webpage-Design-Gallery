@@ -1,17 +1,60 @@
 #!/usr/bin/env node
 'use strict';
 
+// First enrollment seeds a project; css-scope stays alongside unscoped-selector; spacing covers margins, padding and gaps.
+const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 
 const DEFAULT_PROJECT = path.resolve(__dirname, '../projects/home');
+const REPO_ROOT = path.resolve(__dirname, '../..');
+const BASELINE_FILE = path.join(REPO_ROOT, 'swarm/design-system/ssot-baseline.json');
 const VOID_TAGS = new Set('area base br col embed hr img input link meta param source track wbr'.split(' '));
 const ROOT_TAGS = new Set(['section', 'header', 'footer']);
 const RAW_TAGS = new Set('script style textarea title xmp iframe noembed noframes'.split(' '));
+const NON_TEXT_TAGS = new Set(['defs', 'desc', 'head', 'template']);
 const SVG_URL_ATTRS = new Set('clip-path cursor fill filter marker marker-end marker-mid marker-start mask stroke'.split(' '));
 const CSS_GROUPS = new Set(['media', 'supports', 'layer', 'container', 'starting-style']);
 const CSS_LITERALS = /\/\*[\s\S]*?(?:\*\/|$)|"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|\\(?:[a-f\d]{1,6}(?:\r\n|[ \t\r\n\f])?|[\s\S])/gi;
 const CSS_ESCAPE = /\\(?:([a-f\d]{1,6})(?:\r\n|[ \t\r\n\f])?|(\r\n|[\s\S]))/gi;
+const CSS_NAME_ESCAPE = String.raw`\\(?:[a-f\d]{1,6}(?:\r\n|[ \t\r\n\f])?|[^\r\n\f])`;
+const CSS_NAME_START = '(?:[a-z_\\u0080-\\uffff]|' + CSS_NAME_ESCAPE + ')';
+const CSS_NAME_CHAR = '(?:[\\w\\u0080-\\uffff-]|' + CSS_NAME_ESCAPE + ')';
+const CSS_IDENTIFIER = '(?:-?' + CSS_NAME_START + '|--)' + CSS_NAME_CHAR + '*';
+const CSS_NUMBER = '[+-]?(?:\\d*\\.\\d+|\\d+)(?:e[+-]?\\d+)?';
+const CSS_VALUE_TOKEN = new RegExp([
+  String.raw`"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'`,
+  CSS_NUMBER + '(?:%|' + CSS_IDENTIFIER + ')?',
+  '(' + CSS_IDENTIFIER + ')(\\()?',
+  '#' + CSS_NAME_CHAR + '+',
+  '\\S',
+].join('|'), 'gi');
+const CSS_MATH = new Set(['calc', 'clamp', 'max', 'min', '(']);
+const CSS_MATH_TERMS = new Set(['0', '100%', '1px', '+', '-', '*', '/', ',']);
+const SDS_VARIABLE = /^--sds-[\w-]+$/;
+const COLOR_FUNCTION = /^(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|device-cmyk)$/;
+const COLOR_KEYWORDS = new Set(('aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond blue '
+  + 'blueviolet brown burlywood cadetblue chartreuse chocolate coral cornflowerblue cornsilk crimson cyan '
+  + 'darkblue darkcyan darkgoldenrod darkgray darkgreen darkgrey darkkhaki darkmagenta darkolivegreen '
+  + 'darkorange darkorchid darkred darksalmon darkseagreen darkslateblue darkslategray darkslategrey darkturquoise '
+  + 'darkviolet deeppink deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite forestgreen fuchsia '
+  + 'gainsboro ghostwhite gold goldenrod gray green greenyellow grey honeydew hotpink indianred indigo ivory '
+  + 'khaki lavender lavenderblush lawngreen lemonchiffon lightblue lightcoral lightcyan lightgoldenrodyellow '
+  + 'lightgray lightgreen lightgrey lightpink lightsalmon lightseagreen lightskyblue lightslategray lightslategrey '
+  + 'lightsteelblue lightyellow lime limegreen linen magenta maroon mediumaquamarine mediumblue mediumorchid '
+  + 'mediumpurple mediumseagreen mediumslateblue mediumspringgreen mediumturquoise mediumvioletred midnightblue '
+  + 'mintcream mistyrose moccasin navajowhite navy oldlace olive olivedrab orange orangered orchid palegoldenrod '
+  + 'palegreen paleturquoise palevioletred papayawhip peachpuff peru pink plum powderblue purple rebeccapurple '
+  + 'red rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell sienna silver skyblue slateblue '
+  + 'slategray slategrey snow springgreen steelblue tan teal thistle tomato turquoise violet wheat white '
+  + 'whitesmoke yellow yellowgreen').split(' '));
+const COLOR_PROPERTY = /(?:^|-)color$|^(?:background(?:-image)?|border(?:-(?:top|right|bottom|left|block|inline)(?:-(?:start|end))?)?|outline|column-rule|text-decoration|text-emphasis|-webkit-text-stroke|fill|stroke|caret|box-shadow|text-shadow|(?:backdrop-)?filter)$/;
+const COLOR_ARGUMENTS = /(?:^|-)gradient$|^(?:drop-shadow|color-mix|light-dark|contrast-color|image)$/;
+const SPACING_PROPERTY = /^(?:(?:scroll-)?(?:margin|padding)(?:-[\w-]+)?|(?:grid-)?(?:row-|column-)?gap|border-spacing)$/;
+const FONT_LENGTH = new RegExp('^' + CSS_NUMBER + '(?:px|rem|em)$', 'i');
+const SPACING_LENGTH = new RegExp('^' + CSS_NUMBER + '(?:[a-z]+|%)?$', 'i');
+const DURATION = new RegExp('^' + CSS_NUMBER + 'm?s$', 'i');
+const Z_INDEX = new RegExp('^' + CSS_NUMBER + '$', 'i');
 const HTML_NAMES = { amp: '&', apos: "'", colon: ':', gt: '>', lt: '<', newline: '\n', num: '#', quot: '"', sol: '/', tab: '\t' };
 const HTML_SPACE = /[ \t\r\n\f]+/;
 
@@ -52,13 +95,25 @@ function parseHtml(source) {
   const markup = /<!--[\s\S]*?(?:-->|$)|<!\[CDATA\[[\s\S]*?(?:\]\]>|$)|<![a-z][^>]*>|<(\/?)([a-z][^\s/'"<>]*)((?:"[^"]*"|'[^']*'|[^'"<>])*)>/gi;
   const roots = [];
   const elements = [];
+  const textNodes = [];
   const stack = [];
   let outside = false;
   let end = 0;
 
+  function readText(stop) {
+    const parent = stack.at(-1);
+    const text = decodeHtml(source.slice(end, stop));
+    if (!parent) {
+      if (text.trim()) outside = true;
+    } else if (!parent.hiddenText && !parent.translatedText) {
+      const content = text.replace(/&(?:nbsp|ensp|emsp|thinsp|zwnj|zwj|lrm|rlm|copy|reg|trade|middot|bull|[lrud]arr);/gi, ' ');
+      if (/[\p{L}\p{N}]/u.test(content)) textNodes.push({ tag: parent.tag, text: content.trim() });
+    }
+  }
+
   for (let match; (match = markup.exec(source));) {
     const [token, close, name, attrSource] = match;
-    if (!stack.length && decodeHtml(source.slice(end, match.index)).trim()) outside = true;
+    readText(match.index);
     end = markup.lastIndex;
     if (!name) {
       if (!stack.length && !token.startsWith('<!--')) outside = true;
@@ -80,7 +135,12 @@ function parseHtml(source) {
     const parent = stack.at(-1);
     const foreign = tagName === 'svg' || tagName === 'math'
       || (parent?.foreign && parent.tag !== 'foreignobject');
-    const element = { tag: tagName, attrs: htmlAttributes(attrSource), foreign, closed: false };
+    const attrs = htmlAttributes(attrSource);
+    const element = {
+      tag: tagName, attrs, foreign, closed: false,
+      hiddenText: parent?.hiddenText || attrs.has('hidden') || NON_TEXT_TAGS.has(tagName) || RAW_TAGS.has(tagName),
+      translatedText: parent?.translatedText || Boolean(attrs.get('data-i18n')?.trim()),
+    };
     elements.push(element);
     if (!parent) roots.push(element);
     if (VOID_TAGS.has(tagName) || (foreign && /\/\s*$/.test(attrSource))) continue;
@@ -95,8 +155,8 @@ function parseHtml(source) {
       end = markup.lastIndex;
     }
   }
-  if (!stack.length && decodeHtml(source.slice(end)).trim()) outside = true;
-  return { roots, elements, outside };
+  readText(source.length);
+  return { roots, elements, outside, textNodes };
 }
 
 function cssSource(source) {
@@ -241,7 +301,7 @@ function isTapSelector({ target }, controls) {
 
 function cssUrls({ text, code }) {
   const urls = [];
-  for (const match of code.matchAll(/[\w\u0080-\uffff-]+\(/g)) {
+  for (const match of code.matchAll(/(?<![\w\u0080-\uffff-])[\w\u0080-\uffff-]+\(/g)) {
     const start = match.index + match[0].length;
     if (decodeCss(text.slice(match.index, start - 1)).toLowerCase() !== 'url') continue;
     const end = code.indexOf(')', start);
@@ -289,14 +349,121 @@ function mediaPixels(size, unit) {
 function declaration(statement) {
   const colon = statement.code.indexOf(':');
   if (colon < 1) return null;
-  const property = statement.code.slice(0, colon).trim().toLowerCase();
+  const property = decodeCss(statement.text.slice(0, colon)).trim().toLowerCase();
   if (!/^(?:--)?[\w-]+$/.test(property)) return null;
   const value = statement.code.slice(colon + 1).trim();
-  return { property, value: value.replace(/\s*!\s*important$/i, '').trim(), important: /!\s*important$/i.test(value) };
+  return {
+    property, value: value.replace(/\s*!\s*important$/i, '').trim(),
+    important: /!\s*important$/i.test(value), sourceValue: statement.text.slice(colon + 1),
+  };
+}
+
+function cssValueTerms(value) {
+  const terms = [];
+  const stack = [terms];
+  for (const [source, identifier, opening] of value.matchAll(CSS_VALUE_TOKEN)) {
+    if (source === ')' && stack.length > 1) {
+      stack.pop();
+    } else if (opening || source === '(') {
+      const name = opening ? decodeCss(identifier).toLowerCase() : '(';
+      const args = [];
+      stack.at(-1).push({ name, args });
+      stack.push(args);
+    } else {
+      stack.at(-1).push({ token: decodeCss(source) });
+    }
+  }
+  return terms;
+}
+
+function tokenReference(term) {
+  return SDS_VARIABLE.test(term.args[0]?.token ?? '');
+}
+
+function someCssTerm(terms, inspect) {
+  return terms.some(term => term.name !== 'url' && (inspect(term) || (term.args && someCssTerm(term.args, inspect))));
+}
+
+function tokenMath(terms) {
+  return terms.every(term => {
+    if (!term.args) return CSS_MATH_TERMS.has(term.token.toLowerCase());
+    if (term.name === 'var') return tokenReference(term) && tokenMath(term.args.slice(1));
+    return CSS_MATH.has(term.name) && tokenMath(term.args);
+  });
+}
+
+function rawNumericValue(terms, literal) {
+  return terms.some(term => {
+    if (!term.args) return term.token !== '0' && literal.test(term.token);
+    if (term.name === 'url') return false;
+    if (term.name === 'var') return !tokenReference(term) || rawNumericValue(term.args.slice(1), literal);
+    if (CSS_MATH.has(term.name)) return !tokenMath(term.args);
+    return rawNumericValue(term.args, literal);
+  });
+}
+
+function inspectSdsDeclaration({ property, sourceValue }, report) {
+  const terms = cssValueTerms(sourceValue);
+  if (terms.at(-2)?.token === '!' && terms.at(-1)?.token?.toLowerCase() === 'important') {
+    terms.splice(-2);
+    report('error', 'important', 'Remove !important from ' + property + '.');
+  }
+  const custom = property.startsWith('--');
+  const colorProperty = COLOR_PROPERTY.test(property);
+  const colorAlias = custom && /(?:^|[-_])(?:colou?r|bg|ink|scrim)(?:[-_]|$)/.test(property);
+  const rawColor = someCssTerm(terms, term => {
+    const word = term.token?.toLowerCase() ?? '';
+    if (term.name === 'var') {
+      return (colorProperty && !tokenReference(term))
+        || (custom && /^--sds-(?:color-|skeleton-(?:base|shine)$)/.test(term.args[0]?.token ?? ''));
+    }
+    return COLOR_FUNCTION.test(term.name)
+      || /^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/.test(word)
+      || ((colorProperty || custom) && COLOR_KEYWORDS.has(word))
+      || (COLOR_ARGUMENTS.test(term.name)
+        && someCssTerm(term.args, arg => COLOR_KEYWORDS.has(arg.token?.toLowerCase())))
+      || (custom && /^(?:transparent|currentcolor)$/.test(word));
+  });
+  if (colorAlias || rawColor) report('error', 'raw-color', 'Use an SDS color token directly in ' + property + '.');
+
+  const slash = terms.findIndex(term => term.token === '/');
+  const fontTerms = property === 'font' && slash !== -1 ? terms.slice(0, slash) : terms;
+  if (/^font(?:-size)?$/.test(property) && rawNumericValue(fontTerms, FONT_LENGTH)) {
+    report('error', 'raw-font-size', 'Use an SDS font-size token in ' + property + '.');
+  }
+  const durationProperty = /^(?:-webkit-)?(?:animation|transition)(?:-(?:duration|delay))?$/.test(property);
+  if (someCssTerm(terms, term => DURATION.test(term.token))
+    || (durationProperty && rawNumericValue(terms, DURATION))) {
+    report('error', 'raw-duration', 'Use an SDS duration token in ' + property + '.');
+  }
+  const easingProperty = /^(?:-webkit-)?(?:animation|transition)(?:-timing-function)?$/.test(property);
+  if (someCssTerm(terms, term => /^(?:cubic-bezier|steps|linear)$/.test(term.name)
+    || ((easingProperty || custom) && /^(?:ease(?:-in(?:-out)?|-out)?|linear|step-start|step-end)$/.test(term.token?.toLowerCase()))
+    || (property.endsWith('-timing-function') && term.name === 'var' && !tokenReference(term)))) {
+    report('error', 'raw-easing', 'Use an SDS easing token in ' + property + '.');
+  }
+  if (property === 'z-index' && rawNumericValue(terms, Z_INDEX)) {
+    report('error', 'raw-z-index', 'Use an SDS stacking token in z-index.');
+  }
+  if (SPACING_PROPERTY.test(property) && rawNumericValue(terms, SPACING_LENGTH)) {
+    report('warn', 'raw-spacing', 'Use an SDS spacing token in ' + property + '.');
+  }
+}
+
+function inspectSdsDeclarations(statements, report) {
+  for (const statement of statements) {
+    if (statement.children) {
+      inspectSdsDeclarations(statement.children, report);
+    } else {
+      const item = declaration(statement);
+      if (item) inspectSdsDeclaration(item, report);
+    }
+  }
 }
 
 function collectCss(source, report, { scope, inline = false, header = false, controls, palette }) {
   const css = cssSource(source);
+  const statements = cssStatements(css);
   const rules = [];
   for (const url of cssUrls(css)) {
     if (externalUrl(url)) report('error', 'external-resource', 'CSS url() loads an external resource.');
@@ -340,7 +507,16 @@ function collectCss(source, report, { scope, inline = false, header = false, con
       const frame = keyframes && children.every(selector => /^(?:from|to|(?:\d*\.)?\d+%)$/i.test(selector));
       const scoped = !keyframes && facts.every(fact => fact.scoped && !fact.hasRoot);
       if (!scoped && !frame) {
-        report('error', 'css-scope', `Scope every selector in "${statement.text}" to .${scope}.`);
+        const message = `Scope every selector in "${statement.text}" to .${scope}.`;
+        report('error', 'css-scope', message);
+        if (!keyframes) report('error', 'unscoped-selector', message);
+      }
+      if (!keyframes && children.some((selector, index) => {
+        if (facts[index].scoped) return false;
+        const last = selectorParts(selector).at(-1)?.piece ?? '';
+        return /^\.sds-[a-z0-9]+(?:-[a-z0-9]+)*$/.test(last);
+      })) {
+        report('error', 'redefine-sds-base', 'Scope overrides of SDS base classes to .' + scope + '.');
       }
       walk(statement.children, {
         ...context, selectors: frame ? [] : children, scoped, keyframes: false,
@@ -348,9 +524,10 @@ function collectCss(source, report, { scope, inline = false, header = false, con
       });
     }
   }
-  walk(cssStatements(css), {
+  walk(statements, {
     selectors: [], conditions: [], scoped: false, keyframes: false, guarded: false, tap: inline && controls.length > 0,
   });
+  inspectSdsDeclarations(statements, report);
   let important = 0;
   for (const [index, { declarations, selectors, scoped, conditions, guarded, tap }] of rules.entries()) {
     let leadingTokens = true;
@@ -418,6 +595,10 @@ function hasExternalSrcset(value) {
 }
 
 function inspectHtml(html, report, options, sectionIds) {
+  for (const { tag, text } of html.textNodes) {
+    const preview = text.replace(/\s+/g, ' ').slice(0, 60);
+    report('warn', 'no-i18n-text', 'Add a data-i18n key for the text in <' + tag + '> (' + preview + ').');
+  }
   for (const { tag, attrs, css, foreign } of html.elements) {
     if (tag === 'script') report('error', 'script-tag', 'Scripts are forbidden in section fragments.');
     if (/^(?:html|head|body)$/.test(tag)) {
@@ -540,7 +721,83 @@ function checkProject(projectDir = DEFAULT_PROJECT) {
     sections.push({ section: id, htmlBytes: html.bytes, cssBytes: css.bytes, findings: count });
   }
   const errors = findings.filter(finding => finding.severity === 'error').length;
-  return { project, sections, findings, errors, warnings: findings.length - errors };
+  const counts = new Map();
+  for (const { rule } of findings) counts.set(rule, (counts.get(rule) ?? 0) + 1);
+  return {
+    project, sections, findings, errors, warnings: findings.length - errors,
+    counts: Object.fromEntries([...counts.entries()].sort(([a], [b]) => a.localeCompare(b))),
+    baseline: { status: 'not-requested', projectName: path.basename(project), offenders: [] },
+  };
+}
+
+function readBaseline() {
+  let source;
+  try {
+    source = fs.readFileSync(BASELINE_FILE, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') return {};
+    throw error;
+  }
+  const baseline = JSON.parse(source);
+  const isObject = value => value && typeof value === 'object' && !Array.isArray(value);
+  if (!isObject(baseline) || Object.values(baseline).some(counts => !isObject(counts)
+    || Object.values(counts).some(count => !Number.isSafeInteger(count) || count < 0))) {
+    throw new Error('Expected project names mapped to rule counts of zero or greater.');
+  }
+  return baseline;
+}
+
+function checkBaseline(result, update) {
+  const verdict = result.baseline;
+  try {
+    const baseline = readBaseline();
+    const projectName = verdict.projectName;
+    const enrolled = Object.hasOwn(baseline, projectName);
+    const allowed = enrolled ? baseline[projectName] : {};
+    if (!update || enrolled) {
+      verdict.offenders = Object.entries(result.counts).flatMap(([rule, count]) => {
+        const limit = Object.hasOwn(allowed, rule) ? allowed[rule] : 0;
+        return count > limit ? [{ rule, count, baseline: limit }] : [];
+      });
+    }
+    if (verdict.offenders.length) {
+      verdict.status = 'fail';
+      if (update) verdict.message = 'Refusing to raise baseline counts. Resolve the listed increases before updating.';
+      return;
+    }
+    if (update) {
+      if (result.counts['file-read']) throw new Error('Resolve file-read errors before updating the baseline.');
+      const rules = [...new Set([...Object.keys(allowed), ...Object.keys(result.counts)])].sort();
+      const next = Object.fromEntries(rules.map(rule => [rule, Object.hasOwn(result.counts, rule) ? result.counts[rule] : 0]));
+      if (!enrolled || rules.some(rule => next[rule] !== allowed[rule])) {
+        const updated = { ...baseline, [projectName]: next };
+        fs.writeFileSync(BASELINE_FILE, JSON.stringify(updated, null, 2) + '\n');
+        verdict.message = enrolled ? 'Lowered baseline counts.' : 'Recorded initial baseline counts.';
+      } else {
+        verdict.message = 'Baseline counts are current.';
+      }
+    }
+    verdict.status = 'pass';
+  } catch (error) {
+    verdict.status = 'error';
+    verdict.message = 'Cannot ' + (update ? 'update' : 'check') + ' ssot-baseline.json. ' + error.message;
+  }
+}
+
+function runSsotChecks(project) {
+  const checks = [
+    ['swarm/design-system/build.js', ['--check']],
+    ['swarm/tools/i18n-extract.js', [project, '--check']],
+  ];
+  return checks.map(([file, args]) => {
+    const script = path.join(REPO_ROOT, file);
+    if (!fs.existsSync(script)) {
+      return { check: file, status: 'skip', output: 'Skipped because the script is missing.' };
+    }
+    const run = spawnSync(process.execPath, [script, ...args], { cwd: REPO_ROOT, encoding: 'utf8' });
+    const output = [run.stdout?.trim(), run.stderr?.trim(), run.error?.message].filter(Boolean).join('\n');
+    return { check: file, status: run.status === 0 ? 'pass' : 'fail', output };
+  });
 }
 
 function printReport(result) {
@@ -555,19 +812,37 @@ function printReport(result) {
     console.log(`${severity} ${file} [${rule}] ${message}`);
   }
   console.log(`${result.sections.length} section(s), ${result.errors} error(s), ${result.warnings} warning(s).`);
+  const { baseline } = result;
+  if (baseline.status !== 'not-requested') {
+    console.log(`Baseline ${baseline.status} (${baseline.projectName}).`);
+    if (baseline.message) console.log(baseline.message);
+    for (const offender of baseline.offenders) {
+      console.log(`[${offender.rule}] Count ${offender.count} exceeds baseline ${offender.baseline}.`);
+    }
+  }
+  for (const { check, status, output } of result.ssot ?? []) {
+    console.log(`SSOT ${status}: ${check}`);
+    if (output) console.log(output);
+  }
 }
 
 if (require.main === module) {
   const args = process.argv.slice(2);
-  const positional = args.filter(arg => arg !== '--json');
+  const flags = new Set(['--json', '--baseline', '--update-baseline', '--ssot']);
+  const positional = args.filter(arg => !flags.has(arg));
   if (positional.length > 1 || positional[0]?.startsWith('-')) {
-    console.error('Usage: node swarm/tools/check-sections.js [projectDir] [--json]');
+    console.error('Usage: node swarm/tools/check-sections.js [projectDir] [--baseline|--update-baseline] [--ssot] [--json]');
     process.exitCode = 1;
   } else {
     const result = checkProject(positional[0]);
+    const update = args.includes('--update-baseline');
+    const ratchet = update || args.includes('--baseline');
+    if (ratchet) checkBaseline(result, update);
+    if (args.includes('--ssot')) result.ssot = runSsotChecks(result.project);
     if (args.includes('--json')) console.log(JSON.stringify(result, null, 2));
     else printReport(result);
-    process.exitCode = result.errors ? 1 : 0;
+    const failed = ratchet ? result.baseline.status !== 'pass' : result.errors > 0;
+    process.exitCode = failed || result.ssot?.some(check => check.status === 'fail') ? 1 : 0;
   }
 }
 

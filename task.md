@@ -1,5 +1,30 @@
 # GJH V11 Virtual Mall Improvement Plan
 
+## Swarm and Swarm Design System programme (2026-11-21, manager: Claude)
+
+Owner constraints (binding, 2026-11-21):
+- Agent workers may ONLY run through two CLIs: `codex` (OpenAI) and `pi` (pi.dev). No direct API calls, no other agent CLIs.
+- Allowed models and reasoning effort: GPT 6.2 Sol (medium, xhigh) and GPT 6.1 Terra (medium, xhigh). Nothing else, including `low`.
+- A Settings page configures runners, model and effort; the server enforces the allowlist.
+- Discuss in Mandarin in the channel (owner message #135); code, file names and page copy stay English.
+- Workers get a position, a skill package (handbook), a tool kit and the framework (SDS) so they can work in parallel.
+- Plan before assigning: `docs/swarm-design-system-plan.md`, interface specs `swarm/CHANNEL_SPEC.md`, `swarm/design-system/SDS_SPEC.md`, `swarm/RUNNER_SETTINGS_SPEC.md`.
+
+Status legend: [x] done and verified, [~] in progress, [ ] not started.
+- [x] Channel system (store, turns, CLI, UI, tests, e2e with fake agent): 34 tests pass, pushed as 7809f0df, bug fix for assign lines without text (local, not yet committed).
+- [x] First real run: GJH home page by Manager + 10 agents, checked at 393px and 1440px; green-gold rerun applied (owner request).
+- [x] Viewer topbar: single 44px line, icon buttons with cursor-following tooltips, right panel on/off, responsive 320-1440 (verified in browser).
+- [~] Chat log redesign and composer redesign (worker L1).
+- [~] Swarm Design System v1, 11 parallel workers (A tokens, B components, C runtime, D i18n, E PWA, F lint ratchet, G standard, H and I handbook, J1 roster and tools, J2 playbooks).
+- [ ] SDS integration: inject position preambles into agent prompts, copy staff and design-system into each project, update CONTRACT.
+- [ ] SDS migration of the GJH home page through the channel (tokens, components, `data-i18n`, `data-reveal`), ratchet baseline to 0.
+- [ ] Runner and model settings: allowlist enforcement (codex and pi only; 6.2 Sol and 6.1 Terra; medium and xhigh), runner adapters, Settings page, CLI `settings` commands. Default effort changes from low to medium.
+- [ ] Verification: browser matrix (390x844, 1440x900; themes x languages), offline reload of exported PWA, reduced motion, screenshots viewed.
+- [ ] KB-MCP write of skill `agent:live-multi-agent-design-swarm` (content in `swarm/LESSONS.md`; blocked: kb connector not responding, needs `/mcp` reconnect of `kb`).
+
+Not verifiable headlessly (stays UNVERIFIED until a real device): iPhone gesture zoom lock, PWA install prompt on iOS, Safari service worker behaviour.
+
+
 ## Roadmap from the owner feedback of 2026-11-19 (status on 2026-11-20)
 
 Full detail: [docs/gjh-v11-improvement-roadmap-2026-11-19.md](docs/gjh-v11-improvement-roadmap-2026-11-19.md), [docs/gjh-v11-session-summary-2026-11-20.md](docs/gjh-v11-session-summary-2026-11-20.md) and [docs/gjh-v11-performance-research-2026-11-19.md](docs/gjh-v11-performance-research-2026-11-19.md). Owner targets: phone 30 FPS (Low by default), tablet and PC 60 FPS, dynamic resolution first. Verify every step in headed Chrome with `docs/mall_lap_probe.py`, `docs/mall_video_probe.py`, `docs/verify_interactions.py`, `docs/verify_upper_level.py`, `docs/verify_tram.py`, `docs/verify_physics_props.py` and `scripts/lighting_score.py` before pushing.

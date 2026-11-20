@@ -12,8 +12,16 @@ const TEMPLATE = path.join(ROOT, 'template');
 const UI = path.join(ROOT, 'ui');
 const PORT = Number(process.env.SWARM_PORT) || 8800;
 const PROJECT = path.join(ROOT, 'projects', process.env.SWARM_PROJECT || 'home');
-const MODEL = process.env.SWARM_MODEL || 'gpt-6.2-sol';
-const EFFORT = process.env.SWARM_EFFORT || 'low';
+// Agents run ONLY through the codex or pi CLI, with the allowlisted model and effort from the settings file (lib/settings.js).
+const S = require('./lib/settings');
+const R = require('./lib/runners');
+const G = require('./lib/guard');
+const SETTINGS_PATH = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS) || path.join(ROOT, '.run', 'settings.json'); // override only in test mode
+const loaded = S.load(SETTINGS_PATH);
+let settings = loaded.settings;
+for (const w of loaded.warnings) console.warn('settings:', w);
+const readiness = {}; // last readiness result per runner (Settings page "Test")
+const modelLabel = () => { const r = S.resolve(settings, 'worker'); return `${r.runner} / ${r.model} / ${r.effort}`; };
 // Company-style pipeline: a Manager sets direction, workers propose and discuss, the Manager decides, then build/review cycles.
 const PLAN = [
   { key: 'kickoff', label: 'Kickoff', who: 'manager', meeting: true },
@@ -30,9 +38,12 @@ const MANAGER = { id: '00', name: 'Manager', color: '#f4f4f5', section: '', lane
 const MIME = { '.html': 'text/html; charset=utf-8', '.css': 'text/css; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json', '.md': 'text/plain; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml' };
 
 const GJH_ASSETS = path.resolve(ROOT, '..', 'assets', 'companies', 'gjh'); // read-only image library for /gjh/*
+const DS_DIR = path.join(ROOT, 'design-system');
+const STAFF_DIR = path.join(ROOT, 'staff');
+const STAFF = require('./lib/staff');
 const GJH_V11_ASSETS = path.resolve(ROOT, '..', 'demos', 'corporate', 'gjh', 'v11', 'assets'); // read-only mall concept images for /gjh-v11/*
 let agentsDef = JSON.parse(fs.readFileSync(path.join(TEMPLATE, 'agents.json'), 'utf8'));
-const state = { project: path.basename(PROJECT), phase: 'idle', round: 0, rounds: PLAN.length, plan: PLAN, model: MODEL + ' / ' + EFFORT, brief: '', agents: {}, feed: [] };
+const state = { project: path.basename(PROJECT), phase: 'idle', round: 0, rounds: PLAN.length, plan: PLAN, model: modelLabel(), brief: '', agents: {}, feed: [] };
 const clients = new Set();
 const children = new Map();
 let stopped = false;
@@ -44,6 +55,22 @@ function emit(evt) {
   for (const c of clients) c.write(line);
 }
 
+// Copy the staff handbook and the design system (text and icon assets only) into the project so agents can read them in their sandbox.
+function copyTree(from, to, allow) {
+  fs.mkdirSync(to, { recursive: true });
+  for (const e of fs.readdirSync(from, { withFileTypes: true })) {
+    const src = path.join(from, e.name), dst = path.join(to, e.name);
+    if (e.isDirectory()) copyTree(src, dst, allow);
+    else if (allow.test(e.name)) fs.copyFileSync(src, dst);
+  }
+}
+function syncDocs() {
+  copyTree(STAFF_DIR, path.join(PROJECT, 'staff'), /\.(md|json)$/);
+  copyTree(DS_DIR, path.join(PROJECT, 'design-system'), /\.(md|json|css|js|html|tpl|webmanifest|png)$/);
+  const lanes = agentsDef.map(a => `${a.id} ${a.lane}`).join('\n');
+  fs.writeFileSync(path.join(PROJECT, 'CONTRACT.md'), fs.readFileSync(path.join(TEMPLATE, 'CONTRACT.md'), 'utf8').replace('{{LANES}}', lanes));
+}
+
 function initProject(brief) {
   fs.rmSync(PROJECT, { recursive: true, force: true });
   for (const d of ['sections', 'notes', 'inbox', 'discussion']) fs.mkdirSync(path.join(PROJECT, d), { recursive: true });
@@ -53,6 +80,7 @@ function initProject(brief) {
   fs.writeFileSync(path.join(PROJECT, 'CONTRACT.md'), fs.readFileSync(path.join(TEMPLATE, 'CONTRACT.md'), 'utf8').replace('{{LANES}}', lanes));
   fs.writeFileSync(path.join(PROJECT, 'brief.md'), brief || fs.readFileSync(path.join(TEMPLATE, 'brief.md'), 'utf8'));
   fs.copyFileSync(path.resolve(ROOT, '..', 'design-canvas', 'tokens.css'), path.join(PROJECT, 'tokens.css'));
+  syncDocs();
   fs.writeFileSync(path.join(PROJECT, 'agents.json'), JSON.stringify(agentsDef, null, 1)); // the project remembers its own team
   fs.writeFileSync(path.join(PROJECT, 'names.json'), JSON.stringify(agentsDef.map(a => ({ id: a.id, section: a.section })), null, 1));
   for (const a of agentsDef) {
@@ -113,68 +141,103 @@ You may edit ONLY: ${own}. Other agents and the manager edit their own files at 
 ${task}`;
 }
 
-function digest(a, ev) {
-  const it = ev.item || {};
+
+// ---------- agent processes (runner-agnostic) ----------
+// Concurrency limit from settings.concurrency.maxParallel.
+let running = 0;
+const waiters = [];
+const slot = {
+  acquire() { if (running < settings.concurrency.maxParallel) { running += 1; return Promise.resolve(); } return new Promise(r => waiters.push(r)); },
+  release() { running -= 1; while (waiters.length && running < settings.concurrency.maxParallel) { running += 1; waiters.shift()(); } }
+};
+
+// Standing owner rules and the channel language go after the STEP line (the first line must stay `STEP: ...`).
+function withPreamble(promptText, a, label) {
+  let pre = S.preamble(settings);
+  try { const sp = STAFF.preamble({ staffDir: path.join(PROJECT, 'staff'), agentId: a.id, step: label }); if (sp) pre = (pre ? pre + '\n' : '') + sp; } catch (_) { /* no staff files in this project: skip */ }
+  if (!pre) return promptText;
+  if (promptText.startsWith('STEP:')) { const i = promptText.indexOf('\n'); return i < 0 ? promptText + '\n' + pre : promptText.slice(0, i + 1) + pre + '\n' + promptText.slice(i + 1); }
+  return pre + '\n' + promptText;
+}
+
+function ownedGlobs(a) {
+  if (a.id === MANAGER.id) return ['direction.md', 'decisions.md', 'review.md', 'review1.md', 'review2.md', 'chat/00.jsonl', 'inbox/00.md'];
+  return [`sections/${a.id}-*.html`, `sections/${a.id}-*.css`, `notes/${a.id}.md`, `discussion/${a.id}.md`, `chat/${a.id}.jsonl`];
+}
+
+// Normalized runner events -> cursor moves and thought bubbles.
+function applyEvent(a, ev) {
   const ag = state.agents[a.id];
-  if (ev.type === 'item.completed' && it.type === 'agent_message' && it.text) {
-    ag.thought = it.text.trim();
+  if (ev.kind === 'thought' && ev.text) {
+    ag.thought = ev.text.trim();
     emit({ type: 'thought', id: a.id, text: ag.thought });
-  } else if (ev.type === 'item.started' && it.type === 'command_execution') {
-    const cmd = String(it.command || '');
-    const refs = [...cmd.matchAll(/(?:sections|notes|discussion)\/(\d\d)/g)].map(m => m[1]);
-    if (/\b(direction|decisions|review[12])\.md/.test(cmd) && a.id !== MANAGER.id) refs.push(MANAGER.id);
+  } else if (ev.kind === 'action') {
+    const refs = (ev.sections || []).slice();
+    if (/\b(direction|decisions|review[12]?)\.md/.test(String(ev.target || '')) && a.id !== MANAGER.id) refs.push(MANAGER.id);
     const other = refs.find(r => r !== a.id);
-    const writes = /(?:^|\s)(?:tee|apply_patch|python3?\b.*write|perl -pi|sed -i)|>\s*\S|<<\s*['"]?EOF/.test(cmd);
-    const verb = writes && !other ? 'editing' : (other ? 'reading' : 'looking');
+    const verb = ev.verb === 'running' ? 'looking' : (other && ev.verb === 'editing' ? 'reading' : ev.verb);
     ag.action = verb + (other ? ' ' + other : '');
     ag.target = other || a.id;
-    emit({ type: 'action', id: a.id, verb, target: ag.target, cmd: cmd.replace(/^\/bin\/zsh -lc\s*/, '').slice(0, 140) });
-  } else if (ev.type === 'item.completed' && it.type === 'file_change') {
-    ag.action = 'editing';
-    ag.target = a.id;
-    emit({ type: 'action', id: a.id, verb: 'editing', target: a.id, cmd: 'file change' });
+    emit({ type: 'action', id: a.id, verb, target: ag.target, cmd: String(ev.target || '').replace(/^\/bin\/zsh -lc\s*/, '').slice(0, 140) });
   }
 }
 
-const CODEX = process.env.SWARM_CODEX || 'codex';
-
-// Runs ONE agent turn through the Codex CLI (or a test double named by SWARM_CODEX); streams its JSONL events to the browser.
-function runCodex(a, label, promptText, isLast, attempt = 1) {
+// One process, one turn. Resolves true when the process exited cleanly without a fatal runner error.
+function runOnce(a, label, promptText) {
   return new Promise(resolve => {
-    const ag = state.agents[a.id];
-    if (!ag) return resolve(false);
-    ag.status = 'working ' + label; ag.action = 'starting'; ag.target = a.id;
-    emit({ type: 'status', id: a.id, status: ag.status });
-    const p = spawn(CODEX, ['exec', '--json', '-m', MODEL, '-c', 'model_reasoning_effort=' + EFFORT, '-s', 'workspace-write', '--skip-git-repo-check', '-C', PROJECT, '-'], { stdio: ['pipe', 'pipe', 'ignore'] });
+    const resolved = S.resolve(settings, a.id === MANAGER.id ? 'manager' : 'worker');
+    let runner, cmd;
+    try { runner = R.get(resolved.runner); cmd = runner.buildCommand({ model: resolved.model, effort: resolved.effort, projectDir: PROJECT }); }
+    catch (e) { emit({ type: 'chat', msg: chat ? chat.post({ from: 'system', kind: 'system', text: `Cannot start ${a.name}: ${e.message}` }) : { id: 0 } }); return resolve(false); }
+    const parser = runner.createParser();
+    const before = resolved.runner === 'pi' ? G.snapshot(PROJECT) : null; // pi has no sandbox: compare the tree after the turn
+    const p = spawn(cmd.command, cmd.args, { cwd: cmd.cwd || PROJECT, stdio: ['pipe', 'pipe', 'ignore'] });
     children.set(a.id, p);
-    let settled = false;
+    let fatal = false, settled = false;
+    const timer = setTimeout(() => { fatal = true; try { p.kill('SIGTERM'); } catch (_) {} }, settings.timeouts.turnMinutes * 60000);
+    const handle = evs => { for (const ev of evs) { if (ev.kind === 'error') fatal = true; else applyEvent(a, ev); } };
     const finish = ok => {
       if (settled) return; settled = true;
-      children.delete(a.id);
-      if (stopped) return resolve(false);
-      if (!ok && attempt < 2) { emit({ type: 'status', id: a.id, status: 'retrying' }); return resolve(runCodex(a, label, promptText, isLast, attempt + 1)); }
-      ag.status = ok ? (isLast ? 'done' : 'waiting') : 'failed';
-      ag.action = '';
-      emit({ type: 'status', id: a.id, status: ag.status });
-      resolve(ok);
+      clearTimeout(timer); children.delete(a.id);
+      if (before && chat) {
+        try {
+          const bad = G.violations(before, G.snapshot(PROJECT), ownedGlobs(a));
+          if (bad.length) chat.post({ from: 'system', kind: 'system', text: `${a.name} changed files outside its ownership: ${bad.slice(0, 5).join(', ')}${bad.length > 5 ? ' ...' : ''}` });
+        } catch (_) { /* guard problems must not fail the turn */ }
+      }
+      resolve(ok && !fatal);
     };
     p.on('error', () => finish(false));
     p.stdin.on('error', () => {});
-    p.stdin.end(promptText);
-    let buf = '';
-    p.stdout.on('data', d => {
-      buf += d;
-      let i;
-      while ((i = buf.indexOf('\n')) >= 0) {
-        const line = buf.slice(0, i); buf = buf.slice(i + 1);
-        try { digest(a, JSON.parse(line)); } catch (_) { /* ignore non-json */ }
-      }
-    });
-    p.on('close', code => finish(code === 0));
+    p.stdin.end(withPreamble(promptText, a, label));
+    p.stdout.on('data', d => { try { handle(parser.push(d)); } catch (_) { /* parser errors must not kill the run */ } });
+    p.on('close', code => { try { handle(parser.end()); } catch (_) {} finish(code === 0); });
   });
 }
 
-function runWorker(a, step) { return runCodex(a, step.label, prompt(a, step), step === PLAN[PLAN.length - 1]); }
+async function runProcess(a, label, promptText, isLast) {
+  const ag = state.agents[a.id];
+  if (!ag) return false;
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    ag.status = 'working ' + label; ag.action = 'starting'; ag.target = a.id;
+    emit({ type: 'status', id: a.id, status: ag.status });
+    await slot.acquire();
+    let ok = false;
+    try { ok = await runOnce(a, label, promptText); } finally { slot.release(); }
+    if (stopped) return false;
+    if (ok) {
+      ag.status = isLast ? 'done' : 'waiting'; ag.action = '';
+      emit({ type: 'status', id: a.id, status: ag.status });
+      return true;
+    }
+    if (attempt === 1) emit({ type: 'status', id: a.id, status: 'retrying' });
+  }
+  ag.status = 'failed'; ag.action = '';
+  emit({ type: 'status', id: a.id, status: 'failed' });
+  return false;
+}
+
+function runWorker(a, step) { return runProcess(a, step.label, prompt(a, step), step === PLAN[PLAN.length - 1]); }
 
 // ---------- channel (group chat) ----------
 const { createChat } = require('./lib/chat');
@@ -188,13 +251,15 @@ function setupChat() {
   turns = createTurns({
     chat, agents: everyone(), managerId: MANAGER.id, maxDiscussRounds: 2,
     // After each agent process exits, ingest its outbox immediately so the next step sees its messages (no watcher race).
-    runAgent: ({ id, label, prompt: pr }) => { const a = everyone().find(x => x.id === id); return a ? runCodex(a, label, pr, false).then(ok => { chat.sync(); return ok; }) : Promise.resolve(false); }
+    runAgent: ({ id, label, prompt: pr }) => { const a = everyone().find(x => x.id === id); return a ? runProcess(a, label, pr, false).then(ok => { chat.sync(); return ok; }) : Promise.resolve(false); }
   });
 }
+let inFlight = 0; // requests being handled or waiting in the queue
 function startTurn(msg) {
+  inFlight += 1;
   state.phase = 'running'; emit({ type: 'phase', phase: 'running' });
   emit({ type: 'busy', busy: true });
-  Promise.resolve(turns.onOwnerMessage(msg)).catch(e => emit({ type: 'chat', msg: chat.post({ from: 'system', text: 'Turn failed: ' + e.message, kind: 'system' }) })).finally(() => { const b = turns.busy(); emit({ type: 'busy', busy: b }); if (!b && state.phase === 'running') { state.phase = 'ready'; emit({ type: 'phase', phase: 'ready' }); } });
+  Promise.resolve(turns.onOwnerMessage(msg)).catch(e => emit({ type: 'chat', msg: chat.post({ from: 'system', text: 'Turn failed: ' + e.message, kind: 'system' }) })).finally(() => { inFlight -= 1; const b = turns.busy(); emit({ type: 'busy', busy: b }); if (!b && state.phase === 'running') { state.phase = 'ready'; emit({ type: 'phase', phase: 'ready' }); } });
 }
 
 function prepare(brief, agentsFile) {
@@ -246,6 +311,21 @@ http.createServer(async (req, res) => {
     return;
   }
   if (p === '/api/state') return send(res, 200, state);
+  if (p === '/api/settings' && req.method === 'GET') return send(res, 200, { settings, allowlist: S.ALLOWLIST, resolved: { manager: S.resolve(settings, 'manager'), worker: S.resolve(settings, 'worker') }, status: readiness });
+  if (p === '/api/settings' && req.method === 'PUT') {
+    const r = S.save(SETTINGS_PATH, await body(req));
+    if (!r.ok) return send(res, 400, { errors: r.errors });
+    settings = r.settings; state.model = modelLabel(); emit({ type: 'settings', model: state.model });
+    return send(res, 200, { settings });
+  }
+  if (p === '/api/settings/test' && req.method === 'POST') {
+    const b = await body(req);
+    const check = S.validate({ defaults: { runner: b.runner, model: b.model || settings.defaults.model, effort: 'medium' } });
+    if (!check.ok) return send(res, 400, { errors: check.errors });
+    const result = await R.get(b.runner).readiness({ model: b.model || settings.defaults.model });
+    readiness[b.runner] = result;
+    return send(res, 200, result);
+  }
   if (p === '/api/chat' && req.method === 'GET') return send(res, 200, { messages: chat ? chat.history(Number(url.searchParams.get('since')) || 0) : [] });
   if (p === '/api/chat' && req.method === 'POST') {
     const b = await body(req);
@@ -253,9 +333,17 @@ http.createServer(async (req, res) => {
     const from = b.from === 'owner' ? 'owner' : 'claude';
     if (!text) return send(res, 400, { error: 'empty' });
     if (!chat) return send(res, 409, { error: 'channel not ready' });
+    const ahead = inFlight;
     const msg = chat.post({ from, text });
+    // Requests are handled one at a time; say so, otherwise a waiting message looks ignored.
+    if (ahead > 0) chat.post({ from: 'system', kind: 'system', text: `Queued: ${ahead} request${ahead > 1 ? 's' : ''} ahead. The team will start on #${msg.id} when it finishes the current one (about 5 to 10 minutes). \u5df2\u6392\u961f\uff0c\u56e2\u961f\u5904\u7406\u5b8c\u5f53\u524d\u8bf7\u6c42\u540e\u4f1a\u5f00\u59cb\u5904\u7406\u4f60\u7684\u6d88\u606f\u3002` });
     startTurn(msg);
     return send(res, 200, { id: msg.id });
+  }
+  if (p === '/api/sync' && req.method === 'POST') {
+    if (!fs.existsSync(PROJECT)) return send(res, 409, { error: 'no project' });
+    syncDocs();
+    return send(res, 200, { ok: true });
   }
   if (p === '/api/init' && req.method === 'POST') {
     if (state.phase === 'running') return send(res, 409, { error: 'busy' });
@@ -287,6 +375,13 @@ http.createServer(async (req, res) => {
   if (p === '/api/stop' && req.method === 'POST') { stopAll(); return send(res, 200, { ok: true }); }
   if (p.startsWith('/p/')) return serveFile(res, PROJECT, p.slice(3));
   if (p.startsWith('/gjh/')) return serveFile(res, GJH_ASSETS, p.slice(5));
+  if (p.startsWith('/ds/')) return serveFile(res, DS_DIR, p.slice(4));
+  const cat = /^\/i18n\/(en|zh-Hans|ms)\.json$/.exec(p);
+  if (cat) { // catalog for the preview: SDS shell strings + the project's own extracted strings
+    const read = f => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (_) { return null; } };
+    const a = read(path.join(DS_DIR, 'i18n', cat[1] + '.json')), b = read(path.join(PROJECT, 'i18n', cat[1] + '.json'));
+    return send(res, 200, { meta: (b || a || {}).meta || { lang: cat[1] }, messages: { ...((a || {}).messages || {}), ...((b || {}).messages || {}) } });
+  }
   if (p.startsWith('/gjh-v11/')) return serveFile(res, GJH_V11_ASSETS, p.slice(9));
   if (p === '/tokens.css') return serveFile(res, PROJECT, 'tokens.css');
   if (p === '/') return serveFile(res, UI, 'index.html');

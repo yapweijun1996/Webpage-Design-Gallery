@@ -95,7 +95,7 @@ test('waits for a complete UTF-8 line and ingests rapid appends once with the po
 test('reports malformed outbox lines by agent name and continues processing', async (t) => {
   const { projectDir, chat, events } = setup(t);
   chat.start();
-  fs.writeFileSync(path.join(projectDir, 'chat', '02.jsonl'), 'not JSON\n{"task":"No text"}\n{"text":"Valid"}\n');
+  fs.writeFileSync(path.join(projectDir, 'chat', '02.jsonl'), 'not JSON\n{"note":"No text or task"}\n{"text":"Valid"}\n');
   await waitFor(() => events.length >= 3);
   const [syntaxNotice, schemaNotice, valid] = chat.history();
   for (const notice of [syntaxNotice, schemaNotice]) {
@@ -105,6 +105,19 @@ test('reports malformed outbox lines by agent name and continues processing', as
   }
   assert.equal(valid.from, '02');
   assert.equal(valid.text, 'Valid');
+});
+
+test('ingests an assign line that has a task but no text (regression: assignments were dropped as malformed)', async (t) => {
+  const { projectDir, chat, events } = setup(t);
+  chat.start();
+  fs.writeFileSync(path.join(projectDir, 'chat', '00.jsonl'), '{"to":["02"],"kind":"assign","task":"Apply the palette to the hero."}\n');
+  await waitFor(() => events.length >= 1);
+  const [assign] = chat.history();
+  assert.equal(assign.from, '00');
+  assert.equal(assign.kind, 'assign');
+  assert.deepEqual(assign.to, ['02']);
+  assert.equal(assign.task, 'Apply the palette to the hero.');
+  assert.equal(assign.text, 'Apply the palette to the hero.');
 });
 
 test('resumes ids and byte offsets from disk after creating a fresh store', (t) => {
