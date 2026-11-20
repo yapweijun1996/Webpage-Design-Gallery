@@ -21,5 +21,7 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| Flying Wheel Air-Dried Singapore Ban Mee Noodles 70g | Near shelf facing the right aisle | Official gallery documents the 5 × 70 g outer pack. Exact stand-alone sleeve and soft outer-film model are pending. |
-| Flying Wheel Shanghai LaMian | Separate rear shelf | Official gallery independently documents a 5 × 70 g outer pack. Soft outer-film geometry, regional print and physical measurements remain pending. |
+| Flying Wheel Air-Dried Singapore Ban Mee Noodles 70g | Loom-front ledge in the candidate | The 5 × 70 g official photo shows the oval end window and wide folds, which passed visual review. Independent review kept the film roll, five separately rounded shoulders and thin end-view crimp open. [Goh Joo Hin angled photo](https://www.gjheshop.com/wp-content/uploads/2025/03/8888140500107_03.jpg) |
+| Flying Wheel Shanghai LaMian | Companion position on the candidate ledge | The 5 × 70 g official photo shows the oval window and finer curled noodles, which passed visual review. The film roll, five separately rounded shoulders and thin end-view crimp remain open. [Goh Joo Hin angled photo](https://www.gjheshop.com/wp-content/uploads/2025/03/8888140500114_03-600x600.jpg) |
+
+The candidate passed the three room budgets, with 2,790 / 3,722 / 5,022 triangles in Low / Balanced / Detailed and no additional draw. It passed the local desktop and 390 px Chrome routes. The candidate is unpublished pending visual acceptance. Top and end close-ups showing the film edge and sleeve shoulders would support the next revision. Physical dimensions, film and closure specifications, current print editions and artwork remain open.

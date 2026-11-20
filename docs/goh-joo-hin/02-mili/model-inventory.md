@@ -27,3 +27,5 @@ Product-specific models and pending source work are listed in the [shop brief](R
 | Sauce comparison sign and Inspect point | Sign on the front of the cookline. The standing point is XZ (0, 2.5). | [Cookline placement record](../../gjh-v11-interior-program.json) |
 
 The sample plate placement in the [room programme](../../gjh-v11-interior-program.json) now selects its own 540 exported vertices. This prevents the placement transform from moving portions of the sauce bottles.
+
+The separate original and vegetarian front and rear views support the shared tapered shoulder and short red-orange closure. The installed nominal 55 × 55 × 245 mm studies were retained after the visual comparison. Exact cap measurements, the thin glass lip and each print revision remain open. [Original Oyster Sauce](https://www.gjheshop.com/product/mili-oyster-sauce-510g/) · [Vegetarian Oyster Sauce](https://www.gjheshop.com/product/mili-vegetarian-oyster-sauce-510g/)
