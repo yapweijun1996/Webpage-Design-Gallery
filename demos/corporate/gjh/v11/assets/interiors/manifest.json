@@ -3213,9 +3213,9 @@
       {
         "store": "S09",
         "file": "s09-spam-details.glb",
-        "bytes": 40464,
-        "sha256": "8aa9c4158df1d0b62f430da87f030b8dd32e0e1a1b3faa46d3283976e97a98fe",
-        "triangles": 1624,
+        "bytes": 76544,
+        "sha256": "e7f12214a52a139a7102db01bb1d7d678cedf17fe60018eff15a8614fbf66752",
+        "triangles": 2092,
         "draws": 3,
         "instances": 16,
         "motion": [],

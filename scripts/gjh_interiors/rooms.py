@@ -8,6 +8,8 @@ from mili_mock_duck import add_mili_mock_duck
 from pzh_carton import add_pzh_carton
 from skippy_jars import SAMPLES as SKIPPY_SAMPLES
 from skippy_jars import SHELF_DEPTH as SKIPPY_SHELF_DEPTH, SHELF_TOP as SKIPPY_SHELF_TOP, add_skippy_jar
+from spam_tins import SAMPLES as SPAM_SAMPLES
+from spam_tins import SHELF_DEPTH as SPAM_SHELF_DEPTH, SHELF_TOP as SPAM_SHELF_TOP, add_spam_tin
 
 GOLD, BONE, INK = "d7a95b", "f6ecd2", "203545"
 MINT, RED, SEA = "70cdb9", "c34339", "357675"
@@ -248,22 +250,9 @@ def spam(r,_):
         dx=-.83+i*.48
         loc.append((-.72+dx*cos(a),1.684,-1.10-dx*sin(a),1.15))
     stock(r,CAN,[GOLD,"254d83","3e6e9d",GOLD],loc[3:],.116,.27,.76,sides=8)
-    # Retailer dimensions give the Classic tin a nominal 100 × 56 × 83 mm envelope.
-    # The anonymous sample colours separate the three variants without reproducing label art.
-    outline=[]
-    for corner in range(4):
-        angle=corner*pi/2
-        cx=.038 if corner in (0,3) else -.038
-        cz=.016 if corner<2 else -.016
-        for step in range(4):
-            t=angle+step*pi/6
-            outline.append((cx+.012*cos(t),cz+.012*sin(t)))
-    for x,col in [(-.83,"29467d"),(-.64,"506e9a"),(-.45,"314c65")]:
-        rings=[[(x+px,y,-3.92+pz) for px,pz in outline] for y in (.899,.906,.976,.982)]
-        for lower,upper,finish in zip(rings,rings[1:],[GOLD,col,GOLD]):
-            for p0,p1,p2,p3 in zip(lower,lower[1:]+lower[:1],upper[1:]+upper[:1],upper):
-                r.face((p1,p0,p3,p2),finish)
-        r.face(rings[-1][::-1],GOLD)
+    for _, pigment, x in SPAM_SAMPLES:
+        add_spam_tin(r.batches[CRAFT], pigment, x, SPAM_SHELF_TOP, SPAM_SHELF_DEPTH,
+                     include_base=False)
     r.box(-.62,1.40,-.633,2.43,.19,.06,"d1a753",yaw=a)
     r.panel(-.61,1.40,-.593,.82,.17,logo(9),yaw=a)
     placard(r,0,2.83,-3.99,2.08,"1d4072")

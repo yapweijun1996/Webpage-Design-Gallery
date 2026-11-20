@@ -85,10 +85,13 @@ S07 passed on Pages build `81963db3c3709f95`. Both Chrome routes reached the sto
 - [ ] **Creamy Peanut Butter 500 g.** Confirm physical lid dimensions and source-backed current print details.
 - [ ] **Chunky Peanut Butter 500 g.** Verify physical closure and current edition and obtain permission for its own front and back artwork. Product viewer and breakfast-chair Sit are separate interaction work.
 
+S08 passed on Pages build `3b578e6230629f54`. Desktop and touch-emulated Chrome reached the story and upper comparison shelf, viewed both jars and returned to the atrium. The room GLB matched the Blender export and Low totals 2,796 triangles. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44644961545)
+
 ## S09 SPAM
 
 [Design and runtime](09-spam/README.md) · [Inventory](09-spam/model-inventory.md)
 
+- [x] **Classic, Lite and Less Sodium 340 g, unprinted form studies.** Three [editable nominal-envelope specimens](../../models/gjh-spam-tins/README.md) share the observed rounded rectangle, projecting rolls, recessed lid and elongated offset ring.
 - [ ] **Classic Luncheon Meat 340 g.** Verify the rounded corners and seams against a measured sample. The 100 × 56 × 83 mm study uses a listing proxy.
 - [ ] **Lite Luncheon Meat 340 g.** Match measured packaging and current Lite artwork.
 - [ ] **Less Sodium Luncheon Meat 340 g.** Match measured packaging and current Less Sodium artwork separately.
