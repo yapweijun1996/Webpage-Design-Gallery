@@ -724,7 +724,10 @@ function animate(now) {
   const live = advancing && !modes.paused() || modes.current() === 'shelf';
   // Direct-pass warm-up submits a scissored draw to the default framebuffer.
   // Its non-preserved back buffer must be covered by a live draw before paint.
-  const uploadMs = live || renderRequested && (forceRender || !modes.paused()) ? warmModels(player.state) : 0;
+  // The mobile settings panel pauses walking, but its tier request still
+  // needs the upload queue to finish before it can become the active tier.
+  const uploadMs = live || tierQueue?.pending || renderRequested && (forceRender || !modes.paused())
+    ? warmModels(player.state) : 0;
   let pose, callbackMs = 0;
   if (live || renderRequested) {
     // Tier preparation can exercise one real screen pixel. The live scene
