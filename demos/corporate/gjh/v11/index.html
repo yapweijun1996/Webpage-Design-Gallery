@@ -14,8 +14,52 @@
   <link rel="apple-touch-icon" href="assets/mall-icon-192.png">
   <link rel="preload" href="assets/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
   <script>try{var c=localStorage.getItem("gjh-v11-color-scheme");if(c==="light"||c==="dark")document.documentElement.dataset.colorScheme=c}catch(e){}</script>
-  <link rel="stylesheet" href="style.bundle.css">
-  <script type="module" src="assets/loader.js"></script>
+  <script>
+    // Recovery stays available if either the stylesheet or the module graph fails.
+    (() => {
+      let stylesheetFailed = false;
+      function showRecovery(stylesheet) {
+        const card = document.getElementById('mall-recovery');
+        if (!card || (!stylesheet && stylesheetFailed)) return;
+        card.querySelector('span').textContent = stylesheet
+          ? 'Page did not load fully:' : 'The 3D mall could not start. Retry or browse the store directory.';
+        card.querySelector('button').textContent = stylesheet ? 'Reload' : 'Retry';
+        card.hidden = false;
+      }
+      window.addEventListener('error', event => {
+        if (event.target.id === 'mall-main-style') {
+          stylesheetFailed = true;
+          showRecovery(true);
+        }
+      }, true);
+      window.addEventListener('mall-loader-failed', () => showRecovery(false));
+      document.addEventListener('DOMContentLoaded', () => {
+        if (stylesheetFailed) showRecovery(true);
+        const reloadFromNetwork = () => {
+          const url = new URL(location.href);
+          url.searchParams.set('recover-page', Date.now());
+          location.replace(url);
+        };
+        document.querySelector('#mall-recovery button').addEventListener('click', reloadFromNetwork);
+        document.getElementById('loader-retry').addEventListener('click', reloadFromNetwork);
+      });
+      window.addEventListener('load', () => {
+        if (getComputedStyle(document.getElementById('app-loader')).position !== 'fixed') {
+          stylesheetFailed = true;
+          showRecovery(true);
+        }
+        const url = new URL(location.href);
+        if (url.searchParams.has('recover-page')) {
+          url.searchParams.delete('recover-page');
+          history.replaceState(history.state, '', url);
+        }
+      });
+    })();
+  </script>
+  <link id="mall-main-style" rel="stylesheet" href="style.bundle.css">
+  <script type="module">
+    import('./assets/loader.js').catch(() => window.dispatchEvent(new Event('mall-loader-failed')));
+  </script>
   <script type="module" src="pwa.js"></script>
 <link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v11">
 <link rel="stylesheet" href="../shared/landing.css">
@@ -52,6 +96,9 @@
     </label>
   </div>
 </div>
+<aside id="mall-recovery" role="status" hidden style="position:fixed;z-index:10000;inset:auto max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));max-width:32rem;margin:auto;padding:1rem;background:#fff;color:#102d26;border:1px solid;border-radius:.5rem;font:1rem system-ui,sans-serif">
+  <span></span> <button type="button" style="min-height:44px">Reload</button>
+</aside>
 <p id="loader-asset-notice" class="loader-asset-notice" hidden>Some 3D models were unavailable, so the mall is using stand-ins.</p>
 <div id="mall-connection-notice" class="mall-connection-notice" role="status" aria-live="polite" hidden>Connection unavailable. Reconnect to browse the mall and its products.</div>
 <div id="mall-update-notice" class="mall-update-notice" role="status" aria-live="polite" hidden><span id="mall-update-message">An update is ready.</span><button id="mall-apply-update" type="button">Update</button></div>

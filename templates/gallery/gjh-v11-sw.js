@@ -7,63 +7,53 @@ const BASE = new URL('./', self.location.href);
 const ROOT = new URL('../../../../', BASE);
 const PREFIX = 'gjh-v11:' + BASE.pathname + ':offline:';
 const CACHE = PREFIX + BUILD;
+const assets = new Map([...PRECACHE, ...LAZY_ASSETS].map(entry => [new URL(entry.path, BASE).pathname, entry]));
+const offline = assets.get(new URL('offline.html', BASE).pathname);
 
-async function fetchVerified({path, sha256}) {
-  const url = new URL(path, BASE); url.searchParams.set('v', BUILD);
-  const asset = await fetch(url, {cache:'reload', redirect:'error'});
-  if (!asset.ok || asset.redirected) throw new Error('Offline resource unavailable');
-  const hash = await crypto.subtle.digest('SHA-256', await asset.clone().arrayBuffer());
-  const actual = Array.from(new Uint8Array(hash), b => b.toString(16).padStart(2,'0')).join('');
-  if (actual !== sha256) throw new Error('Offline resource integrity mismatch');
-  return asset;
-}
+__PRECACHE_RUNTIME__
 
 async function installRelease() {
   try {
-    const response = await fetch(new URL('version.json?v=' + BUILD, ROOT), {cache:'reload'});
+    const response = await fetch(new URL('version.json?v=' + BUILD, ROOT), {cache: 'reload', redirect: 'error'});
     if (!response.ok || response.redirected) throw new Error('Release identity unavailable');
     const identity = await response.json();
     if (identity.build !== BUILD || identity.version !== VERSION) throw new Error('Release identity mismatch');
-    const cache = await caches.open(CACHE);
-    for (const entry of PRECACHE) await cache.put(new URL(entry.path, BASE), await fetchVerified(entry));
-  } catch (error) { await caches.delete(CACHE); throw error; }
+    await preparePrecache(PRECACHE, CACHE, BUILD);
+  } catch (error) {
+    await caches.delete(CACHE);
+    throw error;
+  }
 }
+
 self.addEventListener('install', event => event.waitUntil(installRelease()));
 self.addEventListener('activate', event => event.waitUntil((async () => {
   await Promise.all((await caches.keys()).filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key)));
-  // Claim only clients within this registration's narrower mall scope; never reload them.
   await self.clients.claim();
 })()));
 self.addEventListener('message', event => {
-  if (event.data?.type === 'GET_VERSION') event.ports[0]?.postMessage({version:VERSION, build:BUILD});
-  if (event.data?.type === 'SKIP_WAITING') event.waitUntil(self.skipWaiting());
+  if (event.data?.type === 'GET_VERSION') event.ports[0]?.postMessage({version: VERSION, build: BUILD});
+  if (event.data?.type === 'SKIP_WAITING') event.waitUntil(activateVerified(PRECACHE, CACHE, BUILD, event.ports[0]));
 });
 self.addEventListener('fetch', event => {
   const request = event.request, url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== BASE.origin || !url.pathname.startsWith(BASE.pathname)) return;
-  if (request.mode === 'navigate') {
-    event.respondWith(fetch(request).then(async response => {
-      if (response.status === 404 && event.clientId) (await self.clients.get(event.clientId))?.postMessage({type:'CHECK_FOR_UPDATE'});
+
+  const entry = assets.get(url.pathname);
+  const recovery = request.mode === 'navigate' && url.searchParams.has('recover-page');
+  const referrer = request.referrer?.startsWith(BASE.origin + '/') ? new URL(request.referrer) : null;
+  if (request.mode !== 'navigate' && referrer?.origin === BASE.origin &&
+      referrer.pathname.startsWith(BASE.pathname) && referrer.searchParams.has('recover-page')) {
+    event.respondWith(fetch(request, {cache: 'reload'}));
+  } else if (entry && !recovery) {
+    event.respondWith(precachedResource(entry, CACHE, BUILD).catch(async () =>
+      request.mode === 'navigate' ? await cachedResource(offline, CACHE) || offlinePage() : Response.error()));
+  } else if (request.mode === 'navigate') {
+    event.respondWith((async () => {
+      // Reload the online document before clearing the active version's cache.
+      const response = await fetch(request, {cache: recovery ? 'reload' : 'no-cache'});
+      if (recovery && response.ok) await caches.delete(CACHE).catch(() => {});
+      if (response.status === 404 && event.clientId) (await self.clients.get(event.clientId))?.postMessage({type: 'CHECK_FOR_UPDATE'});
       return response;
-    }).catch(async () => {
-      const cached = await (await caches.open(CACHE)).match(new URL('offline.html', BASE));
-      return cached || new Response('Connection required. Please reconnect and try again.', {status:503, headers:{'Content-Type':'text/plain; charset=utf-8'}});
-    }));
-  } else if (PRECACHE.some(entry => new URL(entry.path, BASE).pathname === url.pathname)) {
-    event.respondWith((async () => {
-      const cached = await (await caches.open(CACHE)).match(new URL(url.pathname, BASE));
-      return cached || new Response('Saved resource unavailable. Reconnect and try again.', {status:503});
-    })());
-  } else {
-    const entry = LAZY_ASSETS.find(entry => new URL(entry.path, BASE).pathname === url.pathname);
-    if (!entry) return;
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE), key = new URL(entry.path, BASE);
-      const cached = await cache.match(key);
-      if (cached) return cached;
-      const asset = await fetchVerified(entry);
-      try { await cache.put(key, asset.clone()); } catch { /* Storage is optional. */ }
-      return asset;
-    })().catch(() => new Response('Visitor outfit unavailable.', {status:503})));
+    })().catch(async () => await cachedResource(offline, CACHE) || offlinePage()));
   }
 });

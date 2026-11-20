@@ -343,6 +343,7 @@ def build_pages(catalog, release=None):
 
 
 def pwa_outputs(pages, catalog, release):
+    precache_runtime = (ROOT / "templates/gallery/precache.js").read_text(encoding="utf-8").rstrip()
     paths = set(pages) | {p.as_posix() for p in runtime_resources(catalog) if p.as_posix() not in ("src/demo-pwa.js", "assets/demo-pwa.css") and not p.as_posix().startswith(("demos/", "style-atlas/images/", "style-atlas/sheets/", "assets/onboarding/", "design-system/onboarding/"))}
     paths.update(design["thumbnail"] for design in catalog["designs"])
     paths.update(c["demoDirectory"] + "/" + c["landing"]["image"] for c in catalog["companies"] if c.get("landing"))
@@ -379,7 +380,9 @@ def pwa_outputs(pages, catalog, release):
     mall_worker = (ROOT / "templates/gallery/gjh-v11-sw.js").read_text(encoding="utf-8")
     mall_worker = mall_worker.replace("__BUILD__", json.dumps(release["build"])).replace("__VERSION__", json.dumps(release["version"])).replace("__PRECACHE__", json.dumps(mall_entries, indent=2))
     mall_worker = mall_worker.replace("__LAZY_ASSETS__", json.dumps(mall_lazy, indent=2))
-    outputs = demo_pwas.outputs(ROOT, catalog, release, runtime_resources(catalog), source_bytes)
+    worker = worker.replace("__PRECACHE_RUNTIME__", precache_runtime)
+    mall_worker = mall_worker.replace("__PRECACHE_RUNTIME__", precache_runtime)
+    outputs = demo_pwas.outputs(ROOT, catalog, release, runtime_resources(catalog), source_bytes, precache_runtime)
     outputs.update({"version.json": json.dumps(release, indent=2) + "\n", "sw.js": worker,
                     "demos/corporate/gjh/v11/pwa-sw.js": mall_worker})
     return outputs

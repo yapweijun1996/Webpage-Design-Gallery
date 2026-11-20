@@ -22,6 +22,8 @@ import {icon} from './assets/icons.js';
   update.prepend(updateIcon);
   const workerURL = new URL('./pwa-sw.js', location.href).href;
   let registration, prompt, checking = false, applying = false, lastCheck = 0, nextWorker = null;
+  let failedWorker = null;
+  const updateFailed = 'Update failed, retry.';
   let hadMallController = navigator.serviceWorker?.controller?.scriptURL === workerURL;
 
   function showVersion(release) {
@@ -56,7 +58,7 @@ import {icon} from './assets/icons.js';
     if (!otherTab && (!registration?.active || registration.active === worker)) return;
     nextWorker = worker;
     message.textContent = otherTab ? 'The mall was updated in another tab. Reload when you are ready.' : 'A mall update is ready. Your demo bag stays in this tab.';
-    update.textContent = otherTab ? 'Reload' : 'Update';
+    update.textContent = otherTab ? 'Reload' : 'Update now';
     update.prepend(updateIcon);
     notice.hidden = false;
     const releaseWorker = worker || registration?.active;
@@ -80,6 +82,7 @@ import {icon} from './assets/icons.js';
       finally { clearTimeout(timer); }
       if (!response.ok || response.redirected) { connectionState(false); throw new Error('Connection unavailable'); }
       connectionState(true);
+      failedWorker = null;
       await registration.update();
       const worker = registration.installing;
       if (worker && worker.state !== 'installed' && worker.state !== 'redundant') {
@@ -90,31 +93,66 @@ import {icon} from './assets/icons.js';
         });
       }
       if (registration.waiting) offer(registration.waiting);
+      else if (failedWorker) setCheckStatus(updateFailed);
       else if (manual) setCheckStatus('No verified update is waiting.');
     } catch {
-      setCheckStatus('Connection or update check unavailable. The current page remains open; reconnect and try again.');
+      setCheckStatus(failedWorker || connection.hidden ? updateFailed : 'Connection unavailable. Reconnect and try again.');
     } finally { checking = false; setChecking(false); }
   }
+  function waitForController(worker) {
+    const workers = navigator.serviceWorker;
+    return new Promise((resolve, reject) => {
+      const channel = new MessageChannel();
+      const timer = setTimeout(() => finish(new Error('Controller change timed out')), 20000);
+      function finish(error) {
+        clearTimeout(timer);
+        channel.port1.close();
+        workers.removeEventListener('controllerchange', changed);
+        worker.removeEventListener('statechange', checkFailure);
+        if (error) reject(error);
+        else resolve();
+      }
+      function changed() {
+        if (workers.controller === worker) finish();
+      }
+      function checkFailure() {
+        if (worker.state === 'redundant') finish(new Error('Activation failed'));
+      }
+      channel.port1.onmessage = ({data}) => {
+        if (data?.type === 'UPDATE_FAILED') finish(new Error('Verification failed'));
+      };
+      workers.addEventListener('controllerchange', changed);
+      worker.addEventListener('statechange', checkFailure);
+      if (workers.controller === worker) changed();
+      else if (registration.waiting === worker) {
+        try { worker.postMessage({type: 'SKIP_WAITING'}, [channel.port2]); }
+        catch (error) { finish(error); }
+      } else checkFailure();
+    });
+  }
+
   update.addEventListener('click', async () => {
     if (applying) return;
     if (document.querySelector('dialog[open]')) { message.textContent = 'Close the open dialog before updating.'; return; }
     applying = true; update.disabled = true; setChecking(true);
     message.textContent = 'Updating the mall… Your demo bag stays in this tab.';
     try {
-      if (nextWorker && registration?.waiting === nextWorker) {
-        const expected = await version(nextWorker);
-        await new Promise((resolve, reject) => {
-          const timer = setTimeout(() => { nextWorker.removeEventListener('statechange', changed); reject(new Error('Activation timed out')); }, 20000);
-          function changed() { if (nextWorker.state === 'activated' || nextWorker.state === 'redundant') { clearTimeout(timer); nextWorker.removeEventListener('statechange',changed); nextWorker.state === 'activated' ? resolve() : reject(new Error('Activation failed')); } }
-          nextWorker.addEventListener('statechange',changed); nextWorker.postMessage({type:'SKIP_WAITING'}); changed();
-        });
-        const actual = await version(registration.active);
-        if (actual.build !== expected.build) throw new Error('Unexpected release');
-      }
+      const worker = nextWorker || navigator.serviceWorker.controller;
+      const expected = await version(worker);
+      if (nextWorker) await waitForController(worker);
+      if (navigator.serviceWorker.controller !== worker) throw new Error('Unexpected controller');
+      // The key is scoped to this mall build, so a later release can also reload once.
+      const key = 'gjh-v11-update-reloads:' + workerURL + ':' + expected.build;
+      let reloads = 0;
+      try {
+        reloads = Number(sessionStorage.getItem(key)) || 0;
+        if (reloads < 1) sessionStorage.setItem(key, String(reloads + 1));
+      } catch { /* The applying flag guards this page if browser storage is blocked. */ }
+      if (reloads >= 1) throw new Error('Update already reloaded');
       location.reload();
     } catch {
       applying = false; update.disabled = !connection.hidden; setChecking(false);
-      message.textContent = 'The update could not finish. Your current page remains available; try again.';
+      message.textContent = updateFailed;
     }
   });
   window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); prompt = event; install.hidden = false; });
@@ -155,9 +193,10 @@ import {icon} from './assets/icons.js';
         const worker = value.installing;
         worker?.addEventListener('statechange', () => {
           if (worker.state === 'installed' && value.waiting) offer(value.waiting);
-          if (worker.state === 'redundant') status.textContent = value.active
-            ? 'The new offline release could not be verified. Your current version remains available.'
-            : 'Offline support is unavailable. You can continue browsing online.';
+          if (worker.state === 'redundant') {
+            failedWorker = worker;
+            setCheckStatus(value.active ? updateFailed : 'Offline support is unavailable. You can continue browsing online.');
+          }
         });
       });
       if (value.waiting) offer(value.waiting);
