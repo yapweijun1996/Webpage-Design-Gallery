@@ -168,6 +168,13 @@
     "detail": "Follow the five stops to the original company account, the brand history and Singapore trademark record T5924841J.", "items": ["Rochor Road", "Provision shop", "1959 filing"]
   },
   {
+    "key": "pantry-shelf", "version": "v29", "kind": "primary", "style": "Amber-lit pantry",
+    "headline": "What's in tonight's pantry?", "action": "Open shelf", "image": "demos/corporate/gjh/v29/assets/pantry-desktop.webp",
+    "composition": "poster", "background": "#1b1815", "ink": "#fbedd9", "accent": "#a53127",
+    "notes": "Separate pantry illustrations keep the stocked jars and tins clear of the copy. The headline sits below the shelves on narrow screens and to their left on desktop.",
+    "detail": "Open the shelf to reveal the food brands. Three illustrated category cards expand to show the complete 17-brand directory.", "items": ["Food & Beverage", "Health & Nutrition", "Electronics & Lifestyle"]
+  },
+  {
     "key": "rochor-photo-contact-sheet", "version": "v8", "kind": "alternate", "style": "Archival photographic contact sheet",
     "headline": "A story that began on Rochor Road.", "action": "Open the 1940s chapter", "image": "demos/corporate/gjh/v8/assets/gjh-history-composite.jpg",
     "composition": "index", "background": "#292722", "ink": "#eee5cf", "accent": "#c7bb8e",

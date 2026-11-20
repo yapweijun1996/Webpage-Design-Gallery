@@ -36,7 +36,8 @@
       if (parsed && typeof parsed === 'object') customCopy = parsed;
     } catch { /* Fall back to default English strings. */ }
   }
-  const copy = Object.assign({}, defaultCopy, customCopy);
+  const baseCopy = {...defaultCopy, ...customCopy};
+  let copy = baseCopy;
   const format = (template, release) => String(template).replace('{release}', release);
 
   const panel = document.createElement('details');
@@ -93,8 +94,18 @@
   let lastCheck = Date.now();
   const owned = worker => worker && new URL(worker.scriptURL).href === new URL('sw.js', scope).href;
   const describe = info => 'v' + info.version + ' · ' + info.build.slice(0, 8);
-  const setStatus = message => {
+  let statusKey = 'preparing';
+  let statusRelease;
+  let summaryKey = 'summary';
+  const setStatus = (key, release) => {
+    statusKey = key;
+    statusRelease = release;
+    const message = format(copy[key], release);
     if (status.textContent !== message) status.textContent = message;
+  };
+  const setSummary = key => {
+    summaryKey = key;
+    trigger.textContent = copy[key];
   };
 
   function identify(worker) {
@@ -112,7 +123,7 @@
   }
 
   function fail() {
-    setStatus(navigator.onLine ? copy.failOnline : copy.failOffline);
+    setStatus(navigator.onLine ? 'failOnline' : 'failOffline');
   }
 
   async function showState() {
@@ -125,12 +136,12 @@
         target = worker;
         apply.hidden = false;
         notice.hidden = panel.open;
-        trigger.textContent = copy.updateNotice;
-        setStatus(format(copy.readyToUpdate, describe(info)));
+        setSummary('updateNotice');
+        setStatus('readyToUpdate', describe(info));
       } else {
         pageWorker = registration.active;
-        trigger.textContent = copy.summary;
-        setStatus(format(copy.availableOffline, describe(info)));
+        setSummary('summary');
+        setStatus('availableOffline', describe(info));
       }
     } catch { fail(); }
   }
@@ -160,7 +171,7 @@
     if (check.disabled || applying) return;
     check.disabled = true;
     lastCheck = Date.now();
-    setStatus(copy.checking);
+    setStatus('checking');
     try {
       if (!registration?.active) await register();
       else await registration.update();
@@ -179,14 +190,14 @@
     if (!target || applying) return;
     applying = true;
     apply.disabled = check.disabled = true;
-    setStatus(copy.applying);
+    setStatus('applying');
     if (target.state === 'activated') { reloadOnce(); return; }
     const worker = target;
     worker.addEventListener('statechange', () => { if (worker.state === 'activated') reloadOnce(); });
     timer = setTimeout(() => {
       applying = false;
       apply.disabled = check.disabled = false;
-      setStatus(copy.updateSlow);
+      setStatus('updateSlow');
     }, 15000);
     worker.postMessage({type: 'SKIP_WAITING'});
   });
@@ -206,7 +217,7 @@
   window.addEventListener('appinstalled', () => {
     installPrompt = undefined;
     installButton.hidden = true;
-    setStatus(copy.installed);
+    setStatus('installed');
   });
   installButton.addEventListener('click', async () => {
     if (installPrompt) {
@@ -214,7 +225,7 @@
       installPrompt = undefined;
       try { await prompt.prompt(); await prompt.userChoice; } catch { fail(); }
     } else {
-      setStatus(copy.installInstructions);
+      setStatus('installInstructions');
     }
   });
 
@@ -255,6 +266,16 @@
     header.classList.toggle('demo-header-away', !engaged && y > 48 && y > previousY);
     previousY = y;
   }
+  document.addEventListener('demo-pwa-copy-change', event => {
+    copy = {...baseCopy, ...event.detail};
+    setSummary(summaryKey);
+    setStatus(statusKey, statusRelease);
+    installButton.textContent = copy.installButton;
+    check.textContent = copy.checkButton;
+    apply.textContent = copy.applyButton;
+    notice.textContent = copy.updateNotice;
+    topButton.setAttribute('aria-label', copy.backToTopLabel);
+  });
   window.addEventListener('scroll', scrollControls, {passive: true});
   panel.addEventListener('toggle', updateTop);
   register().catch(fail);

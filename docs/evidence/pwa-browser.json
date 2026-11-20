@@ -3,6 +3,7 @@
   "checks": {
     "manifestAndChromeInstallability": "PASS",
     "responsiveSafeAreaCSSReducedMotionSmartHeaderScrollTop": "PASS",
+    "missingCachedStylesheetIsRepairedFromNetwork": "PASS",
     "offlineLaunchSearchFiltersAndExplicitDemoFallback": "PASS",
     "identityMismatchAndMixedFileHashFailClosed": "PASS",
     "comparisonSelectionBlocksUpdate": "PASS",

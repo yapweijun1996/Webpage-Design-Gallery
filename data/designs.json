@@ -969,6 +969,45 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "gjh-v29",
+    "companyId": "gjh",
+    "slug": "v29",
+    "version": "v29",
+    "title": "The Pantry Shelf",
+    "description": "Open the shelf to browse 17 brands across food and beverage, health and nutrition, and electronics and lifestyle.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 260,
+    "demoPath": "demos/corporate/gjh/v29/index.html",
+    "thumbnail": "demos/corporate/gjh/v29/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v29/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v29/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v29/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",

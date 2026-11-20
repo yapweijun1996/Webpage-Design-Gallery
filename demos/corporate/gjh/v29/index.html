@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en-SG">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Open the pantry shelf to browse 17 brands across three categories.">
+  <meta name="theme-color" content="#1b1815">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>The Pantry Shelf</title>
+  <link rel="icon" href="../../../../assets/icons/gallery-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v29">
+  <link rel="stylesheet" href="../../../../assets/tokens.css">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="../../../../src/demo-pwa.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <a class="skip" href="#shelf" data-i18n="skip">Skip to the brand directory</a>
+  <header class="site-header frame">
+    <p class="wordmark">Goh Joo Hin</p>
+    <div class="languages" role="group" aria-label="Language" hidden>
+      <button type="button" data-lang="en" lang="en-SG" aria-label="English" aria-pressed="true">EN</button>
+      <button type="button" data-lang="zh" lang="zh-Hans" aria-pressed="false">中文</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-heading">
+      <figure class="scene">
+        <picture>
+          <source media="(min-width: 1024px)" srcset="assets/pantry-desktop.webp" width="1536" height="1024">
+          <img src="assets/pantry-mobile.webp" width="864" height="1296" alt="Wooden pantry shelves stocked with jars, tins and baskets" fetchpriority="high">
+        </picture>
+        <figcaption class="frame" data-i18n="credit">AI concept illustration</figcaption>
+      </figure>
+      <div class="hero-copy frame">
+        <h1 id="hero-heading"><span data-i18n="headlineStart">What’s in</span> <span data-i18n="headlineEnd">tonight’s pantry?</span></h1>
+        <a class="open-shelf" href="#shelf">
+          <span data-i18n="open">Open shelf</span>
+          <span class="down" aria-hidden="true">↓</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="shelf frame" id="shelf" tabindex="-1" aria-labelledby="shelf-heading">
+      <div class="shelf-intro">
+        <h2 id="shelf-heading" data-i18n="directory">Brand directory</h2>
+        <p data-i18n="note">Brand list follows public channel listings; relationships vary.</p>
+      </div>
+      <div class="categories">
+        <details>
+          <summary>
+            <img src="assets/category-food.webp" width="680" height="680" alt="" loading="lazy">
+            <span class="category-copy">
+              <span class="category-name" data-i18n="food">Food &amp; Beverage</span>
+              <span class="category-count" data-brand-count="9">9 brands</span>
+            </span>
+            <span class="disclosure-icon" aria-hidden="true"></span>
+          </summary>
+          <ul class="brands" role="list">
+            <li>New Moon</li>
+            <li>MILI</li>
+            <li>GOGO</li>
+            <li>Flying Wheel</li>
+            <li>Gu Long</li>
+            <li>Skippy</li>
+            <li>SPAM</li>
+            <li>Hormel</li>
+            <li>California Mexico</li>
+          </ul>
+        </details>
+        <details>
+          <summary>
+            <img src="assets/category-health.webp" width="660" height="660" alt="" loading="lazy">
+            <span class="category-copy">
+              <span class="category-name" data-i18n="health">Health &amp; Nutrition</span>
+              <span class="category-count" data-brand-count="3">3 brands</span>
+            </span>
+            <span class="disclosure-icon" aria-hidden="true"></span>
+          </summary>
+          <ul class="brands" role="list">
+            <li>Borsch Med</li>
+            <li>Pien Tze Huang</li>
+            <li>Zeria</li>
+          </ul>
+        </details>
+        <details>
+          <summary>
+            <img src="assets/category-electronics.webp" width="680" height="680" alt="" loading="lazy">
+            <span class="category-copy">
+              <span class="category-name" data-i18n="electronics">Electronics &amp; Lifestyle</span>
+              <span class="category-count" data-brand-count="5">5 brands</span>
+            </span>
+            <span class="disclosure-icon" aria-hidden="true"></span>
+          </summary>
+          <ul class="brands" role="list">
+            <li>Sony</li>
+            <li>LG</li>
+            <li>Casio</li>
+            <li>GP Batteries</li>
+            <li>Gigaset</li>
+          </ul>
+        </details>
+      </div>
+      <p class="category-credit" data-i18n="categoryCredit">Category images · AI concept illustration</p>
+    </section>
+  </main>
+
+  <footer class="site-footer frame">
+    <div class="footer-row">
+      <p data-i18n="disclaimer">Independent design concept, not affiliated with Goh Joo Hin.</p>
+      <a href="https://www.gjhglobal.com/"><span data-i18n="official">Official Goh Joo Hin website</span> <span aria-hidden="true">↗</span></a>
+    </div>
+    <div data-demo-pwa-mount></div>
+  </footer>
+</body>
+</html>

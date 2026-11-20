@@ -40,7 +40,7 @@ def check(browser, base):
     alternates = sum(entry["kind"] == "alternate" for entries in references.values() for entry in entries)
     # Full-page studies and their head metadata links were introduced after the original audit.
     # v24 and v25 also have primary references without before/after audits.
-    full_page_studies = {"gjh-v20", "gjh-v21", "gjh-v22", "gjh-v24", "gjh-v25"}
+    full_page_studies = {"gjh-v20", "gjh-v21", "gjh-v22", "gjh-v24", "gjh-v25", "gjh-v29"}
     with browser.new_context(viewport={"width": 1440, "height": 900}) as context:
         page = context.new_page()
         errors = []

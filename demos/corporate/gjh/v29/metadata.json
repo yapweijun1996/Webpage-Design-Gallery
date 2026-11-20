@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - The Pantry Shelf",
+  "version": "v29",
+  "designStyle": "A full-bleed amber-lit pantry illustration leads into a bilingual brand directory with three expandable shelves.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v29/",
+  "officialWebsite": "https://www.gjhglobal.com/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v29",
+  "companyId": "gjh",
+  "displayTitle": "The Pantry Shelf",
+  "summary": "Open the shelf to browse 17 brands across food and beverage, health and nutrition, and electronics and lifestyle.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 260
+}
