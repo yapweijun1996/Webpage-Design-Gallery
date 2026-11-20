@@ -557,6 +557,7 @@ http.createServer(async (req, res) => {
   }
   if (p === '/api/stop' && req.method === 'POST') { stopAll(); return send(res, 200, { ok: true }); }
   if (p.startsWith('/p/')) return serveFile(res, PROJECT, p.slice(3));
+  if (p.startsWith('/assets/generated/')) return serveFile(res, path.join(PROJECT, 'assets', 'generated'), p.slice(18)); // generated images referenced as ../assets/generated/* from sections
   if (p.startsWith('/gjh/')) return serveFile(res, GJH_ASSETS, p.slice(5));
   if (p.startsWith('/ds/')) return serveFile(res, DS_DIR, p.slice(4));
   const cat = /^\/i18n\/(en|zh-Hans|ms)\.json$/.exec(p);
