@@ -21,6 +21,9 @@ Status legend: [x] done and verified, [~] in progress, [ ] not started.
 - [ ] Runner and model settings: allowlist enforcement (codex and pi only; 6.2 Sol and 6.1 Terra; medium and xhigh), runner adapters, Settings page, CLI `settings` commands. Default effort changes from low to medium.
 - [ ] Verification: browser matrix (390x844, 1440x900; themes x languages), offline reload of exported PWA, reduced motion, screenshots viewed.
 - [x] KB-MCP reflection (2026-11-21): new skill `agent:live-multi-agent-design-swarm` v1.0.0, `agent:parallel-coding-workers` updated to v1.4.0, 10 memories saved (project Webpage-Design-Gallery); verified by recall. Source text in `swarm/LESSONS.md`.
+- [x] Team editor in Settings (2026-11-21): parallel workers with job titles, per-worker runner/model/effort; `swarm/TEAM_SPEC.md`, `lib/team.js`, `/api/team`; Settings layout polished by a Codex worker. Verified: API round trip and live page.
+- [x] Squad mode (2026-11-21): specialists work on the SAME screen in layer files `NN-name.<layer>.css`; `swarm/SQUAD_SPEC.md`, `lib/layers.js`, `lib/squad.js`, `squad/roster.json`; viewer switch and `swarm squad on|off`. Verified live on the GJH hero incl. research and image generation. Open: larger generated images, other screens, real iPhone, occasional ownership guard false warnings.
+- [x] Screen focus, autopilot, fast lane, research role, role-based runners (2026-11-21): in use on the GJH page.
 
 Not verifiable headlessly (stays UNVERIFIED until a real device): iPhone gesture zoom lock, PWA install prompt on iOS, Safari service worker behaviour.
 
