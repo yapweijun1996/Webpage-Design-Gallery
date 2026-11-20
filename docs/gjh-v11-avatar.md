@@ -21,11 +21,34 @@ Avatar anisotropy is 2× on phones and 4× on tablets/desktops subject to hardwa
 
 Keep the tier's present AA policy pending a matched live test. Record the GL sample count on the default framebuffer and the base render target's samples on Detailed. At matched drawing-buffer sizes, compare direct output and Detailed compositing while walking and rotating past the same hair outline. On a measurement build compare 2× MSAA on the base target or FXAA independently. Test 100%, 80% and 60% render scale. Judge temporal shimmer in motion and skin/atlas softening in the native crops. Record GPU time and p95/p99 without recording; retain a change only if it improves the silhouette within the device targets.
 
-## Round 2 player portrait
+## Redrawn player face
 
-Desktop and tablet sessions starting on Balanced or Detailed load `assets/gjh-tripo-visitor-2k.glb`. Low and phone sessions use the 1K near mesh. The texture choice lasts for the session so changing quality while walking never initiates a 2K upload. A missing 2K download falls back to the 1K rig. Both near meshes use the existing 512² far LOD. The 2K map replaces the 1K allocation (+16 MiB including RGBA8 mips) and uses the GPU's maximum anisotropy, linear magnification, trilinear minification and implicit zero mip bias. Eyes and glasses share this opaque map. The loader drives the existing sliced model queue and waits for its GPU fence before the first visible draw. A per-material uniform adds neutral fill in proportion to the head's lighting deficit, retaining the existing rim and shared shader program.
+The editable [face artwork](../scripts/avatar_art/visitor-face.svg) uses the original rig's frontal bind pose. The SVG has a 500-unit design grid and renders at 4096². The original nose and chin positions, iris centres, red hair, light skin and purple spectacles provide the registration. The skin layer contains the eyelids, lashes, brows, two catchlights per iris, mouth, blush and lens reflections. The rim layer belongs to the raised spectacle surface. Keeping it off the cheeks prevents a second outline when the character turns.
 
-The CPU bake verifies the 4K source hash and bind matrices, keeps the runtime clips, and simplifies the geometry while preserving UV seams. Permissive simplification in the earlier candidate introduced wrong-colour triangles across atlas charts. The head charts receive sqrt(3) times the linear sampling density of the body charts, relative to their density in the source. Four-pixel source-colour gutters separate charts.
+The player loads a single opaque atlas for each LOD. Balanced and Detailed on desktop and tablet select 2048² for the near mesh. Phones and Low select 1024². Both use the 512² far mesh. Session-tier selection, sliced preparation and the preload fence keep the near atlas off the first visible draw's upload path. Sampling is capped at 4× on desktop/tablet and 2× on phones, subject to hardware limits. The complete RGBA8 mip chains differ by 16 MiB between the two near sizes. Relative to the prior release, all three dimensions are unchanged. Head fill and rim lighting continue to use the existing avatar shader.
+
+### Rebuild the player
+
+Use the original 4K GLB identified by the SHA-256 in the [visitor source manifest](../demos/corporate/gjh/v11/assets/gjh-tripo-visitor-source.json). For the offline build, make `sharp` and `gltf-validator` available to Node, provide the meshoptimizer simplifier from Three, and select a Python with Pillow and NumPy. Set `BLENDER` to Blender 5.1. On a sandboxed Mac that needs the startup workaround, set `BLENDER_METAL_GUARD` to the process-local dylib and use the temporary Blender executable described in [the signage build](gjh-v11-signage-assets.md).
+
+```sh
+out=$(mktemp -d)
+node scripts/avatar_art/render_face.cjs "$out"
+node scripts/bake_tripo_candidate.mjs "$SOURCE_GLB" "$out/2k.glb" "$SIMPLIFIER" \
+  "$out/overlay.png" "$out/skin.png" "$out/1k.glb" "$out/512.glb"
+```
+
+Blender packs the face charts at 4.00 times the texels per square metre of the remaining charts. The desktop bake integrates four vector-layer samples per destination texel and compensates for bilinear sampling on painted edges. The phone bake protects the front of the head during simplification. The desktop, phone and far meshes have 13,997, 11,763 and 3,921 triangles respectively.
+
+The bake validates each GLB before writing it. Use fresh output paths. The [matched camera renders and measurement commands](evidence/gjh-v11-face-redraw/README.md) use the previous shipped 2K mesh as the baseline. The Tripo boy has a different head mesh and UV layout and retains his existing artwork.
+
+For a browser-free smoke test, run `node --test tests/gjh_tripo_visitor.test.mjs tests/gjh_model_warmup.test.mjs`. The tests parse the shipped rigs, inspect atlas dimensions and exercise the loading and warmup paths. Early-entry frame counts require a live browser.
+
+## Round 2 player portrait (historical baseline)
+
+Desktop and tablet sessions starting on Balanced or Detailed load `assets/gjh-tripo-visitor-2k.glb`. Low and phone sessions use the 1K near mesh. The texture choice lasts for the session so changing quality while walking never initiates a 2K upload. A missing 2K download falls back to the 1K rig. Both near meshes use the existing 512² far LOD. The Round 2 2K map replaced the 1K allocation (+16 MiB including RGBA8 mips) and used the GPU's maximum anisotropy, linear magnification, trilinear minification and implicit zero mip bias. Eyes and glasses share this opaque map. The loader drives the existing sliced model queue and waits for its GPU fence before the first visible draw. A per-material uniform adds neutral fill in proportion to the head's lighting deficit, retaining the existing rim and shared shader program.
+
+The Round 2 CPU bake verified the 4K source hash and bind matrices, keeps the runtime clips, and simplifies the geometry while preserving UV seams. Permissive simplification in the earlier candidate introduced wrong-colour triangles across atlas charts. The head charts receive sqrt(3) times the linear sampling density of the body charts, relative to their density in the source. Four-pixel source-colour gutters separate charts.
 
 ```sh
 export NODE_PATH="/path/to/Blender-3D-Gallery/node_modules"
@@ -34,7 +57,7 @@ node scripts/bake_tripo_candidate.mjs /path/to/motion-BRgAS3uq.glb /tmp/portrait
   "$NODE_PATH/three/examples/jsm/libs/meshopt_simplifier.module.js"
 ```
 
-Supply an unused output path. The shipped file has 13,997 triangles, 3,484,156 bytes and SHA-256 `c18ad275c1c255e02cd6d0bd5750f796ab9945f982f3ec68487209c6a3b81ff9`. Khronos validation reported zero errors and one existing skinned-mesh warning.
+Supply an unused output path. The Round 2 file had 13,997 triangles, 3,484,156 bytes and SHA-256 `c18ad275c1c255e02cd6d0bd5750f796ab9945f982f3ec68487209c6a3b81ff9`. Khronos validation reported zero errors and one existing skinned-mesh warning.
 
 ### Measurements
 

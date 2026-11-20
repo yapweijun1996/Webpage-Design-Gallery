@@ -70,13 +70,14 @@ function createSitClip(T, source, hips, placement) {
 }
 
 export async function createCharacterTripo(T, createLocomotionContinuity, prepareModel, portrait) {
-  let nearModel = portrait ? model + '-2k' : model;
+  let highResolution = Boolean(portrait?.highResolution);
+  let nearModel = highResolution ? model + '-2k' : model;
   let gltf;
   try {
     gltf = await loadVisitorGLTF(new URL(`./${nearModel}.glb`, import.meta.url));
   } catch (error) {
-    if (!portrait) throw error;
-    portrait = null;
+    if (!highResolution) throw error;
+    highResolution = false;
     nearModel = model;
     gltf = await loadVisitorGLTF(new URL(`./${model}.glb`, import.meta.url));
   }
@@ -90,14 +91,14 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     }
     const prepareMaterial = material => {
       prepareTripoMaterial(material);
-      if (portrait) material.userData.portraitLift = .55;
+      if (highResolution) material.userData.portraitLift = .55;
     };
     prepareMaterial(mesh.material);
     if (portrait) {
       // Eyes and glasses are painted into the one opaque base-colour map.
       mesh.material.map.magFilter = T.LinearFilter;
       mesh.material.map.minFilter = T.LinearMipmapLinearFilter;
-      mesh.material.map.anisotropy = Math.max(1, portrait.anisotropy);
+      mesh.material.map.anisotropy = Math.min(mesh.material.map.anisotropy, Math.max(1, portrait.anisotropy));
       mesh.material.map.needsUpdate = true;
     }
     const hips = mesh.skeleton.bones.find(bone => /^mixamorig:?Hips$/.test(bone.name));

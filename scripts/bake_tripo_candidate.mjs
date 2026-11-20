@@ -1,4 +1,4 @@
-// CPU-only offline candidate. Arguments and validation procedure are in docs/gjh-v11-avatar.md.
+// Offline visitor atlas builder. Reproduction commands are in docs/gjh-v11-avatar.md.
 import assert from 'node:assert/strict';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
@@ -8,7 +8,8 @@ import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 
-const [source, output, simplifier] = process.argv.slice(2);
+const [source, output, simplifier, overlay, skinOverlay, lowOutput, farOutput] = process.argv.slice(2);
+if (overlay) assert.ok(skinOverlay && lowOutput && farOutput, 'Provide the 1K and 512 output paths');
 const assets = new URL('../demos/corporate/gjh/v11/assets/', import.meta.url);
 const bytes = readFileSync(source);
 const metadata = JSON.parse(readFileSync(new URL('gjh-tripo-visitor-source.json', assets)));
@@ -47,6 +48,22 @@ function writeGLB(doc, views) {
   return Buffer.concat([header, json, binary]);
 }
 
+// Copy all per-vertex values verbatim, including joint indices and skin weights.
+function compactGeometry(doc, views, sourceViews, selected, indices) {
+  for (const [i, stride] of [12, 12, 8, 4, 16].entries()) {
+    const source = sourceViews[i];
+    views[i] = Buffer.concat(selected.map(id => source.subarray(id*stride, (id+1)*stride)));
+    doc.accessors[i].count = selected.length;
+  }
+  views[5] = Buffer.from(new Uint16Array(indices).buffer);
+  doc.accessors[5].count = indices.length;
+  const position = floats(views[0]);
+  for (const bound of ['min', 'max']) {
+    doc.accessors[0][bound] = [0, 1, 2].map(axis =>
+      Math[bound](...selected.map((_, i) => position[3*i+axis])));
+  }
+}
+
 const raw = readGLB(bytes);
 const runtime = readGLB(readFileSync(new URL(metadata.runtime_exports.lod0, assets)));
 const jointNames = doc => doc.skins[0].joints.map(i => doc.nodes[i].name);
@@ -76,24 +93,51 @@ const directory = mkdtempSync(join(tmpdir(), 'tripo-portrait-'));
 try {
   writeFileSync(join(directory, 'geometry.json'), JSON.stringify([positions, packed(uv, 2), indices]));
   writeFileSync(join(directory, 'source.jpg'), raw.views[raw.doc.images[0].bufferView]);
-  execFileSync(process.env.PYTHON || 'python3', [fileURLToPath(new URL('./bake_tripo_atlas.py', import.meta.url)), directory]);
-  for (const [i, stride] of [12, 12, 8, 4, 16].entries()) {
-    views[i] = Buffer.concat(vertexIds.map(id => raw.views[i].subarray(id*stride, (id+1)*stride)));
-    doc.accessors[i].count = vertexIds.length;
-  }
+  const baker = overlay ? './project_tripo_face.py' : './bake_tripo_atlas.py';
+  execFileSync(process.env.PYTHON || 'python3', [fileURLToPath(new URL(baker, import.meta.url)),
+    directory, ...(overlay ? [overlay, skinOverlay] : [])], {stdio:'inherit'});
+  compactGeometry(doc, views, raw.views, vertexIds, indices);
   views[2] = Buffer.from(new Float32Array(JSON.parse(readFileSync(join(directory, 'uv.json'))).flat()).buffer);
-  views[5] = Buffer.from(new Uint16Array(indices).buffer);
   views[doc.images[0].bufferView] = readFileSync(join(directory, 'atlas.jpg'));
-  doc.accessors[5].count = indices.length;
-  for (const bound of ['min','max']) {
-    doc.accessors[0][bound] = [0,1,2].map(axis => Math[bound](...positions.map(p => p[axis])));
-  }
-  const result = writeGLB(doc, views);
+  const exports = [];
   const validator = createRequire(import.meta.url)('gltf-validator');
-  const {issues} = await validator.validateBytes(result);
-  assert.equal(issues.numErrors, 0, JSON.stringify(issues.messages.slice(0, 10)));
-  writeFileSync(output, result, {flag:'wx'});
-  console.log(JSON.stringify({triangles:indices.length/3, bytes:result.length, warnings:issues.numWarnings}));
+  async function stageExport(outputDoc, outputViews, targetPath) {
+    const result = writeGLB(outputDoc, outputViews);
+    const {issues} = await validator.validateBytes(result);
+    assert.equal(issues.numErrors, 0, JSON.stringify(issues.messages.slice(0, 10)));
+    exports.push({targetPath, result, triangles:outputDoc.accessors[5].count / 3, issues});
+
+  }
+  await stageExport(doc, views, output);
+  if (overlay) {
+    // Keep the phone triangle envelope and the crack-fixed face from the 2K mesh.
+    const lockFace = Uint8Array.from(positions, ([, y, z]) => y > .55 && z > -.04 ? 1 : 0);
+    const [lowIndices] = MeshoptSimplifier.simplifyWithAttributes(new Uint16Array(indices),
+      floats(views[0]), 3, floats(views[2]), 2, [1, 1], lockFace, 11764*3, 1, []);
+    assert.ok(lowIndices.length <= 11764*3, 'Exceeded the existing phone geometry budget');
+    const lowVertices = [...new Set(lowIndices)];
+    const lowRemap = new Map(lowVertices.map((id, i) => [id, i]));
+    compactGeometry(doc, views, views, lowVertices, Array.from(lowIndices, id => lowRemap.get(id)));
+    views[doc.images[0].bufferView] = readFileSync(join(directory, 'low.jpg'));
+    await stageExport(doc, views, lowOutput);
+    const far = readGLB(readFileSync(new URL(metadata.runtime_exports.lod1, assets)));
+    far.views[far.doc.images[0].bufferView] = readFileSync(join(directory, 'far.jpg'));
+    await stageExport(far.doc, far.views, farOutput);
+  }
+  const created = [];
+  try {
+    for (const {targetPath, result} of exports) {
+      writeFileSync(targetPath, result, {flag:'wx'});
+      created.push(targetPath);
+    }
+  } catch (error) {
+    for (const path of created) rmSync(path);
+    throw error;
+  }
+  for (const {targetPath, result, triangles, issues} of exports) {
+    console.log(JSON.stringify({targetPath, triangles, bytes:result.length,
+      errors:issues.numErrors, warnings:issues.numWarnings}));
+  }
 } finally {
   rmSync(directory, {recursive:true, force:true});
 }

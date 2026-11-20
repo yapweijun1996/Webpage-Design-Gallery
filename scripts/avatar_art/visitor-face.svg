@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="4096" height="4096" viewBox="0 0 500 500">
+  <title>GJH visitor face, front projection in bind pose</title>
+  <desc>Projection x = 250 + 1050 X, y = 1050 (1 - Y), viewed from positive Z.</desc>
+  <defs>
+    <radialGradient id="skin" cx=".48" cy=".27" r=".8">
+      <stop stop-color="#ffe5ce"/><stop offset=".66" stop-color="#ffdbc4"/>
+      <stop offset=".91" stop-color="#fac7ac"/><stop offset="1" stop-color="#f4b697"/>
+    </radialGradient>
+    <radialGradient id="fade">
+      <stop offset=".79" stop-color="white"/><stop offset="1" stop-color="black"/>
+    </radialGradient>
+    <mask id="edge"><ellipse cx="249" cy="309" rx="168" ry="120" fill="url(#fade)"/></mask>
+    <radialGradient id="rouge">
+      <stop stop-color="#eb777b" stop-opacity=".78"/><stop offset=".59" stop-color="#f18d87" stop-opacity=".44"/>
+      <stop offset="1" stop-color="#f79f89" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="white" x2=".18" y2="1">
+      <stop stop-color="#d8b7bf"/><stop offset=".34" stop-color="#fff2ee"/>
+      <stop offset=".74" stop-color="#fffdfa"/><stop offset="1" stop-color="#f4d6c9"/>
+    </linearGradient>
+    <linearGradient id="ruby" x1=".3" x2=".53" y2="1">
+      <stop stop-color="#3b1222"/><stop offset=".38" stop-color="#6a1428"/>
+      <stop offset=".72" stop-color="#be2a30"/><stop offset=".9" stop-color="#eb6550"/>
+      <stop offset="1" stop-color="#ffab78"/>
+    </linearGradient>
+    <linearGradient id="brow" x2=".9" y2=".45">
+      <stop stop-color="#573031"/><stop offset=".53" stop-color="#6e3434"/><stop offset="1" stop-color="#43232b"/>
+    </linearGradient>
+    <linearGradient id="frame" x2=".18" y2="1">
+      <stop stop-color="#994ac0"/><stop offset=".28" stop-color="#68288b"/>
+      <stop offset=".7" stop-color="#562369"/><stop offset="1" stop-color="#9948b5"/>
+    </linearGradient>
+    <linearGradient id="glass" x1=".15" x2=".88" y2=".93">
+      <stop stop-color="#c9b9ff" stop-opacity=".15"/><stop offset=".55" stop-color="#f5e4ff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#d7c1f6" stop-opacity=".12"/>
+    </linearGradient>
+    <path id="aperture" d="M130 307 C137 286 154 279 176 279 C195 278 211 292 216 308
+      C217 328 204 343 186 348 C162 352 140 344 133 327 Q130 317 130 307Z"/>
+    <clipPath id="eyelids"><use xlink:href="#aperture"/></clipPath>
+    <g id="eye">
+      <path d="M129 282 Q166 257 201 278 Q211 284 216 295 C196 277 166 266 134 284Z" fill="#cf9288"/>
+      <use xlink:href="#aperture" fill="url(#white)"/>
+      <g clip-path="url(#eyelids)">
+        <ellipse cx="182" cy="313" rx="29.5" ry="34.5" fill="#210e19"/>
+        <ellipse cx="182" cy="313" rx="25.8" ry="31.1" fill="url(#ruby)"/>
+        <path d="M158 319 Q160 339 180 343 Q199 345 206 323 Q198 338 183 338 Q165 337 158 319Z" fill="#ffbf8d" opacity=".92"/>
+        <!-- The lower iris catches the sky in small, tapered carmine and amber facets. -->
+        <path d="M157 314 Q159 325 168 333 L168 328 Q162 321 161 314Z
+                 M196 332 Q204 327 207 316 L203 315 Q200 322 195 326Z" fill="#eb654d"/>
+        <path d="M162 325 L168 331 L167 326Z M199 326 L203 319 L203 324Z" fill="#ffb289"/>
+        <ellipse cx="182" cy="311" rx="15.2" ry="19" fill="#190e17"/>
+        <path d="M168 320 Q175 333 190 326 Q183 336 172 329Z" fill="#ffac85"/>
+        <path d="M169 331 Q172 334 174 334 M191 335 L194 333" stroke="#ffceaa" stroke-width="1.4" stroke-linecap="round"/>
+      </g>
+      <path d="M132 320 C134 337 149 348 171 350 C189 352 205 344 212 330 C206 346 190 354 172 353 C150 352 135 342 132 330Z" fill="#552637"/>
+      <path d="M135 324 Q139 341 159 346 Q170 350 181 347
+               Q160 349 148 339 Q139 332 135 324Z" fill="#fff8ed"/>
+      <path d="M138 336 Q145 346 160 349 Q150 347 146 344
+               Q142 347 139 345 L141 342Z" fill="#683244"/>
+      <path d="M215 307 C204 287 190 283 175 284 C153 282 139 294 132 311
+        L129 320 Q126 306 129 299 Q123 299 117 288 Q124 293 131 292
+        Q125 286 124 279 Q131 286 138 285 Q132 279 132 273 Q139 281 146 281
+        C166 268 190 272 205 287 Q214 296 215 307Z" fill="#1e101b"/>
+      <path d="M145 285 Q161 273 178 276" fill="none" stroke="#69313b" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M144 352 Q155 357 170 356" fill="none" stroke="#d68e80" stroke-width="1.15" stroke-linecap="round"/>
+      <path d="M138 337 Q132 339 129 334 Q132 340 140 340
+               M144 343 Q139 347 136 344 Q138 350 148 346Z" fill="#62313e"/>
+      <path d="M148 277 Q167 263 191 273 Q202 277 207 283
+               Q185 270 169 272 Q157 273 148 277Z" fill="#68333e"/>
+    </g>
+    <path id="lens" d="M106 289 C111 272 133 265 157 267 C186 267 216 272 227 287
+      Q235 295 231 307 C228 332 217 351 196 355 C174 360 142 358 127 347
+      C114 337 111 313 106 289Z"/>
+    <g id="spectacle">
+      <use xlink:href="#lens" fill="url(#glass)"/>
+      <g class="rim">
+      <use xlink:href="#lens" fill="none" stroke="#45215a" stroke-width="5.4"/>
+      <use xlink:href="#lens" fill="none" stroke="url(#frame)" stroke-width="3.35"/>
+      <path d="M116 280 C133 263 161 267 190 271 M120 337 Q122 342 127 346 M141 353 Q156 358 179 356"
+            fill="none" stroke="#f0c9fa" stroke-width="1.65" stroke-linecap="round"/>
+      </g>
+      <!-- A small window reflection falls across the shaded edge of the lens. -->
+      <path d="M143 307 Q148 289 166 280 L161 287 Q152 294 147 306Z" fill="#fff6f5" opacity=".83"/>
+      <path d="M149 307 Q153 298 157 295" fill="none" stroke="#fff7f3" opacity=".64"
+            stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M123 303 Q130 287 142 282 M126 309 L131 299" fill="none" stroke="#fff5ff"
+            stroke-opacity=".76" stroke-width="2" stroke-linecap="round"/>
+      <path class="rim" d="M107 287 Q100 286 98 290 L101 296 L110 298Z" fill="#7d4192"/>
+    </g>
+    <path id="eyebrow" d="M143 244 C158 229 175 221 190 226 C200 228 209 237 212 247
+      C205 243 200 240 194 239 C173 232 157 237 143 244Z" fill="url(#brow)"/>
+  </defs>
+  <g mask="url(#edge)">
+    <rect x="80" y="188" width="338" height="244" fill="url(#skin)"/>
+    <ellipse cx="161" cy="364" rx="33" ry="17" fill="url(#rouge)"/>
+    <ellipse cx="335" cy="364" rx="33" ry="17" fill="url(#rouge)"/>
+    <ellipse cx="247" cy="354" rx="12" ry="8" fill="url(#rouge)" opacity=".69"/>
+  </g>
+  <use xlink:href="#eyebrow"/><use xlink:href="#eyebrow" transform="translate(496 0) scale(-1 1)"/>
+  <use xlink:href="#eye"/><use xlink:href="#eye" transform="translate(496 0) scale(-1 1)"/>
+  <path d="M151 240 Q171 224 188 228 Q177 227 163 235Z
+           M345 240 Q325 224 308 228 Q319 227 333 235Z" fill="#af6959"/>
+  <g fill="#fffdf8">
+    <ellipse cx="188" cy="296.5" rx="8.1" ry="8.4"/><circle cx="171" cy="329" r="3.85"/>
+    <ellipse cx="308" cy="296.5" rx="8.1" ry="8.4"/><circle cx="325" cy="329" r="3.85"/>
+  </g>
+  <path d="M238 352 Q240 355 243 355 Q241 358 239 356Z" fill="#ce917e"/>
+  <path d="M239 353 Q245 357 253 353 Q250 360 244 359 Q241 358 239 353Z" fill="#d9927b"/>
+  <ellipse cx="244" cy="350" rx="2.9" ry="1.45" fill="#fff0d8"/>
+  <path d="M221 369 C234 382 257 385 275 368 C271 381 259 389 246 389 C234 388 225 380 221 369Z" fill="#671629"/>
+  <path d="M229 378 Q248 388 269 376 Q253 394 234 384Z" fill="#ed4854"/>
+  <path d="M230 377 Q244 385 260 379 Q249 386 239 383 Q234 382 230 377Z" fill="#ffd5c1"/>
+  <path d="M234 390 Q247 394 262 389 Q255 396 245 395 Q237 394 234 390Z" fill="#fff0df"/>
+  <use xlink:href="#spectacle"/><use xlink:href="#spectacle" transform="translate(496 0) scale(-1 1)"/>
+  <g class="rim">
+  <path d="M230 300 Q247 286 266 300" fill="none" stroke="#4c225e" stroke-width="6.1" stroke-linecap="round"/>
+  <path d="M230 298.5 Q247 285 266 298.5" fill="none" stroke="#9442ad" stroke-width="3.25" stroke-linecap="round"/>
+  <path d="M237 293.7 Q246 290 252 292" fill="none" stroke="#eac4ec" stroke-width="1.15" stroke-linecap="round"/>
+  </g>
+</svg>

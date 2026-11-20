@@ -3082,6 +3082,9 @@ var WINDOW_SIZE = 90;
 var MIN_SCALE = 60;
 var SCALE_STEP = 5;
 var RECOVERY_MS = 1e4;
+function usesPortraitAtlas(deviceClass, tier) {
+  return deviceClass !== "phone" && (tier === "balanced" || tier === "detailed");
+}
 var qualityPreference = (value) => TIERS.includes(value) ? value : "auto";
 var positive = (value) => Number.isFinite(value) && value > 0;
 function detectDeviceClass({
@@ -7814,7 +7817,8 @@ async function initialize() {
     ...options
   });
   const portraitProfile = quality.resolve(innerWidth);
-  const portrait = quality.deviceClass !== "phone" && portraitProfile.tier !== "low" ? {
+  const portrait = {
+    highResolution: usesPortraitAtlas(quality.deviceClass, portraitProfile.tier),
     anisotropy: renderer.capabilities.getMaxAnisotropy(),
     async preload(mesh) {
       let frame2;
@@ -7835,7 +7839,7 @@ async function initialize() {
         cancelAnimationFrame(frame2);
       }
     }
-  } : null;
+  };
   const { createPlayer } = await import("./assets/player.bundle.js");
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats, world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);
   if (player.npcSource)

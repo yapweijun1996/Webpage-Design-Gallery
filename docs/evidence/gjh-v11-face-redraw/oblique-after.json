@@ -1,0 +1,27 @@
+{
+  "asset_sha256": "6e2746c1d46043e1ef9c931152552896d5797d9530dfbd0a031da75c12ec4066",
+  "renderer": "CYCLES",
+  "blender": "5.1.2",
+  "size": [
+    1920,
+    900
+  ],
+  "vertical_fov_degrees": 64,
+  "normalized_height_m": 1.7,
+  "pose": "bind",
+  "focus": [
+    0.0019119617063552141,
+    -0.06577101349830627,
+    0.5011214017868042
+  ],
+  "forward": [
+    -0.00012139917816966772,
+    -1.0,
+    0.0
+  ],
+  "native_units_per_metre": 0.5758231621450036,
+  "images": {
+    "oblique-after-2.5m.png": "81920caebe2ae5ec9e941ad5c2b35c829e63cbb1f6b1a5d9409d60054b47a055"
+  },
+  "yaw_degrees": 40.0
+}

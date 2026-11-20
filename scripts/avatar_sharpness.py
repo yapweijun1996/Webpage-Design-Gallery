@@ -1,10 +1,12 @@
-"""Measure face detail in display-referred luma and skin brightness in linear sRGB."""
+"""Measure fixed anatomical crops in matched native renders and build a comparison sheet."""
 import argparse
 import json
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
+
+LUMA = np.array([.2126, .7152, .0722])
 
 
 def region(value):
@@ -23,42 +25,79 @@ def rgb_crop(image, box):
     return np.asarray(image.crop(box), dtype=np.float64)
 
 
-def measure(path, face, skin):
-    with Image.open(path) as image:
-        rgb = image.convert("RGB")
-    weights = np.array([.2126, .7152, .0722])
-    crop = rgb_crop(rgb, face) @ weights
-    if min(crop.shape) < 3:
-        raise ValueError("Face region must contain at least 3 by 3 pixels")
-    laplacian = (crop[:-2, 1:-1] + crop[2:, 1:-1] + crop[1:-1, :-2] + crop[1:-1, 2:]
-                 - 4 * crop[1:-1, 1:-1])
+def edge_variance(rgb, boxes):
+    edges = []
+    for box in boxes:
+        crop = rgb_crop(rgb, box) @ LUMA
+        if min(crop.shape) < 3:
+            raise ValueError(f"Region {box} must contain at least 3 by 3 pixels")
+        laplacian = (crop[:-2, 1:-1] + crop[2:, 1:-1] + crop[1:-1, :-2] + crop[1:-1, 2:]
+                     - 4 * crop[1:-1, 1:-1])
+        edges.append(laplacian.ravel())
+    return float(np.concatenate(edges).var())
+
+
+def measure(rgb, face, skin):
     samples = np.concatenate([rgb_crop(rgb, box).reshape(-1, 3) for box in skin]) / 255
     linear = np.where(samples <= .04045, samples / 12.92, ((samples + .055) / 1.055) ** 2.4)
-    return {"size": rgb.size, "laplacian_variance": float(laplacian.var()),
-            "mean_skin_luminance": float((linear @ weights).mean()),
-            "mean_skin_srgb_luma": float((samples @ weights).mean())}
+    return {"size": rgb.size, "laplacian_variance": edge_variance(rgb, [face]),
+            "mean_skin_luminance": float((linear @ LUMA).mean()),
+            "mean_skin_srgb_luma": float((samples @ LUMA).mean())}
+
+
+def contact_sheet(images, box, path, label):
+    width, height = box[2] - box[0], box[3] - box[1]
+    zoom = max(1, min(6, 600 // width))
+    cell = max(250, width * zoom)
+    out = Image.new('RGB', (2 * cell + 36, height * zoom + 55), '#ededeb')
+    draw = ImageDraw.Draw(out)
+    for i, (image, title) in enumerate(zip(images, ('Before', 'Redraw'))):
+        crop = image.crop(box)
+        left = 12 + i * (cell + 12)
+        draw.text((left, 9), f'{title}   {label}', fill='#222222')
+        draw.text((left, 26), f'{width} x {height} native pixels, shown {zoom}x', fill='#444444')
+        out.paste(crop.resize((width * zoom, height * zoom), Image.Resampling.NEAREST), (left, 44))
+    out.save(path)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("before", type=Path)
     parser.add_argument("after", type=Path)
-    parser.add_argument("--face", type=region, default=(220, 413, 375, 508),
-                        help="Eye, brow and mouth region, left,top,right,bottom")
-    parser.add_argument("--skin", type=region, action="append",
-                        help="Skin patch, left,top,right,bottom (repeatable)")
+    parser.add_argument("--face", type=region, default=(220, 413, 375, 508))
+    parser.add_argument("--skin", type=region, action="append")
+    for feature in ("eye", "brow", "mouth"):
+        parser.add_argument(f"--{feature}", type=region, action="append",
+                            help="Native pixel rectangle, repeat for paired features")
+    parser.add_argument("--sheet", type=Path)
+    parser.add_argument("--context", type=region, help="Larger portrait region to show in the sheet")
+    parser.add_argument("--label", default="")
     args = parser.parse_args()
-    # Fixed anatomical patches on the supplied 600px crops: forehead, nose bridge and cheeks.
     args.skin = args.skin or [(290, 385, 324, 408), (285, 468, 297, 484),
                               (255, 489, 272, 497), (311, 489, 331, 497)]
-    before, after = (measure(p, args.face, args.skin) for p in (args.before, args.after))
-    if before["size"] != after["size"]:
+    images = []
+    for path in (args.before, args.after):
+        with Image.open(path) as source:
+            images.append(source.convert("RGB"))
+    if images[0].size != images[1].size:
         parser.error("Use matching pose, framing and native screenshot sizes")
+    if args.context:
+        rgb_crop(images[0], args.context)
+    before, after = (measure(image, args.face, args.skin) for image in images)
     if not before["laplacian_variance"]:
-        parser.error("The baseline crop has zero variance")
+        parser.error("The baseline face crop has zero variance")
     ratio = after["laplacian_variance"] / before["laplacian_variance"]
+    features = {}
+    for feature in ("eye", "brow", "mouth"):
+        boxes = getattr(args, feature)
+        if boxes:
+            baseline, redraw = (edge_variance(image, boxes) for image in images)
+            features[feature] = {"boxes": boxes, "before": baseline, "after": redraw,
+                                 "ratio": redraw / baseline if baseline else None}
+    if args.sheet:
+        contact_sheet(images, args.context or args.face, args.sheet, args.label)
     print(json.dumps({"face": args.face, "skin": args.skin, "before": before, "after": after,
-                      "sharpness_ratio": ratio, "sharpness_pass": ratio >= 1.6,
+                      "sharpness_ratio": ratio, "sharpness_pass": ratio >= 2, "features": features,
                       "skin_not_darker": after["mean_skin_luminance"] >= before["mean_skin_luminance"],
                       "skin_in_range": .55 <= after["mean_skin_luminance"] <= .70}, indent=2))
 

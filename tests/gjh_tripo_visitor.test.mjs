@@ -6,6 +6,8 @@ import {GLTFLoader} from '../demos/corporate/gjh/v11/vendor/GLTFLoader.js';
 import {createLocomotionContinuity, createSelectedVisitor} from '../demos/corporate/gjh/v11/assets/character.js';
 import {createCharacterTripo, mapTripoClips, normalizeTripoHeight} from '../demos/corporate/gjh/v11/assets/character-tripo.js';
 import {createCharacterV2} from '../demos/corporate/gjh/v11/assets/character-v2.js';
+import {meshTextures} from '../demos/corporate/gjh/v11/assets/model-warmup.js';
+import {usesPortraitAtlas} from '../demos/corporate/gjh/v11/assets/graphics-quality.js';
 import {playerCameraFraming} from '../demos/corporate/gjh/v11/assets/player.js';
 import {createSeatAnchor, createSeatPlacements} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
 
@@ -20,9 +22,9 @@ function sourceClips() {
 
 const tripoAssets = new URL('../demos/corporate/gjh/v11/assets/', import.meta.url);
 
-async function withVisitorAssets(run, factory = createCharacterTripo, portrait) {
+async function withVisitorAssets(run, factory = createCharacterTripo, portrait, availablePortrait = true) {
   const files = factory === createCharacterV2 ? ['gjh-mall-visitor-v2.glb', 'gjh-mall-visitor-v2-lod1.glb'] : ['gjh-tripo-visitor.glb', 'gjh-tripo-visitor-lod1.glb'];
-  if (portrait) files.push('gjh-tripo-visitor-2k.glb');
+  if (portrait?.highResolution && availablePortrait) files.push('gjh-tripo-visitor-2k.glb');
   files.push('visitor-carry-hand.glb');
   const data = new Map(await Promise.all(files.map(async file => [file, await readFile(new URL(file, tripoAssets))])));
   const globals = {
@@ -97,6 +99,68 @@ test('Tripo entrance framing clears the idle visitor at desktop and portrait siz
   });
 });
 
+// Read embedded pixel dimensions independently of the Node bitmap placeholder.
+function atlasDimensions(bytes, mimeType) {
+  if (mimeType === 'image/png') {
+    assert.equal(bytes.toString('ascii', 12, 16), 'IHDR');
+    return [bytes.readUInt32BE(16), bytes.readUInt32BE(20)];
+  }
+  assert.equal(mimeType, 'image/jpeg');
+  assert.equal(bytes.readUInt16BE(0), 0xffd8);
+  for (let offset = 2; offset + 8 < bytes.length;) {
+    assert.equal(bytes[offset], 0xff);
+    const marker = bytes[offset + 1], length = bytes.readUInt16BE(offset + 2);
+    if ([0xc0, 0xc1, 0xc2].includes(marker))
+      return [bytes.readUInt16BE(offset + 7), bytes.readUInt16BE(offset + 5)];
+    assert.ok(length >= 2 && marker !== 0xda, 'expected a JPEG frame header before scan data');
+    offset += 2 + length;
+  }
+  assert.fail('Missing JPEG frame');
+}
+
+test('shipped face atlases keep one skin, one map, the shared bind pose and the device texture budget', async () => {
+  const specs = [['gjh-tripo-visitor.glb', 1024], ['gjh-tripo-visitor-2k.glb', 2048],
+    ['gjh-tripo-visitor-lod1.glb', 512]];
+  let baseline;
+  for (const [file, pixels] of specs) {
+    const bytes = await readFile(new URL(file, tripoAssets));
+    assert.equal(bytes.toString('ascii', 0, 4), 'glTF');
+    assert.equal(bytes.readUInt32LE(4), 2);
+    assert.equal(bytes.readUInt32LE(8), bytes.length);
+    const jsonEnd = 20 + bytes.readUInt32LE(12);
+    const doc = JSON.parse(bytes.subarray(20, jsonEnd));
+    function viewBytes(id) {
+      const view = doc.bufferViews[id];
+      const start = jsonEnd + 8 + (view.byteOffset ?? 0);
+      return bytes.subarray(start, start + view.byteLength);
+    }
+    for (const key of ['meshes', 'skins', 'images', 'textures', 'materials'])
+      assert.equal(doc[key].length, 1, file + ' ' + key);
+    assert.equal(doc.meshes[0].primitives.length, 1);
+    const prim = doc.meshes[0].primitives[0], attrs = prim.attributes;
+    assert.deepEqual(Object.keys(attrs).sort(), ['JOINTS_0', 'NORMAL', 'POSITION', 'TEXCOORD_0', 'WEIGHTS_0']);
+    assert.deepEqual(prim.targets ?? [], []);
+    const skin = doc.skins[0];
+    const rig = {nodes:doc.nodes, joints:skin.joints,
+      inverseBind:viewBytes(doc.accessors[skin.inverseBindMatrices].bufferView)};
+    baseline ??= rig;
+    assert.deepEqual(rig, baseline, file + ' rig');
+    assert.deepEqual((doc.animations ?? []).map(clip => clip.name).sort(),
+      pixels === 512 ? [] : ['dance','idle','jump','nod','run','sit','walk','wave']);
+    const material = doc.materials[prim.material];
+    assert.equal(material.alphaMode ?? 'OPAQUE', 'OPAQUE');
+    const atlas = doc.images[doc.textures[material.pbrMetallicRoughness.baseColorTexture.index].source];
+    assert.deepEqual(atlasDimensions(viewBytes(atlas.bufferView), atlas.mimeType), [pixels, pixels]);
+  }
+  for (const device of ['phone','tablet','desktop']) {
+    for (const tier of ['low','balanced','detailed']) {
+      const high = usesPortraitAtlas(device, tier);
+      const expected = device === 'phone' || tier === 'low' ? 1024 : 2048;
+      assert.equal(specs[Number(high)][1], expected, device + ' ' + tier);
+    }
+  }
+});
+
 test('desktop portrait prepares the near mesh before exposing its rig', async () => {
   let prepared;
   await withVisitorAssets(async character => {
@@ -104,14 +168,36 @@ test('desktop portrait prepares the near mesh before exposing its rig', async ()
     const mesh = character.visual.getObjectByProperty('isSkinnedMesh', true);
     assert.equal(mesh, prepared);
     assert.equal(mesh.geometry.index.count / 3, 13997);
-    assert.equal(mesh.material.map.anisotropy, 16);
+    assert.equal(mesh.material.map.anisotropy, 4);
+    assert.deepEqual(new Set(meshTextures(prepared, true)), new Set([mesh.material.map, mesh.skeleton.boneTexture]));
     assert.equal(mesh.material.map.minFilter, T.LinearMipmapLinearFilter);
     assert.equal(mesh.material.map.magFilter, T.LinearFilter);
     assert.ok(character.state.clips.sit);
     const shader = { ...T.ShaderLib.standard, uniforms:{} };
     mesh.material.onBeforeCompile(shader);
     assert.ok(shader.uniforms.avatarLift.value > 0);
-  }, createCharacterTripo, {anisotropy:16, async preload(mesh) { prepared = mesh; }});
+  }, createCharacterTripo, {highResolution:true, anisotropy:16, async preload(mesh) {
+    await new Promise(resolve => setImmediate(resolve));
+    prepared = mesh;
+  }});
+});
+
+test('Low prepares its shipped 1K texture in the upload plan before returning the character', async () => {
+  let warmTextures;
+  await withVisitorAssets(async character => {
+    assert.equal(character.state.asset, 'assets/gjh-tripo-visitor.glb');
+    const mesh = character.visual.getObjectByProperty('isSkinnedMesh', true);
+    assert.deepEqual(new Set(warmTextures), new Set([mesh.material.map, mesh.skeleton.boneTexture]));
+    assert.equal(mesh.material.map.anisotropy, 1);
+  }, createCharacterTripo, {highResolution:false, anisotropy:1, async preload(mesh) { warmTextures = meshTextures(mesh); }});
+});
+
+test('a missing 2K atlas still waits for the 1K upload before exposing the fallback rig', async () => {
+  let prepared;
+  await withVisitorAssets(async character => {
+    assert.equal(character.state.asset, 'assets/gjh-tripo-visitor.glb');
+    assert.equal(prepared, character.visual.getObjectByProperty('isSkinnedMesh', true));
+  }, createCharacterTripo, {highResolution:true, anisotropy:4, async preload(mesh) { prepared = mesh; }}, false);
 });
 
 test('visitor v2 keeps its existing expanded and classic camera settings', () => {

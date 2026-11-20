@@ -4,7 +4,7 @@ import {createPerformanceMonitor} from './assets/performance-monitor.js';
 import {createPerformancePanel} from './assets/performance-panel.js';
 import {createFrameTrace, createProgramTrace} from './assets/frame-trace.js';
 import {createUI} from './assets/ui.js';
-import {createGraphicsQuality, MALL_FRAME_BUDGETS} from './assets/graphics-quality.js';
+import {createGraphicsQuality, MALL_FRAME_BUDGETS, usesPortraitAtlas} from './assets/graphics-quality.js';
 import {createModes} from './assets/modes.js';
 import {setupOriginalTin} from './assets/original-tin.js';
 import {spatial, storeAt} from './assets/spatial.js';
@@ -1114,7 +1114,8 @@ async function initialize() {
   });
   // Select once at startup. Quality changes during walking must never upload a portrait atlas.
   const portraitProfile = quality.resolve(innerWidth);
-  const portrait = quality.deviceClass !== 'phone' && portraitProfile.tier !== 'low' ? {
+  const portrait = {
+    highResolution:usesPortraitAtlas(quality.deviceClass, portraitProfile.tier),
     anisotropy:renderer.capabilities.getMaxAnisotropy(),
     async preload(mesh) {
       // The regular animation loop starts after the first visible draw. Drive its
@@ -1132,7 +1133,7 @@ async function initialize() {
         cancelAnimationFrame(frame);
       }
     }
-  } : null;
+  };
   const {createPlayer} = await import('./assets/player.js');
   player = await createPlayer(T, R, physics, world.scene, canvas, world.contact, world.plane, world.seats,
     world.cameraObstacles, expanded, prepareAvatar, portrait, portraitProfile.tier);

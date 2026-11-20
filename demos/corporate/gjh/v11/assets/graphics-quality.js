@@ -13,6 +13,10 @@ const MIN_SCALE = 60;
 const SCALE_STEP = 5;
 const RECOVERY_MS = 10000;
 
+export function usesPortraitAtlas(deviceClass, tier) {
+  return deviceClass !== 'phone' && (tier === 'balanced' || tier === 'detailed');
+}
+
 export const qualityPreference = value => TIERS.includes(value) ? value : 'auto';
 const positive = value => Number.isFinite(value) && value > 0;
 

@@ -7,12 +7,9 @@ from pathlib import Path
 from PIL import Image
 
 
-def bake(directory):
-    positions, uv, indices = json.loads((directory / 'geometry.json').read_text())
-    source = Image.open(directory / 'source.jpg').convert('RGB')
-    if source.size != (4096, 4096):
-        raise ValueError(f'Expected a 4K source, got {source.size}')
-    parents = list(range(len(uv)))
+def chart_roots(vertex_count, triangles):
+    """Group UV-connected vertices, preserving the seams split in glTF."""
+    parents = list(range(vertex_count))
 
     def root(i):
         while i != parents[i]:
@@ -20,12 +17,21 @@ def bake(directory):
             i = parents[i]
         return i
 
-    for a, b, c in zip(indices[::3], indices[1::3], indices[2::3]):
+    for a, b, c in triangles:
         parents[root(b)] = root(a)
         parents[root(c)] = root(a)
+    return [root(i) for i in range(vertex_count)]
+
+
+def bake(directory):
+    positions, uv, indices = json.loads((directory / 'geometry.json').read_text())
+    source = Image.open(directory / 'source.jpg').convert('RGB')
+    if source.size != (4096, 4096):
+        raise ValueError(f'Expected a 4K source, got {source.size}')
     groups = {}
-    for i in range(len(uv)):
-        groups.setdefault(root(i), []).append(i)
+    triangles = zip(indices[::3], indices[1::3], indices[2::3])
+    for vertex, chart in enumerate(chart_roots(len(uv), triangles)):
+        groups.setdefault(chart, []).append(vertex)
     charts = []
     for vertices in groups.values():
         u, v = zip(*(uv[i] for i in vertices))

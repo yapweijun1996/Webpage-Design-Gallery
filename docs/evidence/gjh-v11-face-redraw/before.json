@@ -1,0 +1,27 @@
+{
+  "asset_sha256": "c18ad275c1c255e02cd6d0bd5750f796ab9945f982f3ec68487209c6a3b81ff9",
+  "renderer": "CYCLES",
+  "blender": "5.1.2",
+  "size": [
+    1920,
+    900
+  ],
+  "vertical_fov_degrees": 64,
+  "normalized_height_m": 1.7,
+  "pose": "bind",
+  "focus": [
+    0.0019119617063552141,
+    -0.06577101349830627,
+    0.5011214017868042
+  ],
+  "forward": [
+    -0.00012139917816966772,
+    -1.0,
+    0.0
+  ],
+  "native_units_per_metre": 0.5758231621450036,
+  "images": {
+    "before-2.5m.png": "619bc7c2f7cac6633e7f28b9be74aa02c85e38855e4512028904799571de5726",
+    "before-5.2m.png": "5accd5befcaac577c085c64b37c5b65ab5548cc687208c86f5e3af8d2a4f2fe1"
+  }
+}
