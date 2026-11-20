@@ -179,6 +179,7 @@ function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
     movement: movementReport(),
+    ...mallAudio.performanceReport(),
     renderScale: quality.state?.renderScale ?? 1,
     targetFps: quality.targetFps,
     refreshHz: quality.refreshHz,

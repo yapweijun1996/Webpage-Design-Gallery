@@ -3,6 +3,8 @@ export const AUDIO_KEY = 'gjh-v11-audio-v1';
 export const BEAT = 60 / 72;
 export const LOOKAHEAD = .18;
 const SWING = .58;
+const INIT_BUDGET_MS = 1.5;
+const MUSIC_DELAY_MS = 1500;
 const DEFAULT_LEVELS = {music:.26, effects:.65, ambience:.30};
 const SHOP_SOUNDS = Object.freeze({
   tea:'pour', drink:'pour', water:'pour', plate:'plate', bell:'bell', drawer:'drawer',
@@ -71,8 +73,19 @@ const browserContext = () => {
   return Audio ? new Audio() : null;
 };
 
+function nextIdleFrame(callback) {
+  if (!globalThis.requestAnimationFrame) return setTimeout(() => callback(), 16);
+  // A new frame separates slices even if the browser has more idle time now.
+  requestAnimationFrame(() => {
+    if (globalThis.requestIdleCallback) requestIdleCallback(callback);
+    else setTimeout(() => callback(), 0);
+  });
+}
+
 export function createAudioManager({
-  createContext = browserContext, storage,
+  createContext = browserContext, storage, now = () => performance.now(),
+  idle = nextIdleFrame, later = (callback, ms) => setTimeout(callback, ms),
+  cancelLater = id => clearTimeout(id),
   every = (callback, ms) => setInterval(callback, ms), stopEvery = id => clearInterval(id)
 } = {}) {
   let saved;
@@ -88,15 +101,20 @@ export function createAudioManager({
   let active = false, primed = false, hidden = false, activated = false, disposed = false, unavailable = false;
   let phone = false, low = false, quiet = false;
   let context, master, timer, wanted, transitionId = 0, serial = 0;
-  const buses = {}, waves = {}, voices = [];
+  const buses = {}, coefficients = {}, waves = {}, voices = [];
+  const timbres = Object.keys(HARMONICS);
+  let prepared = 0, waveIndex = 0, pendingIdle = false, musicDelay, unlockedAt;
+  let readyForMusic = false, audioInitMs = null, audioInitSliceMaxMs = 0;
+  const effectLimit = () => phone ? 6 : 8;
   const listeners = new Set();
   let step = 0, next = null, zone = 'atrium', style = LOBBY, lastStyleZone = '', motif = null;
   let stride = 0, railVoice, duckUntil = 0, captionDucking = false, speechDucking = false, musicDucked = false;
   const musicEnabled = () => musicChoice ?? !(quiet || (phone && low));
   const canResume = () => (active || primed) && activated && !muted && !hidden && !disposed;
   const audible = () => active && canResume();
-  const running = () => audible() && context?.state === 'running';
-  const musicPlaying = () => running() && musicEnabled() && levels.music > 0;
+  const running = () => audible() && !unavailable && wanted === true && context?.state === 'running';
+  const wantsMusic = () => running() && musicEnabled() && levels.music > 0;
+  const musicPlaying = () => timer !== undefined;
 
   function publish() {
     for (const listener of listeners) listener();
@@ -118,6 +136,7 @@ export function createAudioManager({
     gain(buses.music, levels.music * (ducked ? .32 : 1));
   }
   function silence(voice) {
+    if (!context) return;
     const now = context.currentTime;
     voice.envelope.gain.cancelScheduledValues(now);
     voice.envelope.gain.setValueAtTime(0, now);
@@ -135,7 +154,7 @@ export function createAudioManager({
   }
   function note(bus, timbre, start, duration, peak, pitch, endPitch, token = 0, notes = null, slot = null) {
     const first = slot ?? 4;
-    const limit = slot === null ? phone ? 6 : 8 : slot + 1;
+    const limit = slot === null ? effectLimit() : slot + 1;
     let index = first;
     while (index < limit && voices[index]?.until > (slot === null ? context.currentTime : start)) index++;
     if (index === limit && slot === null && timbre !== 'rail' && duration > .10) {
@@ -203,7 +222,7 @@ export function createAudioManager({
     }
   }
   function schedule() {
-    if (!musicPlaying()) return;
+    if (!musicPlaying() || !wantsMusic()) return;
     const now = context.currentTime;
     applyDuck(now);
     if (next === null || next < now) next = now + .026;
@@ -214,18 +233,97 @@ export function createAudioManager({
     }
   }
   function syncClock() {
-    if (musicPlaying()) {
-      if (timer === undefined) {
-        buses.music.connect(master);
-        timer = every(schedule, 75);
-      }
-    } else if (timer !== undefined) {
+    if (timer !== undefined && !wantsMusic()) {
       stopEvery(timer);
       timer = undefined;
       buses.music.disconnect();
       next = null;
       for (const voice of voices) if (voice?.bus === 'music') silence(voice);
     }
+  }
+  function createBus(bus) {
+    const output = context.createGain();
+    output.gain.value = levels[bus];
+    if (bus !== 'music') output.connect(master);
+    buses[bus] = output;
+  }
+  function warmupTask() {
+    if (!active || hidden || disposed || unavailable) return;
+    if (prepared < timbres.length) return () => {
+      const timbre = timbres[prepared++];
+      const harmonics = HARMONICS[timbre];
+      coefficients[timbre] = [new Float32Array(harmonics.length), Float32Array.from(harmonics)];
+    };
+    if (!running()) return;
+    if (!master) return () => {
+      master = context.createGain();
+      master.gain.value = .75;
+      master.connect(context.destination);
+    };
+    if (!buses.effects) return () => createBus('effects');
+    if (!buses.ambience) return () => createBus('ambience');
+    if (waveIndex < timbres.length) return () => {
+      const timbre = timbres[waveIndex++];
+      waves[timbre] = context.createPeriodicWave(...coefficients[timbre]);
+      delete coefficients[timbre];
+    };
+    for (let slot = 4; slot < effectLimit(); slot++) {
+      if (!voices[slot]) return () => voiceAt(slot);
+    }
+    if (!readyForMusic || !wantsMusic() || musicPlaying()) return;
+    if (!buses.music) return () => createBus('music');
+    for (let slot = 0; slot < 4; slot++) {
+      if (!voices[slot]) return () => voiceAt(slot);
+    }
+    return () => {
+      applyDuck(context.currentTime);
+      buses.music.connect(master);
+      timer = every(schedule, 75);
+    };
+  }
+  function queueWarmup() {
+    if (pendingIdle || !warmupTask()) return;
+    pendingIdle = true;
+    idle(deadline => {
+      pendingIdle = false;
+      const work = warmupTask();
+      if (!work) return;
+      if (!deadline || deadline.timeRemaining() >= INIT_BUDGET_MS) {
+        // Web Audio calls are atomic. Issue at most one setup task per frame.
+        const start = now();
+        const wasPlaying = musicPlaying();
+        try { work(); } catch { markUnavailable(); }
+        if (musicPlaying() !== wasPlaying) publish();
+        audioInitSliceMaxMs = Math.max(audioInitSliceMaxMs, now() - start);
+      }
+      queueWarmup();
+    });
+  }
+  function audioStateChanged() {
+    if (disposed) return;
+    syncClock();
+    if (wantsMusic() && !readyForMusic && musicDelay === undefined) {
+      const remaining = MUSIC_DELAY_MS - (now() - unlockedAt);
+      musicDelay = later(() => {
+        readyForMusic = true;
+        queueWarmup();
+      }, Math.max(0, remaining));
+    }
+    queueWarmup();
+    publish();
+  }
+  function setContextRunning(play) {
+    wanted = play;
+    const id = ++transitionId;
+    const transition = play ? context.resume() : context.suspend();
+    void transition.then(() => {
+      if (id === transitionId) audioStateChanged();
+    }, () => {
+      if (id === transitionId && !disposed) {
+        wanted = undefined;
+        audioStateChanged();
+      }
+    });
   }
   function sync() {
     if (!audible()) {
@@ -235,56 +333,57 @@ export function createAudioManager({
     if (context) {
       const play = canResume();
       if (wanted !== play || (play && context.state === 'interrupted')) {
-        wanted = play;
-        master.gain.value = play ? .75 : 0;
+        if (master) master.gain.value = play ? .75 : 0;
         if (!play) for (const voice of voices) if (voice) silence(voice);
-        // Calling resume in the gesture itself also covers iOS autoplay policy.
-        const id = ++transitionId;
-        const transition = play ? context.resume() : context.suspend();
-        void transition.then(() => {
-          if (id === transitionId) { syncClock(); publish(); }
-        }, () => {
-          if (id === transitionId && !disposed) {
-            wanted = undefined;
-            syncClock();
-            publish();
-          }
-        });
+        setContextRunning(play);
       }
-      syncClock();
     }
-    publish();
+    audioStateChanged();
+  }
+  function closeContext() {
+    if (!context) return;
+    context.onstatechange = null;
+    railVoice = null;
+    for (const voice of voices) if (voice) {
+      voice.oscillator.stop();
+      voice.oscillator.disconnect();
+      voice.envelope.disconnect();
+    }
+    Object.values(buses).forEach(bus => bus.disconnect());
+    master?.disconnect();
+    void context.close().catch(noop);
+    context = null;
+  }
+  function markUnavailable() {
+    unavailable = true;
+    syncClock();
+    closeContext();
+    queueMicrotask(audioStateChanged);
   }
   function unlock(prime = false) {
     if (disposed || unavailable || (activated && wanted === true && context?.state === 'running')) return;
     activated = true;
     primed ||= prime && !active && !hidden;
-    if (!context && canResume()) {
-      try {
+    if (!canResume()) return;
+    const start = now();
+    const first = !context;
+    try {
+      if (first) {
+        unlockedAt = start;
         context = createContext();
-        if (context) {
-          master = context.createGain();
-          master.gain.value = .75;
-          master.connect(context.destination);
-          for (const [bus,level] of Object.entries(levels)) {
-            buses[bus] = context.createGain();
-            buses[bus].gain.value = level;
-            if (bus !== 'music') buses[bus].connect(master);
-          }
-          for (const [timbre,harmonics] of Object.entries(HARMONICS)) {
-            waves[timbre] = context.createPeriodicWave(new Float32Array(harmonics.length), Float32Array.from(harmonics));
-          }
-          for (let i = 4; i < (phone ? 6 : 8); i++) voiceAt(i);
-          context.onstatechange = () => { syncClock(); publish(); };
-        } else unavailable = true;
-      } catch {
-        if (context) void context.close().catch(noop);
-        context = null;
-        unavailable = true;
+        if (!context) {
+          markUnavailable();
+          return;
+        }
+        context.onstatechange = audioStateChanged;
       }
+      // Resume in the user gesture for browser autoplay policy.
+      setContextRunning(true);
+    } catch {
+      markUnavailable();
+    } finally {
+      if (first) audioInitMs = now() - start;
     }
-    if (context?.state === 'suspended') wanted = undefined;
-    sync();
   }
   function duck(seconds) {
     if (!running()) return;
@@ -292,8 +391,9 @@ export function createAudioManager({
     if (musicPlaying()) applyDuck(context.currentTime);
   }
   function play(sound, bus = 'effects', cancellable = false) {
-    if (!audible() || !context || wanted !== true || !levels[bus] || !Object.hasOwn(SOUNDS,sound)) return;
+    if (!running() || !buses[bus] || !levels[bus] || !Object.hasOwn(SOUNDS,sound)) return;
     const [timbre, notes, duration, peak, slide] = SOUNDS[sound];
+    if (Object.hasOwn(HARMONICS, timbre) && !waves[timbre]) return;
     const token = cancellable ? ++serial : 0;
     const voice = note(bus,timbre,context.currentTime + .009,duration,peak,notes[0],slide,token,
       notes.length > 1 ? notes : null);
@@ -311,10 +411,11 @@ export function createAudioManager({
   function setVolume(bus, value) {
     if (!Object.hasOwn(levels,bus) || !Number.isFinite(value)) return;
     levels[bus] = Math.min(1,Math.max(0,value));
-    if (buses[bus]) gain(buses[bus], levels[bus] * (bus === 'music' && musicDucked ? .32 : 1));
+    if (context && buses[bus]) gain(buses[bus], levels[bus] * (bus === 'music' && musicDucked ? .32 : 1));
     save(); syncClock(); publish();
   }
   return {
+    performanceReport() { return {audioInitMs, audioInitSliceMaxMs}; },
     get demoMuted() { return demoMuted; },
     get canNarrate() { return audible() && voiceChoice; },
     get state() { return {muted,demoMuted,musicEnabled:musicEnabled(),musicPlaying:musicPlaying(),
@@ -325,7 +426,7 @@ export function createAudioManager({
     setMusic(value) { musicChoice = value; save(); sync(); },
     setDemoMuted(value) {
       demoMuted = value;
-      if (value) for (const voice of voices) if (voice?.token) silence(voice);
+      if (value && context) for (const voice of voices) if (voice?.token) silence(voice);
       save();
     },
     setVoice(value) { voiceChoice = value; if (!value) narrationStop(); save(); publish(); },
@@ -345,7 +446,7 @@ export function createAudioManager({
     setHidden(value) { if (hidden !== value) { hidden = value; if (value) primed = false; sync(); } },
     setPolicy(isPhone, isLow, prefersQuiet) {
       if (phone === isPhone && low === isLow && quiet === prefersQuiet) return;
-      if (isPhone) for (let i = 6; i < voices.length; i++) if (voices[i]) silence(voices[i]);
+      if (isPhone && context) for (let i = 6; i < voices.length; i++) if (voices[i]) silence(voices[i]);
       phone = isPhone; low = isLow; quiet = prefersQuiet; sync();
     },
     setZone(value) { zone = value; },
@@ -355,7 +456,7 @@ export function createAudioManager({
       if (stride >= .79) { stride %= .79; play('step'); }
     },
     rail(moving) {
-      if (moving && !railVoice && running() && levels.ambience) {
+      if (moving && !railVoice && running() && buses.ambience && levels.ambience) {
         railVoice = note('ambience','rail',context.currentTime + .009,Infinity,.023,42);
       } else if (!moving && railVoice) {
         const now = context.currentTime;
@@ -368,18 +469,11 @@ export function createAudioManager({
     dispose() {
       if (disposed) return;
       disposed = true;
-      sync();
+      syncClock();
+      narrationStop();
+      cancelLater(musicDelay);
       listeners.clear();
-      if (!context) return;
-      context.onstatechange = null;
-      for (const voice of voices) if (voice) {
-        voice.oscillator.stop();
-        voice.oscillator.disconnect();
-        voice.envelope.disconnect();
-      }
-      Object.values(buses).forEach(bus => bus.disconnect());
-      master.disconnect();
-      void context.close().catch(noop);
+      closeContext();
     }
   };
 }
@@ -388,9 +482,15 @@ let storage;
 try { storage = globalThis.localStorage; } catch { /* Session only. */ }
 export const mallAudio = createAudioManager({storage});
 
-export function createTramNarration(audio, speech, Utterance) {
-  const available = Boolean(speech && Utterance);
-  let current = null, spoken = '';
+export function createTramNarration(audio, getSpeech, Utterance) {
+  const available = Boolean(getSpeech && Utterance);
+  let speech, current = null, spoken = '', voices = [];
+  function selectSystemVoice() {
+    try {
+      speech ??= getSpeech();
+      voices = speech?.getVoices?.() ?? [];
+    } catch { /* Use the browser's default voice. */ }
+  }
   function stop() {
     if (current) {
       current.onend = current.onerror = null;
@@ -402,17 +502,18 @@ export function createTramNarration(audio, speech, Utterance) {
   }
   audio.onNarrationStop(stop);
   return {
-    available, stop,
+    available, stop, selectSystemVoice,
     read(key, text, language) {
       if (!available || !audio.canNarrate || key === spoken) return;
       stop();
       spoken = key;
       try {
+        speech ??= getSpeech();
+        if (!speech) return;
         const utterance = new Utterance(text);
         current = utterance;
         utterance.lang = language === 'zh-Hans' ? 'zh-Hans' : language === 'ms' ? 'ms' : 'en-SG';
         const locale = utterance.lang.toLowerCase();
-        const voices = speech.getVoices?.() ?? [];
         const family = locale.split('-')[0];
         utterance.voice = voices.find(voice => voice.lang.toLowerCase() === locale) ??
           voices.find(voice => voice.lang.toLowerCase().split('-')[0] === family) ?? null;

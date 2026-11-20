@@ -1530,7 +1530,7 @@ function createTramHud(parent, scene, canControl) {
   const buttons = {};
   let controls = null, previousIndex = -2, wasActive = false;
   let lastShop = null, lastLanguage, wasPaused = false, localized;
-  const narration = createTramNarration(mallAudio2, globalThis.speechSynthesis, globalThis.SpeechSynthesisUtterance);
+  const narration = createTramNarration(mallAudio2, "speechSynthesis" in globalThis ? () => globalThis.speechSynthesis : null, globalThis.SpeechSynthesisUtterance);
   for (const [action, label, key] of [["pause", "Pause", "Space"], ["skip", "Skip shop", "N"], ["end", "End", "Escape"]]) {
     const button2 = document.createElement("button");
     button2.type = "button";
@@ -1550,6 +1550,8 @@ function createTramHud(parent, scene, canControl) {
     voice.addEventListener("click", () => {
       mallAudio2.unlock();
       const enabled = !mallAudio2.state.voice;
+      if (enabled)
+        narration.selectSystemVoice();
       mallAudio2.setVoice(enabled);
       voice.setAttribute("aria-pressed", String(enabled));
       show(controls);
@@ -6610,6 +6612,7 @@ function performanceReport() {
   return {
     ...performanceMonitor.snapshot(),
     movement: movementReport(),
+    ...mallAudio3.performanceReport(),
     renderScale: quality.state?.renderScale ?? 1,
     targetFps: quality.targetFps,
     refreshHz: quality.refreshHz,

@@ -17,9 +17,15 @@ class Param {
 }
 
 function rig(storage) {
-  const timers = new Set(), contexts = [];
+  const timers = new Set(), contexts = [], delays = new Map(), frames = [];
+  const calls = {buffer:0, bufferSource:0, wave:0, oscillator:0, gain:0};
+  let clock = 0;
   const audio = createAudioManager({
     storage,
+    now: () => clock,
+    idle: callback => frames.push(callback),
+    later(callback, ms) { delays.set(callback, clock + ms); return callback; },
+    cancelLater: callback => delays.delete(callback),
     every(callback, period) {
       assert.equal(period,75);
       timers.add(callback);
@@ -27,6 +33,7 @@ function rig(storage) {
     },
     stopEvery(callback) { assert(timers.delete(callback)); },
     createContext() {
+      clock += .5;
       const oscillators = [], gains = [];
       function node(key) {
         return {
@@ -40,27 +47,104 @@ function rig(storage) {
       }
       const ctx = {
         state:'suspended', currentTime:0, destination:{}, oscillators, gains, transitions:[],
-        async resume() { this.transitions.push('run'); this.state = 'running'; },
+        async resume() { clock += .25; this.transitions.push('run'); this.state = 'running'; },
         async suspend() { this.transitions.push('suspend'); this.state = 'suspended'; },
         async close() { this.transitions.push('close'); this.state = 'closed'; },
-        createOscillator() { const source = node('frequency'); oscillators.push(source); return source; },
-        createGain() { const gain = node('gain'); gains.push(gain); return gain; },
-        createPeriodicWave(_, harmonics) { return harmonics; }
+        createBuffer() { calls.buffer++; clock += .8; },
+        createBufferSource() { calls.bufferSource++; clock += .8; },
+        createOscillator() {
+          calls.oscillator++; clock += .45;
+          const source = node('frequency'); oscillators.push(source); return source;
+        },
+        createGain() {
+          calls.gain++; clock += .35;
+          const gain = node('gain'); gains.push(gain); return gain;
+        },
+        createPeriodicWave(_, harmonics) { calls.wave++; clock += .8; return harmonics; }
       };
       contexts.push(ctx);
       return ctx;
     }
   });
-  return {audio,timers,contexts,
+  function frame(remaining = 5) {
+    assert.equal(frames.length,1,'one idle slice per frame');
+    const start = clock;
+    frames.shift()({timeRemaining: () => remaining});
+    return clock - start;
+  }
+  function advance(ms) {
+    clock += ms;
+    for (const [callback, at] of delays) {
+      if (at <= clock) { delays.delete(callback); callback(); }
+    }
+  }
+  return {audio,timers,contexts,calls,frame,advance,
+    async warm(ms = 1500) {
+      await Promise.resolve();
+      advance(ms);
+      for (let count = 0; frames.length; count++) {
+        assert(count < 30,'warmup must finish');
+        assert(frame() <= 1.5);
+      }
+    },
     tick(time) { contexts[0].currentTime = time; for (const callback of timers) callback(); }};
 }
+
+test('first gesture only constructs and resumes the context, then setup stays within the idle slice budget', async () => {
+  const {audio,calls,contexts,timers,frame,advance,warm} = rig();
+  audio.setActive(true);
+  await warm(0);
+  assert.equal(contexts.length,0,'coefficients can be prepared before the gesture');
+  audio.unlock();
+  assert.deepEqual(calls,{buffer:0,bufferSource:0,wave:0,oscillator:0,gain:0});
+  assert.deepEqual(audio.performanceReport(),{audioInitMs:.75,audioInitSliceMaxMs:0});
+  assert.deepEqual(contexts[0].transitions,['run']);
+  assert.equal(timers.size,0);
+  await Promise.resolve();
+  assert.equal(frame(1),0,'a busy frame defers setup');
+  assert.equal(calls.gain,0);
+  await warm(0);
+  assert.equal(calls.gain,7,'master, two buses and four effects voices');
+  assert.equal(calls.wave,3);
+  assert.equal(timers.size,0);
+  advance(1000);
+  await warm(0);
+  assert.equal(timers.size,0);
+  advance(500);
+  await warm(0);
+  assert.equal(timers.size,1);
+  assert(contexts[0].oscillators.every(voice => !voice.frequency.events.length),
+    'the first score tick is separate from setup');
+  const {audioInitSliceMaxMs} = audio.performanceReport();
+  assert(audioInitSliceMaxMs > 0 && audioInitSliceMaxMs <= 1.5);
+  audio.dispose();
+});
 function memoryStorage() {
   const rows = new Map();
   return {getItem:key => rows.get(key), setItem:(key,value) => rows.set(key,value)};
 }
 
+test('a Low phone can lazily play an effect before its pool is prewarmed', async () => {
+  const {audio,frame,calls,warm,timers} = rig();
+  audio.setPolicy(true,true,false);
+  audio.setActive(true);
+  await warm(0);
+  audio.unlock();
+  await Promise.resolve();
+  frame(); // Master.
+  frame(); // Effects bus.
+  assert.equal(calls.oscillator,0);
+  assert.equal(typeof audio.shop('press'),'function');
+  assert.equal(calls.oscillator,1);
+  await warm();
+  assert.equal(calls.oscillator,2);
+  assert.equal(calls.gain,5);
+  assert.equal(timers.size,0);
+  audio.dispose();
+});
+
 test('gesture creates one context, prime is silent, and mute/hidden gate the entire mixer', async () => {
-  const storage = memoryStorage(), {audio,timers,contexts,tick} = rig(storage);
+  const storage = memoryStorage(), {audio,timers,contexts,tick,warm} = rig(storage);
   audio.play('bag');
   assert.equal(contexts.length,0);
   audio.unlock(true);
@@ -68,6 +152,7 @@ test('gesture creates one context, prime is silent, and mute/hidden gate the ent
   assert.equal(timers.size,0);
   assert.equal(audio.state.musicPlaying,false);
   audio.setActive(true);
+  await warm();
   assert.equal(audio.state.musicPlaying,true);
   assert.equal(timers.size,1);
   audio.unlock();
@@ -85,6 +170,7 @@ test('gesture creates one context, prime is silent, and mute/hidden gate the ent
   assert.equal(timers.size,0);
   audio.setMuted(false);
   assert.equal(ctx.state,'running');
+  await warm(0);
   assert.equal(timers.size,1);
   audio.setActive(false);
   assert.equal(ctx.state,'suspended');
@@ -95,7 +181,7 @@ test('gesture creates one context, prime is silent, and mute/hidden gate the ent
   assert.equal(timers.size,0);
 });
 
-test('persists mute, demo mute, explicit music and independent bus levels', () => {
+test('persists mute, demo mute, explicit music and independent bus levels', async () => {
   const storage = memoryStorage();
   const original = rig(storage).audio;
   original.setMuted(true);
@@ -105,7 +191,7 @@ test('persists mute, demo mute, explicit music and independent bus levels', () =
   original.setVolume('ambience',.13);
   original.setVolume('effects',0);
   original.setVolume('music',.37);
-  const {audio,contexts,timers} = rig(storage);
+  const {audio,contexts,timers,warm} = rig(storage);
   assert.deepEqual(JSON.parse(storage.getItem(AUDIO_KEY)), {
     muted:true, demoMuted:true, music:true, voice:true, levels:{music:.37,effects:0,ambience:.13}
   });
@@ -118,54 +204,60 @@ test('persists mute, demo mute, explicit music and independent bus levels', () =
   assert.equal(audio.state.voice,true);
   audio.setMuted(false);
   audio.unlock();
+  await warm();
   assert.equal(audio.state.musicPlaying,true);
   assert.equal(audio.shop('listen'),undefined);
   audio.dispose();
 });
 
-test('Low phone, reduced motion and data saver policy leave the music clock and graph idle', () => {
+test('Low phone, reduced motion and data saver policy leave the music clock and graph idle', async () => {
   for (const policy of [[true,true,false],[false,false,true]]) {
-    const {audio,timers,contexts,tick} = rig();
+    const {audio,timers,contexts,tick,warm} = rig();
     audio.setPolicy(...policy);
     audio.setActive(true);
     audio.unlock();
+    await warm();
     tick(0);
     const ctx = contexts[0];
     assert.equal(timers.size,0);
-    assert.equal(ctx.gains[1].links.size,0);
+    assert.equal(ctx.gains.length,policy[0] ? 5 : 7);
     assert(ctx.oscillators.every(voice => voice.frequency.events.length === 0));
     audio.setMusic(true);
+    await warm();
+    const musicBus = ctx.gains.find(bus => bus.gain.value === .26);
     tick(.075);
     assert.equal(timers.size,1);
-    assert.equal(ctx.gains[1].links.size,1);
+    assert.equal(musicBus.links.size,1);
     audio.setMusic(false);
     assert.equal(timers.size,0);
-    assert.equal(ctx.gains[1].links.size,0);
+    assert.equal(musicBus.links.size,0);
     audio.dispose();
   }
-  const {audio,contexts,timers,tick} = rig();
+  const {audio,contexts,timers,tick,warm} = rig();
   audio.setPolicy(true,false,false);
   audio.setActive(true);
   audio.unlock();
+  await warm();
   tick(0);
   assert.equal(timers.size,1);
   audio.setPolicy(true,true,false);
   assert.equal(timers.size,0);
-  assert.equal(contexts[0].gains[1].links.size,0);
+  assert.equal(contexts[0].gains.find(bus => bus.gain.value === .26).links.size,0);
   audio.dispose();
 });
 
-test('72 BPM lookahead maintains the swung grid across the eight-bar seam', () => {
-  const {audio,contexts,tick} = rig();
+test('72 BPM lookahead maintains the swung grid across the eight-bar seam', async () => {
+  const {audio,contexts,tick,warm} = rig();
   audio.setPolicy(true,false,false);
   audio.setActive(true);
   audio.unlock();
+  await warm();
   const ctx = contexts[0];
   tick(0);
   const bass = ctx.oscillators[2].frequency;
   const hats = () => ctx.oscillators[5]?.frequency.events;
   assert.equal(bass.events[0][2],.026);
-  assert.equal(hats(),undefined);
+  assert.deepEqual(hats(),[]);
   for (let time = .075; time < 29; time += .075) {
     tick(time);
     for (const oscillator of ctx.oscillators) {
@@ -183,12 +275,13 @@ test('72 BPM lookahead maintains the swung grid across the eight-bar seam', () =
   audio.dispose();
 });
 
-test('shop effects and narration duck the same music bus, then restore its volume', () => {
-  const {audio,contexts,tick} = rig();
+test('shop effects and narration duck the same music bus, then restore its volume', async () => {
+  const {audio,contexts,tick,warm} = rig();
   audio.setActive(true);
   audio.unlock();
+  await warm();
   tick(0);
-  const music = contexts[0].gains[1].gain;
+  const music = contexts[0].gains.find(bus => bus.gain.value === .26).gain;
   const stop = audio.shop('play');
   assert.equal(typeof stop,'function');
   assert.equal(music.events.at(-1)[1],.26 * .32);
@@ -208,10 +301,11 @@ test('shop effects and narration duck the same music bus, then restore its volum
 });
 
 test('phone caps the pool at six voices, cancels effects and disconnects every node on disposal', async () => {
-  const {audio,contexts,tick} = rig();
+  const {audio,contexts,tick,warm} = rig();
   audio.setPolicy(true,false,false);
   audio.setActive(true);
   audio.unlock();
+  await warm();
   const ctx = contexts[0], [effect1,effect2] = ctx.oscillators;
   tick(0);
   audio.rail(true);
@@ -221,7 +315,7 @@ test('phone caps the pool at six voices, cancels effects and disconnects every n
   assert.equal(typeof audio.shop('plate'),'function', 'station and shop cues can reclaim the rail voice');
   assert.equal(audio.shop('listen'),undefined,'third concurrent foreground voice is refused');
   stop();
-  assert.equal(ctx.gains[5].gain.events.at(-1)[1],0);
+  assert.equal([...effect2.links][0].gain.events.at(-1)[1],0);
   for (let time = .075; time < 9; time += .075) {
     tick(time);
     audio.walk(.9);
@@ -240,12 +334,13 @@ test('phone caps the pool at six voices, cancels effects and disconnects every n
   assert.equal(ctx.transitions.filter(value => value === 'close').length,1);
 });
 
-test('every documented sound-producing shop action resolves to a mapped synthesis patch', () => {
+test('every documented sound-producing shop action resolves to a mapped synthesis patch', async () => {
   const doc = JSON.parse(readFileSync(new URL('../docs/gjh-v11-interior-program.json',import.meta.url)));
   const seen = new Set();
-  const {audio,contexts,tick} = rig();
+  const {audio,contexts,tick,warm} = rig();
   audio.setActive(true);
   audio.unlock();
+  await warm();
   for (const store of doc.stores) {
     for (const item of store.items) {
       const {shopAction} = createShopInteractionTarget(store.id,store,item);
@@ -270,16 +365,26 @@ test('optional narration selects the page language and cancels on caption change
   audio.setActive(true);
   audio.unlock();
   const utterances = [], cancels = [];
-  const speech = {speak:utterance => utterances.push(utterance),cancel:() => cancels.push(true)};
+  const voice = {lang:'en-SG'};
+  let speechAccesses = 0, lookups = 0;
+  const speech = {
+    speak:utterance => utterances.push(utterance), cancel:() => cancels.push(true),
+    getVoices() { lookups++; return [voice]; }
+  };
   class Utterance { constructor(text) { this.text = text; } }
-  const narration = createTramNarration(audio,speech,Utterance);
+  const narration = createTramNarration(audio,() => { speechAccesses++; return speech; },Utterance);
   narration.read('one','Caption','en');
   assert.equal(utterances.length,0);
+  assert.equal(speechAccesses,0);
+  assert.equal(lookups,0);
+  narration.selectSystemVoice();
   audio.setVoice(true);
   narration.read('one','Caption','en');
   narration.read('one','Caption','en');
   assert.equal(utterances.length,1);
   assert.equal(utterances[0].lang,'en-SG');
+  assert.equal(utterances[0].voice,voice);
+  assert.equal(lookups,1);
   narration.read('two','内容','zh-Hans');
   assert.equal(cancels.length,1);
   assert.equal(utterances.at(-1).lang,'zh-Hans');

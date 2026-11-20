@@ -70,7 +70,9 @@ export function createTramHud(parent, scene, canControl) {
   const buttons = {};
   let controls = null, previousIndex = -2, wasActive = false;
   let lastShop = null, lastLanguage, wasPaused = false, localized;
-  const narration = createTramNarration(mallAudio, globalThis.speechSynthesis, globalThis.SpeechSynthesisUtterance);
+  const narration = createTramNarration(mallAudio,
+    'speechSynthesis' in globalThis ? () => globalThis.speechSynthesis : null,
+    globalThis.SpeechSynthesisUtterance);
   for (const [action,label,key] of [['pause','Pause','Space'], ['skip','Skip shop','N'], ['end','End','Escape']]) {
     const button = document.createElement('button');
     button.type = 'button';
@@ -90,6 +92,7 @@ export function createTramHud(parent, scene, canControl) {
     voice.addEventListener('click', () => {
       mallAudio.unlock();
       const enabled = !mallAudio.state.voice;
+      if (enabled) narration.selectSystemVoice();
       mallAudio.setVoice(enabled);
       voice.setAttribute('aria-pressed', String(enabled));
       show(controls);

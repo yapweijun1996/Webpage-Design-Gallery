@@ -100,7 +100,7 @@
     "demos/corporate/gjh/v11/assets/tram-car.js": "0bb6340a4310c5b6dca5382ba940f39da3f1020c50aee83da8ccdf314a70f308",
     "demos/corporate/gjh/v11/assets/tram-layout.js": "c0731472686ff79be4e310ebd8116b5bdd714fa790823c12529aae1c5e7cde37",
     "demos/corporate/gjh/v11/assets/tram-ride.js": "4a5b58c7fbc0e55115e7d5ddd5b16ca192e3de84e10191d3cbc0b88e6a8772b8",
-    "demos/corporate/gjh/v11/assets/ui.js": "4a0496178d5bf57fec4e97e1124a2dc28f54e6ff37eb1644e70d2d36dc3dbd37",
+    "demos/corporate/gjh/v11/assets/ui.js": "e1c5596940db5d00643e43dee4401225e2b9a02a1051e00933f12439fe478ac5",
     "demos/corporate/gjh/v11/assets/upper-layout.js": "ee42543c61268d4f2ccde8bf2f55cfe155e7e65027ee308dcbfe764ae3d7445a",
     "demos/corporate/gjh/v11/assets/upper-level-atlas.js": "6b1b81c1000c2e2bb4a305d1a9cb12c6829b4fbdd66649e02513ae97b898b7b8",
     "demos/corporate/gjh/v11/assets/upper-level.js": "d5a646ea63b5a9ca9befa6360394459b1264e10e6a48fbdb9616bf96f85d45a5",
@@ -113,10 +113,10 @@
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "767cb347ec0e15a09c80c640cd8efe0d4ae3f1be334a2c8dbae7ddf206d8e490",
     "demos/corporate/gjh/v11/assets/window-studios.js": "2603bc84246f3c19f9e47d2fb380232a242bc856f493511e73219c18da924dc4",
     "demos/corporate/gjh/v11/assets/world.js": "9671469bb7bee36139f739a2c50b683f9ae5efcd7c798dbdcebd7f6c4e9d1679",
-    "demos/corporate/gjh/v11/script.js": "e2c2857f81c2ac2113d8d44af2e13dde92f7fd1981f1f413ebdaf9039def998a"
+    "demos/corporate/gjh/v11/script.js": "f0fa4ca2b89e22f66575bf808bbb892a38c45b70f00c544a6f44f8f2b4e7219e"
   },
   "outputs": {
-    "demos/corporate/gjh/v11/script.bundle.js": "c59b47682b6bc438cece3a20396d6f600cc47fa32848a70961195dd5888e27d0",
+    "demos/corporate/gjh/v11/script.bundle.js": "586605962add201f97a1b49954083fd984b1c2c7ebc8f5e49d81a5d3827d911b",
     "demos/corporate/gjh/v11/assets/world.bundle.js": "7adf0e480f7a864ce0485e01904bfbf4d1acb309e3ba4da20164ebfef0ee78df",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "7bbbc36acfc1e1964d28800fcd7864bfd3fd8d5943d7be520d932a3ca41e71eb",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "47baec7837deb630e46cb0bc58041d6d98e5e9cb7d841c3c7126eb3d81d5ec87"
