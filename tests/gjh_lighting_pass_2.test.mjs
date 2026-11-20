@@ -181,12 +181,15 @@ test('bundled world starts and submits expanded Low, Balanced and Detailed frame
     createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),
     measureText:text=>({width:String(text).length*12})}, {get:(object,key)=>object[key] ?? noop});
   const canvas=()=>({width:1,height:1,getContext:()=>context});
+  const requests = [];
   t.mock.method(globalThis,'fetch',async input=>{
     const url=new URL(input);
-    if (url.protocol==='file:' && url.pathname.endsWith('.json')) return new Response(await readFile(url));
+    requests.push(url.pathname);
+    if (url.protocol==='file:' && /\.(pack|json)$/.test(url.pathname)) return new Response(await readFile(url));
     return new Response(null,{status:404});
   });
-  const globals={location:new URL('../demos/corporate/gjh/v11/index.html',import.meta.url),window:{requestIdleCallback:noop},document:{
+  const globals={self:globalThis, createImageBitmap:async()=>canvas(),
+    location:new URL('../demos/corporate/gjh/v11/index.html',import.meta.url),window:{requestIdleCallback:noop},document:{
     createElement:canvas,querySelector:()=>null,addEventListener:noop,hidden:false
   },Image:class {
     set src(_) {queueMicrotask(()=>this.onerror?.());}
@@ -209,7 +212,12 @@ test('bundled world starts and submits expanded Low, Balanced and Detailed frame
     async loadAsync(url) {textureRequests.push(url);return new T.Texture(canvas());}
   }
   const three={...T,TextureLoader};
-  const world=await createWorld(three,R,physics,true,async()=>{},()=> 'low',false);
+  const world=await createWorld(three,R,physics,true,async()=>{},()=> 'low',false,()=>false);
+  assert.equal(requests.filter(path=>path.endsWith('/startup-assets.pack')).length,1);
+  assert.deepEqual(requests.filter(path=>path.endsWith('.glb')),[], 'first frame should use only packed models');
+  assert.equal(world.signage.configs.size, 17);
+  assert.equal(world.interiors.groups.length, 17);
+  assert.deepEqual(Object.values(world.productAssets.cans).map(({status,reason})=>reason ?? status), Array(4).fill('loaded'));
   t.after(()=>world.interiors.dispose());
   const camera=new T.PerspectiveCamera(65,1,.1,160);
   camera.position.set(10,2,45);camera.updateMatrixWorld(true);

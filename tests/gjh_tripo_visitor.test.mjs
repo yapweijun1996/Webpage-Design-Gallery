@@ -102,7 +102,7 @@ test('Tripo entrance framing clears the idle visitor at desktop and portrait siz
 
 test('shipped face atlases keep one skin, one map, the shared bind pose and the device texture budget', async () => {
   const specs = [['gjh-tripo-visitor.glb', 1024], ['gjh-tripo-visitor-2k.glb', 2048],
-    ['gjh-tripo-visitor-lod1.glb', 512]];
+    ['gjh-tripo-visitor-lod1.glb', 512], ['gjh-tripo-entry.glb', 512]];
   let baseline;
   for (const [file, pixels] of specs) {
     const bytes = await readFile(new URL(file, tripoAssets));
@@ -128,7 +128,7 @@ test('shipped face atlases keep one skin, one map, the shared bind pose and the 
     baseline ??= rig;
     assert.deepEqual(rig, baseline, file + ' rig');
     assert.deepEqual((doc.animations ?? []).map(clip => clip.name).sort(),
-      pixels === 512 ? [] : ['dance','idle','jump','nod','run','sit','walk','wave']);
+      file.includes('lod1') ? [] : ['dance','idle','jump','nod','run','sit','walk','wave']);
     const material = doc.materials[prim.material];
     assert.equal(material.alphaMode ?? 'OPAQUE', 'OPAQUE');
     const atlas = doc.images[doc.textures[material.pbrMetallicRoughness.baseColorTexture.index].source];
@@ -141,6 +141,21 @@ test('shipped face atlases keep one skin, one map, the shared bind pose and the 
       assert.equal(specs[Number(high)][1], expected, device + ' ' + tier);
     }
   }
+});
+
+test('compact entry decodes from the shared pack and retains the authored visitor rig', async () => {
+  let prepared;
+  const entry = new Promise(() => {});
+  await withVisitorAssets(async character => {
+    const mesh = character.visual.getObjectByProperty('isSkinnedMesh', true);
+    assert.equal(character.state.asset, 'assets/gjh-tripo-entry.glb');
+    assert.equal(mesh, prepared);
+    assert.equal(mesh.geometry.index.count / 3, 11763);
+    assert.ok(character.state.clips.sit);
+    assert.equal(character.state.cart.available, false);
+    assert.equal(character.state.lod.available, false);
+  }, createCharacterTripo, {compactEntry:true, highResolution:false, anisotropy:1, entry,
+    async preload(mesh) { prepared = mesh; }});
 });
 
 test('desktop portrait prepares the near mesh before exposing its rig', async () => {

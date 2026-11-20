@@ -200,13 +200,13 @@ function createCharacter(T, prepareModel, portrait) {
     },
     async v2() {
       const { createCharacterV2 } = await import("./character-v2.bundle.js");
-      return createCharacterV2(T, createLocomotionContinuity, prepareModel);
+      return createCharacterV2(T, createLocomotionContinuity, prepareModel, portrait?.entry);
     },
     v1: () => createCharacterV1(T, prepareModel)
   });
 }
 async function createCharacterV1(T, prepareModel) {
-  const [{ GLTFLoader }, { createPushCart }, { createSeatedPose }, { createCollectionGesture }, { createCarryBag }] = await Promise.all([
+  const [{ GLTFLoader }, { createLazyCart }, { createSeatedPose }, { createCollectionGesture }, { createCarryBag }] = await Promise.all([
     import("../vendor/GLTFLoader.js"),
     import("./push-cart.js"),
     import("./seated-pose.js"),
@@ -235,7 +235,7 @@ async function createCharacterV1(T, prepareModel) {
   const visual = new T.Group;
   visual.add(avatar);
   const seatContact = createSeatContact(T, visual, avatar);
-  const cart = await createPushCart(T, avatar, visual, { prepareModel });
+  const cart = createLazyCart(T, avatar, visual, { prepareModel });
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const clips = Object.freeze({ idle: "idle", walk: "walk", run: "sprint" });
   const mixer = new T.AnimationMixer(avatar);
@@ -286,6 +286,7 @@ async function createCharacterV1(T, prepareModel) {
   }
   return {
     visual,
+    prepareCart: cart.prepare,
     setCameraOccluded(value) {
       avatar.visible = !value;
     },
@@ -1003,12 +1004,13 @@ function landingOccupied(scene) {
   const { x, z } = tramStations.entry;
   return someVisitor(scene, (p) => Math.abs(p.x - x) < 0.6 + VISITOR_RADIUS && p.z >= tramLanding.z - 0.6 - VISITOR_RADIUS && p.z <= z + VISITOR_RADIUS);
 }
-function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat, prepareModel, tier }) {
+function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat, prepareModel, tier, detailsEnabled = () => true }) {
   if (!tramEnabled(expanded, search))
     return null;
   const exit = { x: tramLanding.x, y: 0.91, z: tramLanding.z };
   const car = createTramCar(T, scene, prepareModel);
-  car.select(tier);
+  let requestedTier = tier;
+  let requested = false;
   const floor = 0.4025;
   const seat = { id: TRAM_STATION_ID, name: "Mall tram", floor, footY: floor, frontEdge: 0.2 };
   const seatAt = (distance) => car.seatPose(tramRoute.sample(distance));
@@ -1027,6 +1029,12 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
     },
     onExit: () => exitSeat(exit)
   });
+  function loadCar() {
+    if (!requested && detailsEnabled()) {
+      requested = true;
+      car.select(requestedTier);
+    }
+  }
   const controls = {
     get state() {
       return ride.state;
@@ -1035,6 +1043,10 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
       return getBoardReason() || car.reason;
     },
     board() {
+      if (nearStation() && detailsEnabled()) {
+        requested = true;
+        car.select(requestedTier);
+      }
       if (controls.reason || !nearStation() || !ride.board())
         return false;
       previousDistance = ride.distance;
@@ -1054,11 +1066,18 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
   };
   return {
     controls,
-    selectTier: car.select,
+    selectTier(next) {
+      requestedTier = next;
+      if (requested)
+        return car.select(next);
+    },
     get seated() {
       return ride.seated;
     },
     update(dt) {
+      const p = getPosition(), station = tramStations.entry;
+      if (Math.abs(p.y - 0.89) < 1 && Math.hypot(p.x - station.x, p.z - station.z) < 8)
+        loadCar();
       if (!ride.active)
         return null;
       previousDistance = ride.distance;
@@ -2081,7 +2100,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       return { allowed: false, disabled: false, sceneDisabled: false, reasonCode: "held-product", reason: "Return the held product to its shelf or add it to your bag before using the cart." };
     if (seated)
       return { allowed: false, disabled: true, sceneDisabled: false, reasonCode: "seated", reason: "Stand up before using the cart." };
-    return { allowed: Boolean(character.state.cart.available), disabled: !character.state.cart.available, sceneDisabled: !character.state.cart.available, reasonCode: character.state.cart.available ? null : "unavailable", reason: character.state.cart.available ? null : "The 3D cart is unavailable. Your bag selection is unchanged." };
+    const { available, requestable } = character.state.cart;
+    const usable = available || requestable;
+    return { allowed: Boolean(usable), disabled: !usable, sceneDisabled: !usable, reasonCode: usable ? null : "unavailable", reason: usable ? null : "The 3D cart is unavailable. Your bag selection is unchanged." };
   }
   function setCart(value) {
     if (value && !cartCapability().allowed)
@@ -2418,6 +2439,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     get npcSource() {
       return character.npcSource;
     },
+    prepareCart: character.prepareCart,
     sit,
     stand,
     setCart,

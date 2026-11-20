@@ -90,7 +90,31 @@ export async function createPushCart(T, avatar, visual, {fixedPose = true, prepa
   cart.traverse(n=>{if(n.isMesh){n.castShadow=true;n.receiveShadow=true;}});
   const parcel=new T.Mesh(new T.BoxGeometry(.23,.28,.22),new T.MeshStandardMaterial({color:0xb48751,roughness:1}));
   parcel.name='SelectionIndicator';parcel.position.set(0,.57,.08);parcel.visible=false;cart.add(parcel);
-  if(prepareModel)void prepareModel(cart,{late:!fixedPose}).then(()=>{available=true;},()=>{});
+  const ready = prepareModel?.(cart,{late:!fixedPose,fence:true}).then(()=>{available=true;},()=>{});
   function restore(){if(saved){joints.forEach((n,i)=>n.quaternion.copy(saved[i]));saved=null;}}
-  return {set(value){if(value&&!available)return false;restore();active=Boolean(value);cart.visible=active;return true;},setCount(value){count=value;parcel.visible=count>0;},restore,apply(){if(!active||!fixedPose)return;saved=joints.map(n=>n.quaternion.clone());joints[0].rotation.set(-1.05,0,0);joints[2].rotation.set(-1.05,0,0);joints[1].rotation.set(-.95,0,0);joints[3].rotation.set(-.95,0,0);},get state(){return {available,active,count,mode:'simplified-push',wheelPhysics:false,ik:false};}};
+  return {ready,set(value){if(value&&!available)return false;restore();active=Boolean(value);cart.visible=active;return true;},setCount(value){count=value;parcel.visible=count>0;},restore,apply(){if(!active||!fixedPose)return;saved=joints.map(n=>n.quaternion.clone());joints[0].rotation.set(-1.05,0,0);joints[2].rotation.set(-1.05,0,0);joints[1].rotation.set(-.95,0,0);joints[3].rotation.set(-.95,0,0);},get state(){return {available,active,count,mode:'simplified-push',wheelPhysics:false,ik:false};}};
+}
+
+
+// The toolbar exposes the action while the cart is still unloaded. Its first
+// activation waits for the same sliced upload used by other optional models.
+export function createLazyCart(T, avatar, visual, options, onLoad) {
+  let request, cart, count = 0;
+  return {
+    prepare() {
+      request ??= createPushCart(T, avatar, visual, options).then(async result => {
+        await result.ready;
+        cart = result;
+        cart.setCount(count);
+        onLoad?.();
+        return cart.state.available;
+      });
+      return request;
+    },
+    set(value) { return cart?.set(value) ?? !value; },
+    setCount(value) { count = value; cart?.setCount(value); },
+    restore() { cart?.restore(); },
+    apply() { cart?.apply(); },
+    get state() { return cart ? {...cart.state, count} : {available:false, requestable:true, active:false, count}; }
+  };
 }

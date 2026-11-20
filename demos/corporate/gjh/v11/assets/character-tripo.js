@@ -1,7 +1,7 @@
 import {prepareTripoMaterial} from './character-tripo-material.js';
 import {createFirstPersonHand} from './visitor-carry-hand.js';
 import {createTripoPoses} from './character-tripo-pose.js';
-import {createPushCart} from './push-cart.js';
+import {createLazyCart} from './push-cart.js';
 import {disposeVisitorScene, loadVisitorGLTF} from './visitor-gltf.js';
 import {createProductTransfer} from './visitor-v2-contact.js';
 import {createVisitorLOD} from './visitor-v2-lod.js';
@@ -13,7 +13,6 @@ const emotes = ['wave', 'nod', 'jump', 'dance'];
 const clipNames = Object.freeze({idle: 'idle', walk: 'walk', run: 'sprint',
   wave: 'wave', nod: 'nod', jump: 'jump', dance: 'dance'});
 const noCustomization = Object.freeze({available: false});
-const noCart = Object.freeze({available: false, active: false, ik: false});
 const unavailable = () => false;
 
 export function normalizeTripoHeight(minY, maxY) {
@@ -70,13 +69,14 @@ function createSitClip(T, source, hips, placement) {
 }
 
 export async function createCharacterTripo(T, createLocomotionContinuity, prepareModel, portrait) {
-  let highResolution = Boolean(portrait?.highResolution);
-  let nearModel = highResolution ? model + '-2k' : model;
+  const compactEntry = Boolean(portrait?.compactEntry);
+  let highResolution = Boolean(portrait?.highResolution && !compactEntry);
+  let nearModel = compactEntry ? 'gjh-tripo-entry' : highResolution ? model + '-2k' : model;
   let gltf;
   try {
     gltf = await loadVisitorGLTF(new URL(`./${nearModel}.glb`, import.meta.url));
   } catch (error) {
-    if (!highResolution) throw error;
+    if (!highResolution && !compactEntry) throw error;
     highResolution = false;
     nearModel = model;
     gltf = await loadVisitorGLTF(new URL(`./${model}.glb`, import.meta.url));
@@ -91,7 +91,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     }
     const prepareMaterial = material => {
       prepareTripoMaterial(material);
-      if (highResolution) material.userData.portraitLift = .55;
+      if (highResolution || (compactEntry && portrait.highResolution)) material.userData.portraitLift = .55;
     };
     prepareMaterial(mesh.material);
     if (portrait) {
@@ -113,7 +113,36 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     visual.add(placement);
     placement.add(avatar);
     mesh.castShadow = mesh.receiveShadow = true;
+    const portraitMaterial = mesh.material;
     if (portrait) await portrait.preload(mesh);
+    if (compactEntry && prepareModel) {
+      void portrait.entry.then(async () => {
+        if (disposed || !portrait.canUpgrade()) return;
+        const url = new URL(portrait.highResolution ? './gjh-tripo-portrait-2k.webp' : './gjh-tripo-portrait.webp', import.meta.url);
+        const response = await fetch(url, {priority:'low'});
+        if (!response.ok) return;
+        const bitmap = await createImageBitmap(await response.blob(), {colorSpaceConversion:'none'});
+        const base = portraitMaterial.map, map = base.clone();
+        // A cloned texture shares its source. Replace it before assigning the image.
+        map.source = new T.Source(bitmap);
+        map.needsUpdate = true;
+        const material = portraitMaterial.clone();
+        material.map = map;
+        prepareMaterial(material);
+        const proxy = mesh.clone(false);
+        proxy.material = material;
+        try {
+          await prepareModel(proxy, {fence:true,late:false});
+          if (disposed || !portrait.canUpgrade()) return;
+          portraitMaterial.map = map;
+          base.dispose();
+          base.source.data?.close?.();
+        } finally {
+          material.dispose();
+          if (disposed || portraitMaterial.map !== map) { map.dispose(); bitmap.close(); }
+        }
+      }).catch(() => {});
+    }
     // A skinned mesh caches its first animated bounding sphere. A fixed player
     // mesh can jump outside that sphere, so use the existing camera occlusion.
     mesh.frustumCulled = false;
@@ -145,7 +174,7 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     const eyeHand = createFirstPersonHand(T, visual, undefined, prepareModel);
     const transfer = createProductTransfer(T, avatar, wrist, visual, grip, eyeHand);
     lod = createVisitorLOD(T, placement, {
-      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareMaterial, prepareModel
+      url: new URL(`./${model}-lod1.glb`, import.meta.url), swapMaterial: true, prepareMaterial, prepareModel, entry:portrait?.entry
     });
 
     const resolveLocomotion = createLocomotionContinuity();
@@ -153,20 +182,14 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
     const target = new T.Vector3(), pole = new T.Vector3(), palm = new T.Vector3();
     const previous = new T.Vector3(), current = new T.Vector3();
     const wheels = [], handErrors = [0, 0];
-    let cart, prop, pushing = false, hasPrevious = false, disposed = false, count = 0;
+    let prop, pushing = false, hasPrevious = false, disposed = false;
     let animation = 'idle', seatWeight = 0, emoteName = null, emoteTime = 0;
     let emoteAction = null, queuedEmote = null, arrivalWave = false;
-    void createPushCart(T, avatar, visual, {fixedPose: false, prepareModel}).then(result => {
+    const cart = createLazyCart(T, avatar, visual, {fixedPose:false, prepareModel}, () => {
       prop = visual.getObjectByName('DemoPushCart');
-      if (disposed) {
-        if (prop) { disposeVisitorScene(prop); prop.removeFromParent(); }
-        return;
-      }
-      if (!prop) return;
-      cart = result;
-      cart.setCount(count);
-      prop.traverse(node => { if (node.name.startsWith('CASTER_Wheel')) wheels.push(node); });
-    }).catch(() => {});
+      if (disposed && prop) { disposeVisitorScene(prop); prop.removeFromParent(); return; }
+      prop?.traverse(node => { if (node.name.startsWith('CASTER_Wheel')) wheels.push(node); });
+    });
 
     function stopEmote() {
       emoteAction?.stop();
@@ -283,7 +306,8 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
       },
       get seatWeight() { return seatWeight; },
       get productPhase() { return transfer.phase; },
-      setBagCount(value) { count = Math.max(0, Number(value) || 0); cart?.setCount(count); },
+      setBagCount(value) { cart.setCount(Math.max(0, Number(value) || 0)); },
+      prepareCart:cart.prepare,
       setCart(value) {
         if (value && (!cart?.state.available || seatWeight > 0)) return false;
         pushing = Boolean(value);
@@ -313,8 +337,8 @@ export async function createCharacterTripo(T, createLocomotionContinuity, prepar
         const physicalProduct = transfer.state;
         return {model, asset, nativeHeight, scale, clips: availableClips,
           lod: lod.state, emote: emoteName, queuedEmote,
-          cart: cart ? {...cart.state, mode: 'contact-ik', ik: true, wheelMotion: 'distance-driven'} : noCart,
-          seated: seatWeight > 0, seatWeight, carrying: {available: false, visible: false, count},
+          cart: {...cart.state, mode: 'contact-ik', ik: true, wheelMotion: 'distance-driven'},
+          seated: seatWeight > 0, seatWeight, carrying: {available: false, visible: false, count:cart.state.count ?? 0},
           collection: {available: false, active: physicalProduct.active}, physicalProduct, customization: noCustomization,
           contacts: {hands: pushing ? handErrors.slice() : [], feet: []},
           weights: Object.fromEntries(movementKeys.map(key => [key, actions[key].getEffectiveWeight()]))};

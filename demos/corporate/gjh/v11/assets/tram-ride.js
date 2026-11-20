@@ -174,11 +174,12 @@ function landingOccupied(scene) {
     p.z >= tramLanding.z - .6 - VISITOR_RADIUS && p.z <= z + VISITOR_RADIUS);
 }
 
-export function createPlayerTram({expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat, prepareModel, tier}) {
+export function createPlayerTram({expanded, search, T, scene, getPosition, getBoardReason, clearPath, enterSeat, exitSeat, prepareModel, tier, detailsEnabled = () => true}) {
   if (!tramEnabled(expanded, search)) return null;
   const exit = {x:tramLanding.x, y:.91, z:tramLanding.z};
   const car = createTramCar(T, scene, prepareModel);
-  void car.select(tier);
+  let requestedTier = tier;
+  let requested = false;
   const floor = .4025;
   const seat = {id:TRAM_STATION_ID, name:'Mall tram', floor, footY:floor, frontEdge:.20};
   const seatAt = distance => car.seatPose(tramRoute.sample(distance));
@@ -197,10 +198,17 @@ export function createPlayerTram({expanded, search, T, scene, getPosition, getBo
     },
     onExit: () => exitSeat(exit)
   });
+  function loadCar() {
+    if (!requested && detailsEnabled()) { requested = true; void car.select(requestedTier); }
+  }
   const controls = {
     get state() { return ride.state; },
     get reason() { return getBoardReason() || car.reason; },
     board() {
+      if (nearStation() && detailsEnabled()) {
+        requested = true;
+        void car.select(requestedTier);
+      }
       if (controls.reason || !nearStation() || !ride.board()) return false;
       previousDistance = ride.distance;
       car.place(tramRoute.sample(ride.distance));
@@ -216,9 +224,15 @@ export function createPlayerTram({expanded, search, T, scene, getPosition, getBo
     }
   };
   return {
-    controls, selectTier:car.select,
+    controls, selectTier(next) {
+      requestedTier = next;
+      if (requested) return car.select(next);
+    },
     get seated() { return ride.seated; },
     update(dt) {
+      // Approach can start the download while walking toward the boarding pad.
+      const p = getPosition(), station = tramStations.entry;
+      if (Math.abs(p.y - .89) < 1 && Math.hypot(p.x - station.x,p.z - station.z) < 8) loadCar();
       if (!ride.active) return null;
       previousDistance = ride.distance;
       if (!ride.seated && !nearStation()) controls.end();

@@ -1,3 +1,5 @@
+import {startStartupPack, startupPackBytes} from './startup-asset-pack.js';
+import {physicsBytes, startPhysics} from './startup-physics.js';
 import {setupDemoBag} from './demo-bag.js';
 import {icon} from './icons.js';
 
@@ -27,14 +29,15 @@ export function loaderLabels(state, language) {
 }
 
 export function createLoaderState(onChange = () => {}) {
-  let completed = 0, hidden = false, contextLost = false, failed = false, dismissed = false, immediate = false, preparation = null;
+  let completed = 0, hidden = false, contextLost = false, failed = false, dismissed = false, immediate = false;
   const skip = new AbortController();
+  let downloads = null;
   const snapshot = () => ({completed, total: stages.length, hidden, contextLost, failed, dismissed, immediate,
-    stage: stages[completed], ready: completed === stages.length,
-    preparing: (Boolean(preparation) || stages[completed] === 'warm') && completed < stages.length,
+    downloads, stage: stages[completed], ready: completed === stages.length,
+    preparing: stages[completed] === 'warm',
     message: failed || (completed === stages.length ? messages.at(-1) :
       contextLost ? 'Graphics were interrupted. Waiting for recovery…' :
-      hidden ? 'Loading is paused until this tab is visible.' : preparation || messages[completed])});
+      hidden ? 'Loading is paused until this tab is visible.' : messages[completed])});
   const notify = () => { const state = snapshot(); onChange(state); return state; };
   return {
     snapshot, skipSignal:skip.signal,
@@ -43,12 +46,11 @@ export function createLoaderState(onChange = () => {}) {
       if (!failed && stage === stages[completed] && (!['frame','warm'].includes(stage) || (!hidden && !contextLost))) {
         completed++;
         if (stage === 'warm') immediate = skipFade;
-        preparation = null;
       }
       return notify();
     },
     enterNow() { if (snapshot().preparing && !failed) skip.abort('enter-now'); },
-    prepare(value) { preparation = value; return notify(); },
+    download(value) { downloads = value; return notify(); },
     visibility(value) { hidden = Boolean(value); return notify(); },
     context(value) { contextLost = Boolean(value); return notify(); },
     fail(message) { if (completed < stages.length) failed = message; return notify(); },
@@ -70,6 +72,7 @@ if (typeof document !== 'undefined') {
   const directory = document.getElementById('loader-directory');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const detailsStep = steps.find(step => step.dataset.stage === 'warm');
+  let lastProgress;
   let fadeTimer, restoreFocus = false, previousStatus, previousStep;
   const motionKey = 'gjh-v11-loader-motion-paused';
   let userPaused = false;
@@ -99,21 +102,28 @@ if (typeof document !== 'undefined') {
     renderText(value);
     overlay.toggleAttribute('data-failed', Boolean(value.failed));
     if (overlay.dataset.completed !== String(value.completed)) {
-      progress.max = value.total;
-      progress.value = value.completed;
-      progress.textContent = `${value.completed} of ${value.total} stages`;
-      count.textContent = `${value.completed} / ${value.total}`;
       overlay.dataset.completed = value.completed;
-      overlay.style.setProperty('--loader-progress', value.completed / value.total);
       steps.forEach((step, index) => {
         step.dataset.state = index < value.completed ? 'done' : index === value.completed ? 'current' : 'todo';
       });
     }
+    const transfer = value.downloads && value.completed < 2 && !value.failed;
+    const [loaded, total] = transfer || [value.completed, value.total];
+    const mb = bytes => (bytes / 1_000_000).toFixed(1);
+    const label = transfer ? `${mb(loaded)} of ${mb(total)} MB` : `${loaded} / ${total}`;
+    if (label !== lastProgress) {
+      lastProgress = label;
+      count.textContent = label;
+    }
+    progress.max = total;
+    progress.value = loaded;
+    progress.textContent = transfer ? label : `${loaded} of ${total} stages`;
+    overlay.style.setProperty('--loader-progress', Math.min(1, loaded / total));
     // Hiding Enter now can move focus to the body before the fade completes.
     if (value.ready && overlay.contains(document.activeElement)) restoreFocus = true;
     retry.hidden = !value.failed;
     renderMotion(value);
-    enterNow.hidden = !value.preparing || Boolean(value.failed);
+    enterNow.hidden = !value.preparing || Boolean(value.failed || value.hidden || value.contextLost);
     if (value.dismissed) {
       clearTimeout(fadeTimer);
       overlay.hidden = true;
@@ -262,6 +272,17 @@ if (typeof document !== 'undefined') {
     } else {
       overlay.hidden = false;
       document.getElementById('loader-directory').focus();
+      const pack = [0, startupPackBytes], physics = [0, physicsBytes];
+      const report = (entry, loaded, total) => {
+        entry[0] = loaded;
+        entry[1] = total;
+        state.download([pack[0] + physics[0], pack[1] + physics[1]]);
+      };
+      report(pack, ...pack);
+      startPhysics((loaded, total) => report(physics, loaded, total));
+      startStartupPack((loaded, total) => report(pack, loaded, total));
+      const hints = document.getElementById('walk-preloads');
+      if (hints) document.head.append(hints.content.cloneNode(true));
     }
     import('../script.bundle.js').then(() => {
       // Initial catalog sorting can move the focused card. Restore focus only while the visitor is still at entry.

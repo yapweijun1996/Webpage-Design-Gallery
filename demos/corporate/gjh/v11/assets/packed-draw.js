@@ -27,7 +27,7 @@ export function mergeOpaqueMeshes(T, root) {
 
 // One indexed draw can retain a different authored range for each visible
 // part. Only indices change during walking; vertex buffers stay immutable.
-export function createPackedDraw(T, parts, material) {
+export function createPackedDraw(T, parts, material, {disposeSources = true} = {}) {
   const sources = parts.flatMap(part => part.geometries);
   for (const geometry of sources) {
     if (!geometry.index) geometry.setIndex(Array.from({length: geometry.attributes.position.count}, (_, i) => i));
@@ -83,7 +83,7 @@ export function createPackedDraw(T, parts, material) {
     }
   }
   update(() => 0);
-  for (const source of sources) source.dispose();
+  if (disposeSources) for (const source of sources) source.dispose();
   return {mesh, update};
 }
 

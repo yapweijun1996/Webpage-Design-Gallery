@@ -228,6 +228,8 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
     }
 
     assert.equal(item.prompt, 'Ride the tram');
+    assert.deepEqual(tramRequests, []);
+    assert.equal(registry.dispatch(item), false);
     for (let i = 0; i < 150 && !warming; i++) await delay(10);
     assert.equal(warming, true);
     assert.equal(registry.dispatch(item), false);
@@ -236,7 +238,8 @@ test('no-browser smoke tests the bundled player, station registry and ride HUD w
     await delay(0);
     assert.equal(tramRequests.length, 1);
     assert.ok(tramRequests[0].endsWith('/balanced.glb'));
-    for (let i = 0; i < 100 && !player.state.character.cart.available; i++) await delay(10);
+    assert.equal(player.state.character.cart.available, false);
+    assert(await player.prepareCart());
     assert.equal(player.setCart(true), true);
     select();
     assert.match(registry.tram.reason, /cart/);

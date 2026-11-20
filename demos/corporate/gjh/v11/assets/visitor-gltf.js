@@ -1,3 +1,4 @@
+import {fetchStartupAsset} from './startup-asset-pack.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 
 export function disposeVisitorScene(scene) {
@@ -29,7 +30,7 @@ export async function loadVisitorGLTF(url) {
   });
   try {
     const load = async () => {
-      const response = await fetch(url, {signal: controller.signal});
+      const response = await fetchStartupAsset(url, {signal: controller.signal});
       if (!response.ok) throw new Error('Visitor model unavailable');
       const buffer = await response.arrayBuffer();
       const gltf = await new GLTFLoader().parseAsync(buffer, new URL('.', url).href);

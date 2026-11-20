@@ -3,15 +3,15 @@ import {createVisitorLOD} from './visitor-v2-lod.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {createVisitorCustomization} from './visitor-v2-customization.js';
 import {createContactSolver,createProductTransfer} from './visitor-v2-contact.js';
-import {createPushCart} from './push-cart.js';
+import {createLazyCart} from './push-cart.js';
 import {createSeatContact} from './seat-contact.js';
 
 // Skinned v2 adapter; v1 remains available through the explicit visitor=v1 URL.
-export async function createCharacterV2(T, createLocomotionContinuity, prepareModel) {
+export async function createCharacterV2(T, createLocomotionContinuity, prepareModel, entry) {
   const model = 'gjh-mall-visitor-v2';
   const gltf = await new GLTFLoader().loadAsync(new URL(`./${model}.glb`, import.meta.url).href);
   const avatar = gltf.scene;
-  const lod=createVisitorLOD(T,avatar,{prepareModel});
+  const lod=createVisitorLOD(T,avatar,{prepareModel,entry});
   const customization = createVisitorCustomization(avatar);
   const bounds = new T.Box3().setFromObject(avatar);
   const nativeHeight = bounds.max.y - bounds.min.y;
@@ -25,7 +25,10 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
     'V2_body_Warm_smile', 'V2_watch_Glasses_and_eyes']);
   avatar.traverse(node => { if (node.isMesh) { node.castShadow = !shadowDetail.has(node.name); node.receiveShadow = true; } });
   const visual = new T.Group(); visual.add(avatar);
-  const cart = await createPushCart(T, avatar, visual, {prepareModel});
+  const wheels=[];
+  const cart = createLazyCart(T, avatar, visual, {prepareModel}, () => {
+    visual.traverse(node => { if (node.name.startsWith('CASTER_Wheel')) wheels.push(node); });
+  });
   const solver = createContactSolver(T, avatar);
   const seatContact = createSeatContact(T, visual, avatar);
   const wrist = avatar.getObjectByName('RightHand'), skin = avatar.getObjectByName('V2_body_Warm_peach_skin');
@@ -40,7 +43,6 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
   avatar.updateWorldMatrix(true,true);
   const footRest=Object.fromEntries(['Left','Right'].map(side=>[side,avatar.getObjectByName(side+'Foot').getWorldQuaternion(new T.Quaternion())]));
   const previous=new T.Vector3(),targetPoint=new T.Vector3();let hasPrevious=false;
-  const wheels=[];visual.traverse(n=>{if(n.name.startsWith('CASTER_Wheel'))wheels.push(n);});
   const mixer = new T.AnimationMixer(avatar);
   const clips = Object.freeze({idle: 'idle', walk: 'walk', run: 'sprint', push: 'push', sit: 'sit'});
   const actions = {};
@@ -108,7 +110,7 @@ export async function createCharacterV2(T, createLocomotionContinuity, prepareMo
   }
   update('idle', 0);
   return {
-    visual, npcSource:gltf, update, frameCarry:eyeHand.frame, updateLOD:camera=>lod.update(camera),
+    visual, prepareCart:cart.prepare, npcSource:gltf, update, frameCarry:eyeHand.frame, updateLOD:camera=>lod.update(camera),
     setCameraOccluded(value, firstPerson) {
       avatar.visible = !value;
       transfer.setFirstPerson(firstPerson);

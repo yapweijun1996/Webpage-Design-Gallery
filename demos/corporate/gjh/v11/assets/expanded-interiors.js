@@ -37,7 +37,7 @@ function displayPlacements(number, heroX, heroZ) {
 
 // Furniture is vertex-coloured and merged; model displays load in the background.
 // Coordinates inside each bay have the glazed front on local +Z.
-export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => 'low') {
+export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => 'low', detailsEnabled = () => true) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
   const material = new T.MeshStandardMaterial({vertexColors:true, roughness:.65});
   const woodFinishes = new Set([0xb18356,0x66412f,0x69442c,0x8b5a38,0xb28a5c,0xc59d69,0x8e4d35,0x66482f,0x604534,0x694635,0xaa8464]);
@@ -96,7 +96,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
         return gltf.scene;
       };
       const deadline = new Promise((_,reject) => {
-        timer=setTimeout(() => { abandoned=true; controller.abort(); reject(new Error('Model load timed out')); },8000);
+        timer=setTimeout(() => { abandoned=true; controller.abort(); reject(new Error('Model load timed out')); },45000);
       });
       models.set(name, Promise.race([load(),deadline]).then(scene => { modelStates.set(name,'loaded'); loadedScenes.set(name,scene); return scene; }, error => { modelStates.set(name,'fallback'); throw error; }).finally(() => clearTimeout(timer)));
     }
@@ -336,6 +336,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   scene.add(studioBatch.mesh);
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
+    if (!detailsEnabled()) return;
     if (loading || scheduled) return;
     const candidates = shops.filter(shop => shop.loadDisplay);
     if (!candidates.length) return;

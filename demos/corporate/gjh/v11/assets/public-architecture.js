@@ -8,7 +8,7 @@ import {decalMaterial} from './surface-decals.js';
 
 // Fit the public rooms to the existing circulation and collision footprints.
 // The authored directory and chandelier keep their exported geometry.
-export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight=false, setCanopyMaterial, artworkTier=()=> 'low'}) {
+export function buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, detailsEnabled = () => true, setPavingMap, ceilingBounds, daylightSkylight=false, setCanopyMaterial, artworkTier=()=> 'low'}) {
   const timber = 'vaultOak';
   materials.vaultOak=materials.oak.clone();
   materials.vaultOak.color.set(0x736558);
@@ -94,7 +94,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   stone.forEach(part => part.dispose());
   solid('paving','paving',0,0,0,1,1,1);
   const pavingURL = new URL('concourse-marble.webp',import.meta.url);
-  new T.TextureLoader().load(pavingURL.href,map=>{
+  new T.TextureLoader().setCrossOrigin(undefined).load(pavingURL.href,map=>{
     map.colorSpace = T.SRGBColorSpace;
     map.wrapS = map.wrapT = T.RepeatWrapping;
     map.anisotropy = 4;
@@ -355,7 +355,7 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
   box('wood',-6.1,.06,13.75,.66,.12,.66,true);
   const fallback=new T.Mesh(geometry.box,materials.ivory);
   fallback.position.y=.95;fallback.scale.set(.87,1.9,.18);totem.add(fallback);
-  loadStaticAsset(T,{file:'mall-directory-standee.glb',asset_id:'ASSET_MallDirectoryStandee',
+  const loadTotem = () => loadStaticAsset(T,{file:'mall-directory-standee.glb',asset_id:'ASSET_MallDirectoryStandee',
     sha256:'639fd4bb992d9453326c04dc936f727d870368fcee8a0cacc651d9a8cf59b4e6',dimensions_m:[.90,1.90,.35],rootExtras:{units:'metres'}},import.meta.url)
     .then(record => mountStaticModel(record, totem, fallback));
   // The directory tablet and its base are inside the closed planter footprint.
@@ -406,10 +406,10 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
       dimensions_m:[3,2,3],rootExtras:{units:'metres'}},import.meta.url);
     await mountStaticModel(record, chandelier);
   }
-  requested=true;
-  if ('requestIdleCallback' in window) window.requestIdleCallback(loadChandelier,{timeout:1500});
-  else setTimeout(loadChandelier,0);
+  let totemRequested = false;
   return function updateChandelier(visitor) {
+    if (!detailsEnabled()) return;
+    if (!totemRequested) { totemRequested = true; void loadTotem(); }
     const dx=visitor.x-chandelier.position.x,dz=visitor.z-chandelier.position.z;
     chandelier.visible=visitor.y<5 && dx*dx+dz*dz<24*24;
     if (!chandelier.visible || requested) return;

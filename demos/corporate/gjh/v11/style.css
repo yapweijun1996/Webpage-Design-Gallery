@@ -1,4 +1,3 @@
-@font-face{font-family:Manrope;src:url("assets/manrope-latin.woff2") format("woff2");font-style:normal;font-weight:200 800;font-display:swap}
 :root{color-scheme:light;--header-h:var(--gjh-size-main-header);--header-safe-top:var(--gjh-space-main-header-safe-base)}
 *{box-sizing:border-box}
 [hidden]{display:none !important}

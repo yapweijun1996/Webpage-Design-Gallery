@@ -36,14 +36,14 @@ export function createCharacter(T, prepareModel, portrait) {
     },
     async v2() {
       const {createCharacterV2} = await import('./character-v2.js');
-      return createCharacterV2(T, createLocomotionContinuity, prepareModel);
+      return createCharacterV2(T, createLocomotionContinuity, prepareModel, portrait?.entry);
     },
     v1: () => createCharacterV1(T, prepareModel)
   });
 }
 
 async function createCharacterV1(T, prepareModel) {
-  const [{GLTFLoader}, {createPushCart}, {createSeatedPose}, {createCollectionGesture}, {createCarryBag}] = await Promise.all([
+  const [{GLTFLoader}, {createLazyCart}, {createSeatedPose}, {createCollectionGesture}, {createCarryBag}] = await Promise.all([
     import('../vendor/GLTFLoader.js'), import('./push-cart.js'), import('./seated-pose.js'),
     import('./collection-gesture.js'), import('./carry-bag.js')
   ]);
@@ -70,7 +70,7 @@ async function createCharacterV1(T, prepareModel) {
   const visual = new T.Group();
   visual.add(avatar);
   const seatContact = createSeatContact(T, visual, avatar);
-  const cart=await createPushCart(T,avatar,visual,{prepareModel});
+  const cart=createLazyCart(T,avatar,visual,{prepareModel});
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const clips = Object.freeze({idle: 'idle', walk: 'walk', run: 'sprint'});
   const mixer = new T.AnimationMixer(avatar);
@@ -116,7 +116,7 @@ async function createCharacterV1(T, prepareModel) {
   }
 
   return {
-    visual,
+    visual, prepareCart:cart.prepare,
     setCameraOccluded(value){avatar.visible=!value;},
     update,
     setBagCount(value){carryBag.setCount(value);cart.setCount(value);},

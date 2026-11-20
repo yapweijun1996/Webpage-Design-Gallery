@@ -12,6 +12,8 @@ from string import Template
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
+GJH_ENTRY = Path("demos/corporate/gjh/v11/index.html")
+GJH_FIRST_VIEW = Path("data/gjh-first-view.json")
 DS_SPEC = importlib.util.spec_from_file_location("build_design_system", ROOT / "scripts/build_design_system.py")
 design_system = importlib.util.module_from_spec(DS_SPEC)
 DS_SPEC.loader.exec_module(design_system)
@@ -293,7 +295,10 @@ def release_info(catalog):
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
         raise ValueError("Application version must use major.minor.patch")
     digest = hashlib.sha256(json.dumps(catalog, sort_keys=True).encode("utf-8"))
-    inputs = runtime_resources(catalog) + list((ROOT / "templates/gallery").glob("*")) + [Path("scripts/build_gallery.py"), Path("scripts/build_demo_pwas.py"), Path("data/app.json")]
+    # The mall entry's template and manifest own its bytes.
+    inputs = [path for path in runtime_resources(catalog) if path != GJH_ENTRY]
+    inputs += list((ROOT / "templates/gallery").glob("*"))
+    inputs.extend(map(Path, ("scripts/build_gallery.py", "scripts/build_demo_pwas.py", "data/app.json", GJH_FIRST_VIEW)))
     for name in sorted(set(path.relative_to(ROOT) if path.is_absolute() else path for path in inputs)):
         digest.update(name.as_posix().encode("utf-8") + b"\0" + source_bytes(ROOT / name))
     return {"version": version, "build": digest.hexdigest()[:16]}
@@ -342,9 +347,22 @@ def build_pages(catalog, release=None):
     return pages
 
 
+def build_gjh_entry():
+    manifest = read_json(ROOT / GJH_FIRST_VIEW)
+    modules, images = manifest["walkPreloads"], manifest["walkImagePreloads"]
+    for path in (*modules, *images):
+        local_path(ROOT / GJH_ENTRY.parent, path)
+    links = "\n".join([
+        *(f'    <link rel="modulepreload" href="{escape(path)}">' for path in modules),
+        *(f'    <link rel="preload" href="{escape(path)}" as="image">' for path in images),
+    ])
+    template = (ROOT / "templates/gallery/gjh-v11-index.html").read_text(encoding="utf-8")
+    return template.replace("__GJH_WALK_PRELOADS__", links)
+
+
 def pwa_outputs(pages, catalog, release):
     precache_runtime = (ROOT / "templates/gallery/precache.js").read_text(encoding="utf-8").rstrip()
-    paths = set(pages) | {p.as_posix() for p in runtime_resources(catalog) if p.as_posix() not in ("src/demo-pwa.js", "assets/demo-pwa.css") and not p.as_posix().startswith(("demos/", "style-atlas/images/", "style-atlas/sheets/", "assets/onboarding/", "design-system/onboarding/"))}
+    paths = {name for name in pages if not name.startswith("demos/")} | {p.as_posix() for p in runtime_resources(catalog) if p.as_posix() not in ("src/demo-pwa.js", "assets/demo-pwa.css") and not p.as_posix().startswith(("demos/", "style-atlas/images/", "style-atlas/sheets/", "assets/onboarding/", "design-system/onboarding/"))}
     paths.update(design["thumbnail"] for design in catalog["designs"])
     paths.update(c["demoDirectory"] + "/" + c["landing"]["image"] for c in catalog["companies"] if c.get("landing"))
     entries = []
@@ -403,6 +421,7 @@ def build(output=ROOT, check=False):
     style_atlas.build(ROOT, catalog, check)
     release = release_info(catalog)
     pages = build_pages(catalog, release)
+    pages[GJH_ENTRY.as_posix()] = build_gjh_entry()
     pages.update(pwa_outputs(pages, catalog, release))
     if check:
         stale = [name for name, text in pages.items() if not (ROOT / name).exists() or (ROOT / name).read_text(encoding="utf-8") != text]
@@ -417,6 +436,8 @@ def build(output=ROOT, check=False):
         if output.resolve() != ROOT:
             # Publish only the gallery and known demo runtime resources, never research downloads.
             for name in runtime_resources(catalog):
+                if name.as_posix() in pages:
+                    continue
                 source = local_path(ROOT, name.as_posix())
                 target = output / name
                 target.parent.mkdir(parents=True, exist_ok=True)

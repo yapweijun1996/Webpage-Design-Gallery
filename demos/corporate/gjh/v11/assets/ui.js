@@ -561,6 +561,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   const cartIcon=icon('cart',{size:18});
   sceneCart.setAttribute('aria-describedby','cart-status');
   const interactionIcons=new Map();
+  let cartLoading = false;
   function updateCartControls() {
     const cart=cartState();
     const recoverFocus=!cart.available&&bag.open&&cartControls.contains(document.activeElement);
@@ -568,14 +569,14 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     if (cartControls.hidden === cart.available) cartControls.hidden = !cart.available;
     if (sceneCart.hidden !== hideCart) sceneCart.hidden = hideCart;
     setHudText(cartToggle, cart.active ? 'Stow cart' : 'Use cart in 3D');
-    const disabled = !cart.available || (!cart.active && cart.capability?.disabled === true);
+    const disabled = cartLoading || !cart.available || (!cart.active && cart.capability?.disabled === true);
     if (cartToggle.disabled !== disabled) cartToggle.disabled = disabled;
     const cartLabel=cart.active?'Stow Cart':'Shopping Cart';
     setHudText(sceneCart, cartLabel);
     if(sceneCart.firstChild!==cartIcon)sceneCart.prepend(cartIcon);
     const pressed = String(cart.active);
     if (sceneCart.getAttribute('aria-pressed') !== pressed) sceneCart.setAttribute('aria-pressed', pressed);
-    const sceneDisabled = !cart.available || (!cart.active && cart.capability?.sceneDisabled === true);
+    const sceneDisabled = cartLoading || !cart.available || (!cart.active && cart.capability?.sceneDisabled === true);
     if (sceneCart.disabled !== sceneDisabled) sceneCart.disabled = sceneDisabled;
     const reason = cartReason(cart);
     setHudAttribute(sceneCart, 'title', `${reason ? `${reason} ` : ''}Demo shopping cart. No orders are created.`);
@@ -590,7 +591,21 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   function cartReason(state){return state.capability?.reasonCode==='held-product'?heldInstruction(state):state.capability?.reason;}
   function productName(id){return records.get(id)?.compactName||'New Moon product';}
   function heldInstruction(state){return `Return ${productName(state.heldProduct)} to its original New Moon shelf or add it to your bag first.`;}
-  function toggleCart(){const state=cartState();if(!state.available){updateCartControls();return;}const next=!state.active;const ok=cartListener?.(next);if(!ok){const message=cartReason(state)|| (state.heldProduct?heldInstruction(state):state.seated?'Stand up before using the cart.':state.elevatorTravel?'Wait for the elevator to stop.':'Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.');cartStatus.textContent=message;announce(message);if(!bag.open)document.querySelector('#bag-open').click();return;}
+  async function toggleCart(){
+    const state = cartState();
+    if (!state.available || cartLoading) { updateCartControls(); return; }
+    const next = !state.active;
+    let ok = false;
+    cartLoading = true;
+    updateCartControls();
+    if (next && state.requestable) {
+      cartStatus.textContent = 'Preparing the 3D cart…';
+      announce(cartStatus.textContent);
+    }
+    try { ok = await cartListener?.(next); }
+    catch { /* Keep the bag open so the visitor can see the failure message. */ }
+    finally { cartLoading = false; updateCartControls(); }
+    if(!ok){const message=cartReason(cartState())|| (state.heldProduct?heldInstruction(state):state.seated?'Stand up before using the cart.':state.elevatorTravel?'Wait for the elevator to stop.':'Cart needs about 3 metres of clear floor. Move away from walls, shelves and furniture; try the open MILI entrance.');cartStatus.textContent=message;announce(message);if(!bag.open)document.querySelector('#bag-open').click();return;}
     if(next){setView(true);bag.closeTo(scene);}
     cartStatus.textContent=next?'Cart active. Slower walking; stow before sitting. Your bag selection is unchanged.':'Cart stowed. Your bag selection is unchanged.';
     toolsMenu.open=false;sceneCart.setAttribute('aria-pressed',String(next));scene.focus({preventScroll:true});

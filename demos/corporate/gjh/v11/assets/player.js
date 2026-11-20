@@ -572,7 +572,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if(elevatorTravel)return {allowed:false,disabled:false,sceneDisabled:false,reasonCode:'elevator-travel',reason:'Wait for the elevator to stop.'};
     if(character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return {allowed:false,disabled:false,sceneDisabled:false,reasonCode:'held-product',reason:'Return the held product to its shelf or add it to your bag before using the cart.'};
     if(seated)return {allowed:false,disabled:true,sceneDisabled:false,reasonCode:'seated',reason:'Stand up before using the cart.'};
-    return {allowed:Boolean(character.state.cart.available),disabled:!character.state.cart.available,sceneDisabled:!character.state.cart.available,reasonCode:character.state.cart.available?null:'unavailable',reason:character.state.cart.available?null:'The 3D cart is unavailable. Your bag selection is unchanged.'};
+    const {available, requestable} = character.state.cart;
+    const usable = available || requestable;
+    return {allowed:Boolean(usable),disabled:!usable,sceneDisabled:!usable,reasonCode:usable?null:'unavailable',reason:usable?null:'The 3D cart is unavailable. Your bag selection is unchanged.'};
   }
   function setCart(value) {
     if(value&&!cartCapability().allowed)return false;
@@ -716,7 +718,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       character.update('idle', 0);
     }
   });
-  return {body, capsule, camera, contactShadow:contact, get visual() { return visual; }, get npcSource() { return character.npcSource; }, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+  return {body, capsule, camera, contactShadow:contact, get visual() { return visual; }, get npcSource() { return character.npcSource; }, prepareCart:character.prepareCart, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
     setTramTier: tram?.selectTier,
     dispose() { tram?.dispose(); character.dispose?.(); },

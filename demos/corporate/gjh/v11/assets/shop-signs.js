@@ -1,3 +1,4 @@
+import {fetchStartupAsset} from './startup-asset-pack.js';
 import {eastShopPlacements} from './gallery-east-shops.js';
 import {westShopPlacements} from './gallery-west-shops.js';
 import {bayWidth,resolveConfig,stores} from './signage/config.js';
@@ -8,7 +9,7 @@ import {createSignageSystem} from './signage/runtime.js';
 // after Bun folds the signage family into assets/world.bundle.js.
 const assetBase=new URL('./',import.meta.url);
 async function readJson(path){
-  const response=await fetch(new URL(path,assetBase));
+  const response=await fetchStartupAsset(new URL(path,assetBase));
   if(!response.ok)throw Error('Unavailable shop artwork manifest: '+path);
   return response.json();
 }
@@ -29,7 +30,7 @@ export async function addShopSignAtlas(T,layout,scene){
     const id='S'+bay.number;
     return resolveConfig(id,stores[id],bay,kit,receipts);
   });
-  const bake=await bakeAtlas(configs,assetBase);
+  const bake=await bakeAtlas(configs,assetBase,fetchStartupAsset);
   return {...createSignageSystem(T,scene,configs,bays,bake,assetBase),
     configs:new Map(configs.map(config=>[config.id,config]))};
 }

@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en" data-gjh-design="v11">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="An independent virtual mall concept featuring New Moon, MILI and GOGO. Walk the courtyard in 3D or browse the complete accessible store directory.">
+  <meta name="theme-color" content="#102d26">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>GJH Virtual Mall — Everyday, explored.</title>
+  <link rel="icon" href="data:,">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/mall-icon-192.png">
+  <link rel="modulepreload" href="assets/loader.js">
+  <script>try{var c=localStorage.getItem("gjh-v11-color-scheme");if(c==="light"||c==="dark")document.documentElement.dataset.colorScheme=c}catch(e){}</script>
+  <script>
+    // Recovery stays available if either the stylesheet or the module graph fails.
+    (() => {
+      let stylesheetFailed = false;
+      function showRecovery(stylesheet) {
+        const card = document.getElementById('mall-recovery');
+        if (!card || (!stylesheet && stylesheetFailed)) return;
+        card.querySelector('span').textContent = stylesheet
+          ? 'Page did not load fully:' : 'The 3D mall could not start. Retry or browse the store directory.';
+        card.querySelector('button').textContent = stylesheet ? 'Reload' : 'Retry';
+        card.hidden = false;
+      }
+      window.addEventListener('error', event => {
+        if (event.target.id === 'mall-main-style') {
+          stylesheetFailed = true;
+          showRecovery(true);
+        }
+      }, true);
+      window.addEventListener('mall-loader-failed', () => showRecovery(false));
+      document.addEventListener('DOMContentLoaded', () => {
+        if (stylesheetFailed) showRecovery(true);
+        const reloadFromNetwork = () => {
+          const url = new URL(location.href);
+          url.searchParams.set('recover-page', Date.now());
+          location.replace(url);
+        };
+        document.querySelector('#mall-recovery button').addEventListener('click', reloadFromNetwork);
+        document.getElementById('loader-retry').addEventListener('click', reloadFromNetwork);
+      });
+      window.addEventListener('load', () => {
+        if (getComputedStyle(document.getElementById('app-loader')).position !== 'fixed') {
+          stylesheetFailed = true;
+          showRecovery(true);
+        }
+        const url = new URL(location.href);
+        if (url.searchParams.has('recover-page')) {
+          url.searchParams.delete('recover-page');
+          history.replaceState(history.state, '', url);
+        }
+      });
+    })();
+  </script>
+  <link id="mall-main-style" rel="stylesheet" href="style.bundle.css">
+  <script type="module">
+    import('./assets/loader.js').catch(() => window.dispatchEvent(new Event('mall-loader-failed')));
+  </script>
+  <script type="module" src="pwa.js"></script>
+<link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v11">
+<link rel="stylesheet" href="../shared/landing.css">
+  <template id="walk-preloads">
+__GJH_WALK_PRELOADS__
+  </template>
+</head>
+<body data-arrivals>
+<a class="skip-link skip-arrivals" href="#arrival-board-heading">Skip to featured products</a>
+<a class="skip-link skip-directory" href="#main">Skip to mall and store directory</a>
+<header class="site-header">
+  <a class="wordmark" href="#mall-arrivals" aria-label="GJH Virtual Mall home"><span class="wordmark-initials">GJH<span class="wordmark-period">.</span></span><span class="wordmark-caption">VIRTUAL<br>MALL</span></a>
+  <button id="location-map" class="header-location" type="button" aria-controls="mall-map" aria-expanded="false" title="Open mall map" hidden><span class="location-light" aria-hidden="true"></span><span id="location-name">Courtyard</span><span data-icon="chevron-down" aria-hidden="true"></span></button>
+  <button id="header-map" class="header-map" type="button" aria-label="Open mall map" aria-controls="mall-map" aria-expanded="false" title="Open mall map" hidden><span data-icon="map-pin" aria-hidden="true"></span><span class="hud-nav-label">Map</span></button>
+  <button id="bag-open" class="bag-open" type="button" aria-controls="bag-dialog" hidden>Bag (0)</button>
+  <button id="view-toggle" class="view-toggle" type="button" aria-controls="experience store-list" hidden><span id="view-toggle-icon" aria-hidden="true"></span><span id="view-toggle-label" class="hud-nav-label">Enter 3D Mall</span></button>
+  <a class="site-enter" href="#experience">Enter 3D Mall</a>
+</header>
+<div class="site-secondary">
+  <nav class="site-tabs" aria-label="Mall sections">
+    <a href="#mall-arrivals" aria-current="page">Home</a>
+    <a href="#store-list">Shops</a>
+  </nav>
+  <div class="site-settings" role="group" aria-label="Page settings">
+    <button id="arrival-theme" type="button" aria-labelledby="site-theme-label" aria-describedby="arrival-theme-label" aria-pressed="false">
+      <span class="site-theme-icon" aria-hidden="true"></span>
+      <span id="site-theme-label" class="site-theme-label">Mall theme settings</span>
+      <span id="arrival-theme-label" class="sr-only">Switch to light theme</span>
+    </button>
+    <button id="directory-theme-open" type="button" aria-controls="mall-theme-dialog" aria-labelledby="directory-theme-label" hidden>
+      <span class="site-theme-icon" aria-hidden="true"></span>
+      <span id="directory-theme-label" class="site-theme-label">Mall theme settings</span>
+    </button>
+    <label class="arrival-language">
+      <span id="site-language-code" aria-hidden="true" translate="no">EN</span>
+      <select id="arrival-language" data-mall-language aria-label="Language"><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select>
+    </label>
+  </div>
+</div>
+<aside id="mall-recovery" role="status" hidden style="position:fixed;z-index:10000;inset:auto max(1rem,env(safe-area-inset-right)) max(1rem,env(safe-area-inset-bottom)) max(1rem,env(safe-area-inset-left));max-width:32rem;margin:auto;padding:1rem;background:#fff;color:#102d26;border:1px solid;border-radius:.5rem;font:1rem system-ui,sans-serif">
+  <span></span> <button type="button" style="min-height:44px">Reload</button>
+</aside>
+<p id="loader-asset-notice" class="loader-asset-notice" hidden>Some 3D models were unavailable, so the mall is using stand-ins.</p>
+<div id="mall-connection-notice" class="mall-connection-notice" role="status" aria-live="polite" hidden>Connection unavailable. Reconnect to browse the mall and its products.</div>
+<div id="mall-update-notice" class="mall-update-notice" role="status" aria-live="polite" hidden><span id="mall-update-message">An update is ready.</span><button id="mall-apply-update" type="button">Update</button></div>
+<section id="mall-arrivals" class="arrivals" aria-labelledby="arrivals-heading">
+  <div class="arrival-layout"><div class="arrival-copy"><p class="entry-kicker">Walking guide</p>
+  <h1 id="arrivals-heading">Everyday, <br><em>explored.</em></h1>
+  <p class="entry-lead">Go straight to four New Moon packs, or explore the mall on foot.</p>
+  <div class="arrival-actions"><a class="entry-action" href="#featured-heading" id="arrival-products">Featured products <svg width="16" height="16" aria-hidden="true" focusable="false"><use href="../../../../assets/icons.svg#arrow-up-right"></use></svg></a>
+  <a id="arrival-walk" href="#experience">Enter 3D mall</a></div>
+  <figure><img src="assets/concept-wayfinding.webp" alt="Illustrated wayfinding signs in the mall"><figcaption>Store wayfinding · Concept illustration</figcaption></figure></div>
+  <div class="arrival-board"><p class="entry-kicker">Featured products</p><h2 id="arrival-board-heading" tabindex="-1">New Moon</h2><ul><li><a href="#arrival-nz" data-arrival-product="nz"><img src="assets/new-moon-nz-425g-front.webp" alt=""><span><small>New Moon abalone</small><strong>New Zealand</strong></span><b>425 g</b></a></li><li><a href="#arrival-au" data-arrival-product="au"><img src="assets/new-moon-au-425g-front.webp" alt=""><span><small>New Moon abalone</small><strong>Australia</strong></span><b>425 g</b></a></li><li><a href="#arrival-sa" data-arrival-product="sa"><img src="assets/new-moon-sa-425g-front.webp" alt=""><span><small>New Moon abalone</small><strong>South Africa</strong></span><b>425 g</b></a></li><li><a href="#arrival-mx" data-arrival-product="mx"><img src="assets/new-moon-mx-454g-front.webp" alt=""><span><small>New Moon abalone</small><strong>Mexico</strong></span><b>454 g</b></a></li></ul></div></div>
+  <div class="arrival-update-tools">
+    <button id="arrival-check-update" class="arrival-update" data-mall-check type="button" disabled><span>Check for updates</span> <bdi data-mall-version></bdi></button>
+    <p id="arrival-update-status" class="arrival-update-status" role="status" aria-live="polite"></p>
+  </div>
+</section>
+  <section id="app-loader" class="app-loader" aria-label="Loading the virtual mall">
+    <div class="app-loader-card">
+      <p class="app-loader-kicker">GJH Virtual Mall</p>
+      <h2>Everyday, <em>explored.</em></h2>
+      <div class="app-loader-art" aria-hidden="true">
+      <svg class="app-loader-atrium" viewBox="0 0 400 318" aria-hidden="true" focusable="false">
+        <defs>
+          <linearGradient id="loader-stone" x2="0%" y2="100%">
+            <stop stop-color="#f5ddb0"/><stop offset="1" stop-color="#877357"/>
+          </linearGradient>
+          <linearGradient id="loader-glass" x2="0%" y2="100%">
+            <stop stop-color="#254d43"/><stop offset="1" stop-color="#0c211d"/>
+          </linearGradient>
+          <radialGradient id="loader-lamp">
+            <stop stop-color="#ffd688" stop-opacity=".85"/><stop offset="1" stop-color="#eeb363" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <path d="M32 247 200 189l168 58-168 63Z" fill="#152e29" stroke="#49635a" stroke-width="1.5"/>
+        <g class="app-loader-reveal app-loader-shell">
+          <path d="M32 247 200 189l168 58v8l-168 63-168-63Z" fill="#6d5f4d"/>
+          <path d="M32 247 200 189l168 58-168 63Z" fill="#bb9f72" stroke="#d7bc8a"/>
+          <path d="m70 261 168-58m-130 72 167-59m-128 73 165-59m17 35-166-62m127 77-164-64m124 78-159-64" fill="none" stroke="#e5c99c" opacity=".55"/>
+          <path d="M41 240V149L200 95l159 54v91L200 184Z" fill="url(#loader-glass)" stroke="#9b8967" stroke-width="2"/>
+          <path d="M41 150V92l159-55 159 55v58L200 95Z" fill="#295047" stroke="#9b8967" stroke-width="2"/>
+          <path d="m38 92 162-56 162 56v9L200 45 38 101Zm0 58 162-56 162 56v14l-162-56-162 56Z" fill="url(#loader-stone)" stroke="#f0d4a5"/>
+          <path d="M49 140v-22l151-53 151 53v22L200 88Z" fill="none" stroke="#d0af74" stroke-width="2"/>
+          <path d="M58 137v-22m21 14v-21m21 14v-22m21 14v-21m21 14v-22m21 14V78m21 14V70m32 0v22m21-14v21m21-14v22m21-14v21m21-14v22m21-14v21m21-14v22" fill="none" stroke="#ab926b"/>
+        </g>
+        <g class="app-loader-orbit" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M200 262C222 238 268 238 268 262C268 286 222 286 200 262C178 238 132 238 132 262C132 286 178 286 200 262Z" stroke="#f6da9a" stroke-opacity=".28" stroke-width="1.6"/>
+          <path class="app-loader-orbit-spark" pathLength="100" d="M200 262C222 238 268 238 268 262C268 286 222 286 200 262C178 238 132 238 132 262C132 286 178 286 200 262Z" stroke="#ffe3a6" stroke-width="3.2" stroke-dasharray="16 84" stroke-dashoffset="0"/>
+        </g>
+        <g class="app-loader-reveal app-loader-fixtures" stroke="#a58a62" stroke-width="1.5">
+          <path d="M53 235v-64l58-20v64Zm68-24v-64l64-22v64Zm94-22v-64l64 22v64Zm74 26v-64l58 20v64Z" fill="#5a4f37"/>
+          <path d="M61 231v-54l42-14v54Zm70-24v-54l45-16v54Zm93-16v-54l45 16v54Zm73 26v-54l42 14v54Z" fill="#845f3c"/>
+          <path d="M82 170v54m72-79v54m92-54v54m72-29v54" fill="none" stroke="#d5ae71"/>
+          <path d="m74 208 24-8v9l-24 8Zm63-26 28-10v9l-28 10Zm97-10 29 10v9l-29-10Zm69 29 25 8v9l-25-8Z" fill="#c69b62"/>
+          <path d="m64 250 24-8 32 10-24 8Zm216 2 24-10 32 8-24 9Z" fill="#263d31" stroke="#b49c70"/>
+          <ellipse cx="200" cy="261" rx="26" ry="10" fill="#536347"/>
+          <path d="M175 260v8c0 10 50 10 50 0v-8c-10 9-40 9-50 0Z" fill="url(#loader-stone)"/>
+          <path d="M200 259v-48m0 25-15-12m15 7 14-13" fill="none" stroke="#b88e5e" stroke-width="2.5"/>
+          <path d="M190 218c-14 3-17-13-6-16-1-10 16-15 21-5 10-7 22 6 15 15 3 9-12 16-19 9-4 6-11 4-11-3Z" fill="#496847" stroke="#869671"/>
+        </g>
+        <g class="app-loader-reveal app-loader-entrance" stroke="#ead4a5" stroke-width="1.6" stroke-linejoin="round">
+          <path class="app-loader-portico" d="M78 113C94 62 146 16 200 16s106 46 122 97h-19c-15-44-60-79-103-79s-88 35-103 79ZM80 110h22v124H80Zm218 0h22v124h-22ZM76 113h30v13H76Zm218 0h30v13h-30ZM76 230h30v12H76Zm218 0h30v12h-30ZM190 13h20l-3 26h-14Z"/>
+          <path d="M87 113C103 67 152 25 200 25s97 42 113 88m-222 13v104m218-104v104M80 118h22m200 0h18M80 235h22m200 0h18" fill="none" opacity=".68"/>
+        </g>
+        <g class="app-loader-reveal app-loader-lighting">
+          <path d="M173 36v43m27-39v57m27-61v43" stroke="#d0a571" stroke-width="1.2"/>
+          <g fill="url(#loader-lamp)">
+            <circle cx="173" cy="79" r="17"/><circle cx="200" cy="97" r="23"/><circle cx="227" cy="79" r="17"/>
+            <circle cx="61" cy="196" r="18"/><circle cx="130" cy="172" r="19"/><circle cx="270" cy="172" r="19"/><circle cx="339" cy="196" r="18"/>
+          </g>
+          <path d="M200 267c-42 0-62-6-62-12s20-12 62-12 62 6 62 12-20 12-62 12Z" fill="url(#loader-lamp)" opacity=".4"/>
+          <g fill="#fff0c8">
+            <circle cx="173" cy="79" r="2.5"/><circle cx="200" cy="97" r="3"/><circle cx="227" cy="79" r="2.5"/>
+            <circle cx="61" cy="196" r="2"/><circle cx="130" cy="172" r="2"/><circle cx="270" cy="172" r="2"/><circle cx="339" cy="196" r="2"/>
+          </g>
+        </g>
+        <g class="app-loader-reveal app-loader-finish" fill="none" stroke="#f6da9a" stroke-width="1.8" stroke-linecap="round">
+          <path d="m113 280 87 31 87-31M89 261l-14-5m236 5 14-5"/>
+          <path d="M184 46c-31 5-62 31-76 54m108-54c31 5 62 31 76 54" opacity=".7"/>
+        </g>
+      </svg>
+        <span class="app-loader-ambient"></span>
+      </div>
+      <div class="app-loader-progress">
+        <div class="app-loader-progress-head"><strong id="loader-status" role="status" aria-live="polite">Preparing the mall…</strong><span id="loader-count" aria-hidden="true">0 / 5</span></div>
+        <div class="app-loader-bar" aria-hidden="true"><i id="loader-fill"></i></div>
+        <progress id="loader-progress" aria-label="Mall startup stages completed" value="0" max="5">0 of 5 stages</progress>
+        <ol class="app-loader-steps" aria-hidden="true">
+          <li data-stage="physics">Engine</li>
+          <li data-stage="scene">Scene</li>
+          <li data-stage="models">Models</li>
+          <li data-stage="frame">First view</li>
+          <li data-stage="warm">Details</li>
+        </ol>
+      </div>
+      <div class="app-loader-actions">
+        <button id="loader-enter-now" type="button" hidden>Enter 3D mall now</button>
+        <a id="loader-directory" href="#store-list">Browse the store directory <span data-icon="arrow-right" aria-hidden="true"></span></a>
+        <button id="loader-retry" type="button" hidden>Retry 3D mall</button>
+      </div>
+      <div class="app-loader-footer">
+        <p class="app-loader-note">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
+        <button class="app-loader-motion" id="loader-motion" type="button" hidden>Pause motion</button>
+      </div>
+    </div>
+  </section>
+  <noscript><style>#app-loader,#arrival-walk,.site-enter,.site-settings{display:none!important}</style></noscript>
+
+  <div id="context-navigation-global" class="context-navigation-global" hidden></div>
+
+  <main id="main" tabindex="-1">
+    <section id="experience" class="experience" aria-label="Walkable 3D virtual mall" hidden>
+      <canvas id="scene" tabindex="0" aria-label="Interactive 3D mall. Use WASD or arrow keys to walk, Shift to run, and Q/E to turn. Press V to switch view, plus or minus to zoom, and F to interact. The store directory also has product information." aria-describedby="controls-copy camera-help"></canvas>
+      <div class="mall-overlay">
+        <div class="scene-readouts">
+          <p id="floor-indicator" class="sr-only">Floor 01 - Atrium</p>
+          <details id="hud-objectives">
+            <summary><span>Objectives</span><span class="hud-objective-dots" aria-hidden="true"><i></i><i></i><i></i><i data-hud-upper-objective hidden></i></span><span id="hud-objective-total" class="sr-only">0 of 3 objectives complete</span></summary>
+            <ul>
+              <li><span>Visit three stores</span><span data-hud-progress="visit">0 / 3</span></li>
+              <li><span>Inspect a product</span><span data-hud-progress="inspect">0 / 1</span></li>
+              <li><span>Add to the demo bag</span><span data-hud-progress="bag">0 / 1</span></li>
+              <li data-hud-upper-objective hidden><span>Visit the upper level</span><span data-hud-progress="upper">0 / 1</span></li>
+            </ul>
+          </details>
+          <p id="hud-objective-toast" hidden></p>
+        </div>
+        <aside id="hud-rail" class="hud-rail" aria-label="Mall tools">
+          <details id="mall-tools"><summary><span data-icon="theme" aria-hidden="true"></span><span>Tools</span></summary>
+          <div id="mall-tools-content" class="mall-tools-content">
+          <button id="rail-guide" type="button" aria-controls="guide-card" title="Replay the Getting Started tutorial"><span data-icon="help-circle"></span>Guide</button>
+        <div class="scene-tools"><details id="keyboard-help" class="keyboard-help">
+          <summary title="Movement, camera, graphics and visitor settings">Help</summary>
+          <div id="controls-copy"><label class="mall-language-picker"><span>Language</span><select id="scene-language" data-mall-language><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select></label><button type="button" id="mall-scene-check" data-mall-check disabled><span>Check for updates</span> <bdi data-mall-version></bdi></button><p data-mall-check-status></p><div class="graphics-settings"><label for="graphics-quality">Graphics quality</label><select id="graphics-quality" aria-describedby="graphics-quality-status"><option value="auto">Auto</option><option value="low">Low</option><option value="balanced">Balanced</option><option value="detailed">Detailed</option></select><label class="graphics-resolution-setting"><input id="auto-resolution" type="checkbox" checked> Auto resolution</label><p id="graphics-quality-status">Auto resolution adjusts the 3D scene to maintain the device's frame rate.</p><p id="npc-appearance-status" hidden>Some visitor outfits are unavailable. You can still explore the mall.</p></div><label class="touch-input-setting"><input id="fullscreen-joystick" type="checkbox"> Full-screen joystick</label><p class="compact-panel-note">Scene paused. Close this panel to continue.</p><p><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrow keys to walk.<br><kbd>Shift</kbd> to run. <kbd>Q</kbd> / <kbd>E</kbd> to turn left / right. Drag the scene to look around.<br><kbd>F</kbd> to interact with a nearby target.</p><div id="camera-help"><p>Press V or use First person in Tools to switch views. Drag the scene or use the right stick to look around.</p><p>Use the mouse wheel, pinch on the trackpad or screen, or use + and − on the keyboard or in Tools to zoom. For touch zoom, start both fingers on the scene away from the joystick and move them together or apart.</p></div><p>On touch screens, drag the right joystick to move and drag the scene to look around. Turn on Full-screen joystick to move from anywhere and look with a second finger. Walking is the default. Tap Run to toggle running. Buttons and panels keep their own actions. All benches support Sit / Stand. Shop benches face the entrance; approach the open seat side. Use Shopping Cart in Tools to start or stow the demo push cart. Leave about 3 metres of clear floor around you to start pushing. Inventory Bag contains collected demo items, not purchases. Neither Bag nor Shopping Cart creates an order. While seated, walking is locked; use Stand or Escape to leave. A sit/stand transition plays with walking locked. The seat camera moves back to frame the visitor. Standing restores your previous view. Escape reverses entry; reduced-motion uses an immediate pose. <span id="visitor-motion-help">The original visitor uses a procedural sitting pose and a generic carried bag.</span></p><p id="interaction-distance-description">Distances are approximate horizontal metres to fictional demo interaction points, not physical store measurements. The outline marks a whole shelf; other labels mark an interaction point.</p><p>Choose any store on the map to go to its entrance. Prefer a page? Choose Store Directory above.</p><button id="guide-reopen" type="button" aria-controls="guide-card" hidden>Show quick guide</button></div>
+        </details><button id="scene-cart" type="button" aria-pressed="false" hidden>Cart</button><button id="mall-theme-open" type="button" aria-controls="mall-theme-dialog" hidden>Theme</button></div>
+          <details id="performance-panel">
+            <summary title="Performance details"><span>Performance</span><span id="performance-fps">—</span> FPS</summary>
+            <section class="performance-details" aria-labelledby="performance-heading">
+              <label class="performance-setting" id="performance-visible"><input id="show-fps" type="checkbox"><span>Show FPS counter</span></label>
+              <header><h2 id="performance-heading">Performance</h2><button id="performance-close" type="button" aria-label="Close performance details">Close</button></header>
+              <dl class="performance-metrics">
+                <div><dt>Frame time</dt><dd data-performance="frameMs">—</dd></div>
+                <div><dt>95th percentile</dt><dd data-performance="p95Ms">—</dd></div>
+                <div><dt>Simulation time</dt><dd data-performance="simulationMs">—</dd></div>
+                <div><dt>Render submission</dt><dd data-performance="renderMs">—</dd></div>
+                <div><dt>Draw calls</dt><dd data-performance="drawCalls">—</dd></div>
+                <div><dt>Triangles</dt><dd data-performance="triangles">—</dd></div>
+              </dl>
+              <figure><figcaption><span>Recent frame times</span><span><span>Peak</span> <span id="performance-peak">—</span></span></figcaption>
+                <svg class="performance-trace" viewBox="0 0 240 42" preserveAspectRatio="none" aria-hidden="true"><polyline id="performance-line" fill="none" vector-effect="non-scaling-stroke"/></svg>
+              </figure>
+              <h3 id="performance-log-heading">Recent slow frames</h3>
+              <p id="performance-log-empty">No slow frames in the last minute.</p>
+              <ol id="performance-log" aria-labelledby="performance-log-heading"></ol>
+              <button id="performance-download" type="button">Download report (JSON)</button>
+            </section>
+          </details>
+          <details class="hud-mini-map"><summary>Mini Map</summary>
+        <div id="mini-map" class="mini-map" aria-label="Mini Map">
+          <div class="mini-map-heading"><span data-icon="map-pin"></span><strong>Mini Map</strong><span>North</span></div>
+          <div id="mini-map-plan"></div>
+          <p id="nearest-target">Explore the courtyard</p>
+        </div>
+          </details>
+          <div id="camera-tools" class="hud-tool-controls">
+            <div id="camera-controls" role="group" aria-label="Camera">
+              <button id="camera-view-toggle" type="button" aria-pressed="false" aria-keyshortcuts="V">First person</button>
+              <div class="camera-zoom">
+                <button id="camera-zoom-out" type="button" aria-label="Zoom out" title="Zoom out">−</button>
+                <button id="camera-zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+              </div>
+            </div>
+          </div>
+        <p class="scene-disclaimer">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p>
+          </div>
+          </details>
+        </aside>
+        <p id="fps-corner" hidden><span>—</span> FPS</p>
+
+        <div class="control-bar" aria-label="Character controls">
+          <span class="desktop-control"><kbd>W A S D</kbd> Move</span>
+          <span class="desktop-control"><span data-icon="mouse"></span> Mouse Look <small>(drag)</small></span>
+          <span class="desktop-control"><kbd>Shift</kbd> Run</span>
+          <span class="touch-control"><span data-icon="move"></span> Joystick</span>
+          <span class="touch-control"><span data-icon="run"></span> Run</span>
+          <span class="touch-control"><span data-icon="camera"></span> Camera</span>
+          <span id="control-interact" hidden><span class="desktop-control"><kbd>F</kbd> - Interact</span><span class="touch-control">Tap Interact</span></span>
+        </div>
+        <div class="mall-intro"><p class="eyebrow">A little closer to goodness</p><h2>Everyday, <em>explored.</em></h2><p>17 stores. One open invitation.</p></div>
+        <div id="hud-context-stack">
+          <div class="interaction-hud" id="hud-context" hidden>
+            <p id="held-product-status" class="held-product-status" hidden></p>
+            <p id="hud-context-hint" class="hud-context-chip" hidden><span id="hud-nearby-arrow" data-icon="arrow-up" aria-hidden="true" hidden></span><span id="hud-context-text"></span><span id="hud-nearby-direction" class="sr-only" hidden></span></p>
+            <div class="inspect-prompt" id="inspect-prompt" hidden><div class="nearby-card"><img id="nearby-image" alt="" width="26" height="26" hidden><span id="nearby-name"></span><span id="nearby-distance" aria-describedby="interaction-distance-description" hidden></span></div><button id="hud-more-actions" type="button" aria-label="More actions" title="More actions" aria-expanded="false" aria-controls="inspect" hidden><span data-icon="menu" aria-hidden="true"></span></button><button id="inspect" class="hud-control" type="button" aria-describedby="interaction-distance-description"><span id="inspect-verb">Inspect</span></button></div>
+          </div>
+          <p id="hud-lift-hint" class="hud-context-chip" hidden>Upper level: take the lift (Ride)</p>
+          <button id="skip-lift-ride" class="hud-context-chip" type="button" hidden>Skip ride</button>
+        </div>
+        <div id="nearby-shelf-outline" class="nearby-shelf-outline" aria-hidden="true" hidden></div>
+        <div id="interaction-point" class="interaction-point" aria-hidden="true" hidden><span></span><small>Press F</small></div>
+        <details id="mall-map" class="mall-map" open>
+          <summary aria-label="Mall map"></summary>
+          <div class="map-content">
+          <p class="compact-panel-note">Scene paused. Close the map to continue.</p><div class="map-heading"><h2 id="map-title">The mall</h2><span>Choose a store</span><button id="map-close" class="map-close" type="button" aria-label="Close mall map">Close</button></div>
+          <div class="map-plan">
+            <svg class="floorplan" viewBox="0 0 300 290" preserveAspectRatio="none" role="img" aria-label="Mall floorplan. New Moon on the left, MILI in the centre and GOGO on the right. The gold dot marks your position.">
+              <rect class="map-courtyard" x="4" y="4" width="292" height="282" rx="12"/>
+              <path class="map-walkway" d="M4 154H296M4 250H296M98 4V154M202 4V154"/>
+              <rect class="map-store" data-map-store="newmoon" x="14" y="20" width="72" height="110" rx="3"/>
+              <rect class="map-store" data-map-store="mili" x="114" y="20" width="72" height="110" rx="3"/>
+              <rect class="map-store" data-map-store="gogo" x="214" y="20" width="72" height="110" rx="3"/>
+              <text class="map-label" x="150" y="189" text-anchor="middle">COURTYARD</text>
+              <text class="map-label map-entry" x="150" y="273" text-anchor="middle">ENTRANCE</text>
+              <circle id="player-dot" cx="150" cy="235" r="6"/>
+            </svg>
+            <button class="map-store-button map-newmoon" type="button" data-teleport="newmoon" aria-label="Go to the New Moon storefront"><span>01</span>New Moon</button>
+            <button class="map-store-button map-mili" type="button" data-teleport="mili" aria-label="Go to the MILI storefront"><span>02</span>MILI</button>
+            <button class="map-store-button map-gogo" type="button" data-teleport="gogo" aria-label="Go to the GOGO storefront"><span>03</span>GOGO</button>
+          </div>
+          <div id="map-destination-controls" hidden><select id="map-destination" aria-label="Choose a destination"></select><button id="map-visit" type="button">Visit store</button><button type="button" data-restroom-visit hidden>Go to restrooms</button></div>
+          <p id="map-travel-status" role="status"></p>
+          <p class="map-caption"><span class="map-key" aria-hidden="true"></span>You are here<span class="map-scale">Not to scale</span></p>
+          </div>
+        </details>
+        <div class="touch-controls"><div id="joystick" class="joystick" role="group" aria-label="Movement joystick"><span class="joystick-thumb"></span></div><button id="run-toggle" class="run-toggle hud-control" type="button" aria-pressed="false"><span data-icon="run" aria-hidden="true"></span><span>Run</span></button></div>
+      </div>
+    </section>
+
+    <section id="store-list" class="store-list" aria-labelledby="list-title" tabindex="-1">
+      <div class="list-heading"><div class="hero-copy"><p class="eyebrow">GJH virtual mall</p><h1 id="list-title">Everyday, <em>explored.</em></h1><p class="list-intro">Discover our stores and their collections, or step inside the 3D mall.</p><p class="list-summary"><strong>17 stores</strong><span aria-hidden="true"> · </span><strong>14 concept stores</strong><span aria-hidden="true"> · </span><strong>4 products</strong></p><div class="hero-actions"><button id="directory-enter-3d" type="button" hidden>Enter 3D Mall <span aria-hidden="true"><span data-icon="arrow-right"></span></span></button><a id="hero-shop" href="#featured-products">Shop products <span aria-hidden="true"><span data-icon="arrow-up-right"></span></span></a></div><p id="model-preload-status" role="status" aria-live="polite" hidden></p></div><a class="mall-preview" href="#amenities-title"><img src="assets/concept-wayfinding.webp" alt="" width="1600" height="900"><span class="mall-preview-caption"><span>Store wayfinding</span> · <span>Concept illustration</span></span></a></div>
+      <p class="layout-preview"><a id="layout-preview-link" href="?layout=classic">Classic 3-store view</a> <span id="layout-preview-notice" hidden>— Ground-floor preview: 17 stores open to explore.</span></p>
+      <details id="expanded-facilities-note" class="planned-spaces-directory"><summary>Expanded preview: lift and facilities</summary><p>The lift is in the north-west court of the expanded preview and serves a small upper viewing landing. The directory is west of the entrance, Guest services is east of the entrance, and the featured New Moon collection is beside the west court. The lift is visitor-only. Before riding, stow the cart and add any held product to your bag or return it to its original shelf. Call the lift when needed, then choose Ride after it arrives. The original visitor (v1) stays on the ground floor.</p><p>Public restrooms are on the east ground-floor arcade. Men, Women and an all-user Accessible restroom have separate entrances. Guest services is self-service. The north service reserves are closed.</p><button type="button" data-restroom-visit hidden>Go to restrooms</button></details>
+      <p id="directory-loading" class="product-results" role="status" hidden>Loading the 3D mall. You can browse the directory while it loads.</p><p id="fallback-message" class="fallback-message" role="status" hidden></p>
+      <div id="graphics-recovery" class="graphics-recovery" hidden><button id="graphics-return" type="button" hidden>Return to 3D mall</button><button id="graphics-reload" type="button">Reload page to retry 3D</button><p>Reload restarts the demo. Your saved demo bag is kept when browser storage is available.</p></div>
+      <noscript><p class="fallback-message">JavaScript is off. The complete store directory, verified product images and official eShop links are available below; the 3D mall needs JavaScript.</p></noscript>
+      <div class="directory-nav" hidden><div class="store-filters" role="group" aria-label="Filter stores"><span class="directory-label">Explore our stores</span><button type="button" data-store-filter="all" aria-pressed="true">All stores (3)</button><button type="button" data-store-filter="newmoon" aria-pressed="false"><img src="assets/new-moon-logo.svg" alt="" width="48" height="24"> New Moon</button><button type="button" data-store-filter="mili" aria-pressed="false"><img src="assets/mili-logo.jpg" alt="" width="36" height="24"> MILI</button><button type="button" data-store-filter="gogo" aria-pressed="false"><img src="assets/gogo-logo.jpg" alt="" width="36" height="24"> GOGO</button></div><a class="directory-demo" href="#original-demo-tin-title"><span>DEMO</span> Original tin <span aria-hidden="true"><span data-icon="arrow-up-right"></span></span></a></div>
+      <article class="store-article newmoon-store" data-store="newmoon" aria-labelledby="newmoon-title">
+        <div class="store-overview"><div class="brand-art concept-brand-art"><img class="concept-brand-scene" src="assets/concept-newmoon-hotpot.webp" alt="A hot pot and ingredients, shown as an AI-generated concept illustration" width="1600" height="900" loading="lazy"><span class="concept-brand-logo"><img src="assets/new-moon-logo.svg" alt="" width="120" height="64"></span><span class="concept-brand-label">AI concept</span></div><div class="store-story"><p class="eyebrow">01 / The New Moon store</p><h2 id="newmoon-title">New Moon</h2><p class="brand-name">A taste of something special.</p><p>Explore four verified products, with original official eShop packshots and full pack details.</p><div class="featured-actions"><a class="featured-shop" href="#featured-products">Shop New Moon products <span aria-hidden="true"><span data-icon="arrow-right"></span></span></a><button type="button" id="visit-newmoon-3d" data-visit-store="newmoon" hidden>Visit New Moon in 3D <span aria-hidden="true"><span data-icon="arrow-up-right"></span></span></button></div></div></div>
+        <div class="products-heading" id="featured-products"><h2 id="featured-heading" tabindex="-1">Featured products <em>from New Moon</em></h2><span>Official product imagery</span></div><div class="catalog-controls" hidden><label>Search products <input id="product-search" type="search" placeholder="Search New Moon products"></label><label>Category <select id="product-category"><option value="all">All categories</option><option value="abalone">Abalone</option></select></label><label>Sort products <select id="product-sort"><option value="featured">Featured</option><option value="name">Name A–Z</option></select></label></div><p id="product-results" class="product-results" role="status" hidden></p>
+        <div class="product-grid" role="group" aria-label="New Moon products">
+          <article id="arrival-nz" tabindex="-1" class="product-card" data-category="abalone" data-product="new-moon-nz-425g-front" data-product-name="New Moon Premium Wild Caught New Zealand Abalone 425g" data-product-image="assets/new-moon-nz-425g-front.jpg"><div class="product-image"><img src="assets/new-moon-nz-425g-front.webp" alt="Front packshot of New Moon Premium Wild Caught New Zealand Abalone 425g" width="1000" height="1000" loading="lazy"></div><div class="product-copy"><p class="eyebrow">New Zealand / 425g</p><h3>New Moon Premium Wild Caught New Zealand Abalone 425g</h3><p class="product-price">Price at official eShop <span>· Stock not provided</span></p><div class="product-actions"><button class="product-inspect" type="button" data-inspect="new-moon-nz-425g-front" hidden>Closer look<span class="sr-only"> at New Moon Premium Wild Caught New Zealand Abalone 425g</span></button><button class="product-add-card" type="button" data-add="new-moon-nz-425g-front" hidden>Add to demo bag</button></div><p class="product-feedback" role="status" aria-live="polite"></p><button class="product-store-link" type="button" data-visit-newmoon hidden>Explore this store in 3D <span data-icon="arrow-up-right"></span></button><a class="text-link" href="https://www.gjheshop.com/">Visit official eShop <span data-icon="arrow-up-right"></span></a></div></article>
+          <article id="arrival-au" tabindex="-1" class="product-card" data-category="abalone" data-product="new-moon-au-425g-front" data-product-name="New Moon Premium Wild Caught Australia Abalone 425g" data-product-image="assets/new-moon-au-425g-front.jpg"><div class="product-image"><img src="assets/new-moon-au-425g-front.webp" alt="Front packshot of New Moon Premium Wild Caught Australia Abalone 425g" width="1000" height="1000" loading="lazy"></div><div class="product-copy"><p class="eyebrow">Australia / 425g</p><h3>New Moon Premium Wild Caught Australia Abalone 425g</h3><p class="product-price">Price at official eShop <span>· Stock not provided</span></p><div class="product-actions"><button class="product-inspect" type="button" data-inspect="new-moon-au-425g-front" hidden>Closer look<span class="sr-only"> at New Moon Premium Wild Caught Australia Abalone 425g</span></button><button class="product-add-card" type="button" data-add="new-moon-au-425g-front" hidden>Add to demo bag</button></div><p class="product-feedback" role="status" aria-live="polite"></p><button class="product-store-link" type="button" data-visit-newmoon hidden>Explore this store in 3D <span data-icon="arrow-up-right"></span></button><a class="text-link" href="https://www.gjheshop.com/">Visit official eShop <span data-icon="arrow-up-right"></span></a></div></article>
+          <article id="arrival-sa" tabindex="-1" class="product-card" data-category="abalone" data-product="new-moon-sa-425g-front" data-product-name="New Moon Premium South Africa Abalone (4 – 5pcs) 425g" data-product-image="assets/new-moon-sa-425g-front.jpg"><div class="product-image"><img src="assets/new-moon-sa-425g-front.webp" alt="Front packshot of New Moon Premium South Africa Abalone (4 – 5pcs) 425g" width="1000" height="1000" loading="lazy"></div><div class="product-copy"><p class="eyebrow">South Africa / 425g</p><h3>New Moon Premium South Africa Abalone (4 – 5pcs) 425g</h3><p class="product-price">Price at official eShop <span>· Stock not provided</span></p><div class="product-actions"><button class="product-inspect" type="button" data-inspect="new-moon-sa-425g-front" hidden>Closer look<span class="sr-only"> at New Moon Premium South Africa Abalone (4 – 5pcs) 425g</span></button><button class="product-add-card" type="button" data-add="new-moon-sa-425g-front" hidden>Add to demo bag</button></div><p class="product-feedback" role="status" aria-live="polite"></p><button class="product-store-link" type="button" data-visit-newmoon hidden>Explore this store in 3D <span data-icon="arrow-up-right"></span></button><a class="text-link" href="https://www.gjheshop.com/">Visit official eShop <span data-icon="arrow-up-right"></span></a></div></article>
+          <article id="arrival-mx" tabindex="-1" class="product-card" data-category="abalone" data-product="new-moon-mx-454g-front" data-product-name="New Moon Premium Mexico Abalone 454g" data-product-image="assets/new-moon-mx-454g-front.jpg"><div class="product-image"><img src="assets/new-moon-mx-454g-front.webp" alt="Front packshot of New Moon Premium Mexico Abalone 454g" width="1000" height="1000" loading="lazy"></div><div class="product-copy"><p class="eyebrow">Mexico / 454g</p><h3>New Moon Premium Mexico Abalone 454g</h3><p class="product-price">Price at official eShop <span>· Stock not provided</span></p><div class="product-actions"><button class="product-inspect" type="button" data-inspect="new-moon-mx-454g-front" hidden>Closer look<span class="sr-only"> at New Moon Premium Mexico Abalone 454g</span></button><button class="product-add-card" type="button" data-add="new-moon-mx-454g-front" hidden>Add to demo bag</button></div><p class="product-feedback" role="status" aria-live="polite"></p><button class="product-store-link" type="button" data-visit-newmoon hidden>Explore this store in 3D <span data-icon="arrow-up-right"></span></button><a class="text-link" href="https://www.gjheshop.com/">Visit official eShop <span data-icon="arrow-up-right"></span></a></div></article>
+        </div>
+        <p class="packaging-note">Unofficial demo: 3D cans use photo-derived labels, with estimated dimensions, panel order and spacing. Mexico includes a 121-degree unprinted placeholder sector. These are not verified packaging replicas or brand-approved editions. Product images remain associated with official eShop listings.</p>
+      <details class="brand-concepts"><summary>New Moon inspiration <span>3 concept images</span></summary><p>AI-generated mood imagery. Not official product photography.</p><div class="brand-concept-grid"><figure><img src="assets/concept-newmoon-hotpot.webp" alt="" width="1600" height="900" loading="lazy"><figcaption>Shared hot pot</figcaption></figure><figure><img src="assets/concept-newmoon-table.webp" alt="" width="1600" height="900" loading="lazy"><figcaption>Gathering at the table</figcaption></figure><figure><img src="assets/concept-newmoon-serving.webp" alt="" width="1600" height="900" loading="lazy"><figcaption>A serving idea</figcaption></figure></div></details>
+      </article>
+      <div class="brand-stories">
+        <article class="store-article brand-store" data-store="mili" data-brand="mili" data-brand-name="MILI" data-brand-image="assets/mili-brand-cover.jpg" aria-labelledby="mili-title"><div class="brand-art concept-brand-art"><img class="concept-brand-scene" src="assets/concept-mili-noodles.webp" alt="A noodle bowl, shown as an AI-generated concept illustration" width="1600" height="900" loading="lazy"><span class="concept-brand-logo"><img src="assets/mili-logo.jpg" alt="" width="120" height="64"></span><span class="concept-brand-label">AI concept</span></div><div class="store-story"><p class="eyebrow">02 / The MILI store</p><h2 id="mili-title">MILI</h2><p>Explore the brand and view its original official cover artwork. No verified MILI product packshots are available for this concept; no MILI products are depicted or listed.</p><div class="brand-actions"><a class="text-link" href="https://www.gjheshop.com/">Visit the official GJH eShop</a><button class="brand-inspect" type="button" data-inspect="mili" hidden>View brand artwork</button><button class="brand-visit" type="button" data-visit-store="mili" hidden>Visit MILI in 3D <span data-icon="arrow-up-right"></span></button></div></div><details class="brand-concepts"><summary>MILI inspiration <span>3 concept images</span></summary><p>AI-generated mood imagery. Not official product photography.</p><div class="brand-concept-grid"><figure><img src="assets/concept-mili-noodles.webp" alt="" width="1600" height="900" loading="lazy"><figcaption>A comforting bowl</figcaption></figure><figure><img src="assets/concept-mili-table.webp" alt="" width="1600" height="900" loading="lazy"><figcaption>A meal at the table</figcaption></figure><figure><img src="assets/concept-mili-kitchen.webp" alt="" width="1600" height="900" loading="lazy"><figcaption>In the kitchen</figcaption></figure></div></details></article>
+        <article class="store-article brand-store" data-store="gogo" data-brand="gogo" data-brand-name="GOGO" data-brand-image="assets/gogo-brand-cover.jpg" aria-labelledby="gogo-title"><div class="brand-art concept-brand-art"><img class="concept-brand-scene" src="assets/concept-gogo-toast.webp" alt="Friends sharing orange drinks, shown as an AI-generated concept illustration" width="1600" height="900" loading="lazy"><span class="concept-brand-logo"><img src="assets/gogo-logo.jpg" alt="" width="120" height="64"></span><span class="concept-brand-label">AI concept</span></div><div class="store-story"><p class="eyebrow">03 / The GOGO store</p><h2 id="gogo-title">GOGO</h2><p>Explore the brand and view its original official cover artwork. No verified GOGO product packshots are available for this concept; no GOGO products are depicted or listed.</p><div class="brand-actions"><a class="text-link" href="https://www.gjheshop.com/">Visit the official GJH eShop</a><button class="brand-inspect" type="button" data-inspect="gogo" hidden>View brand artwork</button><button class="brand-visit" type="button" data-visit-store="gogo" hidden>Visit GOGO in 3D <span data-icon="arrow-up-right"></span></button></div></div><details class="brand-concepts"><summary>GOGO inspiration <span>3 concept images</span></summary><p>AI-generated mood imagery. Not official product photography.</p><div class="brand-concept-grid"><figure><img src="assets/concept-gogo-toast.webp" alt="" width="1600" height="900" loading="lazy"><figcaption>A joyful toast</figcaption></figure><figure><img src="assets/concept-gogo-pour.webp" alt="" width="1600" height="900" loading="lazy"><figcaption>A citrus moment</figcaption></figure><figure><img src="assets/concept-gogo-garden.webp" alt="" width="1600" height="900" loading="lazy"><figcaption>Gathering outdoors</figcaption></figure></div></details></article>
+      </div>
+      <details class="concept-gallery"><summary>Explore the concept gallery <span>20 illustrations</span></summary><p>AI-generated concept imagery for inspiration. These are not photographs of the 3D mall, real stores or products.</p><div class="concept-grid"><figure><img src="assets/concept-hero.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>The imagined mall</figcaption></figure><figure><img src="assets/concept-arrival.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Arrival</figcaption></figure><figure><img src="assets/concept-atrium.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>The atrium</figcaption></figure><figure><img src="assets/concept-arcade.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>The arcade</figcaption></figure><figure><img src="assets/concept-courtyard.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Garden courtyard</figcaption></figure><figure><img src="assets/concept-upper-level.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Upper level</figcaption></figure><figure><img src="assets/concept-wayfinding.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Wayfinding</figcaption></figure><figure><img src="assets/concept-service-desk.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Guest services</figcaption></figure><figure><img src="assets/concept-lounge.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>A place to pause</figcaption></figure><figure><img src="assets/concept-storefront-food.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Food and pantry</figcaption></figure><figure><img src="assets/concept-storefront-lifestyle.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Lifestyle</figcaption></figure><figure><img src="assets/concept-storefront-wellness.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Wellness</figcaption></figure><figure><img src="assets/concept-pantry.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Pantry inspiration</figcaption></figure><figure><img src="assets/concept-dining.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>At the table</figcaption></figure><figure><img src="assets/concept-ingredients.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Fresh ingredients</figcaption></figure><figure><img src="assets/concept-gathering.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Gathering together</figcaption></figure><figure><img src="assets/concept-tea-break.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>A quiet tea break</figcaption></figure><figure><img src="assets/concept-grocery-basket.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Everyday essentials</figcaption></figure><figure><img src="assets/concept-discovery.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Finding your way</figcaption></figure><figure><img src="assets/concept-evening.webp" alt="" width="1200" height="614" loading="lazy"><figcaption>Evening in the mall</figcaption></figure></div></details>
+      <section class="original-tin-entry" aria-labelledby="original-demo-tin-title">
+        <div>
+          <p class="eyebrow">Interactive study / Not a store</p>
+          <h2 id="original-demo-tin-title">Original demo tin</h2>
+          <p>This separate viewer is an original generic food-tin demonstration. It is not New Moon packaging, a New Moon SKU, or an official product representation.</p>
+        </div>
+        <button id="original-tin-open" hidden class="original-tin-open" type="button" aria-controls="original-tin-dialog">Open original tin viewer</button><noscript><p>The interactive original tin viewer requires JavaScript. The description above remains available.</p></noscript>
+      </section>
+      <details id="planned-spaces-directory" class="planned-spaces-directory">
+        <summary>Concept stores (14)</summary>
+        <p id="planned-spaces-note">Step inside these concept stores in the expanded 3D mall.</p>
+        <ol id="planned-spaces-list" class="planned-spaces-list" aria-describedby="planned-spaces-note">
+        <li id="planned-space-04" data-planned-space="planned-space-04" data-planned-number="04" data-planned-side="north" data-planned-status="open" data-planned-available="true" data-planned-brand="Borsch Med"><h3>04 · Borsch Med</h3><p data-planned-field="location">North side</p><button type="button" data-visit-store="planned-space-04" hidden>Visit Borsch Med in 3D</button></li>
+        <li id="planned-space-05" data-planned-space="planned-space-05" data-planned-number="05" data-planned-side="north" data-planned-status="open" data-planned-available="true" data-planned-brand="Pien Tze Huang"><h3>05 · Pien Tze Huang</h3><p data-planned-field="location">North side</p><button type="button" data-visit-store="planned-space-05" hidden>Visit Pien Tze Huang in 3D</button></li>
+        <li id="planned-space-06" data-planned-space="planned-space-06" data-planned-number="06" data-planned-side="west" data-planned-status="open" data-planned-available="true" data-planned-brand="Flying Wheel"><h3>06 · Flying Wheel</h3><p data-planned-field="location">West side</p><button type="button" data-visit-store="planned-space-06" hidden>Visit Flying Wheel in 3D</button></li>
+        <li id="planned-space-07" data-planned-space="planned-space-07" data-planned-number="07" data-planned-side="west" data-planned-status="open" data-planned-available="true" data-planned-brand="Gu Long"><h3>07 · Gu Long</h3><p data-planned-field="location">West side</p><button type="button" data-visit-store="planned-space-07" hidden>Visit Gu Long in 3D</button></li>
+        <li id="planned-space-08" data-planned-space="planned-space-08" data-planned-number="08" data-planned-side="west" data-planned-status="open" data-planned-available="true" data-planned-brand="Skippy"><h3>08 · Skippy</h3><p data-planned-field="location">West side</p><button type="button" data-visit-store="planned-space-08" hidden>Visit Skippy in 3D</button></li>
+        <li id="planned-space-09" data-planned-space="planned-space-09" data-planned-number="09" data-planned-side="west" data-planned-status="open" data-planned-available="true" data-planned-brand="SPAM"><h3>09 · SPAM</h3><p data-planned-field="location">West side</p><button type="button" data-visit-store="planned-space-09" hidden>Visit SPAM in 3D</button></li>
+        <li id="planned-space-10" data-planned-space="planned-space-10" data-planned-number="10" data-planned-side="west" data-planned-status="open" data-planned-available="true" data-planned-brand="California Mexico"><h3>10 · California Mexico</h3><p data-planned-field="location">West side</p><button type="button" data-visit-store="planned-space-10" hidden>Visit California Mexico in 3D</button></li>
+        <li id="planned-space-11" data-planned-space="planned-space-11" data-planned-number="11" data-planned-side="west" data-planned-status="open" data-planned-available="true" data-planned-brand="Hormel"><h3>11 · Hormel</h3><p data-planned-field="location">West side</p><button type="button" data-visit-store="planned-space-11" hidden>Visit Hormel in 3D</button></li>
+        <li id="planned-space-12" data-planned-space="planned-space-12" data-planned-number="12" data-planned-side="east" data-planned-status="open" data-planned-available="true" data-planned-brand="Zeria"><h3>12 · Zeria</h3><p data-planned-field="location">East side</p><button type="button" data-visit-store="planned-space-12" hidden>Visit Zeria in 3D</button></li>
+        <li id="planned-space-13" data-planned-space="planned-space-13" data-planned-number="13" data-planned-side="east" data-planned-status="open" data-planned-available="true" data-planned-brand="Sony"><h3>13 · Sony</h3><p data-planned-field="location">East side</p><button type="button" data-visit-store="planned-space-13" hidden>Visit Sony in 3D</button></li>
+        <li id="planned-space-14" data-planned-space="planned-space-14" data-planned-number="14" data-planned-side="east" data-planned-status="open" data-planned-available="true" data-planned-brand="LG"><h3>14 · LG</h3><p data-planned-field="location">East side</p><button type="button" data-visit-store="planned-space-14" hidden>Visit LG in 3D</button></li>
+        <li id="planned-space-15" data-planned-space="planned-space-15" data-planned-number="15" data-planned-side="east" data-planned-status="open" data-planned-available="true" data-planned-brand="Casio"><h3>15 · Casio</h3><p data-planned-field="location">East side</p><button type="button" data-visit-store="planned-space-15" hidden>Visit Casio in 3D</button></li>
+        <li id="planned-space-16" data-planned-space="planned-space-16" data-planned-number="16" data-planned-side="east" data-planned-status="open" data-planned-available="true" data-planned-brand="GP"><h3>16 · GP</h3><p data-planned-field="location">East side</p><button type="button" data-visit-store="planned-space-16" hidden>Visit GP in 3D</button></li>
+        <li id="planned-space-17" data-planned-space="planned-space-17" data-planned-number="17" data-planned-side="east" data-planned-status="open" data-planned-available="true" data-planned-brand="Gigaset"><h3>17 · Gigaset</h3><p data-planned-field="location">East side</p><button type="button" data-visit-store="planned-space-17" hidden>Visit Gigaset in 3D</button></li>
+        </ol>
+      </details>
+      <section class="mall-amenities-directory" aria-labelledby="amenities-title">
+      <h2 id="amenities-title" tabindex="-1">Mall services &amp; featured collection</h2>
+      <p>Find store information at the service desk or ceiling signs, and discover the New Moon showcase. The complete product list above remains available without 3D.</p>
+      <div class="amenities-actions"><button type="button" data-amenity="service-desk" hidden>Guest services</button><button type="button" data-amenity="wayfinding-west" hidden>Store wayfinding</button><button type="button" data-amenity="featured-showcase" hidden>Featured collection</button></div>
+      <p><a href="#newmoon-title">New Moon</a> · <a href="#mili-title">MILI</a> · <a href="#gogo-title">GOGO</a></p>
+    </section>
+    </section>
+  </main>
+  <footer class="site-footer"><p class="footer-name">GJH Virtual Mall<span>Everyday, explored.</span></p><p>Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p><a href="https://www.gjheshop.com/">Official GJH eShop</a> <a class="design-reference" rel="related" href="../../../../style-atlas/index.html#gjh-v11">View design reference</a></footer>
+  <details class="mall-app-settings"><summary>App &amp; offline help</summary><div><label class="mall-language-picker"><span>Language</span><select id="directory-language" data-mall-language><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select></label><p>Install this mall from your browser menu. On iPhone or iPad, open Share and choose Add to Home Screen.</p><p>The mall and products need a connection. Offline, this app shows a reconnect screen. The demo bag stays in this browser tab only.</p><div class="mall-app-actions"><button id="mall-install" type="button" hidden>Install mall</button><button id="mall-check-update" data-mall-check type="button" disabled><span>Check for updates</span> <bdi data-mall-version></bdi></button></div><p id="mall-app-status" role="status" aria-live="polite">Checking offline support…</p></div></details>
+  <div id="mall-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+  <dialog id="mall-theme-dialog" class="mall-theme-dialog" aria-labelledby="mall-theme-title" aria-describedby="mall-theme-description mall-theme-status">
+    <div class="mall-theme-top"><div><p class="eyebrow">Mall appearance</p><h2 id="mall-theme-title" tabindex="-1">Mall theme</h2></div><button id="mall-theme-close" type="button">Close</button></div>
+    <p id="mall-theme-description">Follow the festival calendar or choose a theme manually.</p>
+    <label for="mall-theme-select">Choose a theme</label><select id="mall-theme-select"></select>
+    <button id="mall-theme-apply" type="button">Apply theme</button>
+    <p id="mall-theme-status" role="status" aria-live="polite"></p>
+  </dialog>
+  <dialog id="shelf-dialog" class="shelf-dialog" aria-labelledby="shelf-title" aria-describedby="shelf-disclosure">
+    <div class="shelf-top"><button id="shelf-back" type="button">Back</button><span>Shelf view</span><button id="shelf-close" type="button">Close</button></div>
+    <div class="shelf-stage"><button id="shelf-target" class="shelf-target" type="button" hidden></button></div>
+    <div class="shelf-sheet">
+      <h2 id="shelf-title"></h2>
+      <p id="shelf-disclosure">Unofficial demo; not endorsed by Goh Joo Hin Pte Ltd. Estimated packaging. No orders.</p>
+      <div class="shelf-actions"><button id="shelf-details" type="button">Inspect details</button><button id="shelf-add" type="button">Add to demo bag</button></div>
+      <p id="shelf-status" role="status" aria-live="polite"></p>
+    </div>
+  </dialog>
+  <dialog id="product-dialog" class="product-dialog" aria-labelledby="product-title" aria-describedby="product-description product-disclaimer"><div class="dialog-top"><p class="eyebrow">A closer look</p><button id="product-close" type="button">Close</button></div><div class="dialog-content"><div class="dialog-image"><div class="product-preview" id="product-preview" data-preview-state="image"><img id="product-image" src="assets/new-moon-nz-425g-front.webp" alt="New Moon Premium Wild Caught New Zealand Abalone 425g" width="1000" height="1000"><canvas id="product-preview-canvas" hidden width="640" height="520" tabindex="0" aria-label="3D product preview. Drag to rotate; scroll or pinch to zoom. Use arrow keys to rotate, plus or minus to zoom, and R to reset."></canvas><p id="product-preview-status" class="product-preview-status" role="status" aria-live="polite">Loading unofficial 3D demo…</p></div></div><div class="dialog-copy"><p id="product-kind" class="eyebrow">New Moon / Product detail</p><h2 id="product-title">New Moon Premium Wild Caught New Zealand Abalone 425g</h2><p id="product-description">Official product imagery. A current brand-approved packaging edition has not been confirmed.</p><div id="product-bag-actions" hidden><button id="product-add" type="button">Add to demo bag</button><button id="product-collect" type="button" hidden>Add + collect in 3D</button><p class="collection-note">Either action adds one item. Collect shows a simplified gesture with the demo can, not a physical shelf pickup. Reduced motion skips the gesture.</p><p id="product-bag-status" role="status" aria-live="polite">Demo only. No payment or order is created.</p></div><a id="product-shop" class="shop-link" href="https://www.gjheshop.com/">Visit the official GJH eShop</a><p id="product-disclaimer" class="concept-note">Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.</p></div></div></dialog>
+  <dialog id="original-tin-dialog" class="original-tin-dialog" aria-labelledby="original-tin-dialog-title" aria-describedby="original-tin-description original-tin-status"><div class="original-tin-top"><div><p class="eyebrow">Independent demo</p><h2 id="original-tin-dialog-title">Original demo tin</h2></div><button id="original-tin-close" type="button" aria-label="Close original demo tin viewer">Close</button></div><div class="original-tin-layout"><div class="original-tin-stage"><canvas id="original-tin-canvas" tabindex="0" width="640" height="520" aria-label="Interactive original generic food tin. Drag to orbit. Use arrow keys to orbit and plus or minus to zoom."></canvas><p id="original-tin-status" class="original-tin-status" role="status" aria-live="polite">The original demo tin is not loaded yet.</p></div><div class="original-tin-controls"><p id="original-tin-description">A generic, original tin study for interaction testing. Not New Moon packaging and not an official SKU.</p><div class="original-tin-buttons" role="group" aria-label="Original tin viewer controls"><button type="button" data-tin-orbit="left" aria-label="Orbit tin left"><span data-icon="arrow-left"></span></button><button type="button" data-tin-orbit="right" aria-label="Orbit tin right"><span data-icon="arrow-right"></span></button><button type="button" data-tin-orbit="up" aria-label="Orbit tin up"><span data-icon="arrow-up"></span></button><button type="button" data-tin-orbit="down" aria-label="Orbit tin down"><span data-icon="arrow-down"></span></button><button type="button" data-tin-zoom="out" aria-label="Zoom out"><span data-icon="minus"></span></button><button type="button" data-tin-zoom="in" aria-label="Zoom in"><span data-icon="plus"></span></button><button type="button" id="original-tin-reset">Reset view</button></div><label class="original-tin-clip">Open / close <input id="original-tin-clip" type="range" min="0" max="1" step="0.01" value="0" aria-label="Open close animation amount"></label><label class="original-tin-clip">Exploded view <input id="original-tin-explode" type="range" min="0" max="1" step="0.01" value="0" aria-label="Exploded view animation amount"></label><p class="original-tin-note">Original procedural geometry for this independent demo. No brand artwork or official SKU is represented.</p></div></div></dialog>
+  <dialog id="bag-dialog" class="demo-bag" aria-labelledby="bag-title" aria-describedby="bag-description"><div class="bag-scroll"><div class="bag-top"><h2 id="bag-title">Your demo bag</h2><button id="bag-close" type="button">Close</button></div><p id="bag-description">Try collecting products. No payment, order or stock reservation. Kept for this browser tab only. In 3D, a generic carried bag shows that you have items; collection is a simplified gesture, not physical grabbing. Optional cart uses a fixed pushing pose and a generic contents marker, not exact products or simulated wheels.</p><section id="cart-controls" hidden><button id="cart-toggle" type="button">Use cart in 3D</button><p id="cart-status" role="status">Slower walking with a wide safety clearance. Stow before sitting. No real orders.</p></section><p id="bag-empty">Your bag is empty. Open a New Moon product and choose Add to demo bag.</p><ul id="bag-items"></ul><button id="bag-clear" type="button" hidden>Clear demo bag</button><p id="bag-status" class="sr-only" role="status" aria-live="polite"></p></div><div id="context-navigation-bag" class="context-navigation-footer"></div></dialog>
+</body>
+</html>

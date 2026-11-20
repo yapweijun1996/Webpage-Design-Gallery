@@ -1,5 +1,6 @@
 """Exercise bundled startup, model integrity and real fallback paths."""
 import functools
+import gzip
 import hashlib
 import http.server
 import json
@@ -58,10 +59,12 @@ def run():
                     if mode == 'truncated-pack':
                         del data[-10:]
                     else:
+                        data = bytearray(gzip.decompress(data))
                         header = struct.unpack_from('<I', data, 8)[0]
                         entries = json.loads(data[12:12 + header])
                         offset, length = entries[CAN]
                         data[12 + header + offset + length - 1] ^= 1
+                        data = gzip.compress(data, mtime=0)
                     page.route('**/startup-assets.pack', lambda route: route.fulfill(status=200, body=bytes(data)))
                 start = time.monotonic()
                 page.goto(base, wait_until='domcontentloaded')

@@ -1,4 +1,6 @@
-"""Pack the independently verified startup models using only Python stdlib."""
+"""Pack the first-view models and artwork using only Python stdlib."""
+import gzip
+import io
 import json
 import re
 import struct
@@ -21,9 +23,10 @@ def outputs():
         raise ValueError('Startup asset names must be sorted, unique and nonempty')
     entries, chunks, offset = {}, [], 0
     for name in names:
-        if not isinstance(name, str) or not re.fullmatch(r'[A-Za-z0-9_-]+\.glb', name):
+        if not isinstance(name, str) or not re.fullmatch(r'(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.(?:glb|json|svg|webp)', name):
             raise ValueError(f'Unsafe startup asset name: {name!r}')
-        data = (ASSETS / name).read_bytes()
+        path = ASSETS / name
+        data = path.read_text(encoding='utf-8-sig').encode('utf-8') if path.suffix in {'.json', '.svg'} else path.read_bytes()
         entries[name] = [offset, len(data)]
         chunks.append(data)
         offset += len(data)
@@ -34,8 +37,13 @@ def outputs():
     template = TEMPLATE.read_text(encoding='utf-8')
     if template.count('__STARTUP_ASSET_NAMES__') != 1:
         raise ValueError('Expected one startup asset name placeholder')
+    output = io.BytesIO()
+    with gzip.GzipFile(fileobj=output, mode='wb', compresslevel=9, mtime=0) as stream:
+        stream.write(pack)
+    compressed = output.getvalue()
     loader = template.replace('__STARTUP_ASSET_NAMES__', json.dumps(names, separators=(',', ':')))
-    return {PACK: pack, LOADER: loader.encode('utf-8')}
+    loader = loader.replace('__STARTUP_PACK_BYTES__', str(len(compressed)))
+    return {PACK: compressed, LOADER: loader.encode('utf-8')}
 
 
 def build(check=False):

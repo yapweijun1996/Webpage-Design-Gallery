@@ -1,3 +1,4 @@
+import gzip
 """Contracts for reproducible V11 startup assets."""
 
 import importlib.util
@@ -22,7 +23,7 @@ class RuntimeBuildTests(unittest.TestCase):
     def test_startup_pack_contains_the_original_models(self):
         build = load('build_gjh_startup_pack')
         build.build(check=True)
-        data = build.PACK.read_bytes()
+        data = gzip.decompress(build.PACK.read_bytes())
         self.assertEqual(data[:8], b'GJHPACK1')
         header_length = struct.unpack_from('<I', data, 8)[0]
         entries = json.loads(data[12:12 + header_length])

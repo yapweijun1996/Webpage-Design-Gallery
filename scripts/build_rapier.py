@@ -25,8 +25,11 @@ def outputs():
     wasm = base64.b64decode(match.group(1), validate=True)
     if hashlib.sha256(wasm).hexdigest() != WASM_SHA256:
         raise ValueError('Extracted Rapier WASM does not match its reviewed hash')
-    replacement = b'new URL("./rapier_bg.wasm",import.meta.url)'
+    replacement = b'input??new URL("./rapier_bg.wasm",import.meta.url)'
     wrapper = source[:match.start()] + replacement + source[match.end():]
+    if wrapper.count(b'function FC(){') != 1:
+        raise ValueError('Rapier init signature changed')
+    wrapper = wrapper.replace(b'function FC(){', b'function FC(input){')
     return {VENDOR / 'rapier.mjs': wrapper, VENDOR / 'rapier_bg.wasm': wasm}
 
 

@@ -18,8 +18,7 @@ JOBS = (
     {
         'entry': BASE / 'script.js', 'output': BASE / 'script.bundle.js',
         'external': ('*world.js', '*player.js', '*elevator-v2.js', '*mall-themes.js',
-                     '*dom-projection.js', '*target-guidance.js', '*shelf-focus.js',
-                     '*visitor-v2-product-ui.js', '*visitor-v2-controls.js', '*original-tin.js', '*npcs.js',
+                     '*startup-asset-pack.js', '*startup-physics.js', '*original-tin.js', '*npcs.js',
                      '*shop-interactions.js',
                      '*newmoon-detail-preview.js', '*demo-bag.js', '*GLTFLoader.js', '*three.module.min.js', '*rapier.mjs'),
         'rewrite': (('"./newmoon-detail-preview.js"', '"./assets/newmoon-detail-preview.js"'),
@@ -30,7 +29,7 @@ JOBS = (
     {
         'entry': BASE / 'assets/world.js', 'output': BASE / 'assets/world.bundle.js',
         'external': ('*GLTFLoader.js', '*BufferGeometryUtils.js', '*three.module.min.js',
-                     '*natural-materials.js', '*products.js', '*startup-asset-pack.js',
+                     '*natural-materials.js', '*startup-asset-pack.js',
                      '*brand-wall.js'),
         'rewrite': (),
     },

@@ -8,6 +8,17 @@ function canvas(w,h) {
   c.width = w; c.height = h;
   return c;
 }
+async function packedImage(url, fetchAsset) {
+  if (!fetchAsset) return image(url);
+  try {
+    const response = await fetchAsset(url);
+    if (!response.ok) return null;
+    const object = URL.createObjectURL(await response.blob());
+    try { return await image(object); }
+    finally { URL.revokeObjectURL(object); }
+  } catch { return null; }
+}
+
 function image(url) {
   return new Promise(resolve => {
     const img = new Image();
@@ -227,14 +238,14 @@ function paintPoster(ctx,c,img,r){
   else {ctx.fillStyle=s.charcoal;ctx.font='bold 24px Georgia';ctx.textAlign='center';ctx.fillText(c.brand,r.w/2,r.h/2,r.w-16);}
   ctx.restore();
 }
-export async function bakeAtlas(configs,assetBase) {
+export async function bakeAtlas(configs,assetBase,fetchAsset) {
   const sheet=canvas(atlasSize,atlasSize), ctx=sheet.getContext('2d',{willReadFrequently:true});
   const tiles=new Map();
   const neutral=await image('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(registry.door.replace('currentColor',s.brass)));
   await Promise.all(configs.map(async c=>{
     const [src,poster]=await Promise.all([
-      c.logoFile?image(new URL(c.id==='S01'?'new-moon-logo.svg':'brands/'+c.logoFile,assetBase)):null,
-      c.poster?image(new URL('brand-kit/'+c.poster+'-hero.webp',assetBase)):null
+      c.logoFile?packedImage(new URL(c.id==='S01'?'new-moon-logo.svg':'brands/'+c.logoFile,assetBase),fetchAsset):null,
+      c.poster?packedImage(new URL('brand-kit/'+c.poster+'-hero.webp',assetBase),fetchAsset):null
     ]);
     const logo=src&&trimLogo(src), cells=atlasCells(Number(c.id.slice(1))-1);
     const masks={};

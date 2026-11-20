@@ -18,7 +18,7 @@ import {addOriginalShopDetails} from './shop-anchor-details-first.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {brandRail} from './upper-layout.js';
-import {buildUpperLevel, loadUpperLevel, deckPlanters} from './upper-level.js';
+import {buildUpperLevel, loadUpperFurniture, deckPlanters} from './upper-level.js';
 import {createInteriorAdditions} from './interior-additions.js';
 import {createFurnishings} from './furnishings.js';
 import {createShell} from './shell.js';
@@ -128,11 +128,32 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
 }
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
-export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low', phone = false) {
+export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low', phone = false, detailsEnabled = () => true) {
   try {
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
-  const [furnishings,shell,upperAssets]=await Promise.all([createFurnishings(T,true,expanded),expanded ? null : createShell(T),expandedLift ? loadUpperLevel(T,artworkTier) : null]);
+  // Local textures share the HTML packshots' request mode, avoiding duplicate image loads.
+  const textures = new Map(), loader = new T.TextureLoader().setCrossOrigin(undefined);
+  const names = ['new-moon-logo.svg', 'mili-logo.jpg', 'gogo-logo.jpg', 'new-moon-brand-cover.jpg', 'mili-brand-cover.jpg', 'gogo-brand-cover.jpg', ...['nz-425g', 'au-425g', 'sa-425g', 'mx-454g'].map(id => `new-moon-${id}-front.jpg`)];
+  const texturesTask = Promise.all(names.map(async name => {
+    let texture;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const url = new URL(name.replace(/(?:-brand-cover|-front)\.jpg$/, match => match.replace('.jpg','.webp')), import.meta.url);
+        if (attempt) url.searchParams.set('retry', String(attempt));
+        texture = await loader.loadAsync(url.href);
+        break;
+      } catch (error) {
+        if (attempt === 2) throw new Error(`Mall texture failed to load: ${name}`, {cause: error});
+        await new Promise(resolve => setTimeout(resolve, attempt ? 800 : 200));
+      }
+    }
+    textures.set(name, setupArtworkTexture(T,texture,artworkTier()));
+  }));
+  const productsTask = import('./products.js');
+  void productsTask.catch(() => {});
+  const furnishingTask = createFurnishings(T,true,expanded,detailsEnabled);
+  const shellTask = expanded ? null : createShell(T);
   const ceilingObstacles=[], shopObstacles=[];
   const bakedFloors=[], bakedCeilings=[];
   function ceilingBounds(x,y,z,sx,sy,sz){
@@ -299,24 +320,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   }
   const cylinder = (m, x, y, z, r, h) => solid('cylinder', m, x, y, z, r, h, r);
   const sphere = (m, x, y, z, sx, sy, sz) => solid('sphere', m, x, y, z, sx, sy, sz);
-  // Local textures share the HTML packshots' request mode, avoiding duplicate image loads.
-  const textures = new Map(), loader = new T.TextureLoader().setCrossOrigin(undefined);
-  const names = ['new-moon-logo.svg', 'mili-logo.jpg', 'gogo-logo.jpg', 'new-moon-brand-cover.jpg', 'mili-brand-cover.jpg', 'gogo-brand-cover.jpg', ...['nz-425g', 'au-425g', 'sa-425g', 'mx-454g'].map(id => `new-moon-${id}-front.jpg`)];
-  await Promise.all(names.map(async name => {
-    let texture;
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        const url = new URL(`assets/${name}`, location.href);
-        if (attempt) url.searchParams.set('retry', String(attempt));
-        texture = await loader.loadAsync(url.href);
-        break;
-      } catch (error) {
-        if (attempt === 2) throw new Error(`Mall texture failed to load: ${name}`, {cause: error});
-        await new Promise(resolve => setTimeout(resolve, attempt ? 800 : 200));
-      }
-    }
-    textures.set(name, setupArtworkTexture(T,texture,artworkTier()));
-  }));
+  const [furnishings,shell] = await Promise.all([furnishingTask,shellTask,texturesTask]);
   const plane = geometry.plane;
   function art(name, x, y, z, width, ry = 0) {
     const texture = textures.get(name), height = width * texture.image.height / texture.image.width;
@@ -444,7 +448,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       }
     }
     if (new URLSearchParams(location.search).get('tram') === 'debug') shopLodUpdates.push(addTramDebug(T, scene));
-    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, artworkTier, daylightSkylight:expandedLift, setCanopyMaterial: material => { finishMaterials.canopy = material; }}));
+    shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, detailsEnabled, setPavingMap, ceilingBounds, artworkTier, daylightSkylight:expandedLift, setCanopyMaterial: material => { finishMaterials.canopy = material; }}));
     if (expandedLift) addAtriumSkylight(T,scene,liftLayout.roofOpening);
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
@@ -896,7 +900,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       }
       cylinder('pot', x + 3.48, 1.38, -4, .15, .32); cylinder('brass', x + 3.48, 1.545, -4, .155, .025);
       sphere('leaf', x + 3.48, 1.72, -4, .22, .3, .19);
-      const {addProducts} = await import('./products.js');
+      const {addProducts} = await productsTask;
       const displayProducts=showcaseProducts(SHOWCASE_PRODUCTS,expanded);
       const firstProduct = scene.children.length;
       productDisplay = await addProducts(T, scene, textures, materials.brass,displayProducts,[],sampleCan,activeShopSlot,artworkTier);
@@ -1141,8 +1145,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     box('wood',band.x,liftLayout.upper+band.y,band.z,band.width,band.height,band.depth,true);
     for(const edge of [-1,1])box('brass',band.x,liftLayout.upper+band.y+edge*band.height/2,
       band.z-band.depth/2,band.width,.028,.035);
-    if(upperAssets){
-      upperLevel=buildUpperLevel(T,upperAssets,{collider,lightWash});
+    if(expandedLift){
+      upperLevel=buildUpperLevel(T,{tier:artworkTier()},{collider,lightWash});
       scene.add(upperLevel.group,upperLevel.panes);
     }
     const deckBench=placement=>{
@@ -1171,7 +1175,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       collider(x,liftLayout.upper+.25,z,.68,.5,.68);
     }
     activeDeck=false;
-    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility,artworkTier);
+    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility,artworkTier,detailsEnabled);
     interiorModels=interiors;
     for(const {x,y,z,width,height,depth} of interiors.collisionBoxes) {
       collider(x,y,z,width,height,depth);
@@ -1539,7 +1543,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       upperLevel?.updateView(view.frustum);
     }
   }
-  const additions = expanded ? createInteriorAdditions(T,{scene,collider,seats,prepareModel,tier:artworkTier}) : null;
+  const additions = expanded ? createInteriorAdditions(T,{scene,collider,seats,prepareModel,detailsEnabled,tier:artworkTier}) : null;
   interactables.push(...seats.map(seat=>({id:seat.id,kind:'sit',x:seat.exitX,y:seat.floor,z:seat.exitZ,floor:seat.floor,radius:seat.clearance.interactionRadius,seat})));
   const firstFurnishing = shopLodMeshes.length;
   const furnishingState=furnishings.finish(scene,mesh=>shopLodMeshes.push(mesh),prepareModel);
@@ -1555,7 +1559,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   // The seating collider intentionally covers only the seat pan. Camera bounds
   // also cover the authored back and arms without blocking sit/stand routes.
   const cameraObstacles=ceilingObstacles.concat(shopObstacles,seats.map(seat=>seat.bounds));
-  let upperWarmStatus=null,landingLights;
+  let upperWarmStatus=null,landingLights,upperFurniture;
   function prepareUpperLevel(){
     if(!upperLevel)return;
     const {group,panes,cabinMark}=upperLevel;
@@ -1567,13 +1571,19 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     landingLights.children=[ambient,key];
     landingLights.fog=scene.fog;landingLights.environment=scene.environment;
     landingLights.environmentIntensity=scene.environmentIntensity;
-    if(upperWarmStatus==='pending')return;
+    if(upperWarmStatus==='pending'||upperWarmStatus==='ready')return;
     upperWarmStatus='pending';
     void warmModel([group,panes,cabinMark],landingLights,{
       late:false,priority:()=>-100,linear:()=>false
     }).then(()=>{upperWarmStatus='ready';},error=>{
       upperWarmStatus='interrupted';console.warn('Upper level GPU warmup interrupted',error);
     });
+  }
+  function prepareUpperFurniture() {
+    if (!upperLevel) return;
+    prepareUpperLevel();
+    upperFurniture ??= loadUpperFurniture(T).then(records => upperLevel.installFurniture(records, prepareModel))
+      .catch(error => console.warn('Upper level furniture unavailable', error));
   }
   let brandWallPromise=null;
   function ensureBrandWall(){
@@ -1593,7 +1603,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   return {signage, defaultExposure:EVERYDAY.lighting.exposure, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
-  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, get upperWarmStatus(){return upperWarmStatus;}, furnishings: Object.freeze({...furnishingState,...additions?.state}), productAssets: Object.freeze(worldProductAssets)};
+  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, prepareUpperFurniture, get upperWarmStatus(){return upperWarmStatus;}, furnishings: Object.freeze({...furnishingState,...additions?.state}), productAssets: Object.freeze(worldProductAssets)};
   } finally {
     releaseStartupAssetPack();
   }

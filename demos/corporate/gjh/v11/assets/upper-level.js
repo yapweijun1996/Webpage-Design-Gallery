@@ -24,16 +24,21 @@ export function thresholdReturns() {
   return [minZ,maxZ].map(z=>({x:(minX+maxX)/2,z,width:maxX-minX,depth:.055}));
 }
 
-export async function loadUpperLevel(T, artworkTier = () => 'low') {
-  const mark=new Image();mark.src=new URL('./gjh-loader-mark.svg',import.meta.url).href;
-  const [logo,...records]=await Promise.all([mark.decode().then(()=>mark,()=>null),
-    ...Object.values(models).map(({id,...receipt})=>loadStaticAsset(T,{
-      ...receipt,asset_id:id,file:'gallery-assets/upper-level/'+id+'.glb'
-    },import.meta.url))]);
-  return {map:paintUpperAtlas(T,logo,artworkTier()),models:Object.fromEntries(Object.keys(models).map((key,i)=>[key,records[i]]))};
+export async function loadUpperFurniture(T) {
+  return Object.fromEntries(await Promise.all(Object.entries(models).map(async ([kind,{id,...receipt}]) => [
+    kind, await loadStaticAsset(T,{...receipt,asset_id:id,file:'gallery-assets/upper-level/'+id+'.glb'},import.meta.url)
+  ])));
 }
 
-export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWash}) {
+export async function loadUpperLevel(T, artworkTier = () => 'low') {
+  const mark = new Image();
+  mark.src = new URL('./gjh-loader-mark.svg',import.meta.url).href;
+  const [logo, models] = await Promise.all([mark.decode().then(() => mark, () => null),loadUpperFurniture(T)]);
+  return {map:paintUpperAtlas(T,logo,artworkTier()), models};
+}
+
+export function buildUpperLevel(T, {map, tier, models:loadedModels}, {collider,lightWash}) {
+  if (tier) map = paintUpperAtlas(T,null,tier);
   const group=new T.Group();group.name='Premium Open Atrium';group.userData.deckLod=true;
   const floor=lift.upper, gold=[], emit=[], solids=[], prints=[], glass=[];
   const viewUpdates = [];
@@ -42,13 +47,13 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
     transform.position.set(x,floor+y,z);transform.rotation.set(pitch,yaw,0,'YXZ');
     transform.scale.set(w,h,d);transform.updateMatrix();return transform.matrix.clone();
   }
-  function tint(source,world,colour) {
+  function tint(source,world,colour,parts = solids) {
     const geo=source.index?source.toNonIndexed():source.clone();
     geo.applyMatrix4(world);
     for(const key of Object.keys(geo.attributes))if(key!=='position'&&key!=='normal')geo.deleteAttribute(key);
     const rgb=new T.Color(colour),values=new Float32Array(geo.attributes.position.count*3);
     for(let i=0;i<values.length;i+=3)rgb.toArray(values,i);
-    geo.setAttribute('color',new T.BufferAttribute(values,3));solids.push(geo);
+    geo.setAttribute('color',new T.BufferAttribute(values,3));parts.push(geo);
   }
   const block=(color,...args)=>tint(unit,matrix(...args),color);
   const brass=(...args)=>gold.push(matrix(...args));
@@ -93,40 +98,41 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
     lightWash(x,floor+.019,z,1.72,1.72,0,-Math.PI/2);
   }
   const furnitureOffset=.024;
+  const furnitureSlots = new Map();
   function furniture(kind,[x,z],sx,sy,sz,fallback,yaw=0){
-    const record=loadedModels[kind];
-    if(!record?.primitives.length){fallback?.(x,z);return false;}
-    const pose=matrix(x,furnitureOffset,z,sx,sy,sz,yaw);
-    for(const p of record.primitives)tint(p.geometry,pose.clone().multiply(p.matrix),p.material.color);
-    for(const geo of new Set(record.primitives.map(p=>p.geometry)))geo.dispose();
-    for(const mat of new Set(record.primitives.map(p=>p.material)))mat.dispose();
-    return true;
+    const start = solids.length;
+    fallback(x,z);
+    furnitureSlots.set(kind,{
+      pose:matrix(x,furnitureOffset,z,sx,sy,sz,yaw), geometry:solids.splice(start)
+    });
   }
   const seatProfiles=new Map();
   const benchProfile=(width,top,depth,seatCentre=0)=>({size:[width,top,depth],top,front:-depth/2,seatCentre});
-  function slats(x,z,yaw){
-    const width=2.12,centre=.46,thickness=.09,slatDepth=.103,spacing=.12;
+  function slats(x,z,yaw,profile){
+    const [width,top,depth] = profile?.size ?? [2.12,.505,.583];
+    const thickness=.09, centre=top-thickness/2, spacing=depth*.2058, slatDepth=depth-4*spacing;
     for(let i=-2;i<=2;i++)block(i%2?0xa96f44:0xb98552,x+i*spacing,centre,z,width,thickness,slatDepth,yaw);
-    for(const dx of [-.78,.78])brass(x,.22,z+dx,.08,.44,.50,yaw);
+    for(const dx of [-.78,.78])block(0x997947,x,.22,z+dx,.08,.44,.50,yaw);
     return benchProfile(width,centre+thickness/2,4*spacing+slatDepth);
   }
   const [benchX,benchY,benchZ]=[1.52,1.1,1.55];
   for(const {finish,x,z,yaw} of atriumLayout.upperSeats){
-    if(finish==='oak' && furniture('bench',[x,z],benchX,benchY,benchZ,null,yaw)){
+    if(finish==='oak'){
       const [width,height,depth]=models.bench.dimensions_m;
-      // The oak model has a narrow gap between slats at its centreline.
-      seatProfiles.set(finish,benchProfile(width*benchX,furnitureOffset+height*benchY,depth*benchZ,-.04));
-    }else if(finish==='oak'||finish==='slats')seatProfiles.set(finish,slats(x,z,yaw));
+      const profile = benchProfile(width*benchX,furnitureOffset+height*benchY,depth*benchZ,-.04);
+      furniture('bench',[x,z],benchX,benchY,benchZ,()=>slats(x,z,yaw,profile),yaw);
+      seatProfiles.set(finish,profile);
+    }else if(finish==='slats')seatProfiles.set(finish,slats(x,z,yaw));
   }
   furniture('table',table,.78,.81,.92,(x,z)=>{
     block(0xb98858,x,.64,z,.86,.09,.55);
-    brass(x,.33,z,.12,.62,.12);
+    block(0x997947,x,.33,z,.12,.62,.12);
     block(0x5d4938,x,.06,z,.55,.08,.37);
   });
   furniture('lamp',lamp,1,1,1,(x,z)=>{
     const baseScale=models.lamp.dimensions_m[0]/(.36*2);
     tint(crop,matrix(x,.05,z,baseScale,1,baseScale),0x997947);
-    brass(x,.79,z,.045,1.5,.045);block(0xf8dda5,x,1.58,z,.51,.35,.51);
+    block(0x997947,x,.79,z,.045,1.5,.045);block(0xf8dda5,x,1.58,z,.51,.35,.51);
   });
   // Low upholstered footstools share the existing opaque furniture batch.
   const cushion=new T.CylinderGeometry(.32,.33,.29,12);
@@ -264,7 +270,55 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
     parent.add(mesh);
     return mesh;
   }
-  merged('Lounge, stone paving and shop arcade',solids,new T.MeshStandardMaterial({vertexColors:true,roughness:.67}),group);
+  const loungeMaterial = new T.MeshStandardMaterial({vertexColors:true,roughness:.67});
+  const loungeName = 'Lounge, stone paving and shop arcade';
+  function buildLounge(replacements = {}) {
+    const parts = [...solids, ...[...furnitureSlots].flatMap(([kind,slot]) => replacements[kind] ?? slot.geometry)];
+    const batch = createPackedDraw(T,parts.map(geometry => {
+      geometry.computeBoundingBox();
+      return {geometries:[geometry], bounds:geometry.boundingBox};
+    }),loungeMaterial,{disposeSources:false});
+    batch.mesh.name = loungeName;
+    // Reveal the complete staged batch during its GPU warm-up.
+    batch.update(() => 0);
+    return batch;
+  }
+  function buildFurniture(records) {
+    const replacements = {};
+    for (const [kind, {pose}] of furnitureSlots) {
+      const record = records[kind];
+      if (!record?.primitives.length) continue;
+      const parts = replacements[kind] = [];
+      for (const p of record.primitives) tint(p.geometry,pose.clone().multiply(p.matrix),p.material.color,parts);
+      for (const geo of new Set(record.primitives.map(p=>p.geometry)))geo.dispose();
+      for (const mat of new Set(record.primitives.map(p=>p.material)))mat.dispose();
+    }
+    const staged = Object.keys(replacements).length ? buildLounge(replacements) : null;
+    for (const geometry of [...solids,...[...furnitureSlots.values()].flatMap(slot => slot.geometry),...Object.values(replacements).flat()]) geometry.dispose();
+    solids.length = 0;
+    furnitureSlots.clear();
+    return staged;
+  }
+  let loungeBatch = buildLounge();
+  if (loadedModels) {
+    const authored = buildFurniture(loadedModels);
+    if (authored) {
+      loungeBatch.mesh.geometry.dispose();
+      loungeBatch = authored;
+    }
+  }
+  group.add(loungeBatch.mesh);
+  viewUpdates.push(frustum => loungeBatch.update(({bounds}) => frustum.intersectsBox(bounds) ? 0 : -1));
+  async function installFurniture(records, prepareModel) {
+    const staged = buildFurniture(records);
+    if (!staged) return;
+    try { await prepareModel?.(staged.mesh,{fence:true,late:false,linear:()=>false}); }
+    catch (error) { staged.mesh.geometry.dispose(); throw error; }
+    loungeBatch.mesh.removeFromParent();
+    loungeBatch.mesh.geometry.dispose();
+    loungeBatch = staged;
+    group.add(staged.mesh);
+  }
   const ink=decalMaterial(new T.MeshBasicMaterial({map,toneMapped:false,fog:false}),-1);
   merged('Directory, mall mark and display graphics',prints,ink,group);
   const rail = new T.InstancedMesh(unit,new T.MeshStandardMaterial({color:0xcdab70,metalness:.52,roughness:.34}),gold.length);
@@ -306,7 +360,7 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   const glazing=new T.MeshStandardMaterial({color:0xdeeff1,emissive:0xb3dbe2,emissiveIntensity:.22,
     transparent:true,opacity:.14,depthWrite:false,roughness:.22,side:T.FrontSide});
   merged('Daylight glass',glass,glazing,panes);
-  return {group,panes,cabinMark,seatProfiles,updateView(frustum) {
+  return {group,panes,cabinMark,seatProfiles,installFurniture,updateView(frustum) {
     if (group.visible) for (const update of viewUpdates) update(frustum);
   }};
 }

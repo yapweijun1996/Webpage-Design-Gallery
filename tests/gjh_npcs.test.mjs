@@ -55,6 +55,7 @@ test('entry crowd keeps the tram landing clear through boarding and return', asy
     exitSeat:landing => {position = landing;}
   });
   t.after(() => tram.dispose());
+  assert.equal(tram.controls.board(), false);
   for (let i = 0; i < 150 && tram.controls.reason; i++) await delay(10);
   assert.equal(tram.controls.board(), true, tram.controls.reason);
   function tick() {

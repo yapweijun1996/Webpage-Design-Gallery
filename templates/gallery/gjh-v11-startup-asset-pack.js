@@ -3,18 +3,48 @@
 const NAMES = __STARTUP_ASSET_NAMES__;
 const known = new Set(NAMES);
 const packURL = new URL('./startup-assets.pack', import.meta.url);
+export const startupPackBytes = __STARTUP_PACK_BYTES__;
 const MAX_BYTES = 10 * 1024 * 1024;
 let shared = null, controller = null, released = false;
 
-async function loadPack() {
+async function loadPack(report) {
   controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 4000);
+  const abort = () => controller?.abort();
+  let timer = setTimeout(abort, 8000);
   try {
     const response = await fetch(packURL, {signal: controller.signal});
     if (!response.ok) throw Error('pack unavailable');
     const length = Number(response.headers.get('content-length'));
     if (Number.isFinite(length) && length > MAX_BYTES) throw Error('pack too large');
-    const bytes = await response.arrayBuffer();
+    let transferred = 0;
+    const track = new TransformStream({transform(chunk, stream) {
+      clearTimeout(timer);
+      timer = setTimeout(abort, 8000);
+      transferred += chunk.byteLength;
+      if (transferred > MAX_BYTES) throw Error('pack too large');
+      report?.(transferred, startupPackBytes);
+      stream.enqueue(chunk);
+    }});
+    const unpack = new DecompressionStream('gzip');
+    const reader = response.body.pipeThrough(track).pipeThrough(unpack).getReader();
+    const chunks = [];
+    let decoded = 0;
+    try {
+      for (;;) {
+        const {done, value} = await reader.read();
+        if (done) break;
+        decoded += value.byteLength;
+        if (decoded > MAX_BYTES) throw Error('pack expands beyond its limit');
+        chunks.push(value);
+      }
+    } finally { await reader.cancel(); }
+    const unpacked = new Uint8Array(decoded);
+    let cursor = 0;
+    for (const chunk of chunks) {
+      unpacked.set(chunk, cursor);
+      cursor += chunk.byteLength;
+    }
+    const bytes = unpacked.buffer;
     if (bytes.byteLength < 12 || bytes.byteLength > MAX_BYTES) throw Error('invalid pack size');
     const view = new DataView(bytes);
     if (new TextDecoder().decode(new Uint8Array(bytes, 0, 8)) !== 'GJHPACK1') throw Error('invalid pack');
@@ -54,14 +84,21 @@ function waitForPack(promise, signal) {
   });
 }
 
+export function startStartupPack(report) {
+  if (!released) shared ||= loadPack(report);
+  return shared;
+}
+
+const mime = {json:'application/json', svg:'image/svg+xml', webp:'image/webp', glb:'model/gltf-binary'};
 export async function fetchStartupAsset(url, options = {}) {
-  const target = new URL(url, import.meta.url), name = target.pathname.split('/').pop();
+  const target = new URL(url, import.meta.url);
+  const name = target.href.slice(new URL('./', import.meta.url).href.length);
   const expected = new URL(name, import.meta.url);
   if (released || !known.has(name) || target.href !== expected.href) return fetch(target, options);
-  const pack = await waitForPack(shared ||= loadPack(), options.signal);
+  const pack = await waitForPack(startStartupPack(), options.signal);
   if (!pack) return fetch(target, options);
   const [offset, length] = pack.entries[name];
-  return new Response(pack.bytes.slice(pack.start + offset, pack.start + offset + length), {status: 200});
+  return new Response(pack.bytes.slice(pack.start + offset, pack.start + offset + length), {status: 200, headers:{'Content-Type':mime[name.split('.').pop()]}});
 }
 
 // Startup models are parsed into their own Three.js resources. Releasing the

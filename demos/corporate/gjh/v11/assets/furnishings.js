@@ -57,7 +57,7 @@ export function simplifyBench(T, geometry) {
   return {geometry:result, error};
 }
 
-export async function createFurnishings(T, shadows, expanded = false) {
+export async function createFurnishings(T, shadows, expanded = false, detailsEnabled = () => true) {
   const sources = expanded ? {...pilotSources, ...shopSources} : pilotSources;
   const records = {};
   const pendingByShop = new Map(), detailQueue = [];
@@ -143,7 +143,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
   }
 
   function scheduleDetails() {
-    if (detailLoading || detailScheduled) return;
+    if (!detailsEnabled() || detailLoading || detailScheduled) return;
     if (!detailQueue.length && pendingByShop.size) {
       const [slot,kinds] = pendingByShop.entries().next().value;
       pendingByShop.delete(slot); detailQueue.push(...kinds);
@@ -172,6 +172,7 @@ export async function createFurnishings(T, shadows, expanded = false) {
 
   return {
     updateView(view, shopNear) {
+      scheduleDetails();
       const near = slot => slot === null || shopNear.get(slot);
       for (const {mesh, slots, compact} of staticBatches) {
         if (mesh.visible) compact.update(view.frustum,slots ? near : undefined,view.shadows,view.shopVisibility?.occluded);

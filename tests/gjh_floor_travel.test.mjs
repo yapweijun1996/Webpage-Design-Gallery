@@ -64,6 +64,8 @@ test('no-browser smoke: real player calls and rides the physical cabin in both d
   assert.match(player.useElevator(elevator).reason,/Walk to the visitor lift/);
   assert(player.teleport('atrium'));
   physics.step();
+  assert.equal(player.state.character.cart.available, false);
+  assert(await player.prepareCart());
   assert(player.setCart(true));
   const before = player.body.translation();
   assert.match(player.useElevator(elevator, undefined, {approach:true,target:L.upper}).reason,/Stow your cart/);

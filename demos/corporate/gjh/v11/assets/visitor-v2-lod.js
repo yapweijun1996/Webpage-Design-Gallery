@@ -10,14 +10,14 @@ export function projectedVisitorLevel(heightPx, previous) {
 
 /** Both levels share the live skeleton and mixer. V2 keeps its customized material. */
 export function createVisitorLOD(T,avatar,{
-  url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url), swapMaterial=false, prepareMaterial, prepareModel
+  url=new URL('./gjh-mall-visitor-v2-lod1.glb',import.meta.url), swapMaterial=false, prepareMaterial, prepareModel, entry
 }={}) {
   const parts=[],position=new T.Vector3();
   avatar.traverse(mesh=>{
     if(mesh.isSkinnedMesh)parts.push({mesh,high:mesh.geometry,highMaterial:mesh.material,low:null,lowMaterial:null});
   });
   let loading=null,level=0,failed=false,distance=0,attempts=0,retryAt=0,available=false,disposed=false;
-  let lowScene=null;
+  let lowScene=null, enabled=!entry;
   const upload=new AbortController();
   const matricesMatch=(a,b)=>a.elements.every((value,i)=>Math.abs(value-b.elements[i])<.0001);
   function releaseLow(){
@@ -63,11 +63,16 @@ export function createVisitorLOD(T,avatar,{
     }catch{if(!disposed){failed=true;retryAt=performance.now()+30000;}releaseLow();}
   }
   function ensure(){
-    if(disposed||loading||available||!parts.length||attempts>=2||(failed&&performance.now()<retryAt))return;
+    if(!enabled||disposed||loading||available||!parts.length||attempts>=2||(failed&&performance.now()<retryAt))return;
     failed=false; loading=load().finally(()=>{loading=null;});
   }
-  if (globalThis.window?.requestIdleCallback) window.requestIdleCallback(ensure,{timeout:1500});
-  else setTimeout(ensure,0);
+  function schedule() {
+    enabled = true;
+    if (globalThis.window?.requestIdleCallback) window.requestIdleCallback(ensure,{timeout:1500});
+    else setTimeout(ensure,0);
+  }
+  if (entry) void entry.then(schedule);
+  else schedule();
   function switchLevel(next){
     if(next===level)return;
     for(const part of parts){

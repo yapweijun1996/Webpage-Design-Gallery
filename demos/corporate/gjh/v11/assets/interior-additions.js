@@ -11,7 +11,7 @@ const nextSlice = () => new Promise(resolve => {
 });
 
 export function createInteriorAdditions(T, {scene, collider, seats, prepareModel, tier,
-  slice = nextSlice}) {
+  slice = nextSlice, detailsEnabled = () => true}) {
   const state = {}, rows = [], batches = [];
   const axis = new T.Vector3(0,1,0);
   let quality = tier(), loading = false;
@@ -84,7 +84,7 @@ export function createInteriorAdditions(T, {scene, collider, seats, prepareModel
     }
   }
   function schedule() {
-    if (loading) return;
+    if (loading || !detailsEnabled()) return;
     const first = rows.find(row => row.status === 'pending' && enabled(row));
     if (!first) return;
     const group = rows.filter(row => row.status === 'pending' && row.entry.minimum_tier === first.entry.minimum_tier);
@@ -96,6 +96,7 @@ export function createInteriorAdditions(T, {scene, collider, seats, prepareModel
   }
   schedule();
   return {state, update(nextTier, view, shopNear) {
+    schedule();
     if (quality !== nextTier) {
       quality = nextTier;
       for (const row of rows) if (row.status === 'loaded') row.proxy.setEnabled(enabled(row));
