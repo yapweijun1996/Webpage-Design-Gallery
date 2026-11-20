@@ -1,77 +1,20 @@
 # GJH V11 Virtual Mall Improvement Plan
 
-## Roadmap from the owner feedback of 2026-11-19 (research-backed)
+## Roadmap from the owner feedback of 2026-11-19 (status on 2026-11-20)
 
-Full detail: [docs/gjh-v11-improvement-roadmap-2026-11-19.md](docs/gjh-v11-improvement-roadmap-2026-11-19.md) and [docs/gjh-v11-performance-research-2026-11-19.md](docs/gjh-v11-performance-research-2026-11-19.md). Owner targets: phone 30 FPS (Low by default), tablet and PC 60 FPS, dynamic resolution first. Execute lane by lane; verify each step in headed Chrome with `docs/mall_lap_probe.py` and `docs/mall_video_probe.py` before pushing.
+Full detail: [docs/gjh-v11-improvement-roadmap-2026-11-19.md](docs/gjh-v11-improvement-roadmap-2026-11-19.md), [docs/gjh-v11-session-summary-2026-11-20.md](docs/gjh-v11-session-summary-2026-11-20.md) and [docs/gjh-v11-performance-research-2026-11-19.md](docs/gjh-v11-performance-research-2026-11-19.md). Owner targets: phone 30 FPS (Low by default), tablet and PC 60 FPS, dynamic resolution first. Verify every step in headed Chrome with `docs/mall_lap_probe.py`, `docs/mall_video_probe.py`, `docs/verify_interactions.py`, `docs/verify_upper_level.py`, `docs/verify_tram.py`, `docs/verify_physics_props.py` and `scripts/lighting_score.py` before pushing.
 
-Shipped on 2026-11-19 (main c06ed9ad): automatic festival theme, single sticky site header, first-person chibi hand, sit fix, elevator and upper level V2, interiors round 2, drawer visibility fix, early-enter warm-up on all tiers (0 frames at or above 50 ms), performance budgets rounds 1-2 (Balanced MILI 992k to 291k triangles), dynamic resolution and device-class frame targets (phones start on Low), flicker fix (mip-maps, anisotropy, decal offsets in all 17 shops), render lane 1 (warmer theme and IBL, fewer lights, shader programs 196 to 90), movement lane M1-M3 (8 m shop crossing 2.6 s, one physics step per tick, cart passes 2.48 m doors), probes lane (lap probe per device class, video probe with flicker heat-maps, perf suite runner), shop lane S0-S1 (165 layout items in one JSON, capsule route sweep, New Moon pick-up clearance 0.395 m, MILI plates snapped, GOGO open floor).
+Shipped (main a36aa42e): automatic festival theme; single sticky site header; first-person chibi hand; sit fix; elevator and upper level V2 plus floor selector, lift hint, objective and finished lift shaft; interiors round 2; drawer visibility fix; early-enter warm-up on all tiers; performance budgets (all three tiers 20/20 on the lap probe); dynamic resolution and device-class frame targets; flicker fix; lighting passes 1-6 (warm theme, IBL zones, ivory marble floor, skylight sun patches, focal pools); movement lane (walk 3.4 / run 5.2 m/s, one physics step per tick); probes lane; unified 17-shop layout JSON plus layout audit; 65/65 shop interactions reachable and triggered; dynamic props (droppable can, ball, basket); tram (default on, `?tram=0` disables; Blender carriage; 17 brand captions); 11 Tripo props mounted; character fill/rim light, hair crack fix and face redraw; upper-level layout rework; PWA update hardening (cache-miss network fallback, atomic update, reload-once guard, recovery card).
 
-- [ ] R-lane (render and lighting): [x] R1, L1, L2, L3, L4, L5 shipped (dce34a16); [ ] L7 avatar rim light (character worker); [ ] L6 baked floor and ceiling planes, L9 compact Detailed shadows, per-shop mood data (worker running); [x] `tests/browser_lighting.py` exists (probes lane), baseline run still to do.
-- [ ] M-lane (movement and physics): [x] M1 `docs/walk_timing_probe.py`, [x] M2 speeds and one step per tick, [x] M3 passage fixes (shipped 6d6473b7); [ ] M4 first dynamic props (can, basket, ball) after the shop interactions land; [ ] M5 acceptance on 17 shops and tiers.
-- [ ] S-lane (shop layouts and interactions): [x] S0 collision sweep, [x] S1 unified layout JSON (shipped c06ed9ad); [ ] S2 interaction state machine wired for GOGO, MILI, New Moon (worker running); [ ] S3 other 14 shops; [ ] S4 animated parts (drawers, bell, piano keys, cup level). Another session owns the New Moon exhibit and S02-S05 showroom concepts: build on main, never overwrite.
-- [ ] C-lane (character): C1-C4 worker running (close-up baseline, avatar rim light and roughness, anisotropy, re-bake script and LOD ladder); C5 modular chibi trial queued.
-- [ ] T-lane (T1 grey-box route worker running; mall tram, brand tour; details in the roadmap doc, section E): T1 grey-box route (new `tram-layout.js`, ~160 m ground loop at the existing brass floor line: entry station (10,39) west along x=-12, north, east along z=3, south along x=32, back along z=39, 2 m corner arcs; sweep car, passenger and camera envelopes every 0.25 m; one seat-view screenshot per shop); T2 single-station ride MVP (board with F, moving seat anchor, locked walking, first/third person via V, exit only when stopped and clear); T3 captions and real car (17 brand cards in route order S11-06, S01-05, S12-17 at about 1.5 m/s, Blender GLB with seat anchors, instanced cars, Low whole train <= 2,500 triangles and <= 4 draws); T4 three-station operation (south entrance, east mid station (32,22), upper gallery with a short lift-rail bridge, NPC waypoint changes, stop when someone is ahead); T5 brand story and accessibility (pause, skip shop, end, optional speech, 44 px controls, reduced-motion static cards). Main risk: NPCs walk the same route; S11 and S17 faces are seen obliquely.
-- [x] P-lane (probes): device targets, GPU timer, refresh rate, shops route, flicker boxes, close-up capture, lighting baseline, `scripts/run_perf_suite.py` (e95a055d). Open: run the full suite on a quiet machine and store baselines.
-- [x] New Moon and all-shop flicker fix (9c6e709a).
-- [ ] Owner real-device checks: iPhone and Android phone (export the performance JSON from the lap page).
+Open items:
 
-### V11 numbered showroom reviews
-
-- [x] Publish the 17 shop concept packets in numerical batches. Each includes four distinct views, an annotated floor plan, a product-form study and a model inventory. [Shop review index](docs/goh-joo-hin/README.md)
-- [x] Verify the New Moon runtime exhibit and all four can interactions. [S01](docs/goh-joo-hin/01-new-moon/README.md)
-- [x] Verify the MILI cookline comparison on published build `f161060cbd89bbc0` with desktop and touch-emulated routes. [S02](docs/goh-joo-hin/02-mili/README.md)
-- [x] Verify the GOGO cart and open centre aisle on published build `077553e3b1a6c526`. [S03](docs/goh-joo-hin/03-gogo/README.md)
-- [x] Verify the Borsch Med patch folio and Lingzhi story on published build `8e4599e605ef0138`. [S04](docs/goh-joo-hin/04-borsch-med/README.md)
-- [x] Verify the Pien Tze Huang single-carton exhibit and rear aisle on published build `c59b32c3eb100103`. [S05](docs/goh-joo-hin/05-pien-tze-huang/README.md)
-- [x] Verify the three S06–S08 catalogue exhibits on published build `46a37ab996fabb31`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44552309398)
-- [x] Verify the three S09–S11 exhibits on published build `45dfc89d1e194c56`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44553308701)
-- [x] Verify the S12–S14 exhibits on published build `ba278cec19153b4e`. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44554504937)
-- [x] Verify S15–S17 on published build `95e5ba13a1d96807`. Repeat the full New Moon route at 390 px on the same build. [Published showroom verification](docs/goh-joo-hin/README.md#published-showroom-verification)
-
-### V11 numbered production models
-
-- [ ] Work through the [S01–S17 production checklist](docs/goh-joo-hin/production-model-checklist.md) in order. Keep each released asset and each exact-product deferral recorded under its shop.
-
-### V11 loader motion
-
-[Codex CLI concept storyboard](docs/gjh-v11-references/loader-motion-concept.webp) shows Engine, Models and Retry on a phone viewport. The illustration explores a gold atrium outline, progressive fixture lighting and a quiet failure state. [Chrome startup comparison](docs/gjh-v11-references/loader-motion-runtime.jpg).
-
-- [x] Develop the “Everyday, explored.” loading screen into a teal-and-gold atrium arrival. Each completed milestone can reveal one set of architectural lines and light fixtures. Use a short transition into the live mall once the first scene and required preparation are ready.
-- [x] Confirm the five existing states on desktop and 390 px touch layouts. Engine establishes the outline, Scene reveals the atrium, Models adds fixtures, First view lights the entrance, and Details settles the final state. Progress and assistive announcements follow the existing readiness signals. Keep Enter now where the runtime permits it.
-- [x] Review failure and recovery when a required asset request drops. Freeze motion at the last completed milestone and keep Retry and the store directory available. Honor reduced motion with static milestone states, stop visual work when hidden, and preserve keyboard focus and readable status messages.
-- [x] Build from the authored [loader markup](demos/corporate/gjh/v11/index.html), [loader state](demos/corporate/gjh/v11/assets/loader.js), [startup milestones](demos/corporate/gjh/v11/script.js), and [loader CSS](demos/corporate/gjh/v11/style.css). Use a small inline drawing with transform and opacity transitions. Verify startup and early-entry frame timing without adding runtime downloads, animation timers, or a second WebGL canvas.
-
-### V11 touch Sit button alignment
-
-- [x] Centre the seated-person icon and `Sit` label on the same vertical centreline in the round nearby-action button. Stack them and align the pair optically within the circle. Verify a phone-viewport screenshot against the reported misalignment, retain the touch target size, and tap through Sit and Stand to confirm the interaction. Chrome touch emulation at 390 px measured a 56 × 56 px target and horizontal centre alignment within 0.01 px. [Chrome seat action](docs/gjh-v11-references/sit-button-runtime.jpg).
-
-### V11 nearby destination hint
-
-- [x] Show nearby shop directions only in the ground-floor public concourse. The 10-second New Moon keyboard route verified the outside direction, no other-shop direction while inside, and the Australia shelf Inspect action under More actions. A separate Detailed run with screen capture disabled recorded 18.6 ms p95 and zero intervals at or above 50 ms in this short desktop route.
-
-### Expanded V11 upper-floor circulation
-
-[Facilities plan and acceptance](docs/gjh-v11-public-facilities.md).
-
-- [x] Verify the public baseline lift round trip. Chrome loaded the redesigned Detailed cabin and reached 7.2 m. Both gates and thresholds behaved as expected while travelling and docked. The tested route left the cabin, walked a short distance across the upper landing and returned.
-- [x] Identify the seat or nearby furniture conflict at the upper doorway and align the rendered model, collision envelope, sitting pose and stand exit.
-- [x] Keep a continuous perimeter running route on the upper level, with safe lift approaches, rail guards and reachable seating. Verify a complete keyboard loop with checkpoints on all sides, safe re-entry and descent. Check a representative route in touch emulation and capture before/after evidence and frame timing.
-
-### Expanded V11 ground-floor circulation
-
-- [x] Complete the four-sided ground loop in headed Chrome with desktop keyboard and the 390 px touch joystick. Capture frame timing with recording disabled. [Recorded paths and frame timing](docs/gjh-v11-public-facilities.md#continuous-ground-floor-loop)
-
-### Expanded V11 public restrooms
-
-- [x] Replace the planned eastern ground-floor facilities block with three enterable rooms for Men, Women and an all-user Accessible restroom. Keep the northern service reserves closed. Design for a step-free public approach, clear entrances and privacy screens, using the BCA public-place guidance as a virtual design reference.
-- [x] Add readable wayfinding and map/directory directions in the supported languages. Use lightweight fixture geometry, mirrors above the basins, an explicit tap on/off action and a short cosmetic flush response.
-- [x] Verify all three entries and exits, tap and flush actions, keyboard and touch controls, and translated destinations in local Chrome. [Room plan, asset inventory and browser views](docs/gjh-v11-public-facilities.md#ground-floor-restroom-cluster).
-- [x] Verify all three rooms on published build `167f5d38d8727909` at 1440 and 390 px. Sample frame timing with capture disabled.
-
-### V11 ambient motion during model preparation
-
-- [x] Keep the approved teal-and-gold loading screen visibly active during model preparation. The fixed gradient pulses slowly through CSS opacity, with a pause control, reduced-motion handling and stopping conditions tied to the loader lifecycle. [Implementation and verification](docs/gjh-v11-loader.md#long-model-preparation).
-- [x] Record a 22-second hold on real model requests at 390 px and verify ready, pause, failure/retry, visibility and reduced motion. Sample the frame intervals in separate runs with recording disabled.
+- [ ] Real-device checks by the owner on iPhone and Android: loader wait, first person hand and can, signage legibility, upper-level lift flow, tram ride, and the PWA 'Update now' path (Chrome could not reproduce the missing-stylesheet failure; the hardening is unproven on iOS).
+- [ ] Lighting score leftovers (Balanced): atrium mean 0.51 (target 0.42 +/- 0.08), New Moon saturation 0.46, GOGO p95 0.87, LG R/B 1.43 and dark 0.33, Low atrium saturation 0.45 and dark 0.39.
+- [ ] Character: Tripo boy NPC and other visitors still use the old soft face; player face sharpness measured 1.55x in game (target 2x).
+- [ ] `tests/browser_gjh_pwa.py` fails on main (expects the old 'Bag (1)' label after the top-bar change); update the test.
+- [ ] Detailed tier early-enter shows an occasional single frame of 50-130 ms under heavy machine load; re-measure on a quiet machine and on the owner's Windows laptop.
+- [ ] Phone: dynamic resolution and 30 FPS cap need real-phone numbers (export the performance JSON).
+- [ ] Optional: tram upper-level station, tram station audio/voice, modular chibi trial (C5), more shop interactions with sound, upper-level lounge detail.
 
 ## Mobile performance, controls and signage programme (2026-11-18)
 
