@@ -51,8 +51,9 @@ S04 passed on Pages build `deaf0fd98cc414b0`. Desktop and 390 px touch-emulated 
 [Design and runtime](05-pien-tze-huang/README.md) · [Inventory](05-pien-tze-huang/model-inventory.md)
 
 - [x] **Single 3 g unit, unprinted form study.** The smaller carton in the manufacturer photo supports a nearly square front and narrower side. The [editable 220 × 216 × 100 mm study](../../models/gjh-pzh-single-carton/README.md) preserves the exhibit position and uses photo-estimated proportions.
+- [x] **Manufacturer ten-unit intermediate carton, unprinted form study.** The 2023 front and back photos show a closed carton approximately twice as wide as tall and an offset film tear strip. The [editable companion study](../../models/gjh-pzh-ten-carton/README.md) uses these visible proportions.
 - [ ] **Single 3 g unit, exact retail carton.** Confirm physical dimensions, closure and current packaging art independently of the enlarged display study.
-- [ ] **GJH 10-piece format.** Verify the outer pack shape, size and relationship to the 3 g carton before modeling.
+- [ ] **GJH 10-piece format.** The GJH listing uses a photo marked as a one-unit carton. The manufacturer documents a ten-unit intermediate carton with an outer film tear strip from batch 2208129. Obtain Singapore-edition outer-pack and open-carton views and dimensions to confirm that version and how it holds the 3 g units. [GJH listing](https://www.gjheshop.com/product/zhang-zhou-pien-tze-huang-10-pcs/) · [Manufacturer packaging notice](https://www.pzhchina.com/gsdt/info_139.aspx?itemid=28536)
 
 S05 passed on Pages build `ef5f8f14a4d09bd5`. Both Chrome routes entered the shop, opened the carton story, continued behind the counter and returned to the atrium. The published room GLB matched the Blender export. The 40-triangle model is part of the existing room mesh, and the parsed Low shop total is 2,350 triangles. [Deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44638720871)
 

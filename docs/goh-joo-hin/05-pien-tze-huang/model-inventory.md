@@ -22,4 +22,5 @@ Product-specific models and pending source work are listed in the [shop brief](R
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
 | Manufacturer single 3 g unit carton | Existing centre counter, local XZ (0.54, −0.36) | Source-referenced unprinted paperboard carton, enlarged to 220 × 216 × 100 mm W × H × D for the display. [Editable study and source](../../../models/gjh-pzh-single-carton/README.md) |
-| GJH 10-piece listing | Research reference only | Hold the group model until its package can be distinguished from the manufacturer’s one-unit carton. |
+| Manufacturer ten-unit intermediate carton, 2023 | Left of the single-unit carton, local XZ (−0.38, −0.36) | Unprinted static study of the broad closed form and offset film tear strip. The 310 × 153 × 115 mm W × H × D display envelope is an estimate. [Editable study and source](../../../models/gjh-pzh-ten-carton/README.md) |
+| GJH 10-piece listing | Research reference only | The listing photo shows a one-unit carton. The manufacturer's 2023 notice identifies a separate ten-unit intermediate carton and its film tear strip. The Singapore outer carton, inner arrangement and dimensions remain open. [GJH listing photo](https://www.gjheshop.com/wp-content/uploads/2023/07/PTH2010s.png) · [Manufacturer packaging notice](https://www.pzhchina.com/gsdt/info_139.aspx?itemid=28536) |
