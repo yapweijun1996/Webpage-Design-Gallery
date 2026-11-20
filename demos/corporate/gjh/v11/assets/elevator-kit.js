@@ -1,18 +1,20 @@
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 
+import {shaftFinish} from './lift-layout.js';
+
 const staticNodes = ['Portal','GoldTrim','Pilasters','Sconces','Planters','ElevatorSign','MarbleInlay','FloorIndicator'];
 const elevatorPriority = () => -10;
 
 // The GLB stays independently editable. Two fixed landings share one mesh,
-// one car follows the existing physics rig, and four leaves share one draw.
+// one car follows the existing physics rig, and all leaves share one draw.
 export function assembleElevatorKit(T, source, layout) {
   const {upper,expanded} = layout;
   source.updateMatrixWorld(true);
   const root = new T.Group();
   root.name = 'Courtyard elevator kit';
   if (expanded) {
-    root.position.set(layout.shaft.minX,0,layout.z);
+    root.position.set(shaftFinish.west,0,layout.z);
     root.rotation.y = -Math.PI/2;
   } else {
     root.position.set(layout.x,0,layout.z-1.36);
@@ -41,11 +43,11 @@ export function assembleElevatorKit(T, source, layout) {
   body.name = 'Lift landings';
   for (const geo of parts) geo.dispose();
   const car = source.getObjectByName('Cabin').clone(false);
+  // Keep the moving car aligned with the cabin colliders behind the architrave.
+  if (expanded) car.position.z = shaftFinish.west-layout.shaft.minX;
   const left = source.getObjectByName('DoorLeft'), right = source.getObjectByName('DoorRight');
   const doors = new T.InstancedMesh(left.geometry,left.material,4);
   doors.name = 'Lift landing doors';
-  // The glass and its opaque steel stiles share one front-sided pass.
-  doors.material.depthWrite = false;
   doors.instanceMatrix.setUsage(T.DynamicDrawUsage);
   const matrix = new T.Matrix4(), home = [left.position.x,right.position.x];
   const previous = [-1,-1];

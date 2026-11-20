@@ -1,6 +1,6 @@
 # GJH v11 courtyard elevator
 
-The two landings share a dark green portal, bronze-lit crown, fluted timber pilasters and wall sconces. Through the centre-opening steel and smoked-glass doors, visitors can see the car's ceiling, rear panels and brass handrail. A mounted lift pictogram and **Elevator** fascia identify the entrance. The right jamb shows the car floor and direction. Two stone planters frame a veined marble apron with a continuous gold inlay.
+The two landings share a dark green portal, bronze-lit crown, fluted timber pilasters and wall sconces. The opaque brushed-metal leaves meet at a centre seam. When they open, the ceiling diffuser, softly lit rear panels and brass handrail are visible. A mounted lift pictogram and **Elevator** fascia identify the entrance. The right jamb shows the car floor and direction. Two stone planters frame a veined marble apron with a continuous gold inlay.
 
 [Ground-floor phone capture](evidence/gjh-v11-elevator/ground.webp) · [Upper-floor arrival](evidence/gjh-v11-elevator/upper.webp)
 
@@ -21,28 +21,28 @@ The demo's original architecture still supplies overhead structure, landing slab
 
 ## Render budgets
 
-The limit covers **both landings and one travelling car together** in one main colour pass. The pre-existing deck, safety geometry, scene lighting and UI belong to the surrounding mall. Triangle counts include all four door instances. Raw GLB counts below include both named leaves once.
+The limit covers **both landings and one travelling car together** in one main colour pass. The pre-existing deck, safety geometry, scene lighting and UI belong to the surrounding mall. Triangle counts include all six expanded door instances. Raw GLB counts below include both named leaves once.
 
 | Tier | Raw kit triangles | Installed triangles / cap | Draws / cap | Textures / cap | GLB bytes |
 | --- | ---: | ---: | ---: | --- | ---: |
-| Low | 1,528 | 2,766 / 3,000 | 3 / 3 | 3 / 3 at 512² | 271,844 |
-| Balanced | 1,996 | 3,666 / 4,000 | 3 / 3 | 3 / 3 at 512² | 311,000 |
-| Detailed | 2,600 | 4,838 / 5,400 | 3 / 3 | 3 / 3 at 512² | 367,076 |
+| Low | 1,676 | 2,340 / 3,000 | 3 / 3 | 3 / 3 at 512² | 269,048 |
+| Balanced | 2,144 | 3,000 / 4,000 | 3 / 3 | 3 / 3 at 512² | 308,204 |
+| Detailed | 2,748 | 3,772 / 5,400 | 3 / 3 | 3 / 3 at 512² | 364,284 |
 
 Low retains the legible sign, indicator, folded foliage, door seam and cabin. Balanced adds finer fluting, lamp cages, glazing beads, denser planting and ceiling ribs. Detailed adds narrower slats, more leaves, additional ceiling ribs and contrasting steel on the leaf edges. All three tiers add **zero real-time lights**. The three embedded sheets supply sRGB colour/alpha, linear metallic/roughness and sRGB emission. Atlas paint provides warm spill along the inlay and timber even with bloom disabled. [Khronos glTF 2.0 materials](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#materials)
 
 ## Asset and renderer contract
 
-One glTF unit is one metre. The origin is at floor level on the centreline of the doorway. +X runs across the doorway, +Y is up and +Z faces the visitor. The car extends along −Z. Expanded rotates the entrance −90° around Y at the west shaft boundary. Classic uses its smaller footprint. The two opaque landings and their indicator faces merge into a single mesh. The car has its own draw. The four steel-glass leaves use a single instanced draw. All keep the exported PBR materials. Door transforms and the car position update from the fixed-step simulation. The indicator offsets existing UVs only on a floor/direction change.
+One glTF unit is one metre. The origin is at floor level on the centreline of the doorway. +X runs across the doorway, +Y is up and +Z faces the visitor. The car extends along −Z. Expanded rotates the entrance −90° around Y at the west shaft boundary. Classic uses its smaller footprint. The two opaque landings and their indicator faces merge into a single mesh. The car has its own draw. Each stop has one pair of leaves. All four share one instanced draw. In Expanded both doors face west at the threshold. Solid green lacquer panels and brass trim enclose the other three sides. All keep the exported PBR materials. Door transforms and the car position update from the fixed-step simulation. The indicator offsets existing UVs only on a floor/direction change.
 
 | glTF nodes | Purpose |
 | --- | --- |
 | `Portal`, `Pilasters`, `GoldTrim`, `Sconces`, `Planters`, `ElevatorSign`, `MarbleInlay` | Editable fixed assembly, repeated on each floor |
 | `FloorIndicator` | Separate emissive face with four atlas cells for G/1 and up/down |
-| `Cabin` | Moving shell, floor, mirror panels, handrails and illuminated ceiling |
+| `Cabin` | Moving floor, three enclosed walls, mirror panels, handrails and illuminated ceiling. |
 | `DoorLeft`, `DoorRight` | Independent transform nodes sharing a mesh at closed local X positions −0.505/+0.505 m. Each slides 1.02 m outward. |
 
-The active quality selects the GLB during loader preparation. The shared upload scheduler prepares the exact merged mesh, car, instanced leaves, textures and shaders before mounting. Fixed-step movement reuses the ride position, collider translations, door matrix and instance buffer. Changing quality retains the current model while its replacement warms. A superseded stage is disposed. An unavailable first asset leaves the functional procedural cabin and original gate colliders available. The gallery generator includes all three GLBs in the publishable directory.
+Lift creation immediately requests the active quality GLB so both finished portals are available before the first Ride interaction. The shared upload scheduler prepares the exact merged mesh, car, instanced leaves, textures and shaders before mounting. Fixed-step movement reuses the ride position, collider translations, door matrix and instance buffer. Changing quality retains the current model while its replacement warms. A superseded stage is disposed. An unavailable first asset leaves the functional procedural cabin and original gate colliders available. The gallery generator includes all three GLBs in the publishable directory.
 
 ## Ride experience
 
@@ -54,6 +54,7 @@ The active quality selects the GLB during loader preparation. The shared upload 
 | 0.78–1.36 | The car and visitor travel together with eased acceleration. The indicator follows car height and direction. |
 | 1.36–1.58 | The arrival bell sounds and the destination doors open. |
 | 1.58–1.84 | The visitor steps out at the existing exit. The capsule and camera return to normal. |
+| 1.84–5.00 | The doors hold for egress and close over the final 0.22 s when the doorway is clear. |
 
 **Skip ride** advances the active trip to its destination on the next simulation step. Reduced motion takes the same shortcut automatically. A normal ride takes 111 steps at 60 Hz, or 1.85 s including step quantization. The separate empty Call still requires a subsequent Ride. Leaving the landing cancels an empty call. The existing controls for carts, carried products, seating, map travel and graphics interruption retain their checks.
 

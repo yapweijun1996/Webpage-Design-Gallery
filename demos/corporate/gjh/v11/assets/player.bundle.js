@@ -11,7 +11,7 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
 import { mallAudio as mallAudio2 } from "./audio.js";
 
 // demos/corporate/gjh/v11/assets/elevator-ride.js
-var rideTime = Object.freeze({ open: 0.22, board: 0.55, close: 0.78, arrive: 1.36, reopen: 1.58, exit: 1.84 });
+var rideTime = Object.freeze({ open: 0.22, board: 0.55, close: 0.78, arrive: 1.36, reopen: 1.58, exit: 1.84, cycle: 5 });
 function easedInterval(time, start, end) {
   const t = Math.max(0, Math.min(1, (time - start) / (end - start)));
   return t * t * (3 - 2 * t);

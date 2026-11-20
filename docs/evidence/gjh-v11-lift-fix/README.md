@@ -1,0 +1,9 @@
+# Ground lift evidence
+
+The seven `model-*.webp` files are isolated Blender CPU renders at 393 × 700. Each pair uses the same camera at eye height 1.6 m, facing the west entrance from the indicated distance. The before views use the actual visible Three.js fallback geometry and vertex colours. The after views use the first-attempt Low GLB and the retained landing geometry. The open view shows the car's ceiling diffuser, rear panels and handrail. The renders use studio lighting and omit the mall surroundings and HUD.
+
+The first Ride action previously initiated the model request. Until then, the docked fallback presented a stone floor, two low side rails and a dark rear panel. Its physics gate was open. The Low GLB already contained both leaves, with a nearly transparent centre. The change starts the model request at lift creation, installs an opaque satin door finish at both landings, and bakes ceiling spill into the cabin panels.
+
+The manager’s two real Chrome captures show the first attempt from the south. The west portal appears edge-on behind the exposed car side and perimeter guard. The revised expanded kit adds a south-facing portal with a synchronized pair of leaves, an open-sided corner car and a lacquer enclosure. Its Low kit submits 2,340 triangles in three draws across both stops. The full-scene 220,000-triangle and 70-draw budgets, prompt and actual browser views require a browser capture. This sandbox denied localhost binding and the headed Chrome process failed during macOS startup.
+
+Serve each checkout with `python3 -m http.server 8731`. Run the candidate checkout's `tests/browser_gjh_ground_lift.py http://127.0.0.1:8731 before` against the original and repeat with `after` against the candidate. Use the Playwright venv and set `GALLERY_CHROME` to the Chrome executable. The capture checks Low, turns toward the doorway at each distance, records the renderer counters, activates Ride and checks upper-floor arrival.

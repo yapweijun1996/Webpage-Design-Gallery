@@ -3,7 +3,6 @@ import math
 import random
 from pathlib import Path
 
-from build_gjh_marble import marble_tile
 
 # x, y, width, height in the 512 px master; four equal indicator cells share a row.
 REGIONS = {"sign": (0, 0, 512, 96), "edgeX": (256, 432, 64, 80),
@@ -12,12 +11,13 @@ REGIONS = {"sign": (0, 0, 512, 96), "edgeX": (256, 432, 64, 80),
            "steel": (352, 160, 80, 176), "mirror": (432, 160, 80, 176),
            "green": (0, 336, 64, 96), "brass": (64, 336, 64, 96),
            "lamp": (128, 336, 64, 96), "gold": (192, 336, 64, 96),
-           "black": (256, 336, 64, 96), "glass": (320, 336, 128, 176),
+           "black": (256, 336, 64, 96), "satin": (320, 336, 128, 176),
            "leaf": (448, 336, 64, 176), "pot": (0, 432, 128, 80),
            "darkleaf": (128, 432, 64, 80), "soil": (192, 432, 64, 80)}
 
 def draw_sheets(out):
     from PIL import Image, ImageDraw, ImageFont
+    from build_gjh_marble import marble_tile
     rng = random.Random(41)
     base = Image.new("RGBA", (512, 512), (20, 37, 31, 255))
     light = Image.new("RGB", base.size)
@@ -26,7 +26,7 @@ def draw_sheets(out):
         "green": ((32, 64, 48), 80, 36), "brass": ((187, 139, 81), 83, 178),
         "lamp": ((255, 226, 164), 75, 9), "gold": ((255, 202, 113), 68, 90),
         "black": ((30, 33, 31), 98, 80), "wood": ((128, 84, 48), 126, 2),
-        "mirror": ((131, 139, 124), 69, 150), "glass": ((149, 175, 164), 43, 54),
+        "mirror": ((131, 139, 124), 69, 150), "satin": ((182, 186, 182), 141, 98),
         "leaf": ((78, 117, 47), 132, 0), "darkleaf": ((48, 91, 49), 144, 0),
         "steel": ((177, 176, 164), 90, 178), "stone": ((233, 220, 192), 76, 26),
         "pot": ((197, 184, 159), 106, 32), "soil": ((54, 43, 33), 220, 0)
@@ -44,15 +44,25 @@ def draw_sheets(out):
                     g += 11*math.sin(38*u+1.5*math.sin(4*v))+6*math.cos(115*u+3*v)+3*math.sin(199*u)
                 elif name in ("steel", "mirror", "brass", "pot"):
                     g += 14*math.cos(6*u) + 9*math.sin(8*u+3*v) + brush
-                elif name == "glass":
-                    streak = math.exp(-62*(u-.75*v-.16)**2)
-                    alpha = int(12+18*streak+6*v)
-                    g += 28*streak
+                elif name == "satin":
+                    g += brush + 22*math.cos(4*u+.55*v)
                 elif name.endswith("leaf"):
                     g += 14*(1-v)+10*math.sin(2.7*u)+18*math.exp(-140*(u-.5)**2)
                 elif name == "green":
                     g += 4*math.cos(4*u+2*v)
                 base.putpixel((x+i,y+j), tuple(max(0,min(255,round(c+g))) for c in color)+(alpha,))
+        if name in ("satin", "steel", "green", "stone"):
+            # Low has no reflection probe. Bake a diffuse light floor into the finish.
+            for i in range(w):
+                stripe = .85 + .15 * math.cos(5 * i / (w-1))
+                tint = {"satin": (143,132,113), "steel": (105,99,86),
+                        "green": (48,75,60), "stone": (92,80,64)}[name]
+                ImageDraw.Draw(light).line((x+i,y,x+i,y+h-1), fill=tuple(round(c*stripe) for c in tint))
+        if name == "mirror":
+            # Baked ceiling spill keeps the cabin panels readable without a dynamic light.
+            for j in range(h):
+                spill = round(94 + 34*(1-j/(h-1)))
+                ImageDraw.Draw(light).line((x,y+j,x+w-1,y+j), fill=(spill,round(.90*spill),round(.76*spill)))
         if name in ("gold", "lamp"):
             ImageDraw.Draw(light).rectangle((x,y,x+w-1,y+h-1),fill=(255,182,81) if name=="gold" else (255,216,146))
     x, y, w, h = REGIONS["stone"]

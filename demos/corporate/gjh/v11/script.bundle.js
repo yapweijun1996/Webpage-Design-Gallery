@@ -696,7 +696,7 @@ function tramCaptionCopy(shop, language) {
 }
 
 // demos/corporate/gjh/v11/assets/elevator-ride.js
-var rideTime = Object.freeze({ open: 0.22, board: 0.55, close: 0.78, arrive: 1.36, reopen: 1.58, exit: 1.84 });
+var rideTime = Object.freeze({ open: 0.22, board: 0.55, close: 0.78, arrive: 1.36, reopen: 1.58, exit: 1.84, cycle: 5 });
 var floorDestinations = Object.freeze({
   "floor-upper": Object.freeze({ label: "Upper level", upper: true }),
   "floor-ground": Object.freeze({ label: "Ground floor", upper: false })
@@ -6952,6 +6952,14 @@ var testAPI = testEnabled ? {
   testShopActions: () => shopActionsLoad ?? null,
   testShopState: (id) => interactions?.shopState(id),
   testProps: () => world?.interactables.physicsProps?.sample(),
+  testSceneNames(pattern) {
+    const re = new RegExp(pattern, "i"), out = [];
+    world?.scene.traverse((o) => {
+      if (re.test(o.name || ""))
+        out.push({ n: o.name, type: o.type, vis: o.visible, kids: o.children.length, p: o.parent?.name || "" });
+    });
+    return out.slice(0, 80);
+  },
   testTramRouteLength: () => tramRoute.length,
   testTramState: () => player?.tramState,
   testTramCarVisible() {
@@ -7543,7 +7551,6 @@ function rideElevator(options) {
   if (!ready || !elevator)
     return { reason: "The elevator is unavailable right now. Please try again." };
   world.prepareUpperFurniture();
-  elevator.kit?.select(quality.state?.tier ?? "low");
   manual = false;
   player.setInput(null);
   const result = player.useElevator(elevator, floorChime, options);
@@ -8054,7 +8061,8 @@ async function initialize() {
   }
   if (liftEnabled) {
     const { createElevatorV2 } = await elevatorTask;
-    elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel);
+    const tier = quality.state?.tier ?? quality.resolve(innerWidth).tier;
+    elevator = createElevatorV2(T, R, physics, world.scene, expanded, prepareModel, tier);
     world.prepareUpperLevel();
     if (mallTheme && elevator.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())) {
       mallTheme.destroy();
