@@ -73,11 +73,10 @@ def add_ct_s1(room, origin=CT_S1_POSITION):
         inner_back = (side * cheek_inner, strip_front_y, bed_rear)
         outer_tip = (side * (x - .014), bed_y, bed_front)
         inner_tip = (side * (cheek_inner + .012), bed_y, bed_front)
-        outer_base = (side * x, bed_y, bed_rear)
         inner_base = (side * cheek_inner, bed_y, bed_rear)
+        # The chassis end cap already closes the outer face of this cheek.
         faces = (
             ((outer_tip, inner_tip, inner_back, outer_back), "191a1d"),
-            ((outer_back, outer_base, outer_tip), case),
             ((inner_tip, inner_base, inner_back), "1d1e20"),
         )
         for points, pigment in faces:
@@ -111,7 +110,7 @@ def add_ct_s1(room, origin=CT_S1_POSITION):
         return strip_front_y + fraction * (strip_back_y - strip_front_y)
 
     model.part("Volume knob")
-    knob_x, knob_z = -.148, -.039
+    knob_x, knob_z = -.157, -.049
     angles = [i * tau / 6 for i in range(6)]
     knob_base_y = control_y(knob_z + .012)  # Seat the flat base in the sloped strip.
     base = [(knob_x + .012 * cos(a), knob_base_y,
@@ -123,9 +122,11 @@ def add_ct_s1(room, origin=CT_S1_POSITION):
     model.face(top[::-1], "414247")
 
     model.part("Unmarked control buttons")
-    button_z = -.037
-    centers = (-.178, -.109, -.088, -.067, -.046,
-               -.020, -.002, .016, .034, .052, .070, .088)
+    button_z = -.036
+    # Centres from the CT-S1BK AR reference: power, four utilities, seven
+    # main tones, and the separate tone variation button on the right.
+    centers = (-.181, -.121, -.103, -.085, -.067, -.034, -.016,
+               .002, .020, .038, .056, .074, .106)
     for center in centers:
         model.across(center - .005, center + .005,
                      (control_y(button_z + .004) + .0012, button_z + .004),

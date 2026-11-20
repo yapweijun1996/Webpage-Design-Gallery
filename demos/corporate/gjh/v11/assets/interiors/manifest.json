@@ -3313,8 +3313,8 @@
       {
         "store": "S15",
         "file": "s15-recital-details.glb",
-        "bytes": 58748,
-        "sha256": "6ea7e2308380383067b81651f3d29de442f10624481aeb2c88263c1819b00e4c",
+        "bytes": 58676,
+        "sha256": "900a6b76adde5ae7d02cfe744a5ed5c31f8414a505f47d6353d0f9c5ff1af3d6",
         "triangles": 748,
         "draws": 2,
         "instances": 0,
@@ -3329,9 +3329,9 @@
       {
         "store": "S16",
         "file": "s16-power-details.glb",
-        "bytes": 107220,
-        "sha256": "00fbe25bb18db35b5e40eb71af732e3867f1ef64e095bcb8aab076e037006969",
-        "triangles": 1406,
+        "bytes": 109620,
+        "sha256": "0bdfb50e514f69ba5fef1b4058c975433b0d2fb1dac51a6614cb78b655be81fe",
+        "triangles": 1446,
         "draws": 3,
         "instances": 0,
         "motion": [

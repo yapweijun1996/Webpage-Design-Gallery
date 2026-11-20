@@ -23,4 +23,6 @@ Product-specific models and pending source work are listed in the [shop brief](R
 | --- | --- | --- |
 | LG OLED55C5PSA | Scaled product display against the rear screen wall | Stand-free case matches the manufacturer outer envelope. Stepped rear housing, VESA mounts and visible recesses are modeled. Exact Singapore jack placement remains open. |
 
+The ATC support page's C5 quick setup guide shows cable routing for the 55-, 65- and 77-inch family and lists compatible connector types separately from the rear illustration. The Singapore product page confirms the connector counts and HDMI 2 eARC for the displayed model. A readable ATC-specific jack layout remains needed before adding sockets. [LG ATC support](https://www.lg.com/sg/support/product-support/cs-OLED55C5PSA.ATC/) · [Singapore specifications](https://www.lg.com/sg/tvs-soundbars/oled-evo/oled55c5psa/)
+
 [Editable Blender sources and QA receipt](../../../models/gjh-lg-oled/README.md)

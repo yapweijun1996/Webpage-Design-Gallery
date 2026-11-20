@@ -73,12 +73,12 @@ export const roomDetails = {
   },
   "S15": {
     "file": "s15-recital-details.glb",
-    "bytes": 58748,
+    "bytes": 58676,
     "roomDetail": true
   },
   "S16": {
     "file": "s16-power-details.glb",
-    "bytes": 107220,
+    "bytes": 109620,
     "roomDetail": true
   },
   "S17": {

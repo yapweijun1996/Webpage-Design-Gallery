@@ -1,5 +1,5 @@
 {
-  "scope": "CT-S1BK 61-key exterior and closed GP-510BP cabinet. Component tolerances, audio and seat interaction remain separate.",
+  "scope": "CT-S1BK 61-key exterior and control layout, plus closed GP-510BP cabinet. Component tolerances, audio and seat interaction remain separate.",
   "referenceImages": [
     {
       "url": "https://support.casio.com/global/en/emi/manual/CT-S1/images/img_ct-s1.png",
@@ -12,6 +12,14 @@
     {
       "url": "https://www.casio.com/content/dam/casio/global/support/manuals/electronic-musical-instruments/pdf/008-en/g/GP510_usersguide_A_EN.pdf",
       "sha256": "1dd30040d922ed6779857b5e9f2a1cc800a7c686c136dea172857c034caa59ff"
+    },
+    {
+      "url": "https://www.casio.com/content/dam/casio/global/support/manuals/electronic-musical-instruments/pdf/008-en/c/CTS1_usersguide_EN.pdf",
+      "sha256": "dfcbf3700e06d087ffb85470b2980ab592f25308d3e202b8b4b47064cc5bbd3e"
+    },
+    {
+      "url": "https://www.casio.com/content/dam/casio/global/emi/ar/glb/CT-S1BK.glb",
+      "sha256": "4b58ec8de520201e08b1e62e638e896be49ad365f9a8ccf076470c8095df9ce8"
     }
   ],
   "blender": {
@@ -19,13 +27,13 @@
     "buildMethod": "Blender MCP background export",
     "editableSource": {
       "file": "models/gjh-casio-instruments/casio-instruments.blend",
-      "sha256": "4ad29fd6c27afac2f509e3e80244bbd74a5ca6217192037d76f504e26cd664e2"
+      "sha256": "1c0d35bed0c241299dc6e871729bdf373f20af4047a882f47f76d150ad6c16d0"
     },
-    "reviewGlbSha256": "a3565f6aa7c378a5df89a8269c9192584f82d253d453d39c9ee1ccfdd5fed7d1"
+    "reviewGlbSha256": "9d82a623e48ce17ad338a7ad95d54eed71fc55310c45a0845e4de28153a664e3"
   },
   "runtime": {
     "file": "demos/corporate/gjh/v11/assets/interiors/s15-recital-details.glb",
-    "sha256": "6ea7e2308380383067b81651f3d29de442f10624481aeb2c88263c1819b00e4c",
+    "sha256": "900a6b76adde5ae7d02cfe744a5ed5c31f8414a505f47d6353d0f9c5ff1af3d6",
     "detailTriangles": 748,
     "wholeRoomTriangles": {
       "low": 2748,
@@ -34,19 +42,19 @@
     }
   },
   "verification": {
-    "localBuild": "2a5c452460ef78fd",
+    "localBuild": "0657f69fe70bece4",
     "views": {
-      "1440-S15-focal.jpg": "b64b9c74b160050c8ca29be4b858438edb5881d2beccd066b532b3ad2b6fda61",
-      "1440-S15-hybrid-cabinet.jpg": "fef6b7d95f85817a71b39d4975f250ff5fac0986e2163436397abea72eeae883",
-      "1440-S15-portable-keyboard.jpg": "0298a0345fb1e8587e59a88bf6e9363abda0a667abe97269ebe23e0e2d516d9c",
-      "1440-S15-story.jpg": "69b9855a6c04ec9bd99641b306de1e5008b82f8d4e330dc5f4b49f2dde9c06cb",
-      "390-S15-hybrid-cabinet.jpg": "fda3385a094ac290d324a77dc98ae5d6019507550df80513b898c6d090e4d82d",
-      "390-S15-portable-keyboard.jpg": "4082051b1383236601cd15d4ddb9f82a1308c14d8d97638305864e606c783c30",
-      "390-S15-story.jpg": "5822c7048e04f98552f913c8d5b0e83f4501f48f89d1a80e4436ba080ffc7d70",
-      "specimen-ct-s1bk.png": "47f89109e8aa0767ce9e1a1c8cc5eb6ec2c59c7d070d13f1df0404287af67554",
-      "specimen-gp-510bp.png": "6337991e549366cb8a372479c8c31dcde4cde7d39f38ea20efc5c00dc0f3d069"
+      "1440-S15-focal.jpg": "c93f6aa2d6a4bb034a281de7d6a7812f922732aff0cccaf030aec5ade848fd03",
+      "1440-S15-hybrid-cabinet.jpg": "3365de9d605dbe268df0f373a61bfcab9ecbda65497380a8c3de93df49cbb8ed",
+      "1440-S15-portable-keyboard.jpg": "e1a71a85b7b97d537bb5c50f933d48bd6ee67e238211236c486fd40287fcbbe7",
+      "1440-S15-story.jpg": "74d497b806831746835f75ec9553ba21228c7e9a0b1739fbf148d41542344f7a",
+      "390-S15-hybrid-cabinet.jpg": "f6986d536c5361214e038fc633c3a4c66f9291be7b83d3e964422ba204a70e8f",
+      "390-S15-portable-keyboard.jpg": "fac04069af48a41f4abf64654ef64a766077ac07bb635eeef54df46e47364b32",
+      "390-S15-story.jpg": "c4d38684d31605fba440b7afc03f828b3c4fe44e377ff350c9159a638a2a4ab8",
+      "specimen-casio-controls-close.png": "4480daf84f5c83cbbf376b410450fa243762b9b3237847addb252332cd461e1c",
+      "specimen-casio-controls.png": "f740bfe3c36b80e60ac9017e17a3e60083c2547ce265b81a2f8d838f4e0ef705"
     },
     "chrome": "1440\u00d7900 desktop and 390\u00d7844 touch-emulated Chrome passed map entry, story, model view, exit and GLB response.",
-    "visualReview": "GPT-6.2 Astra comparison of the portable keyboard and cabinet with retained revisions."
+    "visualReview": "Independent GPT-6.2 Astra passed CT-S1BK control count, grouping and position, with simplified caps and no LEDs. GP-510BP geometry is unchanged."
   }
 }
