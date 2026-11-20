@@ -24,11 +24,13 @@ World origin (-20, 0, 28), yaw 90°. Dimensions are authored metres. The [floor 
 
 ## Display products and model work
 
+The [editable rear-shelf samples](../../../models/gjh-spam-tins/README.md) use separate pigments, recessed ends and offset open pull tabs within the shared nominal 100 × 56 × 83 mm envelope.
+
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| SPAM Classic Luncheon Meat 340g | Front conveyor display slot | Pending rounded-can model matched to official front and rear references. Retailer box-scale proxy 100 × 56 × 83 mm, direct can measurement pending. |
-| SPAM Lite Luncheon Meat 340g | Second independent bay | Pending exact variant appearance and SKU model. |
-| SPAM Less Sodium Luncheon Meat 340g | Third independent bay | Pending exact variant appearance and SKU model. |
+| SPAM Classic Luncheon Meat 340g | Rear shelf, left | Unprinted nominal-envelope rounded tin. Physical measurements and current artwork remain open. |
+| SPAM Lite Luncheon Meat 340g | Rear shelf, middle | Separate unprinted tin based on its own catalogue references. Print and physical measurements remain open. |
+| SPAM Less Sodium Luncheon Meat 340g | Rear shelf, right | Separate unprinted tin based on its own catalogue references. Print and physical measurements remain open. |
 
 Model each variant’s label from its linked evidence if rights allow. Keep the exhibit geometry separate.
 

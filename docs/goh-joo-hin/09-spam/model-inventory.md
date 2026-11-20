@@ -21,6 +21,8 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| SPAM Classic Luncheon Meat 340g | Front conveyor display slot | Pending rounded-can model matched to official front and rear references. Retailer box-scale proxy 100 × 56 × 83 mm, direct can measurement pending. |
-| SPAM Lite Luncheon Meat 340g | Second independent bay | Pending exact variant appearance and SKU model. |
-| SPAM Less Sodium Luncheon Meat 340g | Third independent bay | Pending exact variant appearance and SKU model. |
+| SPAM Classic Luncheon Meat 340g | Rear shelf, left | Unprinted nominal-envelope rounded tin. Physical measurements and current artwork remain open. |
+| SPAM Lite Luncheon Meat 340g | Rear shelf, middle | Separate unprinted tin based on its own catalogue references. Print and physical measurements remain open. |
+| SPAM Less Sodium Luncheon Meat 340g | Rear shelf, right | Separate unprinted tin based on its own catalogue references. Print and physical measurements remain open. |
+
+The [editable 340 g specimens](../../../models/gjh-spam-tins/README.md) share the nominal 100 × 56 × 83 mm catalogue envelope. Each has projecting rolls, a recessed lid and its own open pull tab and unprinted pigment. Physical seam and closure measurements, current editions and print scope remain open.
