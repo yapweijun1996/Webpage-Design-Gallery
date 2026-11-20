@@ -6,13 +6,18 @@ import {expandedLayout, expandedStoreArrival} from './expanded-layout.js';
 import {isShelfInReach} from './visitor-v2-contact.js';
 import {
   chaseDistance, clampCameraPitch, createCameraController, DEFAULT_PITCH, easeCameraValue, firstPersonFov,
-  limitCameraByFloor, neutralFramingWeight, positionTramChase, sweepCameraClearance
+  limitCameraByFloor, limitCameraByObstacles, neutralFramingWeight, positionTramChase, sweepCameraClearance
 } from './camera-controller.js';
 import {advanceVelocity, interpolate, interpolateAngle, MOVEMENT, stickStrength} from './movement.js';
 import {createPlayerTram, tramBoardReason} from './tram-ride.js';
 import {seatEyeHeight} from './tram-layout.js';
 import {isInFrontOfSeat} from './seat-placements.js';
 
+// An orbit above the cabin roof can still put its opaque shell between the
+// lens and the visitor. Keep deck-side chase views on the visitor's side.
+const shaft=liftLayout.shaft;
+const upperCameraBoundary=[{min:{x:shaft.minX,y:liftLayout.upper,z:shaft.minZ},
+  max:{x:shaft.maxX,y:Infinity,z:shaft.maxZ}}];
 const CAMERA_LIFTS = [1.1, 2.2];
 const ZOOM_STEP = .2;
 const CHASE_NEAR = .08;
@@ -435,6 +440,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const start = performance.now();
     const bounded = sweepCameraClearance(physics, origin, cameraRotation, direction, cameraBall, length, capsule, body, cameraObstacles);
     cameraQueryMs += performance.now() - start;
+    if(expanded && !elevatorTravel && visual.position.y>liftLayout.upper-.1 &&
+        (origin.x<shaft.minX || origin.x>shaft.maxX || origin.z<shaft.minZ || origin.z>shaft.maxZ)){
+      return limitCameraByObstacles(origin,direction,bounded,cameraBall.radius,upperCameraBoundary);
+    }
     return bounded;
   }
   function cameraCandidate(lift, out, minimumY, seatView) {

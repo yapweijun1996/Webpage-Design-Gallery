@@ -165,6 +165,14 @@ test('Tripo chase damps toward both pitches, clears the floor and roof, and reta
   assert.ok(player.camera.position.y >= 7.2 + player.state.cameraObstruction.radius + .039);
   assert.ok(Math.abs(lookPitch() - radians(-30)) < .005);
 
+  await t.test('upper lift arrival keeps the chase lens on the directory side of the portal', () => {
+    player.body.setTranslation({x:-6.4,y:8.075,z:10},true);
+    player.setInput({yaw:Math.PI/2,pitch:.12});
+    settle();
+    assert(player.camera.position.x < -5-player.state.cameraObstruction.radius);
+    assert(player.camera.getWorldDirection(new T.Vector3()).x < 0);
+  });
+
   await t.test('sit, stand and teleport preserve the fixed physics clock', () => {
     const bench = physics.createCollider(R.ColliderDesc.cuboid(1.25,.32,.4).setTranslation(0,.32,0));
     seats.push(createSeatAnchor({id:'test-seat',x:0,z:0,floor:0,exit:{x:0,z:-1.2},

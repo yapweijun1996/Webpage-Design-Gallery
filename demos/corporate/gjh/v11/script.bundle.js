@@ -5313,6 +5313,14 @@ function shouldOpenStoreDoor(door, player) {
   return player.y < 2 && Math.hypot(player.x - door.x, player.z) < (door.targetOpen ? 5.2 : 4.8);
 }
 
+// demos/corporate/gjh/v11/assets/upper-layout.js
+var directory = { x: -8.78, z: 10, width: 1.48, height: 1.72, yaw: Math.PI / 2 };
+var upperSeats = [
+  { x: 2.52, z: 5.98, facing: 1, yaw: Math.PI / 2, finish: "oak" },
+  { x: 2.52, z: 12, facing: 1, yaw: Math.PI / 2, finish: "slats" },
+  { x: -5.66, z: 4.72, facing: -1, yaw: Math.PI, finish: "upholstered" }
+];
+
 // demos/corporate/gjh/v11/assets/atrium-layout.js
 var point = (x, z) => Object.freeze({ x, z });
 var lounge = (id, x) => Object.freeze({
@@ -5328,11 +5336,7 @@ var atriumLayout = Object.freeze({
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
-  upperSeats: Object.freeze([
-    Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
-    Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
-    Object.freeze({ x: -3, z: 6, facing: -1, finish: "upholstered" })
-  ]),
+  upperSeats: Object.freeze(upperSeats.map(Object.freeze)),
   event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
 });
 

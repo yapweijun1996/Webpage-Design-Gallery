@@ -59,7 +59,15 @@ export function createSeatPlacements(expanded) {
   if (expanded) {
     for(const [i,seat] of atriumLayout.upperSeats.entries()){
       add('deck',seat.x,seat.z,seat.facing,`Upper deck bench ${i+1}`,liftLayout.upper);
-      placements.at(-1).finish=seat.finish;
+      const placement=placements.at(-1);
+      placement.finish=seat.finish;
+      placement.pose.angle=seat.yaw;
+      placement.exit.x=seat.x-1.2*Math.sin(seat.yaw);
+      placement.exit.z=seat.z-1.2*Math.cos(seat.yaw);
+      if(seat.yaw===Math.PI/2){
+        [placement.clearance.colliderWidth,placement.clearance.colliderDepth]=
+          [placement.clearance.colliderDepth,placement.clearance.colliderWidth];
+      }
     }
   }
   return placements;

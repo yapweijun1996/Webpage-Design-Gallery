@@ -67,6 +67,12 @@ function createExpandedElevator(T,R,physics,scene,motion) {
   const slabX=(slab.minX+slab.maxX)/2,slabZ=(slab.minZ+slab.maxZ)/2;
   const shaftX=(shaft.minX+shaft.maxX)/2,shaftZ=(shaft.minZ+shaft.maxZ)/2;
   const doorwayZ=(t.minZ+t.maxZ)/2,doorwayDepth=t.maxZ-t.minZ;
+  // The fitted header and jambs extend above the physics guard. Stop the
+  // chase camera at their visible faces while keeping the doorway open.
+  for(const [z,width,bottom,top] of [[L.z,4.2,2.94,3.80],[L.z-1.54,1.04,0,2.94],[L.z+1.54,1.04,0,2.94]]){
+    obstacles.push({min:{x:shaft.minX-.39,y:L.upper+bottom,z:z-width/2},
+      max:{x:shaft.minX+.29,y:L.upper+top,z:z+width/2}});
+  }
   const guardHeight=1.1,wallThickness=.1;
   for(const r of cutRectangle(slab,shaft))fixed('stone',(r.minX+r.maxX)/2,L.upper-.2,(r.minZ+r.maxZ)/2,r.maxX-r.minX,.4,r.maxZ-r.minZ);
   // Low guards enclose the landing and both shaft entrances without a tall opaque tower.

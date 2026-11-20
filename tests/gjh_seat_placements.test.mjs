@@ -13,13 +13,13 @@ const near = (a,b) => assert.ok(Math.abs(a-b)<1e-9, `${a} != ${b}`);
 test('all classic and expanded bench placements have authored seat data and stable identities', () => {
   const classic=createSeatPlacements(false), expanded=createSeatPlacements(true);
   assert.deepEqual(coordinates(classic), [[-7.8,9.5],[7.8,9.5],[-7.8,13],[7.8,13],[-3,-6.8],[3,-6.8],[7,-6.8],[13,-6.8]]);
-  assert.deepEqual(coordinates(expanded), [[-5.7,24.5],[-2.3,24.5],[22.3,24.5],[25.7,24.5],[-2.7,-6.8],[3.05,-7.85],[7,-6.8],[13.35,-7.05],[-6.65,12.55],[.1,8.8],[-3,6]]);
+  assert.deepEqual(coordinates(expanded), [[-5.7,24.5],[-2.3,24.5],[22.3,24.5],[25.7,24.5],[-2.7,-6.8],[3.05,-7.85],[7,-6.8],[13.35,-7.05],[2.52,5.98],[2.52,12],[-5.66,4.72]]);
   for(const placements of [classic,expanded]) {
     for(const [index,p] of placements.entries()) {
       assert.equal(p.id,index ? `bench-seat-${index+1}` : 'courtyard-seat');
       assert.equal(p.exit.y,p.floor);
       assert(Math.hypot(p.exit.x-p.x+1.2*Math.sin(p.pose.angle),p.exit.z-p.z+1.2*Math.cos(p.pose.angle))<1e-6);
-      assert.equal(p.pose.facing,p.facing); if (placements===classic || !['mili','gogo'].includes(p.group)) assert.equal(p.pose.angle,p.facing===1?0:Math.PI);
+      assert.equal(p.pose.facing,p.facing); if (placements===classic || !['mili','gogo','deck'].includes(p.group)) assert.equal(p.pose.angle,p.facing===1?0:Math.PI);
       assert.equal(p.clearance.interactionRadius,1.65); assert.equal(p.clearance.capsuleRadius,.3);
       const seat=createSeatAnchor(p,123);
       assert.equal(seat.collider,123); near((seat.x-p.x)*Math.cos(p.pose.angle)-(seat.z-p.z)*Math.sin(p.pose.angle),0);

@@ -2,6 +2,8 @@
 
 The expanded mall’s upper landing at +7.2 m now overlooks a permanent 5.47 × 12 m lightwell. The lift can be upstairs while visitors look down into the ground court. The arrival view pairs a GJH mark with a directory, an upholstered lounge and four illuminated category windows. The opposite gallery is display architecture. The 17 operating shop destinations remain on the ground floor.
 
+The current deck furniture, directory, brand rail, collision itinerary and phone comparison are documented in the [upper layout audit](gjh-v11-upper-layout-audit.md). The layout measurements below describe the earlier V2 installation.
+
 ## What the iPhone capture showed
 
 Research used the supplied current and concept images and worktree revision `0181ffd6`.

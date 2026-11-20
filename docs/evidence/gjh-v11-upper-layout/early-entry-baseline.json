@@ -1,0 +1,11 @@
+{
+  "revision": "d7756af1",
+  "frames": 3598,
+  "slow": [],
+  "maxMs": 48.40000000000009,
+  "busy": 0,
+  "closest": 0.05850290732364548,
+  "tier": "low",
+  "reason": "enter-now",
+  "interrupted": false
+}

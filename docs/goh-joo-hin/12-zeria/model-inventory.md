@@ -21,5 +21,7 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| Zeria Lively & Healthy 180 Tablets | Left front mount at the opal display | Pending exact-model silhouette and source-based packaging. |
-| Zeria Chondro Max 300 Tablets | Right front mount with separate carton and bottle | Pending matched geometry. Official GJH photos show both pieces. |
+| Zeria Lively & Healthy 180 Tablets | Left rear shelf, right comparison position | Amber bottle and broad ribbed yellow closure. Physical dimensions and authorized artwork remain open. |
+| Zeria Chondro Max 300 Tablets | Left rear shelf, left comparison positions | Two separate unprinted form studies. Retail artwork, actual dimensions and clear bottle contents remain open. |
+
+[Editable pack models and verification](../../../models/gjh-zeria-packs/README.md)

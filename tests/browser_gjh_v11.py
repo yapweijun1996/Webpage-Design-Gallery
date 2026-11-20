@@ -540,7 +540,7 @@ def upper_deck_gallery(page):
     upper = state(page)
     assert upper['brandPlaqueCount'] == 17, upper
     assert upper['drawCalls'] <= 190, upper['drawCalls']
-    for x, z in ((-8.18, 10), (-8.18, 14.67), (-6.51, 14.67)):
+    for x, z in ((-8.18, 10), (-8.18, 14.67), (1.72, 14.76)):
         walk_to(page, x, z, precise=True)
     assert state(page)['nearby'] == 'brand-plaque-S01', state(page)
     story = page.locator('.brand-story-nearby')
@@ -556,9 +556,8 @@ def upper_deck_gallery(page):
                   if seat['id'] == 'bench-seat-9']
     assert len(deck_seats) == 1, deck_seats
     seat = deck_seats[0]
-    # Return by the west perimeter and turn into the bench's open side.
-    walk_to(page, -8.18, 14.67, precise=True)
-    walk_to(page, -8.18, seat['exitZ'], precise=True)
+    # The oak bench opens onto the inner east aisle.
+    walk_to(page, seat['exitX'], 14.67, precise=True)
     walk_to(page, seat['exitX'], seat['exitZ'])
     assert state(page)['nearby'] == seat['id'], state(page)
     page.locator('#inspect').click()
@@ -577,8 +576,8 @@ def upper_deck_gallery(page):
                   if item['id'] == 'bench-seat-11']
     assert len(deck_seats) == 1, deck_seats
     seat = deck_seats[0]
-    walk_to(page, -8.18, stood['z'], precise=True)
-    walk_to(page, -8.18, seat['exitZ'], precise=True)
+    walk_to(page, stood['x'], 7.4, precise=True)
+    walk_to(page, seat['exitX'], 7.4, precise=True)
     walk_to(page, seat['exitX'], seat['exitZ'], precise=True)
     assert state(page)['nearby'] == seat['id'], state(page)
     page.locator('#inspect').click()

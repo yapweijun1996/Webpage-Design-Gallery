@@ -48,17 +48,17 @@ export const roomDetails = {
   },
   "S10": {
     "file": "s10-coast-details.glb",
-    "bytes": 71920,
+    "bytes": 78468,
     "roomDetail": true
   },
   "S11": {
     "file": "s11-deli-details.glb",
-    "bytes": 75704,
+    "bytes": 107652,
     "roomDetail": true
   },
   "S12": {
     "file": "s12-herbarium-details.glb",
-    "bytes": 33300,
+    "bytes": 106468,
     "roomDetail": true
   },
   "S13": {

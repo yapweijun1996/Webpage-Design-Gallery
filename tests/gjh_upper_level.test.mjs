@@ -12,6 +12,8 @@ import {createSeatAnchor,createSeatPlacements} from '../demos/corporate/gjh/v11/
 import {addBrandWallAtlas} from '../demos/corporate/gjh/v11/assets/brand-wall.js';
 import {clearanceGrid,distance} from '../scripts/gjh_interiors/sweep.mjs';
 
+import {brandRail,directory,lounge,upperSeats} from '../demos/corporate/gjh/v11/assets/upper-layout.js';
+
 const route = JSON.parse(await readFile(new URL('../docs/gjh-v11-upper-level-route.json', import.meta.url)));
 
 function localFetch(t) {
@@ -104,6 +106,17 @@ test('the brand wall warms before its mesh and story interactions are available'
   assert.equal(mesh.visible,false);
   assert.equal(mesh.userData.deckLod,true);
   assert.equal(wall.interactables.length,17);
+  const positions=mesh.geometry.attributes.position;
+  for(const [i,point] of wall.interactables.entries()){
+    const v=i*4, x=(positions.getX(v)+positions.getX(v+1))/2;
+    assert(Math.abs(x-point.x)<1e-5);
+    assert.equal(point.z,brandRail.z-1.02);
+    for(let k=0;k<4;k++){
+      assert.equal(positions.getZ(v+k),positions.getZ(0),'parallel to south rail');
+      assert.equal(positions.getY(v+k),positions.getY(k),'single sign height');
+    }
+    if(i)assert(Math.abs(positions.getX(v)-positions.getX(v-4)+brandRail.pitch)<1e-5);
+  }
   assert.ok(wall.interactables.every(({id,y})=>wall.records[id]?.action==='brand-story' && y===L.upper));
 });
 
@@ -114,8 +127,20 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
   const scene=new T.Scene(),elevator=createElevatorV2(T,R,physics,scene,true);
   const colliders=(x,y,z,w,h,d)=>physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z));
   const upper=buildUpperLevel(T,{map:null,models:{}},{collider:colliders,lightWash:()=>{}});
+  // The procedural lamp has the same 0.60 m footprint as the loaded model.
+  const lampBaseAt=dx=>new T.Raycaster(
+    new T.Vector3(lounge.lamp[0]+dx,L.upper+.11,lounge.lamp[1]),new T.Vector3(0,-1,0),0,.08
+  ).intersectObject(upper.group.getObjectByName('Lounge, stone paving and shop arcade'));
+  assert(lampBaseAt(.27).length>0);
+  assert.equal(lampBaseAt(.32).length,0);
   scene.add(upper.group,upper.panes);
   scene.getObjectByName('Expanded physical lift cabin').add(upper.cabinMark);
+  const directoryRay=new T.Raycaster(new T.Vector3(L.exit.x,L.upper+1.16,L.exit.z),new T.Vector3(-1,0,0));
+  const [sign]=directoryRay.intersectObject(upper.group,true);
+  assert.equal(sign.object.name,'Directory, mall mark and display graphics');
+  assert(sign.distance>=1.5 && sign.face.normal.x>.999);
+  assert(Math.abs(sign.uv.x-(cells.directory.x+cells.directory.w/2)/256)<.01);
+  assert(Math.abs(sign.uv.y-(1-(cells.directory.y+cells.directory.h/2)/256))<.01);
   const view=new T.Raycaster(new T.Vector3(-5.2,L.upper+1.26,L.z),new T.Vector3(1,0,0));
   for(const height of [0,L.upper]){
     elevator.setHeight(height);physics.step();scene.updateMatrixWorld(true);
@@ -183,7 +208,7 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
 
   // Include the furnishing colliders owned by world.js in the real lift and
   // upper-level scene. Walk from the landing continuously through each side.
-  colliders(-3,L.upper+1.23,15.78,9.4,2.46,.16);
+  colliders(brandRail.x,L.upper+brandRail.y,brandRail.z,brandRail.width,brandRail.height,brandRail.depth);
   for(const [x,z] of deckPlanters)colliders(x,L.upper+.25,z,.68,.5,.68);
   const deckSeats=createSeatPlacements(true).filter(({group})=>group==='deck');
   const seatColliders=deckSeats.map(({x,z,clearance})=>
@@ -200,7 +225,7 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
   };
   body.setTranslation({x:L.exit.x,y:L.upper+.875,z:L.exit.z},true);physics.step();
   for(const [axis,target,label] of [
-    ['x',-8.18,'west exit'],['z',4.92,'west to north'],['x',2.12,'north to east'],
+    ['x',-8.18,'west exit'],['z',7.4,'west to north'],['x',1.32,'north to east'],
     ['z',14.67,'east to south'],['x',-8.18,'south to west'],['z',L.exit.z,'west return'],
     ['x',L.exit.x,'lift approach'],['x',L.x,'docked cabin']
   ])aim(axis,target,label);
@@ -209,7 +234,7 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
   for(const [i,placement] of deckSeats.entries()){
     const seat=createSeatAnchor(placement,seatColliders[i].handle,upper.seatProfiles.get(placement.finish),1);
     // Follow the open side from the perimeter to the exact interaction point.
-    const laneX=placement.finish==='slats'?2.12:-8.18;
+    const laneX=placement.finish==='upholstered'?-4.12:.72;
     body.setTranslation({x:laneX,y:L.upper+.875,z:seat.exitZ},true);physics.step();
     aim('x',seat.exitX,seat.name+' approach');
     for(let j=0;j<=16;j++){
@@ -260,4 +285,30 @@ test('walking capsule stops at outer edges, shaft sides, corners and the undocke
     }
     assert(remaining<=.038,`${id}: blocked near (${p.x}, ${p.z}) en route to (${x}, ${z})`);
   }
+});
+
+test('upper plan leaves the arrival circle, furniture spacing and circulation lanes clear',()=>{
+  const {x,z,yaw}=directory, dx=L.exit.x-x, dz=L.exit.z-z;
+  const range=Math.hypot(dx,dz);
+  assert(range-.085>=1.5);
+  assert(Math.abs((Math.sin(yaw)*dx+Math.cos(yaw)*dz)/range-1)<1e-6);
+  const items=[
+    [x,z,.17,directory.width+.10],
+    ...upperSeats.map(s=>[s.x,s.z,...(s.finish==='upholstered'?[2.34,.785]:[.76,2.13])]),
+    ...deckPlanters.map(([px,pz])=>[px,pz,.90,.90]),
+    [...lounge.table,.86,.56],[...lounge.lamp,.6,.6],
+    ...lounge.ottomans.map(p=>[...p,.66,.66])
+  ];
+  const separation=([ax,az,aw,ad],[bx,bz,bw,bd])=>Math.hypot(
+    Math.max(0,Math.abs(ax-bx)-(aw+bw)/2),Math.max(0,Math.abs(az-bz)-(ad+bd)/2));
+  for(const [i,item] of items.entries()){
+    assert(separation(item,[L.exit.x,L.exit.z,0,0])>=.75);
+    for(const other of items.slice(i+1))assert(separation(item,other)>=.9,JSON.stringify([item,other]));
+    // Protected 1.2 m wide circulation strips with overlapping corner landings.
+    for(const lane of [[-7.65,11.1,1.2,8.3],[-3.275,7.34,9.95,1.2],
+      [1.10,10.8,1.2,8.1],[-3.275,14.45,9.95,1.2]]){
+      assert(separation(item,lane)>0,JSON.stringify([item,lane]));
+    }
+  }
+  assert(7.34+.6<L.shaft.minZ-.05 && 1.10-.6>L.shaft.maxX+.17);
 });

@@ -1058,6 +1058,14 @@ function createPlayerTram({ expanded, search, T, scene, getPosition, getBoardRea
   };
 }
 
+// demos/corporate/gjh/v11/assets/upper-layout.js
+var directory = { x: -8.78, z: 10, width: 1.48, height: 1.72, yaw: Math.PI / 2 };
+var upperSeats = [
+  { x: 2.52, z: 5.98, facing: 1, yaw: Math.PI / 2, finish: "oak" },
+  { x: 2.52, z: 12, facing: 1, yaw: Math.PI / 2, finish: "slats" },
+  { x: -5.66, z: 4.72, facing: -1, yaw: Math.PI, finish: "upholstered" }
+];
+
 // demos/corporate/gjh/v11/assets/atrium-layout.js
 var point = (x, z) => Object.freeze({ x, z });
 var lounge = (id, x) => Object.freeze({
@@ -1073,11 +1081,7 @@ var atriumLayout = Object.freeze({
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
   lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
-  upperSeats: Object.freeze([
-    Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
-    Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
-    Object.freeze({ x: -3, z: 6, facing: -1, finish: "upholstered" })
-  ]),
+  upperSeats: Object.freeze(upperSeats.map(Object.freeze)),
   event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
 });
 
@@ -1321,6 +1325,11 @@ function isInFrontOfSeat(seat, { x, z }) {
 }
 
 // demos/corporate/gjh/v11/assets/player.js
+var shaft = liftLayout.shaft;
+var upperCameraBoundary = [{
+  min: { x: shaft.minX, y: liftLayout.upper, z: shaft.minZ },
+  max: { x: shaft.maxX, y: Infinity, z: shaft.maxZ }
+}];
 var CAMERA_LIFTS = [1.1, 2.2];
 var ZOOM_STEP = 0.2;
 var CHASE_NEAR = 0.08;
@@ -1899,6 +1908,9 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const start = performance.now();
     const bounded = sweepCameraClearance(physics, origin, cameraRotation, direction, cameraBall, length, capsule, body, cameraObstacles);
     cameraQueryMs += performance.now() - start;
+    if (expanded && !elevatorTravel && visual.position.y > liftLayout.upper - 0.1 && (origin.x < shaft.minX || origin.x > shaft.maxX || origin.z < shaft.minZ || origin.z > shaft.maxZ)) {
+      return limitCameraByObstacles(origin, direction, bounded, cameraBall.radius, upperCameraBoundary);
+    }
     return bounded;
   }
   function cameraCandidate(lift, out, minimumY, seatView) {

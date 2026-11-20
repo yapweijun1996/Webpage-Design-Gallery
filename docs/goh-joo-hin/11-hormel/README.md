@@ -26,8 +26,8 @@ World origin (-20, 0, 44), yaw 90°. Dimensions are authored metres. The [floor 
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| HORMEL Chili No Beans 15 oz | Front-facing side shelf nearest the packing bench | Pending measured SKU model. Manufacturer confirms exact reference size. |
-| HORMEL Chili With Beans | Neighbouring comparison facing | Pending exact size and selected reference pack for geometry. |
+| HORMEL Chili No Beans 15 oz | Left rear shelf, left comparison facing | Unprinted form study from the official 15 oz front view. Physical can and closure measurements remain open. |
+| HORMEL Chili With Beans 15 oz | Left rear shelf, right comparison facing | Separate unprinted form study from the official 15 oz front view. GJH range, physical dimensions, and art remain open. |
 
 Manufacturer products establish reference examples. A current GJH listing for the two products was not corroborated.
 
@@ -47,6 +47,6 @@ The current packing bench stays. The proposed products do not change the V11 cat
 
 ## Catalogue exhibit
 
-The packing bench has a manufacturer-catalogue story for Chili No Beans and Chili with Beans. Two neutral tins sit in the left rear bay. The No Beans 15 oz image is a manufacturer reference and the current GJH range remains a separate source question.
+The packing bench has a manufacturer-catalogue story for Chili No Beans and Chili with Beans. Both [editable 15 oz form studies](../../../models/gjh-hormel-chili/README.md) sit on the left rear shelf. The approximate Ø75 × 117 mm forms follow the manufacturer pack photos. Current GJH distribution and physical can measurements require separate evidence.
 
 Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action displayed the referenced catalogue link. [Runtime Chrome views](exhibit-runtime.webp)

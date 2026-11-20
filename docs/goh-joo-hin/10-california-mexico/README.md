@@ -12,7 +12,7 @@ The entrance view frames the open shell. At the authored closer browse point, th
 
 ## Interior design
 
-Make shell nacre and teal a quiet frame for two tin placements. Keep the dramatic open shell as a signature, with separate red and black product pockets available from the side.
+Keep the open nacre shell as the signature display. The left rear shelf holds the two tin comparison positions.
 
 | Element | Placement and interaction |
 | --- | --- |
@@ -26,10 +26,10 @@ World origin (-20, 0, 36), yaw 90°. Dimensions are authored metres. The [floor 
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| Red California Mexico Abalone 454g | Red display pocket on the shell’s concourse-facing edge | Pending measured SKU model and current Red packaging edition. |
-| Black California Mexico Abalone 454g | Separate black display pocket | Pending matched SKU model. Do not substitute the New Moon Mexico tin. |
+| [Red California Mexico Abalone 454 g](https://www.gjheshop.com/product/red-california-mexico-abalone-454g/) | Left rear shelf at (-2.69, 2.1125, -4.070) | Unprinted form study. Exact measurements and current authorized Red artwork remain open. |
+| [Black California Mexico Abalone 454 g](https://www.gjheshop.com/product/black-california-mexico-abalone-454g/) | Left rear shelf at (-1.51, 2.1125, -4.070) | Unprinted form study. Exact measurements and current authorized Black artwork remain open. |
 
-The GJH product pages distinguish three official views per variant. The palette study omits commercial graphics.
+The GJH product pages distinguish three official views per variant. The [editable source](../../../models/gjh-california-mexico-tins/README.md) uses a photo-estimated Ø75 × 120 mm envelope and plain recessed lids.
 
 [Top-down floor plan](floor-plan.webp) · [Model inventory](model-inventory.md) · [Product model reference](product-model-reference.webp)
 
@@ -47,6 +47,6 @@ Entrance and bypass passed in Chrome. The front-side inspection point is a propo
 
 ## Catalogue exhibit
 
-The validated left-front approach faces the open shell. The story distinguishes the Red and Black 454 g catalogue entries. Two neutral colour studies sit on the left rear shelf. Exact retail pack geometry and artwork remain pending.
+The current story point is on the right-hand aisle. The story distinguishes the Red and Black 454 g catalogue entries. Both specimens sit at the original left rear shelf positions. Measured can dimensions, closure detail and current packaging art remain open.
 
 Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action displayed the referenced catalogue link. [Runtime Chrome views](exhibit-runtime.webp)

@@ -59,7 +59,7 @@ def alternate_release(source, target, catalog, release, activation_delay=False, 
         pages["sw.js"] = pages["sw.js"].replace("self.addEventListener('activate', (event) => {", "self.addEventListener('activate', (event) => {\n  event.waitUntil(new Promise(resolve => setTimeout(resolve, 1200)));")
         pages["sw.js"] = pages["sw.js"].replace("event.ports[0]?.postMessage({ version: VERSION, build: BUILD })", "setTimeout(() => event.ports[0]?.postMessage({ version: VERSION, build: BUILD }), 1000)")
     if ignore_activation:
-        pages["sw.js"] = pages["sw.js"].replace("event.waitUntil(self.skipWaiting())", "void 0")
+        pages["sw.js"] = pages["sw.js"].replace("await self.skipWaiting();", "")
     for name, text in pages.items():
         (target / name).write_text(text, encoding="utf-8", newline="\n")
 
@@ -148,6 +148,17 @@ def run():
                     page.wait_for_function("() => scrollY === 0")
                 assert not online_errors, online_errors
                 evidence["checks"]["responsiveSafeAreaCSSReducedMotionSmartHeaderScrollTop"] = "PASS"
+                css_request = base + "assets/gallery.css"
+                gallery_cache = "wdg:/Webpage-Design-Gallery/:shell:" + release_a["build"]
+                delete_css = "async ([name, url]) => (await caches.open(name)).delete(url)"
+                assert page.evaluate(delete_css, [gallery_cache, css_request])
+                assert page.evaluate("""async ([name, url]) => {
+                    const loaded = await fetch(url);
+                    const saved = await caches.match(url, {cacheName: name});
+                    return loaded.ok && loaded.headers.get('Content-Type').startsWith('text/css')
+                        && await loaded.text() === await saved.text();
+                }""", [gallery_cache, css_request])
+                evidence["checks"]["missingCachedStylesheetIsRepairedFromNetwork"] = "PASS"
                 context.set_offline(True)
                 # Playwright's network block does not set navigator.onLine in this
                 # Chrome build. Model the OS connectivity signal separately through

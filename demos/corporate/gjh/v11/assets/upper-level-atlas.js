@@ -31,8 +31,8 @@ export function paintUpperAtlas(T, mark, tier) {
     categories.forEach((name,i)=>{
       const y=66+i*23;
       ctx.fillStyle=cream;ctx.font='bold 17px Arial';ctx.fillText(name,9,y,118);
-      // Viewed from the totem, the opposite windows run left to right.
-      ctx.save();ctx.translate(140,y-6);ctx.rotate([-.76,-.52,0,.64][i]);
+      // Facing west at the totem, turn right for the north aisle or left for the south.
+      ctx.save();ctx.translate(140,y-6);ctx.rotate(i<2?Math.PI/2:-Math.PI/2);
       ctx.strokeStyle=swatch.gold;ctx.lineWidth=2;ctx.beginPath();
       ctx.moveTo(0,6);ctx.lineTo(0,-6);ctx.moveTo(-5,-1);ctx.lineTo(0,-6);ctx.lineTo(5,-1);ctx.stroke();ctx.restore();
     });

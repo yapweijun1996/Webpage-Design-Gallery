@@ -26,8 +26,8 @@ World origin (40, 0, 4), yaw -90°. Dimensions are authored metres. The [floor p
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| Zeria Lively & Healthy 180 Tablets | Left front mount at the opal display | Pending exact-model silhouette and source-based packaging. |
-| Zeria Chondro Max 300 Tablets | Right front mount with separate carton and bottle | Pending matched geometry. Official GJH photos show both pieces. |
+| Zeria Lively & Healthy 180 Tablets | Left rear shelf, right comparison position | Amber bottle and broad ribbed yellow closure. Physical dimensions and authorized artwork remain open. |
+| Zeria Chondro Max 300 Tablets | Left rear shelf, left comparison positions | Two separate unprinted form studies. Retail artwork, actual dimensions and clear bottle contents remain open. |
 
 Use only the packaging and existing product taxonomy in the display. Do not add health outcomes or indications.
 
@@ -43,10 +43,10 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 
 ## Runtime acceptance
 
-Route passed in both viewport profiles. The aisle-facing display mount and SKU models remain proposed.
+Both viewport profiles passed the story, rear shelf and return routes. The rear shelf holds three separate editable specimens.
 
 ## Catalogue exhibit
 
-The opal display offers a product-library story for Chondro Max 300 Tablets and Lively & Healthy 180 Tablets. An unprinted bottle and carton pair occupies the left rear shelf beside the existing stock. The source link opens the Chondro Max product gallery.
+The opal display offers a product-library story for Chondro Max 300 Tablets and Lively & Healthy 180 Tablets. The [three form studies](../../../models/gjh-zeria-packs/README.md) occupy the left rear shelf beside the established stock. The source link opens the Chondro Max product gallery.
 
 Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action opened the reference and displayed the source link. [Runtime Chrome views](exhibit-runtime.webp)

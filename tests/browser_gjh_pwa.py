@@ -143,6 +143,16 @@ def run():
                 context.set_offline(False)
                 page.wait_for_function("() => !document.querySelector('#mall-apply-update').disabled", timeout=30000)
                 page.wait_for_function("v => document.querySelector('#mall-apply-update bdi')?.textContent === 'v' + v", arg=release_b['version'])
+                version_cache = "gjh-v11:/Webpage-Design-Gallery/demos/corporate/gjh/v11/:offline:" + release_b["build"]
+                css_url = url + "style.bundle.css"
+                delete_asset = "async ([name, url]) => (await caches.open(name)).delete(url)"
+                css_path = "demos/corporate/gjh/v11/style.bundle.css"
+                assert page.evaluate(delete_asset, [version_cache, css_url])
+                server.mixed_files = {css_path: b"tampered stylesheet"}
+                page.locator('#mall-apply-update').click()
+                page.wait_for_function("() => document.querySelector('#mall-update-message').textContent.includes('Update failed, retry')")
+                assert page.evaluate("(name) => caches.has(name)", version_cache.replace(release_b["build"], release_a["build"]))
+                server.mixed_files = {}
                 before = page.evaluate("() => navigator.serviceWorker.controller.scriptURL")
                 assert before.endswith('/pwa-sw.js')
                 navigations = []
@@ -159,8 +169,32 @@ def run():
                 assert not other_navigations, other_navigations
                 assert not errors, errors
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                probe = context.new_page()
+                probe.goto(url)
+                assert probe.evaluate("getComputedStyle(document.querySelector('#app-loader')).position") == 'fixed'
+                assert probe.evaluate(delete_asset, [version_cache, css_url])
+                server.mixed_files = {css_path: b"missing stylesheet"}
+                probe.reload()
+                assert probe.locator('#mall-recovery').is_visible()
+                assert 'Page did not load fully:' in probe.locator('#mall-recovery').inner_text()
+                server.mixed_files = {}
+                with probe.expect_navigation(wait_until='load'):
+                    probe.locator('#mall-recovery button').click()
+                assert probe.locator('#mall-recovery').is_hidden()
+                assert probe.evaluate("getComputedStyle(document.querySelector('#app-loader')).position") == 'fixed'
+                assert not probe.evaluate("(name) => caches.has(name)", version_cache)
+
+                loader_path = "demos/corporate/gjh/v11/assets/loader.js"
+                server.mixed_files = {loader_path: b"missing module"}
+                probe.reload()
+                probe.get_by_role('button', name='Retry', exact=True).wait_for()
+                assert 'could not start' in probe.locator('#mall-recovery').inner_text()
+                server.mixed_files = {}
+                with probe.expect_navigation(wait_until='load'):
+                    probe.locator('#mall-recovery button').click()
+                assert probe.locator('#mall-recovery').is_hidden()
                 context.close()
-                print('PASS: scoped installation, parent coexistence, manifest, offline fallback, bag retention, identity/hash rejection, explicit update and one reload')
+                print('PASS: scoped installation, parent coexistence, manifest, offline fallback, bag retention, identity/hash rejection, explicit update and one reload, stylesheet and loader recovery')
         finally:
             server.shutdown()
 

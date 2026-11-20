@@ -1,3 +1,4 @@
+import {upperSeats} from './upper-layout.js';
 // Ground-floor objects stay within the stage 1 planting and lounge reservations.
 // Coordinates use the expanded shell's translated world space, in metres.
 const point = (x,z) => Object.freeze({x,z});
@@ -13,12 +14,7 @@ export const atriumLayout = Object.freeze({
   arcadePilaster:Object.freeze({inset:.03,depth:.45}),
   garden:Object.freeze({x:10,z:16,width:8,depth:3,height:.48}),
   lounges:Object.freeze([lounge('west',-4),lounge('east',24)]),
-  upperSeats:Object.freeze([
-    // Keep the west lift approach and perimeter aisle clear of the seat pan.
-    Object.freeze({x:-6.65,z:12.55,facing:1,finish:'oak'}),
-    Object.freeze({x:.1,z:8.8,facing:1,finish:'slats'}),
-    Object.freeze({x:-3,z:6,facing:-1,finish:'upholstered'})
-  ]),
+  upperSeats:Object.freeze(upperSeats.map(Object.freeze)),
   // Reserved for a future removable installation; no stage 4 object occupies it.
   event:Object.freeze({minX:3,maxX:17,minZ:24,maxZ:32})
 });

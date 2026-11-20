@@ -1,0 +1,196 @@
+[
+  {
+    "frames": 3598,
+    "slow": [
+      {
+        "at": 2554.9,
+        "previous": 2504.8,
+        "frameMs": 50.09999999999991
+      }
+    ],
+    "maxMs": 50.09999999999991,
+    "busy": 0,
+    "closest": 0.07002479321343151,
+    "tier": "low",
+    "reason": "enter-now",
+    "interrupted": false
+  },
+  {
+    "frames": 3594,
+    "slow": [
+      {
+        "at": 2512.1,
+        "previous": 2445.4,
+        "frameMs": 66.69999999999982
+      }
+    ],
+    "maxMs": 66.69999999999982,
+    "busy": 0,
+    "closest": 0.06662962029994092,
+    "tier": "low",
+    "reason": "enter-now",
+    "interrupted": false,
+    "diagnostics": [
+      {
+        "frame": [
+          {
+            "at": 2445.4,
+            "callbackMs": 7.5,
+            "drawCalls": 46
+          }
+        ],
+        "gl": [
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0.09999999403953552
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "texSubImage2D",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ],
+          [
+            "bufferSubData",
+            0
+          ]
+        ]
+      }
+    ]
+  },
+  {
+    "context": "fresh isolated browser context, 659a4969 sources plus upper layout",
+    "frames": 3598,
+    "slow": [],
+    "maxMs": 33.70000000000027,
+    "busy": 0,
+    "closest": 0.009562057651868986,
+    "tier": "low",
+    "reason": "enter-now",
+    "interrupted": false
+  },
+  {
+    "context": "fresh isolated browser context, 18f145c6 sources plus upper layout",
+    "frames": 3600,
+    "slow": [],
+    "maxMs": 33.29999999999973,
+    "busy": 0,
+    "closest": 0.06995366271421921,
+    "tier": "low",
+    "reason": "enter-now",
+    "interrupted": false
+  },
+  {
+    "context": "fresh isolated browser context, 898266f9 sources plus upper layout",
+    "frames": 3595,
+    "slow": [],
+    "maxMs": 47.90000000000009,
+    "busy": 0,
+    "closest": 0.0056068515011862335,
+    "tier": "low",
+    "reason": "enter-now",
+    "interrupted": false
+  }
+]

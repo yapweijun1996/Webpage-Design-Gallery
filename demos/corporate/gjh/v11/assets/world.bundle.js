@@ -1651,9 +1651,25 @@ async function loadStaticAsset(T, definition, baseURL) {
   return record;
 }
 
+// demos/corporate/gjh/v11/assets/upper-layout.js
+var directory = { x: -8.78, z: 10, width: 1.48, height: 1.72, yaw: Math.PI / 2 };
+var deckPlanters = [[-8.4, 4.65], [2.45, 15.28]];
+var lounge = {
+  lamp: [-3.25, 4.72],
+  table: [-1.5, 4.72],
+  ottomans: [[-7.38, 6.4], [-3.56, 6.4]],
+  rug: { x: -5.1, z: 5.84, width: 6.6, depth: 3.12 }
+};
+var brandRail = { x: -3, z: 15.78, width: 10.3, height: 0.66, depth: 0.16, y: 1.42, pitch: 0.59 };
+var upperSeats = [
+  { x: 2.52, z: 5.98, facing: 1, yaw: Math.PI / 2, finish: "oak" },
+  { x: 2.52, z: 12, facing: 1, yaw: Math.PI / 2, finish: "slats" },
+  { x: -5.66, z: 4.72, facing: -1, yaw: Math.PI, finish: "upholstered" }
+];
+
 // demos/corporate/gjh/v11/assets/atrium-layout.js
 var point = (x, z) => Object.freeze({ x, z });
-var lounge = (id, x) => Object.freeze({
+var lounge2 = (id, x) => Object.freeze({
   id,
   x,
   z: 24,
@@ -1665,12 +1681,8 @@ var atriumLayout = Object.freeze({
   anchorPierXs: Object.freeze([-14.9, -5, 5, 14.9]),
   arcadePilaster: Object.freeze({ inset: 0.03, depth: 0.45 }),
   garden: Object.freeze({ x: 10, z: 16, width: 8, depth: 3, height: 0.48 }),
-  lounges: Object.freeze([lounge("west", -4), lounge("east", 24)]),
-  upperSeats: Object.freeze([
-    Object.freeze({ x: -6.65, z: 12.55, facing: 1, finish: "oak" }),
-    Object.freeze({ x: 0.1, z: 8.8, facing: 1, finish: "slats" }),
-    Object.freeze({ x: -3, z: 6, facing: -1, finish: "upholstered" })
-  ]),
+  lounges: Object.freeze([lounge2("west", -4), lounge2("east", 24)]),
+  upperSeats: Object.freeze(upperSeats.map(Object.freeze)),
   event: Object.freeze({ minX: 3, maxX: 17, minZ: 24, maxZ: 32 })
 });
 
@@ -1942,8 +1954,8 @@ totalEmissiveRadiance *= vColor;`);
     }
   };
   tree(garden.x - 3.4, garden.z + 1.2, 5.9);
-  for (const lounge2 of atriumLayout.lounges) {
-    const planter = lounge2.planters[lounge2.id === "west" ? 1 : 0];
+  for (const lounge3 of atriumLayout.lounges) {
+    const planter = lounge3.planters[lounge3.id === "west" ? 1 : 0];
     tree(planter.x, planter.z, 4.2);
     lightPool(planter.x, 0.023, planter.z, 2.2, 2.2);
   }
@@ -2564,9 +2576,9 @@ function createSeatPlacements(expanded) {
     });
   };
   if (expanded) {
-    for (const lounge2 of atriumLayout.lounges)
-      for (const [i, point2] of lounge2.seats.entries())
-        add("atrium", point2.x, point2.z, 1, `${lounge2.id === "west" ? "West" : "East"} lounge seat ${i + 1}`);
+    for (const lounge3 of atriumLayout.lounges)
+      for (const [i, point2] of lounge3.seats.entries())
+        add("atrium", point2.x, point2.z, 1, `${lounge3.id === "west" ? "West" : "East"} lounge seat ${i + 1}`);
   } else {
     add("atrium", -7.8, 9.5);
     add("atrium", 7.8, 9.5);
@@ -2592,7 +2604,14 @@ function createSeatPlacements(expanded) {
   if (expanded) {
     for (const [i, seat] of atriumLayout.upperSeats.entries()) {
       add("deck", seat.x, seat.z, seat.facing, `Upper deck bench ${i + 1}`, liftLayout.upper);
-      placements.at(-1).finish = seat.finish;
+      const placement = placements.at(-1);
+      placement.finish = seat.finish;
+      placement.pose.angle = seat.yaw;
+      placement.exit.x = seat.x - 1.2 * Math.sin(seat.yaw);
+      placement.exit.z = seat.z - 1.2 * Math.cos(seat.yaw);
+      if (seat.yaw === Math.PI / 2) {
+        [placement.clearance.colliderWidth, placement.clearance.colliderDepth] = [placement.clearance.colliderDepth, placement.clearance.colliderWidth];
+      }
     }
   }
   return placements;
@@ -3672,7 +3691,7 @@ function paintUpperAtlas(T, mark, tier) {
       ctx.fillText(name, 9, y, 118);
       ctx.save();
       ctx.translate(140, y - 6);
-      ctx.rotate([-0.76, -0.52, 0, 0.64][i]);
+      ctx.rotate(i < 2 ? Math.PI / 2 : -Math.PI / 2);
       ctx.strokeStyle = swatch.gold;
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -3807,10 +3826,7 @@ var models = {
   lamp: { id: "GJH_NEW_lamp_floor", dimensions_m: [0.6, 1.7, 0.6], sha256: "5cb040bd1982017acc97b2d96cb80963516be67814c92cab49d816539c1581f2" },
   table: { id: "GJH_NEW_table_display", dimensions_m: [1.1, 0.85, 0.6], sha256: "30234aa8ff7d21761920ee1527f374076ded2ae2d296f6499edea2e2759d4ba9" }
 };
-var deckPlanters = [[-6.25, 13.8], [0.45, 13.8], [-7, 8], [0.45, 6.15]];
-var lamp = [-1.38, 5.75];
-var table = [-4.79, 6.05];
-var directory = { x: -2.96, z: 13.52, width: 2.46, height: 2.56 };
+var { lamp, table, rug, ottomans } = lounge;
 function thresholdReturns() {
   const { minX, maxX, minZ, maxZ } = liftLayout.threshold;
   return [minZ, maxZ].map((z) => ({ x: (minX + maxX) / 2, z, width: maxX - minX, depth: 0.055 }));
@@ -3834,9 +3850,9 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   group.userData.deckLod = true;
   const floor = liftLayout.upper, gold = [], emit = [], solids = [], prints = [], glass = [];
   const unit = new T.BoxGeometry, plane = new T.PlaneGeometry, transform = new T.Object3D;
-  function matrix(x2, y, z2, w, h, d, yaw = 0, pitch = 0) {
+  function matrix(x2, y, z2, w, h, d, yaw2 = 0, pitch = 0) {
     transform.position.set(x2, floor + y, z2);
-    transform.rotation.set(pitch, yaw, 0, "YXZ");
+    transform.rotation.set(pitch, yaw2, 0, "YXZ");
     transform.scale.set(w, h, d);
     transform.updateMatrix();
     return transform.matrix.clone();
@@ -3904,7 +3920,7 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
           tint2(plane, matrix((a + b) / 2, 0.008, (c + d) / 2, b - a, d - c, 1, 0, -Math.PI / 2), tones[(col * 3 + row * 7) % 4]);
       }
   }
-  print(cells.rug, -3.05, 0.022, 6.27, 4.87, 2.23, 1, 0, -Math.PI / 2);
+  print(cells.rug, rug.x, 0.022, rug.z, rug.width, rug.depth, 1, 0, -Math.PI / 2);
   const crop = new T.CylinderGeometry(0.36, 0.32, 0.053, 16);
   for (const [x2, z2] of deckPlanters) {
     const ring = new T.RingGeometry(0.408, 0.447, 24);
@@ -3912,13 +3928,13 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     lightWash(x2, floor + 0.019, z2, 1.72, 1.72, 0, -Math.PI / 2);
   }
   const furnitureOffset = 0.024;
-  function furniture(kind2, [x2, z2], sx, sy, sz, fallback) {
+  function furniture(kind2, [x2, z2], sx, sy, sz, fallback, yaw2 = 0) {
     const record = loadedModels[kind2];
     if (!record?.primitives.length) {
       fallback?.(x2, z2);
       return false;
     }
-    const pose = matrix(x2, furnitureOffset, z2, sx, sy, sz);
+    const pose = matrix(x2, furnitureOffset, z2, sx, sy, sz, yaw2);
     for (const p of record.primitives)
       tint2(p.geometry, pose.clone().multiply(p.matrix), p.material.color);
     for (const geo of new Set(record.primitives.map((p) => p.geometry)))
@@ -3929,21 +3945,21 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   }
   const seatProfiles = new Map;
   const benchProfile = (width2, top, depth, seatCentre = 0) => ({ size: [width2, top, depth], top, front: -depth / 2, seatCentre });
-  function slats(x2, z2) {
+  function slats(x2, z2, yaw2) {
     const width2 = 2.12, centre = 0.46, thickness = 0.09, slatDepth = 0.103, spacing = 0.12;
     for (let i = -2;i <= 2; i++)
-      block(i % 2 ? 11104068 : 12158290, x2, centre, z2 + i * spacing, width2, thickness, slatDepth);
+      block(i % 2 ? 11104068 : 12158290, x2 + i * spacing, centre, z2, width2, thickness, slatDepth, yaw2);
     for (const dx of [-0.78, 0.78])
-      brass(x2 + dx, 0.22, z2, 0.08, 0.44, 0.5);
+      brass(x2, 0.22, z2 + dx, 0.08, 0.44, 0.5, yaw2);
     return benchProfile(width2, centre + thickness / 2, 4 * spacing + slatDepth);
   }
   const [benchX, benchY, benchZ] = [1.52, 1.1, 1.55];
-  for (const { finish, x: x2, z: z2 } of atriumLayout.upperSeats) {
-    if (finish === "oak" && furniture("bench", [x2, z2], benchX, benchY, benchZ)) {
+  for (const { finish, x: x2, z: z2, yaw: yaw2 } of atriumLayout.upperSeats) {
+    if (finish === "oak" && furniture("bench", [x2, z2], benchX, benchY, benchZ, null, yaw2)) {
       const [width2, height2, depth] = models.bench.dimensions_m;
       seatProfiles.set(finish, benchProfile(width2 * benchX, furnitureOffset + height2 * benchY, depth * benchZ, -0.04));
     } else if (finish === "oak" || finish === "slats")
-      seatProfiles.set(finish, slats(x2, z2));
+      seatProfiles.set(finish, slats(x2, z2, yaw2));
   }
   furniture("table", table, 0.78, 0.81, 0.92, (x2, z2) => {
     block(12159064, x2, 0.64, z2, 0.86, 0.09, 0.55);
@@ -3951,10 +3967,18 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     block(6113592, x2, 0.06, z2, 0.55, 0.08, 0.37);
   });
   furniture("lamp", lamp, 1, 1, 1, (x2, z2) => {
-    tint2(crop, matrix(x2, 0.05, z2, 1, 1, 1), 10058055);
+    const baseScale = models.lamp.dimensions_m[0] / (0.36 * 2);
+    tint2(crop, matrix(x2, 0.05, z2, baseScale, 1, baseScale), 10058055);
     brass(x2, 0.79, z2, 0.045, 1.5, 0.045);
     block(16309669, x2, 1.58, z2, 0.51, 0.35, 0.51);
   });
+  const cushion = new T.CylinderGeometry(0.32, 0.33, 0.29, 12);
+  for (const [x2, z2] of ottomans) {
+    tint2(crop, matrix(x2, 0.055, z2, 0.82, 2, 0.82), 9861201);
+    tint2(cushion, matrix(x2, 0.24, z2, 1, 1, 1), 12429703);
+    collider(x2, floor + 0.19, z2, 0.62, 0.38, 0.62);
+  }
+  cushion.dispose();
   crop.dispose();
   led(lamp[0], 1.44, lamp[1], 0.32, 0.025, 0.32);
   collider(table[0], floor + 0.33, table[1], 0.86, 0.66, 0.55);
@@ -3967,13 +3991,13 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   for (const y of [0.43, 2.14])
     brass(east + 0.025, y, cz, 0.035, 0.032, 3.09);
   print(cells.mark, east + 0.025, 1.32, cz, 2.06, 1.48, 1, -Math.PI / 2);
-  const { x, z, width, height } = directory;
-  block(6901045, x, 1.43, z, width + 0.1, height + 0.15, 0.15);
-  print(cells.directory, x, 1.43, z - 0.083, width, height, 1, Math.PI);
+  const { x, z, width, height, yaw } = directory;
+  block(6901045, x, 1.16, z, width + 0.1, height + 0.15, 0.15, yaw);
+  print(cells.directory, x + 0.083, 1.16, z, width, height, 1, yaw);
   for (const dx of [-width / 2 - 0.045, width / 2 + 0.045])
-    led(x + dx, 1.43, z - 0.087, 0.031, height + 0.08, 0.031);
-  brass(x, 0.23, z, 1.25, 0.46, 0.13);
-  collider(x, floor + 1.31, z, width + 0.1, 2.62, 0.17);
+    led(x + 0.087, 1.16, z + dx, 0.031, height + 0.08, 0.031);
+  brass(x, 0.15, z, 0.15, 0.3, 0.96);
+  collider(x, floor + 1.08, z, 0.17, 2.16, width + 0.1);
   const front = liftLayout.roofOpening.maxX, start = liftLayout.roofOpening.minZ, end = liftLayout.roofOpening.maxZ;
   const span = (end - start) / 4, mid = (start + end) / 2;
   block(12627340, front + 0.12, 1.17, mid, 0.42, 0.56, end - start + 0.14);
@@ -6465,14 +6489,7 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       box(x, h, z + 0.23, w, 0.085, 0.5, oak);
       box(x, h - 0.04, decalHeight(z + 0.48) - 0.0175, w - 0.05, 0.035, 0.035, shopLamp);
       const featured = n === 4 && x === 0 || h === 2.07 && x < 0 && [5, 6, 7, 8, 10, 11, 12, 17].includes(n);
-      if (featured && (n === 10 || n === 11)) {
-        const pair = n === 10 ? [10040880, 2697258] : [10106426, 11881270];
-        for (const [i, colour] of pair.entries())
-          can(x + (i === 0 ? -0.59 : 0.59), h + 0.043, z + 0.29, colour, 0.064, 0.106);
-      } else if (featured && n === 12) {
-        box(x - 0.55, h + 0.167, z + 0.32, 0.113, 0.248, 0.088, white);
-        can(x + 0.55, h + 0.043, z + 0.32, cream, 0.046, 0.155);
-      } else if (!featured)
+      if (!featured)
         packageRow(x, h + 0.05, z + 0.28, Math.floor(w / 0.27), 0.25, kind2, c);
     }
   }
@@ -7979,17 +7996,17 @@ var roomDetails = {
   },
   S10: {
     file: "s10-coast-details.glb",
-    bytes: 71920,
+    bytes: 78468,
     roomDetail: true
   },
   S11: {
     file: "s11-deli-details.glb",
-    bytes: 75704,
+    bytes: 107652,
     roomDetail: true
   },
   S12: {
     file: "s12-herbarium-details.glb",
-    bytes: 33300,
+    bytes: 106468,
     roomDetail: true
   },
   S13: {
@@ -9930,21 +9947,21 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           solid("sphere", leaf % 2 ? "leaf" : "foliage", x + Math.sin(angle) * 0.2, 0.72, z + Math.cos(angle) * 0.2, 0.1, i % 4 === 0 ? 0.38 : 0.3, 0.065, angle, 0.72, "YXZ");
         }
       }
-      for (const lounge2 of atriumLayout.lounges) {
-        box("rugSand", lounge2.x, 0.01, lounge2.z, 5.8, 0.012, 7.8);
+      for (const lounge3 of atriumLayout.lounges) {
+        box("rugSand", lounge3.x, 0.01, lounge3.z, 5.8, 0.012, 7.8);
         for (const side of [-1, 1]) {
-          box("oak", lounge2.x + side * 2.84, 0.019, lounge2.z, 0.035, 0.008, 7.62);
-          box("oak", lounge2.x, 0.019, lounge2.z + side * 3.74, 5.7, 0.008, 0.035);
+          box("oak", lounge3.x + side * 2.84, 0.019, lounge3.z, 0.035, 0.008, 7.62);
+          box("oak", lounge3.x, 0.019, lounge3.z + side * 3.74, 5.7, 0.008, 0.035);
         }
-        for (const placement of seatPlacements.filter((item) => item.group === "atrium" && item.name.startsWith(lounge2.id === "west" ? "West" : "East")))
+        for (const placement of seatPlacements.filter((item) => item.group === "atrium" && item.name.startsWith(lounge3.id === "west" ? "West" : "East")))
           bench(placement);
-        const table2 = lounge2.table;
+        const table2 = lounge3.table;
         cylinder("brass", table2.x, 0.27, table2.z, 0.055, 0.5);
         cylinder("oak", table2.x, 0.53, table2.z, 0.29, 0.06);
         cylinder("brass", table2.x, 0.04, table2.z, 0.2, 0.05);
         collider(table2.x, 0.28, table2.z, 0.58, 0.56, 0.58);
         shadow(table2.x, table2.z, 1, 1);
-        for (const planter of lounge2.planters) {
+        for (const planter of lounge3.planters) {
           box("green", planter.x, 0.3, planter.z, 0.7, 0.6, 0.7, true);
           const aisle = Math.sign(atriumLayout.garden.x - planter.x);
           lightWash(planter.x + aisle * 0.354, 0.21, planter.z, 0.72, 0.52, aisle * Math.PI / 2, 0, true);
@@ -9956,8 +9973,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           lightWash(planter.x, 0.025, planter.z, 1.55, 1.55, 0, -Math.PI / 2, true);
         }
         for (const z of [22, 26]) {
-          box("glow", lounge2.x, 8.34, z, 4, 0.035, 0.065);
-          lightPool(lounge2.x, 0.025, z, 5, 4);
+          box("glow", lounge3.x, 8.34, z, 4, 0.035, 0.065);
+          lightPool(lounge3.x, 0.025, z, 5, 4);
         }
       }
     }
@@ -10541,9 +10558,10 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         lightWash(10, 0.029, z, 44, 0.028, 0, -Math.PI / 2, true);
       }
       activeDeck = true;
-      box("green", -3, liftLayout.upper + 1.23, 15.78, 9.4, 2.46, 0.16, true);
-      for (const y of [0.08, 2.4])
-        box("brass", -3, liftLayout.upper + y, 15.68, 9.48, 0.047, 0.04);
+      const band = brandRail;
+      box("wood", band.x, liftLayout.upper + band.y, band.z, band.width, band.height, band.depth, true);
+      for (const edge of [-1, 1])
+        box("brass", band.x, liftLayout.upper + band.y + edge * band.height / 2, band.z - band.depth / 2, band.width, 0.028, 0.035);
       if (upperAssets) {
         upperLevel = buildUpperLevel(T, upperAssets, { collider, lightWash });
         scene.add(upperLevel.group, upperLevel.panes);

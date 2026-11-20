@@ -19,8 +19,9 @@ class DemoTheme(HTMLParser):
             self.color = attrs.get("content")
 
 
-def outputs(root, catalog, release, resources, source_bytes):
-    template = (root / "templates/gallery/demo-sw.js").read_text(encoding="utf-8")
+def outputs(root, catalog, release, resources, source_bytes, precache_runtime):
+    template = (root / "templates/gallery/demo-sw.js").read_text(encoding="utf-8").replace(
+        "__PRECACHE_RUNTIME__", precache_runtime)
     companies = {company["id"]: company for company in catalog["companies"]}
     result = {}
     hashes = {}

@@ -17,6 +17,7 @@ import {buildPublicArchitecture} from './public-architecture.js';
 import {addOriginalShopDetails} from './shop-anchor-details-first.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
+import {brandRail} from './upper-layout.js';
 import {buildUpperLevel, loadUpperLevel, deckPlanters} from './upper-level.js';
 import {createInteriorAdditions} from './interior-additions.js';
 import {createFurnishings} from './furnishings.js';
@@ -1136,8 +1137,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }
     // The story gallery lines the south perimeter, behind the directory.
     activeDeck=true;
-    box('green',-3,liftLayout.upper+1.23,15.78,9.4,2.46,.16,true);
-    for(const y of [.08,2.40])box('brass',-3,liftLayout.upper+y,15.68,9.48,.047,.04);
+    const band=brandRail;
+    box('wood',band.x,liftLayout.upper+band.y,band.z,band.width,band.height,band.depth,true);
+    for(const edge of [-1,1])box('brass',band.x,liftLayout.upper+band.y+edge*band.height/2,
+      band.z-band.depth/2,band.width,.028,.035);
     if(upperAssets){
       upperLevel=buildUpperLevel(T,upperAssets,{collider,lightWash});
       scene.add(upperLevel.group,upperLevel.panes);

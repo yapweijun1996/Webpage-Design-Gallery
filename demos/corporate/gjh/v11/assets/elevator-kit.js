@@ -24,10 +24,13 @@ export function assembleElevatorKit(T, source, layout) {
   let vertex = 0;
   for (const y of [0,upper]) {
     for (const name of staticNodes) {
+      const upperLanding=expanded && y===upper;
+      if(upperLanding && (name==='MarbleInlay' || name==='Planters'))continue;
       const part = source.getObjectByName(name);
       // Classic has a raised courtyard mosaic with brass at +0.043 m.
       const apronOffset = !expanded && y===0 && name==='MarbleInlay' ? .045 : 0;
       const geo = part.geometry.clone().applyMatrix4(part.matrixWorld).translate(0,y+apronOffset,0);
+      if(upperLanding && name==='ElevatorSign')geo.scale(.74,1,1);
       if (name === 'FloorIndicator') displays.push([vertex, geo.attributes.uv.array.slice()]);
       parts.push(geo);
       vertex += geo.attributes.position.count;

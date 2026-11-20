@@ -1,5 +1,6 @@
 import {extrudeArtworkGutter, setupArtworkTexture} from './artwork-textures.js';
 import {decalClearance, decalMaterial} from './surface-decals.js';
+import {brandRail} from './upper-layout.js';
 
 const SLOT_COUNT = 17;
 const COLUMNS = 4;
@@ -74,9 +75,9 @@ export async function addBrandWallAtlas(T, scene, deckY, prepareModel, artworkTi
   const texture = setupArtworkTexture(T,new T.CanvasTexture(canvas),artworkTier());
   const positions = [], uvs = [], indices = [], interactables = [], records = {};
   entries.forEach((entry, index) => {
-    const column = index % COLUMNS, row = Math.floor(index / COLUMNS);
-    const x = -6.25 + column * 2.15, y = deckY + 2.16 - row * .455, z = 15.69-decalClearance;
-    const width = 2, height = .40;
+    const x = brandRail.x + ((SLOT_COUNT-1)/2-index)*brandRail.pitch;
+    const y = deckY+brandRail.y, z = brandRail.z-brandRail.depth/2-decalClearance;
+    const width = .55, height = .48;
     positions.push(x+width/2,y-height/2,z, x-width/2,y-height/2,z,
       x-width/2,y+height/2,z, x+width/2,y+height/2,z);
     const cell = cells[index];
@@ -85,7 +86,7 @@ export async function addBrandWallAtlas(T, scene, deckY, prepareModel, artworkTi
     uvs.push(left,bottom,right,bottom,right,top,left,top);
     const vertex = index * 4; indices.push(vertex,vertex+1,vertex+2,vertex,vertex+2,vertex+3);
     const id = `brand-plaque-${entry.slot}`;
-    interactables.push({id,x:x+(row-2)*.13,y:deckY,z:14.50+column*.05,radius:1.35});
+    interactables.push({id,x,y:deckY,z:brandRail.z-1.02,radius:1.35});
     records[id] = {name:entry.brand,brand:entry.brand,tagline:entry.tagline,story:entry.story,
       image:`assets/brands/${entry.slot}-${LOGO_FILES[index]}.webp`, action:'brand-story',
       kind:'Brand plaque · independent virtual mall concept',alt:`${entry.brand} logo`};

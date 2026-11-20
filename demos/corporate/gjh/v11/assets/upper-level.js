@@ -6,16 +6,16 @@ import {loadStaticAsset} from './static-asset.js';
 import {uvRect} from './signage/builder.js';
 import {atlasPx, cells, paintUpperAtlas} from './upper-level-atlas.js';
 import {decalMaterial} from './surface-decals.js';
+import {deckPlanters,directory,lounge} from './upper-layout.js';
+
+export {deckPlanters};
 
 const models = {
   bench:{id:'GJH_NEW_bench_oak',dimensions_m:[1.4,.45,.42],sha256:'064fb57f222a95e9327e2fa9ea9e111a2020dbcfc02590c6d6060a54e7570bd9'},
   lamp:{id:'GJH_NEW_lamp_floor',dimensions_m:[.6,1.7,.6],sha256:'5cb040bd1982017acc97b2d96cb80963516be67814c92cab49d816539c1581f2'},
   table:{id:'GJH_NEW_table_display',dimensions_m:[1.1,.85,.6],sha256:'30234aa8ff7d21761920ee1527f374076ded2ae2d296f6499edea2e2759d4ba9'}
 };
-// Keep the planters inside the perimeter aisle and clear of the seat exits.
-export const deckPlanters=[[-6.25,13.8],[.45,13.8],[-7,8],[.45,6.15]];
-const lamp=[-1.38,5.75],table=[-4.79,6.05];
-const directory={x:-2.96,z:13.52,width:2.46,height:2.56};
+const {lamp,table,rug,ottomans}=lounge;
 
 // Two short returns protect the sides of the threshold while the cabin is docked.
 // The lift owns all four perimeter walls, fixed shaft walls and moving west gate.
@@ -95,7 +95,7 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
       if(a<b&&c<d)tint(plane,matrix((a+b)/2,.008,(c+d)/2,b-a,d-c,1,0,-Math.PI/2),tones[(col*3+row*7)%4]);
     }
   }
-  print(cells.rug,-3.05,.022,6.27,4.87,2.23,1,0,-Math.PI/2);
+  print(cells.rug,rug.x,.022,rug.z,rug.width,rug.depth,1,0,-Math.PI/2);
   const crop=new T.CylinderGeometry(.36,.32,.053,16);
   for(const [x,z] of deckPlanters){
     const ring=new T.RingGeometry(.408,.447,24);
@@ -103,10 +103,10 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
     lightWash(x,floor+.019,z,1.72,1.72,0,-Math.PI/2);
   }
   const furnitureOffset=.024;
-  function furniture(kind,[x,z],sx,sy,sz,fallback){
+  function furniture(kind,[x,z],sx,sy,sz,fallback,yaw=0){
     const record=loadedModels[kind];
     if(!record?.primitives.length){fallback?.(x,z);return false;}
-    const pose=matrix(x,furnitureOffset,z,sx,sy,sz);
+    const pose=matrix(x,furnitureOffset,z,sx,sy,sz,yaw);
     for(const p of record.primitives)tint(p.geometry,pose.clone().multiply(p.matrix),p.material.color);
     for(const geo of new Set(record.primitives.map(p=>p.geometry)))geo.dispose();
     for(const mat of new Set(record.primitives.map(p=>p.material)))mat.dispose();
@@ -114,19 +114,19 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   }
   const seatProfiles=new Map();
   const benchProfile=(width,top,depth,seatCentre=0)=>({size:[width,top,depth],top,front:-depth/2,seatCentre});
-  function slats(x,z){
+  function slats(x,z,yaw){
     const width=2.12,centre=.46,thickness=.09,slatDepth=.103,spacing=.12;
-    for(let i=-2;i<=2;i++)block(i%2?0xa96f44:0xb98552,x,centre,z+i*spacing,width,thickness,slatDepth);
-    for(const dx of [-.78,.78])brass(x+dx,.22,z,.08,.44,.50);
+    for(let i=-2;i<=2;i++)block(i%2?0xa96f44:0xb98552,x+i*spacing,centre,z,width,thickness,slatDepth,yaw);
+    for(const dx of [-.78,.78])brass(x,.22,z+dx,.08,.44,.50,yaw);
     return benchProfile(width,centre+thickness/2,4*spacing+slatDepth);
   }
   const [benchX,benchY,benchZ]=[1.52,1.1,1.55];
-  for(const {finish,x,z} of atriumLayout.upperSeats){
-    if(finish==='oak' && furniture('bench',[x,z],benchX,benchY,benchZ)){
+  for(const {finish,x,z,yaw} of atriumLayout.upperSeats){
+    if(finish==='oak' && furniture('bench',[x,z],benchX,benchY,benchZ,null,yaw)){
       const [width,height,depth]=models.bench.dimensions_m;
       // The oak model has a narrow gap between slats at its centreline.
       seatProfiles.set(finish,benchProfile(width*benchX,furnitureOffset+height*benchY,depth*benchZ,-.04));
-    }else if(finish==='oak'||finish==='slats')seatProfiles.set(finish,slats(x,z));
+    }else if(finish==='oak'||finish==='slats')seatProfiles.set(finish,slats(x,z,yaw));
   }
   furniture('table',table,.78,.81,.92,(x,z)=>{
     block(0xb98858,x,.64,z,.86,.09,.55);
@@ -134,9 +134,18 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
     block(0x5d4938,x,.06,z,.55,.08,.37);
   });
   furniture('lamp',lamp,1,1,1,(x,z)=>{
-    tint(crop,matrix(x,.05,z,1,1,1),0x997947);
+    const baseScale=models.lamp.dimensions_m[0]/(.36*2);
+    tint(crop,matrix(x,.05,z,baseScale,1,baseScale),0x997947);
     brass(x,.79,z,.045,1.5,.045);block(0xf8dda5,x,1.58,z,.51,.35,.51);
   });
+  // Low upholstered footstools share the existing opaque furniture batch.
+  const cushion=new T.CylinderGeometry(.32,.33,.29,12);
+  for(const [x,z] of ottomans){
+    tint(crop,matrix(x,.055,z,.82,2,.82),0x967851);
+    tint(cushion,matrix(x,.24,z,1,1,1),0xbda987);
+    collider(x,floor+.19,z,.62,.38,.62);
+  }
+  cushion.dispose();
   crop.dispose();
   led(lamp[0],1.44,lamp[1],.32,.025,.32);
   collider(table[0],floor+.33,table[1],.86,.66,.55);
@@ -151,13 +160,13 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
   for(const y of [.43,2.14])brass(east+.025,y,cz,.035,.032,3.09);
   print(cells.mark,east+.025,1.32,cz,2.06,1.48,1,-Math.PI/2);
 
-  // Face the lift from the inner aisle and leave the story wall approachable.
-  const {x,z,width,height}=directory;
-  block(0x694d35,x,1.43,z,width+.10,height+.15,.15);
-  print(cells.directory,x,1.43,z-.083,width,height,1,Math.PI);
-  for(const dx of [-width/2-.045,width/2+.045])led(x+dx,1.43,z-.087,.031,height+.08,.031);
-  brass(x,.23,z,1.25,.46,.13);
-  collider(x,floor+1.31,z,width+.10,2.62,.17);
+  // A shallow sign at the west guard faces the cabin along the exit axis.
+  const {x,z,width,height,yaw}=directory;
+  block(0x694d35,x,1.16,z,width+.10,height+.15,.15,yaw);
+  print(cells.directory,x+.083,1.16,z,width,height,1,yaw);
+  for(const dx of [-width/2-.045,width/2+.045])led(x+.087,1.16,z+dx,.031,height+.08,.031);
+  brass(x,.15,z,.15,.30,.96);
+  collider(x,floor+1.08,z,.17,2.16,width+.10);
 
   // Frame the architectural shop windows across the lightwell. The former
   // sloped bridges and balcony apron ended at guards and had no public access.
