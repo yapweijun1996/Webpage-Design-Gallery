@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "Goh Joo Hin · The GJH Story Manga",
+  "short_name": "The GJH Story Manga",
+  "description": "Read the Goh Joo Hin story as a six-chapter manga. Tap panels to reveal dialogue, then open each chapter's fact check and sources.",
+  "lang": "en-SG",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#121212",
+  "background_color": "#121212",
+  "icons": [
+    {
+      "src": "../../../../assets/icons/gallery-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

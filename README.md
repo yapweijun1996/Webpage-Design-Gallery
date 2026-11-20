@@ -1,6 +1,6 @@
 # Webpage Design Gallery
 
-A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **three companies and 51 designs**. All concepts are unofficial and do not imply company endorsement.
+A company-first design exploration platform. Browse companies, enter a company collection, explore design directions, and open an independent live demo. This checkout contains **three companies and 52 designs**. All concepts are unofficial and do not imply company endorsement.
 
 The [Design System SSOT](ds.md) owns shared gallery design and UX contracts, the prioritized UI audit, cross-project reuse boundaries and acceptance criteria. Its version 1.0.0 tracks the executable token/icon registry, gallery adoption and remaining verification. Run `python scripts/check_ssot.py` to check generated artifacts and prevent new design-system debt.
 
@@ -16,7 +16,7 @@ The [company shortlist](docs/next-company-demo.md) compares three Singapore demo
 
 | Company | Concepts | Start here |
 | --- | ---: | --- |
-| Goh Joo Hin | 21 | [Company collection](companies/gjh/index.html) |
+| Goh Joo Hin | 22 | [Company collection](companies/gjh/index.html) |
 | Yeo Hiap Seng | 15 | [Compare the official pack sizes of any two of six drinks](demos/food-beverage/yeos/v1/index.html#compare) |
 | Thow Kwang Pottery Jungle | 15 | [Inside the Dragon Kiln](demos/heritage/thow-kwang/v1/index.html) · [Visitor research and design index](demos/heritage/thow-kwang/README.md) |
 
@@ -24,11 +24,13 @@ The [New Moon Product Wall edition](demos/corporate/gjh/v23/index.html) opens wi
 
 The [Luxury Digital Experience edition](demos/corporate/gjh/v24/index.html) is a six-page black-and-champagne-gold corporate site: Home, About, a filterable brand directory, Business, a Virtual World entrance that loads the 3D mall only on request, and an accessible enquiry form. See its [design notes](docs/gjh-v24/design-notes.md).
 
+Read six manga chapters in [The GJH Story Manga edition](demos/corporate/gjh/v25/index.html) in English, Mandarin or Malay. Dialogue appears by itself as each chapter scrolls into view, and each chapter's fact check lists its sources. The five-part [story research](docs/gjh-story/README.md) behind it labels every claim CONFIRMED, REPORTED or UNVERIFIED.
+
 Each concept has its own install identity. The [demo PWA guide](docs/company-demo-pwas.md) covers offline content, update controls and device verification.
 
 ## Landing page ideas and review tools
 
-The [landing style atlas](https://yapweijun1996.github.io/Webpage-Design-Gallery/style-atlas/) pairs the 51 demos with 65 visual references. The [GitHub image index](style-atlas/README.md) links each WebP to its edition. Every live demo links back to its primary reference. In **1.4.0**, the [46-page visual audit](docs/landing-atlas/anchor-audit.md) pairs each mockup with before-and-after desktop and phone captures. The [GJH visitor arrivals board](demos/corporate/gjh/v11/index.html) offers a direct [product directory](demos/corporate/gjh/v11/index.html#featured-heading) and a separate [3D mall entrance](demos/corporate/gjh/v11/index.html#experience).
+The [landing style atlas](https://yapweijun1996.github.io/Webpage-Design-Gallery/style-atlas/) pairs the 52 demos with 66 visual references. The [GitHub image index](style-atlas/README.md) links each WebP to its edition. Every live demo links back to its primary reference. In **1.4.0**, the [46-page visual audit](docs/landing-atlas/anchor-audit.md) pairs each mockup with before-and-after desktop and phone captures. The [GJH visitor arrivals board](demos/corporate/gjh/v11/index.html) offers a direct [product directory](demos/corporate/gjh/v11/index.html#featured-heading) and a separate [3D mall entrance](demos/corporate/gjh/v11/index.html#experience).
 
 The [design directions](docs/landing-design-directions.md) describe the first screen and primary visitor action for every edition. Each collection offers two task-based entrances alongside the official company link. The [local review skill](.agents/skills/gallery-landing-review/SKILL.md) and [before/after tool](scripts/review_landings.py) support future revisions.
 
