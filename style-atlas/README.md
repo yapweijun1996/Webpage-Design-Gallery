@@ -6,7 +6,7 @@ Every published edition has one primary mockup. Alternate directions propose ano
 
 ## Goh Joo Hin
 
-[See all 28 references together](sheets/gjh.webp)
+[See all 29 references together](sheets/gjh.webp)
 
 | Edition | Art direction | Image | Live demo |
 | --- | --- | --- | --- |
@@ -38,6 +38,7 @@ Every published edition has one primary mockup. Alternate directions propose ano
 | V16 · alternate | Packaging proof sheet | [Open WebP](images/gjh/pack-label-proof.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v16/index.html) |
 | V17 · alternate | Tabletop menu card | [Open WebP](images/gjh/sunday-menu-card.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v17/index.html) |
 | V11 · alternate | Stockroom drawer catalogue | [Open WebP](images/gjh/newmoon-drawer.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v11/index.html) |
+| V28 · primary | Distribution desk with wayfinding plaques | [Open WebP](images/gjh/distribution-desk.webp) | [Open demo](https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/gjh/v28/index.html) |
 
 ## Thow Kwang Pottery Jungle
 

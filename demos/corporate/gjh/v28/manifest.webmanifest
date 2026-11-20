@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "Goh Joo Hin · The Distribution Desk",
+  "short_name": "The Distribution Desk",
+  "description": "Explore Goh Joo Hin’s brands by category and prepare a brief for a distribution enquiry.",
+  "lang": "en-SG",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#214337",
+  "background_color": "#214337",
+  "icons": [
+    {
+      "src": "../../../../assets/icons/gallery-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

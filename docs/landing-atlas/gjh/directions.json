@@ -194,5 +194,12 @@
     "composition": "ticket", "background": "#e9e2cb", "ink": "#333a28", "accent": "#5d663d",
     "notes": "Begin the mall visit at the result of its product shortcut. Treat each origin as a drawer label with the pack’s photograph above, and keep the wayfinding link at the foot of the directory.",
     "detail": "Browse four New Moon packs in the mall directory.", "items": ["Australia · 425 g", "Mexico · 454 g", "All four packs"]
+  },
+  {
+    "key": "distribution-desk", "version": "v28", "kind": "primary", "style": "Distribution desk with wayfinding plaques",
+    "headline": "Good things. Every day. Connected.", "action": "Business enquiries", "image": "demos/corporate/gjh/v28/assets/family-lifestyle-1200.jpg",
+    "composition": "poster", "background": "#faf9f6", "ink": "#272326", "accent": "#a20c3b",
+    "notes": "The desktop capture shows a split hero with the official GJH lifestyle image, three green wayfinding plaques for Food, Electronics and Health & Nutrition, and three quick routes to enquiries, the e-shop and careers.",
+    "detail": "Choose a division, filter the brand shelf, then prepare an enquiry brief for the official contact page.", "items": ["Food", "Electronics", "Health & Nutrition"]
   }
 ]

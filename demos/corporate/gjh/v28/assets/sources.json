@@ -1,0 +1,150 @@
+{
+  "sourcePathBase": "Repository root",
+  "canonicalManifest": "assets/companies/gjh/official/manifest.json",
+  "heroMaster": {
+    "sourcePath": "demos/corporate/gjh/v1/assets/family-lifestyle.jpg",
+    "sha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623"
+  },
+  "assets": [
+    {
+      "file": "family-lifestyle-480.webp",
+      "sourcePath": "demos/corporate/gjh/v1/assets/family-lifestyle-480.webp",
+      "sourceSha256": "eca7ad6afdcf1feb89cb4e51b00088fb24ab2744deb33277c90cd4bf65d95c25",
+      "sha256": "eca7ad6afdcf1feb89cb4e51b00088fb24ab2744deb33277c90cd4bf65d95c25",
+      "bytes": 15008,
+      "width": 480,
+      "height": 212
+    },
+    {
+      "file": "family-lifestyle-480.jpg",
+      "sourcePath": "demos/corporate/gjh/v1/assets/family-lifestyle-480.jpg",
+      "sourceSha256": "84a05dc7daf58fbab1e680872c2d1146f62ed7013c35332c7a9ca41bc836f914",
+      "sha256": "84a05dc7daf58fbab1e680872c2d1146f62ed7013c35332c7a9ca41bc836f914",
+      "bytes": 22190,
+      "width": 480,
+      "height": 212
+    },
+    {
+      "file": "family-lifestyle-768.webp",
+      "sourcePath": "demos/corporate/gjh/v1/assets/family-lifestyle-768.webp",
+      "sourceSha256": "4380fedd48ffbf0a727ea47da498fe29c3f617428cfcf485a35ec944e5ad995f",
+      "sha256": "4380fedd48ffbf0a727ea47da498fe29c3f617428cfcf485a35ec944e5ad995f",
+      "bytes": 28252,
+      "width": 768,
+      "height": 340
+    },
+    {
+      "file": "family-lifestyle-768.jpg",
+      "sourcePath": "demos/corporate/gjh/v1/assets/family-lifestyle-768.jpg",
+      "sourceSha256": "fcca913f76bd35f5b2377fb43e23a35a7f7e463b45ec1921539628d04a965a5f",
+      "sha256": "fcca913f76bd35f5b2377fb43e23a35a7f7e463b45ec1921539628d04a965a5f",
+      "bytes": 46485,
+      "width": 768,
+      "height": 340
+    },
+    {
+      "file": "family-lifestyle-1200.webp",
+      "sourcePath": "demos/corporate/gjh/v1/assets/family-lifestyle-1200.webp",
+      "sourceSha256": "6340a20664a77b537387e55b6a7a3f583277c87991c55621899d01b184f49d2a",
+      "sha256": "6340a20664a77b537387e55b6a7a3f583277c87991c55621899d01b184f49d2a",
+      "bytes": 53824,
+      "width": 1200,
+      "height": 531
+    },
+    {
+      "file": "family-lifestyle-1200.jpg",
+      "sourcePath": "demos/corporate/gjh/v1/assets/family-lifestyle-1200.jpg",
+      "sourceSha256": "e122ec72727eefce0c0332839f48ab549dd691276ca7fbbc3ba26255eb55b109",
+      "sha256": "e122ec72727eefce0c0332839f48ab549dd691276ca7fbbc3ba26255eb55b109",
+      "bytes": 94289,
+      "width": 1200,
+      "height": 531
+    },
+    {
+      "file": "family-lifestyle-1920.webp",
+      "sourcePath": "demos/corporate/gjh/v1/assets/family-lifestyle-1920.webp",
+      "sourceSha256": "a17b84016d2ccd9665af64b528f1123359201b07b521af83cbbdf93187d0f0dd",
+      "sha256": "a17b84016d2ccd9665af64b528f1123359201b07b521af83cbbdf93187d0f0dd",
+      "bytes": 99424,
+      "width": 1920,
+      "height": 850
+    },
+    {
+      "file": "gjh-logo.webp",
+      "sourcePath": "assets/companies/gjh/official/gjh-logo.png",
+      "sourceSha256": "25202d0cb3e5650a62050353d13cb608823a0320f2961b4f5143ccc55ad47b50",
+      "sha256": "618304d48d73acaa86a7ecdd4d63b2a7bf6509205279389f8c16f57cc1386f98",
+      "bytes": 12664,
+      "width": 167,
+      "height": 73
+    },
+    {
+      "file": "brand-new-moon.webp",
+      "sourcePath": "assets/companies/gjh/official/new-moon-brand-cover.jpg",
+      "sourceSha256": "8295ae806f3c8272c0134c1b35561c28fb17b51dfcb71d51fe451c57f669bbf8",
+      "sha256": "9f77e63ce7cfbbcb9967635d51bc37e714aada135cb87641427ec88316e569c4",
+      "bytes": 42524,
+      "width": 438,
+      "height": 438
+    },
+    {
+      "file": "brand-mili.webp",
+      "sourcePath": "assets/companies/gjh/official/mili-brand-cover.jpg",
+      "sourceSha256": "b5d43fcc03b4e36c0a238b3ff0dbe487b667517574adc53520b850b9da881f39",
+      "sha256": "65d5eeecd2c7e22a077df16242bd7065f04b4f8a6760406c1bd0ed60fdbd3bac",
+      "bytes": 41706,
+      "width": 500,
+      "height": 500
+    },
+    {
+      "file": "brand-gogo.webp",
+      "sourcePath": "assets/companies/gjh/official/gogo-brand-cover.jpg",
+      "sourceSha256": "0e9c6bbc12a847d04566fb2add4e8edb6d2bc6de0d564e0ec1abca0d52983380",
+      "sha256": "0b5cc74f4ba8de9d200a883f4828268d7015db4bbb07aa434bab3f985e0440d8",
+      "bytes": 22578,
+      "width": 438,
+      "height": 438
+    },
+    {
+      "file": "brand-borsch-med.webp",
+      "sourcePath": "assets/companies/gjh/official/borsch-med-logo.jpg",
+      "sourceSha256": "1135d2beb38992b84dd12a898789532c2679eddc772eb1396dd6e60b0e8d4d07",
+      "sha256": "89deb904b1a46459645fb19c77612ec5ebbe09813558949082db7d00dd4b365d",
+      "bytes": 4046,
+      "width": 319,
+      "height": 170
+    },
+    {
+      "file": "history-composite.webp",
+      "sourcePath": "assets/companies/gjh/official/gjh-history-composite.jpg",
+      "sourceSha256": "89a674fd19460ffae08b7863193e0d7fec80e83101a5c865a98e3ebf1bfd00c6",
+      "sha256": "b56d77a6a952cf72bf6ac47a02077109f49bfe952172734298a57b013f917110",
+      "bytes": 22926,
+      "width": 550,
+      "height": 240
+    },
+    {
+      "file": "thumbnail.webp",
+      "sourcePath": "demos/corporate/gjh/v1/assets/family-lifestyle.jpg",
+      "sourceSha256": "4bfaf4eecb987fcac91135fe2a7646afc95a7f30555c516412eee84165ef1623",
+      "sha256": "4e12e7b42c7508707d61407002a58d546d0d926b83c0b7434bfa4dbdc805d6a6",
+      "bytes": 73596,
+      "width": 1200,
+      "height": 630
+    },
+    {
+      "file": "manrope-latin.woff2",
+      "sourcePath": "demos/corporate/gjh/v1/assets/manrope-latin.woff2",
+      "sourceSha256": "8c2def024c1bf31aacf3624ae3c4d701269b4ec3dc765c04830839f0d36b2d9e",
+      "sha256": "8c2def024c1bf31aacf3624ae3c4d701269b4ec3dc765c04830839f0d36b2d9e",
+      "bytes": 24532
+    },
+    {
+      "file": "OFL-Manrope.txt",
+      "sourcePath": "demos/corporate/gjh/v1/assets/OFL-Manrope.txt",
+      "sourceSha256": "58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b",
+      "sha256": "58172e0c0fac2cda8a37b348164bb55e44b0e69051e557e92b1d3f6910141f7b",
+      "bytes": 4387
+    }
+  ]
+}

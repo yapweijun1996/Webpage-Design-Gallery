@@ -21,7 +21,7 @@ class GalleryTests(unittest.TestCase):
     def test_real_companies_contain_their_own_versions(self):
         catalog = gallery.load_catalog()
         versions = [d["version"] for d in catalog["designs"] if d["companyId"] == "gjh"]
-        self.assertEqual(versions, ["v1", *(f"v{number}" for number in range(5, 28))])
+        self.assertEqual(versions, ["v1", *(f"v{number}" for number in range(5, 29))])
         self.assertEqual({c["id"] for c in catalog["companies"]}, {"gjh", "yeos", "thow-kwang"})
         for company in catalog["companies"]:
             designs = [d for d in catalog["designs"] if d["companyId"] == company["id"]]

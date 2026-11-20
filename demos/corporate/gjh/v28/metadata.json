@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - The Distribution Desk",
+  "version": "v28",
+  "designStyle": "An editorial landing page with a lifestyle hero, wayfinding plaques, a filterable brand shelf and a trade enquiry checklist.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v28/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v28",
+  "companyId": "gjh",
+  "displayTitle": "The Distribution Desk",
+  "summary": "Explore Goh Joo Hin’s brands by category and prepare a brief for a distribution enquiry.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 250
+}

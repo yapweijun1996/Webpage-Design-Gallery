@@ -930,6 +930,45 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "gjh-v28",
+    "companyId": "gjh",
+    "slug": "v28",
+    "version": "v28",
+    "title": "The Distribution Desk",
+    "description": "Explore Goh Joo Hin’s brands by category and prepare a brief for a distribution enquiry.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 250,
+    "demoPath": "demos/corporate/gjh/v28/index.html",
+    "thumbnail": "demos/corporate/gjh/v28/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/gjh/v28/screenshots/1440.png",
+        "width": 1440,
+        "height": 2604
+      },
+      "tablet": {
+        "path": "demos/corporate/gjh/v28/screenshots/768.png",
+        "width": 768,
+        "height": 3531
+      },
+      "mobile": {
+        "path": "demos/corporate/gjh/v28/screenshots/390.png",
+        "width": 780,
+        "height": 10120
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",
