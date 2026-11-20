@@ -53,7 +53,7 @@ function createExpandedElevator(T,R,physics,scene,motion) {
   function geometry(kind,x,y,z,sx,sy,sz) {
     const g=new T.BoxGeometry(sx,sy,sz).toNonIndexed();g.translate(x,y,z);
     const n=g.attributes.position.count,c=palette[kind],colors=new Float32Array(n*3),surface=new Float32Array(n*2);
-    for(let i=0;i<n;i++){colors.set([c.r,c.g,c.b],i*3);surface.set(kind==='rail'?[.35,.55]:[.8,0],i*2);}
+    for(let i=0;i<n;i++){colors.set([c.r,c.g,c.b],i*3);surface.set(kind==='rail'?[.35,.55]:kind==='stone'?[.28,.16]:[.8,0],i*2);}
     g.setAttribute('color',new T.BufferAttribute(colors,3));g.setAttribute('obSurface',new T.BufferAttribute(surface,2));return g;
   }
   function collider(x,y,z,sx,sy,sz) {return physics.createCollider(R.ColliderDesc.cuboid(sx/2,sy/2,sz/2).setTranslation(x,y,z));}

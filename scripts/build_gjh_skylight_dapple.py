@@ -11,8 +11,8 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 SIZE = 512
 TILES = 4
 PANES_X, PANES_Z = 10, 5
-SUN = (255, 244, 220)
-MAX_ALPHA = 42
+SUN = (255, 229, 183)
+MAX_ALPHA = 49
 OUTPUT = (Path(__file__).resolve().parents[1]
           / 'demos/corporate/gjh/v11/assets/mall-skylight-dapple-512.png')
 
@@ -36,7 +36,7 @@ def build():
                 for dy in (-SIZE, 0, SIZE):
                     draw.ellipse((round(x + dx - length), round(y + dy - width),
                                   round(x + dx + length), round(y + dy + width)), fill=255)
-    mask = mask.filter(ImageFilter.GaussianBlur(6.5))
+    mask = mask.filter(ImageFilter.GaussianBlur(2.1))
     tile = mask.crop((margin, margin, margin + SIZE, margin + SIZE))
     tiled = Image.new('L', (SIZE, SIZE))
     for row in range(TILES):
@@ -66,8 +66,8 @@ def build():
             draw.polygon([(x + .20 * (y - SIZE/2), y) for x, y in
                           [(left+5, top+6), (right-5, top+6),
                            (right-5, bottom-6), (left+5, bottom-6)]], fill=255)
-    panes = panes.filter(ImageFilter.GaussianBlur(3.0))
-    dapple = tiled.point(lambda value: round(MAX_ALPHA * (1 - .78 * value / 255)))
+    panes = panes.filter(ImageFilter.GaussianBlur(.85))
+    dapple = tiled.point(lambda value: round(MAX_ALPHA * (1 - .47 * value / 255)))
     sunlight = Image.new('RGBA', (SIZE, SIZE), SUN)
     sunlight.putalpha(ImageChops.multiply(ImageChops.multiply(panes, dapple), envelope))
     return sunlight

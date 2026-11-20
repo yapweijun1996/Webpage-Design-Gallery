@@ -280,6 +280,19 @@ test('bundled world starts and submits expanded Low, Balanced and Detailed frame
   const ceiling=world.scene.getObjectByName(ceilingName);
   assert.equal(new T.Raycaster(new T.Vector3(liftLayout.x,7.3,liftLayout.z),new T.Vector3(0,1,0))
     .intersectObject(ceiling).length,0,'atlas geometry must keep the roof opening');
+  world.scene.updateMatrixWorld(true);
+  const paving = world.scene.getObjectByName('Mall ivory marble paving');
+  assert.ok(paving.isInstancedMesh && paving.count === 1);
+  assert.ok(paving.material.roughness >= .22 && paving.material.roughness <= .30);
+  const deckRay = (x,z) => new T.Raycaster(new T.Vector3(x,liftLayout.upper+.5,z),
+    new T.Vector3(0,-1,0),0,1).intersectObject(paving);
+  assert.equal(deckRay(liftLayout.x,liftLayout.z).length,0,'marble must leave the lift shaft open');
+  assert.ok(deckRay(liftLayout.slab.minX+.3,liftLayout.slab.minZ+.3).length,
+    'the upper deck uses the public marble batch');
+  const sky = world.scene.getObjectByName('Atrium daylight glazing');
+  assert.ok(new T.Raycaster(new T.Vector3(-3,8,10),new T.Vector3(0,1,0))
+    .intersectObject(sky).length,'the canopy texture faces the mall');
+
   assert.equal(textureRequests.filter(url=>url.includes('mall-light-ao')).length,2);
   assert.equal(textureRequests.filter(url=>url.includes('mall-skylight-dapple-512.png')).length,1);
 });

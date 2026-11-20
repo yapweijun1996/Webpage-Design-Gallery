@@ -48,9 +48,9 @@ function addAtriumSkylight(T, scene, {minX,maxX,minZ,maxZ}) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
   const sky = ctx.createLinearGradient(0,0,size,size);
-  sky.addColorStop(0,'#c5dde4');
-  sky.addColorStop(.58,'#e5eff0');
-  sky.addColorStop(1,'#fff0cf');
+  sky.addColorStop(0,'#85bde1');
+  sky.addColorStop(.54,'#c5e7fa');
+  sky.addColorStop(1,'#f5f9f6');
   ctx.fillStyle = sky;
   ctx.fillRect(0,0,size,size);
 
@@ -58,13 +58,13 @@ function addAtriumSkylight(T, scene, {minX,maxX,minZ,maxZ}) {
   // branches frame the clear panes instead of repeating at every roof rib.
   let seed = 271;
   const random = () => ((seed = Math.imul(1664525,seed) + 1013904223 | 0) >>> 0) / 4294967296;
-  const leaves = ['#68765b','#83916a','#9da379','#b5b894'];
+  const leaves = ['#536047','#667559','#899770','#a6a683'];
   function bough(x,y,length,angle,depth) {
     const tipX = x + Math.cos(angle)*length, tipY = y + Math.sin(angle)*length;
     ctx.beginPath();
     ctx.moveTo(x,y);
     ctx.lineTo(tipX,tipY);
-    ctx.strokeStyle = '#6d7057';
+    ctx.strokeStyle = '#5e614d';
     ctx.lineWidth = depth*1.25;
     ctx.lineCap = 'round';
     ctx.stroke();
@@ -81,10 +81,11 @@ function addAtriumSkylight(T, scene, {minX,maxX,minZ,maxZ}) {
   }
   bough(-8,200,53,-.91,4);
   bough(261,52,46,2.4,4);
-  bough(165,259,38,-2.11,3);
+  bough(165,259,50,-2.11,4);
+  bough(80,-7,38,1.18,3);
   const sheen = ctx.createLinearGradient(0,size,size,0);
   sheen.addColorStop(0,'rgba(255,249,230,0)');
-  sheen.addColorStop(.53,'rgba(255,249,230,.23)');
+  sheen.addColorStop(.53,'rgba(255,253,244,.30)');
   sheen.addColorStop(.83,'rgba(255,249,230,0)');
   ctx.fillStyle = sheen;
   ctx.fillRect(0,0,size,size);
@@ -248,7 +249,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   async function setPavingMap(map) {
     const material = materials.paving.clone();
     material.map = map;
-    const sample = new T.InstancedMesh(geometry.box, material, 1);
+    material.color.set(0xf8f5f1);
+    const sample = new T.InstancedMesh(geometry.paving, material, 1);
     try {
       await prepareModel?.(sample);
       // A graphics tier can change while the mapped material is warming.
@@ -443,8 +445,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }
     if (new URLSearchParams(location.search).get('tram') === 'debug') shopLodUpdates.push(addTramDebug(T, scene));
     shopLodUpdates.push(buildPublicArchitecture(T, {scene, materials, geometry, box, solid, lightPool, lightWash, garden:atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, artworkTier, daylightSkylight:expandedLift, setCanopyMaterial: material => { finishMaterials.canopy = material; }}));
-    // Leave headroom for daylight and warm spill on the public stone.
-    materials.paving.color.set(0xc6b8a5);
     if (expandedLift) addAtriumSkylight(T,scene,liftLayout.roofOpening);
   } else {
     // Classic GLBs, fallback/caps and original aggregate proxies share one layout.
@@ -1193,10 +1193,18 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         return () => physics.removeCollider(box,false);
       }
     });
-    // Contact decals follow the authored furniture footprints and share the
-    // public contact batch. Keep them hidden until their room is installed.
+    // Shop focus pools share the public light wash. Contact decals follow
+    // the authored furniture footprints in the existing contact batch.
     for (const [id,store] of Object.entries(interiorStores)) {
       activeShopSlot = Number(id.slice(1));
+      const [fx,,fz] = store.ambient.focus;
+      const [standingX,standingZ] = store.anchor.standing;
+      const floorY = Math.max(.036,store.floor.position_m[1]+.012);
+      const [px,py,pz] = worldInteriorPoint(store,[(fx+standingX)/2,floorY,(fz+standingZ)/2]);
+      const width = id === 'S01' ? 7.8 : 3.25;
+      const intensity = id === 'S03' ? 1.10 : 1.42;
+      lightWash(px,py,pz,width,2.75,store.frame.yaw_world_deg*Math.PI/180,-Math.PI/2,
+        activeShopSlot,id === 'S01' ? 0xffe1b6 : 0xffe8c3,intensity);
       if (id === 'S04') {
         for (const [storyId, [x, z]] of [
           ['borsch-patch-story', store.anchor.standing],
@@ -1210,7 +1218,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         interactables.push({id:'pzh-carton-story',x,z,radius:1.0});
       } else if (shopCatalogueFocals[id]) {
         const exhibit = shopCatalogueFocals[id];
-        const [standingX,standingZ] = store.anchor.standing;
         const [x,,z] = worldInteriorPoint(store,[standingX,0,standingZ]);
         const plaque = sign(exhibit.caption,...worldInteriorPoint(store,exhibit.panel),1.02,.15,true,65);
         plaque.rotation.y = store.frame.yaw_world_deg*Math.PI/180;
@@ -1305,6 +1312,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     if (batch.material === contact) mesh.name = 'Mall contact shadows';
     if (batch.material === materials.lightPool) mesh.name = 'Mall floor and wall light pools';
     if (batch.material === materials.paving) {
+      mesh.name = 'Mall ivory marble paving';
       pavingMesh = mesh;
       if (mappedPaving) mesh.material = mappedPaving;
     }

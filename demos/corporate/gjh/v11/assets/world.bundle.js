@@ -1687,6 +1687,80 @@ var atriumLayout = Object.freeze({
 });
 
 // demos/corporate/gjh/v11/assets/public-architecture.js
+import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
+
+// demos/corporate/gjh/v11/assets/lift-layout.js
+var freeze = (value) => {
+  if (value && typeof value === "object") {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+  return value;
+};
+var liftLayout = freeze({
+  x: -3,
+  z: 10,
+  upper: 7.2,
+  shaft: { minX: -5, maxX: -1, minZ: 8, maxZ: 12 },
+  slab: { minX: -9, maxX: 3, minZ: 4, maxZ: 16 },
+  roofOpening: { minX: -16, maxX: 10, minZ: -3, maxZ: 23 },
+  cabin: { width: 3.2, depth: 3.2 },
+  threshold: { minX: -5, maxX: -4.6, minZ: 9, maxZ: 11 },
+  exit: { x: -6.4, z: 10 },
+  radius: 1.15,
+  directory: { x: -5, z: 45 },
+  desk: { x: 25, z: 45 },
+  showcase: { x: -7, z: 18 },
+  facilities: { ...restroomParcel, status: "open" }
+});
+var shaftFinish = Object.freeze({
+  west: liftLayout.shaft.minX - 0.27,
+  east: liftLayout.shaft.maxX + 0.18,
+  north: liftLayout.shaft.minZ - 0.11,
+  south: liftLayout.shaft.maxZ + 0.11,
+  height: 3.84
+});
+var shaft = liftLayout.shaft;
+var upperCameraBoundary = [{
+  min: { x: shaftFinish.west - 0.12, y: liftLayout.upper, z: shaftFinish.north - 0.04 },
+  max: { x: shaftFinish.east + 0.05, y: Infinity, z: shaftFinish.south + 0.04 }
+}];
+var cabinCameraBounds = [];
+var { x: carX, z: carZ, upper: carFloor, cabin } = liftLayout;
+var halfW = cabin.width / 2;
+var halfD = cabin.depth / 2;
+function carBound(x0, z0, x1, z1, bottom, top) {
+  cabinCameraBounds.push({ min: { x: x0, y: carFloor + bottom, z: z0 }, max: { x: x1, y: carFloor + top, z: z1 } });
+}
+for (const side of [-1, 1]) {
+  const z = carZ + side * (halfD - 0.1);
+  carBound(carX - halfW, z, carX + halfW, z, 0, 2.92);
+}
+carBound(carX + halfW - 0.1, carZ - halfD, carX + halfW - 0.1, carZ + halfD, 0, 2.92);
+carBound(carX - halfW, carZ - halfD, carX + halfW, carZ + halfD, 2.84, 2.92);
+function cutRectangle(rect, hole) {
+  const x0 = Math.max(rect.minX, hole.minX), x1 = Math.min(rect.maxX, hole.maxX);
+  const z0 = Math.max(rect.minZ, hole.minZ), z1 = Math.min(rect.maxZ, hole.maxZ);
+  if (x0 >= x1 || z0 >= z1)
+    return [{ ...rect }];
+  return [
+    { minX: rect.minX, maxX: x0, minZ: rect.minZ, maxZ: rect.maxZ },
+    { minX: x1, maxX: rect.maxX, minZ: rect.minZ, maxZ: rect.maxZ },
+    { minX: x0, maxX: x1, minZ: rect.minZ, maxZ: z0 },
+    { minX: x0, maxX: x1, minZ: z1, maxZ: rect.maxZ }
+  ].filter((r) => r.maxX > r.minX && r.maxZ > r.minZ);
+}
+function showcaseProducts(items, expanded) {
+  if (!expanded)
+    return items;
+  return items.map((item) => ({ ...item, position: [
+    liftLayout.showcase.x + item.position[0] + 7,
+    item.position[1],
+    liftLayout.showcase.z + item.position[2] - 2.2
+  ] }));
+}
+
+// demos/corporate/gjh/v11/assets/public-architecture.js
 function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, lightPool, lightWash, garden, prepareModel, setPavingMap, ceilingBounds, daylightSkylight = false, setCanopyMaterial, artworkTier = () => "low" }) {
   const timber = "vaultOak";
   materials.vaultOak = materials.oak.clone();
@@ -1748,16 +1822,27 @@ function buildPublicArchitecture(T, { scene, materials, geometry, box, solid, li
       }
     }
   }
-  materials.paving = new T.MeshStandardMaterial({ color: 13483950, roughness: 0.34, metalness: 0.09 });
-  const pavingURL = new URL("concourse-limestone.webp", import.meta.url);
+  materials.paving = new T.MeshStandardMaterial({ color: 14604494, roughness: 0.28, metalness: 0.16 });
+  const stone = [new T.BoxGeometry(49.85, 0.002, 47.85).translate(10, -0.013, 24)];
+  if (daylightSkylight)
+    for (const { minX, maxX, minZ, maxZ } of cutRectangle(liftLayout.slab, liftLayout.shaft)) {
+      stone.push(new T.PlaneGeometry(maxX - minX, maxZ - minZ).rotateX(-Math.PI / 2).translate((minX + maxX) / 2, liftLayout.upper + 0.008, (minZ + maxZ) / 2));
+    }
+  for (const part of stone) {
+    const { position, uv } = part.attributes;
+    for (let i = 0;i < uv.count; i++)
+      uv.setXY(i, position.getX(i) / 3.2, -position.getZ(i) / 3.2);
+  }
+  geometry.paving = mergeGeometries2(stone);
+  stone.forEach((part) => part.dispose());
+  solid("paving", "paving", 0, 0, 0, 1, 1, 1);
+  const pavingURL = new URL("concourse-marble.webp", import.meta.url);
   new T.TextureLoader().load(pavingURL.href, (map) => {
     map.colorSpace = T.SRGBColorSpace;
     map.wrapS = map.wrapT = T.RepeatWrapping;
-    map.repeat.set(12.5, 12);
     map.anisotropy = 4;
     setPavingMap(map);
   }, undefined, () => {});
-  box("paving", 10, -0.013, 24, 49.85, 0.002, 47.85);
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 384;
   const ctx = canvas.getContext("2d");
@@ -2181,77 +2266,6 @@ function galleryFixture(slot, socket, file, scale = 1, onTop = false) {
 
 // demos/corporate/gjh/v11/assets/interiors/mili-seats.js
 var shopBenches = { mili: [{ xyz: [-2.7, 0, -0.8], yawDeg: -120, exit: [-1.66077, -0.2] }, { xyz: [3.05, 0, -1.85], yawDeg: 135, exit: [2.201472, -1.001472] }], gogo: [{ xyz: [-3, 0, -0.8], yawDeg: -165, exit: [-2.689417, 0.359111] }, { xyz: [3.35, 0, -1.05], yawDeg: 120, exit: [2.31077, -0.45] }] };
-
-// demos/corporate/gjh/v11/assets/lift-layout.js
-var freeze = (value) => {
-  if (value && typeof value === "object") {
-    Object.values(value).forEach(freeze);
-    Object.freeze(value);
-  }
-  return value;
-};
-var liftLayout = freeze({
-  x: -3,
-  z: 10,
-  upper: 7.2,
-  shaft: { minX: -5, maxX: -1, minZ: 8, maxZ: 12 },
-  slab: { minX: -9, maxX: 3, minZ: 4, maxZ: 16 },
-  roofOpening: { minX: -16, maxX: 10, minZ: -3, maxZ: 23 },
-  cabin: { width: 3.2, depth: 3.2 },
-  threshold: { minX: -5, maxX: -4.6, minZ: 9, maxZ: 11 },
-  exit: { x: -6.4, z: 10 },
-  radius: 1.15,
-  directory: { x: -5, z: 45 },
-  desk: { x: 25, z: 45 },
-  showcase: { x: -7, z: 18 },
-  facilities: { ...restroomParcel, status: "open" }
-});
-var shaftFinish = Object.freeze({
-  west: liftLayout.shaft.minX - 0.27,
-  east: liftLayout.shaft.maxX + 0.18,
-  north: liftLayout.shaft.minZ - 0.11,
-  south: liftLayout.shaft.maxZ + 0.11,
-  height: 3.84
-});
-var shaft = liftLayout.shaft;
-var upperCameraBoundary = [{
-  min: { x: shaftFinish.west - 0.12, y: liftLayout.upper, z: shaftFinish.north - 0.04 },
-  max: { x: shaftFinish.east + 0.05, y: Infinity, z: shaftFinish.south + 0.04 }
-}];
-var cabinCameraBounds = [];
-var { x: carX, z: carZ, upper: carFloor, cabin } = liftLayout;
-var halfW = cabin.width / 2;
-var halfD = cabin.depth / 2;
-function carBound(x0, z0, x1, z1, bottom, top) {
-  cabinCameraBounds.push({ min: { x: x0, y: carFloor + bottom, z: z0 }, max: { x: x1, y: carFloor + top, z: z1 } });
-}
-for (const side of [-1, 1]) {
-  const z = carZ + side * (halfD - 0.1);
-  carBound(carX - halfW, z, carX + halfW, z, 0, 2.92);
-}
-carBound(carX + halfW - 0.1, carZ - halfD, carX + halfW - 0.1, carZ + halfD, 0, 2.92);
-carBound(carX - halfW, carZ - halfD, carX + halfW, carZ + halfD, 2.84, 2.92);
-function cutRectangle(rect, hole) {
-  const x0 = Math.max(rect.minX, hole.minX), x1 = Math.min(rect.maxX, hole.maxX);
-  const z0 = Math.max(rect.minZ, hole.minZ), z1 = Math.min(rect.maxZ, hole.maxZ);
-  if (x0 >= x1 || z0 >= z1)
-    return [{ ...rect }];
-  return [
-    { minX: rect.minX, maxX: x0, minZ: rect.minZ, maxZ: rect.maxZ },
-    { minX: x1, maxX: rect.maxX, minZ: rect.minZ, maxZ: rect.maxZ },
-    { minX: x0, maxX: x1, minZ: rect.minZ, maxZ: z0 },
-    { minX: x0, maxX: x1, minZ: z1, maxZ: rect.maxZ }
-  ].filter((r) => r.maxX > r.minX && r.maxZ > r.minZ);
-}
-function showcaseProducts(items, expanded) {
-  if (!expanded)
-    return items;
-  return items.map((item) => ({ ...item, position: [
-    liftLayout.showcase.x + item.position[0] + 7,
-    item.position[1],
-    liftLayout.showcase.z + item.position[2] - 2.2
-  ] }));
-}
 
 // demos/corporate/gjh/v11/assets/spatial.js
 var FLOOR = Object.freeze({ minX: -15.2, maxX: 15.2, minZ: -11.2, maxZ: 18.2 });
@@ -2750,7 +2764,7 @@ function addOriginalShopDetails(zone, x, { box, cylinder, solid, collider, seats
 }
 
 // demos/corporate/gjh/v11/assets/world.js
-import { mergeGeometries as mergeGeometries5 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries6 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/amenities.js
 import { GLTFLoader as GLTFLoader2 } from "../vendor/GLTFLoader.js";
@@ -2997,7 +3011,7 @@ async function addAmenities(T, scene, collider, createCollectProp, shadows, stat
 }
 
 // demos/corporate/gjh/v11/assets/upper-level.js
-import { mergeGeometries as mergeGeometries2 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/expanded-layout.js
 var slot = (number, side, minX, maxX, minZ, maxZ) => Object.freeze({
@@ -3950,17 +3964,6 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
     collider(x2, floor + 0.55, z2, width2, 1.1, depth);
     glass.push(plane.clone().applyMatrix4(matrix(x2, 0.55, z2, width2, 1.1, 1)));
   }
-  const tile = 1.5, tones = [14405306, 14602686, 14208185, 14471613];
-  for (const area of cutRectangle(liftLayout.slab, liftLayout.shaft)) {
-    for (let col = 0;col < 8; col++)
-      for (let row = 0;row < 8; row++) {
-        const x2 = liftLayout.slab.minX + col * tile, z2 = liftLayout.slab.minZ + row * tile;
-        const a = Math.max(area.minX, x2 + 0.009), b = Math.min(area.maxX, x2 + tile - 0.009);
-        const c = Math.max(area.minZ, z2 + 0.009), d = Math.min(area.maxZ, z2 + tile - 0.009);
-        if (a < b && c < d)
-          tint2(plane, matrix((a + b) / 2, 0.008, (c + d) / 2, b - a, d - c, 1, 0, -Math.PI / 2), tones[(col * 3 + row * 7) % 4]);
-      }
-  }
   print(cells.rug, rug.x, 0.022, rug.z, rug.width, rug.depth, 1, 0, -Math.PI / 2);
   const crop = new T.CylinderGeometry(0.36, 0.32, 0.053, 16);
   for (const [x2, z2] of deckPlanters) {
@@ -4115,7 +4118,7 @@ function buildUpperLevel(T, { map, models: loadedModels }, { collider, lightWash
   function merged(name, parts, material, parent) {
     let mesh;
     if (material.transparent) {
-      mesh = new T.Mesh(mergeGeometries2(parts), material);
+      mesh = new T.Mesh(mergeGeometries3(parts), material);
       parts.forEach((part) => part.dispose());
     } else {
       const batch = createPackedDraw(T, parts.map((geometry) => {
@@ -5756,7 +5759,7 @@ function createProgressiveAtlas(T, sheet) {
 }
 
 // demos/corporate/gjh/v11/assets/shop-sign-vendor.js
-import { mergeGeometries as mergeGeometries3 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
 import { GLTFLoader as GLTFLoader3 } from "../vendor/GLTFLoader.js";
 
 // demos/corporate/gjh/v11/assets/signage/hardware.js
@@ -6019,7 +6022,7 @@ function modelRelief(T, sign, module, mask, finishes) {
       g.dispose();
     return geometry;
   });
-  const merged = mergeGeometries3(pieces);
+  const merged = mergeGeometries4(pieces);
   pieces.forEach((g) => g.dispose());
   const remaining = mask.ink.slice();
   for (let j = Math.floor(y0 + (y1 - y0) * v);j < y0 + (y1 - y0) * (v + h); j++)
@@ -6087,7 +6090,7 @@ function* buildRelief(T, signs, tiles, modules, texture, detailed) {
   }
   if (!pieces.length)
     return null;
-  const geo = mergeGeometries3(pieces);
+  const geo = mergeGeometries4(pieces);
   pieces.forEach((g) => g.dispose());
   const Index = offset > 65535 ? Uint32Array : Uint16Array;
   const original = new Index(source), index = new T.BufferAttribute(new Index(source.length), 1);
@@ -6137,7 +6140,7 @@ function createSignageSystem(T, scene, configs, bays, bake, assetBase) {
     const hasEndTrim = config.finish === "timber-slat" || config.preset === "t3-cafe";
     signs.push({ config, matrix, mount, hardwareMatrix, centre, hasEndTrim, sphere: new T.Sphere(centre, config.size.width / 2 + 0.6) });
   });
-  const faces = new T.Mesh(mergeGeometries3(pieces), flat);
+  const faces = new T.Mesh(mergeGeometries4(pieces), flat);
   pieces.forEach((g) => g.dispose());
   faces.name = "Expanded branded shop signs";
   faces.layers.enable(1);
@@ -6441,7 +6444,7 @@ function addExpandedStorefronts(T, layout, scene, signs, trimMaterial = instance
 }
 
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
-import { mergeGeometries as mergeGeometries4 } from "../vendor/BufferGeometryUtils.js";
+import { mergeGeometries as mergeGeometries5 } from "../vendor/BufferGeometryUtils.js";
 
 // demos/corporate/gjh/v11/assets/window-studios.js
 var cream = 15984077;
@@ -7761,7 +7764,7 @@ function kelvinColour(T, kelvin) {
 function merged(parts) {
   if (!parts.length)
     return null;
-  const result = mergeGeometries3(parts);
+  const result = mergeGeometries4(parts);
   for (const geometry of parts)
     geometry.dispose();
   return result;
@@ -8123,7 +8126,7 @@ function* mergeInteriorAnchor(T, scene) {
           parts.push(mesh.geometry.clone().applyMatrix4(mesh.matrixWorld));
           yield;
         }
-        const geometry = mergeGeometries3(parts);
+        const geometry = mergeGeometries4(parts);
         if (geometry) {
           anchor.add(new T.Mesh(geometry, material));
           for (const mesh of meshes)
@@ -8780,11 +8783,11 @@ var SURFACES = {
   detailed: { roughness: 0.85, emission: 1.1, washOpacity: 0.94 }
 };
 var SHOP_LAMPS = {
-  S01: 16764813,
+  S01: 16767399,
   S02: 15986113,
-  S03: 13107187,
+  S03: 14744548,
   S13: 14938623,
-  S14: 15200511,
+  S14: 16183272,
   S15: 16761981
 };
 function shopLampTint(T, id) {
@@ -8863,10 +8866,12 @@ function createMallSurfaceAtmosphere(T, scene, {
     washVisibility.update(view?.frustum, (key) => {
       if (typeof key === "boolean")
         return key || broadWash;
+      if (typeof key === "number")
+        return shopNear?.get(key);
       const { shop, deckLod } = poolSlots.get(key);
       return preset2 === SURFACES.low && (!deckLod || view?.deckVisible) && (shop === null || shopNear?.get(shop));
     }, false, (key, bounds) => {
-      const shop = poolSlots.get(key)?.shop;
+      const shop = typeof key === "number" ? key : poolSlots.get(key)?.shop;
       return shop != null && view?.shopVisibility?.occluded(shop, bounds);
     });
     washMesh.visible = washMesh.count > 0;
@@ -9017,7 +9022,7 @@ function createSkylightDapple(T, scene, {
       return;
     mesh.visible = tier !== "low";
     const drift = (tier === "balanced" || tier === "detailed") && !reducedMotion ? now : 0;
-    map.offset.set(0.008 * Math.sin(drift / 67000), 0.006 * Math.sin(drift / 59000));
+    map.offset.set(0.002 * Math.sin(drift / 67000), 0.0015 * Math.sin(drift / 59000));
   }
   return { prepare, update };
 }
@@ -9108,7 +9113,7 @@ var EVERYDAY = Object.freeze({
     liftGate: 11901794,
     liftGlassOpacity: 0.24
   }),
-  lighting: Object.freeze({ sky: 16183011, ground: 8615784, ambient: 0.51, key: 16761744, keyIntensity: 1.62, fog: 6707789, exposure: 0.72 }),
+  lighting: Object.freeze({ sky: 16183011, ground: 9536632, ambient: 0.52, key: 16760464, keyIntensity: 1.6, fog: 6707789, exposure: 0.72 }),
   decorationRefs: Object.freeze([])
 });
 var LUNAR_NEW_YEAR = Object.freeze({
@@ -9212,20 +9217,20 @@ function addAtriumSkylight(T, scene, { minX: minX2, maxX: maxX2, minZ: minZ2, ma
   if (!ctx)
     return;
   const sky = ctx.createLinearGradient(0, 0, size, size);
-  sky.addColorStop(0, "#c5dde4");
-  sky.addColorStop(0.58, "#e5eff0");
-  sky.addColorStop(1, "#fff0cf");
+  sky.addColorStop(0, "#85bde1");
+  sky.addColorStop(0.54, "#c5e7fa");
+  sky.addColorStop(1, "#f5f9f6");
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, size, size);
   let seed = 271;
   const random = () => ((seed = Math.imul(1664525, seed) + 1013904223 | 0) >>> 0) / 4294967296;
-  const leaves = ["#68765b", "#83916a", "#9da379", "#b5b894"];
+  const leaves = ["#536047", "#667559", "#899770", "#a6a683"];
   function bough(x, y, length, angle, depth) {
     const tipX = x + Math.cos(angle) * length, tipY = y + Math.sin(angle) * length;
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.lineTo(tipX, tipY);
-    ctx.strokeStyle = "#6d7057";
+    ctx.strokeStyle = "#5e614d";
     ctx.lineWidth = depth * 1.25;
     ctx.lineCap = "round";
     ctx.stroke();
@@ -9243,10 +9248,11 @@ function addAtriumSkylight(T, scene, { minX: minX2, maxX: maxX2, minZ: minZ2, ma
   }
   bough(-8, 200, 53, -0.91, 4);
   bough(261, 52, 46, 2.4, 4);
-  bough(165, 259, 38, -2.11, 3);
+  bough(165, 259, 50, -2.11, 4);
+  bough(80, -7, 38, 1.18, 3);
   const sheen = ctx.createLinearGradient(0, size, size, 0);
   sheen.addColorStop(0, "rgba(255,249,230,0)");
-  sheen.addColorStop(0.53, "rgba(255,249,230,.23)");
+  sheen.addColorStop(0.53, "rgba(255,253,244,.30)");
   sheen.addColorStop(0.83, "rgba(255,249,230,0)");
   ctx.fillStyle = sheen;
   ctx.fillRect(0, 0, size, size);
@@ -9776,7 +9782,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     materials2.skylightGlass.side = T.FrontSide;
     const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
     doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
-    const doorFrameGeometry = mergeGeometries5(doorFrameParts);
+    const doorFrameGeometry = mergeGeometries6(doorFrameParts);
     doorFrameParts.forEach((part) => part.dispose());
     const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
     const finishForRole = new Map;
@@ -9805,7 +9811,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     async function setPavingMap(map) {
       const material = materials2.paving.clone();
       material.map = map;
-      const sample = new T.InstancedMesh(geometry.box, material, 1);
+      material.color.set(16315889);
+      const sample = new T.InstancedMesh(geometry.paving, material, 1);
       try {
         await prepareModel?.(sample);
         material.roughness = materials2.paving.roughness;
@@ -9897,7 +9904,6 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       shopLodUpdates.push(buildPublicArchitecture(T, { scene, materials: materials2, geometry, box, solid, lightPool, lightWash, garden: atriumLayout.garden, prepareModel, setPavingMap, ceilingBounds, artworkTier, daylightSkylight: expandedLift, setCanopyMaterial: (material) => {
         finishMaterials.canopy = material;
       } }));
-      materials2.paving.color.set(13023397);
       if (expandedLift)
         addAtriumSkylight(T, scene, liftLayout.roofOpening);
     } else {
@@ -10673,6 +10679,13 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       });
       for (const [id, store2] of Object.entries(interiorStores)) {
         activeShopSlot = Number(id.slice(1));
+        const [fx, , fz] = store2.ambient.focus;
+        const [standingX, standingZ] = store2.anchor.standing;
+        const floorY = Math.max(0.036, store2.floor.position_m[1] + 0.012);
+        const [px, py, pz] = worldInteriorPoint(store2, [(fx + standingX) / 2, floorY, (fz + standingZ) / 2]);
+        const width = id === "S01" ? 7.8 : 3.25;
+        const intensity = id === "S03" ? 1.1 : 1.42;
+        lightWash(px, py, pz, width, 2.75, store2.frame.yaw_world_deg * Math.PI / 180, -Math.PI / 2, activeShopSlot, id === "S01" ? 16769462 : 16771267, intensity);
         if (id === "S04") {
           for (const [storyId, [x, z]] of [
             ["borsch-patch-story", store2.anchor.standing],
@@ -10686,7 +10699,6 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           interactables.push({ id: "pzh-carton-story", x, z, radius: 1 });
         } else if (shopCatalogueFocals[id]) {
           const exhibit = shopCatalogueFocals[id];
-          const [standingX, standingZ] = store2.anchor.standing;
           const [x, , z] = worldInteriorPoint(store2, [standingX, 0, standingZ]);
           const plaque = sign(exhibit.caption, ...worldInteriorPoint(store2, exhibit.panel), 1.02, 0.15, true, 65);
           plaque.rotation.y = store2.frame.yaw_world_deg * Math.PI / 180;
@@ -10767,6 +10779,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       if (batch.material === materials2.lightPool)
         mesh.name = "Mall floor and wall light pools";
       if (batch.material === materials2.paving) {
+        mesh.name = "Mall ivory marble paving";
         pavingMesh = mesh;
         if (mappedPaving)
           mesh.material = mappedPaving;

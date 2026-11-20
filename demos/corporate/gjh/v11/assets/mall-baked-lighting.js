@@ -139,7 +139,7 @@ export function createSkylightDapple(T, scene, {panels, projection, contact, pre
     if (!map) return;
     mesh.visible = tier !== 'low';
     const drift = (tier === 'balanced' || tier === 'detailed') && !reducedMotion ? now : 0;
-    map.offset.set(.008*Math.sin(drift/67000), .006*Math.sin(drift/59000));
+    map.offset.set(.002*Math.sin(drift/67000), .0015*Math.sin(drift/59000));
   }
   return {prepare,update};
 }

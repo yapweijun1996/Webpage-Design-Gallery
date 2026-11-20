@@ -3,6 +3,8 @@ import math
 import random
 from pathlib import Path
 
+from build_gjh_marble import marble_tile
+
 # x, y, width, height in the 512 px master; four equal indicator cells share a row.
 REGIONS = {"sign": (0, 0, 512, 96), "edgeX": (256, 432, 64, 80),
            "edgeZ": (384, 96, 128, 64), "display": (0, 96, 96, 64),
@@ -26,7 +28,7 @@ def draw_sheets(out):
         "black": ((30, 33, 31), 98, 80), "wood": ((128, 84, 48), 126, 2),
         "mirror": ((131, 139, 124), 69, 150), "glass": ((149, 175, 164), 43, 54),
         "leaf": ((78, 117, 47), 132, 0), "darkleaf": ((48, 91, 49), 144, 0),
-        "steel": ((177, 176, 164), 90, 178), "stone": ((105, 109, 99), 72, 18),
+        "steel": ((177, 176, 164), 90, 178), "stone": ((225, 220, 210), 72, 41),
         "pot": ((197, 184, 159), 106, 32), "soil": ((54, 43, 33), 220, 0)
     }
     for name, (color, rough, metal) in finishes.items():
@@ -40,10 +42,6 @@ def draw_sheets(out):
                 alpha = 255
                 if name == "wood":
                     g += 11*math.sin(38*u+1.5*math.sin(4*v))+6*math.cos(115*u+3*v)+3*math.sin(199*u)
-                elif name == "stone":
-                    swirl = 3.9*u+2.2*v+.24*math.sin(12*u+7*v)+.10*math.sin(29*v+11*u)+.045*math.sin(57*u-43*v)
-                    vein = abs(math.sin(4*swirl))
-                    g += 13*math.sin(5*u+7*v)+9*math.sin(21*u-9*v)+78*math.exp(-16*vein)+19*math.exp(-35*(vein-.16)**2)
                 elif name in ("steel", "mirror", "brass", "pot"):
                     g += 14*math.cos(6*u) + 9*math.sin(8*u+3*v) + brush
                 elif name == "glass":
@@ -57,6 +55,8 @@ def draw_sheets(out):
                 base.putpixel((x+i,y+j), tuple(max(0,min(255,round(c+g))) for c in color)+(alpha,))
         if name in ("gold", "lamp"):
             ImageDraw.Draw(light).rectangle((x,y,x+w-1,y+h-1),fill=(255,182,81) if name=="gold" else (255,216,146))
+    x, y, w, h = REGIONS["stone"]
+    base.paste(marble_tile().resize((w,h), Image.Resampling.LANCZOS), (x,y))
     # Pre-bake a small warm spill into the marble borders and fluted timber.
     # It remains legible at phone resolution without adding bloom or a light.
     for tile in ("edgeX","edgeZ"):

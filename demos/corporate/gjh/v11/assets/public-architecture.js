@@ -2,6 +2,8 @@ import {mergeOpaqueMeshes} from './packed-draw.js';
 import {loadStaticAsset} from './static-asset.js';
 import {atriumLayout} from './atrium-layout.js';
 import {setupArtworkTexture} from './artwork-textures.js';
+import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
+import {cutRectangle, liftLayout} from './lift-layout.js';
 import {decalMaterial} from './surface-decals.js';
 
 // Fit the public rooms to the existing circulation and collision footprints.
@@ -76,15 +78,28 @@ export function buildPublicArchitecture(T, {scene, materials, geometry, box, sol
     }
   }
 
-  // The court uses a softly veined ivory stone tile with staggered joints.
-  materials.paving=new T.MeshStandardMaterial({color:0xcdbfae,roughness:.34,metalness:.09});
-  const pavingURL=new URL('concourse-limestone.webp',import.meta.url);
+  // Ground paving and the upper deck share one marble draw. Project UVs in
+  // metres so the veining keeps its scale on both the court and clipped deck.
+  materials.paving = new T.MeshStandardMaterial({color:0xded8ce,roughness:.28,metalness:.16});
+  const stone = [new T.BoxGeometry(49.85,.002,47.85).translate(10,-.013,24)];
+  if (daylightSkylight) for (const {minX,maxX,minZ,maxZ} of cutRectangle(liftLayout.slab,liftLayout.shaft)) {
+    stone.push(new T.PlaneGeometry(maxX-minX,maxZ-minZ).rotateX(-Math.PI/2)
+      .translate((minX+maxX)/2,liftLayout.upper+.008,(minZ+maxZ)/2));
+  }
+  for (const part of stone) {
+    const {position,uv} = part.attributes;
+    for (let i=0;i<uv.count;i++) uv.setXY(i,position.getX(i)/3.2,-position.getZ(i)/3.2);
+  }
+  geometry.paving = mergeGeometries(stone);
+  stone.forEach(part => part.dispose());
+  solid('paving','paving',0,0,0,1,1,1);
+  const pavingURL = new URL('concourse-marble.webp',import.meta.url);
   new T.TextureLoader().load(pavingURL.href,map=>{
-    map.colorSpace=T.SRGBColorSpace;map.wrapS=map.wrapT=T.RepeatWrapping;
-    map.repeat.set(12.5,12);map.anisotropy=4;
+    map.colorSpace = T.SRGBColorSpace;
+    map.wrapS = map.wrapT = T.RepeatWrapping;
+    map.anisotropy = 4;
     void setPavingMap(map);
   },undefined,()=>{});
-  box('paving',10,-.013,24,49.85,.002,47.85);
 
   // A light sage terrazzo runner with fine aggregate, set into the marble.
   const canvas = document.createElement('canvas');

@@ -1,6 +1,6 @@
 import {createInstanceVisibility, createPackedDraw} from './packed-draw.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
-import {liftLayout as lift, cutRectangle, shaftFinish} from './lift-layout.js';
+import {liftLayout as lift, shaftFinish} from './lift-layout.js';
 import {atriumLayout} from './atrium-layout.js';
 import {loadStaticAsset} from './static-asset.js';
 import {uvRect} from './signage/builder.js';
@@ -85,17 +85,6 @@ export function buildUpperLevel(T, {map,models:loadedModels}, {collider,lightWas
     glass.push(plane.clone().applyMatrix4(matrix(x,.55,z,width,1.10,1)));
   }
 
-  // The tile joints reveal the existing stone slab. Clip each tile to the
-  // floor panels, so neither artwork nor collision bridges the open shaft.
-  const tile=1.5,tones=[0xdbceba,0xded1be,0xd8ccb9,0xdcd1bd];
-  for(const area of cutRectangle(lift.slab,lift.shaft)){
-    for(let col=0;col<8;col++)for(let row=0;row<8;row++){
-      const x=lift.slab.minX+col*tile,z=lift.slab.minZ+row*tile;
-      const a=Math.max(area.minX,x+.009),b=Math.min(area.maxX,x+tile-.009);
-      const c=Math.max(area.minZ,z+.009),d=Math.min(area.maxZ,z+tile-.009);
-      if(a<b&&c<d)tint(plane,matrix((a+b)/2,.008,(c+d)/2,b-a,d-c,1,0,-Math.PI/2),tones[(col*3+row*7)%4]);
-    }
-  }
   print(cells.rug,rug.x,.022,rug.z,rug.width,rug.depth,1,0,-Math.PI/2);
   const crop=new T.CylinderGeometry(.36,.32,.053,16);
   for(const [x,z] of deckPlanters){

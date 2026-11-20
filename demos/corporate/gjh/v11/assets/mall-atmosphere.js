@@ -20,8 +20,8 @@ const SURFACES = {
 // Fixture tints are in display sRGB. Kelvin and focus coordinates still come
 // from the shop programme. These tints describe the light, not the brand paint.
 const SHOP_LAMPS = {
-  S01:0xffcf8d, S02:0xf3edc1, S03:0xc7fff3,
-  S13:0xe3f1ff, S14:0xe7f0ff, S15:0xffc47d
+  S01:0xffd9a7, S02:0xf3edc1, S03:0xe0fbe4,
+  S13:0xe3f1ff, S14:0xf6efe8, S15:0xffc47d
 };
 
 export function shopLampTint(T, id) {
@@ -91,11 +91,12 @@ export function createMallSurfaceAtmosphere(T, scene, {
   function updateWash(view) {
     washVisibility.update(view?.frustum, key => {
       if (typeof key === 'boolean') return key || broadWash;
+      if (typeof key === 'number') return shopNear?.get(key);
       const {shop,deckLod} = poolSlots.get(key);
       return preset === SURFACES.low && (!deckLod || view?.deckVisible) &&
         (shop === null || shopNear?.get(shop));
     }, false, (key,bounds) => {
-      const shop = poolSlots.get(key)?.shop;
+      const shop = typeof key === 'number' ? key : poolSlots.get(key)?.shop;
       return shop != null && view?.shopVisibility?.occluded(shop,bounds);
     });
     washMesh.visible = washMesh.count > 0;
@@ -105,7 +106,7 @@ export function createMallSurfaceAtmosphere(T, scene, {
 }
 
 const STUDIO_LIGHTING = {
-  atrium: {walls:0x726861, panels:0xffead4, ceiling:0xece0d0, width:7, intensity:.52, ceilingGain:2.15},
+  atrium: {walls:0x675f5d, panels:0xffdcb7, ceiling:0xe0e9f0, width:7, intensity:.52, ceilingGain:2.0},
   corridor: {walls:0x66615b, panels:0xf5e6d4, ceiling:0xd7cbbb, width:5, intensity:.58},
   shop: {walls:0x9e9184, panels:0xffefe0, ceiling:0xffefe1, width:3, intensity:.94}
 };
@@ -153,8 +154,11 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       ? (expanded ? .91 : .74) + .20*(mood.kelvin-2700)/1300 + .10*accentLuminance
       : studioLighting.shop.intensity;
     const lamp = expanded && SHOP_LAMPS[store?.id] ? new T.Color(shopLampTint(T,store.id)) : null;
-    return {slot,x,z,mood,keyPosition,accentPosition,accent,environmentIntensity,lamp,
-      doorFill:expanded && store?.id === 'S14' ? 1.65 : 1,
+    const gogo = expanded && store?.id === 'S03', lg = expanded && store?.id === 'S14';
+    return {slot,x,z,mood,keyPosition,accentPosition,accent,lamp,
+      environmentIntensity:environmentIntensity * (gogo ? .92 : lg ? .94 : 1),
+      keyGain:gogo ? .91 : lg ? .81 : 1, doorFill:gogo ? .90 : lg ? 1.38 : 1,
+      shadowFill:lg ? .075 : 0,
       temperature:mood ? kelvinColour(T,mood.kelvin) : interiorWarm, colors:[new T.Color(),new T.Color()]};
   });
   const lights = Array.from({length:2}, (_, index) => {
@@ -199,9 +203,10 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     visitorFill = inside ? .22 : publicZone === 'atrium' ? .18 : .27;
     avatarMaterials.forEach(applyPortraitFill);
   }
-  let focus = null, strength = 0, previousTime;
+  let focus = null, strength = 0, previousTime, baseAmbient = hemisphere?.intensity;
   const applyFocusColors = () => lights.forEach((light,index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
+    baseAmbient = theme?.lighting?.ambient ?? baseAmbient;
     const key = new T.Color(theme?.lighting?.key ?? 0xffe5c1);
     for (const bay of bays) {
       const [main,accent] = bay.colors;
@@ -220,18 +225,21 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     for (const light of lights) light.visible = ground;
     return ground;
   }
-  function update(position, now = performance.now()) {
+  function update(position, now = performance.now(), tier) {
     const {x,y,z} = position;
     const inside = Math.abs(y) < 4 ? bays.find(bay => insideBay(x,z,bay.slot)) : null;
     const publicZone = publicEnvironmentZone(position,atrium);
     if (expanded) setPortraitFill(inside,publicZone);
+    let shadowFill = tier === 'low' && publicZone === 'atrium' ? .08 : 0;
     if (inside?.mood) {
       const {minX,maxX,minZ,maxZ} = inside.slot;
       const edge = Math.min(x-minX,maxX-x,z-minZ,maxZ-z);
       const weight = Math.min(1,edge/1.6);
+      shadowFill += weight*(inside.shadowFill-shadowFill);
       const outside = studioLighting[publicZone].intensity;
       selectEnvironment('shop',outside + weight*(inside.environmentIntensity-outside));
     } else selectEnvironment(inside ? 'shop' : publicZone);
+    if (hemisphere) hemisphere.intensity = baseAmbient + shadowFill;
     const ground = setLightFloor(position);
     let nearest = inside?.mood ? inside : null, best = 24 ** 2;
     if (ground && !nearest) for (const bay of bays) {
@@ -257,7 +265,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       }
     }
     if (focus && nearest === focus) strength = Math.min(1,strength+fadeIn);
-    lights[0].intensity = (focus?.mood && expanded ? 32 : 26) * strength;
+    lights[0].intensity = (focus?.mood && expanded ? 32 : 26) * strength * (focus?.keyGain ?? 1);
     lights[1].intensity = (focus?.mood && expanded ? 20 : 18) * strength * (focus?.doorFill ?? 1);
   }
 
@@ -297,10 +305,29 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     for (const [x,z,w] of [[-2,-4,3],[2,4,2]]) {
       const panel = new T.Mesh(geometry,materials[1]); panel.position.set(x,2,z); panel.scale.set(w,.2,2); studio.add(panel);
     }
+    // Warm vertical returns and a cool skylight share the existing atrium PMREM.
+    // On the polished stone their narrow highlights stretch at grazing angles.
+    let pierHighlights;
+    if (expanded) {
+      const strip = geometry.toNonIndexed().scale(.11,3.4,.18);
+      const positions = [];
+      for (const x of [-3.85,3.85]) for (const z of [-3,0,3]) {
+        const vertices = strip.attributes.position;
+        for (let i=0;i<vertices.count;i++) {
+          positions.push(x+vertices.getX(i),1.1+vertices.getY(i),z+vertices.getZ(i));
+        }
+      }
+      strip.dispose();
+      const strips = new T.BufferGeometry();
+      strips.setAttribute('position',new T.Float32BufferAttribute(positions,3));
+      pierHighlights = new T.Mesh(strips,materials[1]);
+      studio.add(pierHighlights);
+    }
     const ceiling = new T.Mesh(geometry,materials[2]); ceiling.position.y=2.9; studio.add(ceiling);
     const next = {};
     try {
       for (const [zone, {walls,panels,ceiling:colour,width,ceilingGain = 1.5}] of Object.entries(studioLighting)) {
+        if (pierHighlights) pierHighlights.visible = zone === 'atrium';
         materials[0].color.set(walls);
         materials[1].color.set(panels).multiplyScalar(1.3);
         materials[2].color.set(colour).multiplyScalar(ceilingGain);
@@ -315,7 +342,10 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       selectEnvironment(currentZone,currentIntensity);
     } finally {
       if (environments !== next) Object.values(next).forEach(target => target.dispose());
-      generator.dispose(); geometry.dispose(); materials.forEach(material=>material.dispose());
+      generator.dispose();
+      geometry.dispose();
+      pierHighlights?.geometry.dispose();
+      materials.forEach(material=>material.dispose());
     }
   }
   function restoreEnvironment() {

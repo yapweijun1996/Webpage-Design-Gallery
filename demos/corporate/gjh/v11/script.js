@@ -519,7 +519,7 @@ function render(force = false) {
     if (expanded) renderer.shadowMap.enabled = detailedReady;
     world.updateShopLods(pose, renderer.shadowMap.enabled, tier, camera,
       canvas.height, Boolean(shelfFocus?.open), lightWash, reducedMotion.matches);
-    atmosphere?.update(pose,now);
+    atmosphere?.update(pose,now,tier);
     const signStart = frameTrace?.start();
     world.updateSigns(camera, canvas, reducedMotion);
     frameTrace?.end('signage.update', signStart);
@@ -939,7 +939,7 @@ function validateRestoration() {
     world.prepareUpperLevel();
     if (mallTheme && (!world.applyMallTheme(mallTheme.definition()) || (elevator?.applyMallTheme && !elevator.applyMallTheme(mallTheme.definition())))) throw new Error('Theme restoration failed');
     atmosphere?.applyTheme(mallTheme?.definition());
-    atmosphere?.update(player.state);
+    atmosphere?.update(player.state,undefined,quality.state?.tier);
     player.camera.updateMatrixWorld();
     sizeDrawingBuffer();
     world.updateShopLods(player.state, renderer.shadowMap.enabled, quality.state?.tier, player.camera, canvas.height, false, lightWash, reducedMotion.matches);
