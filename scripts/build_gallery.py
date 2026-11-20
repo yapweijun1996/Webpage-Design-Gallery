@@ -265,6 +265,8 @@ def runtime_resources(catalog):
     for design in catalog["designs"]:
         directory = Path(design["demoPath"]).parent
         resources.add(directory / "index.html")
+        # Multi-page editions ship every top-level page beside index.html.
+        resources.update(p.relative_to(ROOT) for p in (ROOT / directory).glob("*.html"))
         resources.update(directory / name for name in ("style.css", "script.js") if (ROOT / directory / name).is_file())
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"

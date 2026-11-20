@@ -101,8 +101,8 @@
   --palette-editorial-ink: #292c28;
   --palette-editorial-muted: #666960;
   --palette-editorial-line: #dcded4;
-  --palette-editorial-accent: #ae3c25;
-  --palette-editorial-wash: #e9e7dc;
+  --palette-editorial-accent: var(--palette-gallery-terracotta-accent);
+  --palette-editorial-wash: var(--palette-gallery-terracotta-wash);
   --font-editorial-heading: Georgia, serif;
   --font-editorial-hero: clamp(42px, 5.4vw, 76px);
   --palette-night-page: #171b20;
@@ -123,8 +123,12 @@
   --palette-night-paper-ink: #efeee6;
   --palette-night-paper-muted: #b9bcb0;
   --palette-night-paper-line: #464b40;
-  --palette-night-paper-accent: #f6a38d;
-  --palette-night-paper-wash: #2c3028;
+  --palette-night-paper-accent: var(--palette-gallery-terracotta-night-accent);
+  --palette-night-paper-wash: var(--palette-gallery-terracotta-night-wash);
+  --palette-gallery-terracotta-accent: #ae3c25;
+  --palette-gallery-terracotta-wash: #e9e7dc;
+  --palette-gallery-terracotta-night-accent: #f6a38d;
+  --palette-gallery-terracotta-night-wash: #2c3028;
   --palette-gallery-ocean-accent: #1f5f99;
   --palette-gallery-ocean-wash: #e1e9f0;
   --palette-gallery-ocean-night-accent: #8cc4f2;

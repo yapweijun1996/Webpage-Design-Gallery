@@ -24,10 +24,12 @@ World origin (-20, 0, 12), yaw 90°. Dimensions are authored metres. The [floor 
 
 ## Display products and model work
 
+The [two editable 256 g tin studies](../../../models/gjh-gulong-tins/README.md) sit on the left provision shelf. The official product photos support their short form, rolled rims and pull rings. The estimated geometry is unprinted.
+
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| GuLong Stewed Pork Chops 256g | Primary pyramid and one front inspection sample | Pending matched cylinder and label mapping. The existing pyramid is a reusable fixture. |
-| GuLong Stewed Pork 256g | Separate rear shelf bay | Pending same-era product references and model. |
+| GuLong Stewed Pork Chops 256g | Left provision shelf, visitor edge | Unprinted form installed. Physical measurements and current label mapping remain pending. The existing pyramid is a reusable fixture. |
+| GuLong Stewed Pork 256g | Left provision shelf beside Pork Chops | Unprinted form installed from its own official reference. Exact dimensions and print remain pending. |
 
 Use GJH carton-deal imagery to identify the variants. The opening shape and exact pack measurements remain separate decisions.
 

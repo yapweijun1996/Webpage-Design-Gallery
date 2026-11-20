@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "Goh Joo Hin - Luxury Digital Experience",
+  "version": "v24",
+  "designStyle": "A six-page black and champagne-gold corporate site with cinematic architectural heroes, editorial serif headings and refined gold-lined cards.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/v24/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin.",
+  "id": "gjh-v24",
+  "companyId": "gjh",
+  "displayTitle": "Luxury Digital Experience",
+  "summary": "Tour six pages: home, story, a filterable brand directory, business areas, the virtual mall entrance and an accessible enquiry form.",
+  "styles": [
+    "corporate",
+    "immersive"
+  ],
+  "order": 210
+}

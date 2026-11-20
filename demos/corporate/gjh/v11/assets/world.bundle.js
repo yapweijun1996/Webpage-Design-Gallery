@@ -7964,7 +7964,7 @@ var roomDetails = {
   },
   S07: {
     file: "s07-dragon-details.glb",
-    bytes: 79092,
+    bytes: 86224,
     roomDetail: true
   },
   S08: {

@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en-SG" data-gjh-design="v24">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Preview GJH Virtual World, explore the features of the 3D mall demo and check your browser before entering.">
+  <meta name="theme-color" content="#080808">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Virtual World · Goh Joo Hin</title>
+  <link rel="icon" href="assets/gjh-logo.webp" type="image/webp">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="../../../../assets/icons/gallery-180.png">
+  <link rel="related" type="text/html" title="Landing design reference" href="../../../../style-atlas/index.html#gjh-v24">
+  <link rel="preload" as="image" type="image/webp" media="(max-width: 700px)" href="assets/virtual-hero-story.webp" fetchpriority="high">
+  <link rel="preload" as="image" type="image/webp" media="(min-width: 701px)" imagesrcset="assets/virtual-hero-medium.webp 960w, assets/virtual-hero-wide.webp 1600w" imagesizes="100vw" fetchpriority="high">
+  <script src="assets/boot.js"></script>
+  <link rel="stylesheet" href="../../../../assets/tokens.css">
+  <link rel="stylesheet" href="assets/theme.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="assets/page-virtual.css">
+  <script defer src="script.js"></script>
+  <script defer src="assets/preferences.js"></script>
+  <script defer src="assets/page-virtual.js"></script>
+  <script defer src="../../../../src/demo-pwa.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="frame header-bar">
+      <a class="brand" href="index.html" aria-label="Goh Joo Hin home">
+        <img src="assets/gjh-logo.webp" alt="" width="134" height="59">
+        <span class="brand-name">Goh Joo Hin</span>
+      </a>
+      <nav class="site-nav" id="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About GJH</a></li>
+          <li><a href="brands.html">Our Brands</a></li>
+          <li><a href="business.html">Business</a></li>
+          <li><a href="virtual-world.html" aria-current="page">Virtual World</a></li>
+          <li class="nav-contact"><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="header-tools">
+        <div class="lang-menu pref-control">
+          <button class="icon-button lang-toggle" type="button" aria-expanded="false" aria-controls="lang-list" aria-label="Language: English"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#globe"/></svg><span class="lang-code">EN</span><svg class="icon lang-chevron" aria-hidden="true"><use href="assets/icons.svg#chevron-down"/></svg></button>
+          <ul class="lang-list" id="lang-list" hidden data-no-translate>
+            <li><button type="button" data-lang="en" lang="en" aria-pressed="true">English <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#check"/></svg></button></li>
+            <li><button type="button" data-lang="zh-Hans" lang="zh-Hans" aria-pressed="false">简体中文 <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#check"/></svg></button></li>
+            <li><button type="button" data-lang="ms" lang="ms" aria-pressed="false">Bahasa Melayu <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#check"/></svg></button></li>
+          </ul>
+        </div>
+        <button class="icon-button theme-toggle pref-control" type="button" aria-pressed="false" aria-label="Switch to light theme"><svg class="icon icon-moon" aria-hidden="true"><use href="assets/icons.svg#moon"/></svg><svg class="icon icon-sun" aria-hidden="true"><use href="assets/icons.svg#sun"/></svg></button>
+        <a class="icon-button" href="brands.html#brand-search" aria-label="Search brands"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#search"/></svg></a>
+        <a class="btn btn-gold header-cta" href="contact.html">Contact Us</a>
+        <button class="icon-button menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+          <svg class="icon icon-open" aria-hidden="true"><use href="assets/icons.svg#menu"/></svg>
+          <svg class="icon icon-close" aria-hidden="true"><use href="assets/icons.svg#close"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero virtual-hero" aria-labelledby="virtual-title">
+      <div class="hero-media" data-parallax="0.12" style="--focus: 64% 50%; --focus-mobile: 50% 42%">
+        <picture>
+          <source media="(max-width: 700px)" srcset="assets/virtual-hero-story.webp" width="750" height="1000">
+          <img src="assets/virtual-hero-wide.webp" srcset="assets/virtual-hero-medium.webp 960w, assets/virtual-hero-wide.webp 1600w" sizes="100vw" width="1600" height="900" alt="Chibi visitors stroll beneath the glowing balconies of a stylised shopping mall." fetchpriority="high">
+        </picture>
+      </div>
+      <div class="frame">
+        <div class="hero-copy">
+          <p class="eyebrow" data-reveal>The virtual mall</p>
+          <h1 class="page-title" id="virtual-title" data-reveal style="--delay: 120ms">GJH Virtual World</h1>
+          <p class="lead" data-reveal style="--delay: 220ms">Step into a new shopping experience</p>
+          <div class="actions" data-reveal style="--delay: 320ms">
+            <a class="btn btn-gold btn-lg" href="../v11/index.html">Enter GJH Virtual World <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#arrow-right"/></svg></a>
+            <a class="btn btn-ghost btn-lg" id="preview-trigger" href="assets/mall-wide.webp">View preview <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#layers"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <p class="media-note">Concept render · AI-generated</p>
+    </section>
+
+    <section class="section" aria-labelledby="features-title">
+      <div class="frame">
+        <div class="section-head">
+          <h2 class="section-title" id="features-title" data-reveal>Inside the <em>virtual mall</em></h2>
+        </div>
+        <div class="virtual-features">
+          <article class="card" data-reveal>
+            <div class="card-body">
+              <svg class="card-icon" aria-hidden="true"><use href="assets/icons.svg#store"/></svg>
+              <h3 class="card-title">3D Shopping Mall</h3>
+              <p class="card-text">Walk through 17 storefronts with automatic doors, then take the elevator to the upper viewing deck.</p>
+            </div>
+          </article>
+          <article class="card virtual-feature-visitor" data-reveal style="--delay: 90ms">
+            <div class="card-media">
+              <img src="assets/chibi-visitor.webp" alt="" width="900" height="900" loading="lazy" decoding="async">
+            </div>
+            <div class="card-body">
+              <svg class="card-icon" aria-hidden="true"><use href="assets/icons.svg#users"/></svg>
+              <h3 class="card-title">Chibi Visitor</h3>
+              <p class="card-text">Explore the mall as Studio Gerak Chibi Tripo.</p>
+              <p class="fine-print virtual-credit">Concept art · AI-generated</p>
+            </div>
+          </article>
+          <article class="card" data-reveal style="--delay: 180ms">
+            <div class="card-body">
+              <svg class="card-icon" aria-hidden="true"><use href="assets/icons.svg#calendar"/></svg>
+              <h3 class="card-title">Seasonal themes</h3>
+              <p class="card-text">Use Theme in the Tools menu to change the mall’s seasonal look.</p>
+            </div>
+          </article>
+          <article class="card" data-reveal style="--delay: 270ms">
+            <div class="card-body">
+              <svg class="card-icon" aria-hidden="true"><use href="assets/icons.svg#devices"/></svg>
+              <h3 class="card-title">Cross-platform</h3>
+              <p class="card-text">Walk with a keyboard on desktop or a touch joystick on mobile. The mall is also an installable web app.</p>
+            </div>
+          </article>
+        </div>
+        <p class="fine-print virtual-credit">Source · GJH v11 Virtual Mall README</p>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="visitor-title">
+      <div class="frame">
+        <div class="card virtual-split">
+          <figure class="virtual-stage" data-reveal>
+            <img src="assets/chibi-visitor.webp" alt="Concept illustration of a chibi visitor with a VR headset and gold-trimmed clothing." width="900" height="900" loading="lazy" decoding="async">
+            <figcaption class="media-note">Concept art · AI-generated</figcaption>
+          </figure>
+          <div class="virtual-copy" data-reveal style="--delay: 120ms">
+            <p class="eyebrow">Chibi visitor</p>
+            <h2 class="section-title" id="visitor-title">Meet your <em>chibi visitor</em></h2>
+            <p class="lead">The project owner’s original rigged character waves on arrival. Take a seat on a lounge bench, or pick up New Moon tins and add them to your demo bag.</p>
+            <p class="fine-print virtual-credit">The demo bag has no payments. Source · GJH v11 Virtual Mall README</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="readiness-title">
+      <div class="frame">
+        <div class="card virtual-split virtual-readiness" data-reveal>
+          <div class="virtual-copy">
+            <h2 class="section-title" id="readiness-title">Before you <em>enter</em></h2>
+            <p class="lead">The 3D mall downloads its models only after you enter.</p>
+          </div>
+          <div class="virtual-checks">
+            <ul class="virtual-status" id="readiness-status" aria-live="polite" aria-atomic="true" hidden>
+              <li data-readiness="graphics"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#clock"/></svg><span>Checking 3D graphics…</span></li>
+              <li data-readiness="motion"><svg class="icon" aria-hidden="true"><use href="assets/icons.svg#clock"/></svg><span>Checking motion preference…</span></li>
+            </ul>
+            <noscript><p>The mall directory is available without JavaScript or WebGL.</p></noscript>
+            <div class="actions">
+              <a class="btn btn-gold" href="../v11/index.html">Enter 3D mall <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#arrow-right"/></svg></a>
+              <a class="btn btn-ghost" href="../v11/index.html">Open the mall directory</a>
+            </div>
+            <p class="fine-print virtual-credit">Source · GJH v11 Virtual Mall README</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="vision-title">
+      <div class="frame">
+        <div class="virtual-split virtual-vision">
+          <div class="virtual-copy" data-reveal>
+            <p class="eyebrow">Vision for this concept</p>
+            <h2 class="section-title" id="vision-title">Singapore to Johor, <em>in one virtual world</em></h2>
+            <p class="lead">This design proposal imagines a future virtual world linking Goh Joo Hin’s Singapore and Senai, Johor offices.</p>
+            <p class="fine-print virtual-credit">Office locations · <a href="https://www.gjhglobal.com/contact-us/">Goh Joo Hin’s official contact page</a></p>
+          </div>
+          <figure class="virtual-map" data-reveal style="--delay: 120ms">
+            <svg viewBox="0 0 460 240" aria-hidden="true">
+              <g class="virtual-map-grid">
+                <path d="M26 48h408M26 96h408M26 144h408M26 192h408M75 24v192M135 24v192M195 24v192M255 24v192M315 24v192M375 24v192"/>
+                <path d="M26 170c61 21 104 8 142-11 53-26 81-23 111-11 55 22 96 17 155-11"/>
+                <path d="M26 182c61 21 104 8 142-11 53-26 81-23 111-11 55 22 96 17 155-11"/>
+              </g>
+              <path class="virtual-map-route" d="M132 115Q256-8 327 156"/>
+              <g class="virtual-map-points">
+                <circle cx="132" cy="115" r="23"/>
+                <circle cx="327" cy="156" r="23"/>
+                <circle cx="132" cy="115" r="13"/>
+                <circle cx="327" cy="156" r="13"/>
+              </g>
+              <circle cx="132" cy="115" r="5"/>
+              <circle cx="327" cy="156" r="5"/>
+              <text x="132" y="77" text-anchor="middle">Senai, Johor</text>
+              <text x="327" y="207" text-anchor="middle">Singapore</text>
+            </svg>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="enter-title">
+      <div class="frame">
+        <div class="cta-band" data-reveal>
+          <h2 class="section-title" id="enter-title">Start your <em>mall visit</em></h2>
+          <div class="actions">
+            <a class="btn btn-gold btn-lg" href="../v11/index.html">Enter GJH Virtual World <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#arrow-right"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <dialog class="virtual-preview" id="mall-preview" aria-labelledby="preview-title" aria-describedby="preview-caption">
+      <div class="virtual-preview-head">
+        <h2 class="card-title" id="preview-title">Mall preview</h2>
+        <form method="dialog">
+          <button class="btn btn-ghost" type="submit" autofocus>Close <svg class="icon" aria-hidden="true"><use href="assets/icons.svg#close"/></svg></button>
+        </form>
+      </div>
+      <figure>
+        <picture>
+          <source media="(max-width: 700px)" srcset="assets/mall-story.webp" width="640" height="800">
+          <img src="assets/mall-wide.webp" alt="A stylised mall atrium with curved balconies opening onto a central concourse." width="1200" height="676" loading="lazy" decoding="async">
+        </picture>
+        <figcaption class="fine-print" id="preview-caption">An imagined view of the virtual mall atrium · AI-generated concept render</figcaption>
+      </figure>
+    </dialog>
+  </main>
+
+  <footer class="site-footer">
+    <div class="frame">
+      <div class="footer-grid">
+        <div class="footer-about">
+          <a class="brand" href="index.html" aria-label="Goh Joo Hin home"><img src="assets/gjh-logo.webp" alt="" width="134" height="59" loading="lazy"><span class="brand-name">Goh Joo Hin</span></a>
+          <p>An independent design concept for Goh Joo Hin Pte Ltd. Not affiliated with or endorsed by GJH.</p>
+        </div>
+        <nav aria-label="Footer">
+          <h2>Explore</h2>
+          <ul>
+            <li><a href="about.html">About GJH</a></li>
+            <li><a href="brands.html">Our Brands</a></li>
+            <li><a href="business.html">Business</a></li>
+            <li><a href="virtual-world.html">Virtual World</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </nav>
+        <div>
+          <h2>Singapore office</h2>
+          <address>8 Gul Avenue<br>Singapore 629652</address>
+        </div>
+        <div>
+          <h2>Official channels</h2>
+          <ul>
+            <li><a href="https://www.gjhglobal.com/" target="_blank" rel="noopener">gjhglobal.com <span class="visually-hidden">(opens in a new tab)</span></a></li>
+            <li><a href="https://www.gjheshop.com/shop/" target="_blank" rel="noopener">GJH eShop <span class="visually-hidden">(opens in a new tab)</span></a></li>
+            <li><a href="https://www.gjhglobal.com/contact-us/" target="_blank" rel="noopener">Official contact page <span class="visually-hidden">(opens in a new tab)</span></a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-base fine-print">
+        <p>Concept v24 · Luxury Digital Experience</p>
+        <p><a rel="related" href="../../../../style-atlas/index.html#gjh-v24">Design reference</a> · <a href="../../../../companies/gjh/index.html">Back to the GJH design gallery</a></p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

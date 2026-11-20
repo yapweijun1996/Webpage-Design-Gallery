@@ -11,6 +11,7 @@ import bpy
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
+from gulong_tins import smooth_gulong_tins
 from mesh import CRAFT, PULSE, SCROLL
 from mili_mock_duck import apply_mili_mock_duck_normals
 from rooms import DESIGNS, LIBRARY, build
@@ -75,6 +76,8 @@ def export(slot, gallery, output):
         obj = batch.object(f"S{slot:02} {name}",finishes[name],name == CRAFT)
         if slot == 2 and name == CRAFT:
             apply_mili_mock_duck_normals(obj, (room.mock_duck_face,))
+        if slot == 7 and name == CRAFT:
+            smooth_gulong_tins(obj, room.gulong_tin_bands)
     for prototype, locations in room.instances:
         holder = bpy.data.objects.new("Shelf stock",None)
         bpy.context.collection.objects.link(holder)
