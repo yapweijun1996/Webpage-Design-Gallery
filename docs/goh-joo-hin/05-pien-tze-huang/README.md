@@ -27,7 +27,8 @@ World origin (30, 0, -6), yaw 0°. Dimensions are authored metres. The [floor pl
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
 | Manufacturer single 3 g unit carton | One enlarged study on the existing centre counter | An unprinted carton with a nearly square front and a folded top replaces the previous rectangular block. Physical measurements, closure and artwork remain pending. [Editable study](../../../models/gjh-pzh-single-carton/README.md) |
-| GJH 10-piece listing | Research reference only | Hold the group model until its package can be distinguished from the manufacturer’s one-unit carton. |
+| Manufacturer ten-unit intermediate carton, 2023 | To the left of the single-unit study | The wide neutral form has an offset film tear strip. The display depth is estimated. [Editable study](../../../models/gjh-pzh-ten-carton/README.md) |
+| GJH 10-piece listing | Research reference only | The listing photo shows a one-unit carton. The current Singapore outer package and its internal grouping remain open. |
 
 Maintain a source-backed distinction between the two package formats.
 

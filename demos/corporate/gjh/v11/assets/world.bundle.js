@@ -8030,7 +8030,7 @@ var roomDetails = {
   },
   S05: {
     file: "s05-herbal-details.glb",
-    bytes: 70160,
+    bytes: 73304,
     roomDetail: true
   },
   S06: {

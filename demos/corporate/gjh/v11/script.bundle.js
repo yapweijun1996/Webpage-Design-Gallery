@@ -7402,7 +7402,7 @@ function animate(now) {
   if (!slotMs)
     return;
   const live = advancing && !modes.paused() || modes.current() === "shelf";
-  const uploadMs = live || renderRequested && (forceRender || !modes.paused()) ? warmModels(player.state) : 0;
+  const uploadMs = live || tierQueue?.pending || renderRequested && (forceRender || !modes.paused()) ? warmModels(player.state) : 0;
   let pose, callbackMs = 0;
   if (live || renderRequested) {
     const renderStart = performance.now();

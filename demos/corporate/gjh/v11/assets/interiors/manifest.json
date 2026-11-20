@@ -3133,9 +3133,9 @@
       {
         "store": "S05",
         "file": "s05-herbal-details.glb",
-        "bytes": 70160,
-        "sha256": "cd293b7dc5f5c027f926c7596a0b047c49b206700c7b65ea609bad0977740c6d",
-        "triangles": 1096,
+        "bytes": 73304,
+        "sha256": "7640d450e8fecb0ed61c425e9f253bc0216444df9b9f79c9c890636f8907b48d",
+        "triangles": 1140,
         "draws": 3,
         "instances": 4,
         "motion": [],
