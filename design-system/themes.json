@@ -1968,6 +1968,7 @@
         "radius-round": "50%",
         "shadow-tick": "0 9px 0 var(--ink)",
         "fold-gradient": "linear-gradient(105deg, var(--paper-2) 0 55%, var(--ink) 55% calc(55% + 2px), transparent calc(55% + 2px))",
+        "lift-stroke": "linear-gradient(to bottom, var(--ink) 0 25%, var(--white) 25% 75%, var(--ink) 75%)",
         "font-finale": "900 1.6rem \"Arial Black\",Impact,sans-serif",
         "type-cover-subtitle": ".55em",
         "type-rail": ".7rem",

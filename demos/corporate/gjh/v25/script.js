@@ -2,56 +2,94 @@
   document.documentElement.classList.add('js');
   const pages = [...document.querySelectorAll('.page')];
   const links = [...document.querySelectorAll('.rail a')];
-  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const params = new URLSearchParams(location.search);
+  const staticLines = params.get('lines') === 'all' || matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LINE_DELAY = 1100;
+  const PANEL_THRESHOLD = .55;
+  if (staticLines) document.documentElement.classList.add('lines-all');
 
   // Each chapter plays its sound effect and speech bubbles by itself while it is on screen.
   pages.forEach((page) => {
     const items = [...page.querySelectorAll('.sfx, .bubble')];
     const live = document.createElement('div');
+    live.className = 'line-announcer';
     live.setAttribute('aria-live', 'polite');
-    live.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)';
+    live.setAttribute('aria-atomic', 'true');
     page.querySelector('.panel').after(live);
+    items.forEach((item) => item.setAttribute('aria-hidden', 'true'));
+
+    const lead = Number(page.dataset.lead || 0);
     let shown = 0;
-    let timer = 0;
-    const reveal = () => {
-      if (shown >= items.length) return;
+    let timer = null;
+    let remaining;
+    let deadline;
+
+    const reveal = (announce) => {
       const item = items[shown++];
       item.classList.add('on');
-      live.textContent = item.textContent;
+      item.removeAttribute('aria-hidden');
+      if (!announce) return;
+
+      // Snapshot the line and its language so translating the panel does not replay it.
+      const message = document.createElement('span');
+      message.lang = document.documentElement.lang;
+      message.textContent = item.textContent;
+      live.replaceChildren(message);
     };
-    const lead = Number(page.dataset.lead || 0);
-    const stop = () => { clearTimeout(timer); clearInterval(timer); timer = 0; };
-    page.play = () => {
-      page.classList.add('is-in');
-      if (timer || shown >= items.length) return;
-      // Let the chapter's own entrance (shutter lift, wide table) land before the first line.
+
+    const scheduleNext = () => {
+      if (timer !== null || shown >= items.length) return;
+      if (remaining === undefined) {
+        const custom = items[shown].dataset.delayMs?.trim();
+        const delay = custom ? Number(custom) : NaN;
+        const entrance = shown === 0 ? lead : 0;
+        // Preserve the immediate first beat (or the chapter's entrance lead) by default.
+        const validDelay = Number.isFinite(delay) && delay >= 0 && delay <= 2_147_483_647 - entrance;
+        remaining = entrance + (validDelay ? delay : shown === 0 ? 0 : LINE_DELAY);
+      }
+      deadline = performance.now() + remaining;
       timer = setTimeout(() => {
-        reveal();
-        timer = setInterval(() => {
-          reveal();
-          if (shown >= items.length) stop();
-        }, LINE_DELAY);
-      }, shown === 0 ? lead : 0);
+        timer = null;
+        remaining = undefined;
+        reveal(true);
+        scheduleNext();
+      }, remaining);
     };
-    page.pause = stop;
-    page.showAll = () => { page.classList.add('is-in'); stop(); while (shown < items.length) reveal(); };
+
+    page.play = () => {
+      page.classList.add('is-in', 'is-playing');
+      scheduleNext();
+    };
+    page.pause = () => {
+      page.classList.remove('is-playing');
+      if (timer === null) return;
+      clearTimeout(timer);
+      timer = null;
+      remaining = Math.max(0, deadline - performance.now());
+    };
+    page.showAll = () => {
+      page.classList.add('is-in');
+      page.pause();
+      while (shown < items.length) reveal(false);
+    };
   });
-  if (calm || params.get('lines') === 'all') pages.forEach((page) => page.showAll());
 
   // Start a chapter's lines when most of its picture is visible, and pause them when it leaves.
-  const panels = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      const page = entry.target.closest('.page');
-      if (entry.isIntersecting) page.play(); else page.pause();
-    });
-  }, { threshold: .55 });
-  pages.forEach((page) => panels.observe(page.querySelector('.panel')));
+  if (staticLines) {
+    pages.forEach((page) => page.showAll());
+  } else {
+    const panels = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        const page = entry.target.closest('.page');
+        if (entry.intersectionRatio >= PANEL_THRESHOLD) page.play(); else page.pause();
+      });
+    }, { threshold: PANEL_THRESHOLD });
+    pages.forEach((page) => panels.observe(page.querySelector('.panel')));
+  }
 
   // Gutter flourishes (page-turn fold, quiet gap) play once as they scroll into view.
   const gutters = [...document.querySelectorAll('[data-reveal]')];
-  if (calm || params.get('lines') === 'all') gutters.forEach((node) => node.classList.add('is-in'));
+  if (staticLines) gutters.forEach((node) => node.classList.add('is-in'));
   const reveals = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (!entry.isIntersecting) return;
