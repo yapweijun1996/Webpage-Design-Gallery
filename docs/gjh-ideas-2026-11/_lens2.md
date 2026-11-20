@@ -1,0 +1,2 @@
+LENS 2 — Art direction and visual benchmarks. Research award-winning (Awwwards/FWA/Apple/Aesop/Muji/Kinfolk-style) brand and corporate sites, Singapore heritage visual culture (kopitiam tiles, Peranakan, shophouse, 1960s-80s trade ads, Nanyang aesthetics), photography/illustration approaches that look expensive rather than collage-like. Propose looks that are cinematic, one-hero-image-per-screen, with a precise palette, type pairing (free web fonts), and an image-generation-friendly art direction.
+Output file: docs/gjh-ideas-2026-11/worker2-art-direction.md
