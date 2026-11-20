@@ -1,0 +1,47 @@
+{
+  "scope": "Two photo-backed unprinted 15 oz tin form studies. Exact dims, closure tooling and GJH retail editions remain open.",
+  "referenceImages": [
+    {
+      "url": "https://www.hormel.com/brands/hormel-chili/wp-content/uploads/sites/4/Web_800_Chili-no-Beans_15.png",
+      "sha256": "d0a47fe253b5cd5fe9236643ef707d18ce872bfe787ba61a58c17c433dad627f"
+    },
+    {
+      "url": "https://www.hormel.com/brands/hormel-chili/wp-content/uploads/sites/4/Web_800_Chili-with-Beans_15.png",
+      "sha256": "0317278b9a8af317995f1c5f60f8ad6fca6825c66f4424b23a97c535cf1bb41f"
+    }
+  ],
+  "blender": {
+    "version": "5.1.2",
+    "buildMethod": "Blender MCP background export",
+    "editableSource": {
+      "file": "models/gjh-hormel-chili/hormel-chili.blend",
+      "sha256": "1da5c1b93bbfa0350717633d9abdcaa08fd964c8983a74488af6fb6cf1cede22"
+    },
+    "reviewGlbSha256": "f3f0f031edb3f6811ba16770a07fc91ac5eacc1125816d0f01308c9bd570dbbf"
+  },
+  "runtime": {
+    "file": "demos/corporate/gjh/v11/assets/interiors/s11-deli-details.glb",
+    "sha256": "4d0c1dc4aee755e2cae09c0723b92cbac50be70867fdc82fc275c14e335a39e3",
+    "detailTriangles": 1564,
+    "wholeRoomTriangles": {
+      "low": 2610,
+      "balanced": 3178,
+      "detailed": 3274
+    }
+  },
+  "verification": {
+    "localBuild": "6512bdb09857518c",
+    "views": {
+      "1440-S11-focal.jpg": "6bc76de0e7963611a33847f2f9f8ec26a4668c3436022f381951375b23ef3f42",
+      "1440-S11-pair-tin.jpg": "2dd90978883384ea92a9d10ace450f74db16d6b3c1fe714e574f613f43eceaf2",
+      "1440-S11-story.jpg": "912e159dfed9eaa67cdb824200b00c5b10de598e4c30efbdf2faa8e9ddf4f090",
+      "390-S11-no-beans-tin.jpg": "32a603736985fae943cb7f5e0559d3e70e01dd5713af592d19b63212e6f0a4cd",
+      "390-S11-story.jpg": "e903704983ab724abde78f69748cbc26f89801115a1b9280d3cf61268577d0c5",
+      "390-S11-with-beans-tin.jpg": "658ce511311c69d716f76d5389aad2c47647769fc1c45e33d2301c7bdd1966ff",
+      "tins-front.png": "d85d92ac7f6b03292f50f2e2053aaacef7becda35031c9f0d0603e2c326e0a30",
+      "tins-three-quarter.png": "5621ae0b26f54d7952bee28a7b1b09426a5128ade911452fea8c59478bde9ab2"
+    },
+    "chrome": "1440\u00d7900 desktop and 390\u00d7844 touch-emulated Chrome passed map entry, story, model view, exit and GLB response.",
+    "visualReview": "GPT-6.2 Astra. Studio front and three-quarter comparison."
+  }
+}

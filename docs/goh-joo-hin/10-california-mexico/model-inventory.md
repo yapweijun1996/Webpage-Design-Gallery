@@ -19,7 +19,9 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 ## Product-specific inventory
 
-| Product | Placement | Runtime and proposed model |
+| Product | Placement in slot-local XYZ metres | Model status |
 | --- | --- | --- |
-| Red California Mexico Abalone 454g | Red display pocket on the shell’s concourse-facing edge | Pending measured SKU model and current Red packaging edition. |
-| Black California Mexico Abalone 454g | Separate black display pocket | Pending matched SKU model. Do not substitute the New Moon Mexico tin. |
+| [Red California Mexico Abalone 454 g](https://www.gjheshop.com/product/red-california-mexico-abalone-454g/) | Left rear shelf at (-2.69, 2.1125, -4.070) | Unprinted red form study. Exact measurements and current authorized artwork remain open. |
+| [Black California Mexico Abalone 454 g](https://www.gjheshop.com/product/black-california-mexico-abalone-454g/) | Left rear shelf at (-1.51, 2.1125, -4.070) | Unprinted near-black form study. Exact measurements and current authorized artwork remain open. |
+
+The [editable source](../../../models/gjh-california-mexico-tins/README.md) uses a photo-estimated Ø75 × 120 mm envelope and supplies the geometry to the S10 detail exporter.

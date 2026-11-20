@@ -1,0 +1,48 @@
+{
+  "scope": "Three photo-backed shelf forms. Physical dimensions, verified closure count, transparent pack treatment and authorized labels remain open.",
+  "referenceImages": [
+    {
+      "url": "https://www.gjheshop.com/wp-content/uploads/2024/03/Chondro-Max-300T-Box-Bottle-white.jpg",
+      "sha256": "771515c77d5f5af4b46909edefb4af3fd3260645ddeedaa98ac3aaf93d17a62e"
+    },
+    {
+      "url": "https://www.gjheshop.com/wp-content/uploads/2024/03/Lively-Healthy-Glucosamine-Chondroitin-180T-Bottle.jpg",
+      "sha256": "c9a438ac9bc902eed9337a87f89ee3dded430c87194ae25610721c28b4230b5a"
+    }
+  ],
+  "blender": {
+    "version": "5.1.2",
+    "buildMethod": "Blender MCP background export",
+    "editableSource": {
+      "file": "models/gjh-zeria-packs/zeria-packs.blend",
+      "sha256": "0cc39414ef483766b5b5dd6cfaf15fb575adb1f7b6ac518655e645dcb0053e03"
+    },
+    "reviewGlbSha256": "bbbf490644c663ed465d10f3f5da7dfac7d8160b089e363bc35be5cdb1bcd4ad"
+  },
+  "runtime": {
+    "file": "demos/corporate/gjh/v11/assets/interiors/s12-herbarium-details.glb",
+    "sha256": "362c1ee7118c35947f986530196c84aabfeb25c280dd92bb2aa8d7d0454d51cb",
+    "detailTriangles": 1498,
+    "wholeRoomTriangles": {
+      "low": 2746,
+      "balanced": 3434,
+      "detailed": 3946
+    }
+  },
+  "verification": {
+    "localBuild": "931948f65ba9f026",
+    "views": {
+      "1440-S12-chondro-pair.jpg": "962a3568ea16811ededfde2daf7eee2a8fe919b73e064e8b4c25fa337c457909",
+      "1440-S12-focal.jpg": "eaeef03ee34e178de7c2c63695f98180385348cdbae22eeae2931a59ea6f3cb5",
+      "1440-S12-lively-bottle.jpg": "96d9b81e3abb3b60f28216e3d7cbaf33475e3c93b93e7b1ff53ba289dd2570f2",
+      "1440-S12-story.jpg": "88fbce5d6a0880432949780a4b5dd228e5d0586064ae3b11b23c3fa18660eda6",
+      "390-S12-chondro-pair.jpg": "faf2ee263ab3b3a349547eee2f5e2cd40b16271faa7d8af127100fdd986b4cf5",
+      "390-S12-lively-bottle.jpg": "56cfb92a368bbf65d7c16df1762ea1a0880a6feff53351a464ee546b99d65090",
+      "390-S12-story.jpg": "7d5378149e499772d4a55266818f058af5097a7e08597b9ca293329eebdb3f12",
+      "packs-front.png": "2a2cd8ad5a329046867dd9abe6444d026b7a99f48626d1b4aac0cbf46aaec39b",
+      "packs-three-quarter.png": "59c1f557dac1aff769289b03bc183119f3b2796f11b6700d006b64082f4d782e"
+    },
+    "chrome": "1440\u00d7900 desktop and 390\u00d7844 touch-emulated Chrome passed map entry, story, model view, exit and GLB response.",
+    "visualReview": "GPT-6.2 Astra passed proportions, curvature, and distinguishable caps and body colours from the studio comparison."
+  }
+}

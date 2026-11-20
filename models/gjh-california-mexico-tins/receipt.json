@@ -1,0 +1,65 @@
+{
+  "scope": "Photo-estimated unprinted forms. Caliper dimensions, closure tooling and artwork remain open.",
+  "referenceImages": [
+    {
+      "url": "https://www.gjheshop.com/wp-content/uploads/2025/05/13-Red-California-Mexico-Abalone-454g-01.jpg",
+      "sha256": "8f36f385d53b5c85abc7d8d0f0091bfa827e5fb335762ff781f67f0425cb02aa"
+    },
+    {
+      "url": "https://www.gjheshop.com/wp-content/uploads/2025/05/13-Red-California-Mexico-Abalone-454g-02.jpg",
+      "sha256": "fbcbfaf9d93b4f97481c32f38c3a157e4206385fa15616b39b41b88ab49ba68a"
+    },
+    {
+      "url": "https://www.gjheshop.com/wp-content/uploads/2025/05/13-Red-California-Mexico-Abalone-454g-03.jpg",
+      "sha256": "7cbfa3ac29bf26bcbbf90b5924056c8a62464e006b4bfcec591dfe8727440280"
+    },
+    {
+      "url": "https://www.gjheshop.com/wp-content/uploads/2025/05/14-Black-California-Mexico-Abalone-454g-01.jpg",
+      "sha256": "782e10bda5df6621eed625cfd77cc936a1ed6804e8da63597fb6dc69eabda607"
+    },
+    {
+      "url": "https://www.gjheshop.com/wp-content/uploads/2025/05/14-Black-California-Mexico-Abalone-454g-02.jpg",
+      "sha256": "ed22d4c405df9563f57b2c686fb3bfc29e97774133ba89858235fe77015f424f"
+    },
+    {
+      "url": "https://www.gjheshop.com/wp-content/uploads/2025/05/14-Black-California-Mexico-Abalone-454g-03.jpg",
+      "sha256": "1308b8143d075724e71626c416f2b3cabf52edeac839551cf279491819298f9a"
+    }
+  ],
+  "blender": {
+    "version": "5.1.2",
+    "buildMethod": "Blender MCP background export",
+    "editableSource": {
+      "file": "models/gjh-california-mexico-tins/california-mexico-tins.blend",
+      "sha256": "b238a38b279049107ccf789e423c85fea1416ccee32328a22bc996503c01126e"
+    },
+    "reviewGlbSha256": "46ef670ea4e951dcc0beb8af161fceaeef93e5dfbf0ab5bd80a84040a54733c6"
+  },
+  "runtime": {
+    "file": "demos/corporate/gjh/v11/assets/interiors/s10-coast-details.glb",
+    "sha256": "905719cc3097ee0ac5148d01dd80095336869374293d4687f9c2fc8b8f37ad28",
+    "detailTriangles": 1164,
+    "specimenTriangles": 284,
+    "wholeRoomTriangles": {
+      "low": 2772,
+      "balanced": 4352,
+      "detailed": 7300
+    }
+  },
+  "verification": {
+    "localBuild": "ef9bbe527835efd9",
+    "visualReview": "GPT-6.2 Astra passed the unprinted in-room form scope. Fine rim glints and closure detail remain unresolved.",
+    "views": {
+      "tins-front.png": "84f9a142abbaf68c00d097926727fe30723c821089527d50d0dfbf6225cbb219",
+      "tins-three-quarter.png": "8155115fcfd2ea35161cd8f04b65ac03ee088ad60cfbc8fe6ce3c424f25fe116",
+      "390-S10-black-tin.jpg": "2aa015ed3063ff299085a791a72cfb1aeea802f8826e234075edb4cd90868c39",
+      "390-S10-red-tin.jpg": "11ccefbbb138fe369bde66e9dec88f6facf5f6a473a8299abc36f21c225ed150",
+      "390-S10-story.jpg": "fca7ccc0fcb546426d172198a54025e67ce844222aeae2895f24dc77fb35b865",
+      "1440-S10-focal.jpg": "3551a6e62017bf5b50f36f180023bf9ddb9cecf2fdc602a6be9da6925799b9f3",
+      "1440-S10-pair-tin.jpg": "8c2aa76e0724b84d101d246da5028db00b4c9ee86465b5a4984414d0005eec1d",
+      "1440-S10-story.jpg": "f01ee6469f2ad9b599fefaa83fc31760341a2e0558e8ae8add96de093a60f5f3"
+    },
+    "chrome": "1440\u00d7900 Detailed keyboard and 390\u00d7844 Low touch emulation passed map, doorway, story, specimen view, exit and GLB response.",
+    "reviewRender": "Blender Cycles CPU, 14 samples, denoised, 640\u00d7500 orthographic front and three-quarter under studio light."
+  }
+}

@@ -21,5 +21,7 @@ Product-specific models and pending source work are listed in the [shop brief](R
 
 | Product | Placement | Runtime and proposed model |
 | --- | --- | --- |
-| HORMEL Chili No Beans 15 oz | Front-facing side shelf nearest the packing bench | Pending measured SKU model. Manufacturer confirms exact reference size. |
-| HORMEL Chili With Beans | Neighbouring comparison facing | Pending exact size and selected reference pack for geometry. |
+| HORMEL Chili No Beans 15 oz | Left rear shelf, left comparison facing | Unprinted form study from the official 15 oz front view. Physical can and closure measurements remain open. |
+| HORMEL Chili With Beans 15 oz | Left rear shelf, right comparison facing | Separate unprinted form study from the official 15 oz front view. GJH range, physical dimensions, and art remain open. |
+
+[Editable 15 oz tins and verification](../../../models/gjh-hormel-chili/README.md)

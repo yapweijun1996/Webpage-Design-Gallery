@@ -100,22 +100,27 @@ S08 passed on Pages build `3b578e6230629f54`. Desktop and touch-emulated Chrome 
 
 [Design and runtime](10-california-mexico/README.md) · [Inventory](10-california-mexico/model-inventory.md)
 
-- [ ] **Red California Mexico Abalone 454 g.** Verify measured can, lid and current authorized Red artwork.
-- [ ] **Black California Mexico Abalone 454 g.** Verify the corresponding separate Black pack. The New Moon Mexico tin has a different product identity.
+- [x] **Red and Black 454 g unprinted form studies.** The [editable pair](../../models/gjh-california-mexico-tins/README.md) uses a photo-estimated Ø75 × 120 mm display envelope. Both specimens were viewed in desktop and touch-emulated Chrome.
+- [ ] **Red California Mexico Abalone 454 g retail pack.** Verify the measured can, closure and current authorized artwork for the [Red catalogue product](https://www.gjheshop.com/product/red-california-mexico-abalone-454g/).
+- [ ] **Black California Mexico Abalone 454 g retail pack.** Verify the measured can, closure and current authorized artwork for the [Black catalogue product](https://www.gjheshop.com/product/black-california-mexico-abalone-454g/).
+
+The S10 release passed both Chrome routes on Pages build `ef9bbe527835efd9`. The public GLB matched the local export SHA-256. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44650655253)
 
 ## S11 Hormel
 
 [Design and runtime](11-hormel/README.md) · [Inventory](11-hormel/model-inventory.md)
 
-- [ ] **Chili No Beans 15 oz.** Confirm actual tin dimensions and current packaging.
-- [ ] **Chili With Beans.** Lock pack size and edition before building its separate specimen. Manufacturer resources identify references while current GJH range remains open.
+- [x] **Chili No Beans and With Beans 15 oz, unprinted form studies.** Each [editable tin](../../models/gjh-hormel-chili/README.md) pairs a straight wall with a projecting gold top rim and silver base. Both manufacturer front photos identify 15 oz retail references.
+- [ ] **Chili No Beans 15 oz retail match.** Obtain a measured physical sample, closure views and current authorized artwork.
+- [ ] **Chili With Beans 15 oz retail match.** Confirm the intended GJH pack and edition. Obtain a measured sample, closure views and current authorized artwork.
 
 ## S12 Zeria
 
 [Design and runtime](12-zeria/README.md) · [Inventory](12-zeria/model-inventory.md)
 
-- [ ] **Lively & Healthy 180 Tablets.** Verify bottle profile, closure and exact retail packaging.
-- [ ] **Chondro Max 300 Tablets.** Verify the bottle and outer carton as two pieces, using the current GJH product gallery as a reference.
+- [x] **Chondro Max 300 and Lively & Healthy 180 unprinted form studies.** Three [editable specimens](../../models/gjh-zeria-packs/README.md) distinguish the individual bottles, closures and Chondro outer carton.
+- [ ] **Lively & Healthy 180 Tablets retail match.** Verify the physical bottle dimensions, exact closure tooling and authorized packaging.
+- [ ] **Chondro Max 300 Tablets retail match.** Verify physical bottle and carton dimensions, exact closure tooling, clear material and authorized packaging.
 
 ## S13 Sony
 
