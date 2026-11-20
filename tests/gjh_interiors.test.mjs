@@ -724,9 +724,14 @@ test('studio substitution retains the exact authored collision boxes', async t =
   globalThis.document = {addEventListener() {}};
   t.after(()=>{ delete globalThis.window; delete globalThis.document; });
   const studio = await createExpandedInteriors(T,expandedLayout,new T.Scene());
-  // Compared with the previous 187-box snapshot. Only the GLB footprints at
-  // indices 65 (S08), 134 (S13) and 186 (S17) moved with their furniture.
-  assert.equal(studio.collisionBoxes.length,187);
-  assert.equal(sha(JSON.stringify(studio.collisionBoxes.map(({replacedDisplay,...geometry})=>geometry))),
+  const footprints = studio.collisionBoxes.map(({replacedDisplay,...geometry})=>geometry);
+  const cabinet = footprints.find(box => box.x === 44 && box.z === 29.55
+    && Math.abs(box.depth - 1.434) < 1e-8);
+  assert(cabinet, 'S15 hybrid cabinet has its own footprint');
+  assert.equal(cabinet.y, .5625);
+  assert.equal(cabinet.height, .963);
+  assert(Math.abs(cabinet.width - .489) < 1e-8);
+  assert.equal(footprints.length,188);
+  assert.equal(sha(JSON.stringify(footprints.filter(box => box !== cabinet))),
     '320ca9b5beda1050df16f1a7b8ff868892b694d85eddd7a3980e5697cd1b5322');
 });

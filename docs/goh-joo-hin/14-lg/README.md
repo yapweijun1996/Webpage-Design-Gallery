@@ -26,7 +26,7 @@ World origin (40, 0, 20), yaw -90°. Dimensions are authored metres. The [floor 
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| LG OLED55C5PSA | Scaled product display against the rear screen wall | Pending 55-inch exact SKU model. Manufacturer dimensions without stand 1222 × 703 × 45.1 mm. Existing large screen is an architectural fixture. |
+| LG OLED55C5PSA | Scaled product display against the rear screen wall | Stand-free case matches the manufacturer outer envelope. Stepped rear housing, VESA mounts and visible recesses are modeled. Exact Singapore jack placement remains open. |
 
 The Home Entertainment concept uses display hardware only. The generic fridge and laundry scenery have no product SKU identity.
 
@@ -44,10 +44,12 @@ The screen shows an original dawn-coast still generated for this design study. I
 
 ## Runtime acceptance
 
-Both viewport flows passed with the current display. Proposed TV identity and room seating require a model and pose pass.
+Both viewport flows passed with the two installed displays. The 55-inch cabinet uses a dark inactive face. The larger architectural screen shows the existing abstract light artwork.
 
 ## Catalogue exhibit
 
-The side wall shows a 1,222 × 703 × 45.1 mm unprinted cabinet study beside the enlarged gallery display. The story links to LG Singapore's OLED55C5PSA page and distinguishes the screen scales.
+The side wall shows the 1,222 × 703 × 45.1 mm stand-free cabinet beside the larger gallery display. The story links to LG Singapore's OLED55C5PSA page and distinguishes the screen scales.
 
 Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action opened the reference and displayed the source link. [Runtime Chrome views](exhibit-runtime.webp)
+
+[Editable Blender sources and QA receipt](../../../models/gjh-lg-oled/README.md)

@@ -6810,8 +6810,6 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
         if (s < 0) {
           const sampleX = -(side - 0.72);
           box(sampleX, 0.991, mid, 0.2, 0.026, 0.22, walnut);
-          box(sampleX, 1.0532, mid, 0.0118, 0.0984, 0.0565, charcoal);
-          box(sampleX + 0.0062, 1.066, mid, 0.001, 0.055, 0.045, 2240310);
         } else
           box(s * (side - 0.72), 1.19, mid, 0.28, 0.48, 0.3, charcoal);
       }
@@ -6838,15 +6836,7 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       for (const x of [0.46, 1.73])
         box(x, 0.51, mid - 0.87, 0.13, 0.84, 0.13, charcoal);
       box(1.1, 1.1, mid - 0.93, 1.63, 0.36, 0.72, charcoal);
-      const keyboardZ = mid - 0.69;
-      box(1.1, 1.3215, keyboardZ, 0.93, 0.083, 0.258, charcoal);
-      for (let key = 0;key < 36; key++) {
-        const keyX = 1.1 + (key - 17.5) * 0.0233;
-        box(keyX, 1.366, keyboardZ + 0.071, 0.0213, 0.006, 0.104, pearl);
-        if (key < 35 && [0, 1, 3, 4, 5].includes(key % 7)) {
-          box(keyX + 0.01165, 1.374, keyboardZ + 0.038, 0.012, 0.02, 0.066, 1909796);
-        }
-      }
+      block(1.55, 0.5625, -4, 1.434, 0.963, 0.489);
       box(1.1, 0.61, mid + 0.16, 0.99, 0.16, 0.49, charcoal);
       for (const x of [0.74, 1.46])
         box(x, 0.33, mid + 0.16, 0.08, 0.48, 0.36, walnut);
@@ -6856,8 +6846,6 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       replace(() => cabinet(-1.62, island, 1.48, 0.78, 0.98, base, white), base);
       cabinet(1.62, island + 0.32, 1.48, 0.78, 0.98, base, white);
       box(1.06, 1.045, island + 0.54, 0.3, 0.015, 0.22, 6452306);
-      column(0.978, 1.078, island + 0.52, 0.00725, 0.0505, 8955434);
-      column(1.13, 1.057, island + 0.63, 0.016, 0.0083, pearl);
       sideShelf(-1, silver, "pack");
       ringLight(0, mid, 1.14, 3.69);
       plant(side - 0.71, front - 1.08, 1.47);
@@ -6865,25 +6853,7 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
     case 17:
       for (const x of [-side + 0.71, side - 0.71])
         shelf(x, rear + 0.24, 0.99, "pack", charcoal);
-      {
-        const top = circleIsland(0, island, 1.12, 0.85, base);
-        const handsets = [
-          { x: -0.32, width: 0.048, height: 0.159, depth: 0.03, screen: 15247198, baseWidth: 0.082 },
-          { x: 0.32, width: 0.055, height: 0.172, depth: 0.034, screen: 6719665, baseWidth: 0.151 }
-        ];
-        for (const { x, width: width2, height, depth: depth2, screen, baseWidth } of handsets) {
-          const front2 = island + depth2 / 2;
-          box(x, top + 0.013, island, baseWidth, 0.027, 0.088, charcoal);
-          box(x, top + 0.026 + height / 2, island, width2, height, depth2, 3489085);
-          box(x, top + 0.026 + height * 0.72, front2 + 0.001, width2 * 0.69, height * 0.235, 0.002, screen);
-          for (let row = 0;row < 4; row++)
-            for (const col of [-1, 0, 1]) {
-              box(x + col * width2 * 0.223, top + 0.045 + row * height * 0.075, front2 + 0.002, width2 * 0.15, 0.006, 0.004, 7964548);
-            }
-        }
-        for (const dx of [0.04, 0.059])
-          box(0.32 + dx, top + 0.029, island + 0.014, 0.013, 0.006, 0.013, 7898237);
-      }
+      circleIsland(0, island, 1.12, 0.85, base);
       ringLight(0, mid, 1.24, 3.56);
       ringLight(0, mid, 0.72, 3.75);
       plant(-side + 0.82, front - 0.8, 1.42);
@@ -8011,27 +7981,27 @@ var roomDetails = {
   },
   S13: {
     file: "s13-listening-details.glb",
-    bytes: 23540,
+    bytes: 104608,
     roomDetail: true
   },
   S14: {
     file: "s14-living-details.glb",
-    bytes: 14064,
+    bytes: 38836,
     roomDetail: true
   },
   S15: {
     file: "s15-recital-details.glb",
-    bytes: 37608,
+    bytes: 58748,
     roomDetail: true
   },
   S16: {
     file: "s16-power-details.glb",
-    bytes: 22604,
+    bytes: 107220,
     roomDetail: true
   },
   S17: {
     file: "s17-telephone-details.glb",
-    bytes: 36748,
+    bytes: 145016,
     roomDetail: true
   }
 };

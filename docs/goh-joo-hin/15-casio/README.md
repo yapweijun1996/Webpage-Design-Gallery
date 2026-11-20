@@ -26,8 +26,8 @@ World origin (40, 0, 28), yaw -90°. Dimensions are authored metres. The [floor 
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| Casiotone CT-S1BK | Right-side instrument stand | Pending exact casing, control and speaker layout. Manufacturer dimensions 930 × 258 × 83 mm. Existing generic 61-key asset is a geometry candidate. |
-| CELVIANO Grand Hybrid GP-510BP | Cabinet-form sample beyond the recital anchor | Pending straight cabinet model with three pedals. The curved stage grand has a materially different form. |
+| Casiotone CT-S1BK | Right-side instrument stand | Installed 930 × 258 × 83 mm study with 61 keys, top controls and a dark textile speaker deck. |
+| CELVIANO Grand Hybrid GP-510BP | Cabinet-form sample beyond the recital anchor | Installed straight cabinet at (1.55, 0.081, -4.00). The covered instrument uses the published envelope and three visible pedals. |
 
 Use the Casio product and AR reference to separate the instrument forms.
 
@@ -43,10 +43,12 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 
 ## Runtime acceptance
 
-Chrome touch and desktop evidence support the right route. Instrument audio, matching models and Sit remain proposed.
+Desktop and touch-emulated Chrome passed the story, the two model views and the return route. Instrument audio and Sit remain separate work.
 
 ## Catalogue exhibit
 
-The recital grand remains the room's architectural anchor. The adjacent station now has a simplified 61-key keyboard form in the published CT-S1BK dimensions. The story compares the portable keyboard with the three-pedal GP-510BP cabinet form and links to Casio Music Singapore.
+The recital grand remains the room's architectural anchor. The adjacent station holds the CT-S1BK form study. The separate GP-510BP cabinet sits in the rear alcove. The story compares the portable keyboard with the three-pedal GP-510BP cabinet form and links to Casio Music Singapore.
 
 Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action opened the reference and displayed the source link. [Runtime Chrome views](exhibit-runtime.webp)
+
+[Editable Blender sources and QA receipt](../../../models/gjh-casio-instruments/README.md)

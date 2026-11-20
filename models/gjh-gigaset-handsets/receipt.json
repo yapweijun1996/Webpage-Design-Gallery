@@ -1,0 +1,58 @@
+{
+  "scope": "Two separate unmarked handset and dock sets. The A170 base axis order is inferred from the photo. Key legends and precise materials remain open.",
+  "referenceImages": [
+    {
+      "url": "https://www.gigaset.com/media/catalog/product/cache/12/image/1800x/040ec09b1e35df139433887a97daa66f/a/1/a170_black_tl_1_3.jpg",
+      "sha256": "b1f4c32a52a0b46b0253e86b678e8f1b2f2d9a157283b4a23a423302828db75b"
+    },
+    {
+      "url": "https://www.gigaset.com/media/catalog/product/cache/12/image/1800x/040ec09b1e35df139433887a97daa66f/a/1/a170_black_fr_4.jpg",
+      "sha256": "921d4266d7030ddd05e28f4d6a8d50b3410f185242f114d10eb0eb2f44f725d6"
+    },
+    {
+      "url": "https://gse.gigaset.com/typo3temp/_processed_/csm_Produktdeteilseite-COMFORT-550-1200x1200_2022_6.1-INT_b7da359df4.jpg",
+      "sha256": "25ce7585649bf3c0e9f514135298e0e895650a942b8a016de206cdb8e34ebff2"
+    },
+    {
+      "url": "https://gse.gigaset.com/fileadmin/legacy-assets/CustomerCare/Manuals/COMFORT_5xx_analog/A31008-M3001-L101-1-7619_en_IE-UK.pdf",
+      "sha256": "7821c6930c4ec2fdf83e5445c4c11d43ac01b4d617670d775454b3715289bfed"
+    }
+  ],
+  "blender": {
+    "version": "5.1.2",
+    "buildMethod": "Blender MCP background export",
+    "editableSource": {
+      "file": "models/gjh-gigaset-handsets/gigaset-handsets.blend",
+      "sha256": "a149b2efe5bbab237cedd7d1aa5cce6e0488dbe8edf9577a972830da561a0a0f"
+    },
+    "reviewGlbSha256": "939ed1c44c8ccc466d302d8924c5b9f4d4e962c24fcda1e30b2a3760316f96c0"
+  },
+  "runtime": {
+    "file": "demos/corporate/gjh/v11/assets/interiors/s17-telephone-details.glb",
+    "sha256": "8835a8cbdfa9dfcbf07a1f98493dd65c856d85a08d5a1a0fe861a5a1fe6723ca",
+    "detailTriangles": 1992,
+    "wholeRoomTriangles": {
+      "low": 2798,
+      "balanced": 3386,
+      "detailed": 3890
+    }
+  },
+  "verification": {
+    "localBuild": "2a5c452460ef78fd",
+    "views": {
+      "1440-S17-550a.jpg": "72567eea90976897277a45d2bd1cf1343bf3f9e079483dfcf78edba0b41654a2",
+      "1440-S17-a170.jpg": "b09c17ea6fd8097661a508a51eb95a0f1fa5151f6d5d97f96846e02e499d5f9e",
+      "1440-S17-focal.jpg": "6b12cf182d0877a8b2c6f884e955a6d50917813bc745a74b998974fff2656c1a",
+      "1440-S17-story.jpg": "30e9293ae8a7cb0ae6de8e02c8f3c1cb09fe441fb21f24d677ae889a82555ce2",
+      "390-S17-550a.jpg": "ec029f19c76fe03c1f9d57ffe12f3d87c8d64894db956e127da246d748e882a8",
+      "390-S17-a170.jpg": "e0b8133a3388b935c125b435ed79a2da08d523c5b951216c6013f234d5f84da9",
+      "390-S17-story.jpg": "681a06aeef031a4e3f591c9995ffc44f877db2f35009b48773aaa042df649081",
+      "specimen-a170-front.png": "5c5e81c6172ceb6efb015a2fd4d83b7d3cfe520696d6b459d869209ef9722d66",
+      "specimen-a170-three-quarter.png": "44994ff2b2679de17fefb7186d19c077f8cb51ffb1c1a772d64b072d18ae7e95",
+      "specimen-comfort-dock-controls.png": "ef8c7fc218c1dfa14463e1b2c9bbf450368ecedd1d5b2c492cb8aced62c4e641",
+      "specimen-comfort-front.png": "f5b085afaa31bb50094dd6baeaa14445745ba68ad80026d64c8762eae33a0ee0"
+    },
+    "chrome": "1440\u00d7900 desktop and 390\u00d7844 touch-emulated Chrome passed map entry, story, model view, exit and GLB response.",
+    "visualReview": "Independent GPT-6.2 Astra passed both sets for the static room viewing scale after revisions to the A170 cradle, dial pad and COMFORT base. Precise cradle curvature, seat depth and key legends remain open."
+  }
+}

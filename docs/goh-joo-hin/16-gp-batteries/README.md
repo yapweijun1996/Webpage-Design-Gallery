@@ -26,9 +26,9 @@ World origin (40, 0, 36), yaw -90°. Dimensions are authored metres. The [floor 
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| GP Ultra+ Alkaline AA | Rear power shelf and one native-size front sample | Pending cell and current paper-pack geometry. Cell form 14.5 × 50.5 mm from manufacturer. |
-| GP eTag Smart Tracker | Small sample next to the eyelet | Pending exact tracker casing. Manufacturer example from Malaysia, Singapore availability unverified. |
-| GP CR2032 | Separate tracker accessory | Pending low-detail coin-cell geometry distinct from AA. |
+| GP Ultra+ Alkaline AA | Right demo plinth | The GP15AUP maximum envelope and raised positive terminal are modeled. Paper-pack revision and artwork remain open. |
+| GP eTag Smart Tracker | Right demo plinth | The white GP Malaysia tracker form has a contoured face and cover seam. Aperture placement and Singapore availability remain open. |
+| GP CR2032 | Right demo plinth, centre | Unmarked Ø20 × 3.2 mm disk with stepped underside. Packaging and markings remain open. |
 
 Do not turn the oversized eyelet architecture into a product label.
 
@@ -44,10 +44,12 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 
 ## Runtime acceptance
 
-Route was verified at two screen sizes. Exact package and tracker forms remain proposed.
+Both viewports confirmed the three plinth specimens and return route.
 
 ## Catalogue exhibit
 
-The eyelet room includes separate unprinted AA and eTag specimens at their published sizes. The catalogue story distinguishes the AA battery from the eTag's replaceable CR2032 and links to the GP Ultra+ AA specification.
+The right demo plinth holds separate unprinted AA, white eTag and CR2032 models at their published sizes. The catalogue story distinguishes the AA battery from the eTag's replaceable CR2032 and links to the GP Ultra+ AA specification.
 
 Desktop and 390 px touch-emulated Chrome entered through the existing doorway, reached the display and returned to the arcade. The Story action opened the reference and displayed the source link. [Runtime Chrome views](exhibit-runtime.webp)
+
+[Editable Blender sources and QA receipt](../../../models/gjh-gp-power/README.md)

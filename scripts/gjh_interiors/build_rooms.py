@@ -12,12 +12,14 @@ import bpy
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
 from california_mexico_tins import smooth_california_mexico_tins
+from gp_power_models import smooth_gp_profiles
 from gulong_tins import smooth_gulong_tins
 from hormel_chili_tins import smooth_hormel_chili_tins
-from mesh import CRAFT, PULSE, SCROLL
+from mesh import CRAFT, PULSE, SCROLL, smooth_face_ranges
 from mili_mock_duck import apply_mili_mock_duck_normals
 from rooms import DESIGNS, LIBRARY, build
 from skippy_jars import smooth_skippy_heels
+from sony_audio_models import smooth_headphones
 from zeria_packs import smooth_zeria_bottles
 
 
@@ -90,6 +92,12 @@ def export(slot, gallery, output):
             smooth_hormel_chili_tins(obj, room.hormel_chili_tin_bands)
         if slot == 12 and name == CRAFT:
             smooth_zeria_bottles(obj, room.zeria_bottle_bands)
+        if slot == 13 and name == CRAFT:
+            smooth_headphones(obj, room.sony_headphone_parts)
+        if slot == 16 and name == CRAFT:
+            smooth_gp_profiles(obj, room.gp_power_profiles)
+        if slot == 17 and name == CRAFT:
+            smooth_face_ranges(obj, room.gigaset_shells)
     for prototype, locations in room.instances:
         holder = bpy.data.objects.new("Shelf stock",None)
         bpy.context.collection.objects.link(holder)

@@ -63,27 +63,27 @@ export const roomDetails = {
   },
   "S13": {
     "file": "s13-listening-details.glb",
-    "bytes": 23540,
+    "bytes": 104608,
     "roomDetail": true
   },
   "S14": {
     "file": "s14-living-details.glb",
-    "bytes": 14064,
+    "bytes": 38836,
     "roomDetail": true
   },
   "S15": {
     "file": "s15-recital-details.glb",
-    "bytes": 37608,
+    "bytes": 58748,
     "roomDetail": true
   },
   "S16": {
     "file": "s16-power-details.glb",
-    "bytes": 22604,
+    "bytes": 107220,
     "roomDetail": true
   },
   "S17": {
     "file": "s17-telephone-details.glb",
-    "bytes": 36748,
+    "bytes": 145016,
     "roomDetail": true
   }
 };
