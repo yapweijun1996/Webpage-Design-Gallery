@@ -3195,9 +3195,9 @@
       {
         "store": "S08",
         "file": "s08-skippy-details.glb",
-        "bytes": 71800,
-        "sha256": "c890629d2540607c3fa5fccbea2ca75bd49137ba205645cdc22b16b08c324418",
-        "triangles": 1104,
+        "bytes": 92684,
+        "sha256": "adc3ea901909519e582f173ad71c690d97d08b61a61e35058302970c5000dd4a",
+        "triangles": 1320,
         "draws": 4,
         "instances": 4,
         "motion": [
