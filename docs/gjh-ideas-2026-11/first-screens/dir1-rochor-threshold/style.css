@@ -1,0 +1,180 @@
+@font-face {
+  font-family: Instrument Serif;
+  src: url("instrument-serif.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url("manrope-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+:root {
+  --charcoal: #171a16;
+  --ivory: #f1e6cc;
+  --glaze: #426254;
+  --gutter: clamp(1.25rem, 5.8vw, 3rem);
+  color: var(--ivory);
+  background: var(--charcoal);
+  font: 100%/1.5 Manrope, Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+body, figure, p, h1, h2 { margin: 0; }
+.scene {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6rem;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: max(1rem, env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right))
+           max(1.5rem, env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+}
+.scene figure {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: var(--charcoal);
+}
+.scene img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 52% center;
+}
+figure::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(12 14 11 / 89%), transparent 18%);
+}
+figcaption {
+  position: absolute;
+  top: calc(max(1rem, env(safe-area-inset-top)) + 3.55rem);
+  right: max(var(--gutter), env(safe-area-inset-right));
+  z-index: 1;
+  padding: .2rem .55rem;
+  background: var(--charcoal);
+  font-size: .6875rem;
+  letter-spacing: .035em;
+}
+.imprint {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: .55rem;
+  border-bottom: 1px solid rgb(241 230 204 / 48%);
+}
+.imprint span:first-child { font: 1.85rem/1.1 "Instrument Serif", Georgia, serif; }
+.imprint span:last-child, .period {
+  text-transform: uppercase;
+  font-size: .68rem;
+  font-weight: 650;
+  letter-spacing: .16em;
+}
+.period span { margin-inline: .52rem; }
+.entry {
+  min-width: 0;
+  position: relative;
+  isolation: isolate;
+}
+.entry::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -4rem calc(0px - max(var(--gutter), env(safe-area-inset-right))) calc(0px - max(1.5rem, env(safe-area-inset-bottom))) calc(0px - max(var(--gutter), env(safe-area-inset-left)));
+  background: linear-gradient(transparent, rgb(23 26 22 / 78%) 4rem, rgb(23 26 22 / 95%));
+}
+.entry h1, .entry h2 {
+  margin: .9rem 0 .8rem;
+  font: 400 clamp(3.45rem, 15vw, 6.3rem)/.94 "Instrument Serif", Georgia, serif;
+  letter-spacing: -.03em;
+}
+.caption {
+  max-width: 34ch;
+  font-size: 1rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem 1.25rem;
+  margin-top: 1.25rem;
+}
+.actions a, .actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
+  min-height: 46px;
+  min-width: 44px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: 600 .8125rem/1.4 Manrope, Arial, sans-serif;
+  text-decoration: underline;
+  text-underline-offset: .33em;
+  cursor: pointer;
+}
+.actions button { padding: 0; }
+.actions .step {
+  padding: .6rem 1.1rem;
+  background: var(--glaze);
+  text-decoration: none;
+}
+.step span { font-size: 1.15rem; }
+.actions .step:hover { background: #355348; }
+:focus-visible { outline: 2px solid var(--ivory); outline-offset: 3px; }
+#account {
+  max-width: min(29rem, calc(100% - 2.5rem));
+  margin: auto;
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid #958e7e;
+  color: var(--ivory);
+  background: var(--charcoal);
+}
+#account h2 { font: 400 2.7rem/1 "Instrument Serif", Georgia, serif; margin-bottom: 1.25rem; }
+#account::backdrop { background: rgb(12 14 11 / 80%); }
+#account .actions { justify-content: space-between; }
+@media (min-width: 24rem) and (max-width: 42.99rem) {
+  .entry h1 { font-size: clamp(3.25rem, 13.5vw, 5.5rem); }
+  .entry h1 br { display: none; }
+}
+@media (min-width: 43rem) {
+  .scene {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(52%, 82svh));
+    grid-template-rows: auto 1fr;
+    gap: 2rem 0;
+    padding: 0;
+  }
+  .scene figure { inset: 0 0 0 auto; width: min(52%, 82svh); }
+  figure::after, .entry::before { display: none; }
+  figcaption {
+    top: auto;
+    bottom: max(1.5rem, env(safe-area-inset-bottom));
+    right: max(1.5rem, env(safe-area-inset-right));
+  }
+  .imprint, .entry {
+    grid-column: 1;
+    margin-inline: max(clamp(1.6rem, 5vw, 6rem), env(safe-area-inset-left)) clamp(1.6rem, 4vw, 5rem);
+  }
+  .imprint { margin-top: max(2rem, env(safe-area-inset-top)); padding-bottom: .85rem; }
+  .entry { align-self: center; padding-bottom: max(3.5rem, env(safe-area-inset-bottom)); }
+  .entry h1, .entry h2 {
+    margin-block: 1.4rem;
+    font-size: clamp(3.45rem, 7.3vw, 7.1rem);
+  }
+  .caption { font-size: 1.0625rem; max-width: 36ch; }
+  .actions { margin-top: 2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

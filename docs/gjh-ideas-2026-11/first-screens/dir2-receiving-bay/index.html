@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en-SG">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>The Receiving Bay — Goh Joo Hin Pte Ltd</title>
+  <link rel="icon" href="data:,">
+  <link rel="preload" as="image" href="opt2-receiving-bay-a.jpg">
+  <link rel="stylesheet" href="style.css">
+  <script defer src="script.js"></script>
+</head>
+<body>
+<main>
+  <section class="bay" id="bay" aria-labelledby="question">
+    <figure class="scene">
+      <img src="opt2-receiving-bay-a.jpg" width="1024" height="1536" alt="Morning light streams through a raised loading door, casting long shadows from a wooden pallet." fetchpriority="high">
+      <figcaption>AI concept illustration</figcaption>
+    </figure>
+    <header class="masthead" aria-label="Goh Joo Hin Pte Ltd">
+      <strong aria-hidden="true">GJH</strong>
+      <span>Goh Joo Hin<br>Pte Ltd</span>
+    </header>
+    <div class="invitation">
+      <p class="eyebrow">The Receiving Bay</p>
+      <h1 id="question" tabindex="-1">Who are you<br>buying for?</h1>
+      <nav aria-label="Select your buying sector">
+        <a href="#retail">Retail <span aria-hidden="true">→</span></a>
+        <a href="#foodservice">Foodservice <span aria-hidden="true">→</span></a>
+      </nav>
+    </div>
+  </section>
+  <section class="checklist" id="retail" aria-labelledby="retail-title">
+    <figure class="scene">
+      <img src="opt2-receiving-bay-a.jpg" width="1024" height="1536" alt="Sunlight falls across the wooden slats of a pallet on the loading bay floor." loading="lazy">
+      <figcaption>AI concept illustration</figcaption>
+    </figure>
+    <div class="worksheet">
+      <a href="#bay" class="back" aria-label="Back to sector choices">← &nbsp;Change sector</a>
+      <p class="eyebrow">Retail checklist</p>
+      <h2 id="retail-title" tabindex="-1">What should sales know?</h2>
+      <form autocomplete="off">
+        <label for="retail-item">Item</label>
+        <input id="retail-item" name="item" type="text">
+        <label for="retail-date">Replenishment date</label>
+        <input id="retail-date" name="date" type="date">
+        <label for="retail-packs">Shelf quantity in packs</label>
+          <input id="retail-packs" name="packs" type="text" inputmode="numeric" pattern="[0-9]*" aria-describedby="retail-packs-error">
+          
+          <small class="error" id="retail-packs-error"></small>
+        <label for="retail-caseSize">Packs per case</label>
+          <input id="retail-caseSize" name="caseSize" type="text" inputmode="numeric" pattern="[0-9]*" aria-describedby="retail-caseSize-error retail-caseSize-hint">
+          <small id="retail-caseSize-hint">Leave blank to ask sales to confirm.</small>
+          <small class="error" id="retail-caseSize-error"></small>
+        <output class="estimate" aria-live="polite"></output>
+      </form>
+      <details><summary>Worked example</summary><p>90 covers ÷ 5 portions per pack = 18 packs. At 12 packs per case, that is 1.5 cases. Order 2 whole cases, leaving 6 packs.</p></details>
+      <div class="review" hidden>
+        <h3>Review your buying note</h3>
+        <pre></pre>
+        <button type="button" class="save">Save text file <span aria-hidden="true">↓</span></button>
+      </div>
+      <p>Ask sales to confirm case configuration and availability. Paste your note into the official contact form.</p>
+      <a class="contact" href="https://gjhglobal.com/contact-us/">Open official contact <span aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+  <section class="checklist" id="foodservice" aria-labelledby="foodservice-title">
+    <figure class="scene">
+      <img src="opt2-receiving-bay-b.jpg" width="1024" height="1536" alt="An empty stainless steel prep pan catches warm side light on a kitchen counter." loading="lazy">
+      <figcaption>AI concept illustration</figcaption>
+    </figure>
+    <div class="worksheet">
+      <a href="#bay" class="back" aria-label="Back to sector choices">← &nbsp;Change sector</a>
+      <p class="eyebrow">Foodservice checklist</p>
+      <h2 id="foodservice-title" tabindex="-1">What should sales know?</h2>
+      <form autocomplete="off">
+        <label for="foodservice-item">Item</label>
+        <input id="foodservice-item" name="item" type="text">
+        <label for="foodservice-date">Service date</label>
+        <input id="foodservice-date" name="date" type="date">
+        <label for="foodservice-covers">Menu covers</label>
+          <input id="foodservice-covers" name="covers" type="text" inputmode="numeric" pattern="[0-9]*" aria-describedby="foodservice-covers-error foodservice-covers-hint">
+          <small id="foodservice-covers-hint">Allow one portion per cover.</small>
+          <small class="error" id="foodservice-covers-error"></small><label for="foodservice-yield">Usable portions per pack</label>
+          <input id="foodservice-yield" name="yield" type="text" inputmode="numeric" pattern="[0-9]*" aria-describedby="foodservice-yield-error">
+          
+          <small class="error" id="foodservice-yield-error"></small>
+        <label for="foodservice-caseSize">Packs per case</label>
+          <input id="foodservice-caseSize" name="caseSize" type="text" inputmode="numeric" pattern="[0-9]*" aria-describedby="foodservice-caseSize-error foodservice-caseSize-hint">
+          <small id="foodservice-caseSize-hint">Leave blank to ask sales to confirm.</small>
+          <small class="error" id="foodservice-caseSize-error"></small>
+        <output class="estimate" aria-live="polite"></output>
+      </form>
+      <details><summary>Worked example</summary><p>90 covers ÷ 5 portions per pack = 18 packs. At 12 packs per case, that is 1.5 cases. Order 2 whole cases, leaving 6 packs.</p></details>
+      <div class="review" hidden>
+        <h3>Review your buying note</h3>
+        <pre></pre>
+        <button type="button" class="save">Save text file <span aria-hidden="true">↓</span></button>
+      </div>
+      <p>Ask sales to confirm case configuration and availability. Paste your note into the official contact form.</p>
+      <a class="contact" href="https://gjhglobal.com/contact-us/">Open official contact <span aria-hidden="true">↗</span></a>
+    </div>
+  </section>
+</main>
+</body>
+</html>

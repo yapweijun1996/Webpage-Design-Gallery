@@ -1,0 +1,160 @@
+@font-face {
+  font-family: Instrument;
+  src: url("instrument-serif.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: Manrope;
+  src: url("manrope-latin.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+:root {
+  --ink: #1f3350;
+  --paper: #f5ecd8;
+  --action: #e4b74d;
+  --serif: Instrument, Georgia, serif;
+  --gutter: clamp(22px, 6vw, 70px);
+  font: 100%/1.45 Manrope, system-ui, sans-serif;
+  color: var(--paper);
+  background: var(--ink);
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body, figure, h1, h2, p, ul { margin: 0; }
+a, summary { color: inherit; touch-action: manipulation; }
+a { text-decoration: none; }
+a:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 7px var(--paper);
+}
+.screen, .ingredients {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+.art, .art img, .cover .art::after { position: absolute; inset: 0; width: 100%; height: 100%; }
+.art { z-index: -1; }
+.art img { object-fit: cover; object-position: 53% 50%; }
+.cover .art::after {
+  content: "";
+  background: linear-gradient(to bottom, rgba(12,23,39,.85), rgba(12,23,39,.76) 28%, transparent 45%, transparent 68%, rgba(12,23,39,.91) 91%);
+}
+.art figcaption {
+  position: absolute;
+  z-index: 1;
+  left: max(var(--gutter), env(safe-area-inset-left));
+  bottom: calc(94px + env(safe-area-inset-bottom));
+  padding: 3px 8px;
+  color: var(--paper);
+  background: #17283e;
+  font-size: .7rem;
+  letter-spacing: .035em;
+}
+.leaf {
+  min-height: inherit;
+  display: flex;
+  flex-direction: column;
+  padding: max(22px, env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right))
+           calc(22px + env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+}
+.mast {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgb(245 236 216 / 50%);
+  font: 1.7rem/1.1 var(--serif);
+}
+.mast small { font-size: .62em; }
+.place, .eyebrow { font: 700 .68rem/1.45 Manrope, system-ui, sans-serif; letter-spacing: .17em; text-transform: uppercase; }
+.title-block { margin: clamp(23px, 4svh, 48px) 0 160px; }
+.eyebrow { margin-bottom: 12px; }
+h1, h2 { font: 400 clamp(3.8rem, 15.8vw, 7.8rem)/.91 var(--serif); letter-spacing: -.037em; }
+.actions {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px clamp(10px, 4vw, 26px);
+}
+.primary, .secondary, .back, summary, details a {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: .55em;
+  font-size: 1rem;
+  font-weight: 650;
+}
+.primary { padding: 0 15px; border-radius: 3px; color: #152337; background: var(--action); }
+.primary span, .secondary span { font: 1.2em/1 system-ui, sans-serif; }
+.secondary, .back { text-decoration: underline; text-underline-offset: .3em; }
+.primary:hover { background: #f2ca68; }
+.secondary:hover, .back:hover { text-decoration-thickness: 2px; }
+.finder { color: var(--ink); background: var(--paper); }
+.finder .art { height: clamp(125px, 29svh, 330px); }
+.finder .art img { object-position: center 38%; }
+.finder .art figcaption { bottom: 12px; }
+.finder .leaf { align-items: flex-start; }
+.back { align-self: flex-start; padding: 0 12px; background: var(--paper); color: var(--ink); }
+.finder .form-panel { width: 100%; padding-top: max(30px, calc(clamp(125px, 29svh, 330px) - 44px)); }
+.form-panel h2, .ingredients h2 { font-size: clamp(2.8rem, 10vw, 5.9rem); }
+label { display: block; margin: 22px 0 6px; font-weight: 650; }
+input {
+  width: 100%; min-height: 48px; padding: 8px 12px;
+  font: inherit; color: var(--ink); background: #fffaf0;
+  border: 1px solid var(--ink); border-radius: 2px;
+}
+input::placeholder { color: #536175; }
+#status { margin: 8px 0; font-size: .875rem; }
+ul { list-style: none; padding: 0; }
+#matches li, details a {
+  display: flex; align-items: center; justify-content: space-between; min-height: 48px;
+  padding: 9px 12px; border-bottom: 1px solid #757d7f; cursor: pointer;
+}
+#matches li[aria-selected="true"], #matches li:hover { background: var(--ink); color: var(--paper); }
+details { width: 100%; margin-top: 12px; }
+summary { display: list-item; padding: 12px 0; cursor: pointer; }
+.ingredients { display: grid; align-content: start; }
+.ingredient-copy { padding: max(22px, env(safe-area-inset-top)) var(--gutter) 22px; }
+.ingredient-copy > div { margin-top: 32px; }
+.pack-name { max-width: 28ch; margin: 22px 0; }
+.pack { display: grid; place-items: center; padding: 32px; background: var(--paper); }
+.pack img { max-width: 100%; width: auto; height: clamp(190px, 32svh, 460px); object-fit: contain; }
+@media (max-width: 374px) {
+  .actions { gap: 6px; justify-content: space-between; }
+  .actions a { font-size: .875rem; }
+}
+@media (min-width: 800px) and (min-aspect-ratio: 1/1) {
+  .screen, .ingredients {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) min(50vw, 74svh);
+  }
+  .art, .finder .art {
+    position: relative; grid-column: 2; grid-row: 1; height: auto; min-height: 100%;
+  }
+  .cover .art::after { display: none; }
+  .art figcaption, .finder .art figcaption { left: 22px; bottom: max(23px, env(safe-area-inset-bottom)); }
+  .leaf { grid-column: 1; grid-row: 1; padding-top: max(34px, env(safe-area-inset-top)); padding-bottom: max(40px, env(safe-area-inset-bottom)); }
+  .title-block { margin: auto 0; padding: 50px 0; }
+  .eyebrow { margin-bottom: 20px; }
+  h1 { font-size: clamp(5.3rem, 8.75vw, 10rem); }
+  .actions { margin-top: 0; padding-top: 24px; border-top: 1px solid rgb(245 236 216 / 50%); }
+  .primary { padding: 0 22px; }
+  .finder .form-panel { margin: auto 0; padding: 40px 0; max-width: 36rem; }
+  .ingredients { align-content: stretch; }
+  .ingredient-copy { display: flex; flex-direction: column; padding: 34px var(--gutter); }
+  .ingredient-copy > div { margin: auto 0; }
+  .pack img { height: min(53svh, 490px); }
+}
+@media (max-height: 540px) and (max-width: 799px) {
+  .finder .art { height: 94px; }
+  .finder .art figcaption { left: auto; right: 16px; }
+  .finder .form-panel { padding-top: 40px; }
+  .title-block { margin-bottom: 60px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .arrived { animation: arrival 140ms ease-out; }
+  @keyframes arrival { from { opacity: 0; } to { opacity: 1; } }
+}
