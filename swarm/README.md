@@ -65,6 +65,18 @@ Command errors exit 1. Use `--port` to override the CLI port.
 | `SWARM_EFFORT` | `low` | Codex reasoning effort. |
 | `SWARM_CODEX` | `codex` | Agent executable, including the test hook. |
 
+## Session usage
+
+The **Session usage** bar totals tokens reported by agent processes since the
+Swarm server started. It updates as the runners report usage and survives a browser
+refresh. **Usage by agent** shows the same totals and token breakdown per agent.
+Input excludes cache reads and includes cache writes. Cache shows tokens read
+from cache. Output includes reasoning tokens. Usage reports without a complete
+breakdown still count toward the total and are marked as partial in the breakdown.
+USD is the estimate reported by pi for model tokens. Codex CLI reports
+tokens only, so the page marks the estimate as partial or unavailable when applicable.
+The estimate covers reported model usage and does not represent an account bill.
+
 ## Verification
 
 ```sh

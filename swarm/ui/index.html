@@ -14,7 +14,7 @@
 <style>
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
-  body{display:grid;grid-template-rows:auto 1fr;background:#0f1115;color:#e8eaf0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+  body{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto 1fr;background:#0f1115;color:#e8eaf0;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
   #top{display:flex;gap:10px;align-items:center;height:44px;padding:0 10px 0 12px;background:#171a21;border-bottom:1px solid #262b36;flex-wrap:nowrap;overflow:hidden;white-space:nowrap;min-width:0}
   #top h1{font-size:14px;margin:0;font-weight:700;display:flex;align-items:center;gap:8px;flex:none}
   #top h1 svg{width:18px;height:18px;color:#8ab4ff}
@@ -80,7 +80,19 @@
   #top .sp{flex:1}
   button{font:inherit;min-height:32px;border:1px solid #333a49;border-radius:8px;background:#1f2430;color:#e8eaf0;padding:0 12px;cursor:pointer}
   button:hover{background:#2a3040}button:focus-visible{outline:2px solid #8ab4ff;outline-offset:2px}
-  #main{display:grid;grid-template-columns:1fr 330px;min-height:0}
+  #usagebar{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px;padding:4px 12px;background:#171a21;border-bottom:1px solid #262b36;color:#aab0bf;font-size:12px;font-variant-numeric:tabular-nums}
+  #usagebar b{color:#e8eaf0;font-weight:600}
+  #usage-details{min-width:0;width:100%}
+  #usage-details:not([open]){width:auto}
+  #usage-details summary{width:max-content;padding:3px 0;color:#8ab4ff;cursor:pointer}
+  #usage-details summary:focus-visible,.usage-scroll:focus-visible{outline:2px solid #8ab4ff;outline-offset:2px}
+  .usage-scroll{max-height:min(30vh,260px);overflow:auto}
+  #usage-table{width:100%;border-collapse:collapse;text-align:right}
+  #usage-table :is(th,td){padding:5px 8px;border-top:1px solid #262b36;white-space:nowrap}
+  #usage-table thead{position:sticky;top:0;background:#171a21}
+  #usage-table th:first-child{text-align:left}
+  #usage-table tbody th{color:#e8eaf0;font-weight:600}
+  #main{display:grid;grid-template-columns:1fr 330px;min-height:0;position:relative}
   #view{overflow:auto;position:relative;background:#0f1115}
   #stage{position:relative;zoom:var(--z,.5);background:var(--dc-bg);color:var(--dc-ink);font-family:var(--dc-font);font-size:var(--dc-text-base);line-height:var(--dc-leading);min-height:400px}
   #stage *{box-sizing:border-box}
@@ -124,7 +136,7 @@
   body[data-chat=off] #main{grid-template-columns:1fr}
   body[data-chat=off] aside{display:none}
   @media (max-width:760px){#main{grid-template-columns:1fr}aside{display:none}
-    body[data-chat=on] aside{display:flex;position:fixed;left:0;right:0;top:44px;bottom:0;z-index:200;border-left:0}}
+    body[data-chat=on] aside{display:flex;position:absolute;inset:0;z-index:200;border-left:0}}
   @media (prefers-reduced-motion:reduce){.cursor{transition:none}}
 </style>
 </head>
@@ -143,6 +155,23 @@
   <button class="ibtn" id="bub" type="button" aria-pressed="true" aria-label="Thoughts" data-tip-title="Thought bubbles" data-tip="Show or hide the speech bubbles next to each agent's cursor."></button>
   <button class="ibtn" id="panel" type="button" aria-pressed="true" aria-label="Chat panel" data-tip-title="Chat panel" data-tip="Show or hide the right side panel with the channel, team and documents."><span class="badge" id="unread"></span></button>
 </header>
+<div id="usagebar">
+  <span>Session usage</span>
+  <b id="usage-tokens">Tokens —</b>
+  <b id="usage-cost">USD —</b>
+  <span id="usage-breakdown" title="Input excludes cache reads. Output includes reasoning."></span>
+  <span id="usage-note">Waiting for usage</span>
+  <details id="usage-details" hidden>
+    <summary>Usage by agent</summary>
+    <p id="usage-empty">Waiting for agent usage</p>
+    <div class="usage-scroll" role="region" aria-label="Usage by agent table" tabindex="0" hidden>
+      <table id="usage-table" aria-label="Usage by agent">
+        <thead><tr><th scope="col">Agent</th><th scope="col">Total</th><th scope="col" title="Input excluding cache reads">Input</th><th scope="col" title="Cached input reads">Cache</th><th scope="col" title="Output including reasoning">Output</th><th scope="col">USD estimate</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </details>
+</div>
 <div id="look" role="dialog" aria-label="Appearance" hidden>
   <div class="lg"><b>Theme</b><span><button type="button" data-sds-theme="auto">Auto</button><button type="button" data-sds-theme="light">Light</button><button type="button" data-sds-theme="dark">Dark</button></span></div>
   <div class="lg"><b>Brand</b><span><button type="button" data-sds-brand="none">None</button><button type="button" data-sds-brand="forest-gold">Forest gold</button><button type="button" data-sds-brand="gjh-classic">GJH classic</button></span></div>
@@ -193,7 +222,60 @@
   function fetchText(u) { return fetch(u + '?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; }); }
   function setZoom(z) { zoom = z; stage.style.setProperty('--z', z); stage.style.setProperty('--inv', 1 / z); paintZoom(); placeAll(); }
 
+  var tokenFormat = new Intl.NumberFormat();
+  var usdFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 });
+  var usageDetails = $('usage-details');
+  var latestUsage;
+  function costText(usage) {
+    if (usage.usd === null) return 'USD —';
+    var amount = usage.usd > 0 && usage.usd < 0.0001 ? '<$0.0001' : usdFormat.format(usage.usd);
+    return amount + ' USD est.' + (usage.unpriced || usage.missingUsage ? ' (partial)' : '');
+  }
+  function renderAgentUsage() {
+    if (!usageDetails.open || !latestUsage || !latestUsage.agents) return;
+    var entries = Object.entries(latestUsage.agents).sort(function (a, b) { return a[0].localeCompare(b[0]); });
+    var tbody = $('usage-table').tBodies[0];
+    $('usage-empty').hidden = entries.length > 0;
+    tbody.closest('.usage-scroll').hidden = entries.length === 0;
+    tbody.replaceChildren(...entries.map(function (entry) {
+      var id = entry[0], usage = entry[1], row = document.createElement('tr');
+      var name = document.createElement('th');
+      name.scope = 'row';
+      name.textContent = id + ' · ' + usage.name;
+      row.append(name);
+      var partial = usage.breakdownReports && usage.breakdownReports < usage.reports;
+      var total = usage.reports ? tokenFormat.format(usage.tokens) : '—';
+      row.insertCell().textContent = total + (usage.missingUsage ? ' (incomplete)' : '');
+      ['input', 'cached', 'output'].forEach(function (key) {
+        var value = usage.breakdownReports ? tokenFormat.format(usage[key]) : '—';
+        row.insertCell().textContent = value + (partial ? ' (partial)' : '');
+      });
+      row.insertCell().textContent = costText(usage);
+      return row;
+    }));
+  }
+  usageDetails.addEventListener('toggle', renderAgentUsage);
+  function paintUsage(usage) {
+    latestUsage = usage;
+    usageDetails.hidden = !usage || !usage.agents;
+    if (!usage) {
+      $('usage-note').textContent = 'Available after server restart';
+      return;
+    }
+    $('usage-tokens').textContent = usage.reports ? tokenFormat.format(usage.tokens) + ' tokens' : 'Tokens —';
+    $('usage-cost').textContent = costText(usage);
+    $('usage-breakdown').textContent = usage.breakdownReports
+      ? 'Input ' + tokenFormat.format(usage.input) + ' · Cache ' + tokenFormat.format(usage.cached) + ' · Output ' + tokenFormat.format(usage.output)
+        + (usage.breakdownReports < usage.reports ? ' (partial)' : '')
+      : usage.reports && usage.agents ? 'Token breakdown unavailable' : '';
+    $('usage-note').textContent = !usage.agents ? 'Details available after server restart'
+      : usage.missingUsage ? 'Usage missing for some agent attempts'
+      : !usage.reports ? 'Waiting for usage' : usage.usd === null ? 'USD estimate unavailable' : '';
+    renderAgentUsage();
+  }
+
   function build(state) {
+    paintUsage(state.usage);
     S = state; page.innerHTML = ''; layer.innerHTML = ''; linksSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); linksSvg.setAttribute('class', 'links'); layer.appendChild(linksSvg); $('agents').innerHTML = '';
     hosts = {}; cur = {}; cards = {}; hash = {}; order = Object.keys(S.agents).sort();
     order.forEach(function (id, i) {
@@ -401,6 +483,7 @@
 
   function onEvent(e) {
     if (e.type === 'state') return build(e.state);
+    if (e.type === 'usage') return paintUsage(e.usage);
     if (e.type === 'autopilot') { ap = e; autoOn = !!e.on; paintFocus(); if (e.on && !e.primary) { lastReport = ''; reportFocus(true); } return; }
     if (e.type === 'settings') { $('model').textContent = e.model; if (S) S.model = e.model; return; }
     if (!S) return;

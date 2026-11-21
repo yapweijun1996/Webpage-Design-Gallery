@@ -15,6 +15,7 @@ const PROJECT = path.join(ROOT, 'projects', process.env.SWARM_PROJECT || 'home')
 // Agents run ONLY through the codex or pi CLI, with the allowlisted model and effort from the settings file (lib/settings.js).
 const S = require('./lib/settings');
 const R = require('./lib/runners');
+const { createUsage, normalizeUsage, addUsage } = require('./lib/usage');
 const G = require('./lib/guard');
 const SETTINGS_PATH = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS) || path.join(ROOT, '.run', 'settings.json'); // override only in test mode
 const loaded = S.load(SETTINGS_PATH);
@@ -44,13 +45,14 @@ const STAFF = require('./lib/staff');
 const GJH_V11_ASSETS = path.resolve(ROOT, '..', 'demos', 'corporate', 'gjh', 'v11', 'assets'); // read-only mall concept images for /gjh-v11/*
 let agentsDef = JSON.parse(fs.readFileSync(path.join(TEMPLATE, 'agents.json'), 'utf8'));
 const state = { project: path.basename(PROJECT), phase: 'idle', round: 0, rounds: PLAN.length, plan: PLAN, model: modelLabel(), brief: '', agents: {}, feed: [] };
+state.usage = { ...createUsage(), agents: Object.create(null) };
 const clients = new Set();
 const children = new Map();
 let stopped = false;
 
 function emit(evt) {
   evt.ts = Date.now();
-  if (evt.type !== 'edit' && evt.type !== 'state') { state.feed.push(evt); if (state.feed.length > 300) state.feed.shift(); }
+  if (!['edit', 'state', 'usage'].includes(evt.type)) { state.feed.push(evt); if (state.feed.length > 300) state.feed.shift(); }
   const line = 'data: ' + JSON.stringify(evt) + '\n\n';
   for (const c of clients) c.write(line);
 }
@@ -199,10 +201,29 @@ function runOnce(a, label, promptText) {
     const p = spawn(cmd.command, cmd.args, { cwd: cmd.cwd || PROJECT, stdio: ['pipe', 'pipe', 'ignore'] });
     children.set(a.id, p);
     let fatal = false, settled = false;
+    let reportedUsage = false;
+    const recordUsage = usage => {
+      const agentUsage = state.usage.agents[a.id] ??= { name: a.title || a.name, ...createUsage() };
+      addUsage(state.usage, usage);
+      addUsage(agentUsage, usage);
+      emit({ type: 'usage', usage: state.usage });
+    };
     const timer = setTimeout(() => { fatal = true; try { p.kill('SIGTERM'); } catch (_) {} }, settings.timeouts.turnMinutes * 60000);
-    const handle = evs => { for (const ev of evs) { if (ev.kind === 'error') fatal = true; else applyEvent(a, ev); } };
+    const handle = evs => {
+      for (const ev of evs) {
+        if (ev.kind === 'error') fatal = true;
+        else if (ev.kind === 'usage' || ev.kind === 'done') {
+          const usage = normalizeUsage(resolved.runner, ev.usage);
+          if (usage) {
+            reportedUsage = true;
+            recordUsage(usage);
+          }
+        } else applyEvent(a, ev);
+      }
+    };
     const finish = ok => {
       if (settled) return; settled = true;
+      if (!reportedUsage) recordUsage(null);
       clearTimeout(timer); children.delete(a.id);
       if (before && chat && !a.squad) { // squad agents run in parallel; layer files enforce ownership, a whole-tree diff would blame the wrong agent
         try {

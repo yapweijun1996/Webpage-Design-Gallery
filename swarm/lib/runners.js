@@ -84,7 +84,9 @@ function piEventParser() {
         : [];
       const text = parts.length ? parts.map(part => part.text).join('') : textDeltas;
       textDeltas = '';
-      return thought(text);
+      const message = thought(text);
+      const usage = event.message.usage;
+      return [usage && { kind: 'usage', usage }, message].filter(Boolean);
     }
 
     if (event.type === 'tool_execution_start') {
@@ -121,7 +123,8 @@ function jsonLines(normalize) {
       try { event = JSON.parse(line); } catch { continue; }
       if (event === null || typeof event !== 'object') continue;
       const normalized = normalize(event);
-      if (normalized) events.push(normalized);
+      if (Array.isArray(normalized)) events.push(...normalized);
+      else if (normalized) events.push(normalized);
     }
     return events;
   }

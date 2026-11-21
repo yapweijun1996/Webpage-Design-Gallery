@@ -197,6 +197,21 @@ async function runScenario(failingAgent = '') {
       return messages.filter(isSummary).length >= 2 && messages;
     }, checkServer);
     const [firstSummary, secondSummary] = messages.filter(isSummary);
+    const usage = await waitFor('usage from both requests', deadline, async () => {
+      const { phase, usage } = await request(base, '/api/state');
+      return phase === 'ready' && usage;
+    }, checkServer);
+    assert.ok(usage.reports > 2, 'Expected usage from multiple agent processes');
+    assert.equal(usage.tokens, usage.reports * 125, 'Cached and reasoning tokens must not be counted twice');
+    assert.equal(usage.usd, null, 'Codex CLI usage has no USD estimate');
+    assert.equal(usage.unpriced, usage.reports);
+    assert.equal(usage.missingUsage, 0);
+    assert.equal(usage.breakdownReports, usage.reports);
+    assert.deepEqual([usage.input, usage.cached, usage.output], [80, 20, 25].map(count => count * usage.reports));
+    assert.deepEqual(Object.keys(usage.agents).sort(), ['00', ...workers]);
+    for (const key of ['input', 'cached', 'output', 'tokens']) {
+      assert.equal(Object.values(usage.agents).reduce((sum, agent) => sum + agent[key], 0), usage[key]);
+    }
     const [firstTriage, secondTriage] = messages.filter(isTriageStart);
     verifyOwner(messages, firstId, firstRequest);
     verifyOwner(messages, secondId, secondRequest);

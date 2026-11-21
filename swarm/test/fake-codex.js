@@ -105,4 +105,6 @@ switch (label) {
     break;
 }
 
-emit({ type: 'turn.completed' });
+emit({ type: 'turn.completed', usage: {
+  input_tokens: 100, cached_input_tokens: 20, output_tokens: 25, reasoning_output_tokens: 5,
+} });

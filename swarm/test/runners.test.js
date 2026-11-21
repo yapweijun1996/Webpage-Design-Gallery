@@ -48,7 +48,15 @@ const fixtureCases = [
     } },
   ]],
   ['pi', 'pi-json-tool-sample.jsonl', [
+    { kind: 'usage', usage: {
+      input: 1257, output: 23, cacheRead: 0, cacheWrite: 0, reasoning: 0, totalTokens: 1280,
+      cost: { input: 1257 * 0.000002, output: 0.00023, cacheRead: 0, cacheWrite: 0, total: 0.002744 },
+    } },
     { kind: 'action', verb: 'editing', target: 'hello.txt', sections: [] },
+    { kind: 'usage', usage: {
+      input: 1295, output: 5, cacheRead: 0, cacheWrite: 0, reasoning: 0, totalTokens: 1300,
+      cost: { input: 0.00259, output: 0.00005, cacheRead: 0, cacheWrite: 0, total: 0.00264 },
+    } },
     { kind: 'thought', text: 'done' },
     { kind: 'done', ok: true },
   ]],
