@@ -32,11 +32,15 @@
   #look button{min-height:34px;padding:0 12px;border-radius:8px;border:1px solid #333a49;background:#1f2430;color:#e8eaf0;font:inherit;cursor:pointer}
   #look button[aria-pressed=true]{background:#2a3350;border-color:#8ab4ff;color:#fff}
   #look p{margin:2px 0 0;color:#8b93a7;font-size:12px}#look code{font-size:11px}
-  #setdlg{position:fixed;inset:0;z-index:400;background:rgba(5,7,10,.6);display:flex;justify-content:flex-end}
-  #setdlg[hidden]{display:none}
-  #setdlg .sheet{width:min(520px,100vw);height:100%;background:#13161c;border-left:1px solid #262b36;display:flex;flex-direction:column;box-shadow:-12px 0 32px rgba(0,0,0,.5)}
-  #setdlg header{display:flex;align-items:center;justify-content:space-between;height:44px;padding:0 6px 0 14px;border-bottom:1px solid #262b36;flex:none}
-  #setroot{flex:1;min-height:0;overflow:auto}
+  #setdlg{position:fixed;inset:0;margin:0;padding:0;border:0;width:100%;height:100dvh;max-width:none;max-height:none;background:#111318;color:#edf1f8;overflow:hidden}
+  #setdlg[open]{display:flex;flex-direction:column}
+  #setdlg > header{display:flex;align-items:center;gap:16px;min-height:64px;padding:10px 28px;border-bottom:1px solid #303744;background:#14171e;flex:none}
+  #setdlg .settings-brand{display:flex;align-items:center;gap:9px;font-size:17px;font-weight:750}
+  #setdlg .settings-brand svg{width:20px;height:20px;color:#94baff}
+  #setdlg .settings-title{padding-left:16px;border-left:1px solid #303744;color:#aab4c5}
+  #setclose{display:flex;gap:6px;width:auto;min-height:44px;margin-left:auto;padding-inline:10px}
+  #setroot{flex:1;min-height:0;overflow:hidden}
+  @media(max-width:480px){#setdlg > header{min-height:55px;padding:5px 12px;gap:9px}#setdlg .settings-title{padding-left:9px}#setclose{padding-inline:6px}}
   .links{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
   .links line{stroke-width:2;stroke-dasharray:7 5;stroke-linecap:round;animation:linkfade 6.5s ease-out forwards}
   .links circle{animation:linkfade 6.5s ease-out forwards}
@@ -92,7 +96,13 @@
   #usage-table thead{position:sticky;top:0;background:#171a21}
   #usage-table th:first-child{text-align:left}
   #usage-table tbody th{color:#e8eaf0;font-weight:600}
-  #main{display:grid;grid-template-columns:1fr 330px;min-height:0;position:relative}
+  #main{display:grid;grid-template-columns:minmax(0,1fr) 6px var(--aside-w,330px);min-height:0;position:relative}
+  /* viewwrap contains fixed-position page elements (action bars) so they cannot cover the side panel */
+  #viewwrap{position:relative;min-width:0;min-height:0;contain:paint;overflow:hidden}
+  #viewwrap>#view{position:absolute;inset:0}
+  #resizer{cursor:col-resize;background:#262b36;position:relative;touch-action:none;transition:background .15s}
+  #resizer::after{content:'';position:absolute;inset:0 -4px}
+  #resizer:hover,#resizer:focus-visible,#resizer.drag{background:#4f7cff;outline:0}
   #view{overflow:auto;position:relative;background:#0f1115}
   #stage{position:relative;zoom:var(--z,.5);background:var(--dc-bg);color:var(--dc-ink);font-family:var(--dc-font);font-size:var(--dc-text-base);line-height:var(--dc-leading);min-height:400px}
   #stage *{box-sizing:border-box}
@@ -133,10 +143,10 @@
   .pane{display:none;flex:1;min-height:0;flex-direction:column}.pane.on{display:flex}
   #chan,#docs{flex:1;min-height:0;overflow:auto}
   #pane-team{overflow:hidden}
-  body[data-chat=off] #main{grid-template-columns:1fr}
-  body[data-chat=off] aside{display:none}
-  @media (max-width:760px){#main{grid-template-columns:1fr}aside{display:none}
-    body[data-chat=on] aside{display:flex;position:absolute;inset:0;z-index:200;border-left:0}}
+  body[data-chat=off] #main{grid-template-columns:minmax(0,1fr)}
+  body[data-chat=off] aside,body[data-chat=off] #resizer{display:none}
+  @media (max-width:760px){#main{grid-template-columns:minmax(0,1fr)}aside,#resizer{display:none}
+    body[data-chat=on] aside{display:flex;position:absolute;inset:0;z-index:200;border-left:0;width:auto}}
   @media (prefers-reduced-motion:reduce){.cursor{transition:none}}
 </style>
 </head>
@@ -149,7 +159,7 @@
   <span class="sp"></span>
   <button class="ibtn" id="focusbtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-pressed="false" aria-label="Screen focus" data-tip-title="Screen focus" data-tip="Make the team work only on the screen you are looking at. Turn on Autopilot and they study it, research the brand on the web, and improve it by themselves."></button>
   <button class="ibtn" id="pick" type="button" aria-pressed="false" aria-label="Pick an element" data-tip-title="Pick an element" data-tip="Click any part of the page to ask the agent who owns that section to change it, or to explain why it is designed that way."></button>
-  <button class="ibtn" id="setbtn" type="button" aria-haspopup="dialog" aria-label="Settings" data-tip-title="Settings" data-tip="Choose which CLI runs the agents (codex or pi), the model and the reasoning effort. Changes apply from the next agent turn."></button>
+  <button class="ibtn" id="setbtn" type="button" aria-haspopup="dialog" aria-controls="setdlg" aria-expanded="false" aria-label="Settings" data-tip-title="Settings" data-tip="Choose which CLI runs the agents (codex or pi), the model and the reasoning effort. Changes apply from the next agent turn."></button>
   <button class="ibtn" id="lookbtn" type="button" aria-haspopup="dialog" aria-expanded="false" aria-label="Appearance" data-tip-title="Appearance" data-tip="Preview the page in light or dark, in another brand colour theme, or in another language. This changes only your preview."></button>
   <button class="ibtn" id="zoom" type="button" aria-label="Zoom" data-tip-title="Zoom" data-tip="Switch between overview, which shows the whole page and every cursor, and 100 percent, the real size."></button>
   <button class="ibtn" id="bub" type="button" aria-pressed="true" aria-label="Thoughts" data-tip-title="Thought bubbles" data-tip="Show or hide the speech bubbles next to each agent's cursor."></button>
@@ -194,11 +204,13 @@
   <textarea id="asktext" rows="3" maxlength="400" placeholder="Describe the change, or ask a question"></textarea>
   <div class="ab"><button type="submit" id="askchange" class="pri">Ask to change</button><button type="button" id="askwhy">Explain why</button></div>
 </form>
-<div id="setdlg" role="dialog" aria-modal="true" aria-label="Settings" hidden>
-  <div class="sheet"><header><b>Settings</b><button class="ibtn" id="setclose" type="button" aria-label="Close settings"></button></header><div id="setroot"></div></div>
-</div>
+<dialog id="setdlg" aria-label="Settings">
+  <header><span class="settings-brand"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/></svg>Swarm</span><span class="settings-title">Settings</span><button class="ibtn" id="setclose" type="button" aria-label="Close settings"></button></header>
+  <div id="setroot"></div>
+</dialog>
 <div id="main">
-  <div id="view"><div id="stage"><div id="page"></div><div id="cursors"></div></div></div>
+  <div id="viewwrap"><div id="view"><div id="stage"><div id="page"></div><div id="cursors"></div></div></div></div>
+  <div id="resizer" role="separator" aria-orientation="vertical" aria-label="Resize side panel (drag, or use left and right arrow keys; double click to reset)" aria-valuemin="280" aria-valuemax="720" aria-valuenow="330" tabindex="0"></div>
   <aside>
     <div id="tabs" role="tablist"><button role="tab" data-t="chan" aria-selected="true" data-tip-title="Channel" data-tip="Group chat with the Manager and every agent. Type here to give the team a request.">Channel<span class="dot" id="d-chan"></span></button><button role="tab" data-t="team" aria-selected="false" data-tip-title="Team" data-tip="Each agent's section, status and latest thought.">Team</button><button role="tab" data-t="docs" aria-selected="false" data-tip-title="Documents" data-tip="The Manager's direction, decisions and reviews.">Docs<span class="dot" id="d-docs"></span></button></div>
     <div class="pane on" id="pane-chan"><div id="chan"></div></div>
@@ -331,7 +343,7 @@
 
   function load(id, animate) {
     var a = S.agents[id], base = '/p/sections/' + id + '-' + a.section;
-    return Promise.all([fetchText(base + '.html'), fetchText(base + '.css')]).then(function (r) {
+    return Promise.all([fetchText(base + '.html'), fetchText(base + '.bundle.css')]).then(function (r) {
       var h = hh(r[0] + '|' + r[1]); if (hash[id] === h) return; hash[id] = h;
       var el = hosts[id].el, filled = r[0].trim().length > 60;
       var prevHtml = el.querySelector('.body').innerHTML, prevCss = el.querySelector('style').textContent;
@@ -482,14 +494,18 @@
   }
 
   function onEvent(e) {
-    if (e.type === 'state') return build(e.state);
+    if (e.type === 'state') {
+      build(e.state);
+      if ($('setdlg').open) window.SwarmSettings?.refreshTeam();
+      return;
+    }
     if (e.type === 'usage') return paintUsage(e.usage);
     if (e.type === 'autopilot') { ap = e; autoOn = !!e.on; paintFocus(); if (e.on && !e.primary) { lastReport = ''; reportFocus(true); } return; }
     if (e.type === 'settings') { $('model').textContent = e.model; if (S) S.model = e.model; return; }
     if (!S) return;
     var a = e.id && S.agents[e.id];
     if (e.type === 'round') { S.round = e.round; setPhase(); }
-    else if (e.type === 'phase') { S.phase = e.phase; setPhase(); }
+    else if (e.type === 'phase') { S.phase = e.phase; setPhase(); if ($('setdlg').open) window.SwarmSettings?.refreshTeam(); }
     else if (e.type === 'chat' && e.msg) {
       if (window.SwarmChannel) SwarmChannel.add(e.msg);
       if (current !== 'chan' && $('d-chan')) $('d-chan').classList.add('on');
@@ -499,16 +515,16 @@
       else if (S.agents[m.from] && cur[m.from] && m.kind !== 'system') say(m.from, m.text, true);
       return;
     }
-    else if (e.type === 'busy') { if (window.SwarmChannel) SwarmChannel.setBusy(!!e.busy); return; }
+    else if (e.type === 'busy') { if (window.SwarmChannel) SwarmChannel.setBusy(!!e.busy); if ($('setdlg').open) window.SwarmSettings?.refreshTeam(); return; }
     else if (e.type === 'doc') { if (window.SwarmDocs) SwarmDocs.refresh(e.file.split('/').pop()); if (current !== 'docs' && $('d-docs')) $('d-docs').classList.add('on'); }
-    else if (e.type === 'status' && a) { if (cur[e.id] && /^working/.test(e.status)) cur[e.id].pinned = false; if (!/^working/.test(e.status)) setAct(e.id, ''); a.status = e.status; if (window.SwarmChannel) SwarmChannel.setStatus(e.id, e.status); if (/^working/.test(e.status)) a.target = e.id; refreshCard(e.id); place(e.id, e.id); }
+    else if (e.type === 'status' && a) { if (cur[e.id] && /^working/.test(e.status)) cur[e.id].pinned = false; if (!/^working/.test(e.status)) setAct(e.id, ''); a.status = e.status; if ($('setdlg').open) window.SwarmSettings?.setWorkerStatus(e.id, e.status); if (window.SwarmChannel) SwarmChannel.setStatus(e.id, e.status); if (/^working/.test(e.status)) a.target = e.id; refreshCard(e.id); place(e.id, e.id); }
     else if (e.type === 'thought' && a) { a.thought = e.text; refreshCard(e.id); if (Date.now() - (lastTalk[e.id] || 0) > 9000) say(e.id, e.text); }
     else if (e.type === 'action' && a) { a.action = e.verb + (e.target !== e.id ? ' ' + e.target : ''); a.target = e.target; seed[e.id] += 3; if (cur[e.id]) cur[e.id].pinned = false; refreshCard(e.id); touch(e.id); setAct(e.id, actText(e)); place(e.id, e.target, true); mark(e.id, e.target); }
     else if (e.type === 'edit' && e.kind === 'sections' && hosts[e.id]) { seed[e.id] += 5; if (S.agents[e.id]) { S.agents[e.id].target = e.id; place(e.id, e.id); mark(e.id, e.id); } load(e.id, true); }
     feed(e);
   }
 
-  $('zoom').onclick = function () { setZoom(zoom < 1 ? 1 : 0.5); };
+  $('zoom').onclick = function () { setZoom(zoom < 1 ? 1 : 0.5); try { localStorage.setItem('swarm.zoom', zoom < 1 ? 'overview' : 'full'); } catch (_) {} };
   // ---- icons (inline SVG, Lucide-style paths) and button state
   var ICON = {
     zoomIn: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3M11 8v6M8 11h6"/>',
@@ -655,35 +671,77 @@
   addEventListener('keydown', function (e) { if (e.key === 'Escape') { if (!$('focuspop').hidden) { $('focuspop').hidden = true; $('focusbtn').setAttribute('aria-expanded', 'false'); } else if (!$('askpop').hidden) closeAsk(); else if (picking) setPicking(false); } });
 
   // ---- settings dialog (runner, model, effort): the SwarmSettings module renders the form, the server validates
-  var settingsReady = false;
+  var settingsReady = false, settingsTrigger;
   function api(path, method, body) { return fetch(path, { method: method || 'GET', headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, json: j }; }); }); }
-  function openSettings() {
-    $('setdlg').hidden = false; $('setbtn').setAttribute('aria-expanded', 'true');
+  function openSettings(event) {
+    if ($('setdlg').open) return;
+    settingsTrigger = event.currentTarget;
+    $('setdlg').showModal();
+    $('setbtn').setAttribute('aria-expanded', 'true');
+    $('setclose').focus();
     if (!window.SwarmSettings) { $('setroot').textContent = 'Settings module not loaded.'; return; }
     if (!settingsReady) {
       SwarmSettings.init({ root: $('setroot'),
         load: function () { return api('/api/settings').then(function (r) { return r.json; }); },
         save: function (st) { return api('/api/settings', 'PUT', st).then(function (r) { return r.ok ? { ok: true, settings: r.json.settings } : { ok: false, errors: r.json.errors || [{ path: '', message: 'Save failed' }] }; }); },
         test: function (q) { return api('/api/settings/test', 'POST', q).then(function (r) { return r.json; }); },
+        images: {
+          loadKey: function () { return api('/api/secrets/openai').then(function (r) { return r.json; }); },
+          saveKey: function (key) { return api('/api/secrets/openai', 'PUT', { key: key }).then(function (r) { return r.json; }); },
+          removeKey: function () { return api('/api/secrets/openai', 'DELETE').then(function (r) { return r.json; }); },
+          testKey: function () { return api('/api/secrets/openai/test', 'POST', {}).then(function (r) { return r.json; }); }
+        },
         team: {
-          load: function () { return api('/api/team').then(function (r) { return r.json; }); },
-          save: function (agents) { return api('/api/team', 'PUT', { agents: agents }).then(function (r) { return r.ok ? { ok: true, agents: r.json.agents } : { ok: false, errors: r.json.errors || [{ path: '', message: r.json.error === 'busy' ? 'The team is working. Try again when it finishes.' : 'Save failed' }] }; }); }
+          load: function () { return api('/api/team').then(function (r) {
+            if (!r.ok) throw new Error('Could not load team');
+            var statuses = Object.fromEntries(Object.entries(S?.agents || {}).map(function (entry) { return [entry[0], entry[1].status]; }));
+            return { ...r.json, statuses: statuses };
+          }); },
+          save: function (agents) { return api('/api/team', 'PUT', { agents: agents }).then(function (r) {
+            return r.ok ? { ok: true, agents: r.json.agents } : { ok: false, busy: r.json.error === 'busy', errors: r.json.errors || [{ path: '', message: 'Save failed' }] };
+          }); }
         } });
       settingsReady = true;
-    } else if (SwarmSettings.refresh) SwarmSettings.refresh();
-    $('setclose').focus();
+    } else SwarmSettings.open();
   }
-  function closeSettings() { $('setdlg').hidden = true; $('setbtn').setAttribute('aria-expanded', 'false'); $('setbtn').focus(); }
   $('setbtn').onclick = openSettings; $('model').onclick = openSettings; $('model').style.cursor = 'pointer';
-  $('setclose').onclick = closeSettings;
-  $('setdlg').addEventListener('click', function (e) { if (e.target === $('setdlg')) closeSettings(); });
-  addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('setdlg').hidden) closeSettings(); });
+  $('setclose').onclick = function () { $('setdlg').close(); };
+  $('setdlg').addEventListener('close', function () {
+    window.SwarmSettings?.close();
+    $('setbtn').setAttribute('aria-expanded', 'false');
+    if (settingsTrigger?.getClientRects().length) settingsTrigger.focus();
+    else $('setbtn').focus();
+  });
   $('lookbtn').onclick = function (e) { e.stopPropagation(); var open = $('look').hidden; $('look').hidden = !open; this.setAttribute('aria-expanded', open ? 'true' : 'false'); };
   document.addEventListener('click', function (e) { if (!$('look').hidden && !$('look').contains(e.target) && e.target !== $('lookbtn')) { $('look').hidden = true; $('lookbtn').setAttribute('aria-expanded', 'false'); } });
   addEventListener('keydown', function (e) { if (e.key === 'Escape' && !$('look').hidden) { $('look').hidden = true; $('lookbtn').setAttribute('aria-expanded', 'false'); $('lookbtn').focus(); } });
   setChat(chatState(), false);
   paintBub();
-  setZoom(0.5);
+  // Resizable side panel: drag the divider, arrow keys, double click resets; width kept in localStorage.
+  (function () {
+    var main = $('main'), rz = $('resizer'), MIN = 280, DEF = 330, w = DEF;
+    function maxW() { return Math.max(MIN, Math.min(720, Math.round(main.clientWidth * 0.6))); }
+    function apply(v, save) {
+      w = Math.max(MIN, Math.min(maxW(), Math.round(v)));
+      main.style.setProperty('--aside-w', w + 'px'); rz.setAttribute('aria-valuenow', String(w)); rz.setAttribute('aria-valuemax', String(maxW()));
+      if (save) { try { localStorage.setItem('swarm.asideW', String(w)); } catch (_) {} }
+      requestAnimationFrame(function () { window.dispatchEvent(new Event('resize')); });
+    }
+    try { var s = Number(localStorage.getItem('swarm.asideW')); if (s) w = s; } catch (_) {}
+    apply(w, false);
+    rz.addEventListener('pointerdown', function (e) { rz.setPointerCapture(e.pointerId); rz.classList.add('drag'); document.body.style.userSelect = 'none'; });
+    rz.addEventListener('pointermove', function (e) { if (!rz.classList.contains('drag')) return; apply(main.getBoundingClientRect().right - e.clientX, false); });
+    function end() { if (!rz.classList.contains('drag')) return; rz.classList.remove('drag'); document.body.style.userSelect = ''; apply(w, true); }
+    rz.addEventListener('pointerup', end); rz.addEventListener('pointercancel', end);
+    rz.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowLeft' ? 16 : e.key === 'ArrowRight' ? -16 : 0;
+      if (d) { e.preventDefault(); apply(w + d, true); } else if (e.key === 'Home') { e.preventDefault(); apply(MIN, true); } else if (e.key === 'End') { e.preventDefault(); apply(maxW(), true); }
+    });
+    rz.addEventListener('dblclick', function () { apply(DEF, true); });
+    window.addEventListener('resize', function () { if (w > maxW()) apply(maxW(), false); });
+  })();
+  var zoomPref = 1; try { zoomPref = localStorage.getItem('swarm.zoom') === 'overview' ? 0.5 : 1; } catch (_) {}
+  setZoom(zoomPref); // default: real size, so the page is shown responsive to the viewer width and needs no zoom click
 
   // ---- tooltips that follow the cursor (data-tip-title + data-tip); keyboard focus shows them next to the control
   (function () {

@@ -274,6 +274,13 @@ const { createChat } = require('./lib/chat');
 const { createTurns } = require('./lib/turns');
 let chat = null, turns = null;
 const SQ = require('./lib/squad');
+const LAYERS = require('./lib/layers');
+const { createSecrets } = require('./lib/secrets');
+const IMG = require('./lib/imagegen');
+const SECRETS_PATH = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS ? process.env.SWARM_SETTINGS + '.secrets' : path.join(ROOT, '.run', 'secrets.json'));
+const secrets = createSecrets(SECRETS_PATH);
+const imageLog = []; // timestamps of API image requests, a simple spend guard (30 per hour)
+function imageSettings() { const i = (settings && settings.images) || {}; return { provider: i.provider || 'codex', model: i.model || 'gpt-image-1', quality: i.quality || 'high', size: i.size || '1536x1024' }; }
 const SQ_COLORS = ['#38bdf8', '#a78bfa', '#f472b6', '#facc15', '#34d399', '#fb923c', '#94a3b8', '#f87171', '#22d3ee', '#c084fc'];
 const squadAgents = SQ_AGENTS_BUILD();
 function SQ_AGENTS_BUILD() { return SQ.roster().map((spec, i) => ({ id: String(81 + i), name: spec.title, title: spec.title, color: SQ_COLORS[i % SQ_COLORS.length], section: 'sq-' + spec.id, lane: spec.mission, runner: spec.runner, squad: spec })); }
@@ -312,9 +319,10 @@ function squadPlan(owner) {
   // Inline the context so a specialist needs no file reads before writing (the dominant latency of a CLI agent turn).
   const rd = (f, n) => { try { return fs.readFileSync(path.join(PROJECT, 'sections', f), 'utf8').slice(0, n); } catch (_) { return ''; } };
   const html = rd(base + '.html', 3500);
+  const viaApi = imageSettings().provider === 'openai' && secrets.openAIKeyStatus().set;
   for (const m of members) {
     const own = m.squad.layer ? rd(base + '.' + m.squad.layer + '.css', 1500) : '';
-    prompts[m.id] = SQ.promptFor(m.squad, { base, scopeLine: '' }) + '\nCURRENT sections/' + base + '.html (trimmed):\n' + html + (own ? '\nCURRENT ' + base + '.' + m.squad.layer + '.css:\n' + own : '') + '\nEverything you need is above. Do not read other files first; write your output immediately.';
+    prompts[m.id] = SQ.promptFor(m.squad, { base, scopeLine: '' }) + '\nCURRENT sections/' + base + '.html (trimmed):\n' + html + (own ? '\nCURRENT ' + base + '.' + m.squad.layer + '.css:\n' + own : '') + (viaApi && m.squad.id === 'image-gen' ? '\nIMAGE PROVIDER: use the OpenAI API, not the Codex image skill. Run: node ' + path.join(ROOT, 'tools', 'gen-image.js') + ' --name ' + base + '-<short-slug> --prompt "<detailed prompt>" (it prints JSON with the saved path, already compressed). Never ask for or print any API key.' : '') + '\nEverything you need is above. Do not read other files first; write your output immediately.';
   }
   return { single: waves.length === 1, base, members, waves, prompts, layoutId: (byId.get('layout') || {}).id };
 }
@@ -326,8 +334,24 @@ function setupChat() {
   turns = createTurns({
     chat, agents: everyone(), managerId: MANAGER.id, maxDiscussRounds: 2, squad: { on: () => squadOn, plan: squadPlan },
     // After each agent process exits, ingest its outbox immediately so the next step sees its messages (no watcher race).
-    runAgent: ({ id, label, prompt: pr }) => { const a = everyone().find(x => x.id === id); return a ? runProcess(a, label, pr, false).then(ok => { chat.sync(); return ok; }) : Promise.resolve(false); }
+    runAgent: ({ id, label, prompt: pr }) => { const a = everyone().find(x => x.id === id); if (!a) return Promise.resolve(false); const guard = a.squad ? scopeGuard(a) : null; return runProcess(a, label, pr, false).then(ok => { chat.sync(); if (guard) guard(); return ok; }); }
   });
+}
+// Modularity guard: a squad specialist may only style its own section. If its layer file contains selectors that are not scoped
+// to the section, the file is restored to what it was before the turn, so one agent can never restyle another section.
+function scopeGuard(a) {
+  const layer = a.squad.layer; if (!layer || !a.base) return null;
+  const file = path.join(PROJECT, 'sections', a.base + '.' + layer + '.css');
+  let before = null; try { before = fs.readFileSync(file, 'utf8'); } catch (_) { /* new file */ }
+  return () => {
+    try {
+      const { checkProject } = require('./tools/check-sections');
+      const bad = (checkProject(PROJECT).findings || []).filter(f => f.rule === 'layer-scope' && String(f.file).endsWith(path.basename(file)));
+      if (!bad.length) return;
+      if (before === null) fs.unlinkSync(file); else fs.writeFileSync(file, before);
+      chat.post({ from: 'system', kind: 'system', text: a.name + ' wrote selectors outside its section (' + bad.length + '); its change to ' + path.basename(file) + ' was reverted.' });
+    } catch (_) { /* the guard must never fail the turn */ }
+  };
 }
 let inFlight = 0; // requests being handled or waiting in the queue
 function startTurn(msg) {
@@ -539,6 +563,25 @@ http.createServer(async (req, res) => {
     try { const d = applyTeam(r.value); return send(res, 200, { agents: agentsDef, diff: d }); }
     catch (e) { return send(res, 500, { errors: [{ path: '$', message: 'Could not apply the team: ' + e.message }] }); }
   }
+  if (p === '/api/secrets/openai' && req.method === 'GET') return send(res, 200, secrets.openAIKeyStatus());
+  if (p === '/api/secrets/openai' && req.method === 'PUT') { const b = await body(req); const r = secrets.setOpenAIKey(b.key); return send(res, r.ok ? 200 : 400, r); }
+  if (p === '/api/secrets/openai' && req.method === 'DELETE') return send(res, 200, secrets.removeOpenAIKey());
+  if (p === '/api/secrets/openai/test' && req.method === 'POST') return send(res, 200, await IMG.testKey({ apiKey: secrets.getOpenAIKey() }));
+  if (p === '/api/image' && req.method === 'POST') {
+    const b = await body(req), cfg = imageSettings();
+    const name = String(b.name || '').toLowerCase();
+    if (!/^\d\d-[a-z0-9][a-z0-9-]{1,40}$/.test(name)) return send(res, 400, { ok: false, error: 'name must look like 02-hero-bg' });
+    if (cfg.provider !== 'openai') return send(res, 409, { ok: false, error: 'Image provider is Codex; set it to OpenAI API in Settings to use this endpoint.' });
+    const now = Date.now(); while (imageLog.length && now - imageLog[0] > 3600000) imageLog.shift();
+    if (imageLog.length >= 30) return send(res, 429, { ok: false, error: 'Image limit reached (30 per hour).' });
+    imageLog.push(now);
+    const dir = path.join(PROJECT, 'assets', 'generated'), png = path.join(dir, name + '.png');
+    const r = await IMG.generate({ apiKey: secrets.getOpenAIKey(), prompt: String(b.prompt || ''), model: cfg.model, size: b.size || cfg.size, quality: cfg.quality, outFile: png });
+    if (!r.ok) return send(res, 502, { ok: false, error: r.error });
+    let file = png, bytes = r.bytes; // shrink for the web: webp when cwebp exists
+    try { const webp = path.join(dir, name + '.webp'); const c = spawnSync('cwebp', ['-quiet', '-q', '82', png, '-o', webp], { timeout: 30000 }); if (c.status === 0 && fs.existsSync(webp)) { file = webp; bytes = fs.statSync(webp).size; fs.unlinkSync(png); } } catch (_) { /* keep the png */ }
+    return send(res, 200, { ok: true, path: 'assets/generated/' + path.basename(file), bytes, ms: r.ms });
+  }
   if (p === '/api/squad' && req.method === 'GET') return send(res, 200, { on: squadOn, specialists: squadAgents.map(a => ({ id: a.id, title: a.title, layer: a.squad.layer || '', runner: a.runner })) });
   if (p === '/api/squad' && req.method === 'POST') { const b = await body(req); setSquad(b.on); return send(res, 200, { on: squadOn }); }
   if (p === '/api/autopilot' && req.method === 'GET') return send(res, 200, autopilotView());
@@ -591,6 +634,7 @@ http.createServer(async (req, res) => {
     return send(res, 200, { ok: true });
   }
   if (p === '/api/stop' && req.method === 'POST') { stopAll(); return send(res, 200, { ok: true }); }
+  { const m = /^\/p\/sections\/(\d\d-[a-z0-9-]+)\.bundle\.css$/.exec(p); if (m) { let css = ''; try { css = LAYERS.assembleCss(path.join(PROJECT, 'sections'), m[1]); } catch (_) { /* no such section */ } return send(res, 200, css, 'text/css; charset=utf-8'); } } // legacy css plus squad layer files, in layer order
   if (p.startsWith('/p/')) return serveFile(res, PROJECT, p.slice(3));
   if (p.startsWith('/assets/generated/')) return serveFile(res, path.join(PROJECT, 'assets', 'generated'), p.slice(18)); // generated images referenced as ../assets/generated/* from sections
   if (p.startsWith('/gjh/')) return serveFile(res, GJH_ASSETS, p.slice(5));
