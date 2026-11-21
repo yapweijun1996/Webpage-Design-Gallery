@@ -283,10 +283,17 @@ function squadPlan(owner) {
   const lane = ids => ids.map(id => byId.get(id)).filter(Boolean);
   const first = picked.filter(sp => sp.id !== 'layout' && sp.id !== 'qa').map(sp => byId.get(sp.id));
   const fast = owner.scope && owner.scope.mode === 'autopilot'; // autopilot: the next cycle starts by inspecting the result, so skip the QA wave
-  const waves = [first, lane(['layout']), fast ? [] : lane(['qa'])].filter(w => w.length);
+  // Autopilot is built for speed: everyone including layout starts at once (one wave); the next cycle inspects and fixes clashes.
+  const waves = (fast ? [[...first, ...lane(['layout'])]] : [first, lane(['layout']), lane(['qa'])]).filter(w => w.length);
   const prompts = {};
-  for (const m of members) prompts[m.id] = SQ.promptFor(m.squad, { base, scopeLine: '' });
-  return { base, members, waves, prompts, layoutId: (byId.get('layout') || {}).id };
+  // Inline the context so a specialist needs no file reads before writing (the dominant latency of a CLI agent turn).
+  const rd = (f, n) => { try { return fs.readFileSync(path.join(PROJECT, 'sections', f), 'utf8').slice(0, n); } catch (_) { return ''; } };
+  const html = rd(base + '.html', 3500);
+  for (const m of members) {
+    const own = m.squad.layer ? rd(base + '.' + m.squad.layer + '.css', 1500) : '';
+    prompts[m.id] = SQ.promptFor(m.squad, { base, scopeLine: '' }) + '\nCURRENT sections/' + base + '.html (trimmed):\n' + html + (own ? '\nCURRENT ' + base + '.' + m.squad.layer + '.css:\n' + own : '') + '\nEverything you need is above. Do not read other files first; write your output immediately.';
+  }
+  return { single: waves.length === 1, base, members, waves, prompts, layoutId: (byId.get('layout') || {}).id };
 }
 const everyone = () => [MANAGER, ...agentsDef, ...squadAgents];
 function setupChat() {

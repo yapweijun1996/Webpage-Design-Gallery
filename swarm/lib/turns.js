@@ -46,13 +46,13 @@ function buildPrompt(agent, label, owner, assignment, isManager) {
 
 function squadPrompt(member, wave, waveNo, plan, owner) {
   const mates = wave.filter(m => m.id !== member.id).map(m => `${m.id} ${m.title}`).join('; ');
-  const role = member.id === plan.layoutId
+  const role = plan.single ? (member.id === plan.layoutId ? 'You own the HTML. Teammates write their layer files at the same time, so apply your structural change now; the next cycle integrates their layers.' : 'Write only your own file. If you need an HTML hook, post one short message to the layout engineer instead of editing HTML.') : member.id === plan.layoutId
     ? 'You are the integrator: read the layer files your teammates wrote (sections/' + plan.base + '.*.css), add the HTML hooks and classes they need, remove clashes, keep one h1 and valid structure.'
     : 'Write only your own file. If you need an HTML class or hook, post a short message to the layout engineer instead of editing the HTML.';
   const lines = [
     `STEP: Work | AGENT: ${member.id}`,
     `You are ${member.name}, job title: ${member.title}, agent ${member.id}, in squad wave ${waveNo} on section ${plan.base}.`,
-    'Read CONTRACT.md, brief.md, direction.md (if present) and channel.md. Open the real page at /p/dist/index.html state when useful.',
+    'Be fast: read CONTRACT.md and direction.md (if present) and only the LAST 40 lines of channel.md (`tail -n 40 channel.md`), never the whole channel. Skip long documents you do not need.',
     `To post, append exactly one JSON object per line to chat/${member.id}.jsonl. Example: ${JSON.stringify({ to: [plan.layoutId], kind: 'msg', text: 'I need class .hero-title on the headline.', reply: owner.id })}`,
     'Live narration rule: before each major step write one short sentence of intent (max 20 words) in your live commentary.',
     mates && `Teammates working at the same time: ${mates}. Do not edit their files.`,
