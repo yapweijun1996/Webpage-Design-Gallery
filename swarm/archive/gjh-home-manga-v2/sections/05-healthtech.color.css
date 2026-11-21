@@ -1,0 +1,56 @@
+/* Calm wellness and precise technology, using shared palette tokens. */
+.s-05 .healthtech-chapter--borsch {
+  background-color: var(--sds-color-forest-50);
+  color: var(--sds-color-forest-900);
+}
+
+.s-05 .healthtech-chapter--sony {
+  background-color: var(--sds-color-forest-900);
+  color: var(--sds-color-forest-50);
+}
+
+.s-05 .healthtech-chapter--borsch .healthtech-eyebrow,
+.s-05 .healthtech-chapter--borsch .healthtech-description {
+  color: var(--sds-color-forest-700);
+}
+
+.s-05 .healthtech-chapter--sony .healthtech-eyebrow,
+.s-05 .healthtech-chapter--sony .healthtech-description {
+  color: var(--sds-color-forest-100);
+}
+
+.s-05 .healthtech-caption {
+  color: var(--sds-color-forest-50);
+  background-color: var(--sds-color-forest-overlay-strong);
+}
+
+.s-05 .healthtech-chapter--borsch .healthtech-action {
+  color: var(--sds-color-forest-50);
+  background-color: var(--sds-color-forest-900);
+  border-color: var(--sds-color-forest-900);
+}
+
+.s-05 .healthtech-chapter--borsch .healthtech-action:hover,
+.s-05 .healthtech-chapter--borsch .healthtech-action:active {
+  color: var(--sds-color-forest-50);
+  background-color: var(--sds-color-forest-700);
+  border-color: var(--sds-color-forest-700);
+}
+
+.s-05 .healthtech-chapter--sony .healthtech-action {
+  color: var(--sds-color-forest-900);
+  background-color: var(--sds-color-gold-300);
+  border-color: var(--sds-color-gold-300);
+}
+
+.s-05 .healthtech-chapter--sony .healthtech-action:hover,
+.s-05 .healthtech-chapter--sony .healthtech-action:active {
+  color: var(--sds-color-forest-900);
+  background-color: var(--sds-color-gold-400);
+  border-color: var(--sds-color-gold-400);
+}
+
+.s-05 .healthtech-action:focus-visible {
+  outline: var(--sds-color-focus) solid medium;
+  outline-offset: var(--sds-space-1);
+}

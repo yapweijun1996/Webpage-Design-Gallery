@@ -1,0 +1,48 @@
+/* Keep content visible and reserve motion for deliberate interaction. */
+.s-04 .s-04__scene img {
+  transition: transform 800ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.s-04 .s-04__action {
+  transition: transform 240ms cubic-bezier(.22, 1, .36, 1),
+    background-color 200ms ease, color 200ms ease,
+    border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.s-04 .s-04__action:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .s-04 .s-04__chapter:hover .s-04__scene img {
+    transform: scale(1.02);
+  }
+
+  .s-04 .s-04__action:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.s-04 .s-04__chapter:focus-within .s-04__scene img {
+  transform: scale(1.02);
+}
+
+.s-04 .s-04__action:active {
+  transform: translateY(0);
+  transition-duration: 100ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-04 .s-04__scene img,
+  .s-04 .s-04__action {
+    transition: none;
+  }
+
+  .s-04 .s-04__chapter:hover .s-04__scene img,
+  .s-04 .s-04__chapter:focus-within .s-04__scene img,
+  .s-04 .s-04__action:hover,
+  .s-04 .s-04__action:active {
+    transform: none;
+  }
+}

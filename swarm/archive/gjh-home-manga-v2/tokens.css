@@ -1,0 +1,85 @@
+/* Design Canvas shared tokens. Owner: worker 01 (foundations). All other frames only READ these names. */
+:root {
+  color-scheme: light dark;
+  /* color: surface and text */
+  --dc-bg: #f7f8fa;
+  --dc-surface: #ffffff;
+  --dc-surface-2: #edf0ff;
+  --dc-ink: #202635;
+  --dc-muted: #626c7a;
+  --dc-line: #e0e4eb;
+  /* color: brand and status */
+  --dc-brand: #4554d8;
+  --dc-brand-dark: #303fbd;
+  --dc-on-brand: #ffffff;
+  --dc-success: #21613f;
+  --dc-success-bg: #edf6ef;
+  --dc-warning: #745014;
+  --dc-warning-bg: #fff2d5;
+  --dc-error: #a73525;
+  --dc-error-bg: #fff0ed;
+  --dc-focus: #4554d8;
+  /* type */
+  --dc-font: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --dc-font-mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+  --dc-text-xs: 12px;
+  --dc-text-sm: 14px;
+  --dc-text-base: 16px;
+  --dc-text-lg: 18px;
+  --dc-text-xl: 24px;
+  --dc-text-2xl: 32px;
+  --dc-text-display: 48px;
+  --dc-leading: 1.6;
+  --dc-leading-tight: 1.2;
+  --dc-weight-regular: 400;
+  --dc-weight-medium: 600;
+  --dc-weight-bold: 700;
+  /* space (4px scale) */
+  --dc-space-1: 4px;
+  --dc-space-2: 8px;
+  --dc-space-3: 12px;
+  --dc-space-4: 16px;
+  --dc-space-6: 24px;
+  --dc-space-8: 32px;
+  --dc-space-12: 48px;
+  /* shape and depth */
+  --dc-radius-sm: 6px;
+  --dc-radius: 10px;
+  --dc-radius-lg: 16px;
+  --dc-radius-pill: 999px;
+  --dc-shadow-1: 0 1px 2px rgba(32, 38, 53, .08);
+  --dc-shadow-2: 0 8px 24px rgba(32, 38, 53, .12);
+  /* motion */
+  --dc-ease: cubic-bezier(.2, .7, .2, 1);
+  --dc-dur-fast: 120ms;
+  --dc-dur: 220ms;
+  --dc-dur-slow: 400ms;
+  /* layout */
+  --dc-tap: 44px;
+  --dc-container: 1120px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --dc-bg: #12151c;
+    --dc-surface: #1a1f2b;
+    --dc-surface-2: #252c3d;
+    --dc-ink: #eef1f7;
+    --dc-muted: #a3adbd;
+    --dc-line: #2f3749;
+    --dc-brand: #8a96ff;
+    --dc-brand-dark: #6c79f0;
+    --dc-on-brand: #10131c;
+    --dc-focus: #8a96ff;
+    --dc-success: #a2dfb6;
+    --dc-success-bg: #20372c;
+    --dc-warning: #f3ce84;
+    --dc-warning-bg: #372d1d;
+    --dc-error: #ffb4a7;
+    --dc-error-bg: #432926;
+    --dc-shadow-1: 0 1px 2px rgba(0, 0, 0, .32);
+    --dc-shadow-2: 0 8px 24px rgba(0, 0, 0, .46);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dc-dur-fast: 0ms; --dc-dur: 0ms; --dc-dur-slow: 0ms; }
+}

@@ -20,7 +20,7 @@ const ROLES = [
 const COLOR_SCHEME_MEDIA = '(prefers-color-scheme: dark)';
 const REDUCED_MOTION_MEDIA = '(prefers-reduced-motion: reduce)';
 const DURATIONS = { instant: '0ms', fast: '120ms', base: '220ms', slow: '400ms', reveal: '600ms' };
-const BRANDS = ['forest-gold', 'gjh-classic'];
+const BRANDS = ['forest-gold', 'gjh-classic', 'cny-red-gold'];
 const MODES = ['light', 'dark'];
 
 function stylesheetRules(css, media = '') {
@@ -216,9 +216,10 @@ test('reduced motion overrides every duration token to 0.01ms', () => {
     Object.fromEntries(durations.map(name => [name, '0.01ms'])));
 });
 
-test('the token reference documents each generated property in all six palettes', () => {
+test('the token reference documents each generated property in every palette', () => {
   const document = stylesheet('TOKENS.md');
-  assert.match(document, /\| Token \| Light \| Dark \| forest-gold light \| forest-gold dark \| gjh-classic light \| gjh-classic dark \|/);
+  const columns = ['Token', 'Light', 'Dark', ...BRANDS.flatMap(brand => MODES.map(mode => `${brand} ${mode}`))];
+  assert.ok(document.includes(`| ${columns.join(' | ')} |`));
   const palettes = ['none', ...BRANDS].flatMap(brand => MODES.map(mode => {
     const selector = (brand === 'none' ? '' : brandSelector(brand)) + themeSelector(mode);
     return ruleValues(themeRules, selector);

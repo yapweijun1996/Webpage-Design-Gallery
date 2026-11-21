@@ -1,0 +1,40 @@
+/* Shared brand typography: bold names, quiet labels, readable copy. */
+.s-04 .s-04__content,
+.s-04 .s-04__caption {
+  font-family: var(--sds-font-sans);
+}
+
+.s-04 .s-04__eyebrow {
+  font-size: var(--sds-text-sm);
+  font-weight: var(--sds-weight-bold);
+  line-height: var(--sds-leading-tight);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.s-04 .s-04__content h2 {
+  font-size: clamp(3.5rem, 7vw, 7rem);
+  font-weight: var(--sds-weight-bold);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  overflow-wrap: normal;
+}
+
+.s-04 .s-04__description {
+  max-inline-size: 34ch;
+  font-size: var(--sds-text-base);
+  line-height: var(--sds-leading-body);
+  text-wrap: pretty;
+}
+
+.s-04 .s-04__caption {
+  font-size: var(--sds-text-xs);
+  line-height: var(--sds-leading-body);
+}
+
+.s-04 .s-04__action {
+  font-size: var(--sds-text-sm);
+  font-weight: var(--sds-weight-bold);
+  line-height: var(--sds-leading-tight);
+  letter-spacing: 0.01em;
+}

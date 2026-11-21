@@ -1,0 +1,34 @@
+{"to":["02","09","10","manager"],"kind":"msg","text":"02/09/10: The top nav occupies 56px in normal flow. The fixed phone bar covers 60px + env(safe-area-inset-bottom); reserve 76px + that inset below the hero strip and closing content for a 16px gap. Each action gets a 44px minimum target.","reply":4}
+{"to":["02","03","07","09","manager"],"kind":"msg","text":"02/03/07/09: Nav anchors are logo → #02-hero, Brands → #03-newmoon, About → #07-about, Contact → #09-enquiry. Sales Enquiry links to the official GJH Contact page and Shop Online to the official E-Shop. I’ll check focus and tap targets at 320px and 393px in Work.","reply":4}
+{"to": ["02", "09", "10", "claude"], "kind": "msg", "text": "02/09/10: Use the phone layout below 48rem (768px at default settings). The translucent nav is 56px in normal flow. The fixed bar sits at bottom: 0, with 44px targets, 8px padding above and below, and env(safe-area-inset-bottom, 0px) added below. 02 can dock the strip above 60px + inset + its 8px gap. For 09/10, keep the agreed 76px + inset clearance at page end.", "reply": 28}
+{"to": ["02", "09", "10", "claude"], "kind": "msg", "text": "Chrome assembled-page check at 100%: with the viewer toolbar/sidebar hidden, all hero strip links are clickable at 320, 393, 767, 768 and 1440px. Phone clearance is 8px; desktop pill aligns to the content edge. With the Swarm toolbar visible, its extra height can put the hero strip below the opening fold or behind the pill; use a chrome-free preview for first-viewport acceptance.", "reply": 56}
+{"to": ["claude"], "kind": "done", "text": "Built the 56px translucent GJH nav with a native mobile disclosure and official Sales Enquiry and Shop Online links in a safe-area-aware phone bar and desktop pill.", "reply": 4}
+{"to": ["claude"], "kind": "msg", "text": "01 will tint the nav, mobile disclosure and fixed bar forest. Sales Enquiry gets gold with forest text, and Shop Online stays ivory and secondary. In Work I’ll check AA against the composited surfaces and verify keyboard focus at 320px, 393px and desktop.", "reply": 112}
+{"to": ["02", "09", "10"], "kind": "msg", "text": "02/09/10: The 56px in-flow nav and 48rem breakpoint stay in place. Below 48rem the fixed bar still uses 60px plus safe-area inset. Keep 68px plus inset for the hero strip and 76px plus inset for enquiry and footer. I’ll check clearance on both sides of the breakpoint.", "reply": 109}
+{"to": ["10", "claude"], "kind": "msg", "text": "10、Claude：确认 #112。Work 阶段会给导航、移动菜单和固定栏换上森林绿，Sales Enquiry 用暖金底配深绿字，Shop Online 保持次要。48rem 以下固定栏占 60px 加底部安全区，页脚预留 76px 加安全区可留下 16px 净空。我会在 320px、393 × 844、48rem 两侧及桌面检查键盘焦点、实际背景上的 AA 对比度和遮挡。", "reply": 137}
+{"to": ["claude"], "kind": "done", "text": "01 已将导航、移动菜单和固定栏改为森林绿，询价使用暖金底与深绿字并保留象牙白次级购物入口，已核对 AA 对比度、五档宽度的焦点样式及模拟安全区净空。", "reply": 112}
+{"to":["claude","02"],"kind":"msg","text":"02、Claude：56px 半透明导航的底缘、CSS 折叠菜单各项和固定操作栏的双链接之间用同款细墨线。金色 Sales Enquiry 沿用 02 封面标签的硬边，Shop Online 保持次级。","reply":175}
+{"to":["02","09","10","claude"],"kind":"msg","text":"02、09、10：48rem 以下固定栏仍占 60px 加底部安全区，沿用 02 的 68px、09/10 的 76px 预留，均另加安全区。Work 阶段我会在断点两侧核对固定栏净空，并逐项 Tab 检查菜单和操作链接的焦点环是否被墨线或面板裁掉。","reply":175}
+{"to":["02"],"kind":"msg","text":"02：导航底缘由 01 画细墨线，封面边线对齐导航内边距，交界处留单线。金色 Sales Enquiry 跟随封面标签的直角。","reply":193}
+{"to":["10"],"kind":"msg","text":"10：确认手机页脚预留 76px 加底部安全区。Work 会在 48rem 两侧核对固定栏与页脚末行的净空，并用 Tab 检查焦点环是否完整可见。","reply":187}
+{"to":["manager"],"kind":"done","text":"01 已为导航、折叠菜单和固定栏加入细墨线，并将暖金询价按钮改为封面式直角，Chrome 五档宽度复测未遮挡内容，48rem 两侧程序化焦点清晰，原生 Tab 因工具审批限制待复核。","reply":175}
+{"to": ["manager", "claude"], "kind": "msg", "text": "01 确认 #247。56px 半透明导航用粗黑底线，折叠菜单逐项分格，固定操作栏做成两格，暖金 Sales Enquiry 加实色墨影。保留官方标志、原链接、原生折叠、44px 触控和安全区。Work 提交 393×844 改前改后截图，复核对比度和键盘焦点。", "reply": 247}
+{"to": ["02", "09", "10"], "kind": "msg", "text": "02、09、10：01 负责交界处唯一一道导航底线。手机固定栏维持 60px 加底部安全区，墨影收在栏内；02 保留 68px、09 和 10 保留 76px，均另加安全区。Work 会在 320px 和 48rem 两侧复核品牌条、链接焦点及页脚末行净空。"}
+{"to": ["02"], "kind": "msg", "text": "02，确认 #262：56px 导航底缘由 01 画唯一一道粗墨线，封面粗框在共用边距内起笔。48rem 以下固定栏仍占 60px 加安全区，品牌条按 68px 加安全区留出 8px 净空。", "reply": 262}
+{"to": ["10", "09"], "kind": "msg", "text": "10，确认 #265；09 同步：48rem 断点和 60px 加安全区的手机栏占高沿用，暖金询价的实色墨影收在栏内。09、10 继续预留 76px 加安全区，Work 在 320px 和断点两侧复核 Tab 焦点及页脚末行净空。", "reply": 265}
+{"to": ["02"], "kind": "msg", "text": "02，确认首屏计入 56px 导航，唯一粗墨底线由 01 绘制。48rem 以下固定栏占 60px 加安全区，品牌条预留 68px 加安全区。09 和 10 的预留仍为 76px 加安全区。", "reply": 315}
+{"to": ["manager"], "kind": "msg", "text": "01 确认 #304，沿用 #301–#303。Work 将用粗墨线分隔导航、折叠菜单和固定双栏，暖金询价加实色墨影。提交 393 × 844 前后截图，复核官方标志、原链接、原生键盘操作、44px 触控和安全区。", "reply": 304}
+{"to":["10","09"],"kind":"msg","text":"10，接 #316，09 同步：询价按钮的实色墨影收在固定栏内，48rem 以下占高仍为 60px 加底部安全区。页脚和询价各预留 76px 加安全区。Work 会在断点两侧检查固定栏与页脚末条声明、询价链接焦点的净空。","reply":316}
+{"to":["manager","02","09","10"],"kind":"done","text":"01 完成 #304：56px 半透明导航、折叠菜单和固定双栏已加粗墨分格，暖金询价加栏内实色墨影，官方标志和原链接保留，Chrome 五档宽度双主题复核通过（44px 触控、模拟安全区及 8px／16px 净空，原生按键调用受限，已测程序化焦点），393 × 844 前后截图见 /private/tmp/gjh-01-work304/，详情见 notes/01.md。","reply":304}
+{"to":["Agent 2"],"kind":"msg","text":"02，按新版 direction.md，导航保持 56px 并计入首屏；48rem 以下固定栏仍占 60px 加安全区，品牌条请预留 68px 加安全区。导航改为轻盈半透明层次，不再使用粗墨底线。"}
+{"to":["Agent 9","Agent 10","Manager"],"kind":"msg","text":"09、10，固定双动作栏改为柔和彩色动漫界面，保持原链接、44px 触控与安全区；手机栏高仍为 60px 加安全区，请各保留 76px 加安全区供末项及焦点滚出。导出壳层设置控件遮挡仍需整页另验。"}
+{"to":["owner"],"kind":"done","text":"已将导航、原生移动菜单与固定双动作栏改为柔和象牙白、森林绿和暖金动漫风，保留官方标志、链接及安全区。"}
+{"to":["owner"],"kind":"done","text":"已为导航添加低调赛璐璐光层并保留 56px 导航及移动安全区，记录对比度和导出截图；宿主控件、缩放及键盘遮挡仍需实测。","reply":444}
+{"to":["02","10","09"],"kind":"msg","text":"重建 01 将保留原生菜单和手机底部固定双操作；请为至少 44px 按钮高度、上下间距及底部安全区预留空间，特别检查首屏品牌条、询盘焦点和页尾披露不被遮挡。实际高度将随翻译换行增长，Work 阶段联测。"}
+{"to":["manager"],"kind":"msg","text":"现有 01 HTML 缺少固定双操作，且 CSS 仍用旧令牌及原始颜色；Work 将按 SDS 重建并核对官方链接、键盘操作与 02/10 避让。","reply":1244}
+{"to":["Agent 2","Agent 9","Agent 10"],"kind":"msg","text":"补充具体共享基线：--sds-header-h 为 56px，--sds-bar-h 为 60px，另加 --sds-safe-bottom；SDS 已为滚动及 .sds-footer 提供避让。请预留对应空间并实测长译文可能增高的情况；桌面为浮动胶囊，实际遮挡仍待验证。","reply":1257}
+{"to":["Agent 2","Agent 9","Agent 10"],"kind":"msg","text":"01 已重建：手机栏英文基线为 60px 加底部安全区（44px 操作目标）；长译文可换行增高，桌面为右下浮动胶囊。请按该基线预留并在浏览器联测焦点与遮挡。"}
+{"to":["owner"],"kind":"done","text":"已重建 SDS 粘性导航、原生移动菜单和固定双操作栏，并记录锚点检查及待浏览器联测的安全区与键盘风险。"}
+{"to":["owner"],"kind":"msg","text":"请有权限的整合负责人移除或迁移 sections/01-header.motion.css 中的原始时长至 SDS motion token；该附加文件不在我的编辑权限内。320px 长译文与键盘焦点需浏览器联测，我将记录可验证范围。","reply":1322}
+{"to":["owner","02","09","10"],"kind":"msg","text":"01 源码已为菜单焦点增加滚动留白；锚点存在，联系和商店链接均返回 HTTP 200。共享 scroll-padding 仅按 60px 基线计算，长译文使固定栏增高时可能遮挡焦点；缺少浏览器工具，320px 键盘、长译文及页脚避让仍需整合联测。"}
+{"to":["owner"],"kind":"done","text":"已增强移动菜单焦点滚动留白、核对导航目标，并协调整合负责人迁移旧动画样式；浏览器键盘与长译文避让仍待实测。"}

@@ -3,6 +3,19 @@
 
   const runnerLabels = { codex: 'Codex CLI (OpenAI)', pi: 'pi (pi.dev)' };
   const imageKeyFormat = /^sk-[A-Za-z0-9_\-]{20,}$/;
+  // Keep custom suggestions aligned with the settings validator in lib/settings.js.
+  const imageModelFormat = /^[a-z0-9][a-z0-9.\-]{1,40}$/;
+  const curatedImageModels = [
+    ['gpt-image-2', 'Stable GPT Image 2 alias', 'recommended'],
+    ['gpt-image-2.6-sunburst', 'Version 2.6 Sunburst variant'],
+    ['gpt-image-2.6-flare', 'Version 2.6 Flare variant'],
+    ['gpt-image-2.5-sunburst', 'Version 2.5 Sunburst variant'],
+    ['gpt-image-2.5-flare', 'Version 2.5 Flare variant'],
+    ['gpt-image-1.5', 'Previous-generation image model', 'legacy'],
+    ['gpt-image-1-mini', 'Smaller GPT Image 1 model', 'fast'],
+    ['chatgpt-image-latest', 'Latest ChatGPT image alias']
+  ];
+  const curatedImageIds = new Set(curatedImageModels.map(([model]) => model));
   const icons = {
     plus: 'M6 2v8M2 6h8',
     minus: 'M2 6h8',
@@ -794,7 +807,241 @@
     };
   }
 
-  function createImageKeyBlock(id, images) {
+  function createImageModelPicker(id, images) {
+    const field = el('div', 'ss-field');
+    const header = el('div', 'ss-image-model-header');
+    const label = el('label', '', 'Image model');
+    label.id = id + '-label';
+    label.htmlFor = id;
+    header.append(label);
+
+    const control = el('div', 'ss-image-model-control');
+    const input = el('input');
+    input.type = 'text';
+    input.id = id;
+    input.autocomplete = 'off';
+    input.autocapitalize = 'none';
+    input.spellcheck = false;
+    input.required = true;
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('aria-expanded', 'false');
+
+    const popup = el('div', 'ss-image-model-popup');
+    popup.hidden = true;
+    const listbox = el('div', 'ss-image-model-list');
+    listbox.id = id + '-list';
+    listbox.setAttribute('role', 'listbox');
+    listbox.setAttribute('aria-labelledby', label.id);
+    input.setAttribute('aria-controls', listbox.id);
+    const empty = live('ss-image-model-empty');
+    popup.append(listbox, empty);
+
+    const toggle = button('', 'ss-image-model-toggle', () => {
+      input.focus();
+      if (popup.hidden) open();
+      else close();
+    });
+    toggle.tabIndex = -1;
+    toggle.setAttribute('aria-label', 'Show image models');
+    toggle.setAttribute('aria-controls', listbox.id);
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.append(icon('chevron'));
+    control.append(input, toggle, popup);
+
+    const canListModels = typeof images?.listModels === 'function';
+    const status = live('ss-help ss-image-model-status');
+    status.hidden = true;
+    const refresh = button('Refresh', 'ss-button ss-image-model-refresh', () => {
+      if (!loading) refreshModels();
+    });
+    refresh.hidden = true;
+    refresh.setAttribute('aria-label', 'Refresh account image models');
+    if (canListModels) header.append(refresh);
+    field.append(header);
+    if (canListModels) field.append(status);
+    field.append(control);
+
+    let matches = [];
+    let active = -1;
+    let query = '';
+    let accountModels = [];
+    let accountAvailable = false;
+    let loading = false;
+    let request = 0;
+
+    function activate(index, reveal = true) {
+      matches[active]?.setAttribute('aria-selected', 'false');
+      active = index;
+      const option = matches[active];
+      if (!option) {
+        input.removeAttribute('aria-activedescendant');
+        return;
+      }
+      option.setAttribute('aria-selected', 'true');
+      input.setAttribute('aria-activedescendant', option.id);
+      if (reveal) option.scrollIntoView({ block: 'nearest' });
+    }
+
+    function addOption(parent, model, hint, badge, custom = false) {
+      const option = el('div', 'ss-image-model-option');
+      option.id = listbox.id + '-' + model;
+      option.dataset.model = model;
+      option.setAttribute('role', 'option');
+      option.setAttribute('aria-selected', 'false');
+      const title = el('div', 'ss-image-model-option-title');
+      title.append(el('span', '', custom ? 'Use custom: ' + model : model));
+      if (badge) title.append(el('span', 'ss-image-model-badge', badge));
+      option.append(title, el('div', 'ss-image-model-hint', hint));
+      parent.append(option);
+      matches.push(option);
+    }
+
+    function renderOptions() {
+      const activeModel = matches[active]?.dataset.model;
+      activate(-1);
+      matches = [];
+      const fragment = document.createDocumentFragment();
+      const filter = query.toLowerCase();
+      for (const [model, hint, badge] of curatedImageModels) {
+        if (model.includes(filter)) addOption(fragment, model, hint, badge);
+      }
+
+      const accountMatches = accountModels.filter(model => model.includes(filter));
+      if (accountMatches.length) {
+        const group = el('div');
+        const heading = el('div', 'ss-image-model-group-label', 'Available on your account');
+        heading.id = listbox.id + '-account';
+        group.setAttribute('role', 'group');
+        group.setAttribute('aria-labelledby', heading.id);
+        group.append(heading);
+        for (const model of accountMatches) addOption(group, model, 'Listed by OpenAI');
+        fragment.append(group);
+      }
+
+      if (!matches.length && imageModelFormat.test(query)) {
+        addOption(fragment, query, 'Use this model ID', '', true);
+      }
+      listbox.replaceChildren(fragment);
+      empty.hidden = matches.length > 0;
+      updateText(empty, matches.length ? '' : 'No matching models. Enter a valid model ID.');
+      activate(matches.findIndex(option => option.dataset.model === activeModel), false);
+      popup.scrollIntoView({ block: 'nearest' });
+    }
+
+    function setExpanded(expanded) {
+      popup.hidden = !expanded;
+      input.setAttribute('aria-expanded', String(expanded));
+      toggle.setAttribute('aria-expanded', String(expanded));
+      toggle.setAttribute('aria-label', expanded ? 'Hide image models' : 'Show image models');
+    }
+
+    function open(filter = '') {
+      query = filter;
+      activate(-1);
+      setExpanded(true);
+      renderOptions();
+      popup.scrollTop = 0;
+    }
+
+    function close() {
+      activate(-1);
+      setExpanded(false);
+    }
+
+    function choose(option) {
+      if (input.value !== option.dataset.model) {
+        input.value = option.dataset.model;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      close();
+    }
+
+    function showStatus(message, failed = false) {
+      status.toggleAttribute('data-error', failed);
+      updateText(status, message.replace(/sk-[A-Za-z0-9_\-]{20,}/g, '[redacted]'));
+    }
+
+    async function refreshModels() {
+      const currentRequest = ++request;
+      loading = true;
+      refresh.setAttribute('aria-disabled', 'true');
+      showStatus('Loading account models…');
+      let result;
+      try {
+        result = await images.listModels();
+      } catch {
+        result = null;
+      }
+      if (currentRequest !== request) return;
+      loading = false;
+      refresh.removeAttribute('aria-disabled');
+      if (result?.ok && Array.isArray(result.models)) {
+        accountModels = [...new Set(result.models.filter(model => typeof model === 'string' &&
+          imageModelFormat.test(model) && !curatedImageIds.has(model)))];
+        showStatus(accountModels.length ? 'Account models loaded.' : 'No additional account models.');
+      } else {
+        accountModels = [];
+        const detail = typeof result?.message === 'string' && result.message.trim();
+        showStatus('Could not load account models.' + (detail ? ' ' + detail : ''), true);
+      }
+      if (!popup.hidden) renderOptions();
+    }
+
+    function setAccountAvailable(available, keyChanged) {
+      if (!canListModels || (available === accountAvailable && !keyChanged)) return;
+      accountAvailable = available;
+      refresh.hidden = status.hidden = !available;
+      accountModels = [];
+      if (!popup.hidden) renderOptions();
+      if (available) return refreshModels();
+      request++;
+      loading = false;
+      refresh.removeAttribute('aria-disabled');
+      showStatus('');
+    }
+
+    input.addEventListener('input', () => open(input.value));
+    input.addEventListener('click', () => {
+      if (popup.hidden) open();
+    });
+    input.addEventListener('blur', close);
+    // Keep focus on the combobox when choosing a suggestion or toggling the popup.
+    popup.addEventListener('mousedown', event => event.preventDefault());
+    toggle.addEventListener('mousedown', event => event.preventDefault());
+    listbox.addEventListener('click', event => {
+      const option = event.target.closest('[role="option"]');
+      if (option) choose(option);
+    });
+    input.addEventListener('keydown', event => {
+      if (event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      const key = event.key;
+      if (key === 'ArrowDown' || key === 'ArrowUp') {
+        event.preventDefault();
+        if (popup.hidden) open();
+        if (!matches.length) return;
+        const next = key === 'ArrowDown' ? Math.min(active + 1, matches.length - 1)
+          : active < 0 ? matches.length - 1 : Math.max(active - 1, 0);
+        activate(next);
+      } else if (!popup.hidden && (key === 'Home' || key === 'End') && matches.length) {
+        event.preventDefault();
+        activate(key === 'Home' ? 0 : matches.length - 1);
+      } else if (!popup.hidden && key === 'Enter' && matches[active]) {
+        event.preventDefault();
+        choose(matches[active]);
+      } else if (!popup.hidden && key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        close();
+      } else if (key === 'ArrowLeft' || key === 'ArrowRight') {
+        activate(-1);
+      }
+    });
+
+    return { field, input, close, setAccountAvailable };
+  }
+
+  function createImageKeyBlock(id, images, onKeyStatus) {
     const block = el('fieldset', 'ss-card ss-image-key');
     block.hidden = true;
     const legend = el('legend', '', 'OpenAI API key');
@@ -829,9 +1076,11 @@
       updateText(feedback, message.replace(/sk-[A-Za-z0-9_\-]{20,}/g, '[redacted]'));
     }
 
-    function setStatus(result) {
+    function setStatus(result, keyChanged = false) {
       const last4 = typeof result.last4 === 'string' && /^[A-Za-z0-9_\-]{4}$/.test(result.last4) ? result.last4 : '';
+      keyChanged ||= Boolean(keyStatus?.set && keyStatus.last4 !== last4);
       keyStatus = { set: result.set === true, last4 };
+      onKeyStatus(keyStatus.set && !block.hidden, keyChanged);
     }
 
     function paint() {
@@ -877,7 +1126,7 @@
       clearInput();
       return run('Saving key…', 'Could not save the key.', async () => {
         const result = await images.saveKey(key);
-        if (result?.ok) setStatus({ set: true, last4: result.last4 ?? key.slice(-4) });
+        if (result?.ok) setStatus({ set: true, last4: result.last4 ?? key.slice(-4) }, true);
         else showFeedback(typeof result?.error === 'string' && result.error || 'Could not save the key.', true);
       });
     }
@@ -925,7 +1174,11 @@
         block.hidden = !visible;
         clearInput();
         showFeedback();
-        if (visible) return refresh();
+        if (visible) {
+          if (pending) onKeyStatus(Boolean(keyStatus?.set));
+          return refresh();
+        }
+        onKeyStatus(false);
       }
     };
   }
@@ -977,7 +1230,10 @@
     const imagesHeading = groupHeading(imagesGroup, 'Image generation', id + '-images', headingLevel);
     const imagesInputs = el('fieldset', 'ss-card ss-images-controls');
     imagesGroup.append(imagesInputs);
-    const imageKey = images ? createImageKeyBlock(id, images) : undefined;
+    let imageModel;
+    const imageKey = images ? createImageKeyBlock(id, images, (available, keyChanged) => {
+      imageModel?.setAccountAvailable(available, keyChanged);
+    }) : undefined;
     if (imageKey) imagesGroup.append(imageKey.block);
     const advancedGroup = el('section', 'ss-group');
     const advancedHeading = groupHeading(advancedGroup, 'Advanced', id + '-advanced', headingLevel);
@@ -1050,6 +1306,7 @@
       if (!next || (currentSection === next && !focus)) return;
       const changed = next !== currentSection;
       currentSection = next;
+      if (next.heading !== imagesHeading) imageModel?.close();
       for (const item of shortcuts) {
         item.group.hidden = item !== next;
         if (item === next) item.link.setAttribute('aria-current', 'page');
@@ -1207,18 +1464,12 @@
         selectField(imagesInputs, 'images.provider', 'Provider', [
           ['codex', 'Codex CLI image skill'], ['openai', 'OpenAI API']
         ], undefined, false);
-        const modelField = el('div', 'ss-field');
-        const imageModel = el('input');
-        imageModel.type = 'text';
-        imageModel.id = id + '-images.model';
-        imageModel.autocapitalize = 'none';
-        imageModel.spellcheck = false;
-        const modelLabel = el('label', '', 'Image model');
-        modelLabel.htmlFor = imageModel.id;
-        modelField.append(modelLabel, imageModel);
-        const modelHelp = helpText(modelField, 'images.model', 'Enter a model ID such as gpt-image-1.');
-        field(modelField, 'images.model', [imageModel], () => imageModel.value, value => {
-          imageModel.value = value;
+        imageModel = createImageModelPicker(id + '-images.model', images);
+        const { field: modelField, input } = imageModel;
+        const modelHelp = helpText(modelField, 'images.model', 'Choose a suggested model or enter a custom model ID.');
+        field(modelField, 'images.model', [input], () => input.value, value => {
+          imageModel.close();
+          input.value = value;
         }, modelHelp);
         imagesInputs.append(modelField);
         selectField(imagesInputs, 'images.quality', 'Quality', [
@@ -1501,6 +1752,7 @@
       close() {
         section.hidden = true;
         teamEditor?.stopPolling();
+        imageModel?.close();
         imageKey?.clearInput();
       },
       refresh,

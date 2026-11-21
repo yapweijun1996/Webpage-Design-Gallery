@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-default-brand="cny-red-gold">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -95,7 +95,9 @@
   #usage-table :is(th,td){padding:5px 8px;border-top:1px solid #262b36;white-space:nowrap}
   #usage-table thead{position:sticky;top:0;background:#171a21}
   #usage-table th:first-child{text-align:left}
+  #usage-table :is(th,td):nth-child(2){text-align:left}
   #usage-table tbody th{color:#e8eaf0;font-weight:600}
+  #usage-estimate-basis{margin:6px 0 2px}
   #main{display:grid;grid-template-columns:minmax(0,1fr) 6px var(--aside-w,330px);min-height:0;position:relative}
   /* viewwrap contains fixed-position page elements (action bars) so they cannot cover the side panel */
   #viewwrap{position:relative;min-width:0;min-height:0;contain:paint;overflow:hidden}
@@ -176,10 +178,11 @@
     <p id="usage-empty">Waiting for agent usage</p>
     <div class="usage-scroll" role="region" aria-label="Usage by agent table" tabindex="0" hidden>
       <table id="usage-table" aria-label="Usage by agent">
-        <thead><tr><th scope="col">Agent</th><th scope="col">Total</th><th scope="col" title="Input excluding cache reads">Input</th><th scope="col" title="Cached input reads">Cache</th><th scope="col" title="Output including reasoning">Output</th><th scope="col">USD estimate</th></tr></thead>
+        <thead><tr><th scope="col">Agent</th><th scope="col">Runner</th><th scope="col">Total</th><th scope="col" title="Input excluding cache reads">Input</th><th scope="col" title="Cached input reads">Cache</th><th scope="col" title="Output including reasoning">Output</th><th scope="col">USD estimate</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
+    <p id="usage-estimate-basis" hidden>Codex CLI estimates use standard API rates for short context and 30-minute cache writes. Actual charges may differ.</p>
   </details>
 </div>
 <div id="look" role="dialog" aria-label="Appearance" hidden>
@@ -238,6 +241,7 @@
   var usdFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 4 });
   var usageDetails = $('usage-details');
   var latestUsage;
+  var usageRunnerLabels = { codex: 'Codex CLI', pi: 'pi' };
   function costText(usage) {
     if (usage.usd === null) return 'USD —';
     var amount = usage.usd > 0 && usage.usd < 0.0001 ? '<$0.0001' : usdFormat.format(usage.usd);
@@ -255,6 +259,7 @@
       name.scope = 'row';
       name.textContent = id + ' · ' + usage.name;
       row.append(name);
+      row.insertCell().textContent = (usage.runners || []).map(function (runner) { return usageRunnerLabels[runner] || runner; }).join(' / ') || '—';
       var partial = usage.breakdownReports && usage.breakdownReports < usage.reports;
       var total = usage.reports ? tokenFormat.format(usage.tokens) : '—';
       row.insertCell().textContent = total + (usage.missingUsage ? ' (incomplete)' : '');
@@ -262,7 +267,9 @@
         var value = usage.breakdownReports ? tokenFormat.format(usage[key]) : '—';
         row.insertCell().textContent = value + (partial ? ' (partial)' : '');
       });
-      row.insertCell().textContent = costText(usage);
+      var cost = row.insertCell();
+      cost.textContent = costText(usage);
+      if (usage.apiEstimates) cost.title = 'Includes a Codex CLI estimate at standard API rates';
       return row;
     }));
   }
@@ -276,6 +283,7 @@
     }
     $('usage-tokens').textContent = usage.reports ? tokenFormat.format(usage.tokens) + ' tokens' : 'Tokens —';
     $('usage-cost').textContent = costText(usage);
+    $('usage-estimate-basis').hidden = !usage.apiEstimates;
     $('usage-breakdown').textContent = usage.breakdownReports
       ? 'Input ' + tokenFormat.format(usage.input) + ' · Cache ' + tokenFormat.format(usage.cached) + ' · Output ' + tokenFormat.format(usage.output)
         + (usage.breakdownReports < usage.reports ? ' (partial)' : '')
@@ -341,6 +349,18 @@
   }
   function setAct(id, text) { var el = cur[id] && cur[id].el.querySelector('.act'); if (el) { el.textContent = text || ''; el.title = text || ''; } }
 
+  // Generated section markup is untrusted: drop active content before it enters the operator's document.
+  function safeFragment(html) {
+    var doc = new DOMParser().parseFromString('<body>' + html + '</body>', 'text/html');
+    doc.querySelectorAll('script,iframe,object,embed,base,meta[http-equiv],link[rel=import],frame,frameset').forEach(function (n) { n.remove(); });
+    doc.body.querySelectorAll('*').forEach(function (n) {
+      Array.prototype.slice.call(n.attributes).forEach(function (at) {
+        var name = at.name.toLowerCase(), val = String(at.value).replace(/[\u0000-\u0020]+/g, '').toLowerCase();
+        if (name.indexOf('on') === 0 || ((name === 'href' || name === 'src' || name === 'action' || name === 'formaction' || name === 'xlink:href') && (val.indexOf('javascript:') === 0 || val.indexOf('data:text/html') === 0))) n.removeAttribute(at.name);
+      });
+    });
+    return doc.body.innerHTML;
+  }
   function load(id, animate) {
     var a = S.agents[id], base = '/p/sections/' + id + '-' + a.section;
     return Promise.all([fetchText(base + '.html'), fetchText(base + '.bundle.css')]).then(function (r) {
@@ -348,7 +368,7 @@
       var el = hosts[id].el, filled = r[0].trim().length > 60;
       var prevHtml = el.querySelector('.body').innerHTML, prevCss = el.querySelector('style').textContent;
       el.querySelector('.stub').style.display = filled ? 'none' : '';
-      el.querySelector('.body').innerHTML = r[0]; el.querySelector('style').textContent = r[1];
+      el.querySelector('.body').innerHTML = safeFragment(r[0]); el.querySelector('style').textContent = r[1];
       if (animate && filled) wipe(id);
       placeAll();
       if (animate && filled && (prevHtml.trim() || prevCss.trim())) visitChanges(id, changedElements(el, prevHtml, r[0], prevCss, r[1]));
@@ -689,7 +709,8 @@
           loadKey: function () { return api('/api/secrets/openai').then(function (r) { return r.json; }); },
           saveKey: function (key) { return api('/api/secrets/openai', 'PUT', { key: key }).then(function (r) { return r.json; }); },
           removeKey: function () { return api('/api/secrets/openai', 'DELETE').then(function (r) { return r.json; }); },
-          testKey: function () { return api('/api/secrets/openai/test', 'POST', {}).then(function (r) { return r.json; }); }
+          testKey: function () { return api('/api/secrets/openai/test', 'POST', {}).then(function (r) { return r.json; }); },
+          listModels: function () { return api('/api/secrets/openai/models').then(function (r) { return r.json; }); }
         },
         team: {
           load: function () { return api('/api/team').then(function (r) {

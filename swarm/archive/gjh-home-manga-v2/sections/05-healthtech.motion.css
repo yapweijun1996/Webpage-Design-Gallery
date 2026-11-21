@@ -1,0 +1,40 @@
+/* Calm, tactile motion for the health and lifestyle chapters. */
+.s-05 .healthtech-picture img {
+  transition: transform 700ms cubic-bezier(.22, 1, .36, 1);
+}
+
+.s-05 .healthtech-action {
+  transition: color 220ms ease, background-color 220ms ease, border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .s-05 .healthtech-chapter:hover .healthtech-picture img {
+    transform: scale(1.025);
+  }
+
+  .s-05 .healthtech-action:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.s-05 .healthtech-action:active {
+  transform: translateY(0);
+}
+
+.s-05 .healthtech-action:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-05 .healthtech-picture img,
+  .s-05 .healthtech-action {
+    transition: none;
+  }
+
+  .s-05 .healthtech-chapter:hover .healthtech-picture img,
+  .s-05 .healthtech-action:hover,
+  .s-05 .healthtech-action:active {
+    transform: none;
+  }
+}

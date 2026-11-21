@@ -1,0 +1,43 @@
+.s-05 .healthtech-inner {
+  display: grid;
+  gap: var(--dc-space-6);
+  max-inline-size: var(--dc-container);
+  margin-inline: auto;
+  padding-inline: var(--healthtech-gutter, var(--dc-space-4));
+}
+
+.s-05 .healthtech-scene {
+  position: relative;
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.s-05 .healthtech-picture {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 4 / 5;
+}
+
+.s-05 .healthtech-picture img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.s-05 .healthtech-content {
+  min-inline-size: 0;
+}
+
+@media (min-width: 48rem) {
+  .s-05 .healthtech-inner {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: center;
+    gap: var(--dc-space-12);
+  }
+
+  .s-05 .healthtech-picture {
+    aspect-ratio: 16 / 9;
+  }
+}

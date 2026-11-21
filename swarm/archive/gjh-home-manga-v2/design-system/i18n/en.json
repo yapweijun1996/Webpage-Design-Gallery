@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "lang": "en",
+    "status": "source",
+    "generated": "2026-11-20T16:41:59.817Z"
+  },
+  "messages": {
+    "sds.brand": "Brand",
+    "sds.language": "Language",
+    "sds.loader": "Loading…",
+    "sds.offline.body": "Reconnect to the internet and try again.",
+    "sds.offline.status": "You are offline",
+    "sds.offline.title": "Offline",
+    "sds.skip": "Skip to content",
+    "sds.theme": "Theme",
+    "sds.theme.auto": "Auto",
+    "sds.theme.dark": "Dark",
+    "sds.theme.light": "Light",
+    "sds.update.available": "Update available",
+    "sds.update.check": "Check updates",
+    "sds.update.now": "Update now",
+    "sds.version": "Version"
+  }
+}

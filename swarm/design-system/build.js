@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const MODES = ['light', 'dark'];
-const BRANDS = ['forest-gold', 'gjh-classic'];
+const BRANDS = ['forest-gold', 'gjh-classic', 'cny-red-gold'];
 const COLOR_ROLES = [
   'accent', 'action', 'action-active', 'action-hover', 'bg', 'border', 'border-strong',
   'danger', 'danger-bg', 'focus', 'info', 'info-bg', 'on-action', 'scrim', 'scrim-strong',

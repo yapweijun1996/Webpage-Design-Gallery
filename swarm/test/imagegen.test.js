@@ -34,7 +34,7 @@ test('generate: sends the key as a bearer header only, writes the file, returns 
   assert.equal(fs.readFileSync(out).length, 200);
   assert.equal(seen.opts.headers.authorization, 'Bearer ' + KEY);
   const body = JSON.parse(seen.opts.body);
-  assert.equal(body.model, 'gpt-image-1'); assert.equal(body.n, 1);
+  assert.equal(body.model, 'gpt-image-2'); assert.equal(body.n, 1);
   assert.ok(!JSON.stringify(r).includes(KEY));
 });
 

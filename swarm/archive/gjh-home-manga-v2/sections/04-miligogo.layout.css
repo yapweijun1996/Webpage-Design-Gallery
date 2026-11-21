@@ -1,0 +1,88 @@
+.s-04 .s-04__chapter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  scroll-margin-block-start: var(--dc-space-12);
+}
+
+.s-04 .s-04__panel {
+  min-inline-size: 0;
+  margin: 0;
+}
+
+.s-04 .s-04__frame {
+  position: relative;
+  overflow: hidden;
+  min-inline-size: 0;
+}
+
+.s-04 .s-04__scene {
+  position: absolute;
+  inset: 0;
+}
+
+.s-04 .s-04__scene,
+.s-04 .s-04__scene img {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.s-04 .s-04__scene img {
+  object-fit: cover;
+}
+
+.s-04 .s-04__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  min-inline-size: 0;
+  padding: var(--dc-space-8) var(--dc-space-4);
+  z-index: 1;
+}
+
+.s-04 .s-04__action {
+  display: inline-flex;
+  align-items: center;
+  min-inline-size: var(--dc-tap);
+  min-block-size: var(--dc-tap);
+}
+
+@media (min-width: 48rem) {
+  .s-04 .s-04__chapter {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  }
+
+  .s-04 .s-04__chapter--gogo {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+
+  .s-04 .s-04__chapter--gogo .s-04__panel {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .s-04 .s-04__chapter--gogo .s-04__content {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .s-04 .s-04__panel {
+    z-index: 0;
+  }
+
+  .s-04 .s-04__content {
+    padding: var(--dc-space-8);
+  }
+
+  .s-04 .s-04__frame {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  .s-04 .s-04__frame {
+    min-block-size: 0;
+    block-size: clamp(16rem, 42svh, 26rem);
+  }
+}

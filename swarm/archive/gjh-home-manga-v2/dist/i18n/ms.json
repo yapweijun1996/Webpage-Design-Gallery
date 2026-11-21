@@ -1,0 +1,24 @@
+{
+  "meta": {
+    "lang": "ms",
+    "status": "machine-draft",
+    "generated": "2026-11-20T16:41:59.818Z"
+  },
+  "messages": {
+    "sds.brand": "Jenama",
+    "sds.language": "Bahasa",
+    "sds.loader": "Sedang dimuatkan…",
+    "sds.offline.body": "Sambung semula ke Internet dan cuba lagi.",
+    "sds.offline.status": "Anda di luar talian",
+    "sds.offline.title": "Luar talian",
+    "sds.skip": "Langkau ke kandungan",
+    "sds.theme": "Tema",
+    "sds.theme.auto": "Automatik",
+    "sds.theme.dark": "Gelap",
+    "sds.theme.light": "Cerah",
+    "sds.update.available": "Kemas kini tersedia",
+    "sds.update.check": "Semak kemas kini",
+    "sds.update.now": "Kemas kini sekarang",
+    "sds.version": "Versi"
+  }
+}

@@ -1,0 +1,16 @@
+/* Keep the chapter immediately readable; animate only intentional interaction. */
+@media (prefers-reduced-motion: no-preference) {
+  .s-03 .newmoon-action {
+    transition: background-color var(--sds-dur-base, var(--dc-dur)) var(--sds-ease-standard, var(--dc-ease)),
+      color var(--sds-dur-base, var(--dc-dur)) var(--sds-ease-standard, var(--dc-ease)),
+      border-color var(--sds-dur-base, var(--dc-dur)) var(--sds-ease-standard, var(--dc-ease)),
+      box-shadow var(--sds-dur-fast, var(--dc-dur)) var(--sds-ease-standard, var(--dc-ease));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-03 .newmoon-action {
+    transition: none;
+    animation: none;
+  }
+}

@@ -85,7 +85,8 @@ class ElementStub extends EventTargetStub {
 const colors = {
   none: { light: '#ffffff', dark: '#151515' },
   'forest-gold': { light: '#f7efdc', dark: '#101c16' },
-  'gjh-classic': { light: '#edeef2', dark: '#0f1115' }
+  'gjh-classic': { light: '#edeef2', dark: '#0f1115' },
+  'cny-red-gold': { light: '#fff7e6', dark: '#29070b' }
 };
 
 function createPage(options = {}) {
@@ -569,6 +570,28 @@ test('boot uses safe defaults for malformed storage, malformed markup and blocke
     assert.deepEqual(['data-theme', 'data-brand', 'lang'].map(name => page.root.getAttribute(name)), ['auto', brand, lang]);
     assert.equal(page.root.hasAttribute('data-loading'), true);
   }
+});
+
+test('boot and runtime apply the Chinese New Year brand in auto and light themes', () => {
+  const brand = 'cny-red-gold';
+  const control = new ElementStub('button', { 'data-sds-brand': brand });
+  const page = createPage({ attributes: { 'data-default-brand': brand }, elements: [control] });
+  page.runBoot();
+  assert.equal(page.root.getAttribute('data-brand'), brand);
+  assert.equal(page.root.getAttribute('data-theme'), 'auto');
+  page.start();
+  assert.equal(page.sds.brand.get(), brand);
+  assert.equal(page.meta.getAttribute('content'), colors[brand].light);
+  page.systemTheme(true);
+  assert.equal(page.meta.getAttribute('content'), colors[brand].dark);
+  page.sds.theme.set('light');
+  assert.equal(page.meta.getAttribute('content'), colors[brand].light);
+
+  page.sds.brand.set('none');
+  assert.equal(control.getAttribute('aria-pressed'), 'false');
+  page.dispatch('click', control);
+  assert.equal(control.getAttribute('aria-pressed'), 'true');
+  assert.equal(page.storage.get('sds.brand'), brand);
 });
 
 function serviceWorkerFixture() {

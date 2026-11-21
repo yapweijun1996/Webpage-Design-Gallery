@@ -414,6 +414,126 @@
   margin-block-start: 0;
 }
 
+.swarm-settings .ss-image-model-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.swarm-settings .ss-button.ss-image-model-refresh {
+  min-block-size: 28px;
+  padding-inline: 8px;
+  font-size: 12px;
+}
+
+.swarm-settings .ss-image-model-status[data-error] {
+  color: var(--ss-error);
+}
+
+.swarm-settings .ss-image-model-control {
+  position: relative;
+}
+
+.swarm-settings .ss-image-model-control input {
+  padding-inline-end: var(--ss-control-height);
+}
+
+.swarm-settings .ss-image-model-toggle {
+  position: absolute;
+  inset-block: 1px;
+  inset-inline-end: 1px;
+  display: grid;
+  place-items: center;
+  inline-size: calc(var(--ss-control-height) - 2px);
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ss-muted);
+  cursor: pointer;
+}
+
+.swarm-settings .ss-image-model-toggle:hover {
+  background: var(--ss-selection);
+}
+
+.swarm-settings .ss-image-model-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.swarm-settings .ss-image-model-popup {
+  position: absolute;
+  z-index: 1;
+  inset-block-start: calc(100% + 4px);
+  inset-inline: 0;
+  max-block-size: min(18rem, 44dvh);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+  border: 1px solid var(--ss-line);
+  border-radius: 8px;
+  background: var(--ss-bg);
+  box-shadow: 0 6px 14px rgb(0 0 0 / 35%);
+  scrollbar-width: thin;
+}
+
+.swarm-settings .ss-image-model-option {
+  min-block-size: var(--ss-control-height);
+  padding: 6px 8px;
+  border-radius: 5px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .swarm-settings .ss-image-model-option:hover {
+    background: var(--ss-surface);
+  }
+}
+
+.swarm-settings .ss-image-model-option[aria-selected="true"] {
+  background: var(--ss-selection);
+  outline: 1px solid var(--ss-accent);
+  outline-offset: -1px;
+}
+
+.swarm-settings .ss-image-model-option-title {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  font-weight: 650;
+}
+
+.swarm-settings .ss-image-model-badge {
+  padding-inline: 6px;
+  border: 1px solid var(--ss-line);
+  border-radius: 8px;
+  color: var(--ss-accent);
+  font-size: 11px;
+}
+
+.swarm-settings :is(.ss-image-model-hint, .ss-image-model-group-label, .ss-image-model-empty) {
+  color: var(--ss-muted);
+  font-size: 12px;
+}
+
+.swarm-settings .ss-image-model-group-label {
+  margin-block-start: 4px;
+  padding: 6px 8px;
+  border-block-start: 1px solid var(--ss-border);
+  font-weight: 650;
+}
+
+.swarm-settings .ss-image-model-empty {
+  padding: 6px 8px;
+}
+
 .swarm-settings .ss-image-key {
   display: grid;
   gap: 8px;

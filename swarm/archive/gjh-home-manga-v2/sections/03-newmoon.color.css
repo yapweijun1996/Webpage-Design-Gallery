@@ -1,0 +1,28 @@
+/* Retain the warm chapter palette while keeping action states distinct. */
+.s-03 .newmoon-action-primary:hover {
+  background: var(--newmoon-gold);
+  border-color: var(--newmoon-gold);
+  color: var(--newmoon-ink);
+}
+
+.s-03 .newmoon-action-secondary:hover {
+  background: var(--newmoon-forest);
+  border-color: var(--newmoon-forest);
+  color: var(--newmoon-ivory);
+}
+
+.s-03 .newmoon-action:focus-visible {
+  outline-color: var(--newmoon-forest);
+}
+
+.s-03 .newmoon-action:active {
+  background: var(--newmoon-ink);
+  border-color: var(--newmoon-ink);
+  color: var(--newmoon-ivory);
+}
+
+@media (forced-colors: active) {
+  .s-03 .newmoon-action:focus-visible {
+    outline-color: Highlight;
+  }
+}

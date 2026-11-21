@@ -13,12 +13,13 @@ const REPO_ROOT = path.resolve(SWARM_ROOT, '..');
 const SDS_ROOT = path.join(SWARM_ROOT, 'design-system');
 const SHELL = path.join(SDS_ROOT, 'shell');
 const LANGUAGES = { en: 'English', 'zh-Hans': '简体中文', ms: 'Bahasa Melayu' };
-const BRANDS = ['none', 'forest-gold', 'gjh-classic'];
+const BRANDS = ['none', 'forest-gold', 'gjh-classic', 'cny-red-gold'];
 const SDS_STYLES = ['tokens.css', 'themes.css', 'components.css'];
 const ICONS = ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 const IMAGE_PREFIXES = [
-  { prefix: '/gjh/', directory: 'assets/companies/gjh', filenamePrefix: '' },
-  { prefix: '/gjh-v11/', directory: 'demos/corporate/gjh/v11/assets', filenamePrefix: 'v11-' },
+  { prefixes: ['/gjh/'], directory: 'assets/companies/gjh', filenamePrefix: '' },
+  { prefixes: ['/gjh-v11/', '../v11/', '/p/v11/'], directory: 'demos/corporate/gjh/v11/assets', filenamePrefix: 'v11-' },
+  { prefixes: ['/assets/generated/', '../assets/generated/'], directory: 'assets/generated', filenamePrefix: '', projectLocal: true },
 ];
 const BASE_CSS = `
 *{box-sizing:border-box}
@@ -74,15 +75,18 @@ function imageSource(relativePath, root) {
   }
 }
 
-function imageRewriter(writeImage, copied, missing, unresolved) {
-  const mappings = IMAGE_PREFIXES.map(({ prefix, directory, filenamePrefix }) => {
-    const root = path.resolve(REPO_ROOT, directory);
-    return { prefix, filenamePrefix, root: fs.existsSync(root) ? fs.realpathSync(root) : null };
+function imageRewriter(projectDir, writeImage, copied, missing, unresolved) {
+  const projectRoot = fs.realpathSync(projectDir);
+  const mappings = IMAGE_PREFIXES.flatMap(({ prefixes, directory, filenamePrefix, projectLocal }) => {
+    const location = path.join(projectLocal ? projectRoot : REPO_ROOT, directory);
+    const root = fs.existsSync(location) ? fs.realpathSync(location) : null;
+    const allowedRoot = root && (!projectLocal || isWithin(projectRoot, root)) ? root : null;
+    return prefixes.map(prefix => ({ prefix, filenamePrefix, root: allowedRoot }));
   });
   const usedNames = new Set();
 
   return function rewriteImage(url) {
-    if (!url.startsWith('/') || url.startsWith('//') || missing.has(url)) return url;
+    if ((!url.startsWith('/') && !url.startsWith('../')) || url.startsWith('//') || missing.has(url)) return url;
     const mapping = mappings.find(({ prefix }) => url.startsWith(prefix));
     if (!mapping) {
       unresolved.add(url);
@@ -339,7 +343,7 @@ function main() {
   const missing = new Set();
   const unresolved = new Set();
   const warnings = [];
-  const rewriteImage = imageRewriter((filename, source) => {
+  const rewriteImage = imageRewriter(projectDir, (filename, source) => {
     if (pwa) {
       bundle.set(filename, fs.readFileSync(source));
     } else {
@@ -385,7 +389,10 @@ function main() {
   for (const url of missing) console.log(`  ${url}`);
   console.log(`Unresolved references: ${unresolved.size}`);
   console.log(`Final file: ${destination} (${Buffer.byteLength(page)} bytes)`);
-  for (const url of unresolved) console.warn(`Warning: Unresolved root-relative reference ${url} (unavailable offline)`);
+  for (const url of unresolved) {
+    const type = url.startsWith('/') ? 'root-relative' : 'relative';
+    console.warn(`Warning: Unresolved ${type} reference ${url} (unavailable offline)`);
+  }
   for (const warning of warnings) console.warn(`Warning: ${warning}`);
 }
 

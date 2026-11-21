@@ -85,13 +85,17 @@ next agent turn. Switching sections keeps both drafts available.
 
 The **Session usage** bar totals tokens reported by agent processes since the
 Swarm server started. It updates as the runners report usage and survives a browser
-refresh. **Usage by agent** shows the same totals and token breakdown per agent.
+refresh. **Usage by agent** shows the same totals, token breakdown, and runners
+used during the session per agent.
 Input excludes cache reads and includes cache writes. Cache shows tokens read
 from cache. Output includes reasoning tokens. Usage reports without a complete
 breakdown still count toward the total and are marked as partial in the breakdown.
-USD is the estimate reported by pi for model tokens. Codex CLI reports
-tokens only, so the page marks the estimate as partial or unavailable when applicable.
-The estimate covers reported model usage and does not represent an account bill.
+Swarm uses the USD estimate reported by pi. For Codex CLI, Swarm calculates an
+estimate from the model selected for each turn and the published standard
+short-context API rates, with 30-minute pricing for reported cache writes.
+Turn totals cannot identify individual long-context requests. The estimate
+covers reported model tokens and does not represent an account bill. The
+page marks the estimate as partial or unavailable when pricing data is missing.
 
 ## Verification
 

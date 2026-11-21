@@ -2,6 +2,7 @@
 
 const PROMPT_LIMIT = 3600;
 const REQUEST_LIMIT = 1200;
+const SQUAD_CONTEXT_LIMIT = 6500; // inlined section context is capped so it can never push the owner request out of the prompt
 
 // When the owner looks at only part of the page, every agent must stay inside that part.
 function scopeLine(scope) {
@@ -57,11 +58,11 @@ function squadPrompt(member, wave, waveNo, plan, owner) {
     'Live narration rule: before each major step write one short sentence of intent (max 20 words) in your live commentary.',
     mates && `Teammates working at the same time: ${mates}. Do not edit their files.`,
     role,
-    plan.prompts[member.id],
+    String(plan.prompts[member.id] || '').slice(0, SQUAD_CONTEXT_LIMIT),
     'Finally append one kind:"done" line to your outbox stating what changed in one sentence.',
     `Current request #${owner.id} from ${owner.from}:`
   ].filter(Boolean).join('\n');
-  return lines + '\n' + String(owner.text).slice(0, Math.max(0, PROMPT_LIMIT + 800 - lines.length));
+  return lines + '\n' + String(owner.text).slice(0, REQUEST_LIMIT);
 }
 
 function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRounds = 2, reviewRounds = 1, squad = null }) {

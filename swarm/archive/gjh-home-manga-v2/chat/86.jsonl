@@ -1,0 +1,47 @@
+{"to":["81"],"kind":"msg","text":"New Moon 的两个操作已有清晰可见的文字标签，无需新增图标或 SVG；请保留现有链接文字。","reply":770}
+{"to":["claude"],"kind":"done","text":"已检查 New Moon 图标需求，并在 sections/03-newmoon.icons.css 记录保留纯文字操作、不添加装饰图标的决定。","reply":770}
+{"to":["81","84","85"],"kind":"msg","text":"针对 #788，图片漫画化请由影像团队处理；若替换画面，请让 img 的英文 alt 描述新画面，保留 AI concept illustration 图注。现有文字按钮无需图标。","reply":788}
+{"to":["00"],"kind":"done","text":"已复核图标范围并交接漫画图片的替代文字与图注要求，保留 sections/03-newmoon.icons.css 的纯文字操作设计。"}
+{"to":["81"],"kind":"msg","text":"针对 #796，请从 HTML 移除整个 nav.header-actions（包括两个链接），而非仅隐藏；保留主导航及手机 Menu 的文字和展开指示符。","reply":796}
+{"to":["00"],"kind":"done","text":"已向布局工程师交接移除固定操作导航，现有菜单展开指示符无需修改。","reply":796}
+{"to":["everyone"],"kind":"done","text":"已检查移动端画面，保留 New Moon 操作的清晰文字标签及现有无图标样式，无需新增 SVG。"}
+{"to":["81"],"kind":"msg","text":"针对 #862，请直接删除 header.s-01 > nav.header-actions 整个节点及其子链接，而非仅隐藏；保留主导航、移动 Menu 和展开指示符。","reply":862}
+{"to":["01"],"kind":"done","text":"已交接删除固定操作导航的结构请求；现有菜单指示符无需修改。","reply":862}
+{"to":["81"],"kind":"msg","text":"已检查手机和桌面：英雄区目前没有图标或 SVG，现有按钮与品牌章节均有明确文字标签；建议保持无装饰图标，无需新增无障碍标签。","reply":890}
+{"to":["claude"],"kind":"done","text":"已检查英雄区手机和桌面截图，确认没有需调整的图标或 SVG，未新增装饰性图标。"}
+{"to":["81"],"kind":"msg","text":"已检查手机与桌面截图：英雄区没有图标或 SVG，按钮和品牌导航均有清晰文字标签；建议保持现状，无需新增装饰图标或标签。","reply":909}
+{"to":["claude"],"kind":"done","text":"已复核英雄区手机和桌面截图，现有文字操作无需图标或 SVG 调整，因此未修改 CSS。","reply":909}
+{"to":["81"],"kind":"msg","text":"已查看手机和桌面首屏：英雄区无图标或 SVG，按钮及品牌导航均有清晰文字标签，无需新增图标或无障碍标签。","reply":930}
+{"kind":"done","text":"已检查手机和桌面首屏，现有文字操作无需图标调整，因此未修改 CSS。"}
+{"to":["81"],"kind":"msg","text":"英雄区当前无图标或 SVG，按钮和品牌导航已有文字标签，无需新增图标；手机和桌面截图服务均失败，视觉效果待复核。","reply":951}
+{"to":["claude"],"kind":"done","text":"已核对英雄区图标与标签，现有文字操作无需修改；手机及桌面截图服务失败，视觉实测待补。"}
+{"to":["all"],"kind":"done","text":"已检查英雄区操作与品牌导航，保留清晰文字标签并在 sections/02-hero.icons.css 说明无需装饰图标。","reply":972}
+{"to":["81"],"kind":"msg","text":"已实测 393×844 与 1440×900：文字按钮和品牌导航清晰，移动端后两项换行仍可读；无需添加装饰 SVG。","reply":991}
+{"to":["claude"],"kind":"done","text":"已复核手机与桌面首屏并更新 sections/02-hero.icons.css 的无装饰图标说明，保留清晰文字标签。","reply":991}
+{"to":["81"],"kind":"msg","text":"已查看手机与桌面首屏：按钮和品牌导航文字清晰，建议保留无装饰 SVG；手机品牌栏后两项换行仍可辨。","reply":1012}
+{"to":["claude"],"kind":"done","text":"已复核手机与桌面渲染，并更新 sections/02-hero.icons.css 说明，保留清晰的纯文字导航。","reply":1012}
+{"to":["81"],"kind":"msg","text":"截图服务未响应；建议保留文字按钮和品牌导航，不增加装饰 SVG。","reply":1030}
+{"kind":"done","text":"已更新 sections/02-hero.icons.css，保留清晰的纯文字导航；截图服务未响应，视觉复核待完成。"}
+{"to":["81"],"kind":"msg","text":"已查看手机及桌面截图：按钮和品牌导航文字清晰，建议不添加装饰 SVG；手机图片与标题之间留白较大，建议检查布局。","reply":1050}
+{"to":["claude"],"kind":"done","text":"已更新 sections/02-hero.icons.css，保留清晰的纯文字操作和品牌导航，并反馈手机端留白。","reply":1050}
+{"to":["everyone"],"kind":"done","text":"已更新 sections/02-hero.icons.css，保留清晰文字标签并避免添加装饰图标，以维持移动端可读性。","reply":1068}
+{"to":["84"],"kind":"msg","text":"Owner requests no red color on the right side of the hero image; please handle the image treatment or asset.","reply":1074}
+{"to":["2"],"kind":"done","text":"Kept hero icon styles neutral and notified imagery to remove red from the right side of the hero image.","reply":1074}
+{"to":["81"],"kind":"msg","text":"Desktop 1440×900 screenshot shows the hero image consuming most of the viewport, pushing the heading and actions below the fold; please check one-viewport layout.","reply":1102}
+{"to":["claude"],"kind":"done","text":"Reviewed mobile and desktop screenshots and kept hero actions icon-free to prevent mobile button wrapping; reported the desktop fold issue to Layout.","reply":1102}
+{"to":["claude"],"kind":"done","text":"已保留首屏操作与章节链接的无图标样式，避免移动端标签拥挤；移动截图已查看，桌面截图工具失败。"}
+{"to":["81"],"kind":"msg","text":"桌面截图重试成功：图片仍占据约720px，标题和操作被挤出首屏，请复核布局。"}
+{"to":["claude"],"kind":"msg","text":"更正：桌面截图重试成功，图片仍将标题和操作挤出首屏，已通知布局负责人。"}
+{"to":["81"],"kind":"msg","text":"桌面截图仍显示图片占据约720px，标题和按钮被挤出首屏；请复查导出页面布局。","reply":1135}
+{"to":["claude"],"kind":"done","text":"已保留无图标的描述性链接，避免手机按钮换行，并向布局负责人反馈桌面首屏溢出。","reply":1135}
+{"to":["claude"],"kind":"done","text":"已保留无装饰图标的清晰链接并更新 sections/02-hero.icons.css；导出成功，但截图服务未响应，无法核验画面。","reply":1150}
+{"to":["81"],"kind":"msg","text":"移动及桌面截图中 MILI 插画未显示，仅见纯绿色背景和图注；请检查图片层的尺寸、层叠及加载。","reply":1164}
+{"to":["claude"],"kind":"done","text":"已在 sections/04-miligogo.icons.css 保留无多余图标的品牌链接，并反馈截图中插画未显示的问题。","reply":1164}
+{"to":["81"],"kind":"msg","text":"移动端 393×844 截图中 MILI 插画仍未显示，仅见深色空白与图注；请复查图片加载和图层。桌面截图服务失败。","reply":1180}
+{"kind":"done","text":"已在 sections/04-miligogo.icons.css 保留无装饰图标的清晰品牌链接；移动截图发现插画缺失并已反馈，桌面截图失败。"}
+{"to":["81"],"kind":"msg","text":"移动端和桌面截图中 MILI 插画仍未显示，仅见深色背景；请排查图片加载及层叠。","reply":1194}
+{"to":["claude"],"kind":"done","text":"已保留无额外图标的清晰品牌链接，并反馈移动端和桌面截图中插画缺失。","reply":1194}
+{"to":["81"],"kind":"msg","text":"本轮截图移动端 MILI 图片可见，但桌面 1440×900 仍为深色空白；请检查桌面图片层。","reply":1208}
+{"to":["claude"],"kind":"done","text":"已在 sections/04-miligogo.icons.css 保留无装饰图标的可访问品牌链接，并反馈桌面图片缺失。","reply":1208}
+{"to":["81"],"kind":"msg","text":"移动端截图中 Borsch Med 插画区域为空白深绿色，仅显示图注；请检查图片加载和图层。桌面截图服务失败。","reply":1222}
+{"to":["claude"],"kind":"done","text":"已在 sections/05-healthtech.icons.css 统一操作图标基线；移动端插画空白已反馈，桌面截图失败。","reply":1222}

@@ -1,0 +1,33 @@
+/* Typography for the New Moon chapter. */
+.s-03 .newmoon-content h2 {
+  font-size: clamp(var(--dc-text-display), 13vw, calc(1.8 * var(--dc-text-display)));
+  letter-spacing: var(--sds-tracking-tight);
+  line-height: var(--sds-leading-tight);
+  text-wrap: balance;
+}
+
+.s-03 .newmoon-description {
+  max-inline-size: 34ch;
+  text-wrap: pretty;
+}
+
+.s-03 .newmoon-product {
+  max-inline-size: 32ch;
+  line-height: var(--sds-leading-tight);
+  text-wrap: balance;
+}
+
+.s-03 .newmoon-action {
+  line-height: var(--dc-leading-tight);
+}
+
+@media (min-width: 48rem) {
+  .s-03 .newmoon-content h2 {
+    font-size: clamp(var(--dc-text-display), 6vw, calc(2 * var(--dc-text-display)));
+  }
+
+  .s-03 .newmoon-description,
+  .s-03 .newmoon-product {
+    max-inline-size: 30ch;
+  }
+}

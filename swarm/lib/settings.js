@@ -19,7 +19,7 @@ const DEFAULTS = Object.freeze({
   channel: Object.freeze({ language: 'zh-Hans', standingRules: '' }),
   research: Object.freeze({ web: true }),
   autopilot: Object.freeze({ maxCyclesPerScreen: 2 }),
-  images: Object.freeze({ provider: 'codex', model: 'gpt-image-1', quality: 'high', size: '1536x1024' }),
+  images: Object.freeze({ provider: 'codex', model: 'gpt-image-2', quality: 'high', size: '1536x1024' }),
 });
 
 const LABELS = Object.freeze({

@@ -203,7 +203,8 @@ function runOnce(a, label, promptText) {
     let fatal = false, settled = false;
     let reportedUsage = false;
     const recordUsage = usage => {
-      const agentUsage = state.usage.agents[a.id] ??= { name: a.title || a.name, ...createUsage() };
+      const agentUsage = state.usage.agents[a.id] ??= { name: a.title || a.name, runners: [], ...createUsage() };
+      if (!agentUsage.runners.includes(resolved.runner)) agentUsage.runners.push(resolved.runner);
       addUsage(state.usage, usage);
       addUsage(agentUsage, usage);
       emit({ type: 'usage', usage: state.usage });
@@ -213,7 +214,7 @@ function runOnce(a, label, promptText) {
       for (const ev of evs) {
         if (ev.kind === 'error') fatal = true;
         else if (ev.kind === 'usage' || ev.kind === 'done') {
-          const usage = normalizeUsage(resolved.runner, ev.usage);
+          const usage = normalizeUsage(resolved.runner, ev.usage, resolved.model);
           if (usage) {
             reportedUsage = true;
             recordUsage(usage);
@@ -280,7 +281,7 @@ const IMG = require('./lib/imagegen');
 const SECRETS_PATH = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS ? process.env.SWARM_SETTINGS + '.secrets' : path.join(ROOT, '.run', 'secrets.json'));
 const secrets = createSecrets(SECRETS_PATH);
 const imageLog = []; // timestamps of API image requests, a simple spend guard (30 per hour)
-function imageSettings() { const i = (settings && settings.images) || {}; return { provider: i.provider || 'codex', model: i.model || 'gpt-image-1', quality: i.quality || 'high', size: i.size || '1536x1024' }; }
+function imageSettings() { const i = (settings && settings.images) || {}; return { provider: i.provider || 'codex', model: i.model || 'gpt-image-2', quality: i.quality || 'high', size: i.size || '1536x1024' }; }
 const SQ_COLORS = ['#38bdf8', '#a78bfa', '#f472b6', '#facc15', '#34d399', '#fb923c', '#94a3b8', '#f87171', '#22d3ee', '#c084fc'];
 const squadAgents = SQ_AGENTS_BUILD();
 function SQ_AGENTS_BUILD() { return SQ.roster().map((spec, i) => ({ id: String(81 + i), name: spec.title, title: spec.title, color: SQ_COLORS[i % SQ_COLORS.length], section: 'sq-' + spec.id, lane: spec.mission, runner: spec.runner, squad: spec })); }
@@ -498,6 +499,11 @@ function serveFile(res, base, rel) {
 function body(req) { return new Promise(r => { let s = ''; req.on('data', d => s += d); req.on('end', () => { try { r(JSON.parse(s || '{}')); } catch (_) { r({}); } }); }); }
 
 http.createServer(async (req, res) => {
+  // Local-API guard: only a page served by this server may call it (blocks cross-site requests and DNS rebinding).
+  { const host = String(req.headers.host || '').replace(/:\d+$/, ''), origin = req.headers.origin;
+    if (!['127.0.0.1', 'localhost', '[::1]'].includes(host)) { res.writeHead(403, { 'content-type': 'text/plain' }); return res.end('forbidden host'); }
+    if (origin && origin !== 'http://' + req.headers.host) { res.writeHead(403, { 'content-type': 'text/plain' }); return res.end('forbidden origin'); }
+    if (['POST', 'PUT', 'PATCH'].includes(req.method) && Number(req.headers['content-length'] || 0) > 0 && !/^application\/json/i.test(req.headers['content-type'] || '')) { res.writeHead(415, { 'content-type': 'text/plain' }); return res.end('json required'); } }
   const url = new URL(req.url, 'http://x');
   const p = decodeURIComponent(url.pathname);
   if (p === '/events') {
@@ -567,6 +573,7 @@ http.createServer(async (req, res) => {
   if (p === '/api/secrets/openai' && req.method === 'PUT') { const b = await body(req); const r = secrets.setOpenAIKey(b.key); return send(res, r.ok ? 200 : 400, r); }
   if (p === '/api/secrets/openai' && req.method === 'DELETE') return send(res, 200, secrets.removeOpenAIKey());
   if (p === '/api/secrets/openai/test' && req.method === 'POST') return send(res, 200, await IMG.testKey({ apiKey: secrets.getOpenAIKey() }));
+  if (p === '/api/secrets/openai/models' && req.method === 'GET') return send(res, 200, await IMG.listImageModels({ apiKey: secrets.getOpenAIKey() }));
   if (p === '/api/image' && req.method === 'POST') {
     const b = await body(req), cfg = imageSettings();
     const name = String(b.name || '').toLowerCase();
@@ -635,6 +642,7 @@ http.createServer(async (req, res) => {
   }
   if (p === '/api/stop' && req.method === 'POST') { stopAll(); return send(res, 200, { ok: true }); }
   { const m = /^\/p\/sections\/(\d\d-[a-z0-9-]+)\.bundle\.css$/.exec(p); if (m) { let css = ''; try { css = LAYERS.assembleCss(path.join(PROJECT, 'sections'), m[1]); } catch (_) { /* no such section */ } return send(res, 200, css, 'text/css; charset=utf-8'); } } // legacy css plus squad layer files, in layer order
+  if (p.startsWith('/p/v11/')) return serveFile(res, GJH_V11_ASSETS, p.slice(7)); // sections may reference ../v11/ from /p/sections
   if (p === '/studio') return serveFile(res, UI, 'studio.html'); // staged Design Studio UI, index.html stays the default until approved
   if (p.startsWith('/p/')) return serveFile(res, PROJECT, p.slice(3));
   if (p.startsWith('/assets/generated/')) return serveFile(res, path.join(PROJECT, 'assets', 'generated'), p.slice(18)); // generated images referenced as ../assets/generated/* from sections

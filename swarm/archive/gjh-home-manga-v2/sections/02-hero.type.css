@@ -1,0 +1,62 @@
+/* Hero typography: expressive headline, readable copy, clear navigation. */
+.s-02 h1 {
+  font-family: var(--dc-font, sans-serif);
+  font-size: clamp(2.75rem, 10vw, 4.5rem);
+  font-weight: var(--dc-weight-medium, 500);
+  line-height: 1.03;
+  letter-spacing: -.025em;
+  font-kerning: normal;
+  max-inline-size: 13ch;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+}
+
+.s-02 .hero-title-lead {
+  font-weight: var(--dc-weight-medium, 500);
+}
+
+.s-02 .hero-company,
+.s-02 .hero-title-emphasis {
+  font-weight: 700;
+}
+
+.s-02 .hero-bubble {
+  max-inline-size: 38ch;
+  font-size: clamp(1rem, 1.15vw, 1.125rem);
+  line-height: 1.5;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+
+.s-02 .hero-actions a {
+  font-size: clamp(.9375rem, 1vw, 1rem);
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.s-02 .hero-brands a {
+  font-size: clamp(.8125rem, .9vw, .875rem);
+  font-weight: 700;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.s-02 .hero-scene figcaption {
+  font-size: .75rem;
+  line-height: 1.4;
+}
+
+@media (min-width: 48rem) {
+  .s-02 h1 {
+    font-size: clamp(var(--dc-text-2xl, 2.5rem), 5vw, calc(1.5 * var(--dc-text-display, 3.5rem)));
+  }
+}
+
+@media (max-width: 30rem) {
+  .s-02 h1 {
+    font-size: clamp(2.25rem, 10vw, 3rem);
+    letter-spacing: -.025em;
+  }
+}

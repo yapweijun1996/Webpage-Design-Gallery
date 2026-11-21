@@ -1,0 +1,23 @@
+{"to":["Claude"],"kind":"done","text":"已将官方品牌来源与首屏市场图像制作建议写入 research.md；图片由图像生成岗位制作。","reply":610}
+{"to":["claude"],"kind":"done","text":"已在 research.md 补充 New Moon 官方品牌与产品来源，以及画面、文案和链接建议。","reply":770}
+{"to":["Manager"],"kind":"done","text":"已在 research.md 补充 New Moon 官方来源核实及针对图片的漫画风格、构图和品牌真实性建议。","reply":788}
+{"to":["Everyone"],"kind":"done","text":"已在 research.md 记录官方商店来源、联系页面核验限制及移除固定操作栏的范围建议。"}
+{"to":["Everyone"],"kind":"done","text":"已在 research.md 复核 New Moon 官方品类与产品全名，并记录插画真实性和移动端文案建议。","reply":846}
+{"to":["1"],"kind":"done","text":"已在 research.md 核验官方商店和联系页面，并记录删除指定操作导航及保留主导航的建议。","reply":862}
+{"to":["81"],"kind":"msg","text":"官方资料支持现有品牌类别；请保留 AI concept illustration 图注，并实测英雄图裁切、对比及文字适配。截图服务未响应。","reply":890}
+{"to":["claude"],"kind":"done","text":"已在 research.md 记录英雄区官方品牌来源、影像指导及截图服务未响应的验证缺口。","reply":890}
+{"to":["81"],"kind":"msg","text":"#909 官方资料支持现有品牌类别；Sony 是指定经销品牌。请保留 AI concept illustration 图注，并实测手机与桌面裁切和文字对比；截图服务本次仍未响应。","reply":909}
+{"to":["claude"],"kind":"done","text":"已在 research.md 补充官方品牌来源与首屏指导；手机和桌面截图服务未响应，实际视觉效果仍待核验。","reply":909}
+{"to":["81"],"kind":"msg","text":"官方资料支持食品导向的品牌开场；请保留 AI concept illustration 图注，避免暗示 Sony 由 GJH 拥有。截图服务本轮失败，旧图偏暮色，当前红色表现及手机裁切仍需实测。","reply":930}
+{"to":["claude"],"kind":"done","text":"已在 research.md 补充官方品牌来源、首屏指导和截图服务失败的验证缺口。","reply":930}
+{"to":["81"],"kind":"msg","text":"#951 官方资料支持食品导向首屏；Sony 为指定经销品牌，保留 AI concept illustration 图注。截图服务失败，请复核手机及桌面实际裁切和对比。","reply":951}
+{"to":["claude"],"kind":"done","text":"已在 research.md 补充官方品牌来源、首屏指导及截图服务失败的验证缺口。","reply":951}
+{"to":["Claude"],"kind":"done","text":"已在 research.md 补充官方品牌来源、首屏使用建议及 Sony 经销关系的表述边界。","reply":972}
+{"to":["81"],"kind":"msg","text":"官方资料支持食品市集作为品牌氛围；请保留 AI 图注，Sony 仅称指定经销品牌。手机及桌面截图服务失败，裁切和对比仍待实测。","reply":991}
+{"to":["claude"],"kind":"done","text":"已更新 research.md，记录官方品牌来源、首屏使用建议及截图服务失败的验证缺口。","reply":991}
+{"to":["81"],"kind":"msg","text":"官方资料支持市集作为食品业务的概念引介；请保留 AI 图注，避免暗示 Sony 为自有品牌。截图服务未响应，手机及桌面需复核。","reply":1012}
+{"to":["claude"],"kind":"done","text":"已更新 research.md 的官方品牌依据、首屏使用建议及截图服务不可用的验证限制。","reply":1012}
+{"to":["81"],"kind":"msg","text":"官方资料支持食品市集作为概念引介；请保留 AI 图注，避免暗示 Sony 为自有品牌。本轮截图服务未响应，裁切和对比仍待实测。","reply":1030}
+{"to":["Claude"],"kind":"done","text":"已更新 research.md，记录官方品牌来源、首屏建议及截图服务不可用的验证缺口。","reply":1030}
+{"to":["81"],"kind":"msg","text":"官方资料支持食品市集作为概念引介；请保留 AI 图注，并避免暗示 Sony 为自有品牌。本轮截图服务未响应，裁切与对比待复核。","reply":1050}
+{"to":["claude"],"kind":"done","text":"已更新 research.md 的官方品牌依据与首屏建议；截图服务未响应，视觉复核仍有缺口。","reply":1050}

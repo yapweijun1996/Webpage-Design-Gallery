@@ -1,0 +1,83 @@
+.s-01 {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--sds-z-bar);
+  font-family: var(--sds-font-sans);
+}
+
+.s-01 .header-nav {
+  background: color-mix(in srgb, var(--sds-color-bg) 94%, transparent);
+  border-block-end: var(--sds-space-1) solid var(--sds-color-text);
+  backdrop-filter: blur(var(--sds-space-3));
+}
+
+.s-01 .header-inner {
+  position: relative;
+  flex-wrap: nowrap;
+  padding-inline: max(var(--sds-gutter), var(--sds-safe-left)) max(var(--sds-gutter), var(--sds-safe-right));
+}
+
+.s-01 .header-logo {
+  flex: none;
+  padding-inline: var(--sds-space-2);
+  background: var(--sds-color-white);
+}
+
+.s-01 .header-logo img {
+  display: block;
+  inline-size: auto;
+  block-size: var(--sds-space-8);
+}
+
+.s-01 .header-desktop a,
+.s-01 .header-menu-links a {
+  font-size: var(--sds-text-sm);
+  font-weight: var(--sds-weight-bold);
+}
+
+.s-01 .header-menu summary {
+  border: var(--sds-space-1) solid var(--sds-color-text);
+  background: var(--sds-color-surface);
+  color: var(--sds-color-text);
+}
+
+.s-01 .header-menu-links {
+  flex-direction: column;
+  align-items: stretch;
+  max-block-size: calc(100svh - var(--sds-header-h) - var(--sds-safe-top) - var(--sds-bar-h) - var(--sds-safe-bottom) - var(--sds-space-4));
+  scroll-padding-block: var(--sds-space-4);
+  border: var(--sds-space-1) solid var(--sds-color-text);
+  border-radius: 0;
+}
+
+.s-01 .header-menu-links a {
+  padding-inline: var(--sds-space-3);
+}
+
+.s-01 .header-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-block-start: var(--sds-space-1) solid var(--sds-color-text);
+  padding-block-start: var(--sds-space-1);
+  background: var(--sds-color-bg);
+}
+
+.s-01 .header-actions a {
+  justify-content: center;
+  padding-inline: var(--sds-space-2);
+  text-align: center;
+  font-size: var(--sds-text-sm);
+}
+
+@media (min-width: 48rem) {
+  .s-01 .header-actions {
+    left: auto;
+    right: max(var(--sds-gutter), var(--sds-safe-right));
+    margin-inline: 0;
+    grid-template-columns: auto auto;
+    border: var(--sds-space-1) solid var(--sds-color-text);
+  }
+  .s-01 .header-actions a {
+    padding-inline: var(--sds-space-4);
+  }
+}

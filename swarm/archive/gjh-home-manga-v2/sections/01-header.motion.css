@@ -1,0 +1,23 @@
+/* Keep navigation immediately usable; motion only follows user interaction. */
+@media (prefers-reduced-motion: no-preference) {
+  .s-01 .header-desktop a,
+  .s-01 .header-menu nav a,
+  .s-01 .header-menu summary {
+    transition: background-color var(--dc-dur-fast) var(--dc-ease),
+      color var(--dc-dur-fast) var(--dc-ease);
+  }
+
+  .s-01 .header-menu summary::after {
+    transition: transform var(--dc-dur) var(--dc-ease);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-01 .header-desktop a,
+  .s-01 .header-menu nav a,
+  .s-01 .header-menu summary,
+  .s-01 .header-menu summary::after {
+    transition: none;
+    animation: none;
+  }
+}

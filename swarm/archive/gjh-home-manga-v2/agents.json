@@ -1,0 +1,82 @@
+[
+ {
+  "id": "01",
+  "section": "header",
+  "color": "#e5484d",
+  "name": "Agent 1",
+  "title": "Header Designer",
+  "lane": "header: 52-56px translucent top nav (GJH logo, Brands, About, Contact, Shop Online; CSS-only mobile menu with details/summary) AND the persistent fixed action pill 'Sales Enquiry | Shop Online' (bottom bar on phones)."
+ },
+ {
+  "id": "02",
+  "section": "hero",
+  "color": "#f76b15",
+  "name": "Agent 2",
+  "title": "Hero Designer",
+  "lane": "hero: exactly one viewport, full-bleed concept image with a dark scrim, the ONLY h1 'Explore Goh Joo Hin's Brands', one supporting sentence, buttons 'Explore Our Brands' and 'Sales Enquiry', and a glass brand strip docked at the bottom linking to chapters. Hero image: New Moon desktop hero 001 plus its mobile story."
+ },
+ {
+  "id": "03",
+  "section": "newmoon",
+  "color": "#d6a100",
+  "name": "Agent 3",
+  "title": "Newmoon Designer",
+  "lane": "newmoon: full-bleed chapter for New Moon (food and beverage eyebrow), giant brand name, one verified sentence, the exact product name, actions 'View Brand' and 'Enquire'. Pick the best New Moon scene from the library."
+ },
+ {
+  "id": "04",
+  "section": "miligogo",
+  "color": "#30a46c",
+  "name": "Agent 4",
+  "title": "Miligogo Designer",
+  "lane": "miligogo: two stacked full-bleed chapters, MILI then GOGO, each with eyebrow, giant name, one verified sentence, 'View Brand'. The two must feel different from each other and from New Moon, yet share the same type rhythm."
+ },
+ {
+  "id": "05",
+  "section": "healthtech",
+  "color": "#12a594",
+  "name": "Agent 5",
+  "title": "Healthtech Designer",
+  "lane": "healthtech: two chapters, Borsch Med (health and nutrition) and Sony (appointed distributor, electronics and lifestyle). Calm and precise; no medical claims, no invented product specs."
+ },
+ {
+  "id": "06",
+  "section": "morebrands",
+  "color": "#0090ff",
+  "name": "Agent 6",
+  "title": "Morebrands Designer",
+  "lane": "morebrands: a horizontal scroll-snap rail of the other verified brands (LG, Casio, GP Batteries, Gigaset, Skippy, SPAM, Flying Wheel, GuLong, California Mexico, Hormel, Pien Tze Huang) with a library detail image where one fits, plus a link to the official brands directory. Not a tile grid of equal cards: use a clear lead item."
+ },
+ {
+  "id": "07",
+  "section": "about",
+  "color": "#3e63dd",
+  "name": "Agent 7",
+  "title": "About Designer",
+  "lane": "about: heritage band, Rochor Road provision store in the 1940s ('Since 1940'), using the official history composite or a fitting library image, verified copy only, link to the official About page."
+ },
+ {
+  "id": "08",
+  "section": "mall",
+  "color": "#8e4ec6",
+  "name": "Agent 8",
+  "title": "Mall Designer",
+  "lane": "mall: 'Virtual Mall Concept' dark full-bleed band using a mall concept image from the library, honest label that it is an independent concept, link to ../v11/ (the existing virtual mall demo), no 3D."
+ },
+ {
+  "id": "09",
+  "section": "enquiry",
+  "color": "#d6409f",
+  "name": "Agent 9",
+  "title": "Enquiry Designer",
+  "lane": "enquiry: static Sales Enquiry section: brand chips as radio inputs, a short buyer checklist (brand, product, quantity, delivery), and clear links to the official contact and corporate sales pages. No form submit, no fake success state, no claim of prefilling the official form."
+ },
+ {
+  "id": "10",
+  "section": "footer",
+  "color": "#6f6f6f",
+  "name": "Agent 10",
+  "title": "Footer Designer",
+  "lane": "footer: address 8 Gul Avenue Singapore 629652, links (official contact, corporate sales, E-Shop, About), the disclaimer 'Independent design concept, not affiliated with Goh Joo Hin.' and 'Imagery: AI-generated concept scenes; product packshots and logos are official GJH assets.' Quiet and well organized."
+ }
+]

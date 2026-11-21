@@ -1,0 +1,53 @@
+.s-04 {
+  --s-04-forest: var(--sds-color-forest-700);
+  --s-04-deep: var(--sds-color-green-950);
+  --s-04-ivory: var(--sds-color-gold-50);
+  --s-04-mint: var(--sds-color-forest-100);
+  --s-04-aqua: var(--sds-color-green-50);
+  --s-04-gold: var(--sds-color-gold-200);
+  --s-04-leaf-light: var(--sds-color-forest-300);
+  --s-04-leaf-mid: var(--sds-color-forest-500);
+  --s-04-water-light: var(--sds-color-green-300);
+  --s-04-water-mid: var(--sds-color-forest-500);
+}
+
+.s-04 ::selection {
+  background-color: var(--s-04-gold);
+  color: var(--sds-color-forest-900);
+}
+
+.s-04 .s-04__action:hover {
+  background-color: var(--s-04-ivory);
+  color: var(--sds-color-forest-900);
+  border-color: var(--s-04-ivory);
+}
+
+.s-04 .s-04__action:active {
+  background-color: var(--sds-color-gold-300);
+  color: var(--sds-color-forest-900);
+  border-color: var(--sds-color-gold-300);
+}
+
+.s-04 .s-04__action:focus-visible {
+  outline: 2px solid var(--s-04-gold);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 var(--dc-space-2) var(--sds-color-forest-900);
+}
+
+@media (forced-colors: active) {
+  .s-04 .s-04__action {
+    border-color: LinkText;
+  }
+
+  .s-04 .s-04__action:hover,
+  .s-04 .s-04__action:active {
+    background-color: Highlight;
+    color: HighlightText;
+    border-color: Highlight;
+  }
+
+  .s-04 .s-04__action:focus-visible {
+    outline-color: Highlight;
+    box-shadow: none;
+  }
+}

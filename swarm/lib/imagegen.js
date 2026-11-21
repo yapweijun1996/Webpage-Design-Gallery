@@ -11,7 +11,7 @@ const QUALITIES = new Set(['auto', 'low', 'medium', 'high']);
 function clean(message, key) { return String(message || '').split(key || '\u0000').join('[key]').replace(/sk-[A-Za-z0-9_\-]{8,}/g, '[key]').slice(0, 300); }
 
 // Generate one image; resolves { ok, file, bytes, ms } or { ok:false, error } (never contains the key).
-async function generate({ apiKey, prompt, model = 'gpt-image-1', size = '1536x1024', quality = 'high', outFile, fetchImpl = globalThis.fetch, timeoutMs = 150000 }) {
+async function generate({ apiKey, prompt, model = 'gpt-image-2', size = '1536x1024', quality = 'high', outFile, fetchImpl = globalThis.fetch, timeoutMs = 150000 }) {
   if (!apiKey) return { ok: false, error: 'No OpenAI API key saved.' };
   if (typeof prompt !== 'string' || prompt.trim().length < 3 || prompt.length > 4000) return { ok: false, error: 'The prompt must be 3 to 4000 characters.' };
   if (!/^[a-z0-9][a-z0-9.\-]{1,40}$/.test(model)) return { ok: false, error: 'Invalid model name.' };
@@ -50,4 +50,18 @@ async function testKey({ apiKey, fetchImpl = globalThis.fetch, timeoutMs = 15000
   finally { clearTimeout(timer); }
 }
 
-module.exports = { generate, testKey, SIZES, QUALITIES };
+// Image-capable model ids for the key (names only; used to suggest a valid model in Settings).
+async function listImageModels({ apiKey, fetchImpl = globalThis.fetch, timeoutMs = 15000 }) {
+  if (!apiKey) return { ok: false, models: [], message: 'No OpenAI API key saved.' };
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), timeoutMs);
+  try {
+    const res = await fetchImpl(MODELS_ENDPOINT, { headers: { authorization: 'Bearer ' + apiKey }, signal: ctl.signal });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) return { ok: false, models: [], message: clean((data.error && data.error.message) || 'HTTP ' + res.status, apiKey) };
+    const ids = (data.data || []).map(m => m && m.id).filter(id => typeof id === 'string' && /image|dall/i.test(id)).sort();
+    return { ok: true, models: ids };
+  } catch (e) { return { ok: false, models: [], message: clean(e && e.message, apiKey) }; }
+  finally { clearTimeout(timer); }
+}
+
+module.exports = { generate, testKey, listImageModels, SIZES, QUALITIES };

@@ -1,0 +1,45 @@
+/* The hero stays immediately readable; motion is reserved for interaction. */
+@media (prefers-reduced-motion: no-preference) {
+  .s-02 .hero-actions a,
+  .s-02 .hero-brands a {
+    transition: background-color 180ms ease-out,
+      color 180ms ease-out,
+      border-color 180ms ease-out,
+      box-shadow 180ms ease-out;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .s-02 .hero-actions a {
+      transition: background-color 180ms ease-out,
+        color 180ms ease-out,
+        border-color 180ms ease-out,
+        box-shadow 180ms ease-out,
+        transform 200ms cubic-bezier(.2, .7, .2, 1);
+    }
+
+    .s-02 .hero-actions a:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  /* Focus and press states must respond immediately. */
+  .s-02 .hero-actions a:focus-visible,
+  .s-02 .hero-brands a:focus-visible,
+  .s-02 .hero-actions a:active,
+  .s-02 .hero-brands a:active {
+    transition: none;
+  }
+
+  .s-02 .hero-actions a:active,
+  .s-02 .hero-brands a:active {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-02 .hero-actions a,
+  .s-02 .hero-brands a {
+    transition: none;
+    animation: none;
+  }
+}

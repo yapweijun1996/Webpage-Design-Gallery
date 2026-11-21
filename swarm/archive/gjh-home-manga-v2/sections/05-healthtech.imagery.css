@@ -1,0 +1,25 @@
+/* Keep the concept scenes immersive without altering official brand assets. */
+.s-05 .healthtech-scene {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.s-05 .healthtech-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.s-05 .healthtech-picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: saturate(.88) contrast(.96);
+}
+
+.s-05 .healthtech-chapter--sony .healthtech-picture img {
+  filter: saturate(.82) contrast(.98);
+}

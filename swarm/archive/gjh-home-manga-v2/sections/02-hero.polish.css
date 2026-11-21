@@ -1,0 +1,60 @@
+/* Short mobile screens place the heading higher over the market image. */
+@media (max-width: 47.99rem) and (max-height: 40rem) {
+  .s-02 .hero-scene picture::after {
+    background: linear-gradient(180deg, rgb(17 26 22 / 25%) 0%, rgb(17 26 22 / 80%) 30%, #111a16 82%);
+  }
+}
+
+/* Allow long translated text to wrap without forcing horizontal overflow. */
+.s-02 .hero-copy,
+.s-02 .hero-brands a {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Keep keyboard focus legible on both the light action and dark brand strip. */
+.s-02 .hero-actions a:focus-visible,
+.s-02 .hero-brands a:focus-visible {
+  outline: 2px solid var(--hero-gold);
+  outline-offset: -3px;
+  box-shadow: inset 0 0 0 5px var(--hero-ink);
+  text-decoration: underline;
+}
+
+/* Keep focused links clear of fixed navigation and action bars. */
+.s-02 .hero-actions a,
+.s-02 .hero-brands a {
+  scroll-margin-block-start: var(--hero-header);
+  scroll-margin-block-end: var(--hero-clearance);
+  min-height: 44px;
+}
+
+/* Do not let the entrance fade obscure a keyboard user's current target. */
+.s-02 .hero-copy:focus-within {
+  animation: none;
+}
+
+/* Preserve a distinct focus indicator in forced-colour environments. */
+@media (forced-colors: active) {
+  .s-02 .hero-actions a:focus-visible,
+  .s-02 .hero-brands a:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: -3px;
+    box-shadow: none;
+    forced-color-adjust: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .s-02 .hero-copy {
+    animation: none;
+  }
+  .s-02 *,
+  .s-02 *::before,
+  .s-02 *::after {
+    scroll-behavior: auto;
+    transition-duration: 0.01ms;
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+}

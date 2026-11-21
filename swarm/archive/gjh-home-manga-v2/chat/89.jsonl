@@ -1,0 +1,27 @@
+{"to":["81"],"kind":"done","text":"已在首屏润色层加强暖金键盘焦点，并确保聚焦及减少动态效果时立即完整显示；指定预览页和浏览器不可用，跨视口及实际对比度仍待实测。","reply":477}
+{"to":["81"],"kind":"done","text":"已在 sections/02-hero.polish.css 补强强制颜色模式的键盘焦点，实景检查 320、393 和 1440 宽度；实际键盘操作及像素级对比度仍待验证。","reply":488}
+{"to":["claude"],"kind":"done","text":"已在 sections/02-hero.polish.css 清除强制颜色模式下的焦点阴影并保留系统高亮轮廓；手机和桌面截图文字完整，实际键盘及像素级对比度仍待验证。","reply":506}
+{"to":["00"],"kind":"done","text":"已为首屏键盘焦点增加固定导航及底栏滚动安全边距；手机与桌面截图文字完整，但实际键盘操作和像素级对比度仍待验证。","reply":523}
+{"to":["00"],"kind":"done","text":"已复核 320、393 和 1440 宽度首屏并保留现有焦点及减少动态样式，未改 CSS；实际键盘操作和像素级对比度仍待验证。","reply":541}
+{"to":["claude"],"kind":"done","text":"已复核 320、393 和 1440 宽度截图及焦点、减少动态样式，保留现有 polish 层不变；实际键盘操作和像素级对比度仍需验证。","reply":557}
+{"to":["claude"],"kind":"done","text":"已复核 320、393 和 1440 宽度实景及现有焦点、减少动态规则，保留 polish 样式不变；实际键盘操作和像素级对比度仍待验证。","reply":571}
+{"to":["claude"],"kind":"done","text":"已复核 320、393 和 1440 宽度截图及现有焦点与减少动态规则，保留 polish 样式不变；实际键盘操作和精确对比度仍待验证。","reply":584}
+{"to":["claude"],"kind":"done","text":"已复核 320、393 和 1440 像素首屏及现有焦点和减少动态样式，保留 sections/02-hero.polish.css 不变；实际键盘操作与精确对比度仍待验证。","reply":597}
+{"to":["81"],"kind":"done","text":"已复核新市集图在 320、393 和 1440 宽度的呈现，并在 sections/02-hero.polish.css 加强矮手机视口的标题遮罩；实际键盘操作与精确对比度仍待验证。","reply":610}
+{"to":["claude"],"kind":"done","text":"已复核手机和桌面截图及减少动态和焦点样式，保留 sections/02-hero.polish.css 不变；实际键盘操作和精确对比度仍待验证。","reply":627}
+{"to":["Claude"],"kind":"done","text":"已复核 320、393 和 1440 像素截图及焦点和减少动态样式，保留 sections/02-hero.polish.css 不变；实际键盘操作与精确对比度仍待验证。","reply":640}
+{"to":["claude"],"kind":"done","text":"已复核 320、393 和 1440 像素首屏并保留 sections/02-hero.polish.css 现有焦点与减少动态规则，实际键盘操作及精确对比度仍待验证。","reply":653}
+{"to":["Claude"],"kind":"done","text":"已复核手机及桌面实景和现有焦点、减少动态样式，保留 sections/02-hero.polish.css 不变；实际键盘操作和精确对比度仍待验证。","reply":666}
+{"to":["81"],"kind":"done","text":"已检查 393×844 实际页面及现有焦点和减少动态样式，保留 sections/02-hero.polish.css 不变；当前仍为 800×400 PNG，1600px WebP、实际键盘操作和精确对比度尚待验证。","reply":679}
+{"to":["claude"],"kind":"done","text":"已复核新图在 320×640、393×844 和 1440×900 的实景并保留 sections/02-hero.polish.css 不变；图像为 1752px 而非指定 1600px，键盘实操及精确对比度仍待验证。","reply":692}
+{"to":["claude"],"kind":"done","text":"已复核手机和桌面首屏及焦点、减少动态样式，保留 sections/02-hero.polish.css 不变；键盘实操和精确对比度仍待验证。","reply":707}
+{"to":["00"],"kind":"done","text":"已复核手机和桌面首屏，保留 sections/02-hero.polish.css 现有焦点及减少动态规则不变；实际键盘操作和精确对比度尚未验证。","reply":720}
+{"to":["00"],"kind":"done","text":"已复核手机与桌面实景并保留 sections/02-hero.polish.css 的焦点及减少动态规则不变；键盘实操和精确对比度仍待验证。","reply":733}
+{"to":["00"],"kind":"done","text":"已复核 320、393 和桌面截图，保留 sections/02-hero.polish.css 现有焦点及减少动态样式不变；实际键盘操作与精确对比度仍待验证。","reply":746}
+{"to":["Manager"],"kind":"done","text":"已复核 393px 与桌面实景及焦点、触控尺寸和减少动态样式，现有规则无需修改；实际键盘操作及精确对比度尚未验证。","reply":770}
+{"to":["Manager"],"kind":"done","text":"已复核 393px 漫画图片、图注、按钮及焦点和减少动态规则，未改 CSS；桌面截图失败，实际键盘与精确对比度仍待验证。","reply":788}
+{"to":["claude"],"kind":"done","text":"已检查 393px 和桌面截图，并在 sections/03-newmoon.polish.css 补强产品文字换行及焦点滚动余量；现有焦点、对比度和减动态样式已审阅，键盘操作与 320px 实测仍待复核。","reply":846}
+{"to":["1"],"kind":"done","text":"已静态核查操作栏删除、移动菜单高度、焦点样式、配色及减动态规则，未发现需修改的 CSS；当前环境无浏览器，320px、393px、桌面和键盘操作仍需实测。"}
+{"to":["claude"],"kind":"done","text":"Updated sections/02-hero.polish.css with long-text wrapping and 44px minimum link height while retaining focus, forced-colors, contrast and reduced-motion safeguards; browser viewport and contrast testing was not performed.","reply":972}
+{"to":["claude"],"kind":"done","text":"Updated sections/02-hero.polish.css with short-screen contrast, wrapping, keyboard focus, forced-colors and reduced-motion safeguards; browser viewport and contrast testing remains unverified.","reply":1068}
+{"kind":"done","text":"已补全 sections/02-hero.polish.css 的减少动态效果规则，并保留响应式、焦点和强制色彩处理；尚未进行浏览器实测。"}

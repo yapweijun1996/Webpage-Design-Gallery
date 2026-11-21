@@ -386,3 +386,15 @@ test('squad mode runs waves in order, in parallel inside a wave, and skips the M
   assert.ok(order.find(e => e[1] === '81')[2].includes('Write only your own file'));
   assert.ok(messages.some(m => /Squad finished/.test(m.text)));
 });
+
+test('squad prompt always keeps the owner request, even with a huge inlined context', async () => {
+  const messages = [];
+  const chat = { start() {}, stop() {}, post: p => { const m = { to: [], kind: 'msg', ...p, id: messages.length + 1 }; messages.push(m); return m; }, history: s => messages.filter(m => m.id > (s || 0)), render: () => '' };
+  const seen = [];
+  const member = { id: '81', name: 'Type', title: 'Type' };
+  const plan = { base: '01-hero', members: [member], waves: [[member]], prompts: { 81: 'X'.repeat(20000) }, layoutId: '81' };
+  const turns = createTurns({ chat, agents, managerId: '00', squad: { on: () => true, plan: () => plan }, runAgent: async ({ prompt }) => { seen.push(prompt); return true; } });
+  await turns.onOwnerMessage({ id: 1, from: 'owner', text: 'MAKE THE HEADLINE GOLD', scope: { sections: ['01'], elements: [] } });
+  assert.ok(seen[0].includes('MAKE THE HEADLINE GOLD'));
+  assert.ok(seen[0].length < 10000);
+});

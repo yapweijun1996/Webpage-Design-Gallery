@@ -47,6 +47,7 @@
         <option value="none">Default</option>
         <option value="forest-gold">Forest Gold</option>
         <option value="gjh-classic">GJH Classic</option>
+        <option value="cny-red-gold">Chinese New Year</option>
       </select>
     </label>
     <label>Language

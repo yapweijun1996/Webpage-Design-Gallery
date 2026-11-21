@@ -15,7 +15,7 @@
   }
 
   root.setAttribute('data-theme', read('theme', ['auto', 'light', 'dark'], 'auto'));
-  root.setAttribute('data-brand', read('brand', ['none', 'forest-gold', 'gjh-classic'], root.getAttribute('data-default-brand')));
+  root.setAttribute('data-brand', read('brand', ['none', 'forest-gold', 'gjh-classic', 'cny-red-gold'], root.getAttribute('data-default-brand')));
   root.setAttribute('lang', read('lang', ['en', 'zh-Hans', 'ms'], root.getAttribute('lang')));
   root.setAttribute('data-loading', '');
   window.setTimeout(() => {

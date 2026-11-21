@@ -1,0 +1,439 @@
+{
+  "version": "1.0.0",
+  "crews": {
+    "build": "builds the design system itself",
+    "page": "designs a page with the design system"
+  },
+  "positions": [
+    {
+      "id": "art-director",
+      "title": "Art Director / Delivery Manager",
+      "crew": "both",
+      "worker": "00",
+      "agents": ["00"],
+      "mission": "Set the page direction, resolve section handoffs, and review the assembled page against the brief and SDS.",
+      "skills": ["ui-ux-core", "color-theme", "qa-verification"],
+      "tools": ["check-sections", "i18n-extract", "export-page", "build-tokens"],
+      "owns": ["direction.md", "decisions.md", "review.md"],
+      "reviews": ["*"],
+      "handoffs": {
+        "receives": ["owner request", "section proposals", "assembled page and verification results"],
+        "delivers": ["section assignments", "agreed handoffs", "review findings and acceptance decision"]
+      },
+      "definitionOfDone": [
+        "Record page direction and each neighboring section handoff.",
+        "Resolve conflicts and review the page through all three lenses.",
+        "Record verified outcomes and outstanding checks."
+      ]
+    },
+    {
+      "id": "design-token-engineer",
+      "title": "Design Token Engineer",
+      "crew": "build",
+      "worker": "A",
+      "agents": [],
+      "mission": "Maintain the semantic token source and generate CSS for each theme and brand. Verify all required contrast pairs.",
+      "skills": ["color-theme", "tokens-ssot", "qa-verification"],
+      "tools": ["build-tokens", "contrast", "test-runner"],
+      "owns": ["swarm/design-system/tokens.json", "swarm/design-system/build.js", "swarm/design-system/tokens.css", "swarm/design-system/themes.css", "swarm/design-system/TOKENS.md", "swarm/test/sds-tokens.test.js"],
+      "reviews": ["component-engineer", "quality-gate-engineer"],
+      "handoffs": {
+        "receives": ["semantic role and scale contract", "brand palette anchors"],
+        "delivers": ["synchronized CSS and token reference", "theme and brand contrast test results"]
+      },
+      "definitionOfDone": [
+        "Define every required role and scale in the token source.",
+        "Regenerate CSS and pass the synchronization check.",
+        "Pass contrast tests for every theme and brand."
+      ]
+    },
+    {
+      "id": "component-engineer",
+      "title": "Component Engineer",
+      "crew": "build",
+      "worker": "B",
+      "agents": [],
+      "mission": "Build reusable token-driven components and a living sheet that covers their states, themes, and languages.",
+      "skills": ["components-engineering", "typography-layout", "accessibility", "motion-loader"],
+      "tools": ["build-tokens", "test-runner", "browser-inspection"],
+      "owns": ["swarm/design-system/components.css", "swarm/design-system/components.html", "swarm/test/sds-components.test.js"],
+      "reviews": ["design-token-engineer", "runtime-engineer"],
+      "handoffs": {
+        "receives": ["component class API", "semantic tokens and motion scales"],
+        "delivers": ["component CSS", "living sheet and state coverage"]
+      },
+      "definitionOfDone": [
+        "Implement all published component classes with SDS tokens.",
+        "Show interactive states and reduced-motion behavior.",
+        "Cover every theme and language in the living sheet."
+      ]
+    },
+    {
+      "id": "runtime-engineer",
+      "title": "Runtime Engineer",
+      "crew": "build",
+      "worker": "C",
+      "agents": [],
+      "mission": "Implement the shared browser runtime for preferences, reveal, loading, and PWA updates. Keep sections script-free.",
+      "skills": ["motion-loader", "pwa-performance", "accessibility", "qa-verification"],
+      "tools": ["test-runner", "live-preview", "browser-inspection"],
+      "owns": ["swarm/design-system/runtime.js", "swarm/design-system/boot.js", "swarm/test/sds-runtime.test.js"],
+      "reviews": ["pwa-engineer", "localization-engineer"],
+      "handoffs": {
+        "receives": ["SDS API and declarative control contract", "language and shell interfaces"],
+        "delivers": ["pre-paint boot and shared runtime", "preference, reveal, and loader tests"]
+      },
+      "definitionOfDone": [
+        "Set preferences before paint and recover when storage is blocked.",
+        "Verify controls, loader dismissal, and reduced-motion reveal.",
+        "Exercise the user-controlled update flow and viewport guard."
+      ]
+    },
+    {
+      "id": "localization-engineer",
+      "title": "Localization Engineer",
+      "crew": "build",
+      "worker": "D",
+      "agents": [],
+      "mission": "Build catalog extraction and in-page localization for English, Simplified Chinese, and Malay. Keep source text available as fallback.",
+      "skills": ["i18n-content", "accessibility", "qa-verification"],
+      "tools": ["i18n-extract", "test-runner", "browser-inspection"],
+      "owns": ["swarm/design-system/i18n.js", "swarm/design-system/i18n/*.json", "swarm/tools/i18n-extract.js", "swarm/test/sds-i18n.test.js"],
+      "reviews": ["runtime-engineer", "localization-reviewer"],
+      "handoffs": {
+        "receives": ["section text and data-i18n keys", "locale mapping and runtime API"],
+        "delivers": ["catalogs with translation status", "live localization runtime and extraction results"]
+      },
+      "definitionOfDone": [
+        "Extract English source and flag unfinished translations.",
+        "Check fallback, language switching, plurals, and Intl formatting.",
+        "Detect catalog drift and conflicting duplicate keys."
+      ]
+    },
+    {
+      "id": "pwa-engineer",
+      "title": "PWA Engineer",
+      "crew": "build",
+      "worker": "E",
+      "agents": [],
+      "mission": "Export the assembled page as an installable PWA with a versioned offline cache and a user-triggered update.",
+      "skills": ["pwa-performance", "motion-loader", "qa-verification"],
+      "tools": ["export-page", "test-runner", "live-preview", "browser-inspection"],
+      "owns": ["swarm/design-system/shell/**", "swarm/tools/export-page.js", "swarm/test/sds-pwa.test.js"],
+      "reviews": ["runtime-engineer", "motion-performance-reviewer"],
+      "handoffs": {
+        "receives": ["shell and update contract", "section fragments, catalogs, and generated CSS"],
+        "delivers": ["exporter and shell templates", "precache and legacy export checks"]
+      },
+      "definitionOfDone": [
+        "Export a sub-path-safe manifest, icons, and offline page.",
+        "Prove the precache list equals the exported files.",
+        "Preserve single-file export and verify click-to-update."
+      ]
+    },
+    {
+      "id": "quality-gate-engineer",
+      "title": "Quality Gate Engineer",
+      "crew": "build",
+      "worker": "F",
+      "agents": [],
+      "mission": "Enforce section rules and prevent increases in baseline violations. Detect drift in generated assets and catalogs.",
+      "skills": ["tokens-ssot", "components-engineering", "qa-verification"],
+      "tools": ["check-sections", "build-tokens", "i18n-extract", "test-runner"],
+      "owns": ["swarm/tools/check-sections.js", "swarm/design-system/ssot-baseline.json", "swarm/test/check-sections.test.js"],
+      "reviews": ["design-token-engineer", "localization-engineer", "standards-lead"],
+      "handoffs": {
+        "receives": ["lint rule IDs and severities", "current section findings"],
+        "delivers": ["ratchet and diagnostics", "fixtures for violations and clean sections"]
+      },
+      "definitionOfDone": [
+        "Prove each new rule with a violation and a clean fixture.",
+        "Reject baseline increases and verify the synchronization checks.",
+        "Keep existing check behavior and document actionable failures."
+      ]
+    },
+    {
+      "id": "standards-lead",
+      "title": "Standards Lead",
+      "crew": "build",
+      "worker": "G",
+      "agents": [],
+      "mission": "Maintain the SDS standard and map each rule to an automated check or a specific manual verification.",
+      "skills": ["ui-ux-core", "accessibility", "pwa-performance", "qa-verification"],
+      "tools": ["check-sections", "test-runner", "live-preview"],
+      "owns": ["swarm/design-system/STANDARD.md", "swarm/README.md", "docs/README.md"],
+      "reviews": ["quality-gate-engineer", "pwa-engineer", "knowledge-librarian"],
+      "handoffs": {
+        "receives": ["binding spec and verification commands", "documented owner decisions"],
+        "delivers": ["standard with rule IDs and checks", "linked documentation entry points"]
+      },
+      "definitionOfDone": [
+        "Give every rule a check, command, or manual verification.",
+        "State the PWA shell zoom-lock trade-off once.",
+        "Verify documentation links and command examples."
+      ]
+    },
+    {
+      "id": "knowledge-librarian",
+      "title": "Knowledge Librarian",
+      "crew": "build",
+      "worker": ["H", "I"],
+      "agents": [],
+      "mission": "Maintain the ten handbook packs with concrete rules, examples, and self-checks grounded in the SDS standard.",
+      "skills": ["ui-ux-core", "tokens-ssot", "qa-verification"],
+      "tools": ["staff-check", "test-runner"],
+      "owns": ["swarm/staff/handbook/*.md"],
+      "reviews": ["standards-lead", "staffing-operations"],
+      "handoffs": {
+        "receives": ["standard and interface spec", "staff skill references"],
+        "delivers": ["ten handbook packs", "examples and self-checks for each pack"]
+      },
+      "definitionOfDone": [
+        "Use the ten published handbook filenames.",
+        "Include SDS rules, examples, and five self-check items per pack.",
+        "Verify each cross-reference and command."
+      ]
+    },
+    {
+      "id": "staffing-operations",
+      "title": "Staffing and Operations",
+      "crew": "build",
+      "worker": ["J1", "J2"],
+      "agents": [],
+      "mission": "Maintain the position roster, playbooks, and tool kit. Supply validated prompt preambles and repeatable roster checks.",
+      "skills": ["qa-verification", "tokens-ssot", "ui-ux-core"],
+      "tools": ["staff-check", "contrast", "test-runner"],
+      "owns": ["swarm/staff/staff.json", "swarm/staff/tools.md", "swarm/staff/playbooks/*.md", "swarm/lib/staff.js", "swarm/test/staff.test.js", "swarm/tools/contrast.js", "swarm/test/contrast.test.js", "swarm/briefs/gjh-agents.json"],
+      "reviews": ["knowledge-librarian", "art-director"],
+      "handoffs": {
+        "receives": ["position assignments", "handbook and tool contracts"],
+        "delivers": ["validated roster, tool kit, and playbooks", "prompt preamble API and contrast CLI"]
+      },
+      "definitionOfDone": [
+        "Map every GJH agent to its position and list each worker.",
+        "Provide one playbook per position and document each tool.",
+        "Pass roster, prompt, and contrast checks."
+      ]
+    },
+    {
+      "id": "nav-chrome-designer",
+      "title": "Navigation and Chrome Designer",
+      "crew": "page",
+      "agents": ["01"],
+      "mission": "Design the sticky navigation and persistent Sales Enquiry and Shop Online actions. Keep the mobile menu keyboard-operable.",
+      "skills": ["ui-ux-core", "typography-layout", "accessibility", "components-engineering"],
+      "tools": ["check-sections", "live-preview", "browser-inspection"],
+      "owns": ["sections/01-header.html", "sections/01-header.css", "notes/01.md"],
+      "reviews": ["hero-designer", "enquiry-ux-designer"],
+      "handoffs": {
+        "receives": ["section anchors", "official shopping destination", "hero opening treatment"],
+        "delivers": ["navigation and action bar", "sticky offsets and mobile bottom clearance"]
+      },
+      "definitionOfDone": [
+        "Use one header and accessible native mobile menu controls.",
+        "Verify navigation and action links reach their destinations.",
+        "Keep focus and page content clear of fixed controls and safe areas."
+      ]
+    },
+    {
+      "id": "hero-designer",
+      "title": "Hero Designer",
+      "crew": "page",
+      "agents": ["02"],
+      "mission": "Design a one-viewport hero with the page's only h1, a legible image overlay, and clear links to brands and sales enquiry.",
+      "skills": ["typography-layout", "color-theme", "accessibility", "motion-loader"],
+      "tools": ["check-sections", "contrast", "live-preview", "browser-inspection"],
+      "owns": ["sections/02-hero.html", "sections/02-hero.css", "notes/02.md"],
+      "reviews": ["nav-chrome-designer", "brand-chapter-designer"],
+      "handoffs": {
+        "receives": ["navigation offsets", "approved image and copy", "brand chapter anchors"],
+        "delivers": ["hero and chapter link strip", "transition into the first chapter"]
+      },
+      "definitionOfDone": [
+        "Keep the hero to one viewport and use the only h1.",
+        "Check crop and text contrast across prescribed viewport sizes.",
+        "Verify both calls to action and every chapter jump link."
+      ]
+    },
+    {
+      "id": "brand-chapter-designer",
+      "title": "Brand Chapter Designer",
+      "crew": "page",
+      "agents": ["03", "04", "05"],
+      "mission": "Design the assigned full-bleed brand chapters with one dominant image per chapter, verified descriptions, and a shared type rhythm.",
+      "skills": ["typography-layout", "color-theme", "i18n-content", "components-engineering"],
+      "tools": ["check-sections", "contrast", "live-preview"],
+      "owns": ["sections/03-newmoon.html", "sections/03-newmoon.css", "sections/04-miligogo.html", "sections/04-miligogo.css", "sections/05-healthtech.html", "sections/05-healthtech.css", "notes/0[345].md"],
+      "reviews": ["hero-designer", "brand-chapter-designer", "directory-designer"],
+      "handoffs": {
+        "receives": ["assigned brand and verified copy", "approved imagery", "neighboring chapter transitions"],
+        "delivers": ["assigned chapter fragments and links", "next chapter handoff and asset notes"]
+      },
+      "definitionOfDone": [
+        "Use only the files for the assigned agent ID.",
+        "Verify product names, distribution claims, and action links.",
+        "Check shared chapter structure, crops, and text contrast."
+      ]
+    },
+    {
+      "id": "directory-designer",
+      "title": "Directory Designer",
+      "crew": "page",
+      "agents": ["06"],
+      "mission": "Present the remaining verified brands in a keyboard-accessible scroll-snap rail with a lead item and an official directory link.",
+      "skills": ["typography-layout", "ui-ux-core", "accessibility", "components-engineering"],
+      "tools": ["check-sections", "live-preview", "browser-inspection"],
+      "owns": ["sections/06-morebrands.html", "sections/06-morebrands.css", "notes/06.md"],
+      "reviews": ["brand-chapter-designer", "heritage-storyteller"],
+      "handoffs": {
+        "receives": ["verified brand list and official link", "last chapter transition"],
+        "delivers": ["ordered rail and lead item", "handoff into the heritage band"]
+      },
+      "definitionOfDone": [
+        "Show verified brands and a distinct lead item.",
+        "Verify rail focus, scrolling, and the official directory link.",
+        "Keep scrolling within the rail at 320 px."
+      ]
+    },
+    {
+      "id": "heritage-storyteller",
+      "title": "Heritage Storyteller",
+      "crew": "page",
+      "agents": ["07"],
+      "mission": "Tell the verified Rochor Road provision-store story in the heritage band and link to Goh Joo Hin's official About page.",
+      "skills": ["ui-ux-core", "typography-layout", "i18n-content", "accessibility"],
+      "tools": ["check-sections", "i18n-extract", "live-preview"],
+      "owns": ["sections/07-about.html", "sections/07-about.css", "notes/07.md"],
+      "reviews": ["directory-designer", "concept-showcase-designer"],
+      "handoffs": {
+        "receives": ["verified chronology and image provenance", "directory transition"],
+        "delivers": ["heritage story and official About link", "transition to the concept band"]
+      },
+      "definitionOfDone": [
+        "Verify dates, location, and image attribution against the brief.",
+        "Use a readable heading, localized copy, and appropriate image alt.",
+        "Confirm the official About link and the next section transition."
+      ]
+    },
+    {
+      "id": "concept-showcase-designer",
+      "title": "Concept Showcase Designer",
+      "crew": "page",
+      "agents": ["08"],
+      "mission": "Present the Virtual Mall Concept in a full-bleed band with an independent concept label and a link to the existing demo.",
+      "skills": ["ui-ux-core", "color-theme", "motion-loader", "pwa-performance"],
+      "tools": ["check-sections", "contrast", "live-preview"],
+      "owns": ["sections/08-mall.html", "sections/08-mall.css", "notes/08.md"],
+      "reviews": ["heritage-storyteller", "enquiry-ux-designer"],
+      "handoffs": {
+        "receives": ["approved mall concept image and demo destination", "heritage transition"],
+        "delivers": ["labeled concept band and demo link", "transition into sales enquiry"]
+      },
+      "definitionOfDone": [
+        "Label the imagery as an independent concept.",
+        "Verify the existing demo link and image contrast.",
+        "Keep the concept band static and check its mobile crop."
+      ]
+    },
+    {
+      "id": "enquiry-ux-designer",
+      "title": "Enquiry UX Designer",
+      "crew": "page",
+      "agents": ["09"],
+      "mission": "Help buyers prepare a sales enquiry with native brand choices and a checklist. Link to official sales channels without a fake submit or success state.",
+      "skills": ["ui-ux-core", "accessibility", "i18n-content", "components-engineering"],
+      "tools": ["check-sections", "live-preview", "browser-inspection"],
+      "owns": ["sections/09-enquiry.html", "sections/09-enquiry.css", "notes/09.md"],
+      "reviews": ["nav-chrome-designer", "footer-compliance-designer"],
+      "handoffs": {
+        "receives": ["verified brand choices and sales destinations", "enquiry anchors"],
+        "delivers": ["buyer checklist and official links", "footer link handoff"]
+      },
+      "definitionOfDone": [
+        "Verify labeled native radios with keyboard input.",
+        "Keep the checklist actionable without claiming to submit or prefill.",
+        "Test official contact and corporate sales links."
+      ]
+    },
+    {
+      "id": "footer-compliance-designer",
+      "title": "Footer and Compliance Designer",
+      "crew": "page",
+      "agents": ["10"],
+      "mission": "Close the page with the verified address and official links. Include the independent design disclaimer and distinguish concept imagery from official assets.",
+      "skills": ["ui-ux-core", "accessibility", "i18n-content", "typography-layout"],
+      "tools": ["check-sections", "i18n-extract", "live-preview"],
+      "owns": ["sections/10-footer.html", "sections/10-footer.css", "notes/10.md"],
+      "reviews": ["enquiry-ux-designer", "nav-chrome-designer"],
+      "handoffs": {
+        "receives": ["official address and destination URLs", "approved disclaimer and image attribution"],
+        "delivers": ["footer landmark, links, and attribution", "verified page-end clearance"]
+      },
+      "definitionOfDone": [
+        "Verify the address and all official links.",
+        "Include both required disclosures with localized copy.",
+        "Check one footer landmark and clearance above the mobile bar."
+      ]
+    },
+    {
+      "id": "accessibility-reviewer",
+      "title": "Accessibility Reviewer",
+      "crew": "page",
+      "agents": [],
+      "mission": "Give the Manager evidence about keyboard access, contrast, semantics, and touch targets during Review.",
+      "skills": ["accessibility", "color-theme", "qa-verification"],
+      "tools": ["check-sections", "contrast", "live-preview", "browser-inspection"],
+      "owns": [],
+      "reviews": ["*"],
+      "handoffs": {
+        "receives": ["assembled page", "theme and viewport coverage"],
+        "delivers": ["accessibility findings with locations and reproduction steps"]
+      },
+      "definitionOfDone": [
+        "Verify landmark usage, heading order, and the sole h1.",
+        "Check keyboard focus, input labels, and touch targets.",
+        "Record contrast failures and checks requiring device evidence."
+      ]
+    },
+    {
+      "id": "localization-reviewer",
+      "title": "Localization Reviewer",
+      "crew": "page",
+      "agents": [],
+      "mission": "Give the Manager evidence about catalog coverage, locale switching, and translated text layout during Review.",
+      "skills": ["i18n-content", "typography-layout", "qa-verification"],
+      "tools": ["i18n-extract", "live-preview", "browser-inspection"],
+      "owns": [],
+      "reviews": ["*"],
+      "handoffs": {
+        "receives": ["assembled page", "English source and translated catalogs"],
+        "delivers": ["missing-key, translation status, and overflow findings"]
+      },
+      "definitionOfDone": [
+        "Check each catalog and verify inline English fallback.",
+        "Inspect long translations, CJK wrapping, and localized attributes.",
+        "Record drafts that still need review by a fluent speaker."
+      ]
+    },
+    {
+      "id": "motion-performance-reviewer",
+      "title": "Motion and Performance Reviewer",
+      "crew": "page",
+      "agents": [],
+      "mission": "Give the Manager evidence about reveal, first paint, loading, and offline behavior during Review.",
+      "skills": ["motion-loader", "pwa-performance", "qa-verification"],
+      "tools": ["check-sections", "export-page", "live-preview", "browser-inspection"],
+      "owns": [],
+      "reviews": ["*"],
+      "handoffs": {
+        "receives": ["assembled export", "motion, loader, and cache contracts"],
+        "delivers": ["motion and performance findings with verification evidence"]
+      },
+      "definitionOfDone": [
+        "Check reduced motion and visible reveal fallback.",
+        "Check loader dismissal and layout stability.",
+        "Record offline and update behavior plus any device gaps."
+      ]
+    }
+  ]
+}

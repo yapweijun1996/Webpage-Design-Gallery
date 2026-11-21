@@ -1,0 +1,9 @@
+/* Keep long product text resilient at narrow widths and high zoom. */
+.s-03 .newmoon-product {
+  overflow-wrap: anywhere;
+}
+
+/* Leave room around keyboard focus when a browser scrolls an action into view. */
+.s-03 .newmoon-action {
+  scroll-margin-block-start: var(--dc-space-8);
+}

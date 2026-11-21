@@ -8,7 +8,7 @@ const { test } = require('node:test');
 const settings = require('../lib/settings');
 
 const DEFAULT_SELECTION = { runner: 'codex', model: 'gpt-6.2-sol', effort: 'medium' };
-const DEFAULT_IMAGES = { provider: 'codex', model: 'gpt-image-1', quality: 'high', size: '1536x1024' };
+const DEFAULT_IMAGES = { provider: 'codex', model: 'gpt-image-2', quality: 'high', size: '1536x1024' };
 const DEFAULT_SETTINGS = {
   version: 1,
   defaults: DEFAULT_SELECTION,

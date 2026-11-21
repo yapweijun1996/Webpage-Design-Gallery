@@ -5,7 +5,7 @@
   const root = document.documentElement;
   const preferences = {
     theme: { attribute: 'data-theme', values: ['auto', 'light', 'dark'], fallback: 'auto' },
-    brand: { attribute: 'data-brand', values: ['none', 'forest-gold', 'gjh-classic'], fallback: root.getAttribute('data-default-brand') },
+    brand: { attribute: 'data-brand', values: ['none', 'forest-gold', 'gjh-classic', 'cny-red-gold'], fallback: root.getAttribute('data-default-brand') },
     lang: { attribute: 'lang', values: Object.freeze(['en', 'zh-Hans', 'ms']), fallback: root.getAttribute('lang') }
   };
   const names = Object.keys(preferences);

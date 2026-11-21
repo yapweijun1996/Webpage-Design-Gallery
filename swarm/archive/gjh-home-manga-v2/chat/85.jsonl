@@ -1,0 +1,32 @@
+{"to": ["Imagery Art Director", "Layout & Structure Engineer"], "kind": "msg", "text": "New hero concept: assets/generated/02-hero-market-dusk.png (800 × 400, 184,050 bytes). Suggested full-bleed cover with left headline scrim and centered mobile crop; retain AI concept illustration caption. Verify actual contrast and desktop sharpness: the 200KB PNG limit requires reduced resolution.", "reply": 610}
+{"to": ["Claude"], "kind": "done", "text": "Generated a wide warm Singapore dusk market hero PNG under 200KB and shared placement guidance; desktop sharpness remains to be checked."}
+{"to": ["Everyone"], "kind": "msg", "text": "新主视觉 assets/generated/02-hero-market-dusk-hd.webp：1752 × 897，195,404 bytes，cwebp -q 78。请布局工程师接入 picture 的桌面和手机资源，更新尺寸与描述性 alt，并保留 AI 图注；建议全幅 cover、主体居中偏右，左侧保留标题遮罩。请复核导出路径与手机裁切。", "reply": 692}
+{"to": ["Everyone"], "kind": "done", "text": "已生成并压缩暖色新加坡黄昏食市主视觉，交接布局工程师接入及复核。", "reply": 692}
+{"to": ["84", "81"], "kind": "msg", "text": "新素材 assets/generated/03-newmoon-abalone-table.webp，1672 × 941，125,908 bytes（cwebp -q 78）。建议全幅背景、主体靠右，左侧放标题；手机请检查餐盘裁切，保留 AI concept illustration 图注。画面含风格化滨海景观，请确认符合方向。", "reply": 770}
+{"to": ["claude"], "kind": "done", "text": "已生成并压缩 New Moon 暖色鲍鱼餐桌场景，交接图片路径和构图建议。", "reply": 770}
+{"to": ["Imagery Art Director", "Layout & Structure Engineer"], "kind": "msg", "text": "针对 #788 已生成 assets/generated/03-newmoon-manga.webp（1672 × 941，182,374 bytes）。建议替换 newmoon-scene 图片，居中裁切并保留 AI concept illustration 图注；请更新宽高并核查手机裁切。图像细节较密，需用 WebP quality 10 才能符合 200 KB 限制。", "reply": 788}
+{"to": ["Manager"], "kind": "done", "text": "已生成并交接无文字漫画风鲍鱼图片，1672 × 941、182,374 bytes。", "reply": 788}
+{"to":["Imagery Art Director","Layout & Structure Engineer"],"kind":"msg","text":"针对 #796，删除 header-actions 导航无需新增或替换图片；请移除指定导航并检查布局。","reply":796}
+{"to":["Everyone"],"kind":"done","text":"已确认删除页头操作导航无需图片资源，并向影像及布局负责人交接。"}
+{"to":["84","Layout & Structure Engineer"],"kind":"msg","text":"#846 新图 assets/generated/03-newmoon-polished.webp（1672 × 941，176,538 bytes）可用于 newmoon-scene；主体居中适合手机裁切，请保留 AI concept illustration 图注并核查实景。压缩质量为 40，以满足 200 KB 限制。","reply":846}
+{"to":["Everyone"],"kind":"done","text":"已生成并交接居中构图的 New Moon 鲍鱼漫画概念图，尺寸 1672 × 941、176,538 bytes。","reply":846}
+{"to":["84","81"],"kind":"msg","text":"针对 #862，删除整个 header.s-01 > nav.header-actions 即可；此变更无需生成或替换图片，保留现有标志。","reply":862}
+{"to":["everyone"],"kind":"done","text":"已交接删除指定操作导航的图片影响评估；无需新增或修改图片资产。","reply":862}
+{"to": ["84", "81"], "kind": "msg", "text": "#890 新候选素材 assets/generated/02-hero-anime-market.webp，1774×887、191108 bytes；建议全屏背景，桌面左侧放文字、手机居中裁切，保留 AI concept illustration 图注。图含概念化城市天际线，请核对品牌及场景适配；截图服务未响应，尚未实测。", "reply": 890}
+{"to": ["81"], "kind": "done", "text": "已生成并交接红色动画风市场首屏候选图，1774×887、191108 bytes；截图服务未响应。", "reply": 890}
+{"to":["81","84"],"kind":"msg","text":"#909 新候选 assets/generated/02-hero-daylight-market.webp：1774×887、164678 bytes。建议桌面左侧叠标题、右侧呈现市集；手机以右中部裁切并保留 AI concept illustration 图注。截图命令未响应，现有截图显示当前图偏暮色；新图尚未整合实测。","reply":909}
+{"to":["81"],"kind":"done","text":"已生成并交接日间中国红动画风首屏候选图，1774×887，164678 bytes。","reply":909}
+{"to":["81","84"],"kind":"msg","text":"#930 新候选 assets/generated/02-hero-red-day-market.webp，1600×800、174122 bytes；明亮日间市集与中国红遮篷，桌面标题可置左侧暗区，手机建议以右中部裁切，保留 AI concept illustration 图注。截图服务失败，整合后请实测裁切与文字对比。","reply":930}
+{"to":["81"],"kind":"done","text":"已生成并交接 1600×800 的日间中国红动画风首屏候选图；截图服务未响应，实际页面效果待复核。","reply":930}
+{"to": ["81", "84"], "kind": "msg", "text": "#951 新候选 assets/generated/02-hero-sunny-market.webp，1600×800、191162 bytes；明亮日景及中国红遮篷，建议桌面左侧叠标题、手机居中裁切并保留 AI 图注。截图服务未响应，整合后需实测裁切及文字对比。", "reply": 951}
+{"to": ["81"], "kind": "done", "text": "已生成并交接 1600×800、低于 200 KB 的日间动画风英雄图；截图服务未响应。", "reply": 951}
+{"to": ["84", "81"], "kind": "msg", "text": "新日景候选 assets/generated/02-hero-sunny-market.webp：1774×887，200972 bytes；建议作为 Hero 全幅背景，保留暗色遮罩及 AI caption，并复核手机裁切和文字对比。", "reply": 972}
+{"to": ["claude"], "kind": "done", "text": "已生成并压缩新加坡阳光市集 Hero 候选图，交付影像与布局同事。", "reply": 972}
+{"to":["81","84"],"kind":"msg","text":"新候选 assets/generated/02-hero-sunlit-neighbourhood.webp（1600×800，185946 bytes）；建议全幅背景、左侧叠标题，手机居中裁切，保留 AI 图注。截图服务未响应，请整合后复核。","reply":991}
+{"to":["Claude"],"kind":"done","text":"已生成并压缩阳光新加坡市集首屏候选图，交接布局与影像同事；截图服务未响应。","reply":991}
+{"to":["81","84"],"kind":"msg","text":"新候选 assets/generated/02-hero-family-market.webp（1774×887，181498 bytes）；建议全幅背景，桌面左侧放标题，手机向右裁切以保留家庭主体，并保留 AI 图注。截图服务未响应，实际裁切待复核。","reply":1012}
+{"to":["Claude"],"kind":"done","text":"已生成并压缩新加坡家庭市集首屏候选图，交接布局及影像同事；截图服务未响应。","reply":1012}
+{"to":["81","84"],"kind":"msg","text":"新候选 assets/generated/02-hero-tropical-market.webp（1774×887，192670 bytes）；建议全幅背景，桌面左侧放标题，手机向右裁切保留家庭和红色棚架，并保留 AI 图注。截图服务未响应，实际裁切待复核。","reply":1030}
+{"to":["claude"],"kind":"done","text":"已生成并压缩热带市集首屏候选图，交接布局与影像同事；截图服务未响应。","reply":1030}
+{"to": ["81", "84"], "kind": "msg", "text": "新候选 assets/generated/02-hero-family-day.webp（1774×887，184092 bytes）；建议全幅背景，桌面标题放左侧，手机以家庭为中心裁切并保留 AI 图注。截图服务未响应，实际裁切待复核。", "reply": 1050}
+{"to": ["claude"], "kind": "done", "text": "已生成并压缩家庭市集首屏候选图，交接布局与影像同事；截图服务未响应。", "reply": 1050}

@@ -1,0 +1,12 @@
+/* Keep any action icons aligned with the link text and theme colour. */
+.s-05 .healthtech-action svg {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex: none;
+  vertical-align: -0.125em;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

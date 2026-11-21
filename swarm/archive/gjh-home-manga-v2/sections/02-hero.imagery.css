@@ -1,0 +1,19 @@
+/* Keep the market illustration warm and natural while preserving readable transitions. */
+.s-02 .hero-scene img {
+  object-fit: cover;
+  object-position: 100% center;
+  filter: saturate(.82) contrast(1.02);
+}
+
+.s-02 .hero-scene picture::before { opacity: .08; }
+.s-02 .hero-scene picture::after {
+  background: linear-gradient(180deg, transparent 35%, rgb(17 26 22 / 8%) 70%, rgb(17 26 22 / 35%) 100%);
+}
+
+@media (min-width: 48rem) {
+  .s-02 .hero-scene img { object-position: center; }
+  .s-02 .hero-scene picture::after {
+    background: linear-gradient(90deg, rgb(17 26 22 / 62%) 0%, rgb(17 26 22 / 30%) 30%, transparent 62%),
+      linear-gradient(0deg, rgb(17 26 22 / 38%) 0%, transparent 30%);
+  }
+}

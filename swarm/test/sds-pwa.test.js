@@ -158,6 +158,14 @@ test('brand and language options narrow the output and remove stale generated fi
   assert.deepEqual(precache(f.text('sw.js')), f.files());
 });
 
+test('exports Chinese New Year as the page default and a selectable brand', t => {
+  const f = fixture(t);
+  f.export('--brand', 'cny-red-gold');
+  const page = f.text('index.html');
+  assert.match(page, /<html lang="en" data-viewport-lock data-default-brand="cny-red-gold">/);
+  assert.match(page, /<option value="cny-red-gold">Chinese New Year<\/option>/);
+});
+
 test('content changes rotate the version while an identical export is reproducible', t => {
   const f = fixture(t);
   f.export();

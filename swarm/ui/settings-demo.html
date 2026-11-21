@@ -28,7 +28,7 @@
     .demo-simulations { display: grid; gap: 2px; }
     .demo-simulations label { display: flex; align-items: center; gap: 5px; min-block-size: 22px; }
     @media (min-width: 700px) {
-      .demo-simulations { grid-auto-flow: column; gap: 16px; }
+      .demo-simulations { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 16px; }
     }
     .demo-tools button,
     .demo-header button {
@@ -102,6 +102,7 @@
       <label><input type="checkbox" id="demo-team-busy"> Simulate a busy team (409)</label>
       <label><input type="checkbox" id="demo-key-invalid"> Simulate an invalid API key</label>
       <label><input type="checkbox" id="demo-key-test-failure"> Simulate a failed key test</label>
+      <label><input type="checkbox" id="demo-models-failure"> Simulate failed model listing</label>
     </div>
     <button type="button" id="demo-open" hidden>Open settings</button>
   </header>
@@ -125,6 +126,7 @@
       const simulateBusy = document.getElementById('demo-team-busy');
       const simulateInvalidKey = document.getElementById('demo-key-invalid');
       const simulateKeyTestFailure = document.getElementById('demo-key-test-failure');
+      const simulateModelsFailure = document.getElementById('demo-models-failure');
       simulateBusy.addEventListener('change', () => window.SwarmSettings.refresh());
       const widths = document.querySelectorAll('[data-width]');
       for (const button of widths) {
@@ -165,7 +167,7 @@
         channel: { language: 'zh-Hans', standingRules: '' },
         research: { web: true },
         autopilot: { maxCyclesPerScreen: 2 },
-        images: { provider: 'codex', model: 'gpt-image-1', quality: 'high', size: '1536x1024' }
+        images: { provider: 'codex', model: 'gpt-image-2', quality: 'high', size: '1536x1024' }
       };
       let agents = [
         { id: '02', name: 'Agent 2', title: 'Hero Designer', section: 'hero',
@@ -207,7 +209,7 @@
           if (!/^[a-z0-9][a-z0-9.\-]{1,40}$/.test(draft.images.model)) {
             return {
               ok: false,
-              errors: [{ path: 'images.model', message: 'Enter an image model ID such as gpt-image-1.' }]
+              errors: [{ path: 'images.model', message: 'Enter an image model ID such as gpt-image-2.' }]
             };
           }
           settings = structuredClone(draft);
@@ -229,6 +231,11 @@
           async testKey() {
             if (simulateKeyTestFailure.checked) return { ok: false, message: 'The saved key failed the test.' };
             return { ok: true, message: 'The saved key passed the test.' };
+          },
+          async listModels() {
+            await new Promise(resolve => setTimeout(resolve, 600));
+            if (simulateModelsFailure.checked) return { ok: false, models: [], message: 'Simulated account lookup failure.' };
+            return { ok: true, models: ['gpt-image-2', 'gpt-image-2.6-preview', 'dall-e-3', 'gpt-image-2.6-preview'] };
           }
         },
         team: {

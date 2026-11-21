@@ -203,12 +203,14 @@ async function runScenario(failingAgent = '') {
     }, checkServer);
     assert.ok(usage.reports > 2, 'Expected usage from multiple agent processes');
     assert.equal(usage.tokens, usage.reports * 125, 'Cached and reasoning tokens must not be counted twice');
-    assert.equal(usage.usd, null, 'Codex CLI usage has no USD estimate');
-    assert.equal(usage.unpriced, usage.reports);
+    assert.ok(Math.abs(usage.usd - usage.reports * 0.000412) < 1e-10, 'Default Sol price is applied to every Codex report');
+    assert.equal(usage.apiEstimates, usage.reports);
+    assert.equal(usage.unpriced, 0);
     assert.equal(usage.missingUsage, 0);
     assert.equal(usage.breakdownReports, usage.reports);
     assert.deepEqual([usage.input, usage.cached, usage.output], [80, 20, 25].map(count => count * usage.reports));
     assert.deepEqual(Object.keys(usage.agents).sort(), ['00', ...workers]);
+    for (const agent of Object.values(usage.agents)) assert.deepEqual(agent.runners, ['codex']);
     for (const key of ['input', 'cached', 'output', 'tokens']) {
       assert.equal(Object.values(usage.agents).reduce((sum, agent) => sum + agent[key], 0), usage[key]);
     }

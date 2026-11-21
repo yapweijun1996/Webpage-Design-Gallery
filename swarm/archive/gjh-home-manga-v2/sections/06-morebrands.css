@@ -1,0 +1,120 @@
+.s-06 {
+  background: var(--sds-color-bg);
+  color: var(--sds-color-text);
+  padding-block: var(--sds-space-16);
+  font-family: var(--sds-font-sans);
+}
+
+.s-06 .morebrands-inner {
+  min-inline-size: 0;
+}
+
+.s-06 .morebrands-heading {
+  max-inline-size: calc(var(--sds-space-16) * 12);
+  margin-block-end: var(--sds-space-6);
+}
+
+.s-06 .morebrands-eyebrow {
+  display: inline-block;
+  margin: 0 0 var(--sds-space-4);
+  padding: var(--sds-space-2) var(--sds-space-3);
+  border: var(--sds-size-unit) solid var(--sds-color-text);
+  background: var(--sds-color-surface);
+  font-size: var(--sds-text-sm);
+  font-weight: var(--sds-weight-bold);
+  text-transform: uppercase;
+}
+
+.s-06 .morebrands-heading h2 {
+  margin: 0;
+  font-size: var(--sds-text-display);
+  font-weight: var(--sds-weight-bold);
+  line-height: var(--sds-leading-tight);
+  letter-spacing: var(--sds-tracking-tight);
+}
+
+.s-06 .morebrands-hint {
+  margin: var(--sds-space-4) 0 0;
+  font-size: var(--sds-text-base);
+  line-height: var(--sds-leading-body);
+}
+
+.s-06 .morebrands-rail {
+  display: flex;
+  align-items: stretch;
+  gap: var(--sds-space-3);
+  max-inline-size: 100%;
+  overscroll-behavior-inline: contain;
+  scroll-margin-block-end: calc(var(--sds-bar-h) + var(--sds-safe-bottom) + var(--sds-space-4));
+}
+
+.s-06 .morebrands-lead,
+.s-06 .morebrands-wordmark {
+  box-sizing: border-box;
+  border: var(--sds-size-unit) solid var(--sds-color-text);
+  background: var(--sds-color-surface);
+  color: var(--sds-color-text);
+}
+
+.s-06 .morebrands-lead {
+  flex: 0 0 min(85%, calc(var(--sds-space-16) * 7));
+}
+
+.s-06 .morebrands-figure {
+  margin: 0;
+}
+
+.s-06 .morebrands-figure img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.s-06 .morebrands-figure-caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sds-space-2);
+  padding: var(--sds-space-4);
+  border-block-start: var(--sds-size-unit) solid var(--sds-color-text);
+}
+
+.s-06 .morebrands-lead-name {
+  font-size: var(--sds-text-2xl);
+  font-weight: var(--sds-weight-bold);
+  line-height: var(--sds-leading-tight);
+}
+
+.s-06 .morebrands-credit {
+  font-size: var(--sds-text-xs);
+}
+
+.s-06 .morebrands-wordmark {
+  display: flex;
+  flex: 0 0 min(65%, calc(var(--sds-space-16) * 4));
+  align-items: end;
+  min-block-size: calc(var(--sds-space-16) * 3);
+  padding: var(--sds-space-6);
+  background-image: radial-gradient(var(--sds-color-border-strong) 12%, transparent 12%);
+  background-size: var(--sds-space-2) var(--sds-space-2);
+  font-size: var(--sds-text-xl);
+  font-weight: var(--sds-weight-bold);
+  line-height: var(--sds-leading-tight);
+}
+
+.s-06 .morebrands-wordmark span {
+  padding: var(--sds-space-2);
+  background: var(--sds-color-surface);
+  border: var(--sds-size-unit) solid var(--sds-color-text);
+}
+
+.s-06 .morebrands-exit {
+  padding-block-start: var(--sds-space-8);
+}
+
+.s-06 .morebrands-link {
+  scroll-margin-block-end: calc(var(--sds-bar-h) + var(--sds-safe-bottom) + var(--sds-space-4));
+}

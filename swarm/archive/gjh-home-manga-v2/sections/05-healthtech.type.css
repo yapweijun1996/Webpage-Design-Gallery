@@ -1,0 +1,43 @@
+/* Calm, legible editorial hierarchy for both brand chapters. */
+.s-05 {
+  font-family: var(--sds-font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.s-05 .healthtech-eyebrow {
+  font-size: var(--sds-text-xs);
+  font-weight: var(--sds-weight-bold);
+  line-height: var(--sds-leading-tight);
+  letter-spacing: var(--sds-tracking-normal);
+  text-transform: uppercase;
+}
+
+.s-05 .healthtech-content h2 {
+  font-family: var(--sds-font-sans);
+  font-size: var(--sds-text-display);
+  font-weight: var(--sds-weight-bold);
+  line-height: var(--sds-leading-tight);
+  letter-spacing: var(--sds-tracking-tight);
+  text-wrap: balance;
+}
+
+.s-05 .healthtech-description {
+  max-width: 31ch;
+  font-size: var(--sds-text-base);
+  font-weight: var(--sds-weight-regular);
+  line-height: var(--sds-leading-body);
+  text-wrap: pretty;
+}
+
+.s-05 .healthtech-action {
+  font-size: var(--sds-text-sm);
+  font-weight: var(--sds-weight-bold);
+  line-height: var(--sds-leading-tight);
+  letter-spacing: var(--sds-tracking-normal);
+}
+
+.s-05 .healthtech-caption {
+  font-size: var(--sds-text-xs);
+  font-weight: var(--sds-weight-medium);
+  line-height: var(--sds-leading-tight);
+}

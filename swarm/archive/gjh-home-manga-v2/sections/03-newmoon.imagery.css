@@ -1,0 +1,32 @@
+/* Keep the illustrated food scene crisp while blending it into the chapter. */
+.s-03 .newmoon-scene {
+  border: 0;
+}
+
+.s-03 .newmoon-scene img {
+  object-position: center 48%;
+  filter: none;
+}
+
+.s-03 .newmoon-scene::before {
+  display: none;
+}
+
+.s-03 .newmoon-scene::after {
+  background: linear-gradient(180deg, transparent 72%, var(--newmoon-ivory) 100%);
+}
+
+.s-03 .newmoon-credit {
+  z-index: 2;
+}
+
+@media (min-width: 48rem) {
+  .s-03 .newmoon-scene::after {
+    background: linear-gradient(90deg, var(--newmoon-ivory) 0%, var(--newmoon-ivory) 16%, transparent 55%);
+  }
+
+  .s-03 .newmoon-credit {
+    inset-block-start: var(--dc-space-4);
+    inset-block-end: auto;
+  }
+}

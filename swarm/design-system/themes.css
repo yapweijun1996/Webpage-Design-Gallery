@@ -276,6 +276,97 @@
   }
 }
 
+[data-brand="cny-red-gold"],
+[data-brand="cny-red-gold"][data-theme="light"],
+[data-brand="cny-red-gold"][data-theme="auto"] {
+  --sds-color-accent: #C8102E;
+  --sds-color-action: #D4A017;
+  --sds-color-action-active: #B88411;
+  --sds-color-action-hover: #F2C14E;
+  --sds-color-bg: #FFF7E6;
+  --sds-color-border: #FEBFC7;
+  --sds-color-border-strong: #DD354B;
+  --sds-color-danger: #991B1B;
+  --sds-color-danger-bg: #FEF2F2;
+  --sds-color-focus: #DD354B;
+  --sds-color-info: #1E40AF;
+  --sds-color-info-bg: #EFF6FF;
+  --sds-color-on-action: #4A0D14;
+  --sds-color-scrim: rgba(74, 13, 20, 0.72);
+  --sds-color-scrim-strong: rgba(41, 7, 11, 0.9);
+  --sds-color-success: #166534;
+  --sds-color-success-bg: #ECFDF3;
+  --sds-color-surface: #FFFFFF;
+  --sds-color-surface-2: #FEF2F2;
+  --sds-color-surface-inverse: #4A0D14;
+  --sds-color-text: #4A0D14;
+  --sds-color-text-inverse: #FFF7E6;
+  --sds-color-text-muted: #710D20;
+  --sds-color-warning: #854D0E;
+  --sds-color-warning-bg: #FFFBEB;
+  color-scheme: light;
+}
+
+[data-brand="cny-red-gold"][data-theme="dark"] {
+  --sds-color-accent: #F2C14E;
+  --sds-color-action: #F2C14E;
+  --sds-color-action-active: #D4A017;
+  --sds-color-action-hover: #F0D487;
+  --sds-color-bg: #29070B;
+  --sds-color-border: #AC1428;
+  --sds-color-border-strong: #FCA5A5;
+  --sds-color-danger: #FCA5A5;
+  --sds-color-danger-bg: #450A0A;
+  --sds-color-focus: #F2C14E;
+  --sds-color-info: #93C5FD;
+  --sds-color-info-bg: #172554;
+  --sds-color-on-action: #4A0D14;
+  --sds-color-scrim: rgba(74, 13, 20, 0.72);
+  --sds-color-scrim-strong: rgba(41, 7, 11, 0.9);
+  --sds-color-success: #86EFAC;
+  --sds-color-success-bg: #052E16;
+  --sds-color-surface: #4A0D14;
+  --sds-color-surface-2: #AC1428;
+  --sds-color-surface-inverse: #C8102E;
+  --sds-color-text: #FFF7E6;
+  --sds-color-text-inverse: #FFF7E6;
+  --sds-color-text-muted: #FFE0E3;
+  --sds-color-warning: #FCD34D;
+  --sds-color-warning-bg: #422006;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  [data-brand="cny-red-gold"][data-theme="auto"] {
+    --sds-color-accent: #F2C14E;
+    --sds-color-action: #F2C14E;
+    --sds-color-action-active: #D4A017;
+    --sds-color-action-hover: #F0D487;
+    --sds-color-bg: #29070B;
+    --sds-color-border: #AC1428;
+    --sds-color-border-strong: #FCA5A5;
+    --sds-color-danger: #FCA5A5;
+    --sds-color-danger-bg: #450A0A;
+    --sds-color-focus: #F2C14E;
+    --sds-color-info: #93C5FD;
+    --sds-color-info-bg: #172554;
+    --sds-color-on-action: #4A0D14;
+    --sds-color-scrim: rgba(74, 13, 20, 0.72);
+    --sds-color-scrim-strong: rgba(41, 7, 11, 0.9);
+    --sds-color-success: #86EFAC;
+    --sds-color-success-bg: #052E16;
+    --sds-color-surface: #4A0D14;
+    --sds-color-surface-2: #AC1428;
+    --sds-color-surface-inverse: #C8102E;
+    --sds-color-text: #FFF7E6;
+    --sds-color-text-inverse: #FFF7E6;
+    --sds-color-text-muted: #FFE0E3;
+    --sds-color-warning: #FCD34D;
+    --sds-color-warning-bg: #422006;
+    color-scheme: dark;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --sds-dur-base: 0.01ms;

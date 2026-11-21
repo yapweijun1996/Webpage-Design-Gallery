@@ -1,0 +1,93 @@
+.s-09 {
+  background: var(--sds-color-bg);
+  color: var(--sds-color-text);
+  padding-block: var(--sds-space-16);
+  font-family: var(--sds-font-sans);
+}
+
+.s-09 .enquiry-heading {
+  display: grid;
+  gap: var(--sds-space-3);
+  margin-block-end: var(--sds-space-8);
+}
+
+.s-09 .enquiry-heading h2 {
+  margin: 0;
+  font-size: var(--sds-text-display);
+  line-height: var(--sds-leading-tight);
+  letter-spacing: var(--sds-tracking-tight);
+}
+
+.s-09 .enquiry-heading p,
+.s-09 .enquiry-route p,
+.s-09 .enquiry-checklist p {
+  margin: 0;
+}
+
+.s-09 .enquiry-panels {
+  display: grid;
+  gap: var(--sds-space-4);
+}
+
+.s-09 .enquiry-panel {
+  min-inline-size: 0;
+  padding: var(--sds-space-6);
+  border: var(--sds-space-1) solid var(--sds-color-border-strong);
+  background: var(--sds-color-surface);
+  box-shadow: var(--sds-space-2) var(--sds-space-2) 0 var(--sds-color-border-strong);
+}
+
+.s-09 .enquiry-checklist {
+  background: var(--sds-color-surface-2);
+}
+
+.s-09 .enquiry-brands {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.s-09 .enquiry-brands legend,
+.s-09 .enquiry-checklist h3 {
+  margin: 0;
+  padding: 0;
+  font-size: var(--sds-text-xl);
+  font-weight: var(--sds-weight-bold);
+  line-height: var(--sds-leading-tight);
+}
+
+.s-09 .enquiry-brands p {
+  margin: var(--sds-space-3) 0 var(--sds-space-4);
+}
+
+.s-09 .enquiry-checklist p {
+  margin-block-start: var(--sds-space-3);
+}
+
+.s-09 .enquiry-checklist ul {
+  margin: var(--sds-space-4) 0 0;
+  padding-inline-start: var(--sds-space-6);
+}
+
+.s-09 .enquiry-checklist li {
+  padding-block: var(--sds-space-2);
+  border-block-start: 1px solid var(--sds-color-border);
+}
+
+.s-09 .enquiry-route {
+  display: grid;
+  gap: var(--sds-space-4);
+  margin-block-start: var(--sds-space-12);
+}
+
+.s-09 .enquiry-chips input,
+.s-09 .enquiry-actions a {
+  scroll-margin-block-end: calc(var(--sds-bar-h) + var(--sds-safe-bottom) + var(--sds-space-8));
+}
+
+@media (min-width: 48rem) {
+  .s-09 .enquiry-panels {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}

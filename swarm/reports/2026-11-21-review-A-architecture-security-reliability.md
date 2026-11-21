@@ -1,0 +1,44 @@
+# Astra review (A): architecture-security-reliability
+
+Reviewer: Codex gpt-6.2-astra (xhigh), read-only, 2026-11-21. Raw report, unedited.
+
+## 1) Verdict
+
+Swarm is unsafe to run unattended with a valuable project or a funded image key. The loopback API accepts privileged operations without authenticating the caller, and the default viewer inserts generated HTML directly into its own document. All 240 selected offline tests passed, but the live worker path bypasses the ownership integrator and anchor approval gate.
+
+## 2) Top 5 risks
+
+1. **An unauthenticated request can erase the current project or start paid work.** `/api/run` replaces the project before launching workers, and `/api/image` can spend against a configured key. R1, R3.
+2. **Generated content shares the operator’s browser privileges.** Active markup in a worker’s section can act on the same-origin control API when the viewer renders it. R2.
+3. **A worker can exceed its assignment and impersonate the Manager.** Workers share the live directory, and the server derives message identity from an outbox filename writable by peers. R4.
+4. **Filesystem boundaries fail in both directions.** An invalid project name can redirect recursive deletion, and a project symlink can expose files outside the serving root. R3, R5.
+5. **Stop and restart do not reliably contain a run.** Queued processes can launch after Stop, overlapping jobs can lose process handles, and restarting loses accepted work. R7–R9.
+
+## 3) Issues table
+
+Evidence paths are relative to `swarm/`.
+
+| ID | Sev | Area | Evidence (file:line) | Impact | Recommended fix |
+|---|---|---|---|---|---|
+| R1 | P0 | HTTP authority | [server.js:499](swarm/server.js:499), `:501–510, :518–522, :567–581, :621–627, :656` | No token, Host or Origin validation. The parser accepts any content type and converts malformed JSON to `{}`. Browser-permitted simple POSTs can cause side effects. Cross-origin reads and PUT/DELETE face browser restrictions, but the server has no DNS-rebinding defense. | Authenticate privileged reads and mutations with a per-launch credential. Validate Host and browser Origin, enforce JSON on body-bearing routes, and reject malformed input. |
+| R2 | P0 | Preview isolation | [ui/index.html:354](swarm/ui/index.html:354), `:359` · [server.js:511](swarm/server.js:511), `:642` | The viewer fetches section markup and assigns it to `innerHTML`. Generated event handlers can execute in the control document. Exported pages also share the API origin. | Serve previews from a separate, credential-free origin. Embed a sandboxed frame and keep operator controls in the parent. |
+| R3 | P0 | Destructive initialization | [server.js:14](swarm/server.js:14), `:76–92, :365–374, :611–626` | `SWARM_PROJECT` accepts path components before recursive deletion. Imported roster JSON bypasses team validation. A valid JSON object of the wrong shape reaches deletion before roster processing fails. | Require a single project slug, verify canonical containment, and validate the roster and brief before staging a replacement. Retain the previous project until initialization succeeds. |
+| R4 | P1 | Worker and channel authority | [server.js:197](swarm/server.js:197), `:200–201, :229–235, :338–354` · [runners.js:166](swarm/lib/runners.js:166) · [guard.js:7](swarm/lib/guard.js:7) · [chat.js:174](swarm/lib/chat.js:174) · [turns.js:92](swarm/lib/turns.js:92) | Pi has unsandboxed shell access. Ordinary ownership violations produce warnings, and squads skip the whole-tree check. The guard excludes chat, so a peer-written Manager outbox entry is accepted as a Manager assignment. | Give each process an OS-enforced workspace and private outbox. Bind sender identity to the launch, isolate server secrets, and publish through the integrator. |
+| R5 | P1 | File serving | [server.js:494](swarm/server.js:494), `:642` | The prefix check blocks lexical traversal, but `readFile` follows links. A symlink under the project can expose an external file readable by the server. `/p/` also serves private project artifacts by name. | Serve an explicit preview asset tree. Reject symlink components and verify the opened regular file belongs to that tree. |
+| R6 | P1 | Prompt integrity | [server.js:197](swarm/server.js:197), `:322–326` · [turns.js:52](swarm/lib/turns.js:52), `:64` | Raw page content enters specialist instructions, and live search can be enabled for ordinary Codex turns. In an in-memory check with 3,500 characters of section HTML, **all eight specialist prompts omitted the owner’s request**. | Reserve space for the owner request first. Mark page and research excerpts as untrusted data, restrict research tools by role, and enforce write permissions outside the prompt. |
+| R7 | P1 | Run admission and outcome | [server.js:202](swarm/server.js:202), `:228, :382–386, :534–554, :621–627` | The busy check precedes an awaited body read. Two starts can both pass, and chat can overlap a legacy run. Processes keyed by agent ID overwrite each other’s handles. The legacy pipeline also reports `done` despite failed workers. | Admit work atomically through one scheduler. Track processes by run and attempt, and derive terminal status from worker results. |
+| R8 | P1 | Cancellation and CLI shutdown | [server.js:212](swarm/server.js:212), `:255–258, :390–392, :674` · [cli.js:197](swarm/cli.js:197), `:258–260` | Waiters check `stopped` after spawning. Timeout and Stop signal only direct children. CLI `quit` trusts one PID file across ports and can signal an unrelated process after PID reuse. | Cancel queued work before spawn. Terminate and reap process trees with escalation. Route shutdown through the authenticated server instance. |
+| R9 | P1 | Restart recovery | [turns.js:180](swarm/lib/turns.js:180) · [chat.js:62](swarm/lib/chat.js:62) · [server.js:659](swarm/server.js:659) | Outbox cursors survive restart, but accepted turns exist only in a promise queue. Startup rebuilds agent status without reconciling interrupted work. A torn final canonical log record also prevents chat initialization. | Journal accepted jobs and attempts. Reconcile interrupted work before resuming autopilot, and recover incomplete log tails. |
+| R10 | P1 | Secret exposure | [server.js:53](swarm/server.js:53), `:174–184, :201` · [chat.js:101](swarm/lib/chat.js:101), `:122–127` | Workers inherit the server environment. Commands and thoughts reach SSE, and channel text reaches disk without redaction. A credential emitted by an agent can therefore reach viewers or history. | Allowlist child environment variables and redact sensitive values before persistence or broadcast. |
+| R11 | P1 | Resource and spend limits | [server.js:283](swarm/server.js:283), `:499, :577–584` · [chat.js:153](swarm/lib/chat.js:153) · [imagegen.js:26](swarm/lib/imagegen.js:26) | The 30-image hourly counter resets on restart and permits concurrent requests. HTTP bodies, unread outbox bytes and image responses are buffered without byte limits. Synchronous conversion can block the server for 30 seconds. | Persist reservations, bound concurrent image jobs and byte counts, and move conversion off the request loop. |
+| R12 | P1 | Spec integration | [server.js:157](swarm/server.js:157), `:197, :338, :655` · [ARCHITECTURE_PLAN.md:18](swarm/ARCHITECTURE_PLAN.md:18) · [SKILLS_SPEC.md:28](swarm/SKILLS_SPEC.md:28) | The runtime has no anchor gate, contract-patch or impact-check merge, fast composer route, versions/rollback API, or project-skill resolution. The small-scope “fast lane” still launches agents. | Wire each library through its entry point and add route-to-worker acceptance tests before marking the feature available. |
+
+## 4) Improvements
+
+- **Quick wins (under one day each).** Reject malformed and oversized bodies, validate project slugs and imported rosters before deletion, reserve prompt space for the request, and check cancellation immediately after acquiring a worker slot.
+- **Strategic.** Separate the operator API, preview origin and worker filesystem identities. Use one durable scheduler and one integration writer for chat, legacy runs, squads and autopilot.
+
+## 5) Verified vs UNVERIFIED
+
+- **Verified.** Node `v23.10.0` passed 240 tests across 17 selected files, with zero failures or skips. Coverage included outbox restart handling, stale/overlap rejection, key-status masking and mocked image-error redaction. The prompt omission was verified separately in memory. No repository files were changed.
+- **UNVERIFIED.** Browser-specific CSRF or DNS-rebinding reachability, actual credential disclosure, billed spend, surviving descendants and crash recovery under a live server. No server, browser or network was used, and `swarm/.run/` was never read. The working tree changed during review. Final evidence uses `server.js` SHA-256 prefix `d121b242d1d8` and `ui/index.html` prefix `333597a68ab2`.

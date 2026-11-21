@@ -223,6 +223,57 @@ test('exports both asset prefixes and reports missing and unsupported URLs witho
   assert.ok(page.includes('url(/other/css.png)'));
 });
 
+test('bundles project-generated images and v11 aliases with collision-safe names', t => {
+  const f = fixture(t);
+  f.asset('hero.webp', 'company image');
+  f.asset('hero.webp', 'generated image', path.relative(f.root, path.join(f.project, 'assets/generated')));
+  f.asset('atrium.webp', 'mall image', 'demos/corporate/gjh/v11/assets');
+  f.section('01-hero', `
+<h1>Hero</h1>
+<img src="/gjh/hero.webp">
+<img src="/assets/generated/hero.webp?rev=1" srcset="../assets/generated/hero.webp 2x">
+<img src="../v11/atrium.webp">
+<img src="/gjh-v11/atrium.webp">
+<a href="../v11/">Mall demo</a>`, `.s-01 { background: url('/p/v11/atrium.webp#crop'); }`);
+
+  const result = f.run();
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stderr, '');
+  assert.match(result.stdout, /Images copied: 3 .*\nImages missing: 0\nUnresolved references: 0/);
+  const page = fs.readFileSync(path.join(f.dist, 'index.html'), 'utf8');
+  assert.ok(page.includes('src="assets/hero-2.webp?rev=1" srcset="assets/hero-2.webp 2x"'));
+  assert.equal(page.match(/src="assets\/v11-atrium\.webp"/g)?.length, 2);
+  assert.ok(page.includes("url('assets/v11-atrium.webp#crop')"));
+  assert.ok(page.includes('href="../v11/"'));
+  const assets = path.join(f.dist, 'assets');
+  assert.deepEqual(fs.readdirSync(assets).sort(), ['hero-2.webp', 'hero.webp', 'v11-atrium.webp']);
+  assert.equal(fs.readFileSync(path.join(assets, 'hero-2.webp'), 'utf8'), 'generated image');
+  assert.equal(fs.readFileSync(path.join(assets, 'v11-atrium.webp'), 'utf8'), 'mall image');
+});
+
+test('reports missing images and refuses parent traversal and escaping symlinks', t => {
+  const f = fixture(t);
+  const generated = path.join(f.project, 'assets/generated');
+  const secret = path.join(f.project, 'secret.png');
+  fs.mkdirSync(generated, { recursive: true });
+  fs.writeFileSync(secret, 'private image');
+  fs.writeFileSync(path.resolve(f.sections, '../../secret.png'), 'another private image');
+  fs.symlinkSync(secret, path.join(generated, 'linked.png'));
+  f.section('01-hero', `
+<h1>Hero</h1>
+<img src="../../secret.png">
+<img src="../assets/generated/%2e%2e/%2e%2e/secret.png">
+<img src="/assets/generated/linked.png">
+<img src="../v11/missing.webp">`, '');
+
+  const result = f.run();
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /Images copied: 0 \(0 bytes\)/);
+  assert.match(result.stdout, /Images missing: 3\n  \.\.\/assets\/generated\/%2e%2e\/%2e%2e\/secret\.png\n  \/assets\/generated\/linked\.png\n  \.\.\/v11\/missing\.webp\nUnresolved references: 1/);
+  assert.match(result.stderr, /Unresolved relative reference \.\.\/\.\.\/secret\.png/);
+  assert.equal(fs.existsSync(path.join(f.dist, 'assets')), false);
+});
+
 test('reports missing mapped image URLs and fragment validation warnings without failing', t => {
   const f = fixture(t);
   f.section('01-hero', `
