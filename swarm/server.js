@@ -282,7 +282,8 @@ function squadPlan(owner) {
   const byId = new Map(members.map(m => [m.squad.id, m]));
   const lane = ids => ids.map(id => byId.get(id)).filter(Boolean);
   const first = picked.filter(sp => sp.id !== 'layout' && sp.id !== 'qa').map(sp => byId.get(sp.id));
-  const waves = [first, lane(['layout']), lane(['qa'])].filter(w => w.length);
+  const fast = owner.scope && owner.scope.mode === 'autopilot'; // autopilot: the next cycle starts by inspecting the result, so skip the QA wave
+  const waves = [first, lane(['layout']), fast ? [] : lane(['qa'])].filter(w => w.length);
   const prompts = {};
   for (const m of members) prompts[m.id] = SQ.promptFor(m.squad, { base, scopeLine: '' });
   return { base, members, waves, prompts, layoutId: (byId.get('layout') || {}).id };
