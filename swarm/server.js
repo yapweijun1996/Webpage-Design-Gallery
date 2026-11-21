@@ -204,7 +204,7 @@ function runOnce(a, label, promptText) {
     const finish = ok => {
       if (settled) return; settled = true;
       clearTimeout(timer); children.delete(a.id);
-      if (before && chat) {
+      if (before && chat && !a.squad) { // squad agents run in parallel; layer files enforce ownership, a whole-tree diff would blame the wrong agent
         try {
           const bad = G.violations(before, G.snapshot(PROJECT), [...ownedGlobs(a), ...everyone().filter(o => o.id !== a.id && children.has(o.id)).flatMap(ownedGlobs)]); // files of agents running at the same time are theirs, not a violation
           if (bad.length) chat.post({ from: 'system', kind: 'system', text: `${a.name} changed files outside its ownership: ${bad.slice(0, 5).join(', ')}${bad.length > 5 ? ' ...' : ''}` });
@@ -274,11 +274,15 @@ function squadPlan(owner) {
   const def = agentsDef.find(a => a.id === ids[0]);
   if (!def) return null;
   const base = def.id + '-' + def.section;
-  const picked = SQ.pickSquad(owner.scope, owner.text);
+  // Full squad: every specialist works on the screen at once (owner request: see 10 agents working together).
+  const all = SQ.roster();
+  const picked = all;
   const members = picked.map(spec => squadAgents.find(a => a.squad.id === spec.id)).filter(Boolean);
   for (const m of members) m.base = base;
   const byId = new Map(members.map(m => [m.squad.id, m]));
-  const waves = SQ.waves(picked).map(w => w.map(spec => byId.get(spec.id)).filter(Boolean)).filter(w => w.length);
+  const lane = ids => ids.map(id => byId.get(id)).filter(Boolean);
+  const first = picked.filter(sp => sp.id !== 'layout' && sp.id !== 'qa').map(sp => byId.get(sp.id));
+  const waves = [first, lane(['layout']), lane(['qa'])].filter(w => w.length);
   const prompts = {};
   for (const m of members) prompts[m.id] = SQ.promptFor(m.squad, { base, scopeLine: '' });
   return { base, members, waves, prompts, layoutId: (byId.get('layout') || {}).id };
