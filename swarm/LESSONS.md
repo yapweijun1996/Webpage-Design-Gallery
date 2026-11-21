@@ -45,3 +45,11 @@ See `CHANNEL_SPEC.md`. Agents post by appending JSON lines to `chat/NN.jsonl`; o
 - The viewer serves `swarm/ui/*` straight from disk, so a worker that rewrites `channel.js` before `channel.css` leaves the owner looking at a half-updated panel (an unsized SVG became a 329px black circle). Have UI workers build in a staging directory (for example `swarm/ui/staging/<name>/`) and let the manager copy the files into place after verification.
 - Pi (pi.dev) accepts the prompt on stdin (`pi -p --mode json ...`), so both runners can share one spawn path; pi has no filesystem sandbox, so the server compares the project tree before and after each pi turn (`lib/guard.js`).
 - Agent effort `low` is no longer allowed by the owner; the allowlist is GPT 6.2 Sol and GPT 6.1 Terra with `medium` or `xhigh`.
+
+## 2026-11-21 late (squad, security, speed)
+- Inlining page context into specialist prompts must never crowd out the owner request: reserve the request first, truncate context, test with a huge context.
+- A control server on loopback needs a Host and Origin guard and JSON-only bodies; generated HTML must be sanitized before it enters the operator document (a sandboxed preview origin is the real fix).
+- The viewer must render the same CSS the exporter ships (legacy css plus layer files); otherwise reviewers judge a different page.
+- Libraries are not features: anchors, integrator, fast path and versions exist but are not wired into server.js yet. Do not report them as available.
+- Worker sandboxes block Chrome and localhost; the manager verifies in a real browser. Worker reports are not evidence.
+- Speed: one wave of pi specialists is 60 to 85 s, three waves about 100 to 140 s, Codex specialists set the pace. Fast path compose+export p95 69 ms, browser time unmeasured.
