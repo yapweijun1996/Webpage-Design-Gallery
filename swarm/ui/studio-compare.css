@@ -1,0 +1,345 @@
+.studio-compare {
+  box-sizing: border-box;
+  container: studio-compare / inline-size;
+  display: grid;
+  gap: var(--sds-space-4);
+  min-inline-size: 0;
+  padding: var(--sds-space-4);
+  border: 1px solid var(--sds-color-border);
+  border-radius: var(--sds-radius-lg);
+  background: var(--sds-color-surface);
+  color: var(--sds-color-text);
+  font: var(--sds-text-base) / var(--sds-leading-body) var(--sds-font-sans);
+  overflow-wrap: anywhere;
+}
+
+.studio-compare [hidden] {
+  display: none !important;
+}
+
+.studio-compare h2,
+.studio-compare h3,
+.studio-compare p {
+  margin: 0;
+}
+
+.studio-compare h2 {
+  font-size: var(--sds-text-xl);
+  line-height: var(--sds-leading-tight);
+}
+
+.studio-compare h3 {
+  font-size: var(--sds-text-lg);
+  line-height: var(--sds-leading-tight);
+}
+
+.studio-compare__header,
+.studio-compare__toolbar,
+.studio-compare__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sds-space-2);
+}
+
+.studio-compare__header,
+.studio-compare__toolbar {
+  justify-content: space-between;
+}
+
+.studio-compare__empty {
+  display: grid;
+  justify-items: center;
+  gap: var(--sds-space-2);
+  padding: var(--sds-space-8) var(--sds-space-4);
+  border: 1px dashed var(--sds-color-border-strong);
+  border-radius: var(--sds-radius-md);
+  background: var(--sds-color-bg);
+  text-align: center;
+}
+
+.studio-compare__empty > svg,
+.studio-compare__handle > svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.studio-compare__empty > svg {
+  inline-size: var(--sds-space-8);
+  block-size: var(--sds-space-8);
+  margin-block-end: var(--sds-space-1);
+  color: var(--sds-color-accent);
+}
+
+.studio-compare__empty > .sds-btn {
+  margin-block: var(--sds-space-2);
+}
+
+.studio-compare__empty > p,
+.studio-compare__metadata,
+.studio-compare__notice {
+  color: var(--sds-color-text-muted);
+  font-size: var(--sds-text-sm);
+}
+
+.studio-compare__empty > .studio-compare__privacy {
+  font-size: var(--sds-text-xs);
+}
+
+.studio-compare__notice:empty,
+.studio-compare__notice[data-kind=""] {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  clip-path: inset(50%);
+}
+
+.studio-compare__notice[data-kind="error"] {
+  padding: var(--sds-space-2);
+  border-radius: var(--sds-radius-sm);
+  background: var(--sds-color-danger-bg);
+  color: var(--sds-color-danger);
+}
+
+.studio-compare[data-dragging] {
+  outline: 2px dashed var(--sds-color-focus);
+  outline-offset: -4px;
+}
+
+.studio-compare[data-dragging] .studio-compare__empty {
+  background: var(--sds-color-info-bg);
+}
+
+.studio-compare__workbench {
+  display: grid;
+  gap: var(--sds-space-4);
+  min-inline-size: 0;
+}
+
+.studio-compare__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sds-space-2);
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.studio-compare__slider {
+  display: grid;
+  grid-template-columns: auto minmax(64px, 1fr) 4ch;
+  align-items: center;
+  gap: var(--sds-space-2);
+  flex: 1 1 224px;
+  max-inline-size: 320px;
+  color: var(--sds-color-text-muted);
+  font-weight: var(--sds-weight-bold);
+  font-size: var(--sds-text-sm);
+}
+
+.studio-compare__slider input {
+  inline-size: 100%;
+  block-size: var(--sds-tap);
+  margin: 0;
+  accent-color: var(--sds-color-action);
+  cursor: pointer;
+}
+
+.studio-compare__slider input:focus-visible {
+  outline: 2px solid var(--sds-color-focus);
+  outline-offset: 2px;
+  border-radius: var(--sds-radius-sm);
+}
+
+.studio-compare__value {
+  color: var(--sds-color-text);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.studio-compare__stage {
+  --studio-compare-ratio: 16 / 9;
+  --studio-compare-width: 960px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-areas:
+    "reference-label actual-label"
+    "reference actual";
+  gap: var(--sds-space-2) var(--sds-space-4);
+  min-inline-size: 0;
+  isolation: isolate;
+}
+
+.studio-compare__stage:is([data-mode="overlay"], [data-mode="swipe"]) {
+  grid-template-areas:
+    "reference-label actual-label"
+    "layers layers";
+  inline-size: min(100%, max(480px, var(--studio-compare-width)));
+  margin-inline: auto;
+}
+
+.studio-compare__label {
+  color: var(--sds-color-text-muted);
+  font-size: var(--sds-text-sm);
+  font-weight: var(--sds-weight-bold);
+}
+
+.studio-compare__label--reference {
+  grid-area: reference-label;
+}
+
+.studio-compare__label--actual {
+  grid-area: actual-label;
+}
+
+.studio-compare__stage:is([data-mode="overlay"], [data-mode="swipe"]) .studio-compare__label--actual {
+  text-align: end;
+}
+
+.studio-compare__surface,
+.studio-compare__scrubber {
+  position: relative;
+  aspect-ratio: var(--studio-compare-ratio);
+  min-inline-size: 0;
+  border-radius: var(--sds-radius-md);
+}
+
+.studio-compare__surface {
+  overflow: hidden;
+  background: var(--sds-color-surface-2);
+  box-shadow: 0 0 0 1px var(--sds-color-border);
+}
+
+.studio-compare__surface--reference {
+  grid-area: reference;
+}
+
+.studio-compare__surface--actual {
+  grid-area: actual;
+}
+
+.studio-compare__stage:is([data-mode="overlay"], [data-mode="swipe"]) .studio-compare__surface {
+  grid-area: layers;
+}
+
+.studio-compare__stage:is([data-mode="overlay"], [data-mode="swipe"]) .studio-compare__surface--reference {
+  z-index: 1;
+  pointer-events: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.studio-compare__stage[data-mode="overlay"] .studio-compare__surface--reference {
+  opacity: var(--studio-compare-opacity);
+}
+
+.studio-compare__stage[data-mode="swipe"] .studio-compare__surface--reference {
+  clip-path: inset(0 calc(100% - var(--studio-compare-split)) 0 0);
+}
+
+.studio-compare__image,
+.studio-compare__frame {
+  position: absolute;
+  inset: 0 auto auto 0;
+  display: block;
+  border: 0;
+  pointer-events: none;
+}
+
+.studio-compare__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  object-position: center top;
+}
+
+.studio-compare__frame {
+  transform-origin: top left;
+}
+
+.studio-compare__no-preview {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--sds-space-2);
+  color: var(--sds-color-text-muted);
+  font-size: var(--sds-text-sm);
+}
+
+.studio-compare__scrubber {
+  grid-area: layers;
+  z-index: 2;
+  overflow: hidden;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+.studio-compare__scrubber::before {
+  position: absolute;
+  inset-block: 0;
+  left: var(--studio-compare-split);
+  inline-size: 2px;
+  background: var(--sds-color-white);
+  box-shadow: 0 0 0 1px var(--sds-color-scrim);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.studio-compare__handle {
+  position: absolute;
+  box-sizing: border-box;
+  top: 50%;
+  left: clamp(var(--sds-space-6), var(--studio-compare-split), calc(100% - var(--sds-space-6)));
+  display: grid;
+  place-items: center;
+  inline-size: var(--sds-tap);
+  block-size: var(--sds-tap);
+  border: 1px solid var(--sds-color-border-strong);
+  border-radius: var(--sds-radius-pill);
+  background: var(--sds-color-surface);
+  color: var(--sds-color-text);
+  box-shadow: var(--sds-shadow-1);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.studio-compare__handle > svg {
+  inline-size: var(--sds-space-6);
+  block-size: var(--sds-space-6);
+}
+
+.studio-compare__metadata {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sds-space-1) var(--sds-space-4);
+}
+
+.studio-compare__filename {
+  color: var(--sds-color-text);
+  font-weight: var(--sds-weight-bold);
+}
+
+.studio-compare__dimensions {
+  font-variant-numeric: tabular-nums;
+}
+
+@container studio-compare (max-width: 560px) {
+  .studio-compare__modes .sds-radio-chip {
+    padding-inline: var(--sds-space-2);
+  }
+
+  .studio-compare__stage[data-mode="side"] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "reference-label" "reference" "actual-label" "actual";
+  }
+
+  .studio-compare__stage[data-mode="side"] .studio-compare__label--actual {
+    margin-block-start: var(--sds-space-2);
+  }
+}

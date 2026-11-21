@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en" data-studio-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Swarm Design Studio</title>
+  <link rel="stylesheet" href="/tokens.css">
+  <link rel="stylesheet" href="/ds/tokens.css">
+  <link rel="stylesheet" href="/ds/themes.css">
+  <link rel="stylesheet" href="/ds/components.css">
+  <link rel="stylesheet" href="/channel.css">
+  <link rel="stylesheet" href="/settings.css">
+  <link rel="stylesheet" href="/docs.css">
+  <link rel="stylesheet" href="/studio-activity.css">
+  <link rel="stylesheet" href="/studio-compare.css">
+  <link rel="stylesheet" href="/studio.css">
+  <script defer src="/ds/runtime.js"></script>
+  <script defer src="/ds/i18n.js"></script>
+  <script defer src="/channel.js"></script>
+  <script defer src="/settings.js"></script>
+  <script defer src="/docs.js"></script>
+  <script defer src="/studio-activity.js"></script>
+  <script defer src="/studio-compare.js"></script>
+  <script defer src="/studio.js"></script>
+</head>
+<body class="studio" data-workspace="design" data-mobile-pane="preview" data-sidebar="open" data-inspector="open">
+  <header id="top" class="studio-top">
+    <button type="button" id="drawerbtn" class="ibtn" data-icon="menu" aria-label="Open project navigation" aria-controls="sidebar" aria-expanded="false"></button>
+    <h1 class="studio-brand"><span class="studio-logo" data-icon="swarm"></span><span>Swarm Design Studio</span></h1>
+    <div id="workspace-tabs" class="studio-tabs" role="tablist" aria-label="Workspace">
+      <button type="button" id="mode-design" role="tab" data-workspace-tab="design" aria-controls="design" aria-selected="true">Design</button>
+      <button type="button" id="mode-team" role="tab" data-workspace-tab="team" aria-controls="team" aria-selected="false" tabindex="-1">Team</button>
+      <button type="button" id="mode-review" role="tab" data-workspace-tab="review" aria-controls="review" aria-selected="false" tabindex="-1">Review</button>
+    </div>
+    <div class="studio-top-actions">
+      <div id="phase" class="studio-status"><span id="status-text" role="status">Connecting</span><time id="timer" aria-label="Run elapsed time" hidden></time></div>
+      <button type="button" id="themebtn" class="ibtn" data-icon="sun" aria-label="Switch to light theme" data-tip="Switch between light and dark themes."></button>
+      <div id="top-tools"><div id="viewer-tools" aria-label="Viewer tools" role="group">
+        <button type="button" id="focusbtn" class="ibtn" data-icon="scan" aria-haspopup="dialog" aria-controls="focuspop" aria-expanded="false" aria-pressed="false" aria-label="Screen focus" data-tip="Limit requests and Autopilot to the sections visible in the preview."><span>Screen focus</span></button>
+        <button type="button" id="pick" class="ibtn" data-icon="pick" aria-pressed="false" aria-label="Pick an element" data-tip="Select an element in the preview to ask its owner about it."><span>Pick an element</span></button>
+        <button type="button" id="setbtn" class="ibtn" data-icon="gear" aria-haspopup="dialog" aria-controls="setdlg" aria-expanded="false" aria-label="Settings" data-tip="Configure the runner, model, and team."><span>Settings</span></button>
+        <button type="button" id="lookbtn" class="ibtn" data-icon="look" aria-haspopup="dialog" aria-controls="look" aria-expanded="false" aria-label="Appearance" data-tip="Set the SDS theme, project brand, and preview language."><span>Appearance</span></button>
+      </div></div>
+      <button type="button" id="viewbtn" class="sds-btn studio-button" data-icon="sliders" aria-label="View options" aria-controls="viewmenu" aria-expanded="false"><span>View</span></button>
+      <button type="button" id="panel" class="ibtn" data-icon="panel" aria-label="Collapse activity panel" aria-controls="inspector" aria-expanded="true" data-tip="Show or hide the activity panel."><span class="badge" id="unread" hidden></span></button>
+    </div>
+  </header>
+
+  <div id="main" class="studio-layout">
+    <aside id="sidebar" class="studio-sidebar" aria-label="Project navigation">
+      <div class="studio-sidebar-head">
+        <span>Project</span>
+        <button type="button" id="side-toggle" class="ibtn" data-icon="sidebar" aria-label="Collapse project navigation" aria-controls="project-nav" aria-expanded="true" data-tip="Collapse project navigation."></button>
+        <button type="button" id="drawerclose" class="ibtn" data-icon="close" aria-label="Close project navigation"></button>
+      </div>
+      <div class="studio-project">
+        <span class="studio-project-icon" data-icon="folder"></span>
+        <div><strong id="project-name">Swarm project</strong><button id="model" type="button" aria-label="Current model. Open settings" hidden></button></div>
+      </div>
+      <nav id="project-nav" class="studio-nav" aria-label="Project">
+        <button type="button" data-nav="overview" data-icon="overview" aria-label="Overview" aria-current="page"><span>Overview</span></button>
+        <button type="button" data-nav="tasks" data-icon="tasks" aria-label="Task board"><span>Task board</span></button>
+        <button type="button" data-nav="agents" data-icon="team" aria-label="Agents"><span>Agents</span></button>
+        <button type="button" data-nav="versions" data-icon="versions" aria-label="Versions"><span>Versions</span></button>
+        <button type="button" data-nav="assets" data-icon="assets" aria-label="Assets"><span>Assets</span></button>
+        <button type="button" data-nav="settings" data-icon="gear" aria-label="Settings"><span>Settings</span></button>
+      </nav>
+      <div class="studio-quick">
+        <h2>Quick actions</h2>
+        <div class="studio-nav" role="group" aria-label="Quick actions">
+          <button type="button" id="quick-prompt" data-icon="prompt" aria-label="Write a prompt"><span>Write a prompt</span></button>
+          <button type="button" id="quick-compare" data-icon="compare" aria-label="Compare reference"><span>Compare reference</span></button>
+        </div>
+      </div>
+    </aside>
+    <div id="drawerbackdrop" hidden></div>
+
+    <main id="workspace" class="studio-workspace">
+      <section id="design" class="studio-design" role="tabpanel" aria-labelledby="mode-design">
+        <div id="preview-shell" class="studio-preview">
+          <div class="studio-preview-toolbar">
+            <h2>Live Preview</h2>
+            <div id="device-group" class="studio-segment" role="group" aria-label="Preview device">
+              <button type="button" data-device="desktop" data-icon="desktop" aria-label="Desktop, 1440 pixels" aria-pressed="true" data-tip="Desktop · 1440 px"><span>Desktop</span></button>
+              <button type="button" data-device="tablet" data-icon="tablet" aria-label="Tablet, 768 pixels" aria-pressed="false" data-tip="Tablet · 768 px"><span>Tablet</span></button>
+              <button type="button" data-device="mobile" data-icon="mobile" aria-label="Mobile, 393 pixels" aria-pressed="false" data-tip="Mobile · 393 px"><span>Mobile</span></button>
+            </div>
+            <output id="device-size" aria-label="Preview width">1440 px</output>
+            <div class="studio-preview-tools" role="group" aria-label="Preview controls">
+              <div class="studio-zoom">
+                <button type="button" class="ibtn" id="zoom-out" data-icon="minus" aria-label="Zoom out" data-tip="Zoom out."></button>
+                <output id="zoom-value" aria-label="Preview scale">100%</output>
+                <button type="button" class="ibtn" id="zoom-in" data-icon="plus" aria-label="Zoom in" data-tip="Zoom in."></button>
+              </div>
+              <button type="button" class="ibtn" id="fit" data-icon="fit" aria-label="Fit preview to canvas" aria-pressed="true" data-tip="Fit preview to canvas."><span>Fit</span></button>
+              <button type="button" class="ibtn" id="fullscreen" data-icon="fullscreen" aria-label="Enter fullscreen" aria-pressed="false" data-tip="Expand the live preview."></button>
+              <a class="ibtn" id="newtab" data-icon="external" aria-label="Open live preview in a new tab" data-tip="Open the live page in a new tab." href="/studio.html?preview=1" target="_blank" rel="noopener"></a>
+            </div>
+          </div>
+          <div class="studio-canvas">
+            <div id="view" class="studio-viewport" tabindex="0" aria-label="Preview canvas">
+              <iframe id="preview-frame" title="Live project preview"></iframe>
+            </div>
+            <div id="focuschip" hidden></div>
+          </div>
+        </div>
+        <section class="studio-versions" id="versions" tabindex="-1" aria-labelledby="versions-title">
+          <div><h2 id="versions-title">Versions</h2><p>No saved versions yet.</p></div>
+          <button type="button" class="sds-btn studio-button" id="compare-btn" data-icon="compare"><span>Compare</span></button>
+        </section>
+        <section class="studio-compose" aria-label="Prompt composer">
+          <div class="studio-compose-head"><h2>Prompt</h2><span id="prompt-scope" hidden></span></div>
+          <div id="composer" class="swarm-channel"><p class="studio-placeholder">Connecting to the channel…</p></div>
+        </section>
+      </section>
+
+      <section id="team" class="studio-mode" role="tabpanel" aria-labelledby="mode-team" hidden>
+        <div class="studio-mode-head"><h2>Team</h2></div>
+        <div class="studio-team-grid">
+          <div class="studio-team-summary">
+            <div id="workspace-roster"></div>
+            <section class="studio-card" aria-labelledby="lanes-title"><h3 id="lanes-title">Agent lanes</h3><dl id="lanes" class="studio-lanes"></dl></section>
+          </div>
+          <div id="team-settings"></div>
+        </div>
+      </section>
+
+      <section id="review" class="studio-mode" role="tabpanel" aria-labelledby="mode-review" hidden>
+        <div class="studio-mode-head"><h2>Review</h2></div>
+        <div id="compare">
+          <section class="studio-card"><h3>Reference vs. actual</h3><p class="studio-placeholder">The comparison workspace is loading.</p></section>
+        </div>
+        <section class="studio-card studio-review-docs" aria-label="Review documents"><div id="docs"></div></section>
+      </section>
+    </main>
+
+    <div id="resize-handle" role="separator" aria-label="Activity panel width" aria-orientation="vertical" aria-controls="inspector" aria-valuemin="320" aria-valuemax="520" aria-valuenow="344" tabindex="0"></div>
+    <aside id="inspector" class="studio-inspector" aria-label="Swarm activity">
+      <div id="progress" class="studio-slot"><div class="studio-card"><h2>Swarm Progress</h2><p class="studio-placeholder">Waiting for progress updates.</p></div></div>
+      <div id="inspector-roster">
+        <div id="activity-team" class="studio-slot"><div class="studio-card"><h2>Agent Team</h2><p class="studio-placeholder">Waiting for the team.</p></div></div>
+      </div>
+      <section class="studio-card studio-events" aria-label="Event details">
+        <div id="inspector-tabs" class="studio-tabs" role="tablist" aria-label="Activity details">
+          <button type="button" id="activity-tab" role="tab" data-inspector-tab="activity" aria-controls="activity-pane" aria-selected="true">Activity</button>
+          <button type="button" id="logs-tab" role="tab" data-inspector-tab="logs" aria-controls="logs-pane" aria-selected="false" tabindex="-1">Logs<span id="logs-dot" hidden></span></button>
+          <button type="button" id="artifacts-tab" role="tab" data-inspector-tab="artifacts" aria-controls="artifacts-pane" aria-selected="false" tabindex="-1">Artifacts</button>
+        </div>
+        <div id="activity-pane" role="tabpanel" aria-labelledby="activity-tab"><div id="activity" class="studio-slot"><p class="studio-placeholder">New activity will appear here.</p></div></div>
+        <div id="logs-pane" role="tabpanel" aria-labelledby="logs-tab" hidden><div id="chan"></div></div>
+        <div id="artifacts-pane" role="tabpanel" aria-labelledby="artifacts-tab" hidden><div id="artifacts" class="studio-slot"><p class="studio-placeholder">No artifacts yet.</p></div></div>
+      </section>
+    </aside>
+  </div>
+
+  <nav id="mobile-tabs" class="studio-mobile-tabs" aria-label="Studio views">
+    <button type="button" data-mobile-view="preview" data-icon="desktop" aria-current="page"><span>Preview</span></button>
+    <button type="button" data-mobile-view="activity" data-icon="activity"><span>Activity</span></button>
+    <button type="button" data-mobile-view="team" data-icon="team"><span>Team</span></button>
+  </nav>
+  <div id="viewmenu" class="studio-popover" role="group" aria-label="View options" hidden>
+    <div id="menu-tools"></div>
+    <div id="menu-workspaces">
+      <button type="button" id="menu-review" class="studio-menu-row" data-icon="compare"><span>Review workspace</span></button>
+    </div>
+    <button type="button" class="studio-menu-row" id="agents-overlay" role="switch" aria-checked="false"><span class="knob"></span><span>Show agent cursors</span></button>
+    <button type="button" class="studio-menu-row" id="bub" role="switch" aria-checked="true" disabled><span class="knob"></span><span>Show thought bubbles</span></button>
+  </div>
+<div id="look" role="dialog" aria-label="Appearance" hidden>
+  <div class="lg"><b>Theme</b><span><button type="button" data-sds-theme="auto">Auto</button><button type="button" data-sds-theme="light">Light</button><button type="button" data-sds-theme="dark">Dark</button></span></div>
+  <div class="lg"><b>Brand</b><span><button type="button" data-sds-brand="none">None</button><button type="button" data-sds-brand="forest-gold">Forest gold</button><button type="button" data-sds-brand="gjh-classic">GJH classic</button></span></div>
+  <div class="lg"><b>Language</b><span><button type="button" data-sds-lang="en">English</button><button type="button" data-sds-lang="zh-Hans">Simplified Chinese</button><button type="button" data-sds-lang="ms">Malay</button></span></div>
+  <p>Preview only. Sections show a theme or language once they use SDS tokens and <code>data-i18n</code>.</p>
+</div>
+<div id="focuspop" role="dialog" aria-label="Screen focus" hidden>
+  <p class="fh">Work only on what you see</p>
+  <button type="button" class="sw" id="swfocus" role="switch" aria-checked="false"><span class="knob"></span><span class="lbl"><b>Limit my requests to this screen</b><small>Messages you send only involve the agents of the sections on screen.</small></span></button>
+  <button type="button" class="sw" id="swauto" role="switch" aria-checked="false"><span class="knob"></span><span class="lbl"><b>Autopilot</b><small>The team studies this screen, researches the brand when unsure, decides and improves it. Scroll down to move on.</small></span></button>
+  <button type="button" class="sw" id="swsquad" role="switch" aria-checked="false"><span class="knob"></span><span class="lbl"><b>Squad mode</b><small>Several specialists (layout, type, colour, motion, QA and more) work on the same screen at once, each in its own layer file.</small></span></button>
+  <p class="fs" id="fstatus">Off</p>
+  <p class="fn">Zoom in or scroll the preview to focus on fewer sections.</p>
+</div>
+<div id="pickbox" hidden><span></span></div>
+<form id="askpop" role="dialog" aria-label="Ask about this element" hidden>
+  <div class="ah"><i></i><b></b><button type="button" class="ibtn" id="askx" aria-label="Cancel"></button></div>
+  <div class="ae"></div>
+  <textarea id="asktext" aria-label="Your request" rows="3" maxlength="400" placeholder="Describe the change, or ask a question"></textarea>
+  <div class="ab"><button type="submit" id="askchange" class="pri">Ask to change</button><button type="button" id="askwhy">Explain why</button></div>
+</form>
+  <dialog id="setdlg" aria-label="Settings">
+    <header><h2>Settings</h2><button class="ibtn" id="setclose" type="button" data-icon="close" aria-label="Close settings"></button></header>
+    <div id="setroot"></div>
+  </dialog>
+</body>
+</html>

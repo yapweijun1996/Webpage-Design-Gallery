@@ -1,0 +1,9 @@
+{
+  "id": "enquiry",
+  "slots": {
+    "title": "text", "description": "text", "checklistTitle": "text",
+    "checklist": { "items": { "label": "text", "detail": "text" } },
+    "primaryLabel": "text", "primaryUrl": "link", "secondaryLabel": "text", "secondaryUrl": "link"
+  },
+  "tokens": ["canvas", "ink", "muted", "inverse", "soft-line", "line"]
+}

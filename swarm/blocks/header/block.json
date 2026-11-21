@@ -1,0 +1,10 @@
+{
+  "id": "header",
+  "slots": {
+    "logo": "image", "logoAlt": "text", "logoWidth": "dimension", "logoHeight": "dimension",
+    "homeUrl": "link", "navLabel": "text", "menuLabel": "text",
+    "brandsLabel": "text", "brandsUrl": "link", "aboutLabel": "text", "aboutUrl": "link",
+    "contactLabel": "text", "contactUrl": "link", "shopLabel": "text", "shopUrl": "link"
+  },
+  "tokens": ["canvas", "paper", "ink", "inverse", "line"]
+}

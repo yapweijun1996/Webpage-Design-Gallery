@@ -1,0 +1,8 @@
+{
+  "id": "about",
+  "slots": {
+    "title": "text", "description": "text", "linkLabel": "text", "linkUrl": "link",
+    "image": "image", "imageAlt": "text", "imageWidth": "dimension", "imageHeight": "dimension"
+  },
+  "tokens": ["surface", "ink", "inverse", "canvas", "line"]
+}

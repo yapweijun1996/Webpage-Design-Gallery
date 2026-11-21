@@ -1,0 +1,125 @@
+.{{scope}} {
+  background: {{token.canvas}};
+  color: {{token.ink}};
+  padding-block: var(--sds-space-12);
+}
+.{{scope}} h2 {
+  margin: 0 0 var(--sds-space-6);
+  font-family: Georgia, var(--sds-font-sans);
+  font-size: var(--sds-text-3xl);
+  font-weight: var(--sds-weight-regular);
+  line-height: var(--sds-leading-tight);
+  letter-spacing: var(--sds-tracking-tight);
+}
+.{{scope}} .card-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sds-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.{{scope}} .brand, .{{scope}} .directory {
+  min-inline-size: 0;
+  border-radius: var(--sds-radius-md);
+  overflow-wrap: anywhere;
+}
+.{{scope}} .brand {
+  overflow: hidden;
+  border: 1px solid {{token.line}};
+  background: {{token.paper}};
+}
+.{{scope}} .brand article {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+}
+.{{scope}} .brand img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: {{token.surface}};
+}
+.{{scope}} .card-copy {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--sds-space-4) var(--sds-space-6);
+}
+.{{scope}} .card-copy h3 {
+  margin: var(--sds-space-2) 0;
+  font-family: Georgia, var(--sds-font-sans);
+  font-size: var(--sds-text-2xl);
+  font-weight: var(--sds-weight-regular);
+  line-height: var(--sds-leading-tight);
+}
+.{{scope}} .card-copy p { margin: 0; }
+.{{scope}} .category {
+  color: {{token.muted}};
+  font-size: var(--sds-text-xs);
+  font-weight: var(--sds-weight-bold);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.{{scope}} .card-copy a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sds-space-2);
+  min-block-size: var(--sds-tap);
+  margin-block-start: auto;
+  color: {{token.ink}};
+  text-underline-offset: .18em;
+  font-size: var(--sds-text-sm);
+  font-weight: var(--sds-weight-bold);
+}
+.{{scope}} .card-copy a:hover { text-decoration-thickness: 2px; }
+.{{scope}} .directory {
+  display: grid;
+  overflow: hidden;
+  background: {{token.inverse}};
+}
+.{{scope}} .directory a {
+  display: grid;
+  min-block-size: var(--sds-tap);
+  border-radius: var(--sds-radius-md);
+  color: {{token.canvas}};
+  text-decoration: none;
+}
+.{{scope}} .directory-image { display: none; }
+.{{scope}} .directory-copy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sds-space-4);
+  padding: var(--sds-space-6);
+  font-family: Georgia, var(--sds-font-sans);
+  font-size: var(--sds-text-xl);
+  line-height: var(--sds-leading-tight);
+}
+.{{scope}} .directory a:hover { text-decoration: underline; }
+.{{scope}} .directory a:focus-visible { outline-offset: -4px; outline-color: {{token.accent}}; }
+.{{scope}} .directory .arrow { color: {{token.accent}}; }
+
+@media (min-width: 40rem) {
+  .{{scope}} .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 60rem) {
+  .{{scope}} { padding-block: var(--sds-space-16); }
+  .{{scope}} .card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sds-space-6); }
+  .{{scope}} .directory a { grid-template-rows: auto 1fr; }
+  .{{scope}} .directory-image {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    object-position: center 58%;
+  }
+  .{{scope}} .directory-copy {
+    padding: var(--sds-space-8);
+    font-size: var(--sds-text-2xl);
+  }
+}

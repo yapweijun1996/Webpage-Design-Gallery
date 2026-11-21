@@ -19,6 +19,7 @@ const DEFAULTS = Object.freeze({
   channel: Object.freeze({ language: 'zh-Hans', standingRules: '' }),
   research: Object.freeze({ web: true }),
   autopilot: Object.freeze({ maxCyclesPerScreen: 2 }),
+  images: Object.freeze({ provider: 'codex', model: 'gpt-image-1', quality: 'high', size: '1536x1024' }),
 });
 
 const LABELS = Object.freeze({
@@ -32,6 +33,13 @@ const SELECTIONS = {
   model: Object.keys(ALLOWLIST.models),
   effort: ALLOWLIST.efforts,
 };
+const IMAGE_SELECTIONS = {
+  provider: ['codex', 'openai'],
+  quality: ['auto', 'low', 'medium', 'high'],
+  size: ['auto', '1024x1024', '1536x1024', '1024x1536'],
+};
+const IMAGE_MODEL = /^[a-z0-9][a-z0-9.\-]{1,40}$/;
+const IMAGE_KEY_FIELD = /(?:^|[^a-z0-9]|api|openai|access|private|secret|bearer)(?:keys?|tokens?|secrets?|credentials?)(?:$|[^a-z0-9])/i;
 const MAX_RULES_LENGTH = 1000;
 
 function isRecord(value) {
@@ -46,6 +54,25 @@ function ownValue(source, key) {
 
 function stripControls(value) {
   return value.replace(/\p{Cc}/gu, '');
+}
+
+function rejectImageKeys(images, errors) {
+  const pending = [{ source: images, path: 'images' }];
+  const seen = new Set([images]);
+  for (const { source, path } of pending) {
+    for (const name of Object.keys(source)) {
+      const location = `${path}.${name}`;
+      if (IMAGE_KEY_FIELD.test(name.replace(/([a-z0-9])([A-Z])/g, '$1 $2'))) {
+        errors.push({ path: location, message: 'Image credentials must be managed outside settings.' });
+        continue;
+      }
+      const child = source[name];
+      if ((isRecord(child) || Array.isArray(child)) && !seen.has(child)) {
+        seen.add(child);
+        pending.push({ source: child, path: location });
+      }
+    }
+  }
 }
 
 function validate(input) {
@@ -84,6 +111,7 @@ function validate(input) {
   const channel = record(input, 'channel');
   const research = record(input, 'research');
   const autopilot = record(input, 'autopilot');
+  const imageInput = record(input, 'images');
   const version = field(input, 'version', 'version', value => value === DEFAULTS.version,
     `Expected version ${DEFAULTS.version}.`);
   const maxParallel = field(concurrency, 'maxParallel', 'concurrency.maxParallel',
@@ -99,6 +127,14 @@ function validate(input) {
     value => typeof value === 'boolean', 'Expected a boolean.');
   const maxCyclesPerScreen = field(autopilot, 'maxCyclesPerScreen', 'autopilot.maxCyclesPerScreen',
     value => Number.isInteger(value) && value >= 1 && value <= 5, 'Expected an integer from 1 to 5.');
+  const images = { ...DEFAULTS.images };
+  for (const [key, allowed] of Object.entries(IMAGE_SELECTIONS)) {
+    images[key] = field(imageInput, key, `images.${key}`, value => allowed.includes(value),
+      `Expected one of ${allowed.join(', ')}.`) ?? images[key];
+  }
+  images.model = field(imageInput, 'model', 'images.model', value => typeof value === 'string' && IMAGE_MODEL.test(value),
+    'Expected 2 to 41 lowercase letters, digits, periods or hyphens, starting with a letter or digit.') ?? images.model;
+  rejectImageKeys(imageInput, errors);
 
   const value = {
     version: version ?? DEFAULTS.version,
@@ -116,6 +152,7 @@ function validate(input) {
     },
     research: { web: web ?? DEFAULTS.research.web },
     autopilot: { maxCyclesPerScreen: maxCyclesPerScreen ?? DEFAULTS.autopilot.maxCyclesPerScreen },
+    images,
   };
   return { ok: errors.length === 0, errors, value };
 }

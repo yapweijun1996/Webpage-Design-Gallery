@@ -1,0 +1,9 @@
+{
+  "id": "footer",
+  "slots": {
+    "title": "text", "address": "text", "navLabel": "text",
+    "links": { "items": { "label": "text", "url": "link" } },
+    "disclosure": "text", "imageCredit": "text"
+  },
+  "tokens": ["inverse", "canvas", "surface", "accent", "inverse-line"]
+}

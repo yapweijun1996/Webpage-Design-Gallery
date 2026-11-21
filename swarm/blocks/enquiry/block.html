@@ -1,0 +1,23 @@
+<section class="{{scope}}" id="{{id}}" aria-labelledby="{{id}}-title">
+  <div class="sds-container enquiry-layout">
+    <div class="enquiry-copy">
+      <h2 id="{{id}}-title" data-i18n="{{id}}.title">{{title}}</h2>
+      <p data-i18n="{{id}}.description">{{description}}</p>
+      <div class="sds-cluster actions">
+        <a class="sds-btn primary" href="{{primaryUrl}}" data-i18n="{{id}}.primary">{{primaryLabel}}</a>
+        <a class="sds-btn secondary" href="{{secondaryUrl}}" data-i18n="{{id}}.secondary">{{secondaryLabel}}</a>
+      </div>
+    </div>
+    <div class="checklist">
+      <h3 data-i18n="{{id}}.checklist">{{checklistTitle}}</h3>
+      <dl>
+        {{#checklist}}
+        <div>
+          <dt data-i18n="{{id}}.item-{{index}}-label">{{label}}</dt>
+          <dd data-i18n="{{id}}.item-{{index}}-detail">{{detail}}</dd>
+        </div>
+        {{/checklist}}
+      </dl>
+    </div>
+  </div>
+</section>

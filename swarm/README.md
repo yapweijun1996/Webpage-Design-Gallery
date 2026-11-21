@@ -65,6 +65,22 @@ Command errors exit 1. Use `--port` to override the CLI port.
 | `SWARM_EFFORT` | `low` | Codex reasoning effort. |
 | `SWARM_CODEX` | `codex` | Agent executable, including the test hook. |
 
+## Settings workspace
+
+Open **Settings** from the viewer to switch between Roles, Research, Autopilot,
+Team, and Advanced. The Images section appears when the server supports image
+generation settings.
+
+Team shows workers' reported status, runner, and assigned section. Search by
+worker or section, filter by runner or status, or select workers to change their
+runner in one draft. Select a worker to edit their settings and inspect the
+effective runner, model, and effort. On a phone, use **Workers** to return to
+the roster.
+
+**Save team** applies the roster draft when the team is idle. **Save settings**
+applies the general settings draft separately. Saved changes apply from the
+next agent turn. Switching sections keeps both drafts available.
+
 ## Session usage
 
 The **Session usage** bar totals tokens reported by agent processes since the

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swarm Design Studio · Compare demo</title>
+<script>
+  const designSystem = location.pathname === '/studio-compare-demo.html' ? '/ds/' : '../design-system/';
+  for (const stylesheet of ['tokens.css', 'themes.css', 'components.css']) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = designSystem + stylesheet;
+    document.head.append(link);
+  }
+</script>
+<link rel="stylesheet" href="studio-compare.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--sds-color-bg);
+    color: var(--sds-color-text);
+    font: var(--sds-text-base) / var(--sds-leading-body) var(--sds-font-sans);
+  }
+  main { padding-block: var(--sds-space-4) var(--sds-space-8); }
+  .demo-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sds-space-2);
+    margin-block-end: var(--sds-space-4);
+  }
+  .demo-header h1 {
+    margin: 0;
+    font-size: var(--sds-text-lg);
+    line-height: var(--sds-leading-tight);
+  }
+</style>
+<script src="studio-compare.js" defer></script>
+</head>
+<body>
+<main class="sds-container">
+  <header class="demo-header">
+    <h1>Swarm Design Studio · Compare demo</h1>
+    <div class="sds-cluster">
+      <button class="sds-btn sds-btn--sm sds-btn--secondary" id="sample" type="button">Use sample image</button>
+      <button class="sds-btn sds-btn--sm sds-btn--ghost" id="theme" type="button">Light theme</button>
+    </div>
+  </header>
+  <div id="compare"></div>
+</main>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const host = document.getElementById('compare');
+    const sample = document.getElementById('sample');
+    const theme = document.getElementById('theme');
+    const params = new URLSearchParams(location.search);
+    const svgNS = 'http://www.w3.org/2000/svg';
+
+    function changeTheme(value) {
+      document.documentElement.dataset.theme = value;
+      theme.textContent = value === 'dark' ? 'Light theme' : 'Dark theme';
+    }
+    changeTheme(params.get('theme') === 'light' ? 'light' : 'dark');
+    theme.addEventListener('click', () => changeTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+
+    function design(doc, live) {
+      const svg = doc.createElementNS(svgNS, 'svg');
+      svg.setAttribute('viewBox', '0 0 960 540');
+      svg.setAttribute('width', '960');
+      svg.setAttribute('height', '540');
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Fieldnote hiking journal landing page');
+
+      function draw(tag, attrs, value) {
+        const node = doc.createElementNS(svgNS, tag);
+        for (const [key, val] of Object.entries(attrs)) node.setAttribute(key, val);
+        if (value) node.textContent = value;
+        svg.append(node);
+      }
+      function rect(x, y, width, height, fill, rx = 0) {
+        draw('rect', { x, y, width, height, fill, rx });
+      }
+      function txt(x, y, value, size, fill, font = 'sans-serif', weight = 400) {
+        draw('text', { x, y, fill, 'font-size': size, 'font-family': font, 'font-weight': weight }, value);
+      }
+      const paper = '#f7f1df';
+      const ink = '#18352d';
+      rect(0, 0, 960, 540, paper);
+      txt(48, 48, 'Fieldnote', 27, ink, 'Georgia', 700);
+      txt(691, 47, 'Trail guides', 14, ink);
+      txt(791, 47, 'Journal', 14, ink);
+      txt(864, 47, 'About', 14, ink);
+      rect(0, 76, 960, 330, live ? '#25483e' : '#1d4037');
+      draw('circle', { cx: live ? 753 : 734, cy: 173, r: 52, fill: '#e7b767' });
+      draw('path', { d: 'M412 406 573 245l58 41 77-86 79 72 70-54 103 104v84Z', fill: '#4c7667' });
+      draw('path', { d: 'M493 406 627 309l83 16 74-49 92 40 84-32v122Z', fill: '#335b50' });
+      draw('path', { d: 'M530 406 640 374l94-17 34-31 82 13 110-16v83Z', fill: '#254c42' });
+      draw('path', {
+        d: 'M695 406c17-16 63-19 83-26s6-12-13-16c-15-4 34-13 73-16',
+        fill: 'none', stroke: '#d0a65f', 'stroke-width': '2'
+      });
+      txt(48, 145, 'WALKING JOURNAL', 14, '#f0bf75', 'sans-serif', 700);
+      const headingY = live ? 224 : 214;
+      txt(48, headingY, 'Take the', 63, paper, 'Georgia');
+      txt(48, headingY + 65, 'long way.', 63, paper, 'Georgia');
+      txt(50, headingY + 104, 'Quiet trails and field notes from the road.', 17, paper);
+      rect(48, 341, 137, 40, '#e7b767', 4);
+      txt(63, 366, 'Browse the trails', 14, ink, 'sans-serif', 700);
+      txt(48, 452, 'From the journal', 28, ink, 'Georgia', 700);
+      draw('path', { d: 'M48 471h864', stroke: '#b8c0ab' });
+      txt(48, 510, '01  /  Along the ridgeline', 17, ink, 'sans-serif', 700);
+      txt(380, 510, '02  /  A slower spring', 17, ink, 'sans-serif', 700);
+      txt(685, 510, '03  /  What we carry', 17, ink, 'sans-serif', 700);
+      return svg;
+    }
+
+    host.addEventListener('load', event => {
+      if (!(event.target instanceof HTMLIFrameElement) || event.target.getAttribute('src') !== 'about:blank') return;
+      const doc = event.target.contentDocument;
+      if (!doc) return;
+      doc.documentElement.lang = 'en';
+      doc.title = 'Fieldnote preview';
+      doc.body.style.cssText = 'margin: 0; background: #f7f1df; overflow: hidden;';
+      const main = doc.createElement('main');
+      const svg = design(doc, true);
+      svg.style.cssText = 'display: block; width: 100%; height: auto;';
+      main.append(svg);
+      doc.body.replaceChildren(main);
+    }, true);
+
+    StudioCompare.mount(host, { getActiveSrc: () => 'about:blank' });
+
+    async function useSample() {
+      sample.disabled = true;
+      const artwork = new XMLSerializer().serializeToString(design(document, false));
+      const src = URL.createObjectURL(new Blob([artwork], { type: 'image/svg+xml' }));
+      try {
+        const image = new Image();
+        image.src = src;
+        await image.decode();
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        canvas.getContext('2d').drawImage(image, 0, 0);
+        const png = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const files = new DataTransfer();
+        files.items.add(new File([png], 'fieldnote-reference.png', { type: 'image/png' }));
+        const picker = host.querySelector('input[type="file"]');
+        picker.files = files.files;
+        picker.dispatchEvent(new Event('change'));
+      } finally {
+        URL.revokeObjectURL(src);
+        sample.disabled = false;
+      }
+    }
+
+    sample.addEventListener('click', useSample);
+    const mode = params.get('mode');
+    for (const radio of host.querySelectorAll('input[type="radio"]')) {
+      if (radio.value === mode) radio.click();
+    }
+    if (params.get('sample') === '1') useSample();
+  });
+</script>
+</body>
+</html>

@@ -1,16 +1,17 @@
 .swarm-settings {
-  --ss-bg: #13161c;
+  --ss-bg: #111318;
+  --ss-rail: #14171e;
   --ss-text: #e8eaf0;
-  --ss-border: #262b36;
-  --ss-surface: #171a21;
+  --ss-border: #303744;
+  --ss-surface: #191d25;
   --ss-muted: #aab0bf;
   --ss-line: #3a4356;
   --ss-accent: #8ab4ff;
   --ss-selection: #23324b;
   --ss-error: #ffaaa0;
-  --ss-team-accent: #80dfc2;
   --ss-control-height: 40px;
-  --ss-content-inset: max(16px, calc((100% - 960px) / 2));
+  --ss-content-inset: max(30px, calc((100% - 1310px) / 2));
+  --ss-rail-width: 208px;
   --ss-select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='none' stroke='%23aab0bf' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 4.5 3 3 3-3'/%3E%3C/svg%3E");
   display: flex;
   flex-direction: column;
@@ -53,55 +54,87 @@
   min-inline-size: 0;
 }
 
-.swarm-settings .ss-header {
-  flex: none;
+.swarm-settings .ss-layout {
   display: grid;
-  gap: 8px;
-  padding: 16px var(--ss-content-inset) 8px;
-  border-block-end: 1px solid var(--ss-border);
-  background: var(--ss-surface);
+  grid-template-columns: var(--ss-rail-width) minmax(0, 1fr);
+  flex: 1;
+  min-block-size: 0;
+}
+
+.swarm-settings .ss-header {
+  min-inline-size: 0;
+  padding: 24px 14px;
+  border-inline-end: 1px solid var(--ss-border);
+  background: var(--ss-rail);
 }
 
 .swarm-settings .ss-header h2 {
-  justify-self: start;
-  font-size: 20px;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
+  font-size: 18px;
+  margin-block-end: 12px;
 }
 
 .swarm-settings .ss-summary {
   color: var(--ss-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .swarm-settings .ss-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.swarm-settings .ss-nav a {
   display: grid;
-  place-items: center;
-  min-block-size: 32px;
-  padding-inline: 8px;
-  border: 1px solid var(--ss-border);
-  border-radius: 8px;
-  color: var(--ss-muted);
-  font-size: 12px;
-  font-weight: 650;
-  text-decoration: none;
+  gap: 5px;
 }
 
-.swarm-settings .ss-nav a:hover {
+.swarm-settings .ss-nav-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: var(--ss-control-height);
+  min-inline-size: 0;
+  padding-inline: 12px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ss-muted);
+  font: 650 13px/1.3 system-ui, sans-serif;
+  text-align: start;
+  cursor: pointer;
+}
+
+.swarm-settings .ss-nav-button svg {
+  flex: none;
+  inline-size: 16px;
+  block-size: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.swarm-settings .ss-nav-button:hover {
   color: var(--ss-text);
   background: var(--ss-bg);
 }
 
-.swarm-settings .ss-nav a[aria-current] {
-  border-color: #5477ab;
+.swarm-settings .ss-nav-button[aria-current] {
+  border-color: #3d5c87;
   background: var(--ss-selection);
   color: var(--ss-text);
+}
+
+.swarm-settings .ss-nav-button[data-pending]::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 6px;
+  inset-inline-end: 4px;
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: 50%;
+  background: #f3c781;
+}
+
+#team-settings .swarm-settings .ss-layout {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .swarm-settings .ss-form {
@@ -112,11 +145,13 @@
 }
 
 .swarm-settings .ss-body {
+  /* Keep visually hidden controls inside the scrolling panel. */
+  position: relative;
   flex: 1 1 auto;
   min-block-size: 0;
   overflow: auto;
   overscroll-behavior: contain;
-  padding: 16px var(--ss-content-inset);
+  padding: 27px var(--ss-content-inset) 32px;
   scroll-padding-block: 16px;
   scrollbar-width: thin;
 }
@@ -136,13 +171,14 @@
   display: grid;
   gap: 8px;
   min-inline-size: 0;
+  max-inline-size: 760px;
 }
 
 .swarm-settings .ss-group-title {
   justify-self: start;
-  font-size: 17px;
-  line-height: 1.3;
-  letter-spacing: -0.015em;
+  font-size: 30px;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
 }
 
 .swarm-settings .ss-card {
@@ -364,6 +400,48 @@
   padding-block: 16px;
 }
 
+.swarm-settings .ss-images-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.swarm-settings .ss-images-controls > .ss-field:nth-child(-n + 2) {
+  grid-column: 1 / -1;
+}
+
+.swarm-settings .ss-images-controls .ss-error {
+  margin-block-start: 0;
+}
+
+.swarm-settings .ss-image-key {
+  display: grid;
+  gap: 8px;
+}
+
+.swarm-settings .ss-image-key > .ss-help {
+  margin-block-start: 0;
+}
+
+.swarm-settings .ss-image-key-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swarm-settings :is(.ss-image-key-status, .ss-image-key-feedback) {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.swarm-settings .ss-image-key-feedback:empty {
+  position: absolute;
+}
+
+.swarm-settings .ss-image-key-feedback[data-error] {
+  color: var(--ss-error);
+}
+
 .swarm-settings .ss-switch-label {
   display: flex;
   align-items: center;
@@ -468,7 +546,7 @@
   stroke-linejoin: round;
 }
 
-.swarm-settings :where(.ss-button, input[type="number"], .ss-team input, select, textarea) {
+.swarm-settings :where(.ss-button, input[type="number"], .ss-team input, .ss-images-controls input, .ss-image-key input, select, textarea) {
   min-inline-size: 0;
   min-block-size: var(--ss-control-height);
   border: 1px solid var(--ss-line);
@@ -477,11 +555,11 @@
   font: inherit;
 }
 
-.swarm-settings :is(input[type="number"], .ss-team input, select, textarea) {
+.swarm-settings :is(input[type="number"], .ss-team input, .ss-images-controls input, .ss-image-key input, select, textarea) {
   background-color: var(--ss-bg);
 }
 
-.swarm-settings :where(.ss-team input, select, textarea) {
+.swarm-settings :where(.ss-team input, .ss-images-controls input, .ss-image-key input, select, textarea) {
   inline-size: 100%;
   padding: 8px;
 }
@@ -573,19 +651,21 @@
 }
 
 .swarm-settings :is(.ss-footer, .ss-team-bar) {
-  padding: 8px var(--ss-content-inset);
+  padding: 11px var(--ss-content-inset);
   border-block-start: 1px solid var(--ss-border);
-  background: var(--ss-surface);
+  background: var(--ss-rail);
 }
 
 .swarm-settings .ss-footer .ss-actions {
-  margin-block-end: 8px;
+  margin: 0;
 }
 
 .swarm-settings .ss-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
 }
 
 .swarm-settings .ss-action-buttons {
@@ -601,132 +681,233 @@
   font-weight: 650;
 }
 
-.swarm-settings .ss-team,
-.swarm-settings .ss-team-list,
-.swarm-settings .ss-team-worker,
-.swarm-settings .ss-team-fields {
+.swarm-settings .ss-action-buttons {
+  margin-inline-start: auto;
+  flex-wrap: wrap;
+}
+
+.swarm-settings .ss-action-state > .ss-help {
+  margin-block-start: 2px;
+}
+
+.swarm-settings [data-pending] .ss-state {
+  color: #f3c781;
+}
+
+.swarm-settings .ss-button.ss-discard {
+  background: transparent;
+  border-color: transparent;
+}
+
+.swarm-settings .ss-error-sections {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.swarm-settings .ss-error-sections:not(:empty) {
+  margin-block-end: 4px;
+}
+
+.swarm-settings :is(.ss-team, .ss-worker-workspace, .ss-team-list, .ss-team-worker, .ss-team-fields) {
   display: grid;
   min-inline-size: 0;
-  gap: 8px;
+  gap: 14px;
 }
 
-.swarm-settings .ss-team {
-  --ss-accent: var(--ss-team-accent);
-  --ss-selection: #18362f;
+.swarm-settings .ss-team-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-end: 7px;
 }
 
-.swarm-settings .ss-team-bar {
-  --ss-accent: var(--ss-team-accent);
-  border-block-start-color: #3d665b;
-  background: var(--ss-surface);
-}
-
-.swarm-settings .ss-team-bar .ss-primary:not(:disabled):hover {
-  background: #a4efd9;
-}
+.swarm-settings .ss-team-intro .ss-summary { margin-block-start: 6px; }
+.swarm-settings .ss-team-intro button { flex-shrink: 0; }
 
 .swarm-settings .ss-team-notice {
-  padding: 8px;
-  border: 1px solid #3d665b;
+  padding: 10px 12px;
+  border: 1px solid #7b633b;
   border-radius: 8px;
-  font-size: 12px;
-  color: var(--ss-team-accent);
+  background: #2b241b;
+  color: #f3d4a2;
 }
 
 .swarm-settings :is(.ss-team-notice, .ss-notice, .ss-team-add-actions .ss-help):empty {
   display: none;
 }
 
-.swarm-settings .ss-team-worker {
-  padding: 16px;
-}
-
-.swarm-settings .ss-team-identity {
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
+.swarm-settings .ss-worker-workspace {
+  grid-template-columns: minmax(0, 1.28fr) minmax(300px, 1fr);
   align-items: start;
+  gap: 18px;
+}
+
+.swarm-settings .ss-worker-roster {
+  padding: 0;
+}
+
+.swarm-settings .ss-worker-roster-header,
+.swarm-settings .ss-team-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
-}
-
-.swarm-settings .ss-team-identity > :is(.ss-team-dot, .ss-team-section) {
-  margin-block-start: calc((var(--ss-control-height) - var(--ss-identity-height)) / 2);
-}
-
-.swarm-settings .ss-team-section {
-  --ss-identity-height: 24px;
   min-inline-size: 0;
-  max-inline-size: min(26cqi, 208px);
-  min-block-size: var(--ss-identity-height);
-  padding-inline: 8px;
-  border: 1px solid var(--ss-border);
-  border-radius: 6px;
-  background: var(--ss-bg);
+}
+
+.swarm-settings .ss-worker-roster-header {
+  padding: 15px 17px;
+  border-block-end: 1px solid var(--ss-border);
+}
+
+.swarm-settings :is(.ss-worker-roster-header h3, .ss-worker-roster-header h4, .ss-worker-title) {
+  font-size: 17px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.swarm-settings .ss-worker-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  padding: 11px 12px;
+}
+
+.swarm-settings .ss-worker-bulk {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--ss-selection);
+}
+
+.swarm-settings :is(.ss-worker-bulk, .ss-worker-filters) select { inline-size: auto; max-inline-size: 100%; }
+
+.swarm-settings .ss-worker-rows { list-style: none; margin: 0; padding: 0; }
+
+.swarm-settings .ss-worker-row {
+  display: grid;
+  grid-template-columns: 23px minmax(0, 1fr) minmax(74px, .53fr) minmax(78px, .43fr);
+  align-items: center;
+  gap: 9px;
+  min-block-size: 44px;
+  padding-inline: 13px;
+  border-block-start: 1px solid var(--ss-border);
+}
+
+.swarm-settings .ss-worker-columns {
+  min-block-size: 36px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .065em;
+  text-transform: uppercase;
   color: var(--ss-muted);
-  font: 600 12px/22px ui-monospace, monospace;
+}
+
+.swarm-settings .ss-worker-row[data-selected] {
+  box-shadow: inset 3px 0 var(--ss-accent);
+  background: var(--ss-selection);
+}
+
+.swarm-settings .ss-worker-row:last-child { border-radius: 0 0 10px 10px; }
+
+.swarm-settings .ss-worker-open {
+  display: grid;
+  justify-items: start;
+  gap: 1px;
+  min-inline-size: 0;
+  min-block-size: 42px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ss-text);
+  text-align: start;
+  font: inherit;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.swarm-settings .ss-worker-open > *,
+.swarm-settings .ss-worker-runner {
+  max-inline-size: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.swarm-settings .ss-team-section:has(input) {
-  display: flex;
-  align-items: center;
+.swarm-settings .ss-worker-check {
+  min-block-size: 34px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
 }
 
-.swarm-settings .ss-team-section .ss-team-section-placeholder {
-  min-block-size: 0;
+.swarm-settings .ss-worker-check input[type=checkbox] {
+  inline-size: 16px;
+  block-size: 16px;
+  margin: 0;
   padding: 0;
-  border: 0;
-  font: inherit;
+  min-block-size: 0;
+  accent-color: var(--ss-accent);
 }
 
-.swarm-settings .ss-team-name label,
+.swarm-settings :is(.ss-worker-scope, .ss-worker-runner, .ss-worker-status, .ss-worker-editor-scope) {
+  color: var(--ss-muted);
+  font-size: 12px;
+}
+
+.swarm-settings .ss-worker-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  overflow-wrap: anywhere;
+}
+
+.swarm-settings .ss-worker-status::before {
+  content: '';
+  flex: none;
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.swarm-settings .ss-worker-status[data-status="waiting"] { color: #87d8b7; }
+.swarm-settings .ss-worker-status:is([data-status="queued"], [data-status="retrying"]) { color: #f3c781; }
+.swarm-settings .ss-worker-status[data-status="failed"] { color: var(--ss-error); }
+.swarm-settings .ss-worker-status:is([data-status="working"], [data-status="draft"]) { color: var(--ss-accent); }
+
+.swarm-settings .ss-worker-empty { padding: 16px; color: var(--ss-muted); }
+
+.swarm-settings .ss-team-worker { padding: 16px; }
+.swarm-settings .ss-team-identity { margin: -16px -16px 2px; padding: 15px 17px; border-block-end: 1px solid var(--ss-border); }
+.swarm-settings .ss-worker-editor-scope { color: var(--ss-accent); font-family: ui-monospace, monospace; overflow-wrap: anywhere; }
+.swarm-settings .ss-worker-effective { padding: 10px 12px; border: 1px solid var(--ss-border); border-radius: 8px; background: #151a23; }
+.swarm-settings .ss-worker-effective strong { font-size: 13px; }
+.swarm-settings .ss-worker-effective .ss-help { margin-block-start: 3px; }
+.swarm-settings .ss-button.ss-worker-back { display: none; }
+
 .swarm-settings .ss-team-action-link:not(:focus) {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;
-  padding: 0;
   overflow: hidden;
   clip-path: inset(50%);
 }
 
-.swarm-settings .ss-team-action-link {
+.swarm-settings .ss-team-action-link { justify-self: start; color: var(--ss-accent); }
+
+.swarm-settings .ss-button.ss-team-remove {
   justify-self: start;
-  color: var(--ss-team-accent);
-}
-
-.swarm-settings .ss-team-action-link:focus {
-  display: inline-flex;
-  align-items: center;
-  min-block-size: var(--ss-control-height);
-}
-
-.swarm-settings .ss-team-remove {
-  inline-size: var(--ss-control-height);
-  padding: 0;
-  border-color: var(--ss-border);
-  background: var(--ss-bg);
-  color: var(--ss-muted);
-}
-
-.swarm-settings .ss-team-remove:not(:disabled):hover,
-.swarm-settings .ss-team-remove[aria-expanded="true"] {
   color: var(--ss-error);
+  border-color: transparent;
+  background: transparent;
 }
 
-.swarm-settings .ss-team-dot {
-  --ss-identity-height: 8px;
-  inline-size: var(--ss-identity-height);
-  block-size: var(--ss-identity-height);
-  border-radius: 50%;
-  background: var(--ss-muted);
-}
-
-.swarm-settings .ss-team-new {
-  justify-self: start;
-  color: var(--ss-accent);
-  font-size: 12px;
-}
+.swarm-settings .ss-team-new { color: var(--ss-accent); font-size: 12px; }
 
 .swarm-settings .ss-team-confirm {
   display: grid;
@@ -739,21 +920,16 @@
   overflow-wrap: anywhere;
 }
 
-.swarm-settings .ss-team-card-error {
-  margin-block-start: 0;
-}
-
-.swarm-settings .ss-team-overrides {
-  display: grid;
+.swarm-settings .ss-team-fields {
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  align-items: start;
+  gap: 13px 12px;
 }
 
-.swarm-settings .ss-team-fields label {
-  color: var(--ss-muted);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.swarm-settings .ss-team-overrides { display: contents; }
+
+.swarm-settings :is(.ss-team-lane, .ss-team-add-section, .ss-team-add-actions, .ss-team-fields > .ss-field:has(textarea)) {
+  grid-column: 1 / -1;
 }
 
 .swarm-settings .ss-team-textarea {
@@ -772,7 +948,7 @@
 }
 
 .swarm-settings .ss-team textarea {
-  min-block-size: 56px;
+  min-block-size: 74px;
   border: 0;
   background: transparent;
   outline: none;
@@ -807,33 +983,58 @@
     --ss-control-height: 44px;
   }
 
-  .swarm-settings .ss-nav a {
+  .swarm-settings .ss-nav-button {
     min-block-size: 44px;
   }
 
-  .swarm-settings :is(.ss-team input, .ss-team select) {
+  .swarm-settings :is(.ss-team input, .ss-team select, .ss-images-controls input, .ss-images-controls select, .ss-image-key input) {
     font-size: 16px;
   }
 }
 
-@container (width < 480px) {
-  .swarm-settings :is(.ss-header, .ss-body, .ss-footer, .ss-team-bar) {
-    padding-inline: 8px;
-  }
+@container (width <= 1050px) {
+  .swarm-settings .ss-layout { grid-template-columns: 174px minmax(0, 1fr); }
+  .swarm-settings :is(.ss-body, .ss-footer, .ss-team-bar) { padding-inline: 20px; }
+  .swarm-settings .ss-worker-workspace { gap: 12px; }
 }
 
-@container (min-width: 480px) {
-  .swarm-settings .ss-team-fields {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-  }
+@container (width <= 940px) {
+  .swarm-settings .ss-layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .swarm-settings .ss-header { padding: 8px 16px; border-inline-end: 0; border-block-end: 1px solid var(--ss-border); }
+  .swarm-settings .ss-nav { display: flex; flex-wrap: wrap; }
+}
 
-  .swarm-settings :is(.ss-team-overrides, .ss-team-lane, .ss-team-add-section, .ss-team-add-actions, .ss-team-fields > .ss-field:has(textarea)) {
-    grid-column: 1 / -1;
-  }
+@container (width <= 735px) {
+  .swarm-settings :is(.ss-body, .ss-footer, .ss-team-bar) { padding-inline: 14px; }
+  .swarm-settings .ss-body { padding-block-start: 19px; }
+  .swarm-settings .ss-group-title { font-size: 25px; }
+  .swarm-settings .ss-worker-workspace { grid-template-columns: minmax(0, 1fr); }
+  .swarm-settings .ss-worker-workspace:not([data-editing]) .ss-team-list,
+  .swarm-settings .ss-worker-workspace[data-editing] .ss-worker-roster { display: none; }
+  .swarm-settings .ss-button.ss-worker-back { display: inline-flex; justify-self: start; border-color: transparent; background: transparent; padding-inline: 8px; }
+}
+
+@container (width <= 480px) {
+  .swarm-settings .ss-header { padding-inline: 8px; }
+  .swarm-settings .ss-nav { gap: 2px; }
+  .swarm-settings .ss-nav-button { padding-inline: 6px; font-size: 12px; }
+  .swarm-settings .ss-nav-button svg { display: none; }
+  .swarm-settings .ss-team-intro .ss-button { padding-inline: 8px; }
+  .swarm-settings .ss-worker-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .swarm-settings .ss-worker-filters input { grid-column: 1 / -1; }
+  .swarm-settings .ss-worker-row { grid-template-columns: 21px minmax(0, 1fr) 65px 64px; gap: 6px; padding-inline: 9px; }
+  .swarm-settings :is(.ss-worker-runner, .ss-worker-status) { font-size: 11px; }
 }
 
 @container (min-width: 640px) {
+  .swarm-settings .ss-images-controls {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.5fr) repeat(2, minmax(0, 1fr));
+  }
+
+  .swarm-settings .ss-images-controls > .ss-field:nth-child(-n + 2) {
+    grid-column: auto;
+  }
+
   .swarm-settings .ss-defaults,
   .swarm-settings .ss-runners {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -843,12 +1044,11 @@
     grid-column: 1 / -1;
   }
 
-  .swarm-settings .ss-team form .ss-team-fields,
   .swarm-settings .ss-role {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .swarm-settings :is(.ss-team-add-section, .ss-role .ss-error) {
+  .swarm-settings .ss-role .ss-error {
     grid-column: auto;
   }
 

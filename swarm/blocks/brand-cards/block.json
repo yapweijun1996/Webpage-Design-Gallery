@@ -1,0 +1,14 @@
+{
+  "id": "brand-cards",
+  "slots": {
+    "title": "text", "directoryLabel": "text", "directoryUrl": "link",
+    "directoryImage": "image", "directoryWidth": "dimension", "directoryHeight": "dimension",
+    "cards": {
+      "items": {
+        "title": "text", "category": "text", "description": "text", "label": "text", "url": "link",
+        "image": "image", "imageAlt": "text", "width": "dimension", "height": "dimension"
+      }
+    }
+  },
+  "tokens": ["canvas", "surface", "paper", "ink", "muted", "line", "inverse", "accent"]
+}

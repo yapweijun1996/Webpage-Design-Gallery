@@ -1,0 +1,21 @@
+<footer class="{{scope}}" id="{{id}}" aria-labelledby="{{id}}-title">
+  <div class="sds-container">
+    <div class="footer-main">
+      <div>
+        <h2 id="{{id}}-title" data-i18n="{{id}}.title">{{title}}</h2>
+        <address data-i18n="{{id}}.address">{{address}}</address>
+      </div>
+      <nav aria-label="{{navLabel}}" data-i18n-attr="aria-label:{{id}}.nav">
+        <ul role="list">
+          {{#links}}
+          <li><a href="{{url}}" data-i18n="{{id}}.link-{{index}}">{{label}}</a></li>
+          {{/links}}
+        </ul>
+      </nav>
+    </div>
+    <div class="footer-notes">
+      <p data-i18n="{{id}}.disclosure">{{disclosure}}</p>
+      <p data-i18n="{{id}}.credit">{{imageCredit}}</p>
+    </div>
+  </div>
+</footer>

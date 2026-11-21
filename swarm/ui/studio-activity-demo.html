@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Swarm Studio Activity</title>
+  <link rel="stylesheet" href="/ds/tokens.css">
+  <link rel="stylesheet" href="/ds/themes.css">
+  <link rel="stylesheet" href="/ds/components.css">
+  <link rel="stylesheet" href="./studio-activity.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-block-size: 100dvh;
+      background: var(--sds-color-bg);
+      color: var(--sds-color-text);
+      font: var(--sds-text-sm) / var(--sds-leading-body) var(--sds-font-sans);
+    }
+    main {
+      inline-size: min(100%, 960px);
+      margin-inline: auto;
+      padding: var(--sds-space-4);
+    }
+    header { justify-content: space-between; margin-block-end: var(--sds-space-4); }
+    h1 { margin: 0; font-size: var(--sds-text-xl); line-height: var(--sds-leading-tight); }
+    .demo-grid { display: grid; gap: var(--sds-space-4); }
+    .demo-column { display: grid; align-content: start; gap: var(--sds-space-4); min-inline-size: 0; }
+    #demo-selection { margin: 0; color: var(--sds-color-text-muted); }
+    #activity .studio-activity-list { max-block-size: 316px; overflow-y: auto; padding-inline-end: var(--sds-space-1); }
+    @media (min-width: 720px) {
+      main { padding: var(--sds-space-6); }
+      .demo-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="sds-cluster">
+      <h1>Swarm Studio Activity</h1>
+      <div class="sds-cluster">
+        <button type="button" class="sds-btn sds-btn--secondary sds-btn--sm" id="replay">Replay</button>
+        <div class="sds-cluster" role="group" aria-label="Theme">
+          <button type="button" class="sds-chip" data-sds-theme="dark">Dark</button>
+          <button type="button" class="sds-chip" data-sds-theme="light">Light</button>
+        </div>
+      </div>
+    </header>
+    <div class="demo-grid">
+      <div class="demo-column">
+        <div id="progress"></div>
+        <div id="team"></div>
+        <p id="demo-selection" role="status" hidden></p>
+      </div>
+      <div class="demo-column">
+        <div id="activity"></div>
+        <div id="artifacts"></div>
+      </div>
+    </div>
+  </main>
+  <script src="/ds/runtime.js"></script>
+  <script src="./studio-activity.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      const theme = new URLSearchParams(location.search).get('theme') || SDS.theme.get();
+      SDS.theme.set(theme === 'light' ? 'light' : 'dark');
+
+      const byId = id => document.getElementById(id);
+      const selection = byId('demo-selection');
+      const replay = byId('replay');
+      const roster = [
+        ['81', 'Layout & Structure Engineer', '#38bdf8'],
+        ['85', 'Image Generator', '#34d399'],
+        ['86', 'Icon & SVG Designer', '#fb923c'],
+        ['89', 'Responsive & Accessibility QA', '#22d3ee'],
+        ['90', 'Brand Researcher', '#c084fc'],
+        ['00', 'Manager', '#f4f4f5']
+      ];
+      const agents = Object.fromEntries(roster.map(([id, title, color]) => [id,
+        { id, name: title, title, color, section: '', lane: '', status: 'queued', thought: '', action: '', target: id }
+      ]));
+
+      function sample(origin, scale = 1000) {
+        let messageId = 0;
+        const time = seconds => origin + seconds * scale;
+        const event = (seconds, type, data) => ({ type, ...data, ts: time(seconds) });
+        const chat = (seconds, from, kind, text, to = [], extra = {}) => event(seconds, 'chat', {
+          msg: { id: ++messageId, ts: time(seconds), from, to, kind, text, ...extra }
+        });
+        const notice = (seconds, text) => chat(seconds, 'system', 'system', text);
+        const status = (seconds, id, status) => event(seconds, 'status', { id, status });
+        const thought = (seconds, id, text) => event(seconds, 'thought', { id, text });
+        return [
+          chat(0, 'owner', 'msg', '[Focus: 02 hero] Refresh the hero image and check that the new headline fits on phones.', [],
+            { scope: { sections: ['02'], elements: [] } }),
+          event(1, 'phase', { phase: 'running' }),
+          event(1, 'busy', { busy: true }),
+          notice(2, `Squad on 02-hero: ${roster.filter(([id]) => id !== '00').map(([, title]) => title).join(', ')}`),
+          notice(3, 'Squad wave 1/3: Brand Researcher, Image Generator, Icon & SVG Designer'),
+          status(4, '90', 'working Work'),
+          status(4, '85', 'working Work'),
+          status(5, '86', 'working Work'),
+          thought(9, '90', 'I found the brand’s approved palette and image direction.'),
+          chat(14, '90', 'done', 'Recorded brand references and image guidance in research.md.'),
+          status(15, '90', 'waiting'),
+          status(17, '86', 'failed'),
+          notice(18, 'Agent 86 (Icon & SVG Designer) failed in squad wave 1'),
+          chat(22, '85', 'done', 'Saved the new image to assets/generated/02-hero-studio.webp.'),
+          status(23, '85', 'waiting'),
+          notice(24, 'Squad wave 2/3: Layout & Structure Engineer'),
+          status(25, '81', 'working Work'),
+          event(29, 'edit', { id: '81', kind: 'sections', file: 'sections/02-hero.layout.css' }),
+          thought(32, '81', 'I adjusted the headline spacing and kept the call to action visible at 393 px.'),
+          event(35, 'edit', { id: '02', kind: 'sections', file: 'sections/02-hero.html' }),
+          event(36, 'doc', { id: '00', file: 'decisions.md' }),
+          chat(38, '81', 'done', 'The hero layout now uses the new image and two-line headline.', ['89']),
+          status(39, '81', 'waiting'),
+          notice(40, 'Squad wave 3/3: Responsive & Accessibility QA'),
+          status(41, '89', 'working Work'),
+          thought(42, '89', 'I’ll check keyboard focus and verify the hero at phone, tablet, and desktop widths.'),
+          event(46, 'edit', { id: '89', kind: 'sections', file: 'sections/02-hero.polish.css' }),
+          status(48, '89', 'waiting'),
+          notice(49, 'Squad finished'),
+          event(49, 'busy', { busy: false }),
+          event(49, 'phase', { phase: 'ready' })
+        ];
+      }
+
+      function mount() {
+        selection.hidden = true;
+        StudioActivity.mount({
+          progress: byId('progress'), team: byId('team'), activity: byId('activity'), artifacts: byId('artifacts'),
+          onOpenAgent(id) {
+            selection.textContent = `Selected ${agents[id].title}.`;
+            selection.hidden = false;
+          }
+        });
+      }
+
+      mount();
+      const now = Date.now();
+      const opening = sample(now - 36_000).filter(ev => ev.ts <= now);
+      // Section edits are live-only on the server. Other recent events arrive in state.feed.
+      const snapshotAgents = structuredClone(agents);
+      for (const ev of opening) {
+        if (ev.type === 'status') snapshotAgents[ev.id].status = ev.status;
+        if (ev.type === 'thought') snapshotAgents[ev.id].thought = ev.text;
+      }
+      StudioActivity.setState({ project: 'studio-demo', agents: snapshotAgents, phase: 'running', round: 0, rounds: 9,
+        feed: opening.filter(ev => ev.type !== 'edit') });
+      for (const ev of opening.filter(ev => ev.type === 'edit')) StudioActivity.onEvent(ev);
+
+      let timer;
+      function play() {
+        if (timer) window.clearTimeout(timer);
+        mount();
+        StudioActivity.onEvent({ type: 'state', state: { project: 'studio-demo', agents, phase: 'ready', round: 0, rounds: 9, feed: [] } });
+        const start = Date.now();
+        const events = sample(start, 160);
+        let index = 0;
+        function next() {
+          StudioActivity.onEvent(events[index++]);
+          if (index < events.length) timer = window.setTimeout(next, Math.max(0, events[index].ts - Date.now()));
+        }
+        next();
+      }
+
+      replay.addEventListener('click', play);
+    }());
+  </script>
+</body>
+</html>

@@ -1,0 +1,116 @@
+{
+  "id": "corporate-landing",
+  "keywords": [
+    "corporate landing",
+    "corporate website",
+    "corporate site",
+    "corporate homepage",
+    "corporate home page",
+    "company landing page",
+    "company website",
+    "company homepage",
+    "business landing page",
+    "business website",
+    "business homepage",
+    "brand landing page",
+    "brand website",
+    "brand portfolio",
+    "corporate page",
+    "company page"
+  ],
+  "defaultBrand": "gjh",
+  "brands": ["gjh"],
+  "sections": [
+    {
+      "id": "01-header",
+      "block": "header",
+      "slots": {
+        "logo": "$header.logo",
+        "logoAlt": "$header.logoAlt",
+        "logoWidth": "$header.logoWidth",
+        "logoHeight": "$header.logoHeight",
+        "homeUrl": "#02-hero",
+        "navLabel": "$header.navLabel",
+        "menuLabel": "$header.menuLabel",
+        "brandsLabel": "$header.brandsLabel",
+        "brandsUrl": "#03-brands",
+        "aboutLabel": "$header.aboutLabel",
+        "aboutUrl": "#04-about",
+        "contactLabel": "$header.contactLabel",
+        "contactUrl": "#05-enquiry",
+        "shopLabel": "$header.shopLabel",
+        "shopUrl": "$links.shop"
+      }
+    },
+    {
+      "id": "02-hero",
+      "block": "hero",
+      "slots": {
+        "eyebrow": "$company",
+        "title": "$hero.title",
+        "description": "$hero.description",
+        "image": "$hero.image",
+        "imageAlt": "$hero.imageAlt",
+        "imageWidth": "$hero.imageWidth",
+        "imageHeight": "$hero.imageHeight",
+        "primaryLabel": "$hero.primaryLabel",
+        "primaryUrl": "#03-brands",
+        "secondaryLabel": "$enquiry.title",
+        "secondaryUrl": "#05-enquiry"
+      }
+    },
+    {
+      "id": "03-brands",
+      "block": "brand-cards",
+      "slots": {
+        "title": "$brands.title",
+        "cards": "$brands.cards",
+        "directoryLabel": "$brands.directoryLabel",
+        "directoryUrl": "$links.directory",
+        "directoryImage": "$brands.directoryImage",
+        "directoryWidth": "$brands.directoryWidth",
+        "directoryHeight": "$brands.directoryHeight"
+      }
+    },
+    {
+      "id": "04-about",
+      "block": "about",
+      "slots": {
+        "title": "$about.title",
+        "description": "$about.description",
+        "image": "$about.image",
+        "imageAlt": "$about.imageAlt",
+        "imageWidth": "$about.imageWidth",
+        "imageHeight": "$about.imageHeight",
+        "linkLabel": "$about.linkLabel",
+        "linkUrl": "$links.about"
+      }
+    },
+    {
+      "id": "05-enquiry",
+      "block": "enquiry",
+      "slots": {
+        "title": "$enquiry.title",
+        "description": "$enquiry.description",
+        "checklistTitle": "$enquiry.checklistTitle",
+        "checklist": "$enquiry.checklist",
+        "primaryLabel": "$enquiry.primaryLabel",
+        "primaryUrl": "$links.contact",
+        "secondaryLabel": "$enquiry.secondaryLabel",
+        "secondaryUrl": "$links.corporate"
+      }
+    },
+    {
+      "id": "06-footer",
+      "block": "footer",
+      "slots": {
+        "title": "$company",
+        "address": "$footer.address",
+        "navLabel": "$footer.navLabel",
+        "links": "$footer.links",
+        "disclosure": "$footer.disclosure",
+        "imageCredit": "$footer.imageCredit"
+      }
+    }
+  ]
+}

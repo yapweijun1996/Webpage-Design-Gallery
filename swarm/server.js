@@ -635,6 +635,7 @@ http.createServer(async (req, res) => {
   }
   if (p === '/api/stop' && req.method === 'POST') { stopAll(); return send(res, 200, { ok: true }); }
   { const m = /^\/p\/sections\/(\d\d-[a-z0-9-]+)\.bundle\.css$/.exec(p); if (m) { let css = ''; try { css = LAYERS.assembleCss(path.join(PROJECT, 'sections'), m[1]); } catch (_) { /* no such section */ } return send(res, 200, css, 'text/css; charset=utf-8'); } } // legacy css plus squad layer files, in layer order
+  if (p === '/studio') return serveFile(res, UI, 'studio.html'); // staged Design Studio UI, index.html stays the default until approved
   if (p.startsWith('/p/')) return serveFile(res, PROJECT, p.slice(3));
   if (p.startsWith('/assets/generated/')) return serveFile(res, path.join(PROJECT, 'assets', 'generated'), p.slice(18)); // generated images referenced as ../assets/generated/* from sections
   if (p.startsWith('/gjh/')) return serveFile(res, GJH_ASSETS, p.slice(5));

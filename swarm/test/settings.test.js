@@ -8,6 +8,7 @@ const { test } = require('node:test');
 const settings = require('../lib/settings');
 
 const DEFAULT_SELECTION = { runner: 'codex', model: 'gpt-6.2-sol', effort: 'medium' };
+const DEFAULT_IMAGES = { provider: 'codex', model: 'gpt-image-1', quality: 'high', size: '1536x1024' };
 const DEFAULT_SETTINGS = {
   version: 1,
   defaults: DEFAULT_SELECTION,
@@ -17,6 +18,7 @@ const DEFAULT_SETTINGS = {
   channel: { language: 'zh-Hans', standingRules: '' },
   research: { web: true },
   autopilot: { maxCyclesPerScreen: 2 },
+  images: DEFAULT_IMAGES,
 };
 
 function settingsPath(t) {
@@ -38,6 +40,7 @@ test('exports the exact immutable allowlist and medium defaults', () => {
   assert.throws(() => { settings.DEFAULTS.defaults.effort = 'low'; }, TypeError);
   assert.throws(() => { settings.DEFAULTS.research.web = false; }, TypeError);
   assert.throws(() => { settings.DEFAULTS.autopilot.maxCyclesPerScreen = 5; }, TypeError);
+  assert.throws(() => { settings.DEFAULTS.images.provider = 'openai'; }, TypeError);
   assert.deepEqual(settings.validate({}), { ok: true, errors: [], value: DEFAULT_SETTINGS });
 });
 
@@ -215,6 +218,69 @@ test('rejects wrong research and autopilot types and out-of-range cycle counts',
   }
 });
 
+test('validates image provider, quality and size independently of runner selection', () => {
+  for (const provider of ['codex', 'openai']) {
+    for (const quality of ['auto', 'low', 'medium', 'high']) {
+      for (const size of ['auto', '1024x1024', '1536x1024', '1024x1536']) {
+        const images = { provider, model: 'gpt-image-2.1', quality, size };
+        const raw = { images };
+        assert.deepEqual(settings.validate(raw), { ok: true, errors: [], value: { ...DEFAULT_SETTINGS, images } });
+        assert.deepEqual(settings.resolve(raw, 'worker'), DEFAULT_SELECTION);
+      }
+    }
+  }
+  for (const model of ['a0', '1' + 'a'.repeat(40)]) {
+    assert.equal(settings.validate({ images: { model } }).value.images.model, model);
+  }
+});
+
+test('rejects invalid image values without coercion and reports exact paths', () => {
+  for (const images of [null, undefined, [], 'images', false]) {
+    const result = settings.validate({ images });
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.errors.map(error => error.path), ['images']);
+    assert.deepEqual(result.value.images, DEFAULT_IMAGES);
+  }
+  for (const [key, invalidValues] of [
+    ['provider', [null, 'pi', 'OpenAI', ['codex']]],
+    ['model', [undefined, 23, {}, 'a', 'a'.repeat(42), '-image', 'GPT-image', 'gpt_image', 'gpt/image', 'gpt-image\n']],
+    ['quality', [null, 'standard', 'high ', ['auto']]],
+    ['size', [3, '1024X1024', '512x512', { width: 1024 }]],
+  ]) {
+    for (const value of invalidValues) {
+      const result = settings.validate({ images: { [key]: value } });
+      assert.equal(result.ok, false);
+      assert.deepEqual(result.errors.map(error => error.path), [`images.${key}`]);
+      assert.deepEqual(result.value.images, DEFAULT_IMAGES);
+    }
+  }
+});
+
+test('rejects image credential fields without returning or persisting their values', t => {
+  const file = settingsPath(t);
+  const baseline = { images: { provider: 'openai' } };
+  assert.equal(settings.save(file, baseline).ok, true);
+  const original = fs.readFileSync(file, 'utf8');
+  const fakeSecret = 'fake-image-credential-value';
+  const fields = ['key', 'apiKey', 'api_key', 'API-KEY', 'openaiKey', 'accessToken', 'secret'];
+  const images = { ...baseline.images, ...Object.fromEntries(fields.map(name => [name, fakeSecret])) };
+  images.extra = [{ openai_api_key: fakeSecret }];
+  const raw = { images };
+  const result = settings.save(file, raw);
+  const paths = fields.map(name => `images.${name}`).concat('images.extra.0.openai_api_key');
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.errors.map(error => error.path), paths);
+  assert.equal(JSON.stringify(result).includes(fakeSecret), false);
+  assert.equal(fs.readFileSync(file, 'utf8'), original);
+  const publicSettings = settings.publicView(raw).settings;
+  assert.deepEqual(publicSettings.images, { ...DEFAULT_IMAGES, ...baseline.images });
+  fs.writeFileSync(file, JSON.stringify(raw));
+  const loaded = settings.load(file);
+  assert.deepEqual(loaded.warnings.map(warning => warning.split(':')[0]), paths);
+  assert.deepEqual(loaded.settings, publicSettings);
+  assert.equal(JSON.stringify(loaded).includes(fakeSecret), false);
+});
+
 test('loads missing files with fresh defaults and no warnings', t => {
   const file = settingsPath(t);
   const result = settings.load(file);
@@ -224,11 +290,12 @@ test('loads missing files with fresh defaults and no warnings', t => {
   assert.equal(fs.existsSync(file), false);
 });
 
-test('loads older files with research and autopilot defaults and no warnings', t => {
+test('loads older files with research, autopilot and image defaults and no warnings', t => {
   const file = settingsPath(t);
   const legacy = { ...DEFAULT_SETTINGS, defaults: { ...DEFAULT_SELECTION, runner: 'pi' } };
   delete legacy.research;
   delete legacy.autopilot;
+  delete legacy.images;
   fs.writeFileSync(file, JSON.stringify(legacy));
   assert.deepEqual(settings.load(file), {
     settings: { ...DEFAULT_SETTINGS, ...legacy },
@@ -265,6 +332,7 @@ test('drops extra keys from a file at every schema level', t => {
     channel: { extra: true },
     research: { web: false, extra: true },
     autopilot: { maxCyclesPerScreen: 1, extra: true },
+    images: { quality: 'low', extra: { futureOption: true } },
   }));
   assert.deepEqual(settings.load(file), {
     settings: {
@@ -274,6 +342,7 @@ test('drops extra keys from a file at every schema level', t => {
       concurrency: { maxParallel: 8 },
       research: { web: false },
       autopilot: { maxCyclesPerScreen: 1 },
+      images: { ...DEFAULT_IMAGES, quality: 'low' },
     },
     warnings: [],
   });
@@ -343,9 +412,12 @@ test('rejects invalid saves and preserves the existing file', t => {
   assert.equal(fs.readFileSync(file, 'utf8'), original);
 });
 
-test('preserves nondefault research and autopilot settings through a save and load', t => {
+test('preserves nondefault research, autopilot and image settings through a save and load', t => {
   const file = settingsPath(t);
-  const input = { research: { web: false }, autopilot: { maxCyclesPerScreen: 5 } };
+  const input = {
+    research: { web: false }, autopilot: { maxCyclesPerScreen: 5 },
+    images: { provider: 'openai', model: 'gpt-image-2', quality: 'medium', size: '1024x1536' },
+  };
   const expected = { ...DEFAULT_SETTINGS, ...input };
   assert.deepEqual(settings.save(file, input), { ok: true, errors: [], settings: expected });
   assert.deepEqual(settings.load(file), { settings: expected, warnings: [] });

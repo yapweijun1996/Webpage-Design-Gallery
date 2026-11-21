@@ -1,0 +1,147 @@
+{
+  "id": "gjh",
+  "name": "Goh Joo Hin",
+  "aliases": ["gjh", "gohjoohin", "gjh.com.sg", "gjhglobal.com"],
+  "tokens": {
+    "canvas": "--sds-color-gold-50",
+    "surface": "--sds-color-ivory",
+    "paper": "--sds-color-white",
+    "ink": "--sds-color-forest-900",
+    "muted": "--sds-color-forest-600",
+    "inverse": "--sds-color-forest-800",
+    "inverse-line": "--sds-color-forest-700",
+    "accent": "--sds-color-gold-200",
+    "accent-hover": "--sds-color-gold-300",
+    "line": "--sds-color-forest-300",
+    "soft-line": "--sds-color-forest-100"
+  },
+  "content": {
+    "company": "Goh Joo Hin",
+    "links": {
+      "shop": "https://www.gjheshop.com/shop/",
+      "about": "https://www.gjh.com.sg/about-us/",
+      "contact": "https://www.gjhglobal.com/contact-us/",
+      "corporate": "https://www.gjhglobal.com/corporate-sales/",
+      "directory": "https://www.gjhglobal.com/explore-our-brand/"
+    },
+    "header": {
+      "logo": "/gjh/official/gjh-logo.png",
+      "logoAlt": "Goh Joo Hin home",
+      "logoWidth": 167,
+      "logoHeight": 73,
+      "navLabel": "Main navigation",
+      "menuLabel": "Menu",
+      "brandsLabel": "Brands",
+      "aboutLabel": "About",
+      "contactLabel": "Contact",
+      "shopLabel": "Shop Online"
+    },
+    "hero": {
+      "title": "Explore our brands",
+      "description": "Discover our food and beverage, health and nutrition, and electronics brands.",
+      "primaryLabel": "Explore Our Brands",
+      "image": "/gjh/landing-concepts/images/074.webp",
+      "imageAlt": "A Singapore home at dusk with families and friends gathered in warm, lit rooms",
+      "imageWidth": 1672,
+      "imageHeight": 941
+    },
+    "brands": {
+      "title": "Our brands",
+      "directoryLabel": "Official Brands Directory",
+      "directoryImage": "/gjh/landing-concepts/images/043.webp",
+      "directoryWidth": 1024,
+      "directoryHeight": 1024,
+      "cards": [
+        {
+          "title": "New Moon",
+          "category": "Food & Beverage",
+          "description": "New Moon’s range includes canned abalone, shellfish, soups and sauces.",
+          "label": "View New Moon",
+          "url": "https://www.gjh.com.sg/newmoon/",
+          "image": "/gjh/landing-concepts/images/001.webp",
+          "imageAlt": "A platter of braised abalone at a reunion table",
+          "width": 1664,
+          "height": 936
+        },
+        {
+          "title": "MILI",
+          "category": "Food & Beverage",
+          "description": "MILI offers canned fruit, vegetables, meat and seafood, plus sauces.",
+          "label": "View MILI",
+          "url": "https://www.gjh.com.sg/mili/",
+          "image": "/gjh/landing-concepts/images/005.webp",
+          "imageAlt": "Noodles being prepared",
+          "width": 1664,
+          "height": 936
+        },
+        {
+          "title": "GOGO",
+          "category": "Food & Beverage",
+          "description": "GOGO offers drinks and potong ice cream.",
+          "label": "View GOGO",
+          "url": "https://www.gjh.com.sg/gogo/",
+          "image": "/gjh/landing-concepts/images/009.webp",
+          "imageAlt": "A frozen treat outdoors",
+          "width": 1664,
+          "height": 936
+        },
+        {
+          "title": "Borsch Med",
+          "category": "Health & Nutrition",
+          "description": "Borsch Med offers health supplements and personal care products.",
+          "label": "View Borsch Med",
+          "url": "https://www.gjh.com.sg/borsch-med/",
+          "image": "/gjh/landing-concepts/images/013.webp",
+          "imageAlt": "An olive-green daypack ready for an outing",
+          "width": 1664,
+          "height": 936
+        },
+        {
+          "title": "Sony",
+          "category": "Electronics & Lifestyle",
+          "description": "Goh Joo Hin is an appointed distributor for specified Sony ranges.",
+          "label": "Enquire about Sony",
+          "url": "https://www.gjhglobal.com/contact-us/",
+          "image": "/gjh/landing-concepts/images/049.webp",
+          "imageAlt": "A softly lit listening nook at dusk",
+          "width": 1672,
+          "height": 941
+        }
+      ]
+    },
+    "about": {
+      "title": "Since 1940",
+      "description": "Goh Joo Hin began as a provision store on Rochor Road in the 1940s.",
+      "image": "/gjh/official/gjh-history-composite.jpg",
+      "imageAlt": "Goh Joo Hin’s provision store storefront and shelves",
+      "imageWidth": 550,
+      "imageHeight": 240,
+      "linkLabel": "About Goh Joo Hin"
+    },
+    "enquiry": {
+      "title": "Sales Enquiry",
+      "description": "Prepare these details before contacting Goh Joo Hin.",
+      "checklistTitle": "Buyer checklist",
+      "checklist": [
+        {"label": "Brand", "detail": "Brand name"},
+        {"label": "Product", "detail": "Product name and pack size"},
+        {"label": "Quantity", "detail": "Number of units or cartons"},
+        {"label": "Delivery", "detail": "Location and preferred date"}
+      ],
+      "primaryLabel": "GJH Contact Us",
+      "secondaryLabel": "GJH Corporate Sales"
+    },
+    "footer": {
+      "address": "8 Gul Avenue, Singapore 629652.",
+      "navLabel": "Official Goh Joo Hin links",
+      "links": [
+        {"label": "Contact Us", "url": "https://www.gjhglobal.com/contact-us/"},
+        {"label": "Corporate Sales", "url": "https://www.gjhglobal.com/corporate-sales/"},
+        {"label": "E-Shop", "url": "https://www.gjheshop.com/shop/"},
+        {"label": "About", "url": "https://www.gjh.com.sg/about-us/"}
+      ],
+      "disclosure": "Independent design concept. Goh Joo Hin is unaffiliated with this page.",
+      "imageCredit": "AI-generated concept scenes. Official GJH logo and heritage photograph."
+    }
+  }
+}

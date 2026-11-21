@@ -1,0 +1,28 @@
+<section class="{{scope}}" id="{{id}}" aria-labelledby="{{id}}-title">
+  <div class="sds-container">
+    <h2 id="{{id}}-title" data-i18n="{{id}}.title">{{title}}</h2>
+    <ul class="card-grid" role="list">
+      {{#cards}}
+      <li class="brand">
+        <article>
+          <img src="{{image}}" width="{{width}}" height="{{height}}" alt="{{imageAlt}}" loading="lazy" decoding="async" data-i18n-attr="alt:{{id}}.card-{{index}}-image">
+          <div class="card-copy">
+            <p class="category" data-i18n="{{id}}.card-{{index}}-category">{{category}}</p>
+            <h3 data-i18n="{{id}}.card-{{index}}-title">{{title}}</h3>
+            <p data-i18n="{{id}}.card-{{index}}-description">{{description}}</p>
+            <a href="{{url}}"><span data-i18n="{{id}}.card-{{index}}-link">{{label}}</span> <span aria-hidden="true">↗</span></a>
+          </div>
+        </article>
+      </li>
+      {{/cards}}
+      <li class="directory">
+        <a href="{{directoryUrl}}">
+          <img class="directory-image" src="{{directoryImage}}" width="{{directoryWidth}}" height="{{directoryHeight}}" alt="" loading="lazy" decoding="async">
+          <span class="directory-copy">
+            <span data-i18n="{{id}}.directory">{{directoryLabel}}</span><span class="arrow" aria-hidden="true">↗</span>
+          </span>
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>

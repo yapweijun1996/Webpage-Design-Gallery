@@ -1,0 +1,9 @@
+{
+  "id": "hero",
+  "slots": {
+    "eyebrow": "text", "title": "text", "description": "text",
+    "image": "image", "imageAlt": "text", "imageWidth": "dimension", "imageHeight": "dimension",
+    "primaryLabel": "text", "primaryUrl": "link", "secondaryLabel": "text", "secondaryUrl": "link"
+  },
+  "tokens": ["canvas", "surface", "ink", "inverse", "accent", "accent-hover", "line"]
+}

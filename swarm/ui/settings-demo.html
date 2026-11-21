@@ -100,6 +100,8 @@
       <label><input type="checkbox" id="demo-save-errors"> Simulate settings field errors</label>
       <label><input type="checkbox" id="demo-team-errors"> Simulate team field errors (400)</label>
       <label><input type="checkbox" id="demo-team-busy"> Simulate a busy team (409)</label>
+      <label><input type="checkbox" id="demo-key-invalid"> Simulate an invalid API key</label>
+      <label><input type="checkbox" id="demo-key-test-failure"> Simulate a failed key test</label>
     </div>
     <button type="button" id="demo-open" hidden>Open settings</button>
   </header>
@@ -121,6 +123,8 @@
       const simulateErrors = document.getElementById('demo-save-errors');
       const simulateTeamErrors = document.getElementById('demo-team-errors');
       const simulateBusy = document.getElementById('demo-team-busy');
+      const simulateInvalidKey = document.getElementById('demo-key-invalid');
+      const simulateKeyTestFailure = document.getElementById('demo-key-test-failure');
       simulateBusy.addEventListener('change', () => window.SwarmSettings.refresh());
       const widths = document.querySelectorAll('[data-width]');
       for (const button of widths) {
@@ -160,7 +164,8 @@
         timeouts: { turnMinutes: 20 },
         channel: { language: 'zh-Hans', standingRules: '' },
         research: { web: true },
-        autopilot: { maxCyclesPerScreen: 2 }
+        autopilot: { maxCyclesPerScreen: 2 },
+        images: { provider: 'codex', model: 'gpt-image-1', quality: 'high', size: '1536x1024' }
       };
       let agents = [
         { id: '02', name: 'Agent 2', title: 'Hero Designer', section: 'hero',
@@ -172,6 +177,7 @@
       const titles = ['Hero Designer', 'Footer and Compliance Designer', 'Motion and Performance Reviewer'];
       const status = {};
       let piTests = 0;
+      let keyLast4 = '';
 
       window.SwarmSettings.init({
         root,
@@ -198,8 +204,32 @@
               errors: [{ path: 'defaults.effort', message: 'For this demo, choose Medium with GPT 6.1 Terra.' }]
             };
           }
+          if (!/^[a-z0-9][a-z0-9.\-]{1,40}$/.test(draft.images.model)) {
+            return {
+              ok: false,
+              errors: [{ path: 'images.model', message: 'Enter an image model ID such as gpt-image-1.' }]
+            };
+          }
           settings = structuredClone(draft);
           return { ok: true, settings: structuredClone(settings) };
+        },
+        images: {
+          async loadKey() {
+            return { set: Boolean(keyLast4), last4: keyLast4 };
+          },
+          async saveKey(key) {
+            if (simulateInvalidKey.checked) return { ok: false, error: 'OpenAI rejected this API key.' };
+            keyLast4 = key.slice(-4);
+            return { ok: true, last4: keyLast4 };
+          },
+          async removeKey() {
+            keyLast4 = '';
+            return { ok: true };
+          },
+          async testKey() {
+            if (simulateKeyTestFailure.checked) return { ok: false, message: 'The saved key failed the test.' };
+            return { ok: true, message: 'The saved key passed the test.' };
+          }
         },
         team: {
           async load() {
