@@ -1,15 +1,11 @@
 :root {
   color-scheme: dark;
-  --charcoal: #171a16;
-  --ivory: #f1e6cc;
-  --glaze: #426254;
-  --gutter: clamp(1rem, 5.6vw, 4.5rem);
   --left: max(var(--gutter), env(safe-area-inset-left));
   --right: max(var(--gutter), env(safe-area-inset-right));
-  --top: max(1rem, env(safe-area-inset-top));
+  --top: max(var(--masthead-min-inset), env(safe-area-inset-top));
   color: var(--ivory);
   background: var(--charcoal);
-  font: 1.0625rem/1.5 "Instrument Sans", Arial, sans-serif;
+  font: var(--type-body);
 }
 
 *, *::before { box-sizing: border-box; }
@@ -31,10 +27,10 @@ figure {
 
 figure::before {
   position: absolute;
-  z-index: 1;
+  z-index: var(--layer-scene-overlay);
   inset: 0 0 auto;
   height: calc(var(--top) + 5rem);
-  background: linear-gradient(#171a16, rgb(23 26 22 / 84%) 38%, transparent);
+  background: var(--scene-top-shade);
   content: "";
   pointer-events: none;
 }
@@ -70,7 +66,7 @@ figure img {
 }
 
 figcaption, .masthead, .attribution {
-  font-size: .75rem;
+  font-size: var(--type-caption);
   line-height: 1.35;
 }
 
@@ -84,7 +80,7 @@ figcaption {
 
 .masthead {
   position: absolute;
-  z-index: 1;
+  z-index: var(--layer-scene-overlay);
   inset: var(--top) var(--right) auto var(--left);
   display: flex;
   flex-wrap: wrap;
@@ -92,28 +88,28 @@ figcaption {
   justify-content: space-between;
   gap: .25rem 1rem;
   padding-bottom: .65rem;
-  border-bottom: 1px solid rgb(241 230 204 / 55%);
+  border-bottom: 1px solid var(--color-masthead-rule);
   letter-spacing: .12em;
   text-transform: uppercase;
 }
 
 .panel {
   padding: 1.05rem var(--right) max(1.3rem, env(safe-area-inset-bottom)) var(--left);
-  border-top: 1px solid #8a806a;
+  border-top: 1px solid var(--color-panel-rule);
 }
 
 .panel-inner { max-width: 66rem; margin-inline: auto; }
 
 .attribution {
   margin-bottom: .45rem;
-  color: #d5c5a4;
+  color: var(--color-attribution);
   letter-spacing: .17em;
   text-transform: uppercase;
 }
 
 h1, h2 {
   max-width: 26ch;
-  font: 600 2.625rem/1.02 "Cormorant Garamond", Georgia, serif;
+  font: var(--type-heading);
   letter-spacing: -.035em;
   text-wrap: balance;
 }
@@ -138,7 +134,7 @@ h1, h2 {
   min-width: 44px;
   min-height: 44px;
   color: inherit;
-  font-size: .875rem;
+  font-size: var(--type-action);
   line-height: 1.25;
   text-underline-offset: .23em;
 }
@@ -149,14 +145,14 @@ h1, h2 {
   text-decoration: none;
 }
 
-.actions .primary:hover { background: #365246; }
+.actions .primary:hover { background: var(--glaze-hover); }
 .actions a:hover { text-decoration: underline; }
 :focus-visible { outline: 2px solid var(--ivory); outline-offset: 3px; }
 
 .site-footer {
   padding: .75rem var(--right) max(1rem, env(safe-area-inset-bottom)) var(--left);
-  border-top: 1px solid #8a806a;
-  font-size: .875rem;
+  border-top: 1px solid var(--color-panel-rule);
+  font-size: var(--type-action);
   text-align: center;
 }
 
@@ -169,7 +165,7 @@ h1, h2 {
 
 .dark-cut {
   position: fixed;
-  z-index: 2;
+  z-index: var(--layer-dark-cut);
   inset: 0;
   background: var(--charcoal);
   opacity: 0;

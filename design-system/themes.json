@@ -2138,6 +2138,27 @@
       },
       "overrides": []
     },
+    "v27": {
+      "tokens": {
+        "charcoal": "#171a16",
+        "ivory": "#f1e6cc",
+        "glaze": "#426254",
+        "glaze-hover": "#365246",
+        "color-attribution": "#d5c5a4",
+        "color-panel-rule": "#8a806a",
+        "color-masthead-rule": "rgb(241 230 204 / 55%)",
+        "scene-top-shade": "linear-gradient(var(--charcoal), rgb(23 26 22 / 84%) 38%, transparent)",
+        "gutter": "clamp(1rem, 5.6vw, 4.5rem)",
+        "masthead-min-inset": "1rem",
+        "type-body": "1.0625rem/1.5 \"Instrument Sans\", Arial, sans-serif",
+        "type-heading": "600 2.625rem/1.02 \"Cormorant Garamond\", Georgia, serif",
+        "type-caption": ".75rem",
+        "type-action": ".875rem",
+        "layer-scene-overlay": "1",
+        "layer-dark-cut": "2"
+      },
+      "overrides": []
+    },
     "v28": {
       "tokens": {
         "paper": "#FAF9F6",
@@ -2166,6 +2187,49 @@
         "type-sign": "var(--font-size-xl)",
         "gutter": "clamp(var(--space-4), 3.5vw, var(--space-12))",
         "section-gap": "clamp(var(--space-8), 4.5vw, var(--space-16))"
+      },
+      "overrides": []
+    },
+    "v29": {
+      "tokens": {
+        "charcoal": "#1b1815",
+        "ivory": "#fbedd9",
+        "muted": "#c8b7a0",
+        "amber": "#f2bc76",
+        "cinnabar": "#a53127",
+        "rule": "#58483a",
+        "serif": "Georgia, \"Times New Roman\", serif",
+        "gutter": "clamp(1.5rem, 5vw, 5.5rem)",
+        "color-language-surface": "#1b1815ca",
+        "color-hero-control-rule": "#fbedda60",
+        "color-disclosure-surface": "#1b181586",
+        "color-category-surface": "#241e19",
+        "color-category-cover": "#2e2018",
+        "hero-shade": "linear-gradient(0deg, var(--charcoal), #1b1815a0 12%, transparent 35%)",
+        "hero-desktop-shade": "linear-gradient(0deg, var(--charcoal) 0%, transparent 12%), linear-gradient(90deg, #1b130d50 0%, transparent 36%)",
+        "hero-tablet-surface": "radial-gradient(ellipse at center, #4a2d1b, #20140e 74%)",
+        "hero-mobile-mask": "linear-gradient(#000 79%, transparent)",
+        "hero-tablet-mask": "linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent)",
+        "category-shade": "linear-gradient(0deg, #17120ff7, #17120fc4 14%, #17120f48 35%, transparent 59%)",
+        "type-wordmark": "1.4rem/1.2 var(--serif)",
+        "type-wordmark-wide": "1.55rem",
+        "type-language": ".8125rem",
+        "type-caption": ".75rem",
+        "type-meta": ".875rem",
+        "type-body-small": ".9375rem",
+        "type-arrow": "1.2rem",
+        "type-hero": "clamp(2.25rem, 11vw, 3.55rem)",
+        "type-hero-desktop": "clamp(3.45rem, 5.05vw, 7rem)",
+        "type-hero-desktop-cjk": "clamp(2.7rem, 4.1vw, 6rem)",
+        "type-section": "clamp(2.4rem, 5vw, 4.2rem)",
+        "type-category": "clamp(1.7rem, 6.8vw, 2.5rem)/1.07 var(--serif)",
+        "type-category-wide": "clamp(1.7rem, 2.58vw, 2.65rem)",
+        "radius-category": ".75rem",
+        "radius-circle": "50%",
+        "layer-category-image": "-1",
+        "layer-category-shade": "0",
+        "layer-hero-caption": "1",
+        "layer-skip-link": "3"
       },
       "overrides": []
     }

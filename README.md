@@ -79,6 +79,8 @@ Update `locales/source/en.json`, `locales/zh-Hans.json` and `locales/ms.json` wh
 
 ## Verification
 
+Install the Python test dependencies with `python -m pip install -r tests/requirements.txt`.
+
 ```sh
 python scripts/build_design_system.py --check
 python scripts/check_ssot.py
