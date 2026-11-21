@@ -276,7 +276,9 @@ function squadPlan(owner) {
   const base = def.id + '-' + def.section;
   // Full squad: every specialist works on the screen at once (owner request: see 10 agents working together).
   const all = SQ.roster();
-  const picked = all;
+  // Codex specialists (image generation, web research) take 60-100 s and set the pace of the whole wave: include them only when the request asks for them.
+  const wanted = new Set(SQ.pickSquad(owner.scope, owner.text).map(sp => sp.id));
+  const picked = all.filter(sp => sp.runner !== 'codex' || wanted.has(sp.id));
   const members = picked.map(spec => squadAgents.find(a => a.squad.id === spec.id)).filter(Boolean);
   for (const m of members) m.base = base;
   const byId = new Map(members.map(m => [m.squad.id, m]));
