@@ -22,10 +22,15 @@ class GalleryTests(unittest.TestCase):
         catalog = gallery.load_catalog()
         versions = [d["version"] for d in catalog["designs"] if d["companyId"] == "gjh"]
         self.assertEqual(versions, ["v1", *(f"v{number}" for number in range(5, 30))])
-        self.assertEqual({c["id"] for c in catalog["companies"]}, {"gjh", "yeos", "thow-kwang"})
+        self.assertEqual({c["id"] for c in catalog["companies"]}, {"gjh", "yeos", "thow-kwang", "pomelo-stem"})
         for company in catalog["companies"]:
             designs = [d for d in catalog["designs"] if d["companyId"] == company["id"]]
-            self.assertGreaterEqual(len({d["demoPath"] for d in designs}), 15)
+            if company["id"] == "pomelo-stem":
+                self.assertEqual([(d["id"], d["demoPath"]) for d in designs], [
+                    ("pomelo-stem-v1", "demos/corporate/pomelo-stem/v1/index.html")
+                ])
+            else:
+                self.assertGreaterEqual(len({d["demoPath"] for d in designs}), 15)
             self.assertEqual(len({d["title"] for d in designs}), len(designs))
 
     def test_v8_metadata_exposes_immersive_concept_contract(self):
@@ -89,6 +94,19 @@ class GalleryTests(unittest.TestCase):
                 self.assertIn('href="../../' + primary + ("#" + anchor if anchor else "") + '"', page)
                 self.assertIn(f'href="../../{directory}/{landing["alternativeVersion"]}/index.html"', page)
                 self.assertIn(f'src="../../{directory}/{landing["image"]}"', page)
+
+    def test_pomelo_landing_links_to_one_hub_and_its_five_categories(self):
+        pages = gallery.build_pages(gallery.load_catalog())
+        page = pages["companies/pomelo-stem/index.html"]
+        route = "demos/corporate/pomelo-stem/v1/index.html"
+        self.assertIn(f'class="primary-link" href="../../{route}#category-1"', page)
+        self.assertIn(f'class="collection-alternative" href="../../{route}"', page)
+        self.assertNotIn('class="compare-checkbox"', page)
+        hub = (ROOT / route).read_text(encoding="utf-8")
+        for category in range(1, 6):
+            with self.subTest(category=category):
+                self.assertEqual(hub.count(f'id="category-{category}"'), 1)
+                self.assertIn(f'href="#category-{category}"', hub)
 
     def test_generation_is_deterministic(self):
         catalog = gallery.load_catalog()
@@ -168,6 +186,22 @@ class GalleryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
             gallery.build(output)
+            pomelo = Path("demos/corporate/pomelo-stem/v1")
+            published = gallery.pomelo_studies.manifest_assets(gallery.ROOT, pomelo)
+            actual = {file.relative_to(output) for folder in ("studies", "shared")
+                      for file in (output / pomelo / folder).rglob("*") if file.is_file()}
+            self.assertEqual(actual, published)
+            self.assertEqual(len([file for file in actual if file.suffix == ".html"]), 240)
+            for file in sorted(actual):
+                self.assertEqual((output / file).read_bytes(), gallery.source_bytes(gallery.ROOT / file))
+            self.assertFalse((output / pomelo / "study-assets.json").exists())
+            worker = (output / pomelo / "sw.js").read_text(encoding="utf-8")
+            self.assertNotIn('"studies/', worker)
+            self.assertIn('"shared/study-tokens.css"', worker)
+            for path in actual:
+                if path.suffix == ".webp":
+                    self.assertNotIn(f'"shared/{path.name}"', worker)
+            self.assertNotIn("pomelo-stem/v1/studies/", (output / "sw.js").read_text(encoding="utf-8"))
             gallery_models = Path("demos/corporate/gjh/v11/assets/gallery-assets")
             for source in (gallery.ROOT / gallery_models).glob("*.glb"):
                 self.assertEqual((output / gallery_models / source.name).read_bytes(), source.read_bytes())

@@ -1,0 +1,8 @@
+:root{--bg:var(--pomelo-study-v-8757d52ac1aeae5b);--surface:var(--pomelo-study-v-af1738b9beaf2667);--ink:var(--pomelo-study-v-d60590fc69e86cf7);--muted:var(--pomelo-study-v-73adf68be3ca97e3);--accent:var(--pomelo-study-v-cab7035c6c7d19bd);--on-accent:var(--pomelo-study-v-e08de713877c54e8);--line:var(--pomelo-study-v-4d9424459b41b24b);--display:"Trebuchet MS",system-ui,sans-serif;--body:system-ui,sans-serif;--radius:var(--pomelo-study-v-9411a1032ff720d7)}
+.masthead{background:var(--pomelo-study-v-9a22a29afd8d3908);border-bottom:1px solid var(--line)}
+.hero h1,.page-intro h1{letter-spacing:-.055em}
+.hero-art{background:var(--pomelo-study-v-7e5c5638df623a8b);border-radius:var(--pomelo-study-v-9d9bfb3528118ed3)}
+.hero-copy{border-radius:var(--radius)}
+.section h2{letter-spacing:-.035em}
+.card{box-shadow:var(--pomelo-study-v-cd194669137d4346)}
+.footer{background:var(--pomelo-study-v-6f62aa2459058452);border-radius:var(--pomelo-study-v-acaed60423b10379)}

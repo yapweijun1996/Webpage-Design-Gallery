@@ -1,0 +1,8 @@
+:root{--bg:#fff4ec;--surface:#fff9f4;--ink:#401f2c;--muted:#624653;--accent:#87304a;--on-accent:#fff;--line:#e1b8c6;--display:"Trebuchet MS",system-ui,sans-serif;--body:system-ui,sans-serif;--radius:27px}
+.masthead{background:#ffede9;border-bottom:1px solid var(--line)}
+.hero h1,.page-intro h1{letter-spacing:-.055em}
+.hero-art{background:radial-gradient(ellipse at 90% 20%,#eab7d0,#f5c5bf 54%,#f3ded1);border-radius:32px}
+.hero-copy{border-radius:var(--radius)}
+.section h2{letter-spacing:-.035em}
+.card{box-shadow:4px 6px 0 #eed2d3}
+.footer{background:#f8dfdc;border-radius:28px 28px 0 0}

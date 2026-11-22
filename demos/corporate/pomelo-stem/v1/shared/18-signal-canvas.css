@@ -1,0 +1,21 @@
+:root {
+  --bg:var(--pomelo-study-v-740fbbf68b789103); --surface:var(--pomelo-study-v-e08de713877c54e8); --ink:var(--pomelo-study-v-afe4a5174cea90c4); --muted:var(--pomelo-study-v-95759427a35b676b);
+  --accent:var(--pomelo-study-v-38fdf9a1fc9c5b42); --on-accent:var(--pomelo-study-v-e08de713877c54e8); --line:var(--pomelo-study-v-2cbe8a1a89850d4e);
+  --display:'Trebuchet MS',Verdana,sans-serif; --body:system-ui,sans-serif;
+  --radius:var(--pomelo-study-v-eb4ebe481cc0c70e);
+}
+body {
+  background-image:var(--pomelo-study-v-e8b4a73969ecbcec);
+  background-size:14px 14px;
+}
+.masthead {background:var(--pomelo-study-v-740fbbf68b789103);border-bottom:var(--pomelo-study-v-9ea4562900076dcd);}
+.hero-copy h1,.page-intro h1 {font-weight:900;letter-spacing:-.07em;text-wrap:balance;}
+.hero-art {
+  background:var(--pomelo-study-v-ff8902eb9f0cf570);
+  border:2px solid var(--accent);box-shadow:var(--pomelo-study-v-3772b3a113bad941) var(--pomelo-study-v-3772b3a113bad941) var(--pomelo-study-v-5feceb66ffc86f38) var(--accent);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e);
+}
+.section h2 {letter-spacing:-.04em;}
+.cards .card,.cases .card {border:2px solid var(--accent);box-shadow:var(--pomelo-study-v-0d8cbfcde7ffc50e);}
+.contact-grid {padding-block:1rem;border-block-end:2px dotted var(--accent);}
+.footer {background:var(--pomelo-study-v-1596263864374450);border-block-start:2px solid var(--accent);}
+@media(max-width:640px){.hero-art,.cards .card,.cases .card {box-shadow:var(--pomelo-study-v-747614001f0119ba) var(--pomelo-study-v-747614001f0119ba) var(--pomelo-study-v-5feceb66ffc86f38) var(--accent);}}

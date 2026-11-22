@@ -1,0 +1,32 @@
+{
+  "id": "./",
+  "name": "Pomelo STEM · Pomelo STEM Website Design Studies",
+  "short_name": "Pomelo STEM Website Design Studies",
+  "description": "Explore twenty website design directions, each with Home, Services, Cases and Contact in English, Simplified Chinese and Malay.",
+  "lang": "en-SG",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#152420",
+  "background_color": "#152420",
+  "icons": [
+    {
+      "src": "../../../../assets/icons/gallery-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "../../../../assets/icons/gallery-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

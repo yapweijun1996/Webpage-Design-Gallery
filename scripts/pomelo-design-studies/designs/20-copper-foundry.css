@@ -1,0 +1,14 @@
+:root {
+  --bg:#1d2023; --surface:#292d32; --ink:#f8f1e8; --muted:#cfcbc2;
+  --accent:#ffc18d; --on-accent:#26190f; --line:#70695e;
+  --display:Impact,'Arial Narrow',sans-serif; --body:system-ui,sans-serif;
+  --radius:3px;
+}
+body {background-image:repeating-linear-gradient(90deg,transparent 0 65px,#ffc18d0c 65px 66px);}
+.masthead {background:#1e2225;border-block-end:1px solid #8e7460;}
+.hero-copy h1,.page-intro h1 {font-weight:700;letter-spacing:-.025em;text-wrap:balance;}
+.hero-art {background:radial-gradient(ellipse at top right,#724630,#28292d 75%);border:1px solid #a78165;box-shadow:7px 7px 0 #ffc18d25;}
+.section h2 {font-weight:600;letter-spacing:.005em;}
+.cards .card,.cases .card {border:1px solid var(--line);border-block-end:3px solid var(--accent);}
+.contact-grid {border-block:1px solid #8e7460;padding-block:1rem;}
+.footer {background:#191c20;border-block-start:1px solid #8e7460;}

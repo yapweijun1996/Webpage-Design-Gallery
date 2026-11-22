@@ -1,0 +1,14 @@
+:root {
+  --bg:#fff3e1;--surface:#f4dfc0;--ink:#37271f;--muted:#645242;--accent:#8a3520;--on-accent:#fff8eb;--line:#c6a281;--radius:14px;
+  --display:'Palatino Linotype',Palatino,Georgia,serif;--body:system-ui,sans-serif;
+}
+.masthead { background:#f5d5ad; border-bottom:2px solid var(--line); }
+.hero { background:#f8dfbf; border:1px solid var(--line); }
+.hero h1 { letter-spacing:-.04em; font-weight:800; }
+.hero-art { background:repeating-linear-gradient(120deg,#a4441721 0 2px,transparent 2px 18px),#f1c58b; border:4px double #8a3520; border-radius:44% 44% 18% 18%; }
+.page-intro { background:#f7ddba; border-bottom:1px dashed var(--accent); }
+.section h2,.page-intro h1 { color:#682d21; }
+.card { border-inline-start:4px solid var(--accent); background:#fffaf0; }
+.card:nth-child(even) { background:#fae8cc; }
+.contact-grid { border-block:1px dashed var(--accent); }
+.footer { background:#efd3ac; border-top:1px solid var(--line); }

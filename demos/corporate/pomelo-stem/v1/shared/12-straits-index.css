@@ -1,0 +1,13 @@
+:root {
+  --bg:var(--pomelo-study-v-30dbf33a6092cf3c);--surface:var(--pomelo-study-v-2e823ea0a4f74b2e);--ink:var(--pomelo-study-v-3be1b444b55020b1);--muted:var(--pomelo-study-v-e8a9188e56cc7816);--accent:var(--pomelo-study-v-49f5ff6a8212c552);--on-accent:var(--pomelo-study-v-e08de713877c54e8);--line:var(--pomelo-study-v-e0014d41c33caa19);--radius:var(--pomelo-study-v-33a3c91b44d2f2f5);
+  --display:Georgia,'Times New Roman',serif;--body:system-ui,sans-serif;
+}
+.masthead { background:var(--pomelo-study-v-30dbf33a6092cf3c); border-block:1px solid var(--line); }
+.hero { background:transparent; border-block:1px solid var(--line); }
+.hero h1 { letter-spacing:-.067em; font-weight:400; max-width:15ch; }
+.hero-art { background:var(--pomelo-study-v-52dcd861d120323c); border-inline:1px solid var(--line); }
+.page-intro { background:transparent; border-block:3px double var(--line); }
+.page-intro h1,.section h2 { font-weight:400; letter-spacing:-.045em; }
+.card { border-width:0 0 1px; background:transparent; padding-inline:0; }
+.cases .card { border-inline-start:3px solid var(--accent); padding-inline-start:1.25rem; }
+.footer { background:var(--pomelo-study-v-63feaee18019e322); border-top:3px double var(--line); }

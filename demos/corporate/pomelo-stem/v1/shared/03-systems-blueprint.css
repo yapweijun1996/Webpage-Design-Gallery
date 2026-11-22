@@ -1,0 +1,7 @@
+:root{--bg:var(--pomelo-study-v-eff806b1c2f0fae2);--surface:var(--pomelo-study-v-060f58b1cad33299);--ink:var(--pomelo-study-v-a05dbb7f8398c9e8);--muted:var(--pomelo-study-v-89b208d5d6bec060);--accent:var(--pomelo-study-v-e3c5a2dee3c8335e);--on-accent:var(--pomelo-study-v-e08de713877c54e8);--line:var(--pomelo-study-v-568ea908e62a20e0);--display:"Arial Narrow","Trebuchet MS",sans-serif;--body:system-ui,sans-serif;--radius:var(--pomelo-study-v-33a3c91b44d2f2f5)}
+.masthead{border-bottom:var(--pomelo-study-v-828caee5871b6745);background:var(--pomelo-study-v-c8fef5456d5cb7db)}
+.hero h1,.page-intro h1{letter-spacing:-.05em}
+.hero-art{background-color:var(--pomelo-study-v-367457125cabc3ac);background-image:var(--pomelo-study-v-ff1ca6bc4095cdf8);background-size:28px 28px;border:1px solid var(--line);border-inline-start:5px solid var(--accent)}
+.cards .card{box-shadow:var(--pomelo-study-v-3f5da385f6d78bfc)}
+.section h2{border-inline-start:4px solid var(--accent);padding-inline-start:.5em}
+.footer{background:var(--pomelo-study-v-c8fef5456d5cb7db)}

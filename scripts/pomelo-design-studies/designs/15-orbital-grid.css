@@ -1,0 +1,14 @@
+:root {
+  --bg:#0b1225;--surface:#152640;--ink:#ecf7fe;--muted:#b7cbde;--accent:#93e9f7;--on-accent:#0c2130;--line:#526987;--radius:23px;
+  --display:'Trebuchet MS',system-ui,sans-serif;--body:system-ui,sans-serif;
+}
+body { background:radial-gradient(ellipse at 12% 40%,#1b304f 0,transparent 40%),var(--bg); }
+.masthead { background:#101c32; border-bottom:1px solid var(--line); }
+.hero { background:radial-gradient(ellipse at 79% 31%,#223b5b 0,transparent 61%),#111e35; border:1px solid var(--line); }
+.hero h1 { letter-spacing:-.068em; font-weight:820; }
+.hero-art { background:radial-gradient(circle,#abccee 1px,transparent 1.5px) 0 0 / 23px 23px,radial-gradient(closest-side,#2c4f75,#112139); border:1px solid #607d9d; border-radius:42%; }
+.page-intro { background:linear-gradient(112deg,#182c48,#101b32); border:1px solid var(--line); }
+.card { background:linear-gradient(155deg,#1b3552,#172843); border:1px solid #587b97; }
+.card:nth-child(even) { border-radius:3px 23px 23px 23px; }
+.section h2,.page-intro h1 { letter-spacing:-.055em; }
+.footer { background:#111e35; border-top:1px solid var(--line); }

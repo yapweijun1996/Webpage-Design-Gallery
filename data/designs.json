@@ -1008,6 +1008,45 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "pomelo-stem-v1",
+    "companyId": "pomelo-stem",
+    "slug": "v1",
+    "version": "v1",
+    "title": "Pomelo STEM Website Design Studies",
+    "description": "Explore twenty website design directions, each with Home, Services, Cases and Contact in English, Simplified Chinese and Malay.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 10,
+    "demoPath": "demos/corporate/pomelo-stem/v1/index.html",
+    "thumbnail": "demos/corporate/pomelo-stem/v1/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/pomelo-stem/v1/screenshots/1440.png",
+        "width": 1440,
+        "height": 1050
+      },
+      "tablet": {
+        "path": "demos/corporate/pomelo-stem/v1/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/pomelo-stem/v1/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design studies. This is not the official Pomelo STEM website."
+  },
+  {
     "id": "thow-kwang-v1",
     "companyId": "thow-kwang",
     "slug": "v1",

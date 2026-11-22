@@ -1,0 +1,20 @@
+{
+  "company": "Pomelo STEM",
+  "industry": "STEM & Technology",
+  "title": "Pomelo STEM - Website Design Studies",
+  "version": "v1",
+  "designStyle": "Twenty independent four-page website studies with three language versions.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/pomelo-stem/v1/",
+  "officialWebsite": "https://pomelostem.com/",
+  "disclaimer": "Independent design studies. This is not the official Pomelo STEM website.",
+  "id": "pomelo-stem-v1",
+  "companyId": "pomelo-stem",
+  "displayTitle": "Pomelo STEM Website Design Studies",
+  "summary": "Explore twenty website design directions, each with Home, Services, Cases and Contact in English, Simplified Chinese and Malay.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 10
+}

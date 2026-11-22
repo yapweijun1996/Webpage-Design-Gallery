@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Explore 20 independent Pomelo STEM website studies in English, Simplified Chinese and Malay.">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Webpage Gallery">
+  <meta name="app-version" content="1.4.0">
+  <meta name="app-build" content="9cf8aad6bdb6dc84">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <title>Pomelo STEM — Design collection</title>
+  <link rel="icon" href="../../assets/icons/gallery.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../../assets/icons/gallery-180.png">
+  <link rel="manifest" href="../../manifest.webmanifest">
+  <script src="../../src/preferences-boot.js"></script>
+  <link rel="stylesheet" href="../../assets/tokens.css">
+  <link rel="stylesheet" href="../../assets/gallery.css">
+  <link rel="stylesheet" href="../../assets/pwa.css">
+  <script type="module" src="../../src/preferences.js"></script>
+  <script type="module" src="../../src/gallery.js"></script>
+  <script type="module" src="../../src/pwa.js"></script>
+</head>
+<body class="gallery">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="system-chrome" aria-hidden="true"></div>
+  <div class="app-chrome">
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="site-identity" href="../../index.html">
+        <span class="identity-symbol" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        <span>Webpage <span class="identity-second">Design Gallery</span></span>
+      </a>
+      <nav aria-label="Gallery navigation">
+        <a class="nav-link" href="../../index.html#companies" >Companies</a>
+        <a class="nav-link" href="#about-gallery">About the gallery</a>
+      </nav>
+      <div class="header-actions">
+        <label class="preference-control language-control" title="Language" hidden>
+          <span class="visually-hidden">Language</span>
+          <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#globe"></use></svg>
+          <select id="language-select" translate="no"><option value="en" lang="en">English</option><option value="zh-Hans" lang="zh-Hans">简体中文</option><option value="ms" lang="ms">Bahasa Melayu</option></select>
+        </label>
+        <details class="palette-picker" hidden>
+          <summary title="Colour palette"><svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#palette"></use></svg><span class="visually-hidden">Colour palette</span><span class="palette-swatch palette-current" aria-hidden="true"></span><span class="palette-name">Terracotta</span></summary>
+          <fieldset class="palette-panel">
+            <legend class="visually-hidden">Colour palette</legend>
+            <label class="palette-option"><input type="radio" name="palette" value="terracotta"><span class="palette-swatch" data-swatch="terracotta" aria-hidden="true"></span><span>Terracotta</span></label>
+            <label class="palette-option"><input type="radio" name="palette" value="ocean"><span class="palette-swatch" data-swatch="ocean" aria-hidden="true"></span><span>Ocean</span></label>
+            <label class="palette-option"><input type="radio" name="palette" value="forest"><span class="palette-swatch" data-swatch="forest" aria-hidden="true"></span><span>Forest</span></label>
+            <label class="palette-option"><input type="radio" name="palette" value="plum"><span class="palette-swatch" data-swatch="plum" aria-hidden="true"></span><span>Plum</span></label>
+            <label class="palette-option"><input type="radio" name="palette" value="amber"><span class="palette-swatch" data-swatch="amber" aria-hidden="true"></span><span>Amber</span></label>
+            <label class="palette-option"><input type="radio" name="palette" value="rose"><span class="palette-swatch" data-swatch="rose" aria-hidden="true"></span><span>Rose</span></label>
+            <label class="palette-option"><input type="radio" name="palette" value="teal"><span class="palette-swatch" data-swatch="teal" aria-hidden="true"></span><span>Teal</span></label>
+            <label class="palette-option"><input type="radio" name="palette" value="indigo"><span class="palette-swatch" data-swatch="indigo" aria-hidden="true"></span><span>Indigo</span></label>
+          </fieldset>
+        </details>
+        <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark theme" title="Switch to dark theme" hidden>
+          <svg class="gallery-icon theme-icon-moon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#moon"></use></svg>
+          <svg class="gallery-icon theme-icon-sun" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#sun"></use></svg>
+        </button>
+        <span id="preferences-status" class="visually-hidden" role="status"></span>
+        <details class="gallery-settings" open>
+          <summary title="Settings"><svg class="gallery-icon settings-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#sliders"></use></svg><span class="settings-label">Settings</span> <svg class="gallery-icon settings-arrow" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#arrow-down"></use></svg></summary>
+          <div class="settings-panel">
+            <div class="gallery-preferences" hidden>
+              <label class="preference-control">
+                <span class="visually-hidden">Theme</span>
+                <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#sun"></use></svg>
+                <select id="theme-select"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select>
+              </label>
+            </div>
+            <button type="button" id="check-update" aria-describedby="check-update-description" hidden>
+              <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#info"></use></svg>
+              <span>Check updates</span>
+            </button>
+            <span id="check-update-description" hidden>Checks for a verified Gallery release.</span>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+  <aside class="update-notice" id="update-notice" hidden aria-label="Gallery update">
+    <p id="update-message" role="status" aria-live="polite"></p><button type="button" id="apply-update">Update now</button>
+  </aside>
+  <p class="connection-notice" id="connection-notice" hidden role="status">Offline. Saved collections and demos are available. Connect to open a new demo or a full screenshot.</p>
+  </div>
+  <main id="main" data-page="company">  <div class="container"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../../index.html">All companies</a><span aria-hidden="true">/</span><span aria-current="page">Pomelo STEM</span></nav></div>
+  <section class="company-intro collection-landing container" aria-labelledby="company-title">
+    <div class="company-intro-copy">
+      <p class="collection-context"><span>STEM &amp; Technology</span> · <span>Online</span></p>
+      <h1 id="company-title">Pomelo STEM<span class="company-title-dot">.</span></h1>
+      <p>Explore 20 independent Pomelo STEM website studies in English, Simplified Chinese and Malay.</p>
+      <div class="collection-actions"><a class="primary-link" href="../../demos/corporate/pomelo-stem/v1/index.html#category-1">Start browsing studies <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#arrow-right"></use></svg></a><a class="collection-alternative" href="../../demos/corporate/pomelo-stem/v1/index.html">View all 20 studies <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#arrow-right"></use></svg></a></div>
+      <a class="official-link" href="https://pomelostem.com/">Official company website <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#arrow-up-right"></use></svg></a>
+    </div>
+    <img class="collection-illustration" src="../../demos/corporate/pomelo-stem/v1/assets/thumbnail.webp" alt="" width="720" height="405" fetchpriority="high">
+  </section>
+  <section class="design-section container" data-company="pomelo-stem" aria-labelledby="designs-heading">
+    <a class="atlas-link collection-reference" href="../../style-atlas/index.html#pomelo-stem">View design references</a>
+    <div class="collection-heading"><div><h2 id="designs-heading">Explore the design<span class="count-badge">1</span></h2></div></div>
+    <aside class="concept-note"><span class="note-icon" aria-hidden="true"><svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#info"></use></svg></span><p>Independent, unofficial concepts. Not affiliated with or endorsed by Pomelo STEM.</p></aside>
+
+    <div class="design-grid"><article class="design-card" data-design="v1" data-title="Pomelo STEM Website Design Studies" data-styles="corporate editorial" data-order="10">
+      <a class="design-preview" href="../../designs/index.html?company=pomelo-stem&amp;design=v1" aria-label="View Pomelo STEM Website Design Studies details"><img src="../../demos/corporate/pomelo-stem/v1/assets/thumbnail.webp" alt="Pomelo STEM Website Design Studies desktop preview" width="720" height="450" loading="lazy"></a>
+      <div class="design-card-copy"><div class="version-row"><span class="version-badge">V1</span></div>
+      <h3><a href="../../designs/index.html?company=pomelo-stem&amp;design=v1">Pomelo STEM Website Design Studies</a></h3><p class="card-description">Explore twenty website design directions, each with Home, Services, Cases and Contact in English, Simplified Chinese and Malay.</p><div class="card-bottom"><a class="details-link" href="../../designs/index.html?company=pomelo-stem&amp;design=v1">View details</a><a class="card-action" href="../../demos/corporate/pomelo-stem/v1/index.html">Open live demo <span aria-hidden="true"><svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#arrow-up-right"></use></svg></span><span class="visually-hidden">: Pomelo STEM Website Design Studies</span></a></div></div></article></div>
+    <div class="empty-results" hidden><h3>No matching designs</h3><p>Choose another style to explore more directions.</p><button type="button" data-reset>Clear filters</button></div>
+
+
+    <a class="back-link" href="../../index.html"><svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#arrow-left"></use></svg> Back to all companies</a>
+  </section>
+</main>
+  <footer class="site-footer" id="about-gallery">
+    <div><span class="footer-brand">Good ideas deserve a place.</span><p>Independent website design concepts, organized by company.<br>Explore the possibilities. Open a demo. Find a direction.</p></div>
+    <div class="footer-note"><p>Concepts are unofficial and do not imply company endorsement.</p><a href="../../index.html">All companies <svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#arrow-up-right"></use></svg></a></div>
+  </footer>
+  <div class="app-tools"><p id="app-status" role="status" aria-live="polite">Version v1.4.0 · 9cf8aad6bdb6dc84</p><button type="button" id="install-app" hidden>Install gallery</button><details><summary>Install help &amp; offline access</summary><p>Use your browser’s Install action. On iPhone or iPad, choose Share → Add to Home Screen. The gallery saves collections and thumbnails. Open a demo online to prepare its own offline files.</p></details></div>
+  <button class="scroll-top" type="button" id="scroll-top" aria-label="Back to top" hidden><svg class="gallery-icon" aria-hidden="true" focusable="false"><use href="../../assets/icons.svg#arrow-up"></use></svg></button>
+  <dialog id="update-dialog" aria-labelledby="update-title"><svg class="update-spinner update-art" viewBox="0 0 64 64" aria-hidden="true" focusable="false"><circle class="update-art-track" cx="32" cy="32" r="27"></circle><circle class="update-art-brush" cx="32" cy="32" r="27" pathLength="100"></circle><rect class="update-art-tile" x="21" y="21" width="10" height="10" rx="1.5"></rect><rect class="update-art-tile" x="33" y="21" width="10" height="10" rx="1.5"></rect><rect class="update-art-tile" x="33" y="33" width="10" height="10" rx="1.5"></rect><rect class="update-art-tile" x="21" y="33" width="10" height="10" rx="1.5"></rect></svg><h2 id="update-title">Updating Webpage Gallery</h2><p id="update-progress" role="status">Preparing the latest version…</p><button type="button" id="close-update" hidden>Close and try again</button></dialog>
+</body>
+</html>

@@ -1,0 +1,8 @@
+:root{--bg:#142420;--surface:#1b2e27;--ink:#fff4df;--muted:#c9cfbf;--accent:#e1a97e;--on-accent:#231911;--line:#52655a;--display:"Palatino Linotype",Palatino,Georgia,serif;--body:system-ui,sans-serif;--radius:22px}
+.masthead,.footer{background:#101e1a}
+.hero h1,.page-intro h1{font-weight:400;letter-spacing:-.055em;color:#f3e8cd}
+.hero-art{background:radial-gradient(ellipse at 30% 12%,#344b3e,#172b24 74%);border:1px solid #566759;border-radius:var(--radius)}
+.page-intro{border-bottom:1px solid var(--line)}
+.card{box-shadow:inset 0 1px 0 #637166}
+.section h2{font-weight:400;letter-spacing:-.03em}
+.footer{border-top:1px solid #695545}

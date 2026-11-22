@@ -1,0 +1,8 @@
+:root{--bg:var(--pomelo-study-v-496085ab14d4f911);--surface:var(--pomelo-study-v-4cfea4dd9b6257c3);--ink:var(--pomelo-study-v-48bc6549e15bd328);--muted:var(--pomelo-study-v-d6f034cb2e9afde5);--accent:var(--pomelo-study-v-837725fd1ff678ba);--on-accent:var(--pomelo-study-v-4f5c74e3b956833b);--line:var(--pomelo-study-v-8c90503dc1e2823f);--display:Georgia,"Times New Roman",serif;--body:system-ui,sans-serif;--radius:var(--pomelo-study-v-747614001f0119ba)}
+.masthead{border-bottom:3px double var(--line)}
+.hero{border-block-end:1px solid var(--line)}
+.hero h1,.page-intro h1{font-weight:400;letter-spacing:-.065em}
+.hero-art{background:var(--pomelo-study-v-42ae926c5356a31b);border:var(--pomelo-study-v-acc2ecd3deb0e911);box-shadow:var(--pomelo-study-v-9414440591b52ce9)}
+.section h2{font-weight:400;letter-spacing:-.035em}
+.cards .card{border-radius:var(--pomelo-study-v-5feceb66ffc86f38);border-block-start:3px solid var(--accent);box-shadow:none}
+.footer{background:var(--pomelo-study-v-0aa4fdc770b570f7);border-block-start:3px double var(--line)}

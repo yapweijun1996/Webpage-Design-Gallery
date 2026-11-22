@@ -1,0 +1,9 @@
+:root{--bg:#f1f1ec;--surface:#fffef7;--ink:#202015;--muted:#555247;--accent:#e6b830;--on-accent:#251d04;--line:#bcbcaa;--display:"Arial Black",system-ui,sans-serif;--body:system-ui,sans-serif;--radius:3px}
+.masthead{background:#f6f4e9;border-bottom:2px solid #292b21}
+.hero h1,.page-intro h1{font-weight:850;letter-spacing:-.05em}
+.hero-art{background:#eece62;border:1px solid #78631e}
+.section{border-top:1px solid var(--line)}
+.cards .card{border-inline-start:4px solid #866300}
+.section h2{letter-spacing:-.035em}
+.footer{background:#24251d;color:#fff7dd}
+.footer a{color:#fff7dd}

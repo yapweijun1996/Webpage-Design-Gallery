@@ -1,0 +1,8 @@
+:root{--bg:var(--pomelo-study-v-27bd9322c32ebe5e);--surface:var(--pomelo-study-v-2c83b7505c69ea39);--ink:var(--pomelo-study-v-a62c1977918ec550);--muted:var(--pomelo-study-v-9094e4454d50e91b);--accent:var(--pomelo-study-v-8a4b95d4feb22846);--on-accent:var(--pomelo-study-v-36ae10b66c902b2d);--line:var(--pomelo-study-v-1f7a36b5839b810e);--display:"Palatino Linotype",Palatino,Georgia,serif;--body:system-ui,sans-serif;--radius:var(--pomelo-study-v-5d6c43977e743143)}
+.masthead,.footer{background:var(--pomelo-study-v-8a7ae17d2ed142b2)}
+.hero h1,.page-intro h1{font-weight:400;letter-spacing:-.055em;color:var(--pomelo-study-v-561df390cedb8a91)}
+.hero-art{background:var(--pomelo-study-v-653f4fabd451dfb1);border:var(--pomelo-study-v-c7ff6b9e316a8682);border-radius:var(--radius)}
+.page-intro{border-bottom:1px solid var(--line)}
+.card{box-shadow:var(--pomelo-study-v-9130d8e18357b5c4)}
+.section h2{font-weight:400;letter-spacing:-.03em}
+.footer{border-top:var(--pomelo-study-v-a0f31636b9d77d34)}

@@ -1,0 +1,8 @@
+:root{--bg:#f8f5e9;--surface:#fffcf1;--ink:#202216;--muted:#575940;--accent:#4d601a;--on-accent:#fffdf1;--line:#cdc8ae;--display:Georgia,"Times New Roman",serif;--body:system-ui,sans-serif;--radius:2px}
+.masthead{border-bottom:3px double var(--line)}
+.hero{border-block-end:1px solid var(--line)}
+.hero h1,.page-intro h1{font-weight:400;letter-spacing:-.065em}
+.hero-art{background:#e8e6ce;border:1px solid #c7c6a8;box-shadow:7px 7px 0 #e1ddc4}
+.section h2{font-weight:400;letter-spacing:-.035em}
+.cards .card{border-radius:0;border-block-start:3px solid var(--accent);box-shadow:none}
+.footer{background:#eeebdb;border-block-start:3px double var(--line)}

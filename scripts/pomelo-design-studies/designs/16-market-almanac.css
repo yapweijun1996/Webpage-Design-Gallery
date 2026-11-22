@@ -1,0 +1,16 @@
+:root {
+  --bg:#f5efdf; --surface:#fffbef; --ink:#172f35; --muted:#465c60;
+  --accent:#174b67; --on-accent:#fff9e8; --line:#aeb8a4;
+  --display:Georgia,'Times New Roman',serif; --body:system-ui,sans-serif;
+  --radius:2px;
+}
+body {background-image:repeating-linear-gradient(0deg,transparent 0 31px,#174b670a 31px 32px);}
+.masthead {border-block:4px double var(--accent);background:var(--bg);}
+.hero {border-block-end:4px double var(--accent);}
+.hero-copy h1,.page-intro h1 {font-weight:normal;letter-spacing:-.06em;text-wrap:balance;}
+.hero-art {border:1px solid var(--accent);outline:1px solid var(--accent);outline-offset:-8px;background-color:#e7e5d2;}
+.section h2 {font-weight:normal;}
+.cards .card {border:1px solid var(--line);border-block-start:3px double var(--accent);box-shadow:3px 3px 0 #174b671a;}
+.cases .card {border-inline-start:5px solid var(--accent);}
+.contact-grid {border-block:1px dashed var(--accent);padding-block:1rem;}
+.footer {border-top:4px double var(--accent);background:#e8e5d5;}

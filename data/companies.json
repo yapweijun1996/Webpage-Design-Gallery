@@ -64,5 +64,27 @@
       "alternativeVersion": "v2",
       "alternativeAction": "Plan your visit"
     }
+  },
+  {
+    "id": "pomelo-stem",
+    "slug": "pomelo-stem",
+    "name": "Pomelo STEM",
+    "legalName": "Pomelo STEM",
+    "initials": "PS",
+    "industry": "STEM & Technology",
+    "categories": ["corporate"],
+    "location": "Online",
+    "description": "Explore 20 independent Pomelo STEM website studies in English, Simplified Chinese and Malay.",
+    "demoDirectory": "demos/corporate/pomelo-stem",
+    "featuredVersion": "v1",
+    "status": "published",
+    "officialWebsite": "https://pomelostem.com/",
+    "landing": {
+      "image": "v1/assets/thumbnail.webp",
+      "action": "Start browsing studies",
+      "anchor": "category-1",
+      "alternativeVersion": "v1",
+      "alternativeAction": "View all 20 studies"
+    }
   }
 ]

@@ -56,6 +56,11 @@ def outputs(root, catalog, release, resources, source_bytes, precache_runtime):
         for path in resources:
             if path.name == "thumbnail.webp" or "screenshots" in path.parts:
                 continue
+            # Keep the index usable offline without precaching 240 study documents.
+            if design["id"] == "pomelo-stem-v1" and (
+                    path.is_relative_to(directory / "studies")
+                    or (path.parent == directory / "shared" and path.suffix == ".webp")):
+                continue
             if path.is_relative_to(directory) or path.is_relative_to(company_dir / "shared"):
                 files.add(path)
             # These two content collections use their first edition's small image and font library.

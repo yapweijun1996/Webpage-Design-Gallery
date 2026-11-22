@@ -1,0 +1,19 @@
+:root {
+  --bg:#edf0df; --surface:#fbfaf0; --ink:#263319; --muted:#4a5639;
+  --accent:#3b5425; --on-accent:#fff9e7; --line:#b1b89b;
+  --display:Georgia,'Times New Roman',serif; --body:system-ui,sans-serif;
+  --radius:14px;
+}
+body {
+  background-image:repeating-linear-gradient(168deg,#3b542509 0 1px,transparent 1px 18px);
+  background-attachment:scroll;
+}
+.masthead {background:#edf0df;border-block-end:1px solid var(--accent);}
+.hero-copy h1,.page-intro h1 {font-weight:500;letter-spacing:-.055em;text-wrap:balance;}
+.hero-art {background:radial-gradient(ellipse at 70% 70%,#bdc99a,#eef0d8 72%);border:1px solid var(--accent);border-radius:44% 10% 30% 12% / 16% 22% 12% 26%;}
+.section h2 {font-weight:500;}
+.cards .card,.cases .card {border:1px solid var(--line);border-inline-start:4px solid var(--accent);}
+.cards .card:nth-child(even) {background:#e2e9ce;}
+.contact-grid {border-block:1px dotted var(--accent);padding-block:1rem;}
+.footer {background:#dce4cb;}
+@media(max-width:640px){.hero-art{border-radius:26px 12px 30px 12px;}}

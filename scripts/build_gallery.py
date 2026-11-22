@@ -48,6 +48,11 @@ gjh_v1 = importlib.util.module_from_spec(GJH_V1_SPEC)
 GJH_V1_SPEC.loader.exec_module(gjh_v1)
 
 
+POMELO_SPEC = importlib.util.spec_from_file_location("pomelo_studies", ROOT / "scripts/pomelo_studies.py")
+pomelo_studies = importlib.util.module_from_spec(POMELO_SPEC)
+POMELO_SPEC.loader.exec_module(pomelo_studies)
+
+
 def read_json(path):
     return json.loads(path.read_text(encoding="utf-8-sig"))
 
@@ -270,6 +275,12 @@ def runtime_resources(catalog):
                              if path.is_file() and path.suffix in (".css", ".js"))
     for design in catalog["designs"]:
         directory = Path(design["demoPath"]).parent
+        if design["id"] == pomelo_studies.DESIGN_ID:
+            resources.update(pomelo_studies.runtime_resources(
+                ROOT, directory, Path(design["thumbnail"]),
+                {Path(item["path"]) for item in design["screenshots"].values()},
+            ))
+            continue
         resources.add(directory / "index.html")
         # Multi-page editions ship every top-level page beside index.html.
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory).glob("*.html"))
@@ -307,7 +318,7 @@ def release_info(catalog):
     # The mall entry's template and manifest own its bytes.
     inputs = [path for path in runtime_resources(catalog) if path != GJH_ENTRY]
     inputs += list((ROOT / "templates/gallery").glob("*"))
-    inputs.extend(map(Path, ("scripts/build_gallery.py", "scripts/build_demo_pwas.py", "data/app.json", GJH_FIRST_VIEW)))
+    inputs.extend(map(Path, ("scripts/build_gallery.py", "scripts/build_demo_pwas.py", "scripts/pomelo_studies.py", "data/app.json", GJH_FIRST_VIEW)))
     for name in sorted(set(path.relative_to(ROOT) if path.is_absolute() else path for path in inputs)):
         digest.update(name.as_posix().encode("utf-8") + b"\0" + source_bytes(ROOT / name))
     return {"version": version, "build": digest.hexdigest()[:16]}

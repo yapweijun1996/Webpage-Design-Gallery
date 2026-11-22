@@ -1,0 +1,14 @@
+:root {
+  --bg:#e9edff;--surface:#f8fbff;--ink:#151b49;--muted:#424a70;--accent:#cdec76;--on-accent:#171c23;--line:#7187d2;--radius:3px;
+  --display:system-ui,'Arial Black',sans-serif;--body:system-ui,sans-serif;
+}
+.masthead { background:#d9e1ff; border-bottom:2px solid #363f97; }
+.hero { background:#28368e; color:#fff; border:1px solid #182264; box-shadow:inset 0 0 0 5px #28368e,inset 0 0 0 6px #94a7ff; }
+.hero h1 { font-weight:840; letter-spacing:-.07em; }
+.hero-copy p { color:#f2f4ff; }
+.hero-art { background:repeating-linear-gradient(0deg,transparent 0 15px,#fff3 15px 16px),repeating-linear-gradient(90deg,transparent 0 15px,#fff2 15px 16px),#15225f; border:1px solid #9eabf7; }
+.page-intro { background:#d9e1ff; border-block:2px solid #4a5baa; }
+.page-intro h1,.section h2 { letter-spacing:-.065em; }
+.card { background:#fafbff; border:1px solid #7187d2; border-top:4px solid #465bbb; }
+.cases .card:nth-child(even) { background:#e1e9ff; }
+.footer { background:#d9e1ff; border-top:2px solid #6475c1; }
