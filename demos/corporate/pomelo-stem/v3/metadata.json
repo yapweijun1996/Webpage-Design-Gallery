@@ -1,0 +1,17 @@
+{
+  "company": "Pomelo STEM",
+  "industry": "STEM & Technology",
+  "title": "Pomelo STEM - Order Journey",
+  "version": "v3",
+  "designStyle": "A four-page visual narrative following a small merchant's sample order.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/pomelo-stem/v3/",
+  "officialWebsite": "https://pomelostem.com/",
+  "disclaimer": "Independent concept. The order story is fictional and does not submit an order.",
+  "id": "pomelo-stem-v3",
+  "companyId": "pomelo-stem",
+  "displayTitle": "Pomelo STEM Order Journey",
+  "summary": "Follow one illustrative order from a first enquiry to packing for pickup, in English, Simplified Chinese and Malay.",
+  "styles": ["corporate", "editorial"],
+  "order": 3
+}

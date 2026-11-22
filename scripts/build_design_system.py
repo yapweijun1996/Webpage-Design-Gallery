@@ -13,6 +13,8 @@ POMELO_TOKEN_OUTPUT = "demos/corporate/pomelo-stem/v1/shared/study-tokens.css"
 POMELO_TOKEN_SOURCE = "design-system/pomelo-study-tokens.json"
 BLUEPRINT_TOKEN_OUTPUT = "demos/corporate/pomelo-stem/v2/assets/blueprint-tokens.css"
 BLUEPRINT_TOKEN_SOURCE = "design-system/pomelo-blueprint-tokens.json"
+ORDER_JOURNEY_TOKEN_OUTPUT = "demos/corporate/pomelo-stem/v3/assets/journey-tokens.css"
+ORDER_JOURNEY_TOKEN_SOURCE = "design-system/pomelo-order-journey-tokens.json"
 DEMO_THEME_OUTPUTS = {
     "v20": "demos/corporate/gjh/v20/assets/theme.css",
     "v21": "demos/corporate/gjh/v21/assets/theme.css",
@@ -183,6 +185,7 @@ def outputs(root=ROOT):
     return {"assets/tokens.css": render_tokens(root), "assets/icons.svg": render_icons(root),
             POMELO_TOKEN_OUTPUT: render_pomelo_tokens(root),
             BLUEPRINT_TOKEN_OUTPUT: render_pomelo_tokens(root, BLUEPRINT_TOKEN_SOURCE),
+            ORDER_JOURNEY_TOKEN_OUTPUT: render_pomelo_tokens(root, ORDER_JOURNEY_TOKEN_SOURCE),
             "assets/gjh-themes.css": render_themes(root, lambda version: version not in DEMO_THEME_OUTPUTS),
             **{path: render_themes(root, lambda version: version == edition)
                for edition, path in DEMO_THEME_OUTPUTS.items()}}

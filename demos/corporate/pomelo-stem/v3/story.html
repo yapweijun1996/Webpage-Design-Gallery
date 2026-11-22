@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Story | Pomelo STEM</title><link rel="stylesheet" href="./assets/journey-tokens.css"><link rel="stylesheet" href="./assets/style.css"></head><body><a class="skip" href="#main">Skip to content</a><header class="sitehead"><div class="wrap"><a class="brand" href="./index.html"><img width="38" height="38" alt="" src="./assets/logo.png">Pomelo STEM</a><nav class="nav" aria-label="Main navigation"><a href="./index.html" data-nav="en/index">Home</a><a href="./story.html" data-nav="en/story" aria-current="page" class="current">Story</a><a href="./services.html" data-nav="en/services">Services</a><a href="./contact.html" data-nav="en/contact">Contact</a></nav><nav class="languages" aria-label="Language"><a lang="en" href="./story.html" data-swap="en" aria-current="true">English</a><a lang="zh-Hans" href="./zh/story.html" data-swap="zh">简体中文</a><a lang="ms" href="./ms/story.html" data-swap="ms">Bahasa Melayu</a></nav></div></header><main id="main" tabindex="-1"><section class="cover-slim"><div class="wrap"><p class="tag">Illustrative order · PS-0124</p><h1>The order journey</h1><p>The phone lights up at a small shop. Two connectors are easy to count. One unanswered question decides what happens next.</p></div></section><section class="story page-story wrap"><nav class="chapter-nav" aria-label="Story chapters"><a href="#en-chapter-1">01 · A message, not yet an order</a><a href="#en-chapter-2">02 · One detail changes the next step</a><a href="#en-chapter-3">03 · The packing team has what it needs</a></nav><div class="story-stack"><article class="chapter" id="en-chapter-1" data-chapter><img class="" width="1536" height="1024" src="./assets/story-message.webp" alt="The shopkeeper reads a product enquiry on her phone beside the window."><div class="copy"><p class="chapnum">01</p><h2 tabindex="-1">A message, not yet an order</h2><p>“Can I get two SPL2 connectors?” The shopkeeper writes down the item and quantity. Before promising anything, she asks one more question: “Pickup or delivery?”</p><p class="lesson"><strong>Waiting for an answer</strong><br>SPL2 × 2 · Receiving method not confirmed</p></div></article><article class="chapter" id="en-chapter-2" data-chapter><img class="" width="1536" height="1024" src="./assets/story-review.webp" alt="The shopkeeper checks a paper slip against two connectors on the workbench."><div class="copy"><p class="chapnum">02</p><h2 tabindex="-1">One detail changes the next step</h2><p>“I’ll pick them up.” She adds the answer to the slip, checks both connectors against the request, and approves it. The draft is now a checked order.</p><p class="lesson"><strong>Approved by the shopkeeper</strong><br>SPL2 × 2 · Customer pickup confirmed</p></div></article><article class="chapter" id="en-chapter-3" data-chapter><img class="" width="1536" height="1024" src="./assets/story-pack.webp" alt="The shopkeeper lowers a pouch with two connectors into a kraft-lined box."><div class="copy"><p class="chapnum">03</p><h2 tabindex="-1">The packing team has what it needs</h2><p>Two connectors go into the box. The packing team works from the approved slip, not the chat thread. The box stays at the shop for pickup.</p><p class="lesson"><strong>Packed, awaiting pickup</strong><br>SPL2 × 2 · Pickup · Not shipped</p></div></article></div></section><section class="journey-end"><div class="wrap"><h2>A small check makes the handoff clear.</h2><p>See where the catalog, chat, drafting and team handoff fit in the same workflow.</p><div class="actions"><a class="btn" href="./services.html">Explore services</a></div></div></section></main><footer class="sitefoot"><div class="wrap"><nav class="nav" aria-label="Main navigation"><a href="./index.html" data-nav="en/index">Home</a><a href="./story.html" data-nav="en/story" aria-current="page" class="current">Story</a><a href="./services.html" data-nav="en/services">Services</a><a href="./contact.html" data-nav="en/contact">Contact</a></nav><p>Fictional order and illustrative imagery. No real orders, messages or personal data are collected here.</p></div></footer><script>
+'use strict';
+function focusChapter(hash) {
+ const article=document.getElementById(hash);
+ const heading=article?.matches('[data-chapter]') ? article.querySelector('h2[tabindex="-1"]') : null;
+ if(!heading)return;
+ article.scrollIntoView({block:'start'});
+ heading.focus({preventScroll:true});
+}
+// A fresh fragment navigation can replace parser-time focus during the load.
+// Restore it only if the chapter is still current and the user has not moved focus.
+const initialChapter=location.hash;
+if(/^#(en|zh|ms)-chapter-[123]$/.test(initialChapter)){
+ window.addEventListener('load',()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   if(location.hash===initialChapter&&document.activeElement===document.body)focusChapter(initialChapter.slice(1));
+ })),{once:true});
+}
+// A second activation of the current link does not fire hashchange.
+document.addEventListener('click',event=>{
+ if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+ const link=event.target.closest('.chapter-nav a');
+ const hash=location.hash;
+ if(link&&hash&&link.getAttribute('href')===hash){
+   event.preventDefault();focusChapter(hash.slice(1));
+ }
+});
+
+function followChapter(){focusChapter(location.hash.slice(1))}
+window.addEventListener('hashchange',followChapter);
+followChapter();
+</script></body></html>

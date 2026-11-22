@@ -27,6 +27,7 @@ class GalleryTests(unittest.TestCase):
             designs = [d for d in catalog["designs"] if d["companyId"] == company["id"]]
             if company["id"] == "pomelo-stem":
                 self.assertEqual([(d["id"], d["demoPath"]) for d in designs], [
+                    ("pomelo-stem-v3", "demos/corporate/pomelo-stem/v3/index.html"),
                     ("pomelo-stem-v2", "demos/corporate/pomelo-stem/v2/index.html"),
                     ("pomelo-stem-v1", "demos/corporate/pomelo-stem/v1/index.html")
                 ])
@@ -104,8 +105,11 @@ class GalleryTests(unittest.TestCase):
         self.assertIn(f'class="collection-alternative" href="../../{route}"', page)
         self.assertIn('href="../../demos/corporate/pomelo-stem/v2/index.html"', page)
         self.assertIn('Pomelo STEM Systems Blueprint', page)
+        self.assertIn('href="../../demos/corporate/pomelo-stem/v3/index.html"', page)
+        self.assertIn('Pomelo STEM Order Journey', page)
         v1_only = gallery.load_catalog()
-        v1_only["designs"] = [d for d in v1_only["designs"] if d["id"] != "pomelo-stem-v2"]
+        v1_only["designs"] = [d for d in v1_only["designs"]
+                              if d["companyId"] != "pomelo-stem" or d["id"] == "pomelo-stem-v1"]
         self.assertNotIn('class="compare-checkbox"', gallery.build_pages(v1_only)["companies/pomelo-stem/index.html"])
         hub = (ROOT / route).read_text(encoding="utf-8")
         for category in range(1, 6):
@@ -224,6 +228,27 @@ class GalleryTests(unittest.TestCase):
             gallery_sw = (output / "sw.js").read_text(encoding="utf-8")
             self.assertEqual(set(re.findall(r'"path": "(demos/corporate/pomelo-stem/v2/[^"]+)"', gallery_sw)),
                              {(blueprint.DIRECTORY / blueprint.THUMBNAIL).as_posix()})
+            journey = gallery.pomelo_order_journey
+            scope = output / journey.DIRECTORY
+            expected = journey.HTML | journey.ASSETS | {journey.THUMBNAIL} | journey.SCREENSHOTS
+            self.assertEqual(len(journey.HTML), 12)
+            self.assertEqual({file.relative_to(scope) for file in scope.rglob("*") if file.is_file()}, expected)
+            for path in journey.HTML:
+                source = (scope / path).read_text(encoding="utf-8")
+                self.assertIn('content="noindex,nofollow"', source, path)
+                self.assertNotIn("serviceWorker", source, path)
+                self.assertNotRegex(source, r'https?://(?:wa\.me|api\.whatsapp\.com)', path)
+                self.assertNotRegex(source, r'<(?:img|script|link|iframe)\b[^>]*(?:src|href)="https?://', path)
+                for href in re.findall(r'(?:href|src)="(\.{1,2}/[^"#]+)', source):
+                    target = (scope / path.parent / href).resolve()
+                    self.assertTrue(target.is_relative_to(scope.resolve()) and target.is_file(), (path, href))
+            for locale, status in (("", "Packed, awaiting pickup"), ("zh", "已打包，待自取"),
+                                   ("ms", "Sudah dibungkus, sedia untuk diambil")):
+                story = (scope / locale / "story.html").read_text(encoding="utf-8")
+                self.assertIn("PS-0124", story)
+                self.assertIn(status, story)
+            self.assertEqual(set(re.findall(r'"path": "(demos/corporate/pomelo-stem/v3/[^"]+)"', gallery_sw)),
+                             {(journey.DIRECTORY / journey.THUMBNAIL).as_posix()})
             gallery_models = Path("demos/corporate/gjh/v11/assets/gallery-assets")
             for source in (gallery.ROOT / gallery_models).glob("*.glb"):
                 self.assertEqual((output / gallery_models / source.name).read_bytes(), source.read_bytes())

@@ -54,6 +54,9 @@ POMELO_SPEC.loader.exec_module(pomelo_studies)
 BLUEPRINT_SPEC = importlib.util.spec_from_file_location("pomelo_blueprint", ROOT / "scripts/pomelo_blueprint.py")
 pomelo_blueprint = importlib.util.module_from_spec(BLUEPRINT_SPEC)
 BLUEPRINT_SPEC.loader.exec_module(pomelo_blueprint)
+ORDER_JOURNEY_SPEC = importlib.util.spec_from_file_location("pomelo_order_journey", ROOT / "scripts/pomelo_order_journey.py")
+pomelo_order_journey = importlib.util.module_from_spec(ORDER_JOURNEY_SPEC)
+ORDER_JOURNEY_SPEC.loader.exec_module(pomelo_order_journey)
 
 
 def read_json(path):
@@ -291,6 +294,13 @@ def runtime_resources(catalog):
                 pomelo_studies.regular_file,
             ))
             continue
+        if design["id"] == pomelo_order_journey.DESIGN_ID:
+            resources.update(pomelo_order_journey.runtime_resources(
+                ROOT, directory, Path(design["thumbnail"]),
+                {Path(item["path"]) for item in design["screenshots"].values()},
+                pomelo_studies.regular_file,
+            ))
+            continue
         resources.add(directory / "index.html")
         # Multi-page editions ship every top-level page beside index.html.
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory).glob("*.html"))
@@ -328,7 +338,7 @@ def release_info(catalog):
     # The mall entry's template and manifest own its bytes.
     inputs = [path for path in runtime_resources(catalog) if path != GJH_ENTRY]
     inputs += list((ROOT / "templates/gallery").glob("*"))
-    inputs.extend(map(Path, ("scripts/build_gallery.py", "scripts/build_demo_pwas.py", "scripts/pomelo_studies.py", "scripts/pomelo_blueprint.py", "data/app.json", GJH_FIRST_VIEW)))
+    inputs.extend(map(Path, ("scripts/build_gallery.py", "scripts/build_demo_pwas.py", "scripts/pomelo_studies.py", "scripts/pomelo_blueprint.py", "scripts/pomelo_order_journey.py", "data/app.json", GJH_FIRST_VIEW)))
     for name in sorted(set(path.relative_to(ROOT) if path.is_absolute() else path for path in inputs)):
         digest.update(name.as_posix().encode("utf-8") + b"\0" + source_bytes(ROOT / name))
     return {"version": version, "build": digest.hexdigest()[:16]}

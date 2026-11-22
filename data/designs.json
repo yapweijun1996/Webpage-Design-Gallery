@@ -1008,6 +1008,45 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "pomelo-stem-v3",
+    "companyId": "pomelo-stem",
+    "slug": "v3",
+    "version": "v3",
+    "title": "Pomelo STEM Order Journey",
+    "description": "Follow one illustrative order from a first enquiry to packing for pickup, in English, Simplified Chinese and Malay.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 3,
+    "demoPath": "demos/corporate/pomelo-stem/v3/index.html",
+    "thumbnail": "demos/corporate/pomelo-stem/v3/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/pomelo-stem/v3/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/pomelo-stem/v3/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/pomelo-stem/v3/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent concept. The order story is fictional and does not submit an order."
+  },
+  {
     "id": "pomelo-stem-v2",
     "companyId": "pomelo-stem",
     "slug": "v2",

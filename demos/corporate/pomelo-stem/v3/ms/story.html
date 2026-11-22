@@ -1,0 +1,31 @@
+<!doctype html><html lang="ms"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>Cerita | Pomelo STEM</title><link rel="stylesheet" href="../assets/journey-tokens.css"><link rel="stylesheet" href="../assets/style.css"></head><body><a class="skip" href="#main">Langkau ke kandungan</a><header class="sitehead"><div class="wrap"><a class="brand" href="./index.html"><img width="38" height="38" alt="" src="../assets/logo.png">Pomelo STEM</a><nav class="nav" aria-label="Navigasi utama"><a href="./index.html" data-nav="ms/index">Utama</a><a href="./story.html" data-nav="ms/story" aria-current="page" class="current">Cerita</a><a href="./services.html" data-nav="ms/services">Perkhidmatan</a><a href="./contact.html" data-nav="ms/contact">Hubungi</a></nav><nav class="languages" aria-label="Bahasa"><a lang="en" href="../story.html" data-swap="en">English</a><a lang="zh-Hans" href="../zh/story.html" data-swap="zh">简体中文</a><a lang="ms" href="./story.html" data-swap="ms" aria-current="true">Bahasa Melayu</a></nav></div></header><main id="main" tabindex="-1"><section class="cover-slim"><div class="wrap"><p class="tag">Contoh pesanan · PS-0124</p><h1>Perjalanan satu pesanan</h1><p>Telefon menyala di sebuah kedai kecil. Mudah untuk mengira dua penyambung. Namun, satu soalan yang belum dijawab menentukan langkah seterusnya.</p></div></section><section class="story page-story wrap"><nav class="chapter-nav" aria-label="Bab cerita"><a href="#ms-chapter-1">01 · Mesej diterima, pesanan belum disahkan</a><a href="#ms-chapter-2">02 · Satu butiran menentukan langkah seterusnya</a><a href="#ms-chapter-3">03 · Pasukan pembungkusan ada semua butiran</a></nav><div class="story-stack"><article class="chapter" id="ms-chapter-1" data-chapter><img class="" width="1536" height="1024" src="../assets/story-message.webp" alt="Peniaga membaca pertanyaan produk pada telefon di sebelah tingkap."><div class="copy"><p class="chapnum">01</p><h2 tabindex="-1">Mesej diterima, pesanan belum disahkan</h2><p>“Boleh saya pesan dua penyambung SPL2?” Peniaga mencatat produk dan kuantiti. Sebelum menjanjikan apa-apa, dia bertanya: “Ambil sendiri atau mahu penghantaran?”</p><p class="lesson"><strong>Menunggu jawapan pelanggan</strong><br>SPL2 × 2 · Kaedah penerimaan belum disahkan</p></div></article><article class="chapter" id="ms-chapter-2" data-chapter><img class="" width="1536" height="1024" src="../assets/story-review.webp" alt="Peniaga menyemak slip pesanan dengan dua penyambung di atas meja kerja."><div class="copy"><p class="chapnum">02</p><h2 tabindex="-1">Satu butiran menentukan langkah seterusnya</h2><p>“Saya akan ambil di kedai.” Peniaga mencatat jawapan itu, menyemak kedua-dua penyambung mengikut permintaan, kemudian meluluskan pesanan.</p><p class="lesson"><strong>Diluluskan oleh peniaga</strong><br>SPL2 × 2 · Pelanggan akan mengambil sendiri</p></div></article><article class="chapter" id="ms-chapter-3" data-chapter><img class="" width="1536" height="1024" src="../assets/story-pack.webp" alt="Peniaga meletakkan beg kecil berisi dua penyambung ke dalam kotak beralas kertas kraft."><div class="copy"><p class="chapnum">03</p><h2 tabindex="-1">Pasukan pembungkusan ada semua butiran</h2><p>Dua penyambung masuk ke dalam kotak. Pasukan berpandukan slip yang telah disahkan, bukan perbualan asal. Bungkusan kekal di kedai untuk diambil.</p><p class="lesson"><strong>Sudah dibungkus, sedia untuk diambil</strong><br>SPL2 × 2 · Ambil sendiri · Tidak dihantar</p></div></article></div></section><section class="journey-end"><div class="wrap"><h2>Satu semakan menjadikan serahan lebih jelas.</h2><p>Lihat peranan katalog, perbualan, draf dan serahan tugas dalam aliran kerja yang sama.</p><div class="actions"><a class="btn" href="./services.html">Terokai perkhidmatan</a></div></div></section></main><footer class="sitefoot"><div class="wrap"><nav class="nav" aria-label="Navigasi utama"><a href="./index.html" data-nav="ms/index">Utama</a><a href="./story.html" data-nav="ms/story" aria-current="page" class="current">Cerita</a><a href="./services.html" data-nav="ms/services">Perkhidmatan</a><a href="./contact.html" data-nav="ms/contact">Hubungi</a></nav><p>Pesanan dan gambar adalah ilustrasi. Halaman ini tidak membuat pesanan sebenar, menghantar mesej atau mengumpul maklumat peribadi.</p></div></footer><script>
+'use strict';
+function focusChapter(hash) {
+ const article=document.getElementById(hash);
+ const heading=article?.matches('[data-chapter]') ? article.querySelector('h2[tabindex="-1"]') : null;
+ if(!heading)return;
+ article.scrollIntoView({block:'start'});
+ heading.focus({preventScroll:true});
+}
+// A fresh fragment navigation can replace parser-time focus during the load.
+// Restore it only if the chapter is still current and the user has not moved focus.
+const initialChapter=location.hash;
+if(/^#(en|zh|ms)-chapter-[123]$/.test(initialChapter)){
+ window.addEventListener('load',()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   if(location.hash===initialChapter&&document.activeElement===document.body)focusChapter(initialChapter.slice(1));
+ })),{once:true});
+}
+// A second activation of the current link does not fire hashchange.
+document.addEventListener('click',event=>{
+ if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+ const link=event.target.closest('.chapter-nav a');
+ const hash=location.hash;
+ if(link&&hash&&link.getAttribute('href')===hash){
+   event.preventDefault();focusChapter(hash.slice(1));
+ }
+});
+
+function followChapter(){focusChapter(location.hash.slice(1))}
+window.addEventListener('hashchange',followChapter);
+followChapter();
+</script></body></html>
