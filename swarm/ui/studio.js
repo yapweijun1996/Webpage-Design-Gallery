@@ -5,13 +5,10 @@
   const ns = 'http://www.w3.org/2000/svg';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const query = new URLSearchParams(location.search);
-  const previewMode = query.get('preview');
-  const previewUrl = '/studio.html?preview=1';
   const devices = { desktop: 1440, tablet: 768, mobile: 393 };
   const deviceHeights = { desktop: 900, tablet: 1024, mobile: 844 };
   const viewport = $('view');
-  let stage, page, layer, linksSvg, S;
-  let hosts = {}, cur = {}, hash = {}, seed = {}, order = [];
+  let S, order = [];
   let zoom = 1, overlays = false, bubbles = true;
 
   function readStore(key) {
@@ -29,203 +26,6 @@
     return el;
   }
 
-  function hh(s) { var x = 0; for (var i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) | 0; return x; }
-  function fetchText(u) { return fetch(u + '?_=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; }); }
-
-  function makeStage() {
-    stage = node('div');
-    stage.id = 'stage';
-    page = node('div');
-    page.id = 'page';
-    layer = node('div');
-    layer.id = 'cursors';
-    layer.setAttribute('aria-hidden', 'true');
-    stage.append(page, layer);
-    document.body.className = 'studio-stage';
-    document.body.replaceChildren(stage);
-  }
-
-  function build(state) {
-    S = state;
-    page.replaceChildren();
-    layer.replaceChildren();
-    linksSvg = stage.ownerDocument.createElementNS(ns, 'svg');
-    linksSvg.setAttribute('class', 'links');
-    layer.append(linksSvg);
-    hosts = {};
-    cur = {};
-    hash = {};
-    seed = {};
-    order = Object.keys(S.agents).sort();
-    for (const [index, id] of order.entries()) {
-      const agent = S.agents[id];
-      if (agent.section) {
-        const host = node('div', 'host');
-        host.id = 'host-' + id;
-        host.style.setProperty('--c', agent.color);
-        host.append(node('div', 'stub', agent.name + ' · ' + agent.section), node('style'), node('div', 'body'));
-        page.append(host);
-        hosts[id] = { el: host, timer: 0 };
-        load(id, false);
-      }
-      if (previewMode) continue;
-      const cursor = node('div', 'cursor');
-      cursor.style.setProperty('--c', agent.color);
-      cursor.innerHTML = '<div class="in"><svg viewBox="0 0 18 22"><path d="M1 1l15 8-6.5 1.8L7 17z" fill="var(--c)" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg><div class="who"><span class="name"></span><span class="act"></span><div class="bub"></div></div></div>';
-      cursor.querySelector('.name').textContent = agent.name;
-      layer.append(cursor);
-      cur[id] = { el: cursor, t: 0, working: /^working/.test(agent.status || '') };
-      seed[id] = index * 7;
-    }
-    if (!previewMode) {
-      updateProject();
-      initChannel();
-      renderLanes();
-      const started = (state.feed || []).findLast(event => state.phase === 'running'
-        ? event.type === 'phase' && event.phase === 'running'
-        : event.type === 'busy' && event.busy);
-      setPhase(started?.ts);
-      onViewChange(false);
-    }
-  }
-
-  // A cursor is visible only while its agent is really working or did something in the last 6 s (no idle ghosts).
-  function touch(id, ms) { if (cur[id]) { cur[id].until = Date.now() + (ms || 6000); sweepLive(); } }
-  function sweepLive() { var now = Date.now(); Object.keys(cur).forEach(function (id) { var c = cur[id]; c.el.classList.toggle('live', !!c.working || (c.until || 0) > now); }); }
-  setInterval(sweepLive, 1000);
-  function actText(e) {
-    var cmd = String(e.cmd || '');
-    var m = /(?:sections|notes|discussion|chat|inbox)\/[\w.\-]+|[\w\-]+\.(?:md|html|css|jsonl|json|js)\b/.exec(cmd);
-    if (m) return e.verb + ' ' + m[0];
-    return 'running ' + cmd.replace(/^["']+|["']+$/g, '').replace(/\s+/g, ' ').slice(0, 26);
-  }
-  function setAct(id, text) { var el = cur[id] && cur[id].el.querySelector('.act'); if (el) { el.textContent = text || ''; el.title = text || ''; } }
-
-  function load(id, animate) {
-    var a = S.agents[id], host = hosts[id], base = '/p/sections/' + id + '-' + a.section;
-    return Promise.all([fetchText(base + '.html'), fetchText(base + '.css')]).then(function (r) {
-      if (hosts[id] !== host) return;
-      var h = hh(r[0] + '|' + r[1]); if (hash[id] === h) return; hash[id] = h;
-      var el = hosts[id].el, filled = r[0].trim().length > 60;
-      var prevHtml = el.querySelector('.body').innerHTML, prevCss = el.querySelector('style').textContent;
-      el.querySelector('.stub').style.display = filled ? 'none' : '';
-      el.querySelector('.body').innerHTML = r[0]; el.querySelector('style').textContent = r[1];
-      stage.ownerDocument.defaultView.SDS?.i18n?.apply();
-      if (animate && filled && overlays) wipe(id);
-      placeAll();
-      if (animate && filled && (prevHtml.trim() || prevCss.trim())) visitChanges(id, changedElements(el, prevHtml, r[0], prevCss, r[1]));
-    });
-  }
-
-  // ---- real change detection: compare the previous and the new fragment and find the elements that differ
-  function changedElements(host, prevHtml, newHtml, prevCss, newCss) {
-    var out = [], body = host.querySelector('.body'), tp = document.createElement('template');
-    tp.innerHTML = prevHtml;
-    function add(n) { if (n && n.nodeType === 1 && out.indexOf(n) < 0 && out.length < 12) out.push(n); }
-    function attrs(n) { return Array.prototype.map.call(n.attributes, function (x) { return x.name + '=' + x.value; }).join(';'); }
-    function walk(a, b) {
-      if (!b) return;
-      if (!a) { add(b.nodeType === 1 ? b : b.parentNode); return; }
-      if (a.nodeType !== b.nodeType) { add(b.nodeType === 1 ? b : b.parentNode); return; }
-      if (b.nodeType === 3) { if (a.nodeValue !== b.nodeValue) add(b.parentNode); return; }
-      if (b.nodeType !== 1) return;
-      if (a.tagName !== b.tagName || attrs(a) !== attrs(b)) { add(b); return; }
-      var n = Math.max(a.childNodes.length, b.childNodes.length);
-      for (var i = 0; i < n; i++) walk(a.childNodes[i], b.childNodes[i]);
-    }
-    var ca = tp.content.childNodes, cb = body.childNodes, n = Math.max(ca.length, cb.length);
-    for (var i = 0; i < n; i++) walk(ca[i], cb[i]);
-    if (prevCss !== newCss) {
-      var old = {}; prevCss.split('}').forEach(function (r) { old[r.trim()] = 1; });
-      newCss.split('}').forEach(function (r) {
-        r = r.trim(); if (!r || old[r] || r.charAt(0) === '@') return;
-        var sel = r.slice(0, r.indexOf('{')); if (!sel) return;
-        sel.split(',').forEach(function (one) { try { var q = host.querySelectorAll(one.trim().replace(/::?[\w-]+(\([^)]*\))?\s*$/, '')); for (var k = 0; k < Math.min(q.length, 2); k++) add(q[k]); } catch (_) {} });
-      });
-    }
-    return out;
-  }
-  function localPos(el) { var x = 0, y = 0, n = el; while (n && n !== stage) { x += n.offsetLeft || 0; y += n.offsetTop || 0; n = n.offsetParent; } return { x: x, y: y }; }
-  // The cursor hops over the really changed elements, one by one, and each gets an outline in the agent colour.
-  function visitChanges(id, els) {
-    var c = cur[id]; if (!c || !els.length) return;
-    var color = S.agents[id].color;
-    c.pinned = true; setAct(id, 'editing ' + els.length + ' element' + (els.length > 1 ? 's' : ''));
-    touch(id, els.length * 420 + 4000);
-    els.forEach(function (n, i) {
-      setTimeout(function () {
-        if (!n.isConnected) return;
-        var p = localPos(n); c.el.style.left = (p.x + 10) + 'px'; c.el.style.top = (p.y + 4) + 'px';
-        if (overlays && !reducedMotion.matches) {
-          n.animate([{ outline: '2px solid ' + color, outlineOffset: '2px' },
-            { outline: '2px solid transparent', outlineOffset: '2px' }], { duration: 1400, easing: 'steps(1, end)' });
-        }
-      }, i * 420);
-    });
-  }
-
-  function wipe(id) {
-    var el = hosts[id].el, body = el.querySelector('.body');
-    if (reducedMotion.matches) return;
-    body.animate([{ clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 1300, easing: 'cubic-bezier(.2,.7,.2,1)' });
-    var s = document.createElement('div'); s.className = 'scan'; el.appendChild(s);
-    var h = el.offsetHeight;
-    var an = s.animate([{ top: '0px', opacity: 1 }, { top: Math.max(h - 3, 0) + 'px', opacity: 1 }, { top: Math.max(h - 3, 0) + 'px', opacity: 0 }], { duration: 1500, easing: 'cubic-bezier(.2,.7,.2,1)' });
-    an.onfinish = function () { s.remove(); };
-  }
-
-  function mark(id, target) {
-    var h = hosts[target]; if (!h) return;
-    h.el.style.setProperty('--c', S.agents[id].color); h.el.classList.add('editing');
-    clearTimeout(h.timer); h.timer = setTimeout(function () { h.el.classList.remove('editing'); }, 2600);
-  }
-  function pulse(id) { mark(id, id); }
-
-  function place(id, target, force) {
-    if (!cur[id]) return;
-    if (cur[id] && cur[id].pinned && !force) return;
-    var h = hosts[target || S.agents[id].target || id]; if (!h) return;
-    var idx = order.indexOf(id), w = stage.clientWidth || 1000, th = h.el.offsetHeight || 100;
-    var x = 12 + (idx % 5) * (w * 0.16) + (idx >= 5 ? w * 0.07 : 0);
-    var y = h.el.offsetTop + 10 + (seed[id] * 53 % Math.max(th - 70, 30));
-    cur[id].el.style.left = x + 'px'; cur[id].el.style.top = y + 'px';
-  }
-  function placeAll() { if (S) order.forEach(function (id) { place(id); }); }
-
-  // Agent-to-agent talk: a dashed line between the two cursors for a few seconds, so the discussion is visible on the page.
-  function talkLink(from, tos, text) {
-    var a = cur[from]; if (!a || !S.agents[from]) return;
-    var names = [];
-    touch(from, 7000);
-    place(from, S.agents[from].target || from, true);
-    tos.forEach(function (t) {
-      var b = cur[t]; if (!b || t === from || !S.agents[t]) return;
-      names.push(S.agents[t].name); touch(t, 7000);
-      if (!b.pinned) place(t, t, true);
-      setTimeout(function () {
-        if (!linksSvg) return;
-        var x1 = parseFloat(a.el.style.left) + 9, y1 = parseFloat(a.el.style.top) + 11, x2 = parseFloat(b.el.style.left) + 9, y2 = parseFloat(b.el.style.top) + 11;
-        if (isNaN(x1 + y1 + x2 + y2)) return;
-        var ns = 'http://www.w3.org/2000/svg', col = S.agents[from]?.color;
-        if (!col || a !== cur[from] || b !== cur[t]) return;
-        var ln = stage.ownerDocument.createElementNS(ns, 'line'); ln.setAttribute('x1', x1); ln.setAttribute('y1', y1); ln.setAttribute('x2', x2); ln.setAttribute('y2', y2); ln.setAttribute('stroke', col);
-        var dot = stage.ownerDocument.createElementNS(ns, 'circle'); dot.setAttribute('cx', x2); dot.setAttribute('cy', y2); dot.setAttribute('r', 6); dot.setAttribute('fill', col);
-        linksSvg.appendChild(ln); linksSvg.appendChild(dot);
-        setTimeout(function () { ln.remove(); dot.remove(); }, 6600);
-      }, 520);
-    });
-    if (names.length) say(from, '\u2192 ' + names.join(', ') + ': ' + text, true);
-  }
-
-  var lastTalk = {};
-  function say(id, text, fromChat) {
-    var c = cur[id]; if (!c) return;
-    if (fromChat) lastTalk[id] = Date.now();
-    c.el.querySelector('.bub').textContent = text; c.el.classList.add('talk');
-    clearTimeout(c.t); c.t = setTimeout(function () { c.el.classList.remove('talk'); }, 9000);
-  }
-
-
   function startEvents(onEvent, onError) {
     const stream = new EventSource('/events');
     stream.onmessage = event => onEvent(JSON.parse(event.data));
@@ -239,39 +39,61 @@
     return light;
   }
 
-  if (previewMode) {
-    syncThemeAttribute();
-    SDS.on('themechange', syncThemeAttribute);
+  function appearance() {
+    return { theme: SDS.theme.get(), brand: SDS.brand.get(), lang: SDS.lang.get() };
+  }
+
+  function previewAgents() {
+    return order.map(id => {
+      const { section, name, color, status, target } = S.agents[id];
+      return { id, section, name, color, status, target };
+    });
+  }
+
+  function setState(state) {
+    S = state;
+    order = Object.keys(state.agents).sort();
+  }
+
+  function refreshPreview(send, event) {
+    if (event.kind !== 'sections') return;
+    // A layer edit is attributed to its specialist, while the file identifies the section to refresh.
+    const section = /^sections[\\/](\d{2})-/.exec(event.file)?.[1] || event.id;
+    if (S?.agents[section]?.section) send('edit', section);
+  }
+
+  if (query.get('preview')) {
+    const preview = node('iframe');
+    preview.title = 'Actual project preview';
+    document.body.className = 'studio-stage studio-device-preview';
+    document.body.replaceChildren(preview);
     const requestedWidth = Number(query.get('w'));
-    // The comparison frame can be narrower than the selected device. Keep its
-    // content viewport at the requested width before the comparison scales it.
-    if (previewMode === '1' && Object.values(devices).includes(requestedWidth)) {
-      document.body.className = 'studio-stage studio-device-preview';
-      const preview = node('iframe');
-      preview.title = 'Actual project preview';
-      preview.src = previewUrl;
-      preview.style.width = requestedWidth + 'px';
-      document.body.replaceChildren(preview);
-      const fitDevice = () => {
-        const scale = Math.min(1, innerWidth / requestedWidth);
-        preview.style.zoom = scale;
-        preview.style.height = Math.floor(innerHeight / scale) + 'px';
-      };
-      fitDevice();
-      addEventListener('resize', fitDevice);
-      return;
+    const width = Object.values(devices).includes(requestedWidth) ? requestedWidth : 0;
+    function fitDevice() {
+      const scale = width ? Math.min(1, innerWidth / width) : 1;
+      preview.style.width = (width || innerWidth) + 'px';
+      preview.style.zoom = scale;
+      preview.style.height = Math.floor(innerHeight / scale) + 'px';
     }
-    makeStage();
-    if (previewMode !== 'embedded') {
-      startEvents(event => {
-        if (event.type === 'state') build(event.state);
-        else if (event.type === 'edit' && event.kind === 'sections' && hosts[event.id]) load(event.id, false);
-      });
-      addEventListener('storage', event => {
-        const preference = { 'sds.theme': 'theme', 'sds.brand': 'brand', 'sds.lang': 'lang' }[event.key];
-        if (preference) SDS[preference].set(event.newValue);
-      });
-    }
+    fitDevice();
+    addEventListener('resize', fitDevice);
+    const publish = () => send('appearance', appearance());
+    const send = StudioPreview.connect(preview, null, () => {
+      publish();
+      if (S) send('roster', previewAgents());
+    });
+    preview.src = StudioPreview.stage;
+    for (const key of ['theme', 'brand', 'lang']) SDS.on(key + 'change', publish);
+    addEventListener('storage', event => {
+      const preference = { 'sds.theme': 'theme', 'sds.brand': 'brand', 'sds.lang': 'lang' }[event.key];
+      if (preference) SDS[preference].set(event.newValue);
+    });
+    startEvents(event => {
+      if (event.type === 'state') {
+        setState(event.state);
+        send('roster', previewAgents());
+      } else if (event.type === 'edit') refreshPreview(send, event);
+    });
     return;
   }
 
@@ -488,7 +310,7 @@
   }
 
   function getActiveSrc() {
-    return previewUrl + '&w=' + devices[device] + '&h=' + deviceHeights[device];
+    return StudioPreview.stage + '?w=' + devices[device] + '&h=' + deviceHeights[device];
   }
 
   function selectWorkspace(name, mobilePane = 'preview') {
@@ -506,7 +328,7 @@
     const compareModule = enhancement('StudioCompare');
     if (name === 'review' && !compareIsMounted && compareModule) {
       $('compare').replaceChildren();
-      compareModule.mount($('compare'), { getActiveSrc });
+      compareModule.mount($('compare'), { getActiveSrc, connectPreview: connectComparison });
       compareIsMounted = true;
     } else if (name !== 'review' && compareIsMounted) {
       compareModule.destroy();
@@ -570,7 +392,7 @@
   }
 
   function openAgent(id) {
-    if (hosts[id]) jump(id);
+    if (S?.agents[id]?.section) jump(id);
     else {
       selectWorkspace('team');
       const lane = Array.from($('lanes').children).find(item => item.dataset.agent === id);
@@ -639,9 +461,30 @@
     syncPreviewAppearance();
   }
 
+  const comparisons = new Set();
+  function synchronize(send) {
+    send('appearance', appearance());
+    if (S) send('roster', previewAgents());
+  }
+  function connectComparison(comparison) {
+    const send = StudioPreview.connect(comparison, null, () => synchronize(send));
+    comparisons.add(send);
+    return () => { send.close(); comparisons.delete(send); };
+  }
+  const sendPreview = StudioPreview.connect(frame, onPreviewMessage, () => {
+    frame.dataset.ready = '';
+    synchronize(sendPreview);
+    paintOverlays();
+    setPicking(picking);
+    updatePreview();
+  });
+  function publishPreview(type, data) {
+    sendPreview(type, data);
+    for (const send of comparisons) send(type, data);
+  }
+
   function syncPreviewAppearance() {
-    const frameSDS = frame.contentWindow?.SDS;
-    for (const key of ['theme', 'brand', 'lang']) frameSDS?.[key].set(SDS[key].get());
+    publishPreview('appearance', appearance());
   }
   $('themebtn').onclick = () => SDS.theme.set(document.documentElement.dataset.studioTheme === 'light' ? 'dark' : 'light');
   SDS.on('themechange', paintTheme);
@@ -651,10 +494,7 @@
   paintTheme();
 
   function paintOverlays() {
-    if (stage) {
-      stage.ownerDocument.body.dataset.overlays = overlays ? 'on' : 'off';
-      stage.ownerDocument.body.classList.toggle('nobub', !bubbles);
-    }
+    sendPreview('overlays', { overlays, bubbles });
     $('agents-overlay').setAttribute('aria-checked', String(overlays));
     $('bub').disabled = !overlays;
     $('bub').setAttribute('aria-checked', String(bubbles));
@@ -673,7 +513,7 @@
       button.setAttribute('aria-pressed', String(button.dataset.device === name));
     });
     $('device-size').value = devices[device] + ' px';
-    $('newtab').href = getActiveSrc();
+    $('newtab').href = '/studio.html?preview=1&w=' + devices[device];
     updatePreview(persist === true);
   }
   function autoDevice() {
@@ -689,13 +529,11 @@
     frame.style.width = width + 'px';
     frame.style.height = Math.floor(h / zoom) + 'px';
     frame.style.setProperty('--preview-zoom', zoom);
-    stage?.style.setProperty('--inv', Math.min(3, 1 / zoom));
     $('zoom-value').value = Math.round(zoom * 100) + '%';
     $('zoom-out').disabled = zoom <= 0.15;
     $('zoom-in').disabled = zoom >= 2;
     $('fit').setAttribute('aria-pressed', String(fit));
-    placeAll();
-    onPreviewScroll(report === true);
+    requestPreviewView(report === true);
   }
   function changeZoom(delta) {
     fit = false;
@@ -743,14 +581,16 @@
   $('fullscreen').onclick = toggleFullscreen;
   document.addEventListener('fullscreenchange', paintFullscreen);
 
-  function handleEscape(event) {
-    if (event.key !== 'Escape' || event.defaultPrevented || $('setdlg').open) return;
+  function closePreviewUI() {
+    if ($('setdlg').open) return;
     if (activePopover) showPopover(null, true);
     else if (document.body.dataset.drawer === 'open') setDrawer(false);
     else if (!$('askpop').hidden || picking) closeAsk();
     else if (isFullscreen()) toggleFullscreen();
   }
-  addEventListener('keydown', handleEscape);
+  addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !event.defaultPrevented) closePreviewUI();
+  });
 
   function updateCompactLayout() {
     const parent = compact.matches ? $('menu-tools') : $('top-tools');
@@ -763,26 +603,18 @@
   // ---- screen focus and autopilot: the team works only on the sections that are on screen
   var focusMode = false, autoOn = false, scopeNow = null, ap = null, reportTimer = 0, lastReport = '';
   focusMode = readStore('swarm.focusMode') === '1';
-  var SCOPE_TAGS = { H1: 1, H2: 1, H3: 1, A: 1, BUTTON: 1, IMG: 1, P: 1, LI: 1, LABEL: 1, INPUT: 1, FIGCAPTION: 1 };
-  function computeScope() {
-    if (!S || !stage || !$('preview-frame').getBoundingClientRect().width) return null;
-    var vr = visibleFrameRect(), found = [], els = [];
-    order.forEach(function (id) {
-      var h = hosts[id]; if (!h) return;
-      var r = h.el.getBoundingClientRect(), vis = Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top);
-      if (vis >= 60 && r.height > 0 && r.right > vr.left && r.left < vr.right) found.push({ id: id, vis: vis, host: h.el });
-    });
-    if (!found.length) return null;
-    found.sort(function (a, b) { return b.vis - a.vis; });
-    found.forEach(function (f) {
-      var n = 0;
-      f.host.querySelectorAll('.body *').forEach(function (el) {
-        if (n >= 6 || !SCOPE_TAGS[el.tagName]) return;
-        var r = el.getBoundingClientRect(), vv = Math.min(r.bottom, vr.bottom) - Math.max(r.top, vr.top);
-        if (r.height > 0 && r.right > vr.left && r.left < vr.right && vv >= r.height * 0.5 && els.length < 14) { n++; els.push({ section: f.id, tag: el.tagName.toLowerCase(), text: (el.textContent || el.getAttribute('alt') || '').replace(/\s+/g, ' ').trim().slice(0, 60), path: pathOf(el) }); }
-      });
-    });
-    return { primary: found[0].id, sections: found.map(function (f) { return f.id; }), elements: els };
+  function requestPreviewView(report = false) {
+    if (!frame.getBoundingClientRect().width) return;
+    sendPreview('view', { clip: visibleFrameRect(), zoom, focus: focusMode || autoOn, report });
+  }
+
+  function validScope(data) {
+    if (!data || !Array.isArray(data.sections) || !Array.isArray(data.elements) || data.elements.length > 14) return null;
+    if (data.sections.length > order.length) return null;
+    const sections = [...new Set(data.sections)];
+    if (!sections.length || !sections.every(id => typeof id === 'string' && order.includes(id) && S.agents[id].section)) return null;
+    const elements = data.elements.map(item => StudioPreview.element(item, sections));
+    return elements.every(Boolean) ? { primary: sections[0], sections, elements } : null;
   }
   function scopeLabel(sc) { return sc.sections.map(function (id) { return id + ' ' + (S.agents[id].section || ''); }).join(', '); }
   function paintFocus() {
@@ -800,57 +632,46 @@
   }
   function reportFocus(force) {
     if (!autoOn || !S) return;
-    var sc = computeScope(); if (!sc) return;
+    var sc = currentScope(); if (!sc) return;
     var key = sc.sections.join(',') + '|' + sc.primary; if (!force && key === lastReport) return; lastReport = key;
     fetch('/api/focus', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(sc) }).catch(function () {});
   }
   function onViewChange(report) {
     if (!(focusMode || autoOn)) return;
-    scopeNow = computeScope();
     paintFocus();
     if (report) {
       clearTimeout(reportTimer);
       reportTimer = setTimeout(() => reportFocus(false), 1500);
     }
   }
-  viewport.addEventListener('scroll', () => onPreviewScroll(true), { passive: true });
-  addEventListener('resize', () => onViewChange(true));
+  viewport.addEventListener('scroll', () => requestPreviewView(true), { passive: true });
+  addEventListener('resize', () => requestPreviewView(true));
   $('focusbtn').onclick = function () {
     const open = $('focuspop').hidden;
     showPopover(open ? 'focuspop' : null);
     if (open) {
       selectWorkspace('design');
-      scopeNow = computeScope();
+      requestPreviewView();
       paintFocus();
     }
   };
-  $('swfocus').onclick = function () { if (autoOn) return; focusMode = !focusMode; writeStore('swarm.focusMode', focusMode ? '1' : '0'); scopeNow = computeScope(); paintFocus(); };
+  $('swfocus').onclick = function () { if (autoOn) return; focusMode = !focusMode; writeStore('swarm.focusMode', focusMode ? '1' : '0'); scopeNow = null; requestPreviewView(); paintFocus(); };
   $('swauto').onclick = function () {
     autoOn = !autoOn; lastReport = '';
     fetch('/api/autopilot', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: autoOn }) }).then(function (r) { return r.json(); }).then(function (j) { ap = j; paintFocus(); reportFocus(true); }).catch(function () {});
-    scopeNow = computeScope(); paintFocus();
+    scopeNow = null; requestPreviewView(autoOn); paintFocus();
   };
   var squadOn = false;
   function paintSquad() { $('swsquad').setAttribute('aria-checked', squadOn ? 'true' : 'false'); }
   $('swsquad').onclick = function () { squadOn = !squadOn; paintSquad(); fetch('/api/squad', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ on: squadOn }) }).then(function (r) { return r.json(); }).then(function (j) { squadOn = !!j.on; paintSquad(); }).catch(function () {}); };
   fetch('/api/squad').then(function (r) { return r.json(); }).then(function (j) { squadOn = !!j.on; paintSquad(); }).catch(function () {});
-  function currentScope() { return (focusMode || autoOn) ? computeScope() : null; }
-  fetch('/api/autopilot').then(function (r) { return r.json(); }).then(function (j) { ap = j; autoOn = !!j.on; onViewChange(false); }).catch(function () {});
+  function currentScope() { return (focusMode || autoOn) ? scopeNow : null; }
+  fetch('/api/autopilot').then(function (r) { return r.json(); }).then(function (j) { ap = j; autoOn = !!j.on; requestPreviewView(autoOn); paintFocus(); }).catch(function () {});
 
   // ---- pick an element on the page and tell its owner agent what to change, or ask why it is designed that way
-  var picking = false, picked = null, hoverEl = null;
-  function pathOf(el) {
-    var parts = [], n = el, body = n.closest('.body');
-    while (n && n !== body && parts.length < 4) {
-      var t = n.tagName.toLowerCase(), c = (n.className && typeof n.className === 'string') ? n.className.trim().split(/\s+/)[0] : '';
-      parts.unshift(t + (c ? '.' + c : '')); n = n.parentElement;
-    }
-    return parts.join(' > ');
-  }
-  function ownerOf(el) { var host = el.closest('.host'); if (!host) return null; var id = host.id.replace('host-', ''); return S && S.agents[id] ? S.agents[id] : null; }
-  function describe(el) { var txt = (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60); return '<' + el.tagName.toLowerCase() + '> ' + (txt ? '\u201c' + txt + '\u201d' : '(no text)'); }
-  function boxOver(el) {
-    const rect = el.getBoundingClientRect();
+  var picking = false, picked = null;
+  function boxOver(item) {
+    const rect = item.rect;
     const clip = visibleFrameRect();
     const frame = $('preview-frame').getBoundingClientRect();
     const bounds = {
@@ -866,8 +687,8 @@
       left: bounds.left + 'px', top: bounds.top + 'px',
       width: bounds.right - bounds.left + 'px', height: bounds.bottom - bounds.top + 'px'
     });
-    const agent = ownerOf(el);
-    box.firstChild.textContent = el.tagName.toLowerCase() + (agent ? ' · ' + agent.name : '');
+    const agent = S.agents[item.section];
+    box.firstChild.textContent = item.tag + ' · ' + agent.name;
     box.style.borderColor = agent?.color || '';
     box.firstChild.style.background = agent?.color || '';
     return bounds;
@@ -875,11 +696,10 @@
 
   function setPicking(on) {
     picking = on;
-    stage?.ownerDocument.body.classList.toggle('picking', on);
+    sendPreview('picking', on);
     $('pick').setAttribute('aria-pressed', String(on));
     if (!on) {
       $('pickbox').hidden = true;
-      hoverEl = null;
     }
   }
 
@@ -897,34 +717,45 @@
     setPicking(enable);
   };
 
-  function onPreviewPointer(e) {
-    if (!picking || !$('askpop').hidden) return;
-    hoverEl = e.target.closest?.('.host .body *') || null;
-    if (hoverEl) boxOver(hoverEl);
-    else $('pickbox').hidden = true;
-  }
-
-  function onPreviewClick(e) {
-    if (!picking) return;
-    const el = e.target.closest?.('.host .body *');
-    if (!el) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const agent = ownerOf(el);
-    if (!agent) return;
-    picked = { el, agent, path: pathOf(el), desc: describe(el), section: agent.section };
-    positionAsk();
-    $('asktext').value = '';
-    $('asktext').focus();
+  function onPreviewMessage(type, data) {
+    if (type === 'scope' && (focusMode || autoOn)) {
+      scopeNow = validScope(data);
+      onViewChange(data?.report === true);
+    } else if (type === 'escape') {
+      closePreviewUI();
+    } else if (type === 'click' && activePopover) {
+      showPopover(null);
+    } else if (type === 'hover' || type === 'pick' || type === 'selection') {
+      if (!picking || (type === 'selection') !== !!picked) return;
+      const item = StudioPreview.element(data, order, true);
+      const agent = item && S?.agents[item.section];
+      if (!agent?.section) {
+        if (picked) closeAsk();
+        else $('pickbox').hidden = true;
+        return;
+      }
+      if (type === 'hover') {
+        boxOver(item);
+        return;
+      }
+      if (type === 'selection' && (picked.agent !== agent || picked.item.path !== item.path)) return;
+      const desc = '<' + item.tag + '> ' + (item.text ? '“' + item.text + '”' : '(no text)');
+      picked = { item, agent, desc, section: agent.section };
+      positionAsk();
+      if (type === 'pick') {
+        $('asktext').value = '';
+        $('asktext').focus();
+      }
+    }
   }
 
   function positionAsk() {
-    const { el, agent, desc, path } = picked;
-    const rect = boxOver(el);
+    const { item, agent, desc } = picked;
+    const rect = boxOver(item);
     const pop = $('askpop');
     pop.style.setProperty('--c', agent.color);
     pop.querySelector('.ah b').textContent = 'Tell ' + agent.name + ' (' + agent.section + ')';
-    pop.querySelector('.ae').textContent = desc + '  ' + path;
+    pop.querySelector('.ae').textContent = desc + '  ' + item.path;
     pop.hidden = false;
     const x = Math.min(Math.max(8, rect.left), innerWidth - pop.offsetWidth - 8);
     const y = rect.bottom + pop.offsetHeight + 18 <= innerHeight
@@ -933,21 +764,16 @@
     pop.style.top = y + 'px';
   }
 
-  function onPreviewScroll(report) {
-    if (picked?.el.isConnected) positionAsk();
-    else if (hoverEl?.isConnected) boxOver(hoverEl);
-    onViewChange(report);
-  }
   function sendAsk(kind) {
     if (!picked) return;
     var t = $('asktext').value.trim();
     if (kind === 'change' && !t) { $('asktext').focus(); return; }
     var head = '@' + picked.agent.name + ' ';
-    var where = 'section ' + picked.section + ', element ' + picked.desc + ' [' + picked.path + ']';
+    var where = 'section ' + picked.section + ', element ' + picked.desc + ' [' + picked.item.path + ']';
     var text = kind === 'change'
       ? head + 'Change request for ' + where + ': ' + t
       : head + 'Question, do not change anything, about ' + where + ': ' + (t || 'Why is it designed this way?') + ' Please answer in the channel.';
-    fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ from: 'owner', text: text.slice(0, 780), scope: { sections: [picked.agent.id], elements: [{ section: picked.agent.id, tag: picked.el.tagName.toLowerCase(), text: (picked.el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60), path: picked.path }] } }) });
+    fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ from: 'owner', text: text.slice(0, 780), scope: { sections: [picked.agent.id], elements: [{ section: picked.item.section, tag: picked.item.tag, text: picked.item.text, path: picked.item.path }] } }) });
     closeAsk();
     showInspector('logs');
   }
@@ -962,12 +788,9 @@
   let runningSince = 0;
 
   function jump(id) {
-    if (!hosts[id]) return;
+    if (!S?.agents[id]?.section) return;
     selectWorkspace('design');
-    requestAnimationFrame(() => {
-      hosts[id]?.el.scrollIntoView({ behavior: reducedMotion.matches ? 'instant' : 'smooth', block: 'start', container: 'nearest' });
-      if (hosts[id]) pulse(id);
-    });
+    requestAnimationFrame(() => sendPreview('jump', id));
   }
 
   function updateProject() {
@@ -1044,7 +867,19 @@
   function onEvent(event) {
     connected = true;
     if (event.type === 'state') {
-      build(event.state);
+      setState(event.state);
+      closeAsk();
+      scopeNow = null;
+      publishPreview('roster', previewAgents());
+      updateProject();
+      initChannel();
+      renderLanes();
+      const started = (S.feed || []).findLast(entry => S.phase === 'running'
+        ? entry.type === 'phase' && entry.phase === 'running'
+        : entry.type === 'busy' && entry.busy);
+      setPhase(started?.ts);
+      paintFocus();
+      requestPreviewView();
       activityModule?.onEvent(event);
       return;
     }
@@ -1054,7 +889,7 @@
       ap = event;
       autoOn = !!event.on;
       paintFocus();
-      if (event.on && !event.primary) { lastReport = ''; reportFocus(true); }
+      if (event.on && !event.primary) { lastReport = ''; requestPreviewView(true); }
       return;
     }
     if (!S) return;
@@ -1083,8 +918,9 @@
           paintUnread();
         }
         const peers = (message.to || []).filter(peer => peer !== message.from && peer !== '00' && S.agents[peer]?.section);
-        if (message.kind === 'msg' && S.agents[message.from]?.section && peers.length) talkLink(message.from, peers, message.text);
-        else if (cur[message.from] && message.kind !== 'system') say(message.from, message.text, true);
+        if (overlays && message.kind !== 'system' && S.agents[message.from]) {
+          sendPreview('talk', { id: message.from, peers: message.kind === 'msg' ? peers : [], text: String(message.text || '').slice(0, 240) });
+        }
         break;
       }
       case 'busy':
@@ -1098,36 +934,22 @@
       case 'status':
         if (!agent) break;
         agent.status = event.status;
-        cur[id].working = /^working/.test(event.status);
-        if (cur[id].working) { cur[id].pinned = false; agent.target = id; }
-        else setAct(id, '');
+        sendPreview('status', { id, status: event.status });
         window.SwarmChannel?.setStatus(id, event.status);
-        sweepLive();
-        place(id, id);
         break;
       case 'thought':
         if (!agent) break;
         agent.thought = event.text;
-        if (Date.now() - (lastTalk[id] || 0) > 9000) say(id, event.text);
+        if (overlays) sendPreview('thought', { id, text: String(event.text || '').slice(0, 240) });
         break;
       case 'action':
         if (!agent) break;
         agent.action = event.verb + (event.target !== id ? ' ' + event.target : '');
         agent.target = event.target;
-        seed[id] += 3;
-        cur[id].pinned = false;
-        touch(id);
-        setAct(id, actText(event));
-        place(id, event.target, true);
-        mark(id, event.target);
+        if (overlays) sendPreview('action', { id, target: event.target, verb: event.verb });
         break;
       case 'edit':
-        if (event.kind !== 'sections' || !hosts[id]) break;
-        seed[id] += 5;
-        agent.target = id;
-        place(id, id);
-        mark(id, id);
-        load(id, true);
+        refreshPreview(publishPreview, event);
         break;
     }
   }
@@ -1141,28 +963,8 @@
   new ResizeObserver(updatePreview).observe(viewport);
   setInterval(paintTimer, 1000);
 
-  frame.addEventListener('load', function connectFrame() {
-    const doc = frame.contentDocument;
-    if (!doc?.getElementById('stage')) return;
-    frame.removeEventListener('load', connectFrame);
-    stage = doc.getElementById('stage');
-    page = doc.getElementById('page');
-    layer = doc.getElementById('cursors');
-    frame.dataset.ready = '';
-    syncPreviewAppearance();
-    paintOverlays();
-    setPicking(picking);
-    stage.addEventListener('pointermove', onPreviewPointer);
-    stage.addEventListener('click', onPreviewClick, true);
-    stage.addEventListener('pointerleave', () => { if (!picked) $('pickbox').hidden = true; });
-    doc.addEventListener('keydown', handleEscape);
-    doc.addEventListener('click', () => { if (activePopover) showPopover(null); });
-    frame.contentWindow.addEventListener('scroll', () => onPreviewScroll(true), { passive: true });
-    new ResizeObserver(() => { placeAll(); onPreviewScroll(false); }).observe(page);
-    updatePreview();
-    startEvents(onEvent, () => { connected = false; setPhase(); });
-  });
-  frame.src = '/studio.html?preview=embedded';
+  frame.src = StudioPreview.stage;
+  startEvents(onEvent, () => { connected = false; setPhase(); });
   // ---- tooltips that follow the cursor (data-tip-title + data-tip); keyboard focus shows them next to the control
   (function () {
     var tip = document.createElement('div'); tip.id = 'tip'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip);

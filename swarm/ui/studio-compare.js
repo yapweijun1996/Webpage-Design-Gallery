@@ -106,7 +106,7 @@
     if (typeof src !== 'string' || !src.trim()) return null;
     try {
       const url = new URL(src, location.href);
-      if (url.origin === location.origin && /^https?:$/.test(url.protocol) && !url.username && !url.password) return url;
+      if (url.origin === location.origin && url.pathname === '/studio-preview.html' && !url.username && !url.password) return url;
     } catch {
       // The host may not have an active preview yet.
     }
@@ -135,7 +135,7 @@
     return { label, input, output };
   }
 
-  function mount(host, { getActiveSrc = () => '/frame' } = {}) {
+  function mount(host, { getActiveSrc = () => '', connectPreview, sampleDocument } = {}) {
     destroy();
     const controller = new AbortController();
     const { signal } = controller;
@@ -202,7 +202,10 @@
     referenceImage.draggable = false;
     const frame = element('iframe', 'studio-compare__frame');
     frame.title = 'Actual design preview';
+    frame.setAttribute('sandbox', 'allow-scripts');
+    frame.referrerPolicy = 'no-referrer';
     frame.src = 'about:blank';
+    const disconnectPreview = connectPreview?.(frame);
     frame.inert = true;
     frame.tabIndex = -1;
     const noPreview = element('p', 'studio-compare__no-preview', 'No active preview');
@@ -245,6 +248,7 @@
       noPreview.hidden = !!src;
       const url = src?.href || 'about:blank';
       if (frame.getAttribute('src') !== url) frame.src = url;
+      if (sampleDocument && url === 'about:blank' && src && !frame.hasAttribute('srcdoc')) frame.srcdoc = sampleDocument;
       scaleFrame();
     }
 
@@ -271,6 +275,7 @@
       workbench.hidden = !hasReference;
       if (!hasReference) {
         referenceImage.removeAttribute('src');
+        frame.removeAttribute('srcdoc');
         if (frame.getAttribute('src') !== 'about:blank') frame.src = 'about:blank';
         filename.textContent = '';
         dimensions.textContent = '';
@@ -411,6 +416,7 @@
     }
     dispose = () => {
       controller.abort();
+      disconnectPreview?.();
       resize.disconnect();
       root.remove();
     };

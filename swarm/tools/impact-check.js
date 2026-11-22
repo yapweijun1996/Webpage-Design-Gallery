@@ -77,7 +77,7 @@ function startChrome(binary, profile, width) {
   const chrome = spawn(binary, [
     '--headless=new', '--remote-debugging-pipe', `--user-data-dir=${profile}`,
     `--window-size=${Math.max(width, 500)},${HEIGHT}`, '--force-device-scale-factor=1', '--hide-scrollbars',
-    '--disable-gpu', '--disable-background-networking', '--no-first-run', '--no-default-browser-check', 'about:blank',
+    '--disable-gpu', '--disable-background-networking', '--use-mock-keychain', '--no-first-run', '--no-default-browser-check', 'about:blank',
   ], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'] });
   const stopped = new AbortController();
   const closed = new Promise(resolve => chrome.once('close', resolve));
@@ -419,4 +419,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { impact, compareWidth, summarizeWidths };
+module.exports = { impact, compareWidth, summarizeWidths, startChrome };

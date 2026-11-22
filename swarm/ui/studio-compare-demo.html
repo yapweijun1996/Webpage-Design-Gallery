@@ -116,21 +116,13 @@
       return svg;
     }
 
-    host.addEventListener('load', event => {
-      if (!(event.target instanceof HTMLIFrameElement) || event.target.getAttribute('src') !== 'about:blank') return;
-      const doc = event.target.contentDocument;
-      if (!doc) return;
-      doc.documentElement.lang = 'en';
-      doc.title = 'Fieldnote preview';
-      doc.body.style.cssText = 'margin: 0; background: #f7f1df; overflow: hidden;';
-      const main = doc.createElement('main');
-      const svg = design(doc, true);
-      svg.style.cssText = 'display: block; width: 100%; height: auto;';
-      main.append(svg);
-      doc.body.replaceChildren(main);
-    }, true);
-
-    StudioCompare.mount(host, { getActiveSrc: () => 'about:blank' });
+    const liveArtwork = new XMLSerializer().serializeToString(design(document, true));
+    StudioCompare.mount(host, {
+      getActiveSrc: () => 'about:blank',
+      sampleDocument: '<!doctype html><html lang="en"><title>Fieldnote preview</title>' +
+        '<style>body{margin:0;background:#f7f1df;overflow:hidden}svg{display:block;width:100%;height:auto}</style>' +
+        '<main>' + liveArtwork + '</main></html>'
+    });
 
     async function useSample() {
       sample.disabled = true;

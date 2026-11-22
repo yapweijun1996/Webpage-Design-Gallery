@@ -6,12 +6,13 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { spawn, spawnSync } = require('child_process');
+const { ProjectInputError, ProjectBusyError, projectPath, parsePreparation, withProjectLock } = require('./lib/project-init');
 
 const ROOT = __dirname;
 const TEMPLATE = path.join(ROOT, 'template');
 const UI = path.join(ROOT, 'ui');
 const PORT = Number(process.env.SWARM_PORT) || 8800;
-const PROJECT = path.join(ROOT, 'projects', process.env.SWARM_PROJECT || 'home');
+const PROJECT = projectPath(ROOT, process.env.SWARM_PROJECT || 'home');
 // Agents run ONLY through the codex or pi CLI, with the allowlisted model and effort from the settings file (lib/settings.js).
 const S = require('./lib/settings');
 const R = require('./lib/runners');
@@ -66,44 +67,40 @@ function copyTree(from, to, allow) {
     else if (allow.test(e.name)) fs.copyFileSync(src, dst);
   }
 }
-function syncDocs() {
-  copyTree(STAFF_DIR, path.join(PROJECT, 'staff'), /\.(md|json)$/);
-  copyTree(DS_DIR, path.join(PROJECT, 'design-system'), /\.(md|json|css|js|html|tpl|webmanifest|png)$/);
-  const lanes = agentsDef.map(a => `${a.id} ${a.lane}`).join('\n');
-  fs.writeFileSync(path.join(PROJECT, 'CONTRACT.md'), fs.readFileSync(path.join(TEMPLATE, 'CONTRACT.md'), 'utf8').replace('{{LANES}}', lanes));
+function syncDocs(project = PROJECT, roster = agentsDef) {
+  copyTree(STAFF_DIR, path.join(project, 'staff'), /\.(md|json)$/);
+  copyTree(DS_DIR, path.join(project, 'design-system'), /\.(md|json|css|js|html|tpl|webmanifest|png)$/);
+  const lanes = roster.map(a => `${a.id} ${a.lane}`).join('\n');
+  fs.writeFileSync(path.join(project, 'CONTRACT.md'), fs.readFileSync(path.join(TEMPLATE, 'CONTRACT.md'), 'utf8').replace('{{LANES}}', lanes));
 }
 
-function initProject(brief) {
-  fs.rmSync(PROJECT, { recursive: true, force: true });
-  for (const d of ['sections', 'notes', 'inbox', 'discussion']) fs.mkdirSync(path.join(PROJECT, d), { recursive: true });
-  fs.writeFileSync(path.join(PROJECT, 'inbox', '00.md'), '');
-  for (const f of ['direction.md', 'decisions.md', 'review1.md', 'review2.md']) fs.writeFileSync(path.join(PROJECT, f), '');
-  const lanes = agentsDef.map(a => `${a.id} ${a.lane}`).join('\n');
-  fs.writeFileSync(path.join(PROJECT, 'CONTRACT.md'), fs.readFileSync(path.join(TEMPLATE, 'CONTRACT.md'), 'utf8').replace('{{LANES}}', lanes));
-  fs.writeFileSync(path.join(PROJECT, 'brief.md'), brief || fs.readFileSync(path.join(TEMPLATE, 'brief.md'), 'utf8'));
-  fs.copyFileSync(path.resolve(ROOT, '..', 'design-canvas', 'tokens.css'), path.join(PROJECT, 'tokens.css'));
-  syncDocs();
-  fs.writeFileSync(path.join(PROJECT, 'agents.json'), JSON.stringify(agentsDef, null, 1)); // the project remembers its own team
-  fs.writeFileSync(path.join(PROJECT, 'names.json'), JSON.stringify(agentsDef.map(a => ({ id: a.id, section: a.section })), null, 1));
-  for (const a of agentsDef) {
-    fs.writeFileSync(path.join(PROJECT, 'sections', `${a.id}-${a.section}.html`), `<section class="s-${a.id}" id="${a.id}-${a.section}"></section>\n`);
-    fs.writeFileSync(path.join(PROJECT, 'sections', `${a.id}-${a.section}.css`), '');
-    fs.writeFileSync(path.join(PROJECT, 'notes', `${a.id}.md`), '');
-    fs.writeFileSync(path.join(PROJECT, 'inbox', `${a.id}.md`), '');
-    fs.writeFileSync(path.join(PROJECT, 'discussion', `${a.id}.md`), '');
+function writeProject(project, brief, roster) {
+  for (const d of ['sections', 'notes', 'inbox', 'discussion']) fs.mkdirSync(path.join(project, d), { recursive: true });
+  fs.writeFileSync(path.join(project, 'inbox', '00.md'), '');
+  for (const f of ['direction.md', 'decisions.md', 'review1.md', 'review2.md']) fs.writeFileSync(path.join(project, f), '');
+  fs.writeFileSync(path.join(project, 'brief.md'), brief);
+  fs.copyFileSync(path.resolve(ROOT, '..', 'design-canvas', 'tokens.css'), path.join(project, 'tokens.css'));
+  syncDocs(project, roster);
+  fs.writeFileSync(path.join(project, 'agents.json'), JSON.stringify(roster, null, 1)); // the project remembers its own team
+  fs.writeFileSync(path.join(project, 'names.json'), JSON.stringify(roster.map(a => ({ id: a.id, section: a.section })), null, 1));
+  for (const a of roster) {
+    fs.writeFileSync(path.join(project, 'sections', `${a.id}-${a.section}.html`), `<section class="s-${a.id}" id="${a.id}-${a.section}"></section>\n`);
+    fs.writeFileSync(path.join(project, 'sections', `${a.id}-${a.section}.css`), '');
+    fs.writeFileSync(path.join(project, 'notes', `${a.id}.md`), '');
+    fs.writeFileSync(path.join(project, 'inbox', `${a.id}.md`), '');
+    fs.writeFileSync(path.join(project, 'discussion', `${a.id}.md`), '');
   }
-  state.brief = fs.readFileSync(path.join(PROJECT, 'brief.md'), 'utf8');
-  state.agents = {};
-  for (const a of [MANAGER, ...agentsDef]) state.agents[a.id] = { id: a.id, name: a.name, title: a.title || '', color: a.color, section: a.section, lane: a.lane, status: 'queued', thought: '', action: '', target: a.id };
-  state.feed = [];
+}
+
+function queuedAgents(roster) {
+  return Object.fromEntries([MANAGER, ...roster].map(a => [a.id, { id: a.id, name: a.name, title: a.title || '', color: a.color, section: a.section, lane: a.lane, status: 'queued', thought: '', action: '', target: a.id }]));
 }
 
 // ---------- file watcher: edits become cursor/wipe events ----------
 let watcher = null;
 const debounce = new Map();
-function watchProject() {
-  if (watcher) watcher.close();
-  watcher = fs.watch(PROJECT, { recursive: true }, (_ev, file) => {
+function createProjectWatcher() {
+  return fs.watch(PROJECT, { recursive: true }, (_ev, file) => {
     if (!file) return;
     const m = /^(sections|notes)[\\/](\d\d)(?:-[a-z0-9-]+)?(?:\.(layout|type|color|imagery|icons|motion|polish))?\.(html|css|md)$/.exec(file);
     const d = /^(?:(direction|decisions|review1|review2)\.md|discussion[\\/](\d\d)\.md)$/.exec(file);
@@ -275,7 +272,6 @@ const { createChat } = require('./lib/chat');
 const { createTurns } = require('./lib/turns');
 let chat = null, turns = null;
 const SQ = require('./lib/squad');
-const LAYERS = require('./lib/layers');
 const { createSecrets } = require('./lib/secrets');
 const IMG = require('./lib/imagegen');
 const SECRETS_PATH = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS ? process.env.SWARM_SETTINGS + '.secrets' : path.join(ROOT, '.run', 'secrets.json'));
@@ -328,15 +324,19 @@ function squadPlan(owner) {
   return { single: waves.length === 1, base, members, waves, prompts, layoutId: (byId.get('layout') || {}).id };
 }
 const everyone = () => [MANAGER, ...agentsDef, ...squadAgents];
+function createChannel(people) {
+  const channel = createChat({ projectDir: PROJECT, agents: people.map(a => ({ id: a.id, name: a.name, section: a.section, color: a.color })), emit });
+  const queue = createTurns({
+    chat: channel, agents: people, managerId: MANAGER.id, maxDiscussRounds: 2, squad: { on: () => squadOn, plan: squadPlan },
+    // After each agent process exits, ingest its outbox immediately so the next step sees its messages (no watcher race).
+    runAgent: ({ id, label, prompt: pr }) => { const a = people.find(x => x.id === id); if (!a) return Promise.resolve(false); const guard = a.squad ? scopeGuard(a) : null; return runProcess(a, label, pr, false).then(ok => { channel.sync(); if (guard) guard(); return ok; }); }
+  });
+  return { chat: channel, turns: queue };
+}
 function setupChat() {
   if (chat) chat.stop();
-  chat = createChat({ projectDir: PROJECT, agents: everyone().map(a => ({ id: a.id, name: a.name, section: a.section, color: a.color })), emit });
+  ({ chat, turns } = createChannel(everyone()));
   chat.start();
-  turns = createTurns({
-    chat, agents: everyone(), managerId: MANAGER.id, maxDiscussRounds: 2, squad: { on: () => squadOn, plan: squadPlan },
-    // After each agent process exits, ingest its outbox immediately so the next step sees its messages (no watcher race).
-    runAgent: ({ id, label, prompt: pr }) => { const a = everyone().find(x => x.id === id); if (!a) return Promise.resolve(false); const guard = a.squad ? scopeGuard(a) : null; return runProcess(a, label, pr, false).then(ok => { chat.sync(); if (guard) guard(); return ok; }); }
-  });
 }
 // Modularity guard: a squad specialist may only style its own section. If its layer file contains selectors that are not scoped
 // to the section, the file is restored to what it was before the turn, so one agent can never restyle another section.
@@ -362,16 +362,40 @@ function startTurn(msg) {
   Promise.resolve(turns.onOwnerMessage(msg)).catch(e => emit({ type: 'chat', msg: chat.post({ from: 'system', text: 'Turn failed: ' + e.message, kind: 'system' }) })).finally(() => { inFlight -= 1; const b = turns.busy(); emit({ type: 'busy', busy: b }); if (!b && state.phase === 'running') { state.phase = 'ready'; emit({ type: 'phase', phase: 'ready' }); } if (!b) maybeAutopilot(); });
 }
 
-function prepare(brief, agentsFile) {
-  stopped = false;
-  agentsDef = JSON.parse(fs.readFileSync(agentsFile || path.join(TEMPLATE, 'agents.json'), 'utf8'));
-  initProject(brief);
-  watchProject();
-  setupChat();
+function openProject(roster) {
+  const nextWatcher = createProjectWatcher();
+  let channel;
+  try {
+    channel = createChannel([MANAGER, ...roster, ...squadAgents]);
+    channel.chat.start();
+    return { watcher: nextWatcher, ...channel };
+  } catch (error) {
+    channel?.chat.stop();
+    nextWatcher.close();
+    throw error;
+  }
 }
 
-async function runAll(brief, agentsFile) {
-  prepare(brief, agentsFile);
+function prepare({ brief, roster }, replace) {
+  const text = brief || fs.readFileSync(path.join(TEMPLATE, 'brief.md'), 'utf8');
+  const nextAgents = queuedAgents(roster);
+  const runtime = replace(project => writeProject(project, text, roster), () => openProject(roster));
+
+  // Keep the old channel and watcher available until the replacement has opened successfully.
+  watcher?.close();
+  chat?.stop();
+  for (const timer of debounce.values()) clearTimeout(timer);
+  debounce.clear();
+  ({ watcher, chat, turns } = runtime);
+  agentsDef = roster;
+  state.brief = text;
+  state.agents = nextAgents;
+  state.feed = [];
+  stopped = false;
+}
+
+const projectBusy = () => inFlight > 0 || running > 0 || state.phase === 'running';
+async function runAll() {
   state.phase = 'running';
   emit({ type: 'state', state });
   for (let i = 0; i < PLAN.length; i++) {
@@ -490,6 +514,9 @@ function applyTeam(next) {
 }
 
 // ---------- http ----------
+const preview = require('./lib/preview').createPreview({
+  ui: UI, project: PROJECT, designSystem: DS_DIR, library: GJH_ASSETS, mall: GJH_V11_ASSETS
+});
 function send(res, code, body, type) { res.writeHead(code, { 'content-type': type || 'application/json', 'cache-control': 'no-store' }); res.end(typeof body === 'string' || Buffer.isBuffer(body) ? body : JSON.stringify(body)); }
 function serveFile(res, base, rel) {
   const full = path.normalize(path.join(base, rel));
@@ -498,10 +525,11 @@ function serveFile(res, base, rel) {
 }
 function body(req) { return new Promise(r => { let s = ''; req.on('data', d => s += d); req.on('end', () => { try { r(JSON.parse(s || '{}')); } catch (_) { r({}); } }); }); }
 
-http.createServer(async (req, res) => {
+const server = http.createServer(async (req, res) => {
   // Local-API guard: only a page served by this server may call it (blocks cross-site requests and DNS rebinding).
   { const host = String(req.headers.host || '').replace(/:\d+$/, ''), origin = req.headers.origin;
     if (!['127.0.0.1', 'localhost', '[::1]'].includes(host)) { res.writeHead(403, { 'content-type': 'text/plain' }); return res.end('forbidden host'); }
+    if (preview(req, res, 'http://' + req.headers.host)) return;
     if (origin && origin !== 'http://' + req.headers.host) { res.writeHead(403, { 'content-type': 'text/plain' }); return res.end('forbidden origin'); }
     if (['POST', 'PUT', 'PATCH'].includes(req.method) && Number(req.headers['content-length'] || 0) > 0 && !/^application\/json/i.test(req.headers['content-type'] || '')) { res.writeHead(415, { 'content-type': 'text/plain' }); return res.end('json required'); } }
   const url = new URL(req.url, 'http://x');
@@ -513,13 +541,6 @@ http.createServer(async (req, res) => {
     return;
   }
   if (p === '/api/state') return send(res, 200, state);
-  if (p === '/frame') { // same-origin wrapper used by tools/shot.js: an iframe of an exact size, scrolled to a section
-    const num = (k, d, lo, hi) => { const v = Number(url.searchParams.get(k)); return Number.isInteger(v) && v >= lo && v <= hi ? v : d; };
-    const w = num('w', 393, 200, 3000), h = num('h', 844, 200, 4000);
-    const src = url.searchParams.get('src') || '', at = url.searchParams.get('at') || '';
-    if (!/^\/p\/[\w./-]+$/.test(src) || (at && !/^[\w-]+$/.test(at))) return send(res, 400, 'bad frame request', 'text/plain');
-    return send(res, 200, `<!doctype html><meta charset="utf-8"><body style="margin:0;background:#0b0d11"><iframe id="f" src="${src}" style="width:${w}px;height:${h}px;border:0;display:block"></iframe><script>var at=${JSON.stringify(at)};document.getElementById('f').onload=function(){setTimeout(function(){try{var d=this.contentDocument,e=at&&d.getElementById(at);if(e)this.contentWindow.scrollTo({top:e.getBoundingClientRect().top+this.contentWindow.scrollY,behavior:'instant'})}catch(_){}}.bind(this),400)}</script>`, 'text/html; charset=utf-8');
-  }
   if (p === '/api/settings' && req.method === 'GET') return send(res, 200, { settings, allowlist: S.ALLOWLIST, resolved: { manager: S.resolve(settings, 'manager'), worker: S.resolve(settings, 'worker') }, status: readiness });
   if (p === '/api/settings' && req.method === 'PUT') {
     const r = S.save(SETTINGS_PATH, await body(req));
@@ -613,22 +634,27 @@ http.createServer(async (req, res) => {
     syncDocs();
     return send(res, 200, { ok: true });
   }
-  if (p === '/api/init' && req.method === 'POST') {
-    if (state.phase === 'running') return send(res, 409, { error: 'busy' });
-    const b = await body(req);
-    let af = '';
-    if (b.agents) { af = path.resolve(b.agents); if (!af.startsWith(ROOT + path.sep) || !fs.existsSync(af)) return send(res, 400, { error: 'agents file must be inside swarm/' }); }
-    prepare(b.brief || '', af);
-    state.phase = 'ready'; state.round = 0;
-    emit({ type: 'state', state });
-    return send(res, 200, { ok: true });
-  }
-  if (p === '/api/run' && req.method === 'POST') {
-    if (state.phase === 'running') return send(res, 409, { error: 'already running' });
-    const b = await body(req);
-    let af = '';
-    if (b.agents) { af = path.resolve(b.agents); if (!af.startsWith(ROOT + path.sep) || !fs.existsSync(af)) return send(res, 400, { error: 'agents file must be inside swarm/' }); }
-    runAll(b.brief || '', af);
+  if ((p === '/api/init' || p === '/api/run') && req.method === 'POST') {
+    const legacy = p === '/api/run';
+    const busy = () => send(res, 409, { error: legacy ? 'already running' : 'busy' });
+    if (projectBusy()) return busy();
+    try {
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      if (projectBusy()) return busy(); // another request may have started work while this body was arriving
+      const input = parsePreparation(ROOT, Buffer.concat(chunks).toString('utf8'));
+      withProjectLock(PROJECT, (_exists, replace) => prepare(input, replace));
+    } catch (error) {
+      if (error instanceof ProjectInputError) return send(res, 400, { error: error.message });
+      if (error instanceof ProjectBusyError) return send(res, 409, { error: error.message });
+      console.error('Project initialization failed:', error);
+      return send(res, 500, { error: 'Project initialization failed.' });
+    }
+    if (legacy) runAll();
+    else {
+      state.phase = 'ready'; state.round = 0;
+      emit({ type: 'state', state });
+    }
     return send(res, 200, { ok: true });
   }
   if (p === '/api/say' && req.method === 'POST') {
@@ -641,40 +667,23 @@ http.createServer(async (req, res) => {
     return send(res, 200, { ok: true });
   }
   if (p === '/api/stop' && req.method === 'POST') { stopAll(); return send(res, 200, { ok: true }); }
-  { const m = /^\/p\/sections\/(\d\d-[a-z0-9-]+)\.bundle\.css$/.exec(p); if (m) { let css = ''; try { css = LAYERS.assembleCss(path.join(PROJECT, 'sections'), m[1]); } catch (_) { /* no such section */ } return send(res, 200, css, 'text/css; charset=utf-8'); } } // legacy css plus squad layer files, in layer order
-  if (p.startsWith('/p/v11/')) return serveFile(res, GJH_V11_ASSETS, p.slice(7)); // sections may reference ../v11/ from /p/sections
-  if (p === '/studio') return serveFile(res, UI, 'studio.html'); // staged Design Studio UI, index.html stays the default until approved
-  if (p.startsWith('/p/')) return serveFile(res, PROJECT, p.slice(3));
-  if (p.startsWith('/assets/generated/')) return serveFile(res, path.join(PROJECT, 'assets', 'generated'), p.slice(18)); // generated images referenced as ../assets/generated/* from sections
-  if (p.startsWith('/gjh/')) return serveFile(res, GJH_ASSETS, p.slice(5));
   if (p.startsWith('/ds/')) return serveFile(res, DS_DIR, p.slice(4));
-  const cat = /^\/i18n\/(en|zh-Hans|ms)\.json$/.exec(p);
-  if (cat) { // catalog for the preview: SDS shell strings + the project's own extracted strings
-    const read = f => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch (_) { return null; } };
-    const a = read(path.join(DS_DIR, 'i18n', cat[1] + '.json')), b = read(path.join(PROJECT, 'i18n', cat[1] + '.json'));
-    return send(res, 200, { meta: (b || a || {}).meta || { lang: cat[1] }, messages: { ...((a || {}).messages || {}), ...((b || {}).messages || {}) } });
-  }
-  if (p.startsWith('/gjh-v11/')) return serveFile(res, GJH_V11_ASSETS, p.slice(9));
-  if (p === '/tokens.css') return serveFile(res, PROJECT, 'tokens.css');
   if (p === '/') return serveFile(res, UI, 'index.html');
   return serveFile(res, UI, p.slice(1));
-}).listen(PORT, '127.0.0.1', () => console.log(`swarm listening on http://127.0.0.1:${PORT}`));
+});
 
 // Idle project so the viewer has something to show before the first run.
-if (fs.existsSync(PROJECT)) {
+withProjectLock(PROJECT, (exists, replace) => {
+  if (!exists) return prepare(parsePreparation(ROOT, ''), replace);
   const remembered = path.join(PROJECT, 'agents.json');
   if (fs.existsSync(remembered)) agentsDef = JSON.parse(fs.readFileSync(remembered, 'utf8'));
   state.brief = fs.existsSync(path.join(PROJECT, 'brief.md')) ? fs.readFileSync(path.join(PROJECT, 'brief.md'), 'utf8') : '';
-  for (const a of [MANAGER, ...agentsDef]) state.agents[a.id] = { id: a.id, name: a.name, title: a.title || '', color: a.color, section: a.section, lane: a.lane, status: 'queued', thought: '', action: '', target: a.id };
-  watchProject();
-  setupChat();
-} else {
-  initProject('');
-  watchProject();
-  setupChat();
-}
+  state.agents = queuedAgents(agentsDef);
+  ({ watcher, chat, turns } = openProject(agentsDef));
+});
 if (squadOn) setSquad(true);
 loadAutopilot();
 if (autopilot.on) maybeAutopilot(); // resume the owner's autopilot after a restart
+server.listen(PORT, '127.0.0.1', () => console.log(`swarm listening on http://127.0.0.1:${PORT}`));
 process.on('SIGTERM', () => { stopAll(); process.exit(0); });
 process.on('SIGINT', () => { stopAll(); process.exit(0); });

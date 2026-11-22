@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Swarm Design Studio</title>
-  <link rel="stylesheet" href="/tokens.css">
   <link rel="stylesheet" href="/ds/tokens.css">
   <link rel="stylesheet" href="/ds/themes.css">
   <link rel="stylesheet" href="/ds/components.css">
@@ -20,6 +19,7 @@
   <script defer src="/settings.js"></script>
   <script defer src="/docs.js"></script>
   <script defer src="/studio-activity.js"></script>
+  <script defer src="/preview-bridge.js"></script>
   <script defer src="/studio-compare.js"></script>
   <script defer src="/studio.js"></script>
 </head>
@@ -99,7 +99,7 @@
           </div>
           <div class="studio-canvas">
             <div id="view" class="studio-viewport" tabindex="0" aria-label="Preview canvas">
-              <iframe id="preview-frame" title="Live project preview"></iframe>
+              <iframe id="preview-frame" title="Live project preview" sandbox="allow-scripts" referrerpolicy="no-referrer"></iframe>
             </div>
             <div id="focuschip" hidden></div>
           </div>
