@@ -48,6 +48,7 @@ def css_paths(root=ROOT):
     generated = {root / "assets/tokens.css", root / "assets/gjh-themes.css",
                  root / "demos/corporate/gjh/v11/style.bundle.css",
                  root / design_system.POMELO_TOKEN_OUTPUT,
+                 root / design_system.BLUEPRINT_TOKEN_OUTPUT,
                  *(root / path for path in design_system.DEMO_THEME_OUTPUTS.values())}
     return sorted(path for path in paths if "vendor" not in path.parts and path not in generated)
 

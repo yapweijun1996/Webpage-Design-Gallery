@@ -1008,6 +1008,45 @@
     "disclaimer": "Independent design concept, not affiliated with Goh Joo Hin."
   },
   {
+    "id": "pomelo-stem-v2",
+    "companyId": "pomelo-stem",
+    "slug": "v2",
+    "version": "v2",
+    "title": "Pomelo STEM Systems Blueprint",
+    "description": "Explore twelve pages in English, Simplified Chinese and Malay, and try the PS-0124 order review demo.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 5,
+    "demoPath": "demos/corporate/pomelo-stem/v2/index.html",
+    "thumbnail": "demos/corporate/pomelo-stem/v2/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/pomelo-stem/v2/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/pomelo-stem/v2/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/pomelo-stem/v2/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent design concept. No messages, orders or payments are sent."
+  },
+  {
     "id": "pomelo-stem-v1",
     "companyId": "pomelo-stem",
     "slug": "v1",

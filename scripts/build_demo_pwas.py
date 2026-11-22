@@ -33,6 +33,8 @@ def outputs(root, catalog, release, resources, source_bytes, precache_runtime):
     for design in catalog["designs"]:
         if design["id"] == "gjh-v11":
             continue  # The virtual mall has its own small offline directory and worker.
+        if design["id"] == "pomelo-stem-v2":
+            continue  # Preserve the standalone Blueprint preview's no-worker behavior.
         directory = Path(design["demoPath"]).parent
         company = companies[design["companyId"]]
         theme = DemoTheme()

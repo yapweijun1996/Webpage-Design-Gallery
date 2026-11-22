@@ -1,0 +1,17 @@
+{
+  "company": "Pomelo STEM",
+  "industry": "STEM & Technology",
+  "title": "Pomelo STEM - Systems Blueprint",
+  "version": "v2",
+  "designStyle": "A twelve-page preview with a simulated WhatsApp-to-packing workflow.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/pomelo-stem/v2/",
+  "officialWebsite": "https://pomelostem.com/",
+  "disclaimer": "Independent design concept. No messages, orders or payments are sent.",
+  "id": "pomelo-stem-v2",
+  "companyId": "pomelo-stem",
+  "displayTitle": "Pomelo STEM Systems Blueprint",
+  "summary": "Explore twelve pages in English, Simplified Chinese and Malay, and try the PS-0124 order review demo.",
+  "styles": ["corporate", "editorial"],
+  "order": 5
+}

@@ -27,6 +27,7 @@ class GalleryTests(unittest.TestCase):
             designs = [d for d in catalog["designs"] if d["companyId"] == company["id"]]
             if company["id"] == "pomelo-stem":
                 self.assertEqual([(d["id"], d["demoPath"]) for d in designs], [
+                    ("pomelo-stem-v2", "demos/corporate/pomelo-stem/v2/index.html"),
                     ("pomelo-stem-v1", "demos/corporate/pomelo-stem/v1/index.html")
                 ])
             else:
@@ -101,7 +102,11 @@ class GalleryTests(unittest.TestCase):
         route = "demos/corporate/pomelo-stem/v1/index.html"
         self.assertIn(f'class="primary-link" href="../../{route}#category-1"', page)
         self.assertIn(f'class="collection-alternative" href="../../{route}"', page)
-        self.assertNotIn('class="compare-checkbox"', page)
+        self.assertIn('href="../../demos/corporate/pomelo-stem/v2/index.html"', page)
+        self.assertIn('Pomelo STEM Systems Blueprint', page)
+        v1_only = gallery.load_catalog()
+        v1_only["designs"] = [d for d in v1_only["designs"] if d["id"] != "pomelo-stem-v2"]
+        self.assertNotIn('class="compare-checkbox"', gallery.build_pages(v1_only)["companies/pomelo-stem/index.html"])
         hub = (ROOT / route).read_text(encoding="utf-8")
         for category in range(1, 6):
             with self.subTest(category=category):
@@ -202,6 +207,23 @@ class GalleryTests(unittest.TestCase):
                 if path.suffix == ".webp":
                     self.assertNotIn(f'"shared/{path.name}"', worker)
             self.assertNotIn("pomelo-stem/v1/studies/", (output / "sw.js").read_text(encoding="utf-8"))
+            blueprint = gallery.pomelo_blueprint
+            expected_blueprint = blueprint.HTML | blueprint.ASSETS | {blueprint.THUMBNAIL} | blueprint.SCREENSHOTS
+            scope = output / blueprint.DIRECTORY
+            self.assertEqual({file.relative_to(scope) for file in scope.rglob("*") if file.is_file()}, expected_blueprint)
+            self.assertEqual(len(blueprint.HTML), 36)
+            for path in blueprint.HTML:
+                source = (scope / path).read_text(encoding="utf-8")
+                self.assertIn('content="noindex,nofollow"', source, path)
+                self.assertNotIn("serviceWorker", source, path)
+                self.assertNotRegex(source, r'https?://(?:wa\.me|api\.whatsapp\.com)', path)
+                self.assertNotRegex(source, r'<(?:img|script|link|iframe)\b[^>]*(?:src|href)="https?://', path)
+                for href in re.findall(r'(?:href|src)="(\.{1,2}/[^"#]+)', source):
+                    target = (scope / path.parent / href).resolve()
+                    self.assertTrue(target.is_relative_to(scope.resolve()) and target.is_file(), (path, href))
+            gallery_sw = (output / "sw.js").read_text(encoding="utf-8")
+            self.assertEqual(set(re.findall(r'"path": "(demos/corporate/pomelo-stem/v2/[^"]+)"', gallery_sw)),
+                             {(blueprint.DIRECTORY / blueprint.THUMBNAIL).as_posix()})
             gallery_models = Path("demos/corporate/gjh/v11/assets/gallery-assets")
             for source in (gallery.ROOT / gallery_models).glob("*.glb"):
                 self.assertEqual((output / gallery_models / source.name).read_bytes(), source.read_bytes())
