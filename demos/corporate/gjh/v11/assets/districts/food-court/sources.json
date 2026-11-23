@@ -1,0 +1,50 @@
+{
+  "project": "Blender-3D-Gallery",
+  "revision": "3b87c372070051a876190518294cb3a0090b1cd3",
+  "assets": [
+    {
+      "file": "hawker-stall.glb",
+      "bytes": 128708,
+      "sha256": "612d6e7b8f94ad49371050c4ae8599683356b23de85e55b780b020cdb5144316",
+      "source": "models/hawker-stall/exports/optimized.glb",
+      "blend": "models/hawker-stall/sources/hawker-stall.blend",
+      "blendSha256": "6f7e28edcd51b24767957e55e32fb36ab45ef330eea569496784a1a4ec499328",
+      "license": "models/hawker-stall/LICENSE.md",
+      "licenseSha256": "6fdfc31a6ac6dface3d1f2d6f10565aebe95bd29901fdced84669a3a07d8ab92",
+      "terms": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.\nOriginal procedural geometry/materials, no external assets."
+    },
+    {
+      "file": "chicken-rice-stall.glb",
+      "bytes": 337768,
+      "sha256": "c0ecc077eed57275b6e46643900ab4b8b35cad42862d98799cd7bb1dae33b59f",
+      "source": "models/chicken-rice-stall/exports/optimized.glb",
+      "blend": "models/chicken-rice-stall/sources/chicken-rice-stall.blend",
+      "blendSha256": "3498259fc096c29e93831453827432a1d78e3e64b51f79d4d7dce35f85bf68e5",
+      "license": "models/chicken-rice-stall/LICENSE.md",
+      "licenseSha256": "4abdabac632a93292fd63fa488f367f4519accd799b3e762543d36c50afa29d0",
+      "terms": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
+    },
+    {
+      "file": "restaurant-table-chair-set.glb",
+      "bytes": 597308,
+      "sha256": "23595162cac96cde7da7a25d73b05d9c279e9e7b465e1f3454467d4a9a739ede",
+      "source": "models/restaurant-table-chair-set/exports/optimized.glb",
+      "blend": "models/restaurant-table-chair-set/sources/restaurant-table-chair-set.blend",
+      "blendSha256": "dfed51000031ec6a337a84f9d5364534bfc6e171f4d807b1a5ea3c0fe1be352e",
+      "license": "models/restaurant-table-chair-set/LICENSE.md",
+      "licenseSha256": "276f913dff6946d5891c853d9f92eeb8c5a6fc3f34cb9c84011ecb79752e50fb",
+      "terms": "# Asset rights\n\nOriginal procedural geometry and materials created for the owner's project. No third-party models, textures, fonts, downloaded scripts, logos or product packaging are included.\n\nReuse in the owner's projects is authorized. Public redistribution terms have not been specified."
+    },
+    {
+      "file": "kopitiam-kettle.glb",
+      "bytes": 152424,
+      "sha256": "fef5f8192497110031216cbcdfe143b5dba6ba9362a9613154beb46259db953a",
+      "source": "models/kopitiam-kettle/exports/optimized.glb",
+      "blend": "models/kopitiam-kettle/sources/kopitiam-kettle.blend",
+      "blendSha256": "dcfb2d167cfe576d6283f21b77c74ed2c7530f0afacf930c05554fe73b8c0ac5",
+      "license": "models/kopitiam-kettle/LICENSE.md",
+      "licenseSha256": "fa831b5cd008668c7f79a009449aad7779816df0070a00011337574127487521",
+      "terms": "# Asset rights and attribution\n\nOriginal asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.\n\nOriginal deterministic Blender Python geometry and materials. No external models, textures, brands or reference photographs incorporated. Title-only V2.1 scope; design is an illustrative interpretation, not an official or surveyed product."
+    }
+  ]
+}

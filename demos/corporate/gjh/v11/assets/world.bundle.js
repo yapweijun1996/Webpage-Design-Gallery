@@ -9490,8 +9490,20 @@ function createInteriorKit(T, scene, {
 
 // demos/corporate/gjh/v11/assets/district-gateway.js
 var southDoor = Object.freeze({ x: expandedLayout.entrance.x, z: expandedLayout.bounds.maxZ, halfWidth: 2.16 });
+var laneImportAttempt = 0;
+async function loadKampungLane(T, signal) {
+  const query = laneImportAttempt ? "?retry=" + laneImportAttempt : "";
+  let module;
+  try {
+    module = await import(`./kampung-lane.js${query}`);
+  } catch (error) {
+    laneImportAttempt++;
+    throw error;
+  }
+  return module.loadKampungLane(T, signal);
+}
 var loadSingaporeStreet = (T, signal) => import("./street-chunk.js").then((module) => module.loadSingaporeStreet(T, signal));
-function createDistrictGateway({ T, R, physics, scene, cameraObstacles, setMallDetail, notice, tier = () => "balanced", load: load2 = loadSingaporeStreet }) {
+function createDistrictGateway({ T, R, physics, scene, cameraObstacles, installSeat, setMallDetail, notice, tier = () => "balanced", load: load2 = loadSingaporeStreet, loadLane = loadKampungLane }) {
   const { x: centre, z: threshold, halfWidth } = southDoor;
   const barrier = physics.createCollider(R.ColliderDesc.cuboid(halfWidth, 2.7, 0.11).setTranslation(centre, 2.68, threshold));
   const geometry = new T.BoxGeometry;
@@ -9523,6 +9535,48 @@ function createDistrictGateway({ T, R, physics, scene, cameraObstacles, setMallD
   positionDoors();
   scene.add(glass, rails);
   let chunk, controller, status = "mall", interiorResident = true, cycles = 0, ended = false;
+  let lane, laneRequest;
+  function cancelVisit() {
+    laneRequest?.abort();
+    laneRequest = undefined;
+  }
+  async function visitLane(enter) {
+    if (ended || lane || laneRequest)
+      return false;
+    const attempt = new AbortController;
+    laneRequest = attempt;
+    const timeout2 = setTimeout(() => attempt.abort(), 20000);
+    let prepared;
+    try {
+      prepared = await loadLane(T, attempt.signal);
+      if (attempt.signal.aborted || laneRequest !== attempt || ended)
+        return false;
+      prepared.mount(scene, R, physics, cameraObstacles);
+      if (!enter(prepared.arrival))
+        return false;
+      lane = prepared;
+      prepared = undefined;
+      retireStreet();
+      mallDetail(false);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      prepared?.dispose();
+      clearTimeout(timeout2);
+      if (laneRequest === attempt)
+        laneRequest = undefined;
+    }
+  }
+  function leaveLane(moveToMall) {
+    cancelVisit();
+    if (!lane || !moveToMall())
+      return false;
+    lane.dispose();
+    lane = undefined;
+    mallDetail(true);
+    return true;
+  }
   let lastNotice = "";
   function message(value) {
     if (lastNotice === value)
@@ -9564,7 +9618,7 @@ function createDistrictGateway({ T, R, physics, scene, cameraObstacles, setMallD
         prepared.dispose(physics);
         throw new DOMException("Street request cancelled", "AbortError");
       }
-      prepared.mount(scene, R, physics, cameraObstacles);
+      prepared.mount(scene, R, physics, cameraObstacles, installSeat);
       chunk = prepared;
       status = "opening";
     } catch {
@@ -9579,8 +9633,14 @@ function createDistrictGateway({ T, R, physics, scene, cameraObstacles, setMallD
     }
   }
   return {
+    visitLane,
+    leaveLane,
+    cancelVisit,
+    get inKampung() {
+      return Boolean(lane);
+    },
     update({ x, y, z, yaw }) {
-      if (ended)
+      if (ended || lane)
         return;
       chunk?.update?.(x, z, tier());
       const outside = z - threshold, lateral = Math.abs(x - centre);
@@ -9609,7 +9669,7 @@ function createDistrictGateway({ T, R, physics, scene, cameraObstacles, setMallD
       }
       if (chunk && outside > 1) {
         status = "street";
-        message("");
+        message(chunk.foodCourt?.notice || "");
       } else if (chunk && status === "street" && outside < -0.5) {
         status = "ready";
         message("");
@@ -9619,13 +9679,19 @@ function createDistrictGateway({ T, R, physics, scene, cameraObstacles, setMallD
         cycles++;
       }
     },
+    foodCourtAt(x, z) {
+      return chunk?.foodCourt?.contains(x, z) ?? false;
+    },
     get state() {
-      return { status, interiorResident, cycles, models: chunk ? [...chunk.models] : [], street: chunk?.counts ?? { models: 0, geometries: 0, materials: 0, colliders: 0, cameraBounds: 0, lodGroups: 0, visibleLod: 0 } };
+      return { kampung: lane?.counts ?? null, foodCourt: chunk?.foodCourt?.state ?? { status: "distant" }, status, interiorResident, cycles, models: chunk ? [...chunk.models] : [], street: chunk?.counts ?? { models: 0, geometries: 0, materials: 0, colliders: 0, cameraBounds: 0, lodGroups: 0, visibleLod: 0 } };
     },
     dispose() {
       if (ended)
         return;
       ended = true;
+      cancelVisit();
+      lane?.dispose();
+      lane = undefined;
       retireStreet();
       physics.removeCollider(barrier, false);
       geometry.dispose();
@@ -10844,6 +10910,16 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     box("ivory", -11, 0.18, 14, 3.1, 0.36, 2.8, true);
   }
   const doors = [], interactables = [], doorFrames = [], doorGlass = [], windowGlass = [];
+  function installSeat(seat) {
+    const entry = seatInteraction(seat), removeRecord = registerShopSeat?.(seat);
+    seats.push(seat);
+    interactables.push(entry);
+    return () => {
+      removeRecord?.();
+      seats.splice(seats.indexOf(seat), 1);
+      interactables.splice(interactables.indexOf(entry), 1);
+    };
+  }
   if (expanded) {
     interactables.push(addFeatureKiosk({ x: 10, z: 20, box, cylinder, sign }));
     collider(10, 0.5, 20, 1.8, 1, 1.4);
@@ -11335,15 +11411,6 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         lightWash((r.minX + r.maxX) / 2, 8.367, (r.minZ + r.maxZ) / 2, r.maxX - r.minX, r.maxZ - r.minZ, 0, Math.PI / 2, false, 16765854, 1.25);
     }, interiorCollider = function({ center: [x, y, z], size: [w, h, d], yaw }) {
       return physics.createCollider(R.ColliderDesc.cuboid(w / 2, h / 2, d / 2).setTranslation(x, y, z).setRotation({ x: 0, y: Math.sin(yaw / 2), z: 0, w: Math.cos(yaw / 2) }));
-    }, installSeat = function(seat) {
-      const entry = seatInteraction(seat), removeRecord = registerShopSeat?.(seat);
-      seats.push(seat);
-      interactables.push(entry);
-      return () => {
-        removeRecord?.();
-        seats.splice(seats.indexOf(seat), 1);
-        interactables.splice(interactables.indexOf(entry), 1);
-      };
     }, installPianoGuard = function(spec) {
       const guard = interiorCollider(spec);
       return () => physics.removeCollider(guard, false);
@@ -12031,6 +12098,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     physics,
     scene,
     cameraObstacles,
+    installSeat,
     notice: streetNotice,
     tier: artworkTier,
     setMallDetail(value) {

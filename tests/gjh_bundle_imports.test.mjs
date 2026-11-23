@@ -28,6 +28,7 @@ const lazyExports = {
   'assets/elevator-v2.js': ['createElevatorV2'],
   'assets/interiors/action-layout.js': ['actionsBySlot:object'],
   'assets/interiors/shop-interactions.js': ['installShopInteractions'],
+  'assets/kampung-lane.js': ['loadKampungLane'],
   'assets/lunar-new-year.js': ['prepareLunarDecor'],
   'assets/mall-themes.js': ['createMallThemeCoordinator'],
   'assets/natural-materials.js': ['createNaturalSurfaceTextures'],

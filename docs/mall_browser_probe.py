@@ -5,8 +5,10 @@ from pathlib import Path
 
 URL = 'http://localhost:8830/demos/corporate/gjh/v11/'
 INIT = """
-localStorage.setItem('gjh-v11-tutorial-v1','dismissed');
-localStorage.setItem('gjh-v11-graphics-quality-v1','%s');
+if (window===top && /^https?:$/.test(location.protocol)) {
+  localStorage.setItem('gjh-v11-tutorial-v1','dismissed');
+  localStorage.setItem('gjh-v11-graphics-quality-v1','%s');
+}
 """
 
 

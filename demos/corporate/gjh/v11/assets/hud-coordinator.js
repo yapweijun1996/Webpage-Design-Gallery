@@ -1,3 +1,4 @@
+import {outdoorLocations} from './district-locations.js';
 import {liftLayout} from './lift-layout.js';
 import {icon} from './icons.js';
 
@@ -43,7 +44,7 @@ export function createObjectiveTracker(storeIds, initialBag = {}, expanded = fal
 }
 
 export function objectiveHint(progress, zone) {
-  if (zone === 'upper') return null;
+  if (zone === 'upper' || zone in outdoorLocations) return null;
   const next = progress.findIndex((value, index) => value < goalTargets[index]);
   return goalHints[next] ?? null;
 }

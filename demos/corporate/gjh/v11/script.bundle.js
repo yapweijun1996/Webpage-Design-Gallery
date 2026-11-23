@@ -673,6 +673,13 @@ function createProgramTrace(renderer) {
   return { event, player, sample, report: () => samples.length < 512 ? samples.slice() : [...samples.slice(next), ...samples.slice(0, next)] };
 }
 
+// demos/corporate/gjh/v11/assets/district-locations.js
+var outdoorLocations = Object.freeze({
+  "singapore-street": "Singapore street",
+  "singapore-food-court": "Food court",
+  "malaysia-kampung": "Malaysia · Kampung lane"
+});
+
 // demos/corporate/gjh/v11/assets/ui.js
 import { mallAudio as mallAudio2, createTramNarration } from "./assets/audio.js";
 
@@ -2261,7 +2268,7 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
   const locationName = document.getElementById("location-name");
   const mapOpeners = [headerMap, locationMap];
   function updateLocation(label) {
-    locationName.textContent = label;
+    locationName.textContent = label === outdoorLocations["malaysia-kampung"] ? "Kampung" : label;
     locationMap.title = `${label} — open mall map`;
   }
   const status = document.getElementById("mall-status");
@@ -2451,6 +2458,7 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
   function closeMap() {
     if (!canUsePanels())
       return;
+    cancelMapTravel();
     mallMap.open = false;
     syncMapButtons();
     updateCompactPanels();
@@ -2505,6 +2513,15 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
     viewToggle.setAttribute("aria-label", showing3D ? "Switch to the accessible store directory" : "Switch to the 3D virtual mall");
     headerMenu.hidden = !showing3D;
   }
+  let neighbourhoodAction, cancelNeighbourhood, visitVersion = 0;
+  const cancelMapTravel = () => {
+    visitVersion++;
+    cancelNeighbourhood?.();
+    if (expanded) {
+      document.getElementById("map-visit").disabled = false;
+      document.getElementById("map-travel-status").textContent = "";
+    }
+  };
   const resetMap = () => {
     mallMap.open = false;
   };
@@ -2527,6 +2544,8 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
   mallMap.addEventListener("toggle", () => {
     if (mallMap.open)
       menu.close({ focus: false });
+    else
+      cancelMapTravel();
     syncMapButtons();
     updateCompactPanels();
     notifyMode();
@@ -2609,12 +2628,45 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
     for (const store of destinations)
       destinationSelect.add(new Option(`${store.number} · ${store.label}`, store.id));
     document.getElementById("map-destination-controls").hidden = false;
+    const neighbourhood = new Option("Malaysia · Kampung lane", "malaysia-kampung");
+    destinationSelect.add(neighbourhood);
     const visit = document.getElementById("map-visit");
     destinationSelect.addEventListener("change", () => {
-      setHudText(visit, floorDestinations[destinationSelect.value] ? "Ride lift" : "Visit store");
+      cancelMapTravel();
+      const label = destinationSelect.value === "malaysia-kampung" ? currentZone === "malaysia-kampung" ? "Return to GJH courtyard" : "Visit neighbourhood" : floorDestinations[destinationSelect.value] ? "Ride lift" : "Visit store";
+      setHudText(visit, label);
       document.getElementById("map-travel-status").textContent = "";
     });
-    visit.addEventListener("click", () => {
+    visit.addEventListener("click", async () => {
+      if (destinationSelect.value === "malaysia-kampung") {
+        if (!neighbourhoodAction || visit.disabled)
+          return;
+        const attempt = ++visitVersion, returning = currentZone === "malaysia-kampung";
+        const status2 = document.getElementById("map-travel-status");
+        status2.textContent = returning ? "Returning to the courtyard…" : "Opening Kampung lane…";
+        visit.disabled = true;
+        let moved;
+        try {
+          moved = await neighbourhoodAction(returning);
+        } finally {
+          if (attempt === visitVersion)
+            visit.disabled = false;
+        }
+        if (attempt !== visitVersion || !mallMap.open)
+          return;
+        if (moved !== true) {
+          const message = typeof moved === "string" ? moved : "Neighbourhood unavailable. Try again when connected.";
+          status2.textContent = message;
+          announce(message);
+          return;
+        }
+        status2.textContent = "";
+        menu.close({ focus: false });
+        mallMap.open = false;
+        setHudText(visit, returning ? "Visit neighbourhood" : "Return to GJH courtyard");
+        scene.focus({ preventScroll: true });
+        return;
+      }
       const floor = floorDestinations[destinationSelect.value];
       if (floor)
         travelToFloor(floor.upper);
@@ -2846,7 +2898,7 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
     records.set(id, { name, action: "amenity" });
   const zones = {
     atrium: "Courtyard",
-    "singapore-street": "Singapore street",
+    ...outdoorLocations,
     ...Object.fromEntries(restroomRooms.map(({ id, label }) => [id, label])),
     ...Object.fromEntries(destinations.map((store) => [store.id, store.label])),
     upper: "Upper level"
@@ -3526,10 +3578,10 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
       tutorial.reportPose({ x, z, yaw });
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
-        const offMap = zone === "upper" || zone === "singapore-street";
+        const offMap = zone === "upper" || zone in outdoorLocations;
         playerDot.style.display = offMap ? "none" : "";
         mapCaption.querySelector(".map-key").hidden = offMap;
-        floorplan.setAttribute("aria-label", offMap ? "Ground floor map. Choose a store to return to its entrance." : floorplanLabel);
+        floorplan.setAttribute("aria-label", zone === "malaysia-kampung" ? "Malaysia · Kampung lane. Return to GJH courtyard using the destination control." : offMap ? "Ground floor map. Choose a store to return to its entrance." : floorplanLabel);
         if (mapCaptionText)
           mapCaptionText.textContent = offMap ? " Ground floor map " : "You are here";
         if (showing3D) {
@@ -3769,6 +3821,10 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
       productInspectListener = listener;
     },
     announce,
+    onNeighbourhood(listener, cancel) {
+      neighbourhoodAction = listener;
+      cancelNeighbourhood = cancel;
+    },
     onTeleport(listener) {
       teleportListener = listener;
     },
@@ -6402,14 +6458,15 @@ function createSpatialHud({ expanded = false, root = document } = {}) {
       travelling = false
     }) {
       const upper = zone === "upper";
-      const floorLabel = upper ? "Floor 02 - Upper Level" : "Floor 01 - Atrium";
+      const outdoor = outdoorLocations[zone];
+      const floorLabel = outdoor || (upper ? "Floor 02 - Upper Level" : "Floor 01 - Atrium");
       const shop = !upper && shops.get(zone);
       setText(floor, shop ? `${floorLabel} · ${shop.label}` : floorLabel);
-      const mapContext = travelling === "escalator" ? "Ground-floor plan · Escalator in transit" : travelling ? "Ground-floor plan · Lift in transit" : upper ? "Ground-floor plan · You are on Floor 02" : "Ground-floor plan · You are here";
+      const mapContext = outdoor || (travelling === "escalator" ? "Ground-floor plan · Escalator in transit" : travelling ? "Ground-floor plan · Lift in transit" : upper ? "Ground-floor plan · You are on Floor 02" : "Ground-floor plan · You are here");
       setText(context, mapContext);
       setAttribute(map, "aria-label", mapContext);
       if (miniMap)
-        miniMap.dataset.floor = upper ? "02" : "01";
+        miniMap.dataset.floor = outdoor ? "outside" : upper ? "02" : "01";
       if (position && Number.isFinite(position.x) && Number.isFinite(position.z)) {
         const point2 = expanded ? expandedMapPoint(position.x, position.z) : mapPoint(position.x, position.z);
         setAttribute(dot, "cx", point2.x);
@@ -6418,9 +6475,9 @@ function createSpatialHud({ expanded = false, root = document } = {}) {
         setAttribute(heading, "transform", `translate(${point2.x} ${point2.y}) rotate(${angle})`);
       }
       if (dot)
-        dot.style.display = upper || travelling ? "none" : "";
+        dot.style.display = upper || outdoor || travelling ? "none" : "";
       if (heading)
-        heading.style.display = upper || travelling ? "none" : "";
+        heading.style.display = upper || outdoor || travelling ? "none" : "";
       const near = Boolean(active && !travelling && usable && interaction && Number.isFinite(distance));
       if (interact)
         interact.hidden = !near;
@@ -6481,7 +6538,7 @@ function createObjectiveTracker(storeIds, initialBag = {}, expanded = false) {
   };
 }
 function objectiveHint(progress, zone) {
-  if (zone === "upper")
+  if (zone === "upper" || zone in outdoorLocations)
     return null;
   const next = progress.findIndex((value, index) => value < goalTargets[index]);
   return goalHints[next] ?? null;
@@ -7397,7 +7454,7 @@ function updateHUD() {
       ui.announce("Ascending to the upper deck. The lift serves both floors.");
     wasOnEscalator = p.escalatorTravel;
   }
-  const zone = district && p.z > 48.2 ? "singapore-street" : elevator && !p.escalatorTravel && p.y > elevator.upper / 2 ? "upper" : (expanded ? restroomAt(p.x, p.z) ?? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
+  const zone = district?.inKampung ? "malaysia-kampung" : district && p.z > 48.2 ? district.foodCourtAt(p.x, p.z) ? "singapore-food-court" : "singapore-street" : elevator && !p.escalatorTravel && p.y > elevator.upper / 2 ? "upper" : (expanded ? restroomAt(p.x, p.z) ?? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
   if (zone !== currentZone || travelling !== wasRiding)
     quality.resetSampling();
   if (zone !== currentZone)
@@ -7917,6 +7974,8 @@ function rideElevator(options) {
   return result;
 }
 function requestFloorRide(upper, arrival) {
+  if (district?.inKampung && !district.leaveLane(() => player.teleport("atrium")))
+    return { reason: "Return to the courtyard first." };
   const target = upper ? liftLayout.upper : 0;
   const result = rideElevator({ approach: true, target });
   if (result.calling) {
@@ -7930,6 +7989,27 @@ function requestFloorRide(upper, arrival) {
   }
   return result;
 }
+ui.onNeighbourhood(async (returning) => {
+  if (!ready || !expanded || !district)
+    return false;
+  let moved;
+  if (returning)
+    moved = district.leaveLane(() => player.teleport("atrium"));
+  else {
+    const canLeave = () => ["atrium", "singapore-street", "singapore-food-court"].includes(currentZone) && !floorRideKind(player.state) && !player.state.seated && !player.state.pushing && !player.state.productApproaching && !player.state.character.physicalProduct?.held;
+    if (!canLeave())
+      return "Visit from the courtyard or street while standing with empty hands.";
+    moved = await district.visitLane((destination) => canLeave() && player.enterNeighbourhood(destination));
+  }
+  if (moved) {
+    manual = false;
+    player.clearInput();
+    quality.resetSampling();
+    updateHUD();
+    requestRender();
+  }
+  return moved;
+}, () => district?.cancelVisit());
 ui.onTeleport((zone) => {
   if (!ready || floorRideKind(player.state) || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone)))
     return false;
@@ -7937,7 +8017,8 @@ ui.onTeleport((zone) => {
   manual = false;
   player.cancelCollection();
   player.setInput(null);
-  if (!player.teleport(zone))
+  const move = () => player.teleport(zone);
+  if (!(district?.inKampung ? district.leaveLane(move) : move()))
     return false;
   quality.resetSampling();
   updateHUD();
@@ -8330,8 +8411,8 @@ async function initialize() {
   world = await createWorld(T, R, physics, expanded, warmModel, () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === "phone", detailsEnabled, waitForParseSlice, (seat) => {
     const remove = ui.registerSeat(seat);
     return () => {
-      if (seat.modelVisible && player?.state.seatId === seat.id && !player.stand(true))
-        player.teleport(currentZone);
+      if (seat.modelVisible && player?.state.seatId === seat.id && !player.stand(true) && !player.teleport(currentZone))
+        player.teleport("entry");
       remove();
     };
   }, (text) => {

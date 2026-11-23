@@ -1,3 +1,4 @@
+import {outdoorLocations} from './district-locations.js';
 import {mapPoint} from './spatial.js';
 import {storeDestinations} from './store-destinations.js';
 import {expandedMapPoint} from './expanded-layout.js';
@@ -60,15 +61,16 @@ export function createSpatialHud({expanded = false, root = document} = {}) {
     update({position, zone = 'atrium', interaction = null, distance = Infinity,
       targetLabel = '', active = false, usable = true, travelling = false}) {
       const upper = zone === 'upper';
-      const floorLabel = upper ? 'Floor 02 - Upper Level' : 'Floor 01 - Atrium';
+      const outdoor=outdoorLocations[zone];
+      const floorLabel = outdoor || (upper ? 'Floor 02 - Upper Level' : 'Floor 01 - Atrium');
       const shop = !upper && shops.get(zone);
       setText(floor, shop ? `${floorLabel} · ${shop.label}` : floorLabel);
-      const mapContext = travelling === 'escalator' ? 'Ground-floor plan · Escalator in transit'
+      const mapContext = outdoor || (travelling === 'escalator' ? 'Ground-floor plan · Escalator in transit'
         : travelling ? 'Ground-floor plan · Lift in transit' : upper
-        ? 'Ground-floor plan · You are on Floor 02' : 'Ground-floor plan · You are here';
+        ? 'Ground-floor plan · You are on Floor 02' : 'Ground-floor plan · You are here');
       setText(context, mapContext);
       setAttribute(map, 'aria-label', mapContext);
-      if (miniMap) miniMap.dataset.floor = upper ? '02' : '01';
+      if (miniMap) miniMap.dataset.floor = outdoor ? 'outside' : upper ? '02' : '01';
       if (position && Number.isFinite(position.x) && Number.isFinite(position.z)) {
         const point = expanded ? expandedMapPoint(position.x, position.z) : mapPoint(position.x, position.z);
         setAttribute(dot, 'cx', point.x);
@@ -78,8 +80,8 @@ export function createSpatialHud({expanded = false, root = document} = {}) {
       }
       // The cloned plan describes the ground floor only, just like the full map.
       // Do not pretend an upper-floor or in-transit position is on that floor.
-      if (dot) dot.style.display = upper || travelling ? 'none' : '';
-      if (heading) heading.style.display = upper || travelling ? 'none' : '';
+      if (dot) dot.style.display = upper || outdoor || travelling ? 'none' : '';
+      if (heading) heading.style.display = upper || outdoor || travelling ? 'none' : '';
       // Range/floor/availability are decided by the existing interaction registry.
       // No second proximity rule or candidate scan belongs in this DOM view.
       const near = Boolean(active && !travelling && usable && interaction && Number.isFinite(distance));

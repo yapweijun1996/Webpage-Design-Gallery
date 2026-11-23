@@ -1,3 +1,5 @@
+import {districtManifest, districtModel, disposeDistrictSource} from './district-assets.js';
+import {createFoodCourtApproach} from './food-court-approach.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {mergeStaticGeometries} from './merge-static-geometries.js';
 
@@ -25,7 +27,7 @@ export async function loadSingaporeStreet(T, signal, {read = fetch, base = new U
   group.name = 'Singapore neighbourhood street';
   const geometries = new Set(), materials = new Set(), batches = new Map(), boxes = [];
   const models = [], finishes = new Map(), detailDraws = [], sightBounds = [];
-  let sceneSightBounds;
+  let sceneSightBounds, foodCourt;
   let attached = false;
   const handles = [];
   const loader = new GLTFLoader();
@@ -64,23 +66,9 @@ export async function loadSingaporeStreet(T, signal, {read = fetch, base = new U
     geometries.add(geometry);
   }
   try {
-    const response = await read(new URL('sources.json', base), {signal});
-    if (response.status !== 200) throw new Error('Street manifest unavailable');
-    const {assets} = await response.json();
+    const manifest = await districtManifest(read,base,signal);
     for (const [id, locations] of Object.entries(placements)) {
-      signal.throwIfAborted();
-      const receipt = assets.find(asset => asset.file === id + '.glb');
-      if (!receipt) throw new Error('Street model missing from manifest');
-      const response = await read(new URL(receipt.file, base), {signal});
-      if (response.status !== 200) throw new Error('Street model unavailable');
-      const buffer = await response.arrayBuffer();
-      if (buffer.byteLength !== receipt.bytes) throw new Error('Incomplete street model');
-      if (globalThis.crypto?.subtle) {
-        const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', buffer));
-        const hex = Array.from(digest, value => value.toString(16).padStart(2, '0')).join('');
-        if (hex !== receipt.sha256) throw new Error('Street model changed');
-      }
-      const {scene:source} = await loader.parseAsync(buffer, base.href);
+      const source = await districtModel(loader,read,base,manifest,id,signal);
       try {
         for (const [x,y,z,yaw] of locations) {
           signal.throwIfAborted();
@@ -94,7 +82,7 @@ export async function loadSingaporeStreet(T, signal, {read = fetch, base = new U
               const bounds = new T.Box3().setFromObject(node);
               // The source includes an empty CONNECT_UpperFloor placement marker.
               if (!bounds.isEmpty() && [...bounds.min, ...bounds.max].every(Number.isFinite)) {
-                if (voidDeckCeiling) bounds.voidDeckCeiling = true;
+                if (voidDeckCeiling) bounds.streetCeiling = true;
                 sightBounds.push(bounds);
               }
             }
@@ -113,10 +101,7 @@ export async function loadSingaporeStreet(T, signal, {read = fetch, base = new U
         }
         models.push(id);
       } finally {
-        const originalGeometry = new Set(), originalMaterials = new Set();
-        source.traverse(node => { if (node.isMesh) { originalGeometry.add(node.geometry); originalMaterials.add(node.material); } });
-        for (const g of originalGeometry) g.dispose();
-        for (const m of originalMaterials) m.dispose();
+        disposeDistrictSource(source);
       }
       await new Promise(resolve => setTimeout(resolve, 0));
     }
@@ -143,11 +128,13 @@ export async function loadSingaporeStreet(T, signal, {read = fetch, base = new U
     batches.clear();
     return {
       group, boxes, models,
+      get foodCourt() { return foodCourt; },
       update(x,z,tier) {
+        foodCourt?.update(x,z);
         const distance = tier === 'low' ? 16 : tier === 'detailed' ? 32 : 24;
         for (const {draw,centre} of detailDraws) draw.visible = Math.hypot(x-centre.x,z-centre.z) <= distance;
       },
-      mount(scene, R, physics, cameraBounds) {
+      mount(scene, R, physics, cameraBounds, installSeat) {
         if (attached) return;
         try {
           for (const {x,y,z,width,height,depth} of boxes) handles.push(physics.createCollider(
@@ -155,6 +142,7 @@ export async function loadSingaporeStreet(T, signal, {read = fetch, base = new U
           sceneSightBounds = cameraBounds;
           sceneSightBounds?.push(...sightBounds);
           scene.add(group);
+          if (installSeat) foodCourt = createFoodCourtApproach({T,R,physics,scene,cameraBounds,installSeat,read,base:new URL('../food-court/',base)});
           attached = true;
         } catch (error) {
           this.dispose(physics);
@@ -163,6 +151,8 @@ export async function loadSingaporeStreet(T, signal, {read = fetch, base = new U
       },
       get counts() { return {models:models.length,lodGroups:detailDraws.length,visibleLod:detailDraws.filter(({draw})=>draw.visible).length, geometries:geometries.size, materials:materials.size, colliders:handles.length,cameraBounds:sceneSightBounds ? sightBounds.length : 0}; },
       dispose(physics) {
+        foodCourt?.dispose();
+        foodCourt = undefined;
         group.removeFromParent();
         if (sceneSightBounds) {
           const owned = new Set(sightBounds);

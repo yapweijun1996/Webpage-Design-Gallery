@@ -12,6 +12,14 @@ Turn toward the south entrance beside the tram and walk through the glazed doors
 
 The [street source receipts](assets/districts/singapore/sources.json) pin the five original GLBs and the corresponding Blender sources and project-use terms. The street loads on approach. Farther down the pavement the mall releases its detailed room models, room proxies and window-studio models. Its structural shell, transit, coarse furnishings, player and session remain resident. Returning rebuilds room details and retires the street geometry, camera bounds and collision handles. The scoped service worker caches verified model files on demand. Opening the live mall offline still uses the existing reconnect page.
 
+A small covered food court sits beyond the final shophouse row. It loads independently on approach. Two original stall models share a browsable aisle and a four-chair table. Each chair sits and stands through the normal visitor controls. The generic stall has a kettle and the other has a chicken-rice display. The [food court source receipts](assets/districts/food-court/sources.json) pin the four owner-project GLBs. Leaving this part of the street retires its seat registrations, camera bounds, collision handles and render resources. A failed court request leaves the existing street accessible. Step away from the parcel and approach again to retry. [Walking and seating evidence](../../../../docs/gjh-v11-food-court.md)
+
+### Malaysia · Kampung lane
+
+In the expanded Map, select **Malaysia · Kampung lane** and choose **Visit neighbourhood** from the courtyard or Singapore street. Walk the connected verges past two raised timber houses and a terrace porch. Open Map and choose **Return to GJH courtyard** to return with the same visitor and bag. The street is an independent architectural study.
+
+The visit loads two owner-project house models and reuses the existing road model. The origin stays playable until the new district has a mounted floor and camera bounds. Closing Map cancels a pending visit. A failed connection leaves the visitor in the original district and allows a retry. Return to the courtyard uses its resident floor. [Model sources and licences](assets/districts/malaysia/sources.json)
+
 Open **Tools** for Guide, Help, Shopping Cart and Theme. Help includes the language picker and versioned update control. These preferences are also accessible from the directory’s **App & offline help**.
 
 The accessible directory contains a separate **Original demo tin — not New Moon packaging** viewer. It lazy-loads the byte-pinned original generic tin, preserves native metre scale, and supports drag/keyboard orbit, zoom, reset and mutually exclusive illustrative OpenClose/Exploded clips. The native dialog is keyboard-contained, restores focus, pauses the mall, and releases resources on close. Missing or invalid assets show a readable fallback; no branded product image, text, eShop link or world geometry is replaced.

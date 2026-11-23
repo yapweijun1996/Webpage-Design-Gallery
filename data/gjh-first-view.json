@@ -89,6 +89,11 @@
       "path": "assets/districts/singapore/*.glb",
       "loader": "assets/district-gateway.js",
       "trigger": "if (status === 'mall' && near) void approach();"
+    },
+    {
+      "path": "assets/districts/food-court/*.glb",
+      "loader": "assets/food-court-approach.js",
+      "trigger": "status === 'distant' && distance < 10"
     }
   ],
   "walkImagePreloads": [

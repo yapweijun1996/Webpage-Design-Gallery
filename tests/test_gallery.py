@@ -144,6 +144,12 @@ class GalleryTests(unittest.TestCase):
         street = Path("assets/districts/singapore")
         expected.update(street / file for file in ("sources.json", "hdb-block.glb", "hdb-void-deck.glb",
                                                     "shophouse.glb", "road-segment.glb", "angsana-tree.glb"))
+        court = Path("assets/districts/food-court")
+        expected.update(court / file for file in ("sources.json", "hawker-stall.glb", "chicken-rice-stall.glb",
+                                                   "restaurant-table-chair-set.glb", "kopitiam-kettle.glb"))
+        malaysia = Path("assets/districts/malaysia")
+        expected.update(malaysia / name for name in ("sources.json", "kampung-house.glb", "terrace-house.glb"))
+        expected.update(Path("assets") / name for name in ("kampung-lane.js", "district-assets.js", "merge-static-geometries.js"))
         expected.add(Path("assets/interiors/showroom-atlas.png"))
         for area in ("assets/interiors", "assets/gallery-assets"):
             expected.update(path.relative_to(ROOT / scope) for path in (ROOT / scope / area).glob("*.glb"))

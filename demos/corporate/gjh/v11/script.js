@@ -469,7 +469,7 @@ function updateHUD() {
     if(p.escalatorTravel)ui.announce('Ascending to the upper deck. The lift serves both floors.');
     wasOnEscalator=p.escalatorTravel;
   }
-  const zone = district && p.z > 48.2 ? 'singapore-street'
+  const zone = district?.inKampung ? 'malaysia-kampung' : district && p.z > 48.2 ? (district.foodCourtAt(p.x,p.z) ? 'singapore-food-court' : 'singapore-street')
     : elevator && !p.escalatorTravel && p.y > elevator.upper / 2 ? 'upper' : (expanded ? restroomAt(p.x,p.z) ?? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
   if (zone !== currentZone || travelling !== wasRiding) quality.resetSampling();
   if (zone !== currentZone) mallAudio.setZone(zone);
@@ -896,6 +896,7 @@ function rideElevator(options) {
   return result;
 }
 function requestFloorRide(upper, arrival) {
+  if(district?.inKampung && !district.leaveLane(()=>player.teleport('atrium'))) return {reason:'Return to the courtyard first.'};
   const target = upper ? liftLayout.upper : 0;
   const result = rideElevator({approach:true, target});
   if (result.calling) {
@@ -906,11 +907,28 @@ function requestFloorRide(upper, arrival) {
   if (ready) { updateHUD(); requestRender(); }
   return result;
 }
+ui.onNeighbourhood(async returning => {
+  if(!ready || !expanded || !district) return false;
+  let moved;
+  if(returning) moved=district.leaveLane(()=>player.teleport('atrium'));
+  else {
+    const canLeave=()=>['atrium','singapore-street','singapore-food-court'].includes(currentZone)
+      && !floorRideKind(player.state) && !player.state.seated && !player.state.pushing
+      && !player.state.productApproaching && !player.state.character.physicalProduct?.held;
+    if(!canLeave()) return 'Visit from the courtyard or street while standing with empty hands.';
+    moved=await district.visitLane(destination=>canLeave() && player.enterNeighbourhood(destination));
+  }
+  if(moved) {
+    manual=false;player.clearInput();quality.resetSampling();updateHUD();requestRender();
+  }
+  return moved;
+},()=>district?.cancelVisit());
 ui.onTeleport(zone => {
   if (!ready || floorRideKind(player.state) || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone))) return false;
   pendingFloorRide = undefined;
   manual = false; player.cancelCollection(); player.setInput(null);
-  if (!player.teleport(zone)) return false;
+  const move=()=>player.teleport(zone);
+  if (!(district?.inKampung ? district.leaveLane(move) : move())) return false;
   quality.resetSampling(); updateHUD(); requestRender(); canvas.focus({preventScroll: true}); return true;
 });
 ui.onSeat((sit,id)=>{if(!ready)return;player.clearInput();manual=false;if(sit)npcs?.releaseSeat(id);const ok=sit?player.sit(id):player.stand();updateHUD();requestRender();return ok;});
@@ -1171,7 +1189,7 @@ async function initialize() {
       const remove=ui.registerSeat(seat);
       return ()=>{
         // Unseat an occupant before the old model's collision guards are removed.
-        if (seat.modelVisible && player?.state.seatId===seat.id && !player.stand(true)) player.teleport(currentZone);
+        if (seat.modelVisible && player?.state.seatId===seat.id && !player.stand(true) && !player.teleport(currentZone)) player.teleport('entry');
         remove();
       };
     }, text => {

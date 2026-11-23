@@ -604,6 +604,17 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     box('ivory', -11, .18, 14, 3.1, .36, 2.8, true);
   }
   const doors = [], interactables = [], doorFrames = [], doorGlass = [], windowGlass = [];
+
+  function installSeat(seat) {
+    const entry=seatInteraction(seat), removeRecord=registerShopSeat?.(seat);
+    seats.push(seat);
+    interactables.push(entry);
+    return () => {
+      removeRecord?.();
+      seats.splice(seats.indexOf(seat),1);
+      interactables.splice(interactables.indexOf(entry),1);
+    };
+  }
   if (expanded) {
     interactables.push(addFeatureKiosk({x:10,z:20,box,cylinder,sign}));
     collider(10,.5,20,1.8,1,1.4);
@@ -1242,16 +1253,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       return physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
         .setRotation({x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}));
     }
-    function installSeat(seat) {
-      const entry=seatInteraction(seat), removeRecord=registerShopSeat?.(seat);
-      seats.push(seat);
-      interactables.push(entry);
-      return () => {
-        removeRecord?.();
-        seats.splice(seats.indexOf(seat),1);
-        interactables.splice(interactables.indexOf(entry),1);
-      };
-    }
     function installPianoGuard(spec) {
       const guard=interiorCollider(spec);
       return ()=>physics.removeCollider(guard,false);
@@ -1683,7 +1684,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     scene, interactables, reserveProduct, expanded, phone, prepareModel, interiors: interiorKit,
     initialTier: artworkTier()
   });
-  const district = expanded ? createDistrictGateway({T,R,physics,scene,cameraObstacles,notice:streetNotice,tier:artworkTier,
+  const district = expanded ? createDistrictGateway({T,R,physics,scene,cameraObstacles,installSeat,notice:streetNotice,tier:artworkTier,
     setMallDetail(value) { interiorModels.setResident(value); interiorKit.setResident(value); }}) : null;
   return {signage,district,
     get mallDetailResidency() { return {studioModels:interiorModels?.residentModels ?? 0,rooms:interiorKit?.residency}; },

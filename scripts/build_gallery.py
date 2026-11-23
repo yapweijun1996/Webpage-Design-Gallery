@@ -444,16 +444,18 @@ def pwa_outputs(pages, catalog, release):
                           "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
     # District bytes and released interior details are cached on demand. Only
     # original owner-project exports recorded in the district manifest ship.
-    street = mall_root / "assets/districts/singapore"
-    receipt = street / "sources.json"
-    resumed = {receipt, *(mall_root / "assets/interiors").glob("*.glb"),
-               mall_root / "assets/interiors/showroom-atlas.png"}
-    for entry in read_json(receipt)["assets"]:
-        path = local_path(street, entry["file"])
-        data = path.read_bytes()
-        if len(data) != entry["bytes"] or hashlib.sha256(data).hexdigest() != entry["sha256"]:
-            raise ValueError(f"Street asset receipt mismatch: {entry['file']}")
-        resumed.add(path)
+    resumed = {*(mall_root / "assets/interiors").glob("*.glb"), mall_root / "assets/interiors/showroom-atlas.png"}
+    resumed.update(mall_root / 'assets' / name for name in ('kampung-lane.js', 'district-assets.js', 'merge-static-geometries.js'))
+    for district in ("singapore", "food-court", "malaysia"):
+        folder = mall_root / "assets/districts" / district
+        receipt = folder / "sources.json"
+        resumed.add(receipt)
+        for entry in read_json(receipt)["assets"]:
+            path = local_path(folder, entry["file"])
+            data = path.read_bytes()
+            if len(data) != entry["bytes"] or hashlib.sha256(data).hexdigest() != entry["sha256"]:
+                raise ValueError(f"District asset receipt mismatch: {entry['file']}")
+            resumed.add(path)
     # Both original studio placement tables refer to these two locations.
     resumed.update((mall_root / "assets/gallery-assets").glob("*.glb"))
     for name in ("pharmacy-counter", "speaker-soundbar", "tv-demo-table", "tv-floor-stand",

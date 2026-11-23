@@ -1,0 +1,937 @@
+{
+  "environment": "Chrome on macOS with Metal. Touch and desktop routes use emulated viewports. Physical frame time and heat were not measured.",
+  "geometryBuild": "e67a1f3923af52ed",
+  "wayfindingBuild": "6faa46c7887eb155",
+  "widths": {
+    "390": {
+      "quality": "low",
+      "browser": "158.0.8127.37",
+      "framesSampled": 4389,
+      "peakDraws": 95,
+      "clearRays": 33,
+      "courtResources": {
+        "status": "ready",
+        "models": 4,
+        "geometries": 26,
+        "materials": 26,
+        "colliders": 19,
+        "cameraBounds": 22,
+        "seats": 4
+      },
+      "stops": {
+        "mall": {
+          "zone": "atrium",
+          "position": [
+            10.0,
+            -0.02,
+            45
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 66,
+          "GPU": {
+            "geometries": 277,
+            "textures": 110
+          },
+          "court": "distant"
+        },
+        "street-before-court": {
+          "zone": "singapore-street",
+          "position": [
+            10.001,
+            -0.02,
+            65.4
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 20,
+          "GPU": {
+            "geometries": 132,
+            "textures": 75
+          },
+          "court": "distant"
+        },
+        "failed-layer": {
+          "zone": "singapore-street",
+          "position": [
+            10.002,
+            -0.02,
+            85.147
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 14,
+          "GPU": {
+            "geometries": 137,
+            "textures": 75
+          },
+          "court": "unavailable"
+        },
+        "public-approach": {
+          "zone": "singapore-street",
+          "position": [
+            10.003,
+            -0.02,
+            85.085
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 44,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "hawker-stall": {
+          "zone": "singapore-food-court",
+          "position": [
+            20.995,
+            -0.02,
+            85.084
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 28,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "chicken-rice-stall": {
+          "zone": "singapore-food-court",
+          "position": [
+            25.042,
+            -0.02,
+            87.651
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 31,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "sit-west": {
+          "zone": "singapore-food-court",
+          "position": [
+            26.375,
+            -0.005,
+            86.8
+          ],
+          "seat": "food-court-seat-west",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 34,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "stand-west": {
+          "zone": "singapore-food-court",
+          "position": [
+            25.325,
+            -0.02,
+            86.8
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 21,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "sit-north": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.005,
+            86.075
+          ],
+          "seat": "food-court-seat-north",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 90,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "stand-north": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.02,
+            85.025
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 30,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "sit-east": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.825,
+            -0.005,
+            86.8
+          ],
+          "seat": "food-court-seat-east",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 16,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "stand-east": {
+          "zone": "singapore-food-court",
+          "position": [
+            28.875,
+            -0.02,
+            86.8
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 36,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "sit-south": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.005,
+            87.525
+          ],
+          "seat": "food-court-seat-south",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 28,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "stand-south": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.02,
+            88.575
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 88,
+          "GPU": {
+            "geometries": 163,
+            "textures": 75
+          },
+          "court": "ready"
+        },
+        "retired-on-street": {
+          "zone": "singapore-street",
+          "position": [
+            9.88,
+            -0.02,
+            62.958
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 86,
+          "GPU": {
+            "geometries": 139,
+            "textures": 75
+          },
+          "court": "distant"
+        },
+        "restored-mall": {
+          "zone": "atrium",
+          "position": [
+            9.881,
+            -0.02,
+            40.964
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 65,
+          "GPU": {
+            "geometries": 277,
+            "textures": 110
+          },
+          "court": "distant"
+        },
+        "map-return": {
+          "zone": "atrium",
+          "position": [
+            32.6,
+            -0.02,
+            12.0
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 21,
+          "GPU": {
+            "geometries": 111,
+            "textures": 76
+          },
+          "court": "distant"
+        }
+      }
+    },
+    "768": {
+      "quality": "balanced",
+      "browser": "158.0.8127.37",
+      "framesSampled": 5557,
+      "peakDraws": 113,
+      "clearRays": 33,
+      "courtResources": {
+        "status": "ready",
+        "models": 4,
+        "geometries": 26,
+        "materials": 26,
+        "colliders": 19,
+        "cameraBounds": 22,
+        "seats": 4
+      },
+      "stops": {
+        "mall": {
+          "zone": "atrium",
+          "position": [
+            10.0,
+            -0.02,
+            45
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 87,
+          "GPU": {
+            "geometries": 294,
+            "textures": 120
+          },
+          "court": "distant"
+        },
+        "street-before-court": {
+          "zone": "singapore-street",
+          "position": [
+            10.001,
+            -0.02,
+            65.444
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 25,
+          "GPU": {
+            "geometries": 153,
+            "textures": 83
+          },
+          "court": "distant"
+        },
+        "public-approach": {
+          "zone": "singapore-street",
+          "position": [
+            10.002,
+            -0.02,
+            85.031
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 43,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "hawker-stall": {
+          "zone": "singapore-food-court",
+          "position": [
+            21.08,
+            -0.02,
+            85.032
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 26,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "chicken-rice-stall": {
+          "zone": "singapore-food-court",
+          "position": [
+            25.069,
+            -0.02,
+            87.683
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 31,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "sit-west": {
+          "zone": "singapore-food-court",
+          "position": [
+            26.375,
+            -0.005,
+            86.8
+          ],
+          "seat": "food-court-seat-west",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 33,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "stand-west": {
+          "zone": "singapore-food-court",
+          "position": [
+            25.325,
+            -0.02,
+            86.8
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 17,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "sit-north": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.005,
+            86.075
+          ],
+          "seat": "food-court-seat-north",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 107,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "stand-north": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.02,
+            85.025
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 29,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "sit-east": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.825,
+            -0.005,
+            86.8
+          ],
+          "seat": "food-court-seat-east",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 16,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "stand-east": {
+          "zone": "singapore-food-court",
+          "position": [
+            28.875,
+            -0.02,
+            86.8
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 36,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "sit-south": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.005,
+            87.525
+          ],
+          "seat": "food-court-seat-south",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 28,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "stand-south": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.02,
+            88.575
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 105,
+          "GPU": {
+            "geometries": 180,
+            "textures": 83
+          },
+          "court": "ready"
+        },
+        "retired-on-street": {
+          "zone": "singapore-street",
+          "position": [
+            9.963,
+            -0.02,
+            62.888
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 102,
+          "GPU": {
+            "geometries": 157,
+            "textures": 83
+          },
+          "court": "distant"
+        },
+        "restored-mall": {
+          "zone": "atrium",
+          "position": [
+            9.966,
+            -0.02,
+            40.86
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 82,
+          "GPU": {
+            "geometries": 296,
+            "textures": 124
+          },
+          "court": "distant"
+        }
+      }
+    },
+    "1440": {
+      "quality": "detailed",
+      "browser": "158.0.8127.37",
+      "framesSampled": 10582,
+      "peakDraws": 137,
+      "clearRays": 33,
+      "courtResources": {
+        "status": "ready",
+        "models": 4,
+        "geometries": 26,
+        "materials": 26,
+        "colliders": 19,
+        "cameraBounds": 22,
+        "seats": 4
+      },
+      "stops": {
+        "mall": {
+          "zone": "atrium",
+          "position": [
+            10.0,
+            -0.02,
+            45
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 104,
+          "GPU": {
+            "geometries": 299,
+            "textures": 139
+          },
+          "court": "distant"
+        },
+        "street-before-court": {
+          "zone": "singapore-street",
+          "position": [
+            10.002,
+            -0.02,
+            65.599
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 30,
+          "GPU": {
+            "geometries": 162,
+            "textures": 96
+          },
+          "court": "distant"
+        },
+        "public-approach": {
+          "zone": "singapore-street",
+          "position": [
+            10.003,
+            -0.02,
+            85.227
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 56,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "hawker-stall": {
+          "zone": "singapore-food-court",
+          "position": [
+            21.14,
+            -0.02,
+            85.228
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 38,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "chicken-rice-stall": {
+          "zone": "singapore-food-court",
+          "position": [
+            25.129,
+            -0.02,
+            87.853
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 40,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "sit-west": {
+          "zone": "singapore-food-court",
+          "position": [
+            26.375,
+            -0.005,
+            86.8
+          ],
+          "seat": "food-court-seat-west",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 71,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "stand-west": {
+          "zone": "singapore-food-court",
+          "position": [
+            25.325,
+            -0.02,
+            86.8
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 31,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "sit-north": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.005,
+            86.075
+          ],
+          "seat": "food-court-seat-north",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 119,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "stand-north": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.02,
+            85.025
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 40,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "sit-east": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.825,
+            -0.005,
+            86.8
+          ],
+          "seat": "food-court-seat-east",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 26,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "stand-east": {
+          "zone": "singapore-food-court",
+          "position": [
+            28.875,
+            -0.02,
+            86.8
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 72,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "sit-south": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.005,
+            87.525
+          ],
+          "seat": "food-court-seat-south",
+          "phase": "seated",
+          "capsule": false,
+          "draws": 39,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "stand-south": {
+          "zone": "singapore-food-court",
+          "position": [
+            27.1,
+            -0.02,
+            88.575
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 115,
+          "GPU": {
+            "geometries": 189,
+            "textures": 96
+          },
+          "court": "ready"
+        },
+        "retired-on-street": {
+          "zone": "singapore-street",
+          "position": [
+            9.927,
+            -0.024,
+            62.82
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 111,
+          "GPU": {
+            "geometries": 163,
+            "textures": 96
+          },
+          "court": "distant"
+        },
+        "restored-mall": {
+          "zone": "atrium",
+          "position": [
+            9.928,
+            -0.02,
+            40.903
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 103,
+          "GPU": {
+            "geometries": 299,
+            "textures": 141
+          },
+          "court": "distant"
+        },
+        "map-return": {
+          "zone": "atrium",
+          "position": [
+            32.6,
+            -0.02,
+            12.0
+          ],
+          "seat": null,
+          "phase": "idle",
+          "capsule": true,
+          "draws": 26,
+          "GPU": {
+            "geometries": 133,
+            "textures": 97
+          },
+          "court": "distant"
+        }
+      }
+    }
+  },
+  "pendingMap": {
+    "commit": "86cc6fe24d501ac0ef96e4d8d1ea5c86aee327e2",
+    "build": "6faa46c7887eb155",
+    "browser": "158.0.8127.37",
+    "events": [
+      {
+        "event": "request held",
+        "milliseconds": 0
+      },
+      {
+        "event": "returned through Map",
+        "milliseconds": 7192
+      },
+      {
+        "event": "request failed",
+        "milliseconds": 7196
+      },
+      {
+        "event": "released late response",
+        "milliseconds": 7203
+      }
+    ],
+    "stops": [
+      "before",
+      "straight-ahead-direction",
+      "browsing-kettle-stall",
+      "browsing-chicken-rice",
+      "hawker-counter-apron",
+      "hawker-counter-oblique",
+      "chicken-counter-apron",
+      "chicken-counter-oblique",
+      "retired",
+      "loading-on-through-street",
+      "walkable-during-delay",
+      "after-late-response"
+    ],
+    "errors": [],
+    "responses": {
+      "/demos/corporate/gjh/v11/assets/player.bundle.js": "3a7b6219c892a0a9206f6911499e246d96b7f4c50800a28946504ff000e804de",
+      "/demos/corporate/gjh/v11/script.bundle.js": "86bb471fc3444ade5bc7c2224240b679c275cfe29a32c7e2e000f774fabaac68",
+      "/demos/corporate/gjh/v11/assets/world.bundle.js": "472e7f7399fb52699470cd363c6b9fbf506ec65a1cb03c84786971d10c89f2f2",
+      "/demos/corporate/gjh/v11/assets/street-chunk.js": "d69bf7b95247b2e20152655d6ff1e1e24accbc9a3b69186ebae7f26605980d95",
+      "/demos/corporate/gjh/v11/assets/food-court-approach.js": "a81a79bf45bca16049e3de4af69a7471443d3e6d7562dba32e949d406170c617",
+      "/demos/corporate/gjh/v11/assets/food-court.js": "1ecc647ad3494f1bb4e8e64f04aa33817ae0211f5ad67a0300b19a2c82b20611",
+      "/demos/corporate/gjh/v11/assets/districts/food-court/sources.json": "c61704d2358faeb1c527adf405e81f60c0bb84257f0fd627a07ba8afff52a87e",
+      "/demos/corporate/gjh/v11/assets/districts/food-court/hawker-stall.glb": "612d6e7b8f94ad49371050c4ae8599683356b23de85e55b780b020cdb5144316",
+      "/demos/corporate/gjh/v11/assets/districts/food-court/chicken-rice-stall.glb": "c0ecc077eed57275b6e46643900ab4b8b35cad42862d98799cd7bb1dae33b59f",
+      "/demos/corporate/gjh/v11/assets/districts/food-court/restaurant-table-chair-set.glb": "23595162cac96cde7da7a25d73b05d9c279e9e7b465e1f3454467d4a9a739ede",
+      "/demos/corporate/gjh/v11/assets/districts/food-court/kopitiam-kettle.glb": "fef5f8192497110031216cbcdfe143b5dba6ba9362a9613154beb46259db953a"
+    }
+  },
+  "imageSourcesSha256": {
+    "walk-to-the-stalls/Street sign": "80b7a956b42fdecd186f49fe1f02c3528270556e9a753591b95994fdf7dfcacb",
+    "walk-to-the-stalls/Hawker counter": "579988eb3d2d6c784b58a3699ebecdb25e0728ac406c7edf7a16ef565a076da7",
+    "walk-to-the-stalls/Chicken rice display": "dc7612b4cfe861433d019be81bce35e37bba34b44b687d30e1bb0528cc58d3b6",
+    "south-chair/Original camera": "b649fe787714d0cd7339b71cb58229a650210cb8b7869d1d2adb017652cc21ab",
+    "south-chair/Corrected camera": "b6f872ffed9fd3a936fa5f295868c58a5195a3cd950f10dbd86bc0c922d314b5",
+    "seating/768 px · east chair": "7580d08cc054caaefb73a4bfb71beb98abd1c7e4453ea44f899fc4bf4721fdd1",
+    "seating/1440 px · east chair": "db90fcc92b08502430ac598373e1aa6ecc42c38637c8927d910d7152cbad750f"
+  }
+}

@@ -1,3 +1,4 @@
+import {outdoorLocations} from './district-locations.js';
 import {mallAudio, createTramNarration} from './audio.js';
 import {tramCaptionCopy} from './tram-caption-copy.js';
 import {floorDestinations} from './elevator-ride.js';
@@ -208,7 +209,7 @@ export function createUI(expanded = false, onMenuOpen = () => {}) {
   const locationName = document.getElementById('location-name');
   const mapOpeners = [headerMap, locationMap];
   function updateLocation(label) {
-    locationName.textContent = label;
+    locationName.textContent = label === outdoorLocations['malaysia-kampung'] ? 'Kampung' : label;
     locationMap.title = `${label} — open mall map`;
   }
   const status = document.getElementById('mall-status');
@@ -361,7 +362,7 @@ export function createUI(expanded = false, onMenuOpen = () => {}) {
   }
   function closeMap() {
     if (!canUsePanels()) return;
-    mallMap.open = false; syncMapButtons(); updateCompactPanels(); notifyMode();
+    cancelMapTravel();mallMap.open = false; syncMapButtons(); updateCompactPanels(); notifyMode();
     mapReturnFocus.focus({preventScroll: true});
   }
   function openHelp() {
@@ -407,6 +408,14 @@ export function createUI(expanded = false, onMenuOpen = () => {}) {
     viewToggle.setAttribute('aria-label', showing3D ? 'Switch to the accessible store directory' : 'Switch to the 3D virtual mall');
     headerMenu.hidden = !showing3D;
   }
+  let neighbourhoodAction, cancelNeighbourhood, visitVersion=0;
+  const cancelMapTravel=()=>{
+    visitVersion++;cancelNeighbourhood?.();
+    if(expanded) {
+      document.getElementById('map-visit').disabled=false;
+      document.getElementById('map-travel-status').textContent='';
+    }
+  };
   const resetMap = () => { mallMap.open = false; };
   resetMap();
   compactMap.addEventListener('change', () => {
@@ -425,6 +434,7 @@ export function createUI(expanded = false, onMenuOpen = () => {}) {
   });
   mallMap.addEventListener('toggle', () => {
     if (mallMap.open) menu.close({focus: false});
+    else cancelMapTravel();
     syncMapButtons();updateCompactPanels();
     notifyMode();
   });
@@ -488,12 +498,35 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     const destinationSelect = document.getElementById('map-destination');
     for (const store of destinations) destinationSelect.add(new Option(`${store.number} · ${store.label}`, store.id));
     document.getElementById('map-destination-controls').hidden = false;
+    const neighbourhood=new Option('Malaysia · Kampung lane','malaysia-kampung');
+    destinationSelect.add(neighbourhood);
     const visit = document.getElementById('map-visit');
     destinationSelect.addEventListener('change', () => {
-      setHudText(visit, floorDestinations[destinationSelect.value] ? 'Ride lift' : 'Visit store');
+      cancelMapTravel();
+      const label=destinationSelect.value==='malaysia-kampung' ? (currentZone==='malaysia-kampung'?'Return to GJH courtyard':'Visit neighbourhood')
+        : floorDestinations[destinationSelect.value] ? 'Ride lift' : 'Visit store';
+      setHudText(visit,label);
       document.getElementById('map-travel-status').textContent = '';
     });
-    visit.addEventListener('click', () => {
+    visit.addEventListener('click', async () => {
+      if(destinationSelect.value==='malaysia-kampung') {
+        if(!neighbourhoodAction || visit.disabled) return;
+        const attempt=++visitVersion, returning=currentZone==='malaysia-kampung';
+        const status=document.getElementById('map-travel-status');
+        status.textContent=returning?'Returning to the courtyard…':'Opening Kampung lane…';
+        visit.disabled=true;
+        let moved;
+        try {moved=await neighbourhoodAction(returning);}
+        finally {if(attempt===visitVersion) visit.disabled=false;}
+        if(attempt!==visitVersion || !mallMap.open) return;
+        if(moved!==true) {
+          const message=typeof moved==='string'?moved:'Neighbourhood unavailable. Try again when connected.';
+          status.textContent=message;announce(message);return;
+        }
+        status.textContent='';menu.close({focus:false});mallMap.open=false;
+        setHudText(visit,returning?'Visit neighbourhood':'Return to GJH courtyard');
+        scene.focus({preventScroll:true});return;
+      }
       const floor = floorDestinations[destinationSelect.value];
       if (floor) travelToFloor(floor.upper);
       else travelToStore(destinationSelect.value);
@@ -653,7 +686,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   }
   records.set(FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD);
   for(const [id,name] of [['service-desk','Guest services'],['wayfinding-west','Store directions'],['wayfinding-east','Store directions'],['featured-showcase','New Moon featured collection']])records.set(id,{name,action:'amenity'});
-  const zones = { atrium: 'Courtyard', 'singapore-street':'Singapore street',
+  const zones = { atrium: 'Courtyard', ...outdoorLocations,
     ...Object.fromEntries(restroomRooms.map(({id,label})=>[id,label])), ...Object.fromEntries(destinations.map(store=>[store.id,store.label])), upper: 'Upper level' };
   let available = false;
   let showing3D = false;
@@ -1169,7 +1202,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       tutorial.reportPose({x,z,yaw});
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
-        const offMap=zone==='upper'||zone==='singapore-street';playerDot.style.display=offMap?'none':'';mapCaption.querySelector('.map-key').hidden=offMap;floorplan.setAttribute('aria-label',offMap?'Ground floor map. Choose a store to return to its entrance.':floorplanLabel);if(mapCaptionText)mapCaptionText.textContent=offMap?' Ground floor map ':'You are here';
+        const offMap=zone==='upper'||zone in outdoorLocations;playerDot.style.display=offMap?'none':'';mapCaption.querySelector('.map-key').hidden=offMap;floorplan.setAttribute('aria-label',zone==='malaysia-kampung'?'Malaysia · Kampung lane. Return to GJH courtyard using the destination control.':offMap?'Ground floor map. Choose a store to return to its entrance.':floorplanLabel);if(mapCaptionText)mapCaptionText.textContent=offMap?' Ground floor map ':'You are here';
         if (showing3D) {
           updateLocation(zones[zone]);
           announce(`Location: ${zones[zone]}.`);
@@ -1357,6 +1390,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     onBagChange(listener) { return bag.subscribe(listener); },
     onProductInspect(listener) { productInspectListener = listener; },
     announce,
+    onNeighbourhood(listener,cancel) {neighbourhoodAction=listener;cancelNeighbourhood=cancel;},
     onTeleport(listener) {
       teleportListener = listener;
     },

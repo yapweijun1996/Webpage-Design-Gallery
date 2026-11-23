@@ -73,7 +73,8 @@ test('upper visit completes once per session and ground objectives stay downstai
   tracker.visit('upper');
   tracker.visit('upper');
   assert.deepEqual(tracker.progress(), [0, 0, 0, 1]);
-  assert.equal(objectiveHint(tracker.progress(), 'upper'), null);
+  for(const zone of ['upper','singapore-street','singapore-food-court','malaysia-kampung'])
+    assert.equal(objectiveHint(tracker.progress(),zone),null);
   assert.equal(objectiveHint(tracker.progress(), 'atrium'), 'Walk into three different stores');
   assert.equal(objectiveHint([3, 1, 1, 0], 'atrium'), 'Visit the upper level');
   assert.equal(objectiveHint([3, 1, 1, 1], 'atrium'), null);

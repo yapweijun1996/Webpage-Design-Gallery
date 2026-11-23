@@ -581,10 +581,10 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const framingWeight = closeFraming * neutralFramingWeight(renderedPitch);
     const inUpperCar=expanded && !elevatorTravel && visual.position.y>liftLayout.upper-.1 && insideLiftShaft(visual.position);
     // In the void deck the raised chase pivot can put a real transfer beam between the eye and the visitor.
-    const underVoidDeck = expanded && visual.position.z > expandedLayout.bounds.maxZ && cameraObstacles.some(box =>
-      box.voidDeckCeiling && target.y < box.min.y && target.x >= box.min.x && target.x <= box.max.x &&
+    const underStreetRoof = expanded && visual.position.z > expandedLayout.bounds.maxZ && cameraObstacles.some(box =>
+      box.streetCeiling && target.y < box.min.y && target.x >= box.min.x && target.x <= box.max.x &&
       target.z >= box.min.z && target.z <= box.max.z);
-    const orbitHeight = seatView ? Math.max(.9, framing.height * .7) : actionView || inUpperCar || underVoidDeck ? 0 : framing.height * framingWeight;
+    const orbitHeight = seatView ? Math.max(.9, framing.height * .7) : actionView || inUpperCar || underStreetRoof ? 0 : framing.height * framingWeight;
     // The walking level also bounds the camera where the upper floor has no slab.
     const floor = elevatorTravel?.height ?? (ridingEscalator ? visual.position.y : visual.position.y > liftLayout.upper / 2 ? liftLayout.upper : 0);
     const minimumY = floor + cameraRadius + .04;
@@ -714,7 +714,9 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   function teleport(zone) {
     if (elevatorTravel || ridingEscalator || beforeTram) return false;
     const destination = zone === 'atrium' ? (expanded ? expandedLayout.courtyardArrival : courtyardArrival) : expanded && zone === 'entry' ? expandedLayout.entrance : expanded ? expandedStoreArrival(zone) : spatial.arrival(zone);
-    if (!destination) return false;
+    return destination ? moveToDestination(destination) : false;
+  }
+  function moveToDestination(destination) {
     productApproach=null;
     const carryingProduct=character.state.physicalProduct?.held;
     if(!carryingProduct){productHome=null;character.resetProduct?.();}
@@ -811,7 +813,11 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       character.update('idle', 0);
     }
   });
-  return {body, capsule, camera, contactShadow:contact, get visual() { return visual; }, get npcSource() { return character.npcSource; }, prepareCart:character.prepareCart, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, boardEscalator, boardTransportReason, enableEscalator(){hasEscalator=true;}, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+  return {body, capsule, camera, contactShadow:contact, get visual() { return visual; }, get npcSource() { return character.npcSource; }, prepareCart:character.prepareCart, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport,
+    enterNeighbourhood(destination) {
+      if(boardTransportReason() || !clearAt({x:destination.x,y:.89,z:destination.z})) return false;
+      return moveToDestination(destination);
+    }, useElevator, boardEscalator, boardTransportReason, enableEscalator(){hasEscalator=true;}, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
     emote: (name, options) => !seated && !elevatorTravel && !ridingEscalator && !productApproach && (character.emote?.(name, options) ?? false),
     setTramTier: tram?.selectTier,
     dispose() { tram?.dispose(); character.dispose?.(); },

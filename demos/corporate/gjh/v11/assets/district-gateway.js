@@ -1,11 +1,20 @@
 import {expandedLayout} from './expanded-layout.js';
 
 export const southDoor = Object.freeze({x:expandedLayout.entrance.x,z:expandedLayout.bounds.maxZ,halfWidth:2.16});
+let laneImportAttempt=0;
+async function loadKampungLane(T,signal) {
+  // Browsers remember failed module requests for the lifetime of the document.
+  const query=laneImportAttempt ? '?retry='+laneImportAttempt : '';
+  let module;
+  try {module=await import(`./kampung-lane.js${query}`);}
+  catch(error) {laneImportAttempt++;throw error;}
+  return module.loadKampungLane(T,signal);
+}
 const loadSingaporeStreet = (T,signal) => import('./street-chunk.js').then(module => module.loadSingaporeStreet(T,signal));
 
 // The doorway remains solid until the destination has all of its proxies.
 // A separate return distance prevents repeated allocations at the threshold.
-export function createDistrictGateway({T,R,physics,scene,cameraObstacles,setMallDetail,notice,tier = () => 'balanced',load = loadSingaporeStreet}) {
+export function createDistrictGateway({T,R,physics,scene,cameraObstacles,installSeat,setMallDetail,notice,tier = () => 'balanced',load = loadSingaporeStreet,loadLane = loadKampungLane}) {
   const {x:centre,z:threshold,halfWidth} = southDoor;
   const barrier = physics.createCollider(R.ColliderDesc.cuboid(halfWidth,2.7,.11).setTranslation(centre,2.68,threshold));
   const geometry = new T.BoxGeometry();
@@ -34,6 +43,40 @@ export function createDistrictGateway({T,R,physics,scene,cameraObstacles,setMall
   positionDoors();
   scene.add(glass,rails);
   let chunk, controller, status = 'mall', interiorResident = true, cycles = 0, ended = false;
+  let lane, laneRequest;
+  function cancelVisit() {
+    laneRequest?.abort();
+    laneRequest=undefined;
+  }
+  async function visitLane(enter) {
+    if(ended || lane || laneRequest) return false;
+    const attempt=new AbortController();
+    laneRequest=attempt;
+    const timeout=setTimeout(()=>attempt.abort(),20000);
+    let prepared;
+    try {
+      prepared=await loadLane(T,attempt.signal);
+      if(attempt.signal.aborted || laneRequest!==attempt || ended) return false;
+      prepared.mount(scene,R,physics,cameraObstacles);
+      if(!enter(prepared.arrival)) return false;
+      lane=prepared;prepared=undefined;
+      retireStreet();
+      mallDetail(false);
+      return true;
+    } catch { return false; }
+    finally {
+      prepared?.dispose();
+      clearTimeout(timeout);
+      if(laneRequest===attempt) laneRequest=undefined;
+    }
+  }
+  function leaveLane(moveToMall) {
+    cancelVisit();
+    if(!lane || !moveToMall()) return false;
+    lane.dispose();lane=undefined;
+    mallDetail(true);
+    return true;
+  }
   let lastNotice = '';
   function message(value) {
     if (lastNotice === value) return;
@@ -70,7 +113,7 @@ export function createDistrictGateway({T,R,physics,scene,cameraObstacles,setMall
         prepared.dispose(physics);
         throw new DOMException('Street request cancelled','AbortError');
       }
-      prepared.mount(scene,R,physics,cameraObstacles);
+      prepared.mount(scene,R,physics,cameraObstacles,installSeat);
       chunk = prepared;
       status = 'opening';
     } catch {
@@ -84,8 +127,10 @@ export function createDistrictGateway({T,R,physics,scene,cameraObstacles,setMall
     }
   }
   return {
+    visitLane, leaveLane, cancelVisit,
+    get inKampung() { return Boolean(lane); },
     update({x,y,z,yaw}) {
-      if (ended) return;
+      if (ended || lane) return;
       chunk?.update?.(x,z,tier());
       const outside = z-threshold, lateral = Math.abs(x-centre);
       if (outside < 4) mallDetail(true);
@@ -109,7 +154,7 @@ export function createDistrictGateway({T,R,physics,scene,cameraObstacles,setMall
       }
       if (chunk && outside > 1) {
         status = 'street';
-        message('');
+        message(chunk.foodCourt?.notice || '');
       } else if (chunk && status === 'street' && outside < -.5) {
         status = 'ready';
         message('');
@@ -119,12 +164,14 @@ export function createDistrictGateway({T,R,physics,scene,cameraObstacles,setMall
         cycles++;
       }
     },
+    foodCourtAt(x,z) { return chunk?.foodCourt?.contains(x,z) ?? false; },
     get state() {
-      return {status,interiorResident,cycles,models:chunk ? [...chunk.models] : [],street:chunk?.counts ?? {models:0,geometries:0,materials:0,colliders:0,cameraBounds:0,lodGroups:0,visibleLod:0}};
+      return {kampung:lane?.counts ?? null,foodCourt:chunk?.foodCourt?.state ?? {status:'distant'},status,interiorResident,cycles,models:chunk ? [...chunk.models] : [],street:chunk?.counts ?? {models:0,geometries:0,materials:0,colliders:0,cameraBounds:0,lodGroups:0,visibleLod:0}};
     },
     dispose() {
       if (ended) return;
       ended = true;
+      cancelVisit();lane?.dispose();lane=undefined;
       retireStreet();
       physics.removeCollider(barrier,false);
       geometry.dispose();
