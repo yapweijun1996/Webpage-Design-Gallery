@@ -9991,7 +9991,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
   } else {
     const garden = atriumLayout.garden;
     box("ivory", garden.x, garden.height / 2, garden.z, garden.width, garden.height, garden.depth, true);
-    box("wood", garden.x, garden.height + 0.012, garden.z, garden.width - 0.18, 0.025, garden.depth - 0.18);
+    box("oak", garden.x, garden.height + 0.012, garden.z, garden.width - 0.18, 0.025, garden.depth - 0.18);
     for (let i = 0;i < 13; i++) {
       const x = garden.x - 3.45 + i * 0.575, z = garden.z + (i % 3 - 1) * 0.65;
       sphere("foliage", x, 0.57, z, 0.28, 0.14, 0.23);

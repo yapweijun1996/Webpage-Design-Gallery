@@ -518,7 +518,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     // Low planting preserves views while leaving the seasonal/event block clear.
     const garden=atriumLayout.garden;
     box('ivory',garden.x,garden.height/2,garden.z,garden.width,garden.height,garden.depth,true);
-    box('wood',garden.x,garden.height+.012,garden.z,garden.width-.18,.025,garden.depth-.18);
+    // A lighter bed liner defines the planting edge without filling the surrounding shadows.
+    box('oak',garden.x,garden.height+.012,garden.z,garden.width-.18,.025,garden.depth-.18);
     for (let i=0;i<13;i++) {
       const x=garden.x-3.45+i*.575, z=garden.z+(i%3-1)*.65;
       sphere('foliage',x,.57,z,.28,.14,.23);

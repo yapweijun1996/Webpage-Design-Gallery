@@ -174,6 +174,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
   scene.traverse(node => { if (node.isLight) node.layers.enable(2); });
   const visitorShadows = contact && plane ? createVisitorShadows(T, scene, plane, contact) : null;
   const hemisphere = expanded && scene.children.find(node => node.isHemisphereLight);
+  const daylight = expanded && scene.children.find(node => node.isDirectionalLight);
   const avatarMaterials = new Set();
   const portraitMeshes = new WeakSet();
   const avatarFill = new T.Color(0xffe9d5);
@@ -208,9 +209,11 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     avatarMaterials.forEach(applyPortraitFill);
   }
   let focus = null, strength = 0, previousTime, baseAmbient = hemisphere?.intensity;
+  let baseDaylight = daylight?.intensity, baseExposure = renderer?.toneMappingExposure;
   const applyFocusColors = () => lights.forEach((light,index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
     baseAmbient = theme?.lighting?.ambient ?? baseAmbient;
+    baseDaylight = theme?.lighting?.keyIntensity ?? baseDaylight;
     const key = new T.Color(theme?.lighting?.key ?? 0xffe5c1);
     for (const bay of bays) {
       const [main,accent] = bay.colors;
@@ -219,7 +222,10 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       accent.copy(main).lerp(bay.accent,bay.lamp ? .10 : bay.mood ? .30 : 0);
     }
     if (focus) applyFocusColors();
-    if (renderer && Number.isFinite(theme?.lighting?.exposure)) renderer.toneMappingExposure = theme.lighting.exposure;
+    if (renderer && Number.isFinite(theme?.lighting?.exposure)) {
+      baseExposure = theme.lighting.exposure;
+      renderer.toneMappingExposure = baseExposure;
+    }
   }
   applyTheme(null);
   // Zero intensity preserves the ground-floor variant. The landing has its
@@ -233,7 +239,18 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     const {x,y,z} = position;
     const inside = Math.abs(y) < 4 ? bays.find(bay => insideBay(x,z,bay.slot)) : null;
     const publicZone = publicEnvironmentZone(position,atrium);
-    if (expanded) setPortraitFill(inside,publicZone);
+    if (expanded) {
+      setPortraitFill(inside,publicZone);
+      // Keep the courtyard floor below the skylight highlights. Ease back to
+      // ordinary lighting before the visitor reaches a shop or the upper deck.
+      const courtyard = (tier === 'balanced' || tier === 'low') && !inside && Math.abs(y) < 4
+        ? 1-T.MathUtils.smoothstep(Math.hypot(x-atrium.x,z-atrium.z),3,8) : 0;
+      const keyScale = T.MathUtils.lerp(1,tier === 'balanced' ? .55 : .90,courtyard);
+      if (daylight) daylight.intensity = baseDaylight*keyScale;
+      if (Number.isFinite(baseExposure)) {
+        renderer.toneMappingExposure = baseExposure*T.MathUtils.lerp(1,.82,tier === 'balanced' ? courtyard : 0);
+      }
+    }
     let shadowFill = tier === 'low' && publicZone === 'atrium' ? .16 : 0;
     if (lgSlot && Math.abs(y) < 4) {
       // Include the arcade in front of LG, where its navigation shortcut arrives.

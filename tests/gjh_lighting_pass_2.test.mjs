@@ -176,6 +176,37 @@ test('authored moods route across all 17 shops with shared IBL and the same ligh
   atmosphere.releaseEnvironment();
 });
 
+test('courtyard daylight tapers before a storefront and restores the selected theme on other tiers', () => {
+  const scene=new T.Scene(), key=new T.DirectionalLight(0xffffff,1.6);
+  const renderer={toneMappingExposure:.72};
+  const {atrium,slots}=expandedLayout;
+  scene.add(key);
+  const atmosphere=createMallAtmosphere(T,renderer,scene,slots,{atrium});
+  const center={...atrium,y:.9};
+  const gogo={...expandedStoreArrival('gogo'),y:.9};
+
+  atmosphere.update(center,0,'balanced');
+  const shaded={intensity:key.intensity,exposure:renderer.toneMappingExposure};
+  assert.ok(shaded.intensity < 1.6 && shaded.exposure < .72);
+  atmosphere.update({...center,z:center.z-6},200,'balanced');
+  assert.ok(key.intensity > shaded.intensity && key.intensity < 1.6);
+  assert.ok(renderer.toneMappingExposure > shaded.exposure && renderer.toneMappingExposure < .72);
+  atmosphere.update(gogo,400,'balanced');
+  assert.equal(key.intensity,1.6);
+  assert.equal(renderer.toneMappingExposure,.72);
+
+  atmosphere.update(center,600,'balanced');
+  atmosphere.applyTheme({lighting:{keyIntensity:1.8,exposure:.7}});
+  atmosphere.update(center,800,'low');
+  assert.ok(key.intensity > shaded.intensity && key.intensity < 1.8);
+  assert.equal(renderer.toneMappingExposure,.7);
+  for (const [position,tier] of [[gogo,'low'],[center,'detailed'],[{...center,y:7.2},'balanced']]) {
+    atmosphere.update(position,800,tier);
+    assert.equal(key.intensity,1.8);
+    assert.equal(renderer.toneMappingExposure,.7);
+  }
+});
+
 test('bundled world starts and submits expanded Low, Balanced and Detailed frames with browser stubs', async t => {
   const noop=()=>{};
   const gradient={addColorStop:noop};
