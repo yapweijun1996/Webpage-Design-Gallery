@@ -154,6 +154,7 @@ function browserCapture(project, origin, signal) {
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-anchor-qa-'));
   const browser = startChrome(chromePath, path.join(scratch, 'profile'), 1440);
   const sessions = new Map();
+  let media;
   let closing;
   const stop = () => { closing ??= browser.close(); };
   signal?.addEventListener('abort', stop, { once: true });
@@ -179,6 +180,7 @@ function browserCapture(project, origin, signal) {
     });
     await Promise.all([sendTo(id, 'Page.enable'), sendTo(id, 'Runtime.enable'),
       sendTo(id, 'Fetch.enable', { patterns: [{ urlPattern: '*' }] })]);
+    if (media) await sendTo(id, 'Emulation.setEmulatedMedia', media);
   }
 
   async function setup() {
@@ -234,10 +236,14 @@ function browserCapture(project, origin, signal) {
         .filter(key => target.searchParams.has(key)).map(key => [key, target.searchParams.get(key)]));
       try {
         await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
-        await send('Emulation.setEmulatedMedia', { features: [
+        const nativeScheme = target.searchParams.get('colorScheme');
+        const colorScheme = ['light', 'dark'].includes(nativeScheme) ? nativeScheme : (appearance.theme === 'dark' ? 'dark' : 'light');
+        media = { features: [
           { name: 'prefers-reduced-motion', value: 'reduce' },
-          { name: 'prefers-color-scheme', value: appearance.theme === 'dark' ? 'dark' : 'light' },
-        ] });
+          { name: 'prefers-color-scheme', value: colorScheme },
+        ] };
+        await Promise.all([...sessions.keys()].map(id => sendTo(id, 'Emulation.setEmulatedMedia', media)
+          .catch(error => { if (sessions.has(id)) throw error; })));
         const navigation = await send('Page.navigate', { url: target.href });
         if (navigation.errorText) throw new Error('Navigation failed.');
       } catch { throw new ScreenshotError('setup', 'Chrome could not open the Studio preview.'); }

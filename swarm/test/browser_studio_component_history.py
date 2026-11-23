@@ -50,6 +50,7 @@ def run_case(browser, base, width):
         assert payload == {
             'projectId': project_id, 'sectionId': '01-header',
             'snapshotId': expected['snapshotId'], 'expectedRevision': expected['expectedRevision'],
+            'appearance': {'theme': 'auto', 'brand': 'forest-gold', 'lang': 'ms', 'colorScheme': 'dark'},
         }
         restores.append(payload)
         if len(restores) == 1:
@@ -58,12 +59,17 @@ def run_case(browser, base, width):
         else:
             pending.append(route)
 
-    context = browser.new_context(viewport={'width': width, 'height': 844}, reduced_motion='reduce')
+    context = browser.new_context(viewport={'width': width, 'height': 844}, color_scheme='dark', reduced_motion='reduce')
     try:
         page = context.new_page()
         errors = []
         page.on('pageerror', lambda error: errors.append(str(error)))
         page.add_init_script('''(() => {
+          if (window === window.top) {
+            for (const [key, value] of Object.entries({theme: 'auto', brand: 'forest-gold', lang: 'ms'})) {
+              localStorage.setItem('sds.' + key, value);
+            }
+          }
           const NativeEventSource = window.EventSource;
           window.EventSource = class extends NativeEventSource {
             constructor(...args) {

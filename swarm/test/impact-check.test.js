@@ -341,7 +341,7 @@ test('shared token approval captures three opaque Studio viewports and reproduce
 
 // Run explicitly where headless Chrome is permitted: SWARM_IMPACT_CHROME_TEST=1 node --test swarm/test/impact-check.test.js
 const chromeTest = { skip: process.env.SWARM_IMPACT_CHROME_TEST !== '1' && 'Set SWARM_IMPACT_CHROME_TEST=1 to run the Chrome proof' };
-const home = path.resolve(__dirname, '../projects/home');
+const home = process.env.SWARM_IMPACT_HOME || path.resolve(__dirname, '../archive/gjh-home-run1');
 const widths = [393, 768, 1440];
 
 function compareHome(t, leaks) {
@@ -352,12 +352,13 @@ function compareHome(t, leaks) {
   fs.cpSync(home, before, { recursive: true });
   fs.cpSync(before, after, { recursive: true });
   const layer = path.join(after, 'sections/01-header.layout.css');
-  fs.appendFileSync(layer, '\n.s-01 { background-color: #ff00ff !important; }\n');
+  // The navigation surface can completely cover its header's background.
+  fs.appendFileSync(layer, '\n.s-01 > :first-child { background-color: #ff00ff !important; }\n');
   if (leaks) fs.appendFileSync(layer, '\nh1 { color: #ff00ff !important; }\n');
   const json = path.join(temp, 'result.json');
   const cli = spawnSync(process.execPath, [TOOL, '--before', before, '--after', after, '--owner', HEADER, '--json', json],
     { encoding: 'utf8', timeout: 120_000 });
-  assert.equal(cli.status, leaks ? 1 : 0, cli.error?.message ?? cli.stderr);
+  assert.equal(cli.status, leaks ? 1 : 0, cli.error?.message || cli.stderr || cli.stdout);
   const result = JSON.parse(fs.readFileSync(json, 'utf8'));
   assert.equal(result.ok, !leaks);
   assert.deepEqual(result.unexpected, leaks ? [HERO] : []);

@@ -73,9 +73,9 @@ function fixture(t, impact = () => assert.fail('Unexpected browser check.')) {
       write(ws.dir, OUTBOX, JSON.stringify({ kind, text: message }) + '\n');
       return ws;
     },
-    async publish(ws, anchor = null) {
+    async publish(ws, anchor = null, appearance) {
       const result = await publication.publish(ws, {
-        anchor, owner: OWNER, workerId: WORKER, cancelled: () => false,
+        anchor, appearance, owner: OWNER, workerId: WORKER, cancelled: () => false,
         checkOutbox: outbox => chat.validateWorkerOutbox(WORKER, outbox),
       });
       if (result.ok) chat.publishWorker(WORKER, result.outbox);
@@ -140,6 +140,7 @@ for (const [name, check, message] of [
   ['a peer section changing', () => impactReport({ unexpected: ['02-about'] }), /other sections: 02-about/],
   ['new horizontal overflow', () => impactReport({ overflow: 5 }), /horizontal overflow/],
   ['a new browser error', () => impactReport({ errors: ['Error: render failed'] }), /browser errors/],
+  ['missing expected Studio evidence', () => ({ ...impactReport(), ok: false }), /every expected section/],
   ['a browser capture failure', () => { throw new Error('Unavailable browser.'); }, /Chrome could not verify/],
 ]) {
   test(`publication keeps live files and channel history when the browser reports ${name}`, async t => {
@@ -161,6 +162,18 @@ test('replacing a valid locked active anchor after launch rejects visual edits a
   const result = await f.publish(ws, launched);
   assertRejected(f, result, 'anchor', /anchor changed during this turn/);
   assert.equal(checked, false);
+});
+
+test('publication freezes the worker appearance before entering the review queue', async t => {
+  const requested = { theme: 'dark', brand: 'forest-gold', lang: 'ms', colorScheme: 'light' };
+  const f = fixture(t, (_before, _after, { appearance }) => {
+    assert.deepEqual(appearance, { theme: 'dark', brand: 'forest-gold', lang: 'ms', colorScheme: 'light' });
+    assert.equal(Object.isFrozen(appearance), true);
+    return impactReport();
+  });
+  const finished = f.publish(f.open(), null, requested);
+  requested.theme = 'light';
+  assert.equal((await finished).ok, true);
 });
 
 test('a changed locked anchor file during browser checks preserves the live project and channel', async t => {

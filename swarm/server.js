@@ -246,6 +246,7 @@ function runOnce(a, label, promptText, appearance, launchChannel, execution) {
     const cancelled = () => stopped || chat !== launchChannel || execution?.isCurrent?.() === false;
     const sectionId = manager ? null : a.base || `${a.id}-${a.section}`;
     const allowProposal = !execution && role === 'worker' && !a.squad && IMPLEMENTATION_PHASES.has(label);
+    const frozenAppearance = Object.freeze(cleanAppearance(appearance));
     let runner, workspace, anchor, p;
     try {
       if (cancelled()) return resolve(false);
@@ -308,10 +309,10 @@ function runOnce(a, label, promptText, appearance, launchChannel, execution) {
         if (!ok || fatal || cancelled() || unfinishedImage || (managerChannel && !managerPosts)) return resolve(false);
         const managerOptions = { allowAssignments: label !== 'Summary' };
         const sharedProposal = allowProposal ? sharedTokens.takeRequest(workspace, {
-          sectionId, workerId: a.id, appearance: { theme: 'light', brand: 'none', lang: 'en', ...cleanAppearance(appearance) },
+          sectionId, workerId: a.id, appearance: { theme: 'light', brand: 'none', lang: 'en', ...frozenAppearance },
           anchor: anchor || null, projectId: TARGET.projectId,
         }) : null;
-        const result = await publication.publish(workspace, { anchor, workerId: a.id, owner: sectionId, sharedProposal,
+        const result = await publication.publish(workspace, { anchor, workerId: a.id, owner: sectionId, appearance: frozenAppearance, sharedProposal,
           cancelled,
           checkOutbox(outbox) {
             if (managerChannel) launchChannel.validateManagerPosts(managerPosts, managerOptions);
@@ -777,7 +778,7 @@ const { createComponentRoutes, matches: isComponentRoute } = require('./lib/comp
 const componentRoutes = createComponentRoutes({
   projectDir: PROJECT, projectId: TARGET.projectId, catalog: componentCatalog,
   busy: () => normalBusy() || fastPath.busy() || anchorRoutes.busy() || sharedRoutes.busy(),
-  authorize: anchorRoutes.authorize, publish: publication.publish,
+  authorize: anchorRoutes.authorize, publish: publication.publish, cleanAppearance,
   changed(result) {
     if (result) {
       if (refreshPreviewSections()) setupChat();

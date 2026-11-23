@@ -281,6 +281,7 @@ test('Studio, agent captures, Compare and the export render in opaque frames in 
       }
     }
 
+    await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'light' }] });
     await send('Page.navigate', { url: ORIGIN + '/studio' });
     const stage = await until(async () => {
       const context = await child('/studio-preview.html');
@@ -314,7 +315,7 @@ test('Studio, agent captures, Compare and the export render in opaque frames in 
     await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x, y, button: 'left', clickCount: 1 });
     await until(() => evalIn("!document.querySelector('#askpop').hidden && document.querySelector('#askpop .ae').textContent.includes('Walk started')"), 'Picking never opened the owner prompt');
     assert.match(await evalIn("document.querySelector('#prompt-scope').textContent"), /01 hero/);
-    const selectedAppearance = { theme: 'light', brand: 'forest-gold', lang: 'ms' };
+    const selectedAppearance = { theme: 'light', brand: 'forest-gold', lang: 'ms', colorScheme: 'light' };
     await evalIn("document.querySelector('#asktext').value = 'Make the button easier to read'; document.querySelector('#askpop').requestSubmit(); true");
     const pickedRequest = await until(() => posts.find(([route]) => route === '/api/chat')?.[1], 'Element request was never submitted');
     assert.deepEqual(pickedRequest.scope.appearance, selectedAppearance);
@@ -326,7 +327,8 @@ test('Studio, agent captures, Compare and the export render in opaque frames in 
     assert.deepEqual(initialFocus.appearance, selectedAppearance);
     await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] });
     await evalIn("SDS.theme.set('auto'); true");
-    const changedFocus = await until(() => posts.find(([route, data]) => route === '/api/focus' && data.appearance.theme === 'dark')?.[1], 'Autopilot focus missed an appearance-only update');
+    const changedFocus = await until(() => posts.find(([route, data]) => route === '/api/focus' && data.appearance.theme === 'auto')?.[1], 'Autopilot focus missed an appearance-only update');
+    assert.equal(changedFocus.appearance.colorScheme, 'dark');
     assert.deepEqual(changedFocus.sections, initialFocus.sections);
     await evalIn("SDS.theme.set('light'); true");
     await send('Emulation.setEmulatedMedia', { features: [] });

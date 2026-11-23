@@ -83,6 +83,7 @@ async function fixture(t, options = {}) {
 }
 
 test('restores an audited component through staged impact review and records an undo version', async t => {
+  const appearance = { theme: 'dark', brand: 'forest-gold', lang: 'ms', colorScheme: 'light' };
   let checked = 0;
   let f;
   f = await fixture(t, { impact(before, after, flags) {
@@ -90,6 +91,8 @@ test('restores an audited component through staged impact review and records an 
     const first = checked === 1;
     assert.equal(flags.owner, SECTION);
     assert.equal(flags.componentRestore, true);
+    if (first) assert.deepEqual(flags.appearance, appearance);
+    assert.ok(flags.signal instanceof AbortSignal);
     assert.equal(read(f.projectDir, HEADER), first ? EDITED : ORIGINAL);
     assert.equal(read(before, HEADER), first ? EDITED : ORIGINAL);
     assert.equal(read(after, HEADER), first ? ORIGINAL : EDITED);
@@ -99,7 +102,7 @@ test('restores an audited component through staged impact review and records an 
   } });
   assert.deepEqual((await f.call(LIST + '?sectionId=02-hero')).data.versions, []);
   assert.equal((await f.call(RESTORE, f.request, 'missing')).status, 403);
-  const result = await f.call(RESTORE, { ...f.request, paths: [PEER] });
+  const result = await f.call(RESTORE, { ...f.request, paths: [PEER], appearance });
   assert.equal(result.status, 200);
   assert.equal(checked, 1);
   assert.deepEqual(result.data.restored, [ASSET, CSS, HEADER]);

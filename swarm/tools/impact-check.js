@@ -206,7 +206,27 @@ async function measurePage(ids, width, flowOwner, studio = false) {
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
   const viewport = document.documentElement.clientWidth;
-  const roots = ids.map(id => [id, document.getElementById(id)]);
+  const publication = studio === 'publication';
+  const stage = publication && document.querySelector('body.studio-stage > #stage > #page');
+  const ownedHost = id => stage?.querySelector(`:scope > #host-${id.slice(0, 2)}`);
+  function visible(node) {
+    if (!node) return false;
+    const { width, height } = node.getBoundingClientRect();
+    return width > 0 && height > 0 && node.checkVisibility({ opacityProperty: true, visibilityProperty: true });
+  }
+  const roots = ids.map(id => {
+    const root = document.getElementById(id);
+    if (!publication) return [id, root, root];
+    const host = ownedHost(id);
+    const body = host?.querySelector(':scope > .body');
+    if (!root || !body?.contains(root) || document.getElementById(host.id) !== host ||
+        document.querySelectorAll(`[id="${id}"]`).length !== 1) return [id, null, null];
+    // The wrapper is the actual layout participant, including padding and the Studio scaffold.
+    const region = visible(host) ? host : root;
+    const stub = host.querySelector(':scope > .stub');
+    const scaffold = root.tagName === 'SECTION' && !root.childElementCount && !root.textContent.trim() && visible(stub);
+    return [id, root, region, scaffold];
+  });
   function overflow(node, clipLeft, clipRight) {
     const { left, width, right, height } = node.getBoundingClientRect();
     const style = getComputedStyle(node);
@@ -227,25 +247,27 @@ async function measurePage(ids, width, flowOwner, studio = false) {
   }
 
   const horizontalOverflow = Math.max(0, document.documentElement.scrollWidth - viewport);
-  const sections = Object.fromEntries(roots.map(([id, root]) => {
+  const sections = Object.fromEntries(roots.map(([id, root, region, scaffold]) => {
     if (!root) return [id, null];
-    const { x, y, width, height } = root.getBoundingClientRect();
+    const { x, y, width, height } = region.getBoundingClientRect();
     return [id, { box: { x, y, width, height },
-      ...(studio && { hidden: !width || !height || !root.checkVisibility({ opacityProperty: true, visibilityProperty: true }) }),
-      horizontalOverflow: overflow(root, -Infinity, Infinity),
-      empty: Boolean(flowOwner && !height && !root.childElementCount && !root.textContent.trim()) }];
+      ...(studio && { hidden: !visible(region) }),
+      ...(publication && { captureId: region.id, scaffold,
+        contentHidden: !visible(root) && ![...root.querySelectorAll('*')].some(visible) }),
+      horizontalOverflow: overflow(region, -Infinity, Infinity),
+      empty: Boolean(!publication && flowOwner && !height && !root.childElementCount && !root.textContent.trim()) }];
   }));
-  const subject = flowOwner && document.getElementById(flowOwner);
-  if (subject) {
-    const style = subject.getAttribute('style');
+  const subject = flowOwner && (publication ? ownedHost(flowOwner) : document.getElementById(flowOwner));
+  if (subject || (publication && flowOwner)) {
+    const style = subject?.getAttribute('style');
     try {
-      subject.style.setProperty('display', 'none', 'important');
-      for (const [id, root] of roots) {
-        if (root && id > flowOwner) sections[id].withoutOwnerY = root.getBoundingClientRect().y;
+      subject?.style.setProperty('display', 'none', 'important');
+      for (const [id, , region] of roots) {
+        if (region && id > flowOwner) sections[id].withoutOwnerY = region.getBoundingClientRect().y;
       }
     } finally {
-      if (style === null) subject.removeAttribute('style');
-      else subject.setAttribute('style', style);
+      if (subject && style === null) subject.removeAttribute('style');
+      else subject?.setAttribute('style', style);
     }
   }
   return {
@@ -303,8 +325,20 @@ async function render(chrome, bundle, width, flowOwner) {
 
     const logs = [];
     const loaded = new Set();
+    const cancelledImages = new Set();
+    const expiredImages = new Map();
     let serveError;
-    on('Fetch.requestPaused', params => { serveRequest(send, bundle, params).catch(error => { serveError ??= error; }); });
+    on('Network.loadingFailed', ({ requestId, type, canceled }) => {
+      if (type === 'Image' && canceled) cancelledImages.add(requestId);
+    });
+    on('Fetch.requestPaused', params => {
+      serveRequest(send, bundle, params).catch(error => {
+        // Chrome may select a new responsive source while the old image is paused.
+        if (params.resourceType === 'Image' && params.networkId && error.message === 'Fetch.fulfillRequest: Invalid InterceptionId.') {
+          expiredImages.set(params.networkId, error);
+        } else serveError ??= error;
+      });
+    });
     on('Page.lifecycleEvent', ({ name, loaderId }) => {
       if (name !== 'load') return;
       loaded.add(loaderId);
@@ -321,6 +355,7 @@ async function render(chrome, bundle, width, flowOwner) {
       logs.push({ message, frames: [details, ...(details.stackTrace?.callFrames ?? [])] });
     });
 
+    await send('Network.enable');
     await send('Page.enable');
     await send('Page.setLifecycleEventsEnabled', { enabled: true });
     await send('Runtime.enable');
@@ -350,6 +385,9 @@ async function render(chrome, bundle, width, flowOwner) {
     }
     if (serveError) throw serveError;
     const ownerForScript = scriptOwners(url, fs.readFileSync(path.join(bundle.output, 'index.html'), 'utf8'), scripts);
+    for (const [id, error] of expiredImages) {
+      if (!cancelledImages.has(id)) throw error;
+    }
     const consoleErrors = logs.map(({ message, frames }) => ({
       section: frames.map(frame => ownerForScript(frame.url, frame.lineNumber)).find(Boolean) ?? null,
       message,
@@ -374,7 +412,7 @@ function errorChanges(before, after) {
   return { before, after, added };
 }
 
-function compareWidth(before, after, owner, { componentRestore = false } = {}) {
+function compareWidth(before, after, owner, { componentRestore = false, allowBidirectionalFlow = componentRestore } = {}) {
   const consoleErrors = errorChanges(before.consoleErrors, after.consoleErrors);
   const ids = [...new Set([...Object.keys(before.sections), ...Object.keys(after.sections)])].sort();
   const perSection = ids.map(id => {
@@ -397,7 +435,7 @@ function compareWidth(before, after, owner, { componentRestore = false } = {}) {
     const emptyPlaceholder = previous?.empty && current?.empty;
     const sameYWithoutOwner = Number.isFinite(previous?.withoutOwnerY) && previous.withoutOwnerY === current?.withoutOwnerY;
     // Restoration can grow or shrink the owner. Even an empty peer needs proof of owner flow.
-    const allowedTranslation = componentRestore
+    const allowedTranslation = allowBidirectionalFlow
       ? sameYWithoutOwner
       : emptyPlaceholder || (boxDelta?.y > 0 && sameYWithoutOwner);
     const flowTranslation = boxDelta?.x === 0 && moved && !resized && diffRatio === 0
@@ -434,7 +472,8 @@ function summarizeWidths(comparisons) {
   return { ok: unexpected.size === 0, perSection, unexpected: [...unexpected].sort(), perWidth };
 }
 
-async function impact(before, after, { owner, firstBuild = false, componentRestore = false, widths = DEFAULT_WIDTHS } = {}) {
+async function impact(before, after, { owner, firstBuild = false, componentRestore = false, widths = DEFAULT_WIDTHS, signal } = {}) {
+  signal?.throwIfAborted();
   if (!Array.isArray(widths) || !widths.length || widths.some(width => !Number.isSafeInteger(width) || width < 1)) {
     throw new Error('Widths must be positive integers');
   }
@@ -442,23 +481,31 @@ async function impact(before, after, { owner, firstBuild = false, componentResto
   if (!binary) throw new Error('Chrome not found; set CHROME_BIN');
   const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-impact-'));
   let chrome;
+  const abort = () => chrome.close().catch(() => {});
   try {
     const original = exportPage(before, path.join(temp, 'before'));
     const candidate = exportPage(after, path.join(temp, 'after'));
     // The real window clears Chrome's minimum width. DevTools sets the exact CSS viewport per render.
     chrome = startChrome(binary, path.join(temp, 'profile'), Math.max(...widths));
+    signal?.addEventListener('abort', abort, { once: true });
     await chrome.send('Browser.getVersion');
     const comparisons = [];
     const flowOwner = firstBuild || componentRestore ? owner : null;
     for (const width of new Set(widths)) {
+      signal?.throwIfAborted();
       const started = performance.now();
       const left = await render(chrome, original, width, flowOwner);
       const right = await render(chrome, candidate, width, flowOwner);
       const report = compareWidth(left, right, owner, { componentRestore });
       comparisons.push({ width, runtimeMs: performance.now() - started, ...report });
     }
+    signal?.throwIfAborted();
     return summarizeWidths(comparisons);
+  } catch (error) {
+    signal?.throwIfAborted();
+    throw error;
   } finally {
+    signal?.removeEventListener('abort', abort);
     if (chrome) await chrome.close();
     fs.rmSync(temp, { force: true, recursive: true });
   }
@@ -495,7 +542,7 @@ frame.src = StudioPreview.stage;
       return send('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' });
     }
     function reply(responseCode, body = '', headers = {}) {
-      if (request.method === 'GET' && url.pathname !== '/favicon.ico') {
+      if (resources && request.method === 'GET' && url.pathname !== '/favicon.ico') {
         // Generated asset revision URLs are tied to the temporary copies' inodes.
         const stableBody = /^\/p\/sections\/.*\.(?:html|css)$/.test(url.pathname)
           ? body.toString().replace(/\?swarm_asset=[a-z0-9]+-[a-z0-9]+(&?)/gi, (_, query) => query ? '?' : '')
@@ -590,9 +637,9 @@ async function captureStableShared(capture, settle, signal) {
   throw new Error('Studio did not paint a stable screenshot.');
 }
 
-async function renderShared(chrome, project, fragments, { width, height }, appearance, colorScheme, takeEvidence, signal) {
+async function renderStudio(chrome, project, fragments, { width, height }, { appearance, colorScheme, flowOwner, publication, takeEvidence, signal }) {
   const ids = fragments.map(({ id }) => id);
-  const resources = new Map();
+  const resources = !publication && new Map();
   const serve = sharedStudio(project, ids, appearance, resources);
   const { browserContextId } = await chrome.send('Target.createBrowserContext');
   const listeners = [];
@@ -679,7 +726,7 @@ async function renderShared(chrome, project, fragments, { width, height }, appea
       throw new Error(`Studio did not settle at ${width}×${height}.`);
     }
     const scope = await ready();
-    const measured = await evaluate(scope, measurePage, ids, width, null, true);
+    const measured = await evaluate(scope, measurePage, ids, width, flowOwner ?? null, publication ? 'publication' : true);
     async function settlePaint() {
       const expression = 'new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))';
       const options = { expression, awaitPromise: true, returnByValue: true };
@@ -722,7 +769,7 @@ async function renderShared(chrome, project, fragments, { width, height }, appea
       }
       return { width: clip.width, height: clip.height, rgb };
     }
-    const png = takeEvidence(await capture());
+    const png = !publication && takeEvidence(await capture());
     for (const [id, section] of Object.entries(measured.sections)) {
       if (!section || section.hidden) continue;
       let offset = 0;
@@ -730,7 +777,7 @@ async function renderShared(chrome, project, fragments, { width, height }, appea
       // The preview runs in a scrollable opaque iframe. Capture its actual viewport
       // in consecutive strips so changes below the fold appear in the section evidence.
       while (true) {
-        const strip = await evaluate(scope, showSharedSection, id, width, height, offset);
+        const strip = await evaluate(scope, showSharedSection, section.captureId ?? id, width, height, offset);
         if (!strip) break;
         const { clip, totalHeight } = strip;
         if (clip.width * totalHeight > 16_000_000 || totalHeight > 32_768) {
@@ -755,12 +802,21 @@ async function renderShared(chrome, project, fragments, { width, height }, appea
       }
     }
     if (failed) throw failed;
-    return { sections: measured.sections, horizontalOverflow: measured.horizontalOverflow, consoleErrors, png,
-      resources: [...resources.values()].sort((a, b) => a.path.localeCompare(b.path)) };
+    return { sections: measured.sections, horizontalOverflow: measured.horizontalOverflow, consoleErrors,
+      ...(!publication && { png, resources: [...resources.values()].sort((a, b) => a.path.localeCompare(b.path)) }) };
   } finally {
     for (const [name, handler] of listeners) chrome.events.off(name, handler);
     await chrome.send('Target.disposeBrowserContext', { browserContextId }).catch(() => {});
   }
+}
+
+function studioAppearance(input, purpose) {
+  const { theme = 'light', brand = 'none', lang = 'en', colorScheme = theme === 'dark' ? 'dark' : 'light' } = input ?? {};
+  if (!['light', 'dark', 'auto'].includes(theme) || !['light', 'dark'].includes(colorScheme) ||
+      !['none', 'forest-gold', 'gjh-classic', 'cny-red-gold'].includes(brand) || !['en', 'zh-Hans', 'ms'].includes(lang)) {
+    throw new TypeError(`${purpose} requires valid Studio appearance preferences.`);
+  }
+  return { theme, brand, lang, colorScheme };
 }
 
 function summarizeSharedTokens(samples, ids, appearance) {
@@ -809,46 +865,31 @@ function sharedFragments(project, ids) {
   });
 }
 
-async function sharedTokensImpact(before, after, { appearance: input, expectedSections, signal } = {}) {
+async function studioRenders(before, after, { style, left, right, flowOwner, publication = false, signal }, receive) {
   signal?.throwIfAborted();
-  if (!Array.isArray(expectedSections) || !expectedSections.length ||
-      expectedSections.some(id => typeof id !== 'string' || !SECTION_ID.test(id)) ||
-      new Set(expectedSections.map(id => id.slice(0, 2))).size !== expectedSections.length) {
-    throw new TypeError('Shared tokens require distinct expected Studio section IDs.');
-  }
-  const { theme = 'light', brand = 'none', lang = 'en', colorScheme = theme === 'dark' ? 'dark' : 'light' } = input ?? {};
-  if (!['light', 'dark', 'auto'].includes(theme) || !['light', 'dark'].includes(colorScheme) ||
-      !['none', 'forest-gold', 'gjh-classic', 'cny-red-gold'].includes(brand) || !['en', 'zh-Hans', 'ms'].includes(lang)) {
-    throw new TypeError('Shared tokens require valid Studio appearance preferences.');
-  }
-  const ids = [...expectedSections].sort();
-  const appearance = { theme, brand, lang };
-  const original = fs.realpathSync(before);
-  const candidate = fs.realpathSync(after);
-  const left = sharedFragments(original, ids);
-  const right = sharedFragments(candidate, ids);
+  const { colorScheme, ...appearance } = style;
   const binary = findChrome();
   if (!binary) throw new Error('Chrome not found; set CHROME_BIN');
-  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-shared-tokens-'));
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-studio-impact-'));
   let chrome, evidenceBytes = 0;
   const abort = () => chrome.close().catch(() => {});
   const takeEvidence = png => {
     evidenceBytes += png.length;
-    if (evidenceBytes > EVIDENCE_LIMIT) throw new Error('Studio screenshot evidence exceeds the shared tokens review limit.');
+    if (evidenceBytes > EVIDENCE_LIMIT) throw new Error('Studio screenshot evidence exceeds the review limit.');
     return png;
   };
   try {
     chrome = startChrome(binary, path.join(temp, 'profile'), 1440);
     signal?.addEventListener('abort', abort, { once: true });
-    const samples = [];
     for (const viewport of STUDIO_VIEWPORTS) {
       signal?.throwIfAborted();
-      const originalView = await renderShared(chrome, original, left, viewport, appearance, colorScheme, takeEvidence, signal);
-      const candidateView = await renderShared(chrome, candidate, right, viewport, appearance, colorScheme, takeEvidence, signal);
-      samples.push({ ...viewport, before: originalView, after: candidateView });
+      if (publication) evidenceBytes = 0;
+      const options = { appearance, colorScheme, flowOwner, publication, takeEvidence, signal };
+      const originalView = await renderStudio(chrome, before, left, viewport, options);
+      const candidateView = await renderStudio(chrome, after, right, viewport, options);
+      receive({ ...viewport, before: originalView, after: candidateView });
     }
     signal?.throwIfAborted();
-    return summarizeSharedTokens(samples, ids, { ...appearance, colorScheme });
   } catch (error) {
     signal?.throwIfAborted();
     throw error;
@@ -857,6 +898,86 @@ async function sharedTokensImpact(before, after, { appearance: input, expectedSe
     if (chrome) await chrome.close();
     fs.rmSync(temp, { recursive: true, force: true, maxRetries: 2 });
   }
+}
+
+async function sharedTokensImpact(before, after, { appearance: input, expectedSections, signal } = {}) {
+  signal?.throwIfAborted();
+  if (!Array.isArray(expectedSections) || !expectedSections.length ||
+      expectedSections.some(id => typeof id !== 'string' || !SECTION_ID.test(id)) ||
+      new Set(expectedSections.map(id => id.slice(0, 2))).size !== expectedSections.length) {
+    throw new TypeError('Shared tokens require distinct expected Studio section IDs.');
+  }
+  const { colorScheme, ...appearance } = studioAppearance(input, 'Shared tokens');
+  const style = { ...appearance, colorScheme };
+  const ids = [...expectedSections].sort();
+  const original = fs.realpathSync(before);
+  const candidate = fs.realpathSync(after);
+  const left = sharedFragments(original, ids);
+  const right = sharedFragments(candidate, ids);
+  const samples = [];
+  await studioRenders(original, candidate, { style, left, right, signal }, sample => samples.push(sample));
+  return summarizeSharedTokens(samples, ids, style);
+}
+
+function studioSectionIds(project) {
+  return fs.readdirSync(path.join(project, 'sections'), { withFileTypes: true })
+    .filter(item => item.isFile() && item.name.endsWith('.html') && SECTION_ID.test(item.name.slice(0, -5)))
+    .map(item => item.name.slice(0, -5)).sort();
+}
+
+function compareStudioPublication({ width, height, before, after }, owner, ids, { firstBuild, componentRestore }) {
+  const left = before.sections;
+  const right = after.sections;
+  const scaffoldReplaced = firstBuild && left[owner]?.scaffold && right[owner] && !right[owner].scaffold;
+  // Studio's painted scaffold can be taller than the completed section. The export
+  // still enforces its existing downward-only insertion rule for a blank owner.
+  const report = compareWidth(before, after, owner, { allowBidirectionalFlow: componentRestore || Boolean(scaffoldReplaced) });
+  const unexpected = new Set(report.unexpected);
+  const coverage = [];
+  const covered = section => section && (section.hidden || section.png);
+  for (const id of ids) {
+    const hasBefore = Object.hasOwn(left, id);
+    const hasAfter = Object.hasOwn(right, id);
+    if ((hasBefore && !covered(left[id])) || (hasAfter && !covered(right[id]))) coverage.push(id);
+    if (id !== owner && (!hasBefore || !hasAfter ||
+        left[id]?.hidden !== right[id]?.hidden ||
+        left[id]?.contentHidden !== right[id]?.contentHidden ||
+        left[id]?.scaffold !== right[id]?.scaffold)) unexpected.add(id);
+  }
+  const sectionOverflow = report.perSection.filter(sample => sample.horizontalOverflow.after > sample.horizontalOverflow.before)
+    .map(sample => sample.id);
+  return { width, height, ...report, unexpected: [...unexpected].sort(), coverage, sectionOverflow };
+}
+
+const browserRegressed = sample => sample.horizontalOverflow.after > sample.horizontalOverflow.before ||
+  sample.consoleErrors.added.length > 0 || (sample.sectionOverflow?.length ?? 0) > 0;
+
+async function publicationImpact(before, after, { owner, appearance, firstBuild = false, componentRestore = false, signal } = {}) {
+  signal?.throwIfAborted();
+  if (typeof owner !== 'string' || !SECTION_ID.test(owner)) throw new TypeError('The publication requires a Studio section owner.');
+  const style = studioAppearance(appearance, 'Publication');
+  const original = fs.realpathSync(before);
+  const candidate = fs.realpathSync(after);
+  const originalIds = studioSectionIds(original);
+  const candidateIds = studioSectionIds(candidate);
+  const ids = [...new Set([...originalIds, ...candidateIds])].sort();
+  if (!ids.includes(owner) || new Set(ids.map(id => id.slice(0, 2))).size !== ids.length) {
+    throw new Error('Cannot determine the exact owned Studio sections.');
+  }
+  const flags = { owner, firstBuild, componentRestore, signal };
+  const exported = await impact(original, candidate, flags);
+  if (!exported.ok || exported.perWidth.some(browserRegressed)) {
+    return { ...exported, ok: false, export: exported, studio: null };
+  }
+  const comparisons = [];
+  const flowOwner = firstBuild || componentRestore ? owner : null;
+  const left = sharedFragments(original, originalIds);
+  const right = sharedFragments(candidate, candidateIds);
+  await studioRenders(original, candidate, { style, left, right, flowOwner, publication: true, signal },
+    views => comparisons.push(compareStudioPublication(views, owner, ids, flags)));
+  const measured = summarizeWidths(comparisons);
+  const studio = { ...measured, ok: measured.ok && comparisons.every(sample => !sample.coverage.length && !browserRegressed(sample)) };
+  return { ...studio, export: exported, studio };
 }
 
 async function main(args) {
@@ -882,4 +1003,6 @@ if (require.main === module) {
   });
 }
 
-module.exports = { impact, compareWidth, summarizeWidths, startChrome, sharedTokensImpact, summarizeSharedTokens, captureStableShared };
+module.exports = {
+  impact, publicationImpact, compareWidth, summarizeWidths, startChrome, sharedTokensImpact, summarizeSharedTokens, captureStableShared,
+};

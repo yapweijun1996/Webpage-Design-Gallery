@@ -13,7 +13,7 @@ const REVISION = /^[a-f\d]{64}$/;
 
 const matches = pathname => pathname === LIST || pathname === RESTORE;
 
-function createComponentRoutes({ projectDir, projectId, catalog, busy, authorize, publish, changed }) {
+function createComponentRoutes({ projectDir, projectId, catalog, busy, authorize, publish, changed, cleanAppearance = input => input }) {
   let active;
   const isBusy = () => Boolean(active) || busy();
   function notify(result) {
@@ -72,7 +72,8 @@ function createComponentRoutes({ projectDir, projectId, catalog, busy, authorize
       notify();
       const { sectionId, snapshotId } = input;
       const result = await publish(workspace, {
-        anchor, workerId, owner: sectionId, restore: { sectionId, snapshotId },
+        anchor, workerId, owner: sectionId, appearance: cleanAppearance(input.appearance), signal: controller.signal,
+        restore: { sectionId, snapshotId },
         cancelled: () => controller.signal.aborted,
         checkOutbox(outbox) {
           if (outbox !== '') throw new Error('A component restore must have an empty outbox.');
@@ -106,13 +107,13 @@ function createComponentRoutes({ projectDir, projectId, catalog, busy, authorize
       if (isBusy()) throw new ProjectBusyError(BUSY);
       const input = await readOptions(req);
       if (!input.value) return send(res, input.status, { error: input.error });
-      const { projectId: target, sectionId, snapshotId, expectedRevision } = input.value;
+      const { projectId: target, sectionId, snapshotId, expectedRevision, appearance } = input.value;
       if (target !== projectId) throw new AnchorRequestError(409, 'The project changed. Reload component history.');
       if (typeof sectionId !== 'string' || typeof snapshotId !== 'string' ||
           typeof expectedRevision !== 'string' || !REVISION.test(expectedRevision)) {
         throw new AnchorRequestError(400, 'Choose a component version before restoring.');
       }
-      return send(res, 200, await restore({ sectionId, snapshotId, expectedRevision }));
+      return send(res, 200, await restore({ sectionId, snapshotId, expectedRevision, appearance }));
     } catch (error) {
       if (error instanceof ProjectBusyError) return send(res, 409, { error: error.message });
       if (error instanceof AnchorRequestError) return send(res, error.status, { error: error.message });

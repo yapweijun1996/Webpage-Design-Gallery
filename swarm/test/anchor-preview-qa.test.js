@@ -226,7 +226,10 @@ test('Chrome captures the real isolated Studio at all three viewport sizes', {
   const sections = path.join(f.projectDir, 'sections');
   fs.mkdirSync(sections);
   fs.writeFileSync(path.join(sections, '01-hero.html'), '<section class="s-01" id="01-hero"><h1>Studio capture</h1></section>');
-  fs.writeFileSync(path.join(sections, '01-hero.css'), '.s-01 { min-height: 100vh; background-color: #ff0000; }');
+  fs.writeFileSync(path.join(sections, '01-hero.css'), `
+    .s-01 { min-height: 100vh; background-color: #00ff00; }
+    @media (prefers-color-scheme: dark) { :root[data-theme=auto] .s-01 { background-color: #ff0000; } }
+  `);
   fs.writeFileSync(path.join(f.projectDir, 'tokens.css'), ':root {}');
   const preview = createPreview({ ui, project: f.projectDir, designSystem, library: ui, mall: ui });
   const server = http.createServer((req, res) => {
@@ -249,7 +252,7 @@ test('Chrome captures the real isolated Studio at all three viewport sizes', {
     server.closeAllConnections();
     return new Promise(resolve => server.close(resolve));
   });
-  const url = `http://127.0.0.1:${server.address().port}/studio.html?preview=1&theme=light`;
+  const url = `http://127.0.0.1:${server.address().port}/studio.html?preview=1&theme=auto&colorScheme=dark`;
   const result = await captureAnchorQA({ ...f, previewUrl: () => url, includeEvidence: true, signal: AbortSignal.timeout(65000) });
   assert.deepEqual(result.breakpoints.map(({ status }) => status), ['pass', 'missing', 'missing'],
     result.breakpoints.map(({ name, status, message }) => `${name}: ${message || status}`).join('\n'));

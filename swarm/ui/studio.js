@@ -45,7 +45,7 @@
   function reviewAppearance() {
     const selected = appearance();
     const colorScheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    return { ...selected, theme: selected.theme === 'auto' ? colorScheme : selected.theme, colorScheme };
+    return { ...selected, colorScheme };
   }
 
   function previewAgents() {
@@ -367,7 +367,7 @@
     if ($('activity-team').parentElement !== roster) roster.append($('activity-team'));
     if (previous !== name) updateSettingsPlacement();
     window.StudioAnchors?.show(name === 'review', reviewAppearance);
-    window.StudioComponentHistory?.show(name === 'review');
+    window.StudioComponentHistory?.show(name === 'review', reviewAppearance);
     window.StudioSharedProposals?.show(name === 'review');
     const compareModule = enhancement('StudioCompare');
     if (name === 'review' && !compareIsMounted && compareModule) {

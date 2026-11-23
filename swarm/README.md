@@ -163,6 +163,16 @@ keeps the token out of runner environments and the isolated preview. The control
 assumes a trusted local account, including processes running as that account.
 The generation and advisor actions require explicit confirmation in Studio.
 
+## Worker publication
+
+Before publishing visual changes, Swarm checks both the browser export and the
+isolated Studio preview at 393, 768 and 1440 px. Studio uses the theme, brand,
+language and system color preference selected when the turn started. Both
+checks reject effects outside the owned section. A first build may move sections
+below its scaffold if removing the owner from layout proves the movement and
+peer pixels and dimensions stay the same. Documentation and chat updates use
+the workspace and channel checks.
+
 ## Shared style proposals
 
 During an implementation turn a section owner can propose a change to an
@@ -189,7 +199,8 @@ Open **Review** and select a component under **Component history**. Each row
 shows the files saved before an audited publication. Review the files and
 confirm **Restore component** to check a staged copy against the current
 design. The restore requires the same confirmed file revision and passes the
-locked-anchor and browser impact checks before committing. Studio records the
+locked-anchor and browser impact checks before committing. The Studio impact
+check uses the appearance selected at confirmation. Studio records the
 restore as another history entry, with a snapshot you can use to undo it.
 Project-wide saves and restores are available in **Versions**.
 
@@ -227,6 +238,7 @@ python swarm/test/browser_studio_anchor_repair.py
 python swarm/test/browser_studio_component_history.py
 python swarm/test/browser_studio_shared_proposals.py
 python swarm/test/browser_sds_export.py
+SWARM_PUBLICATION_STUDIO_CHROME_TEST=1 node --test swarm/test/publication-studio.test.js
 SWARM_SHARED_PROPOSALS_E2E_TEST=1 node --test swarm/test/shared-proposals-e2e.test.js
 ```
 

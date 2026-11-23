@@ -19,6 +19,7 @@
   let loading = false;
   let loadError = '';
   let pending = false;
+  let readAppearance;
 
   function timeLabel(node, timestamp) {
     const date = new Date(timestamp || NaN);
@@ -173,6 +174,7 @@
     event.preventDefault();
     if (confirm.disabled) return;
     const { projectId, sectionId, snapshotId, expectedRevision } = editing;
+    const appearance = readAppearance?.();
     pending = true;
     dialogStatus.textContent = 'Checking and restoring the component…';
     paintControls();
@@ -184,7 +186,7 @@
       const result = await json('/api/component-rollback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-swarm-anchor-token': token },
-        body: JSON.stringify({ projectId, sectionId, snapshotId, expectedRevision }),
+        body: JSON.stringify({ projectId, sectionId, snapshotId, expectedRevision, appearance }),
       });
       if (!result.undoId || !Array.isArray(result.restored) || result.snapshotId !== snapshotId) {
         throw new Error('The restore could not be confirmed.');
@@ -205,7 +207,8 @@
   });
 
   window.StudioComponentHistory = {
-    show(showing) {
+    show(showing, currentAppearance) {
+      readAppearance = currentAppearance;
       if (active === showing) return;
       active = showing;
       if (active) refresh();

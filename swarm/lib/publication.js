@@ -6,7 +6,7 @@ const { createHash } = require('node:crypto');
 const { createFlow } = require('./anchorflow');
 const anchors = require('./anchors');
 const integrator = require('./integrator');
-const { impact } = require('../tools/impact-check');
+const { publicationImpact } = require('../tools/impact-check');
 
 function approvedAnchor(projectDir) {
   const root = path.join(projectDir, 'anchors');
@@ -51,7 +51,7 @@ function isBlankSection(before, owner) {
   return fs.readFileSync(html, 'utf8').trim() === `<section class="s-${owner.slice(0, 2)}" id="${owner}"></section>`;
 }
 
-function createPublication(projectDir, checkImpact = impact) {
+function createPublication(projectDir, checkImpact = publicationImpact) {
   let tail = Promise.resolve();
 
   function audit(result, owner, anchor, restore) {
@@ -72,7 +72,8 @@ function createPublication(projectDir, checkImpact = impact) {
     });
   }
 
-  function publish(ws, { anchor, workerId, owner, cancelled, checkOutbox, restore, sharedProposal }) {
+  function publish(ws, { anchor, workerId, owner, appearance, signal, cancelled, checkOutbox, restore, sharedProposal }) {
+    const frozenAppearance = appearance && Object.freeze({ ...appearance });
     const operation = tail.then(async () => {
       if (cancelled()) return reject('cancelled', 'The turn was stopped.');
       const result = await integrator.publish(projectDir, ws, {
@@ -93,12 +94,20 @@ function createPublication(projectDir, checkImpact = impact) {
             let report;
             try {
               report = await checkImpact(before, after, { owner, firstBuild: isBlankSection(before, owner),
+                ...(frozenAppearance && { appearance: frozenAppearance }), ...(signal && { signal }),
                 ...(restore && { componentRestore: true }) });
             }
-            catch { return reject('impact', 'Chrome could not verify the candidate preview.'); }
-            if (!report.ok) return reject('impact', `The candidate changes other sections: ${report.unexpected.join(', ')}.`);
-            if (report.perWidth.some(sample => sample.horizontalOverflow.after > sample.horizontalOverflow.before || sample.consoleErrors.added.length)) {
+            catch { return cancelled() ? reject('cancelled', 'The turn was stopped.')
+              : reject('impact', 'Chrome could not verify the candidate preview.'); }
+            if (!report.ok && report.unexpected?.length) {
+              return reject('impact', `The candidate changes other sections: ${report.unexpected.join(', ')}.`);
+            }
+            if (report.perWidth?.some(sample => sample.horizontalOverflow.after > sample.horizontalOverflow.before ||
+                sample.consoleErrors.added.length || sample.sectionOverflow?.length)) {
               return reject('impact', 'The candidate introduces browser errors or horizontal overflow.');
+            }
+            if (!report.ok) {
+              return reject('impact', 'Chrome could not verify every expected section in the Studio preview.');
             }
           }
           return cancelled() ? reject('cancelled', 'The turn was stopped.') : { ok: true };
