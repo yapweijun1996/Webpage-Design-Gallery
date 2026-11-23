@@ -155,6 +155,9 @@ test('authored moods route across all 17 shops with shared IBL and the same ligh
     atmosphere.update(position,index*300+150);
     assert.deepEqual(lights[0].position.toArray(),worldInteriorBox(shop,{center:mood.focus,yaw:0}).center);
     assert.ok(lights.every(light=>light.visible && light.intensity>0));
+    // Shared lights return to normal reach as the visitor leaves GOGO.
+    if (slot.number === '03') assert.ok(lights.every(light=>light.distance<11));
+    else assert.deepEqual(lights.map(light=>light.distance),[11,11]);
     colours.add(lights[1].color.getHex());
     intensities.add(scene.environmentIntensity);
     maps.add(scene.environment);

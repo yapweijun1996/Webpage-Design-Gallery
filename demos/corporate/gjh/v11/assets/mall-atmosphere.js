@@ -139,6 +139,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
   const studioLighting = expanded ? STUDIO_LIGHTING : CLASSIC_STUDIO_LIGHTING;
   const classicAccents = [0xb84739,0xd4a159,0x79a992,0x785a68,0x913f35,0x667887,0x9c4937,0x477aac,0x294f7c];
   const interiorWarm = new T.Color(expanded ? 0xffd6b0 : 0xffd5a0);
+  const shopLightReach = 11;
   const bays = slots.map((slot, index) => {
     const store = interiorStores['S'+slot.number], mood = store?.ambient;
     const x = (slot.minX + slot.maxX) / 2, z = (slot.minZ + slot.maxZ) / 2;
@@ -159,11 +160,13 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     return {slot,x,z,mood,keyPosition,accentPosition,accent,lamp,
       environmentIntensity:environmentIntensity * (gogo ? .92 : lg ? .94 : 1),
       keyGain:gogo ? .91 : lg ? .81 : newMoon ? .92 : 1, doorFill:gogo ? .90 : lg ? 1.38 : 1,
+      // Confine the cart lights so the arcade floor retains its skylight pattern.
+      keyReach:gogo ? 8.5 : shopLightReach, doorReach:gogo ? 5.8 : shopLightReach,
       temperature:mood ? kelvinColour(T,mood.kelvin) : interiorWarm, colors:[new T.Color(),new T.Color()]};
   });
   const lgSlot = expanded && bays.find(bay => bay.slot.number === '14')?.slot;
   const lights = Array.from({length:2}, (_, index) => {
-    const light = new T.PointLight(0xffe5c1, 0, 11, 2);
+    const light = new T.PointLight(0xffe5c1, 0, shopLightReach, 2);
     light.name = `Shop focus accent ${index + 1}`;
     scene.add(light);
     return light;
@@ -266,6 +269,8 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
         if (focus) {
           lights[0].position.set(...focus.keyPosition);
           lights[1].position.set(...focus.accentPosition);
+          lights[0].distance = focus.keyReach;
+          lights[1].distance = focus.doorReach;
           applyFocusColors();
         }
       }

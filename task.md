@@ -51,7 +51,8 @@ Shipped (main a36aa42e): automatic festival theme; single sticky site header; fi
 Open items:
 
 - [ ] Real-device checks by the owner on iPhone and Android: loader wait, first person hand and can, signage legibility, upper-level lift flow, tram ride, and the PWA 'Update now' path (Chrome could not reproduce the missing-stylesheet failure; the hardening is unproven on iOS).
-- [ ] Lighting score leftovers (Balanced): atrium mean 0.51 (target 0.42 +/- 0.08), New Moon saturation 0.46, GOGO p95 0.87, LG R/B 1.43 and dark 0.33, Low atrium saturation 0.45 and dark 0.39.
+- [x] GOGO storefront highlight target (p95 at or below 0.85). Shortened the range of its two shared focus lights. Matched headed Chrome captures moved Everyday Balanced from 0.864 to 0.835 and Low from 0.852 to 0.821. Christmas moved from 0.871 to 0.843 and 0.858 to 0.826 respectively. Draw counts stayed at 51 and 42 for the sampled tiers.
+- [ ] Remaining measured lighting work: Everyday atrium Balanced mean and Low shadow share, New Moon saturation, GOGO mean and Low contrast, and seasonal LG tint and highlights. Pin theme, tier and camera pose for comparisons and keep the other shop budgets stable.
 - [ ] Character: remeasure player face sharpness against the 2x target. The Tripo boy, Visitor v2 and modular NPC faces were subsequently redrawn (`f1fd4e19`); details are in `docs/evidence/gjh-v11-npc-face/README.md`.
 - [x] Updated `tests/browser_gjh_pwa.py` for the current bag badge and deterministic CSS and loader cache recovery checks. The full journey passes in Chrome with ANGLE Metal, including same-tab bag retention, update consent, and single reload.
 - [ ] Detailed tier early-enter shows an occasional single frame of 50-130 ms under heavy machine load; re-measure on a quiet machine and on the owner's Windows laptop.
