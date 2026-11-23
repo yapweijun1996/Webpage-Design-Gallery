@@ -68,6 +68,27 @@ the candidate desktop atlases and the original native frontal captures.
 | 1 | `91c0ccdd605c56f2719958a629e34df82942434b02a82278c8a42f098384416f` | `5c9851f141d376e766da07b8b3805b2758b3d1869bcd897cd46008d9012723fc` |
 | 2 | `e6a8a31bf0a94c76c1c00e1541dbf91ccfef9c38e12a3be5684ec755cf80a987` | `c10cddbdd1d87be7cb7801eba3c312d830234b2babc955fce91b3868231b28b7` |
 
+### Spectacle rim ownership
+
+An instrumented bake reproduced the shipped 2K GLB byte-for-byte and marked
+which UV texels retained the source coating or received the authored rim
+color. The pale double line follows the authored color where it overlaps
+the raised source wire. At four native frontal samples on the upper wire
+(`y=317`, `x=904, 910, 916, 922`), 8-bit luma was `158, 156, 168, 158` in
+the shipped render and `81, 79, 82, 90` with the original source atlas on
+the same UVs. The diagnostic also shows the frontal projection extending
+past the source wire at the temples.
+
+A candidate assigned the full raised wire coating to the source texture and
+kept the SVG skin layer. The double line disappeared at 0° and ±40°, with
+sample luma `81, 79, 81, 93` in the matched frontal render. The 2.5 m C1 score
+fell from **1.510×** to **1.311×** against Round 2, so the candidate was held.
+Non-image GLB buffers matched and each view kept its draw count. A next design
+option is to author a continuous finish in the raised wire's own UV charts
+and judge its reflection and silhouette at all three headings.
+
+[Matched rim crops and ownership legend](chrome-rim-ownership.png)
+
 ## Reproduce
 
 Use the guarded Blender invocation in [the signage documentation](../../gjh-v11-signage-assets.md). Supply a Round 2 baseline GLB with the hash recorded in `before.json`.
