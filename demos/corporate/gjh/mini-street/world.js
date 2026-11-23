@@ -196,12 +196,16 @@ export function buildWorld(scene, invalidate) {
     return object;
   }
 
-  function hit(name, x, y, z, width, height, depth) {
-    const target = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth));
+  function hitTarget(name, geometry, x, y, z) {
+    const target = new THREE.Mesh(geometry);
     target.position.set(x, y, z);
     target.updateMatrixWorld();
     target.name = name;
     hitTargets.push(target);
+  }
+
+  function hit(name, x, y, z, width, height, depth) {
+    hitTarget(name, new THREE.BoxGeometry(width, height, depth), x, y, z);
   }
 
   function archGeometry(radius, band, legs, depth) {
@@ -879,51 +883,120 @@ export function buildWorld(scene, invalidate) {
     hit("vending", x, 1.17, z + 0.16, 1.24, 2.34, 0.79);
   }
 
-  function mall(x, z) {
-    const radius = 2.55;
-    const spring = 2.37;
-    const width = 6.18;
-    box(deepGreen, x, 2.50, z - 2.71, width, 4.88, 0.35);
-    box(cream, x, 0.20, z - 0.99, width, 0.30, 3.30);
-    for (const side of [-1, 1]) {
-      box(plaster[0], x + side * 2.86, 2.39, z - 1.00, 0.54, 4.73, 3.30);
-      box(cream, x + side * 2.85, 0.36, z + 0.42, 0.66, 0.66, 0.70);
-      lantern(x + side * 2.78, 2.39, z + 0.57, 0.77);
+  function mallMarquee(x, spring, z, radius) {
+    const width = 5.50;
+    const height = 1.20;
+    const y = spring + 0.77;
+    archedGlass(x, spring, z + 0.028, radius, 0, slate);
+    box(deepGreen, x, spring + 0.034, z + 0.10, radius * 2, 0.123, 0.32);
+    for (let i = -9; i <= 9; i += 1) {
+      const dx = i * 0.30;
+      const length = Math.sqrt((radius - 0.045) ** 2 - dx ** 2) - 0.12;
+      const cy = spring + 0.12 + length / 2;
+      box(brass, x + dx, cy, z + 0.14, 0.088, length, 0.20);
+      box(neon, x + dx, cy, z + 0.249, 0.032, length - 0.08, 0.022);
     }
-    archedGlass(x, spring, z - 2.49, radius - 0.05, 2.26, windows[2]);
-    for (let i = -4; i <= 4; i += 1) {
-      box(deepGreen, x + i * 0.51, 1.65, z - 2.44, 0.069, 3.37, 0.09);
+    const art = paintedTexture(768, 168, (ctx, w, h) => {
+      ctx.fillStyle = "#102e28";
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = "#cf9c5f";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(13, 12, w - 26, h - 24);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#f3c67d";
+      ctx.font = "bold 42px Georgia";
+      ctx.fillText("GJH", w / 2, 49);
+      for (const side of [-1, 1]) ctx.fillRect(w / 2 + side * 111 - 39, 49, 78, 2);
+      ctx.fillStyle = "#fff3cc";
+      ctx.font = "bold 66px sans-serif";
+      ctx.fillText("VIRTUAL MALL", w / 2, 115, w - 80);
+    });
+    const lettering = new THREE.MeshStandardMaterial({
+      map: art, emissiveMap: art, emissive: "#fff0d2", roughness: 0.52,
+    });
+    signMaterials.push(lettering);
+    box(ink, x, y, z + 0.32, width + 0.18, height + 0.17, 0.28);
+    box(brass, x, y, z + 0.477, width + 0.09, height + 0.09, 0.046);
+    stamp(plane, lettering, x, y, z + 0.502, width, height, 1);
+  }
+
+  function mallVestibule(x, z, radius, spring, floor) {
+    const width = radius * 2;
+    const doorZ = z - 1.08;
+    const rearZ = z - 3.51;
+    const canopyY = spring - 0.07;
+    const height = canopyY - floor;
+    const midY = floor + height / 2;
+    const floorFront = z + 0.77;
+    box(cream, x, floor / 2, (floorFront + rearZ) / 2, width + 1.63, floor, floorFront - rearZ);
+    box(stone, x, 0.071, floorFront, width + 1.88, 0.142, 0.57);
+    box(brass, x, floor + 0.001, floorFront - 0.08, width + 1.49, 0.006, 0.046);
+    box(litTimber, x, midY, rearZ, width, height, 0.16);
+    box(wood, x, canopyY, (z + rearZ) / 2, width, 0.16, z - rearZ + 0.16);
+    for (const dx of [-1.85, 0, 1.85]) {
+      box(windows[1], x + dx, midY + 0.16, rearZ + 0.10, 1.53, height - 0.64, 0.062);
+      box(litTimber, x + dx, 1.13, rearZ + 0.17, 1.55, 0.14, 0.15);
+      box(cane, x + dx, midY + 0.16, rearZ + 0.166, 0.051, height - 0.64, 0.072);
     }
-    box(wood, x, 1.95, z - 2.43, 4.58, 0.13, 0.07);
-    arch(x, spring, z - 0.06, radius, 0.61, 2.28, deepGreen, 0.49);
-    arch(x, spring, z + 0.458, radius + 0.04, 0.07, 2.28, neon, 0.025);
-    arch(x, spring, z + 0.463, radius + 0.49, 0.077, 2.28, brass, 0.041);
-    arch(x, spring - 0.09, z - 1.04, radius - 0.21, 0.054, 2.15, windows[3], 0.27);
-    arch(x, spring - 0.16, z - 1.83, radius - 0.34, 0.067, 2.10, windows[2], 0.23);
+    for (const dz of [-0.42, -1.63, -2.88]) {
+      box(cane, x, canopyY - 0.071, z + dz, width - 0.03, 0.095, 0.14);
+      box(displayLight, x, canopyY - 0.123, z + dz, width - 0.73, 0.018, 0.055);
+    }
+
+    // The door plane sits inside the canopy and leaves the lit lobby visible.
+    for (const dx of [-radius, -1.78, 0, 1.78, radius]) {
+      box(deepGreen, x + dx, midY, doorZ, 0.105, height, 0.14);
+    }
     for (const side of [-1, 1]) {
-      for (let bay = 0; bay < 3; bay += 1) {
-        const pz = z - 0.36 - bay * 0.59;
-        const px = x + side * 2.45;
-        box(stone, px, 1.29, pz, 0.10, 2.10, 0.053);
-        box(brass, px, 2.58, pz, 0.18, 0.053, 0.14);
+      box(deepGreen, x + side * 0.89, floor + 0.16, doorZ, 1.76, 0.32, 0.14);
+      box(brass, x + side * 0.155, 1.48, doorZ + 0.097, 0.053, 0.42, 0.066);
+      glassPane(x + side * 1.58, midY + 0.12, doorZ + 0.078, radius - 0.054, height - 0.27);
+      box(brass, x + side * 1.27, floor + 0.006, z - 0.88, 0.025, 0.012, 2.48);
+      for (const dz of [-0.24, -1.25, -2.40]) {
+        box(litTimber, x + side * (radius - 0.037), midY, z + dz, 0.10, height, 0.14);
       }
     }
-    box(deepGreen, x, 0.63, z - 2.38, 4.58, 0.55, 0.12);
-    for (const offset of [-0.25, 0.25]) box(brass, x + offset, 1.36, z - 2.365, 0.079, 0.32, 0.035);
-    for (let i = -10; i <= 10; i += 1) {
-      const dx = i * 0.221;
-      const top = spring + Math.sqrt(radius ** 2 - dx ** 2);
-      const length = top - 3.53;
-      box(brass, x + dx, top - length / 2, z + 0.13, 0.083, length, 0.23);
-      box(neon, x + dx, top - length / 2, z + 0.263, 0.032, length - 0.04, 0.026);
+    box(deepGreen, x, 2.62, doorZ, width, 0.127, 0.14);
+    box(brass, x, 2.638, doorZ + 0.087, width - 0.15, 0.027, 0.041);
+    decal(pool, x, floor + 0.016, z - 0.89, width - 0.14, 3.03, -Math.PI / 2, 2);
+    decal(pool, x, 0.047, z + 1.58, width - 0.35, 1.62, -Math.PI / 2, 2);
+    light(x, 2.66, z - 0.45, 13.8, 6.2);
+  }
+
+  function mall(x, z) {
+    const radius = 3.16;
+    const band = 0.90;
+    const spring = 3.25;
+    const floor = 0.24;
+    const legs = spring - floor;
+    const outer = radius + band;
+    arch(x, spring, z - 3.57, radius, 0.25, legs, deepGreen, 3.25);
+    arch(x, spring, z - 0.32, radius, band, legs, deepGreen, 0.68);
+    arch(x, spring, z + 0.29, outer - 0.24, 0.24, legs, cream, 0.15);
+    arch(x, spring, z + 0.365, radius + 0.077, 0.084, legs, neon, 0.038);
+    arch(x, spring, z + 0.365, radius + 0.52, 0.037, legs, brass, 0.038);
+    mallMarquee(x, spring, z, radius);
+    mallVestibule(x, z, radius, spring, floor);
+
+    for (let i = 0; i < 17; i += 1) {
+      const angle = (i + 0.5) * Math.PI / 17;
+      const molding = outer - 0.13;
+      box(i === 8 ? brass : stone, x + Math.cos(angle) * molding, spring + Math.sin(angle) * molding,
+        z + 0.45, i === 8 ? 0.16 : 0.034, 0.18, 0.03, 0, 0, angle + Math.PI / 2);
     }
-    sign(x, 3.54, z + 0.40, 4.51, 0.64, "GJH VIRTUAL MALL");
-    for (const [width, height, depth] of [[5.84, 0.23, 0.60], [6.04, 0.125, 0.79]]) {
-      box(stone, x, height / 2, z + 0.53, width, height, depth);
+    for (const side of [-1, 1]) {
+      const px = x + side * (outer - 0.43);
+      box(stone, px, 0.32, z + 0.25, 0.89, 0.55, 0.66);
+      box(lightCream, px, 0.59, z + 0.26, 0.87, 0.102, 0.68);
+      box(cream, px, spring - 0.10, z + 0.26, 0.86, 0.17, 0.59);
+      for (const y of [0.86, 1.13, 1.40]) stamp(plane, encaustic, px, y, z + 0.369, 0.235, 0.235, 1);
+      lantern(px, 2.24, z + 0.65, 0.96);
     }
-    decal(pool, x, 0.354, z - 0.58, 5.56, 3.45, -Math.PI / 2, 2);
-    light(x, 2.03, z - 0.35, 11, 5.8);
-    hit("mall", x, 1.95, z + 0.12, 5.16, 3.90, 0.58);
+
+    // Pick the portal silhouette, including the open doorway and the marquee.
+    hitTarget("mall", archFill(outer, legs), x, spring, z + 0.51);
+    return [x, 0.055, z + 2.45];
   }
 
   function streetLamp(x, z, size = 1) {
@@ -1198,7 +1271,9 @@ export function buildWorld(scene, invalidate) {
   house(-5.25, 7.03, -0.52, plaster[0], 7.01, true);
   arcade(1.28, -1.08);
   cornerShop(6.10, -2.80);
-  mall(11.98, -2.38);
+  const mallX = 12.73;
+  const mallZ = -1.10;
+  const mallAnchor = mall(mallX, mallZ);
   house(18.56, 6.80, -5.78, plaster[2], 6.78);
   house(25.29, 6.60, -7.20, plaster[3], 7.15);
   vending(-0.89, -0.05);
@@ -1210,13 +1285,13 @@ export function buildWorld(scene, invalidate) {
   planter(3.35, 0.21, 1.18);
   planter(5.74, -1.91, 1.17);
   planter(6.59, -1.45, 0.74, false);
-  planter(9.00, -1.85, 1.14);
-  planter(14.97, -1.83, 1.27, false);
+  planter(mallX - 3.97, mallZ + 0.93, 1.14);
+  planter(mallX + 3.97, mallZ + 0.93, 1.27, false);
   planter(20.81, -2.28, 1.48);
   planter(-11.30, 1.37, 1.08, false);
   bench(-10.74, 0.40);
   cafeTable(-9.59, 0.72);
-  streetLamp(15.46, -2.82, 1.20);
+  streetLamp(mallX + 4.72, mallZ - 0.79, 1.20);
   streetLamp(3.77, 1.85, 0.99);
   streetLamp(-12.71, 1.81, 1.00);
   streetLamp(3.05, 8.68, 1.08);
@@ -1227,16 +1302,16 @@ export function buildWorld(scene, invalidate) {
   palm(21.54, -3.48, 6.18);
   palm(27.82, -2.43, 6.29);
   banner(3.50, 3.68, -0.32);
-  banner(14.51, 3.55, -1.76);
+  banner(mallX + 4.77, 3.55, mallZ - 0.43);
   for (let i = 0; i < 5; i += 1) {
     const x = 5.1 + i * 0.96;
     const z = 1.61 - i * 0.75;
     tube(ink, x, 0.30, z, 0.066, 0.53, 0.066);
     ellipsoid(brass, x, 0.56, z, 0.092, 0.063, 0.092);
   }
-  box(stone, 6.02, 0.023, 10.26, 6.37, 0.055, 3.58);
-  planter(3.74, 9.40, 2.08, false, 0.10);
-  planter(4.16, 9.85, 1.52, true, 0.10);
+  box(stone, 3.9675, 0.023, 10.26, 2.265, 0.055, 3.58);
+  planter(3.74, 9.40, 2.08, false, 0.0505);
+  planter(4.16, 9.85, 1.52, true, 0.0505);
   visitor(1.13, 3.25);
   decal(shade, 1.13, 0.016, 3.25, 0.95, 0.71, -Math.PI / 2, 1);
 
@@ -1294,5 +1369,5 @@ export function buildWorld(scene, invalidate) {
     for (const material of signMaterials) material.emissiveIntensity = night ? 0.77 : 0.14;
   }
 
-  return { hitTargets, setNight };
+  return { hitTargets, mallAnchor, setNight };
 }

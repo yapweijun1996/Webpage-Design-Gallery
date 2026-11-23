@@ -4,8 +4,8 @@ import { buildWorld, REFLECTED } from "./world.js";
 const LANDMARKS = {
   shop: [-4.71, 2.07, 0.53],
   vending: [-0.89, 2.40, 0.50],
-  mall: [11.98, 1.70, -1.86],
 };
+const PHONE_MALL_TURN = 0.9;
 
 function rain(scene) {
   const material = new THREE.ShaderMaterial({
@@ -153,6 +153,7 @@ export function createStreet({ canvas, stops, activate, fail }) {
   const world = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.15, 150);
   const street = buildWorld(world, invalidate);
+  const landmarks = { ...LANDMARKS, mall: street.mallAnchor };
   const rainLines = rain(world);
   const reflection = wetRoad(world);
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -181,6 +182,7 @@ export function createStreet({ canvas, stops, activate, fail }) {
     reflection.resize(width, height);
     camera.aspect = width / height;
     camera.fov = portrait.matches ? THREE.MathUtils.clamp(53 - camera.aspect * 9, 43, 50) : 43;
+    if (portrait.matches) azimuth = Math.min(azimuth, PHONE_MALL_TURN);
     camera.updateProjectionMatrix();
     invalidate();
   }
@@ -188,12 +190,14 @@ export function createStreet({ canvas, stops, activate, fail }) {
   function placeStops() {
     if (portrait.matches) return;
     const positions = stops.map((element) => {
-      projected.set(...LANDMARKS[element.dataset.stop]).project(camera);
+      const stop = element.dataset.stop;
+      projected.set(...landmarks[stop]).project(camera);
       const half = element.offsetWidth / 2 + 10;
+      const lift = stop === "mall" ? 8 : 29;
       return {
         element,
         x: THREE.MathUtils.clamp((projected.x + 1) * width / 2, half, width - half),
-        y: THREE.MathUtils.clamp((1 - projected.y) * height / 2 - 29, 108, height - 39),
+        y: THREE.MathUtils.clamp((1 - projected.y) * height / 2 - lift, 108, height - 39),
         half,
       };
     });
@@ -211,12 +215,19 @@ export function createStreet({ canvas, stops, activate, fail }) {
 
   function updateView() {
     const narrow = portrait.matches;
-    const wideFocus = THREE.MathUtils.clamp(1.9 - camera.aspect * 1.5, -0.46, 1.72);
-    const focus = (narrow ? -4.15 : wideFocus) + azimuth * (narrow ? 10.1 : 7.1);
-    const distance = narrow ? 16.6 : THREE.MathUtils.clamp(20.7 / camera.aspect, 16.9, 25.1);
-    const angle = (narrow ? -0.50 : -0.69) + azimuth * 0.28;
+    const { clamp, degToRad, lerp } = THREE.MathUtils;
+    const wideFocus = clamp(3.05 - camera.aspect * 1.65, -0.38, 1.95);
+    const mallTurn = narrow ? clamp(azimuth / PHONE_MALL_TURN, 0, 1) : 0;
+    const focus = narrow
+      ? lerp(-4.15, street.mallAnchor[0], mallTurn) + Math.min(0, azimuth) * 10.1
+      : wideFocus + azimuth * 7.1;
+    // Fit the full arch and its approach when the phone camera reaches the mall.
+    const horizontalSpan = 2 * Math.tan(degToRad(camera.fov / 2)) * camera.aspect;
+    const mallDistance = Math.max(16.6, 10.9 / horizontalSpan);
+    const distance = narrow ? lerp(16.6, mallDistance, mallTurn) : clamp(24.8 / camera.aspect, 16.9, 37);
+    const angle = (narrow ? -0.50 : -0.63) + azimuth * 0.28;
     camera.position.set(focus + Math.sin(angle) * distance, 4.73 + elevation, 0.12 + Math.cos(angle) * distance);
-    camera.lookAt(focus, narrow ? 2.78 : 3.00, -0.40);
+    camera.lookAt(focus, narrow ? lerp(2.78, 3.40, mallTurn) : 3.00, -0.40);
     camera.updateMatrixWorld();
     placeStops();
     reflection.update(renderer, camera, night);
@@ -245,7 +256,7 @@ export function createStreet({ canvas, stops, activate, fail }) {
   }
 
   function turn(horizontal, vertical = 0) {
-    azimuth = THREE.MathUtils.clamp(azimuth + horizontal, -0.83, 1.15);
+    azimuth = THREE.MathUtils.clamp(azimuth + horizontal, -0.83, portrait.matches ? PHONE_MALL_TURN : 1.15);
     elevation = THREE.MathUtils.clamp(elevation + vertical, -2.0, 2.85);
     invalidate();
   }

@@ -2,9 +2,11 @@
 
 ## Deliverable and scope
 
-An independent, unofficial 3D street outside the existing GJH Virtual Mall concept. The visitor can look around a rainy SG/MY-inspired shophouse street, browse New Moon packshots, try a fictional capsule and follow the mall entrance to v11. The street uses real camera movement and a day/night lighting toggle. The closer, oblique camera frames the storefront and vending machine on phones, and reveals the covered walkway and Virtual Mall canopy on wider screens.
+An independent, unofficial 3D street outside the existing GJH Virtual Mall concept. The visitor can look around a rainy SG/MY-inspired shophouse street, browse New Moon packshots, try a fictional capsule and follow the mall entrance to v11. The street uses real camera movement and a day/night lighting toggle. On phones the camera opens on the storefront and vending machine. Drag left or press Look right three times to frame the full mall arch. At tablet and desktop widths the opening view includes the covered walkway and mall canopy.
 
 The upstairs window openings pass through the facade and have deep jambs, fanlight bars, shutters, curtains and pendant shades. The shop has a recessed glazed doorway, staggered cases, a tea counter and back shelves under timber ceiling beams. Striped fabric hangs from a roller with visible ribs and braces. Potted plants, a teapot beside the bench, the gold crescent on the vending machine and the visitor's tote give the five-foot way a sense of scale. Drain grates and a curved curb lead past the mall into another row of shophouses. The rainy evening uses warm light pools and a low-resolution planar reflection with irregular pools and gutter runoff. In daylight the fixtures dim and the paving retains a weaker reflection.
+
+The mall portal has a cream stone rim, illuminated brass fins and a two-line GJH Virtual Mall marquee. A stepped threshold leads into a recessed glazed vestibule with ceiling lights and a warm lobby behind it. The portal's silhouette accepts canvas clicks and taps. On wider screens the Enter Mall link sits near the foot of the steps, leaving the marquee and doors visible.
 
 ## Gallery registration and local preview
 
@@ -40,7 +42,11 @@ WebGL 2 is required for 3D. The HTML stops and shop images remain available duri
 
 The collection entry answers what visitors can explore before entering the mall. The New Moon street stop opens a panel with four packshots and their labeled weights. The vending stop reveals a fictional keepsake, and Enter Mall opens v11's arrivals page.
 
-The captures use reduced motion for a reproducible first screen. Each was taken from the running WebGL prototype at 390 × 844, 768 × 1024 or 1440 × 900 CSS pixels. The 720 × 450 collection thumbnail is a downsample of the desktop capture.
+The saved captures show the mall entrance in build `a71aa8c02f698adf`; the historical browser results below cover earlier builds. The captures use reduced motion for a reproducible first screen. Each was taken from the running WebGL prototype at 390 × 844, 768 × 1024 or 1440 × 900 CSS pixels. The 720 × 450 collection thumbnail is a downsample of the desktop capture.
+
+### Mall entrance pass
+
+A real HTTP Chromium check of build `a71aa8c02f698adf` exercised actual canvas clicks or touch at 1440 × 900, 768 × 1024, 390 × 844, 390 × 647 and 320 × 568. Each opened v11 and restored the 3D street on Back; hits outside the arch were also checked. A narrow 320 × 568 viewport requires scrolling to reach the lighting controls. Physical phone performance remains unverified. The required GJH browser suite passed its standalone layout checks but timed out waiting for a v11 crowd member within 45 seconds. The same targeted check timed out at the same step on the unmodified `71901df6` baseline in the same headless environment.
 
 ### Facade and street detail pass
 
@@ -74,4 +80,4 @@ The earlier `06e505d627ee533b` run served generated files by request interceptio
 2. Drag the canvas or use the directional buttons, then reset. Tap or click the storefront and vending machine in the scene. Use Tab and Enter to open each labeled stop, then check focus returns after Back, Close and Escape.
 3. Check the shop's four packshots and displayed weights. In vending, select each capsule and check its fictional result.
 4. Switch Day on and return to Night. Check the sky, window glow, road reflections and rain. Repeat with reduced motion enabled.
-5. Open the mall entrance and use browser Back to return. Repeat under a nested URL prefix. Disable WebGL and repeat the HTML stop flows, then disable JavaScript and check the inline shop and vending details.
+5. On a phone, turn right until the full mall arch is in view. Tap or click the 3D doorway to open v11, then use browser Back to return. Repeat with the Enter Mall link using Tab and Enter and under a nested URL prefix. Disable WebGL and repeat the HTML stop flows, then disable JavaScript and check the inline shop and vending details and the Enter Mall link.
