@@ -35,14 +35,14 @@
 {{BODY}}
   </main>
   <div class="sds-container sds-prefs" role="group" aria-label="Page preferences">
-    <label>Theme
+    <label><span data-i18n="sds.theme">Theme</span>
       <select data-sds-select="theme" class="sds-field">
-        <option value="auto">System</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
+        <option value="auto" data-i18n="sds.theme.auto">Auto</option>
+        <option value="light" data-i18n="sds.theme.light">Light</option>
+        <option value="dark" data-i18n="sds.theme.dark">Dark</option>
       </select>
     </label>
-    <label>Brand
+    <label><span data-i18n="sds.brand">Brand</span>
       <select data-sds-select="brand" class="sds-field">
         <option value="none">Default</option>
         <option value="forest-gold">Forest Gold</option>
@@ -50,18 +50,18 @@
         <option value="cny-red-gold">Chinese New Year</option>
       </select>
     </label>
-    <label>Language
-      <select data-sds-select="lang" class="sds-field">
+    <label><span data-i18n="sds.language">Language</span>
+      <select data-sds-select="lang" data-sds-export-languages class="sds-field">
         {{LANG_OPTIONS}}
       </select>
     </label>
-    <p>Version <span>{{VERSION}}</span></p>
-    <button type="button" class="sds-btn sds-btn--secondary" data-sds-check-updates>Check updates</button>
+    <p><span data-i18n="sds.version">Version</span> <span>{{VERSION}}</span></p>
+    <button type="button" class="sds-btn sds-btn--secondary" data-sds-check-updates data-i18n="sds.update.check">Check updates</button>
     <span role="status" data-sds-update-status></span>
   </div>
   <div class="sds-toast" data-sds-update-toast hidden>
-    <span>Update available</span>
-    <button type="button" class="sds-btn sds-btn--primary" data-sds-apply-update>Update now</button>
+    <span data-i18n="sds.update.available">Update available</span>
+    <button type="button" class="sds-btn sds-btn--primary" data-sds-apply-update data-i18n="sds.update.now">Update now</button>
   </div>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -71,6 +71,12 @@
       const toast = document.querySelector('[data-sds-update-toast]');
       const check = document.querySelector('[data-sds-check-updates]');
       const apply = document.querySelector('[data-sds-apply-update]');
+
+      if (window.isSecureContext && /^https?:$/.test(location.protocol) && window === window.top && 'serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {
+          status.textContent = 'Offline access could not be enabled.';
+        });
+      }
 
       sds.on('updateavailable', () => {
         toast.hidden = false;

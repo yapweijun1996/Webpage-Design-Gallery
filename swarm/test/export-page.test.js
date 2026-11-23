@@ -22,6 +22,7 @@ function fixture(t) {
   fs.mkdirSync(path.dirname(exporter), { recursive: true });
   fs.mkdirSync(path.join(root, 'swarm/lib'));
   fs.copyFileSync(EXPORTER, exporter);
+  fs.copyFileSync(require.resolve('../lib/catalog'), path.join(root, 'swarm/lib/catalog.js'));
   fs.copyFileSync(require.resolve('../lib/layers'), path.join(root, 'swarm/lib/layers.js'));
   fs.writeFileSync(path.join(project, 'tokens.css'), TOKENS);
 

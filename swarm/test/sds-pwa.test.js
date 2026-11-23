@@ -24,6 +24,7 @@ function fixture(t) {
   }
 
   write('swarm/tools/export-page.js', fs.readFileSync(path.join(SWARM, 'tools/export-page.js')));
+  write('swarm/lib/catalog.js', fs.readFileSync(path.join(SWARM, 'lib/catalog.js')));
   write('swarm/lib/layers.js', fs.readFileSync(path.join(SWARM, 'lib/layers.js')));
   fs.cpSync(path.join(SWARM, 'design-system/shell'), path.join(root, 'swarm/design-system/shell'), { recursive: true });
   const system = {
@@ -103,7 +104,7 @@ test('exports the full PWA and precaches exactly the files on disk', t => {
     assert.equal(f.text(`design-system/${file}`), f.system[file]);
   }
   for (const control of ['theme', 'brand', 'lang']) assert.ok(page.includes(`data-sds-select="${control}"`));
-  assert.ok(page.includes(`<p>Version <span>${version.version}</span></p>`));
+  assert.ok(page.includes(`<p><span data-i18n="sds.version">Version</span> <span>${version.version}</span></p>`));
   assert.ok(page.includes('src="assets/logo.png?v=2"'));
   assert.ok(page.includes('src="assets/v11-card.png"'));
   assert.equal(f.text('assets/logo.png'), 'asset bytes');
@@ -142,6 +143,26 @@ test('manifest URLs resolve under a subpath and all three icon headers match the
   assert.ok(page.includes('<link rel="apple-touch-icon" href="icons/icon-192.png">'));
   assert.ok(page.includes('<meta name="theme-color" content="#eef3e8">'));
   assert.ok(page.includes('<title>A "Shop" &amp; &lt;Cafe&gt; {{VERSION}}</title>'));
+});
+
+test('loads project translations before language initialization and includes merged catalogs offline', t => {
+  const f = fixture(t);
+  f.write('swarm/design-system/i18n/ms.json', JSON.stringify({ messages: { greeting: 'Generic', theme: 'Tema' } }));
+  f.write('project/i18n/ms.json', JSON.stringify({ meta: { lang: 'ms' }, messages: { greeting: 'Selamat datang' } }));
+  f.export('--langs', 'ms');
+  const page = f.text('index.html');
+  const i18n = page.indexOf('<script defer src="design-system/i18n.js">');
+  assert.ok(i18n >= 0 && i18n < page.indexOf('<script defer src="design-system/runtime.js">'));
+  assert.deepEqual(JSON.parse(f.text('i18n/ms.json')).messages, { greeting: 'Selamat datang', theme: 'Tema' });
+  assert.ok(precache(f.text('sw.js')).includes('i18n/ms.json'));
+  const version = f.text('version.json');
+  f.write('project/i18n/ms.json', JSON.stringify({ messages: { greeting: 'Halaman utama' } }));
+  f.export('--langs', 'ms');
+  assert.notEqual(f.text('version.json'), version);
+  const good = f.text('version.json');
+  f.write('project/i18n/ms.json', '{');
+  assert.equal(f.run('--langs', 'ms').status, 1);
+  assert.equal(f.text('version.json'), good);
 });
 
 test('brand and language options narrow the output and remove stale generated files on re-export', t => {

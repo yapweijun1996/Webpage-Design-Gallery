@@ -3,6 +3,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { assembleCss } = require('./layers');
+const { readCatalog } = require('./catalog');
 
 const STAGE = '/studio-preview.html';
 const EXPORT = '/p/dist/index.html';
@@ -209,12 +210,7 @@ function createPreview({ ui, project, designSystem, library, mall }) {
 
     const catalog = CATALOG.exec(route);
     if (catalog) {
-      function read(root, owner) {
-        try { return JSON.parse(readFile(root, catalog[1] + '.json', owner)); } catch (_) { return null; }
-      }
-      const base = read(path.join(designSystem, 'i18n'));
-      const local = read(path.join(project, 'i18n'), project);
-      const data = { meta: (local || base || {}).meta || { lang: catalog[1] }, messages: { ...base?.messages, ...local?.messages } };
+      const data = readCatalog(designSystem, project, catalog[1]);
       send(res, 200, JSON.stringify(data), 'application/json', cors);
       return true;
     }

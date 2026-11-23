@@ -8,6 +8,11 @@
     brand: { attribute: 'data-brand', values: ['none', 'forest-gold', 'gjh-classic', 'cny-red-gold'], fallback: root.getAttribute('data-default-brand') },
     lang: { attribute: 'lang', values: Object.freeze(['en', 'zh-Hans', 'ms']), fallback: root.getAttribute('lang') }
   };
+  const exportLanguages = document.querySelector('select[data-sds-export-languages]');
+  if (exportLanguages) {
+    const included = new Set(Array.from(exportLanguages.options, option => option.value));
+    preferences.lang.values = Object.freeze(preferences.lang.values.filter(code => included.has(code)));
+  }
   const names = Object.keys(preferences);
   const controls = names.map(name => '[data-sds-' + name + ']').join(',');
   const values = {};

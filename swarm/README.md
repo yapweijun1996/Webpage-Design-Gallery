@@ -193,6 +193,28 @@ locked-anchor and browser impact checks before committing. Studio records the
 restore as another history entry, with a snapshot you can use to undo it.
 Project-wide saves and restores are available in **Versions**.
 
+## Export a multilingual PWA
+
+From the repository root, build the Home project into its own output directory.
+
+```sh
+node swarm/tools/export-page.js swarm/projects/home --sds --brand gjh-classic --out swarm/projects/home/export-pwa --title "Goh Joo Hin"
+python -m http.server 8080 --directory swarm/projects/home/export-pwa
+```
+
+Open `http://localhost:8080/` while online to install the service worker and
+cache the page, images and language catalogs. The export also works under a
+subdirectory on an HTTPS host. Once the service worker controls the page, it
+can reload and switch languages offline.
+
+The export includes English, Simplified Chinese and Malay by default. It merges
+shared control labels with project strings in `i18n/en.json`,
+`i18n/zh-Hans.json` and `i18n/ms.json`. Mark page text with `data-i18n` and
+attributes with `data-i18n-attr`. Run `node swarm/tools/i18n-extract.js
+swarm/projects/home --check` to check the project catalogs. Missing translations
+use the original English content. Use `--langs en,ms` to export a smaller
+selection. English is always included.
+
 ## Verification
 
 ```sh
@@ -204,6 +226,7 @@ python swarm/test/browser_studio_anchors.py
 python swarm/test/browser_studio_anchor_repair.py
 python swarm/test/browser_studio_component_history.py
 python swarm/test/browser_studio_shared_proposals.py
+python swarm/test/browser_sds_export.py
 SWARM_SHARED_PROPOSALS_E2E_TEST=1 node --test swarm/test/shared-proposals-e2e.test.js
 ```
 

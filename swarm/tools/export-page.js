@@ -7,6 +7,7 @@ const path = require('node:path');
 const { createHash } = require('node:crypto');
 const { parseArgs } = require('node:util');
 const { assembleCss, parseSectionFile } = require('../lib/layers');
+const { readCatalog } = require('../lib/catalog');
 
 const SWARM_ROOT = path.resolve(__dirname, '..');
 const REPO_ROOT = path.resolve(SWARM_ROOT, '..');
@@ -220,13 +221,14 @@ function sha256(content) {
   return createHash('sha256').update(content).digest('hex');
 }
 
-function buildPwa(bundle, { title, htmlTitle, brand, languages, styles, body }) {
+function buildPwa(bundle, { projectDir, title, htmlTitle, brand, languages, styles, body }) {
   for (const file of [...SDS_STYLES, 'runtime.js', 'i18n.js']) {
     bundle.set(`design-system/${file}`, readPwaFile(SDS_ROOT, file));
   }
   for (const language of languages) {
     const file = `i18n/${language}.json`;
-    bundle.set(file, readPwaFile(SDS_ROOT, file));
+    const catalog = readCatalog(SDS_ROOT, projectDir, language, { strict: true });
+    bundle.set(file, JSON.stringify(catalog, null, 2) + '\n');
   }
   for (const icon of ICONS) {
     const file = `icons/${icon}`;
@@ -246,7 +248,7 @@ function buildPwa(bundle, { title, htmlTitle, brand, languages, styles, body }) 
     LANG_OPTIONS: [...new Set(['en', ...languages])].map(lang => `<option value="${lang}">${LANGUAGES[lang]}</option>`).join('\n        '),
     STYLES: [...SDS_STYLES.map(file => `<link rel="stylesheet" href="design-system/${file}">`), ...styles].join('\n  '),
     BODY: body,
-    SCRIPTS: `<script>\n${boot}\n</script>\n  <script defer src="design-system/runtime.js"></script>`,
+    SCRIPTS: `<script>\n${boot}\n</script>\n  <script defer src="design-system/i18n.js"></script>\n  <script defer src="design-system/runtime.js"></script>`,
   };
 
   bundle.set('manifest.webmanifest', render(readPwaFile(SHELL, 'manifest.webmanifest.tpl', 'utf8'), {
@@ -365,7 +367,7 @@ function main() {
   const destination = path.join(output, 'index.html');
   let page;
   if (pwa) {
-    buildPwa(bundle, { ...pwa, title, htmlTitle, styles, body });
+    buildPwa(bundle, { ...pwa, projectDir, title, htmlTitle, styles, body });
     writePwa(output, bundle);
     page = bundle.get('index.html');
   } else {
