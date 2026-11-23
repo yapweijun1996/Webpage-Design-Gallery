@@ -157,7 +157,7 @@ Design and implementation are tracked in [the upper-deck brand-wall brief](docs/
 - [x] Stage 1 — Add the design brief and this checklist.
 - [x] Stage 2 — Build the upper deck, railing, benches and planters.
 - [x] Stage 3 — Build the 17-plaque atlas and accessible nearby/tap story interaction.
-- [ ] Stage 4 — Fix expanded-layout copy, extend `tests/browser_gjh_v11.py`, update README, regenerate outputs, and verify both views <=190 draw calls.
+- [x] Stage 4 — Expanded-layout copy, README and generated outputs shipped. Desktop Chrome/Metal measured 73 draw calls at the default entrance, 56 on the upper deck with all 17 plaques, and 86 after the bench interactions. All passed the 190-call limit. [Repeatable browser command and receipt](docs/evidence/gjh-v11-upper-layout/desktop-stage4.md)
 
 
 - [x] Stage 2 — Build one 17-sign texture atlas with logo/text fallback and add category storefront variants.

@@ -2,6 +2,7 @@
 from gjh_menu_test_helpers import open_menu_page
 import argparse
 import functools
+import hashlib
 import http.server
 import importlib.util
 import json
@@ -524,7 +525,10 @@ def npc_budget_coverage(browser, url):
 
 
 def upper_deck_gallery(page):
+    # Resume the real frame loop after the entrance sample so deferred NPCs can install.
+    page.evaluate('__mall.setInput(null)')
     assert page.evaluate('__mall.teleport("atrium")')
+    page.wait_for_function('window.__mall.state.npcs?.active > 0', timeout=120000)
     crowded = drive(page, 100)
     assert crowded['npcs']['active'] > 0, crowded['npcs']
     assert crowded['drawCalls'] <= 200, crowded['drawCalls']
@@ -538,7 +542,9 @@ def upper_deck_gallery(page):
     drive(page, 4500)
     upper = state(page)
     assert abs(upper['y'] - 7.2) < .1 and not upper['elevatorTravel'], upper
-    page.wait_for_function('window.__mall.state.brandPlaqueCount === 17', timeout=10000)
+    # The lazy atlas needs live frames to drain its upload queue after manual lift steps.
+    page.evaluate('__mall.setInput(null)')
+    page.wait_for_function('window.__mall.state.brandPlaqueCount === 17', timeout=60000)
     upper = state(page)
     assert upper['brandPlaqueCount'] == 17, upper
     assert upper['drawCalls'] <= 190, upper['drawCalls']
@@ -592,6 +598,37 @@ def upper_deck_gallery(page):
     assert abs(stood['x'] - seat['exitX']) < .05 and abs(stood['z'] - seat['exitZ']) < .05, stood
     assert abs(stood['y'] - 7.2) < .1, stood
     return upper
+
+
+def expanded_upper_deck_coverage(browser, base):
+    context = browser.new_context(viewport={'width': 1440, 'height': 900})
+    try:
+        page = context.new_page()
+        errors = []
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        page.on('console', lambda message: errors.append(message.text) if message.type == 'error' else None)
+        url = base + '/gallery/demos/corporate/gjh/v11/'
+        with page.expect_response(url + 'script.bundle.js', timeout=90000) as bundle:
+            page.goto(url + '#experience')
+        page.wait_for_function('window.__mall?.ready && window.__sceneReady')
+        dismiss_tutorial(page)
+        drive(page, 0)
+        entrance = state(page)['drawCalls']
+        assert entrance <= 190, entrance
+        try:
+            upper = upper_deck_gallery(page)
+        except Exception as error:
+            current = state(page)
+            raise AssertionError({key: current[key] for key in ('zone', 'y', 'nearby', 'drawCalls',
+                'brandPlaqueCount', 'elevator')} | {'brandWallErrors': errors}) from error
+        final = state(page)
+        assert final['brandPlaqueCount'] == 17
+        assert final['drawCalls'] <= 190
+        digest = hashlib.sha256(bundle.value.body()).hexdigest()
+        return {'expandedDefaultDrawCalls': entrance, 'upperDeckBrandWall': upper,
+                'upperDeckFinalDrawCalls': final['drawCalls'], 'servedAppSha256': digest}
+    finally:
+        context.close()
 
 
 def keyboard_turning(page):
@@ -737,10 +774,9 @@ def loader_coverage(browser, url):
         context.close()
 
 
-def run(capture=False):
+def run(capture=False, upper_deck=False):
     spec = importlib.util.spec_from_file_location('gallery', ROOT / 'scripts/build_gallery.py')
     gallery = importlib.util.module_from_spec(spec); spec.loader.exec_module(gallery)
-    review = Path(tempfile.mkdtemp(prefix='gjh-v11-review-'))
     evidence = []
     layout_evidence = []
     with tempfile.TemporaryDirectory(prefix='gjh-v11-artifact-') as temp:
@@ -754,6 +790,19 @@ def run(capture=False):
             with sync_playwright() as p:
                 browser = p.chromium.launch(executable_path=os.environ['GALLERY_CHROME'], args=ARGS)
                 try:
+                    if upper_deck:
+                        deck = expanded_upper_deck_coverage(browser, base)
+                        digest = hashlib.sha256((DEMO / 'script.bundle.js').read_bytes()).hexdigest()
+                        assert deck['servedAppSha256'] == digest, deck['servedAppSha256']
+                        print(json.dumps({'chrome': browser.version,
+                            'webglBackend': os.environ.get('GALLERY_WEBGL_BACKEND', 'swiftshader'),
+                            'viewport': [1440, 900], 'expandedDefaultDrawCalls': deck['expandedDefaultDrawCalls'],
+                            'upperDeckDrawCalls': deck['upperDeckBrandWall']['drawCalls'],
+                            'upperDeckFinalDrawCalls': deck['upperDeckFinalDrawCalls'],
+                            'brandPlaqueCount': deck['upperDeckBrandWall']['brandPlaqueCount'],
+                            'servedAppSha256': digest}, indent=2))
+                        return
+                    review = Path(tempfile.mkdtemp(prefix='gjh-v11-review-'))
                     evidence.append({'loader': loader_coverage(browser, url)})
                     evidence.append({'uxHud': ux_hud_coverage(browser, base + '/gallery/demos/corporate/gjh/v11/#experience')})
                     evidence.extend(npc_budget_coverage(browser, base + '/gallery/demos/corporate/gjh/v11/#experience'))
@@ -976,28 +1025,7 @@ def run(capture=False):
                         draw_calls['max'] = max(max_draw_calls, *draw_calls.values())
                         assert max(draw_calls.values()) <= 200, draw_calls
                         evidence.append({'width':width, 'drawCalls':initial['drawCalls'], 'drawCallsByView':draw_calls, 'walkingCollisionDoorsInspection':'PASS', 'keyboardTurningAndFInspection':'PASS','errors':errors})
-                    # Exercise the default expanded floor separately from classic-layout
-                    # regression flows so the deck route always exists.
-                    context=browser.new_context(viewport={'width':1440,'height':900})
-                    page=context.new_page(); brand_wall_errors=[]
-                    page.on('pageerror',lambda error:brand_wall_errors.append(str(error)))
-                    page.on('console',lambda message:brand_wall_errors.append(message.text) if message.type=='error' else None)
-                    page.goto(base+'/gallery/demos/corporate/gjh/v11/#experience')
-                    page.wait_for_function('window.__mall?.ready && window.__sceneReady')
-                    dismiss_tutorial(page)
-                    drive(page,0)
-                    expanded_default_draw_calls=state(page)['drawCalls']
-                    assert expanded_default_draw_calls<=190,expanded_default_draw_calls
-                    try:brand_wall_evidence=upper_deck_gallery(page)
-                    except Exception as error:
-                        current=state(page)
-                        raise AssertionError({'zone':current['zone'],'y':current['y'],'nearby':current['nearby'],
-                          'drawCalls':current['drawCalls'],'brandPlaqueCount':current['brandPlaqueCount'],
-                          'elevator':current['elevator'],'brandWallErrors':brand_wall_errors}) from error
-                    assert state(page)['brandPlaqueCount']==17
-                    assert state(page)['drawCalls']<=190
-                    context.close()
-                    evidence.append({'expandedDefaultDrawCalls':expanded_default_draw_calls,'upperDeckBrandWall':brand_wall_evidence})
+                    evidence.append(expanded_upper_deck_coverage(browser, base))
                     for width,height in ((390,844),(1440,900)):
                         context=browser.new_context(viewport={'width':width,'height':height},
                             device_scale_factor=2,has_touch=width<600,reduced_motion='reduce')
@@ -1053,5 +1081,8 @@ def run(capture=False):
 
 if __name__ == '__main__':
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--capture', action='store_true')
-    run(parser.parse_args().capture)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--capture', action='store_true')
+    mode.add_argument('--upper-deck', action='store_true', help='Run the focused expanded upper-deck acceptance.')
+    args = parser.parse_args()
+    run(args.capture, args.upper_deck)
