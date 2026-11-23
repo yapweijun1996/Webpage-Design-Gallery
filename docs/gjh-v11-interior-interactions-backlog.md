@@ -16,9 +16,9 @@ The layout sweep checks each action from its standing position across all 17 sho
 
 ## Installed shop interactions
 
-The expanded mall has 18 native shop seats, 60 scripted targets, 19 catalogue Story stops and four distinct physical product pickups. The [initial inventory](https://github.com/yapweijun1996/Webpage-Design-Gallery/commit/29ba490e219d68f764843d3f480760bd671e43ab) recorded ten seats. Five seats use their room-kit colliders, the LG studio sofa and Casio keyboard bench use their studio footprints, and the Gigaset bench shares its composite model’s collider.
+The expanded mall has 19 native shop seats when the Casio recital grand is installed, 60 scripted targets, 19 catalogue Story stops and four distinct physical product pickups. The [initial inventory](https://github.com/yapweijun1996/Webpage-Design-Gallery/commit/29ba490e219d68f764843d3f480760bd671e43ab) recorded ten seats. Five seats use their room-kit colliders, the LG studio sofa and Casio keyboard bench use their studio footprints, and the Gigaset bench shares its composite model’s collider. The central recital piano exposes its own bench only while the installed model supplies the cushion and instrument body.
 
-The [65-action walkthrough](verify_interactions.py) covers the 60 scripted targets and five stools. Run `python tests/browser_gjh_showroom_seats.py` to exercise the seven additional SKIPPY, Sony, LG and Casio seats at phone and desktop sizes. Add `--width 390 768 1440` for the tablet routes. The [Gigaset walkthrough](../tests/browser_gjh_gigaset_seat.py) checks both native seats with the loaded model and with `--truncate-sofa`.
+The [65-action walkthrough](verify_interactions.py) covers the 60 scripted targets and five stools. Run `python tests/browser_gjh_showroom_seats.py` to exercise the eight additional SKIPPY, Sony, LG and Casio seats at phone and desktop sizes. Add `--width 390 768 1440` for the tablet routes. The [Gigaset walkthrough](../tests/browser_gjh_gigaset_seat.py) checks both native seats with the loaded model and with `--truncate-sofa`.
 
 | Room | Native seats | Scripted targets | Stories | Installed exhibits and visitor actions |
 | --- | ---: | ---: | ---: | --- |
@@ -36,11 +36,11 @@ The [65-action walkthrough](verify_interactions.py) covers the 60 scripted targe
 | [S12 Zeria](goh-joo-hin/12-zeria/README.md) | 0 | 2 | 1 | Lively & Healthy and Chondro Max share a Story. Visitors can match an herb print and water the orchid. |
 | [S13 Sony](goh-joo-hin/13-sony/README.md) | 1 | 3 | 1 | The WH-1000XM6 and NW-A306 share a Story and the listening displays offer sound demos. Visitors can sit in the felt listening chair behind the console. |
 | [S14 LG](goh-joo-hin/14-lg/README.md) | 3 | 2 | 1 | The OLED55C5PSA has a Story. Visitors can change the display channel and open the refrigerator. The alcove sofa, window ottoman and studio sofa each have a Sit action. |
-| [S15 Casio](goh-joo-hin/15-casio/README.md) | 2 | 3 | 1 | The CT-S1BK and GP-510BP share a Story. Both instrument demos can play a phrase. Visitors can sit beside the recital piano or approach the keyboard bench from the aisle and sit facing the keys. |
+| [S15 Casio](goh-joo-hin/15-casio/README.md) | 3 | 3 | 1 | The CT-S1BK and GP-510BP share a Story. Both instrument demos can play a phrase. Visitors can sit in the audience chair, at the CT-S1 or on the installed central grand’s bench. Both piano benches face their own keys. |
 | [S16 GP Batteries](goh-joo-hin/16-gp-batteries/README.md) | 0 | 2 | 1 | The AA cells, eTag tracker and CR2032 cell share a Story. Visitors can switch the torch and test the cells. |
 | [S17 Gigaset](goh-joo-hin/17-gigaset/README.md) | 2 | 2 | 1 | The sofa and backless bench support Sit and Stand with the model or its fallback. The A170 and COMFORT 550A share a Story. The receiver and dial have separate demo actions. |
 
-The Casio grand piano has a separate bench. A cabinet collision box overlaps its seated position and must be resolved before it can support Sit. The two Sony studio sofa declarations keep collision volumes after their mesh is replaced. Repeated shelf facings, alternate levels of detail and serving props reuse the underlying product or demonstration. [Seat registration](../demos/corporate/gjh/v11/assets/world.js) · [Shop action installer](../demos/corporate/gjh/v11/assets/interiors/shop-interactions.js) · [Seat and pickup controls](gjh-v11-engine-interactions.md)
+Casio also displays a second black grand by the storefront. Its dark bench is a separate full-size cushion within that model’s collision box, and still needs its own approach and Sit action. The two Sony studio sofa declarations keep collision volumes after their mesh is replaced. Repeated shelf facings, alternate levels of detail and serving props reuse the underlying product or demonstration. [Seat registration](../demos/corporate/gjh/v11/assets/world.js) · [Shop action installer](../demos/corporate/gjh/v11/assets/interiors/shop-interactions.js) · [Seat and pickup controls](gjh-v11-engine-interactions.md)
 
 ## Original interaction proposals
 

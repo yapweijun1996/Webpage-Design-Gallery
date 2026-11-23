@@ -2186,7 +2186,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   }
   const rotation = { x: 0, y: 0, z: 0, w: 1 };
   function clearAt(position, ignoreBench = false) {
-    return !physics.intersectionWithShape(position, rotation, walkingShape, undefined, undefined, capsule, body, ignoreBench ? (c) => c.handle !== seat.collider : undefined);
+    return !physics.intersectionWithShape(position, rotation, walkingShape, undefined, undefined, capsule, body, ignoreBench ? (c) => c.handle !== seat.collider && c.handle !== seat.cabinetCollider : undefined);
   }
   function clearPath(from, to, ignoreBench = false) {
     const steps = Math.max(1, Math.ceil(Math.hypot(to.x - from.x, to.y - from.y, to.z - from.z) / 0.08));
@@ -2246,7 +2246,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     if (seated || pushing || elevatorTravel || character.state.physicalProduct && character.state.physicalProduct.phase !== "empty")
       return false;
     const candidate = seats.find((s) => s.id === id), p = body.translation();
-    if (!candidate)
+    if (!candidate || candidate.modelVisible?.() === false)
       return false;
     if (Math.abs(p.y - 0.875 - candidate.floor) > 0.5 || Math.hypot(p.x - candidate.exitX, p.z - candidate.exitZ) > candidate.clearance.interactionRadius || !isInFrontOfSeat(candidate, p))
       return false;

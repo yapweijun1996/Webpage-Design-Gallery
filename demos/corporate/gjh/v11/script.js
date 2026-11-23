@@ -1146,7 +1146,14 @@ async function initialize() {
   // Let the shared transfer finish before asset-specific deadlines begin.
   await packTask;
   world = await createWorld(T, R, physics, expanded, warmModel,
-    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === 'phone', detailsEnabled, waitForParseSlice, ui.registerSeat);
+    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === 'phone', detailsEnabled, waitForParseSlice, seat=>{
+      const remove=ui.registerSeat(seat);
+      return ()=>{
+        // Unseat an occupant before the old model's collision guards are removed.
+        if (seat.modelVisible && player?.state.seatId===seat.id && !player.stand(true)) player.teleport(currentZone);
+        remove();
+      };
+    });
   if (expanded) renderer.toneMappingExposure = world.defaultExposure;
   ui.setBrandStories(world.shopExhibits);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);

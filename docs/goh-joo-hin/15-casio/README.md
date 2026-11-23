@@ -47,6 +47,10 @@ The audience chair beside the piano offers **Sit** from the side aisle. The visi
 
 The CT-S1 keyboard has a 0.690 m-high bench. Approach from the aisle and sit facing the keys. The seated camera shows the visitor in profile. Stand and approach the keyboard to play the C4, E4 and G4 phrase. [Seated view on touch and desktop](keyboard-bench-runtime.webp)
 
+The brown bench belongs to the central recital grand. Enter from the side aisle and sit at its 0.726 m cushion, then stand to play the original piano phrase. The walking collision around the instrument stays in place. On a failed tier download the current piano remains usable. If the replacement loads without a bench, the visitor stands at the clear aisle point before the seat is removed. Returning to a valid model restores one seat. [Phone and desktop seated views](recital-grand-bench.webp) · [Missing-bench and recovery test](../../../tests/browser_gjh_grand_tier.py)
+
+The smaller black grand near the storefront has its own dark bench. Its seat is visible and remains on the interaction backlog.
+
 ## Catalogue exhibit
 
 The recital grand remains the room's architectural anchor. The adjacent station holds the CT-S1BK form study. The separate GP-510BP cabinet sits in the rear alcove. The story compares the portable keyboard with the three-pedal GP-510BP cabinet form and links to Casio Music Singapore.

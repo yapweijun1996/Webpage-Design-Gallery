@@ -28,6 +28,8 @@ def project(shop):
         if item['collision'] == 'kit':
             x, y, z = item['xyz']
             collider = dict(center=[x, y+item['size'][1]/2, z], size=item['size'], yaw=item['yawDeg'])
+            if item.get('modelId') == 'grand-piano':
+                collider['grandPiano'] = True
             if 'sit' in item['action']:
                 collider['seat'] = dict(id=item['id'], socket=item['socket'])
             colliders.append(collider)

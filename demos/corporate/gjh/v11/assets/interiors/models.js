@@ -1,3 +1,4 @@
+import {measureGrandPiano} from './casio-grand-seat.js';
 import {bakedParts} from './baked-layout.js';
 import {roomAtlas,roomDetails} from './detail-files.js';
 import {GLTFLoader, mergeGeometries} from '../shop-sign-vendor.js';
@@ -23,7 +24,7 @@ export function positionRoomInlays(geometry, store) {
   }
 }
 
-function* mergeInteriorAnchor(T, scene) {
+function* mergeInteriorAnchor(T, scene, grand) {
   scene.updateMatrixWorld(true);
   const batches = new Map(), anchor = new T.Group();
   scene.traverse(mesh => {
@@ -42,7 +43,9 @@ function* mergeInteriorAnchor(T, scene) {
         }
         const geometry = mergeGeometries(parts);
         if (geometry) {
-          anchor.add(new T.Mesh(geometry,material));
+          const draw = new T.Mesh(geometry,material);
+          anchor.add(draw);
+          if (grand && meshes.includes(grand.source)) grand.draw = draw;
           for (const mesh of meshes) mesh.geometry.dispose();
         } else {
           // Retain the authored transforms for incompatible primitive formats.
@@ -50,12 +53,14 @@ function* mergeInteriorAnchor(T, scene) {
             const copy = new T.Mesh(mesh.geometry,material);
             mesh.matrixWorld.decompose(copy.position,copy.quaternion,copy.scale);
             anchor.add(copy);
+            if (grand?.source === mesh) grand.draw = copy;
           }
         }
       } finally { for (const part of parts) part.dispose(); }
       yield;
     }
     if (!anchor.children.length) throw new Error('Empty interior fixture');
+    if (grand?.draw) anchor.userData.grandPiano = {bench:grand.bench,guards:grand.guards,drawIndex:anchor.children.indexOf(grand.draw)};
     complete = true;
     return anchor;
   } finally {
@@ -178,7 +183,7 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
           yield;
         }
         if (asset.roomDetail) return yield* prepareDetail(scene,store,bakedParts[asset.file]);
-        return yield* mergeInteriorAnchor(T,scene);
+        return yield* mergeInteriorAnchor(T,scene,store?.anchor.asset_id==='grand-piano' ? measureGrandPiano(T,scene) : null);
       };
       if (build) return await build(work);
       const iterator = work();

@@ -48,6 +48,8 @@ Add a placement to `assets/seat-placements.js` with its floor, position, facing 
 
 The third upper-deck bench is at `(-3, 6)`, facing its exit at `(-3, 7.2)` between the bench and the lift's south guard. This moves it off the shaft and registers it as a seat. The placement tests check the slab and guard clearance; the browser test exercises the sit/stand route against the actual colliders.
 
+For a seat embedded in a replaceable model, bind its availability to the displayed mesh. The Casio recital grand measures the bench, body, keyboard and lid before batching. The current model keeps its seat during a failed replacement download. A successful replacement without a bench returns an occupant to a clear aisle and removes the target. [Model-switch test](../tests/browser_gjh_grand_tier.py)
+
 ## Adding a door
 
 Create both sliding leaves and their kinematic bodies, and register the door in `world.doors` under its stable store ID. The fixed-step loop checks the visitor’s position, opens the passage on approach from either side and closes it after departure. Move the visual leaves and their colliders together. Use `tests/browser_gjh_auto_doors.py` to verify proximity and clearance, and `tests/browser_gjh_shop_walkthrough.py` to verify entry and exit throughout the expanded mall.

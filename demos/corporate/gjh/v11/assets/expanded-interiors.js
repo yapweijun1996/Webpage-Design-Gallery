@@ -68,7 +68,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   };
   const studioParts = [];
   const shops = [], collisionBoxes = [], nativeStudioSeats = new Map();
-  let gigasetSeatBox;
+  let gigasetSeatBox, grandCabinetBox;
   const models = new Map(), loadedScenes = new Map(), gltfLoader = new GLTFLoader();
   const modelStates = new Map(slots.flatMap(slot => {
     const number=Number(slot.number);
@@ -150,6 +150,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     }
     const tools = {
       block,
+      grandCabinet(footprint) { grandCabinetBox=footprint; },
       nativeSeat(footprint,{id,name,centre,width,height,depth,standDistance,seatedYaw,cameraOffset}) {
         const store = interiorStores['S'+slot.number];
         const floor = store.frame.world_origin_m[1]+store.frame.floor_surface_y_m;
@@ -401,7 +402,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) schedulePrefetch(); });
   schedulePrefetch();
-  return {collisionBoxes,gigasetSeatBox,nativeStudioSeats,getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
+  return {collisionBoxes,gigasetSeatBox,grandCabinetBox,nativeStudioSeats,getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
     return {models:Object.fromEntries(modelStates), shops:shops.map(shop => ({...shop.state})),
       settled:shops.filter(shop => shop.state.status==='settled').length, total:shops.length};
   }, update(visitor, view) {

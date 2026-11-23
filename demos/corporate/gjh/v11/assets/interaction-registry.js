@@ -10,7 +10,7 @@ const tramStation = {
 function distanceToInteraction(item, position, context) {
   const floor = typeof item.floor === 'number' ? item.floor : item.y;
   if (Math.abs((position.y ?? 0) - floor) > .5 || !item.availability(context, item)) return Infinity;
-  if (item.seat && !isInFrontOfSeat(item.seat, position)) return Infinity;
+  if (item.seat && (item.seat.modelVisible?.() === false || !isInFrontOfSeat(item.seat, position))) return Infinity;
   const point = item.standing ?? item.anchor;
   const distance = item.shopAction?.seated && context.player?.seated ? 0 :
     Math.hypot(position.x - point.x, position.z - point.z);

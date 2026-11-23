@@ -9,7 +9,7 @@ import {roomDetails} from './detail-files.js';
 import {emptyInteriorReport} from './warmup.js';
 
 export function createInteriorKit(T, scene, {
-  assetBase, packshot, prepareModel, registerCollider, artworkTier = () => 'low',
+  assetBase, packshot, prepareModel, registerCollider, showGrandBench, artworkTier = () => 'low',
   waitForSlice, loadModel = createInteriorModelLoader(T,assetBase,undefined,artworkTier,waitForSlice),
   reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),
   now = () => performance.now()
@@ -107,6 +107,7 @@ export function createInteriorKit(T, scene, {
     for (const root of roots) root.visible = true;
     shop.shown = roots;
     shop.group.visible = shop.near;
+    if (shop.store.anchor.asset_id === 'grand-piano') showGrandBench?.(roots.find(root=>root.userData.grandPiano));
   }
 
   function activateTier(tier) {
@@ -325,6 +326,7 @@ export function createInteriorKit(T, scene, {
       request = initialTier = activeTier = undefined;
       report.preinstalled = {shops:0,ms:0};
       for (const shop of shops) {
+        if (shop.store.anchor.asset_id === 'grand-piano') showGrandBench?.(null);
         removeColliders(shop);
         shop.ready.clear();
         for (const root of shop.shown ?? []) root.visible = false;
@@ -338,6 +340,7 @@ export function createInteriorKit(T, scene, {
       request?.resolve({...report.preinstalled});
       installer?.dispose();
       for (const shop of shops) {
+        if (shop.store.anchor.asset_id === 'grand-piano') showGrandBench?.(null);
         removeColliders(shop);
         for (const model of shop.models.values()) disposeInteriorModel(model);
         shop.layers.forEach(layer => layer.traverse(mesh => {

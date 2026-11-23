@@ -22,6 +22,7 @@ ROUTES = {
     "S14-leftfront": ((35.9, 20), (37.2, 19.1)),
     "lg-studio-sofa": ((35.9, 20), (37.4, 20), (38.55, 19.3)),
     "casio-keyboard-bench": ((35, 28), (37.1, 29)),
+    "casio-grand-piano-bench": ((35, 28), (38.9, 28.1)),
     "S15-backleft": ((35, 28), (37.1, 29), (40, 30.6), (41.7, 30.5), (42.9, 27.9),
                      (43.2, 26.4), (43.1, 25.9)),
 }
@@ -37,7 +38,7 @@ def pose(page):
 
 
 def exercise(page, seat_id, touch, out=None):
-    store = {"lg-studio-sofa": "14", "casio-keyboard-bench": "15"}.get(seat_id, seat_id[1:3])
+    store = {"lg-studio-sofa": "14", "casio-keyboard-bench": "15", "casio-grand-piano-bench": "15"}.get(seat_id, seat_id[1:3])
     zone = f"planned-space-{store}"
     route = ROUTES[seat_id]
     assert_teleport(page, zone)
@@ -45,6 +46,11 @@ def exercise(page, seat_id, touch, out=None):
     matches = page.evaluate("id => __mall.state.seats.filter(seat => seat.id === id)", seat_id)
     assert len(matches) == 1, (seat_id, matches)
     seat = matches[0]
+    if seat_id == "casio-grand-piano-bench":
+        others = page.evaluate("""() => __mall.state.seats.filter(s =>
+            ['casio-keyboard-bench', 'S15-backleft'].includes(s.id)).map(s => [s.id, s.y])""")
+        assert len(others) == 2 and dict(others).keys() == {"casio-keyboard-bench", "S15-backleft"}
+        assert math.isclose(dict(others)["casio-keyboard-bench"], .69, abs_tol=.001)
     for x, z in route:
         walk(page, x, z, speed=1.8)
     front = (seat["exitX"], seat["exitZ"])
@@ -62,8 +68,11 @@ def exercise(page, seat_id, touch, out=None):
     assert math.dist((seated["x"], seated["z"]), (seat["x"], seat["z"])) < .1, (seated, seat)
     if seat_id == "casio-keyboard-bench":
         assert abs(math.remainder(seated["facing"] + math.pi / 2, math.tau)) < .02, seated
+    if seat_id == "casio-grand-piano-bench":
+        assert abs(math.remainder(seated["facing"] + math.radians(105), math.tau)) < .02, seated
     # These fixtures obscure the seated visitor in a straight-on view.
-    offsets = {"S08-leftmid": -60, "S13-backleft": 75, "S15-backleft": -60, "casio-keyboard-bench": -60}
+    offsets = {"S08-leftmid": -60, "S13-backleft": 75, "S15-backleft": -60, "casio-keyboard-bench": -60,
+               "casio-grand-piano-bench": -60}
     camera_offset = math.radians(offsets.get(seat_id, 0))
     assert abs(math.remainder(seated["yaw"] - seated["facing"] - math.pi - camera_offset, math.tau)) < .03, seated
     if out:
@@ -82,15 +91,16 @@ def exercise(page, seat_id, touch, out=None):
 
     for x, z in reversed(route):
         walk(page, x, z, speed=1.8)
-    if seat_id == "casio-keyboard-bench":
-        keyboard = page.evaluate("""async () => (await __mall.testShopActions())
-            .find(item => item.id === 'S15-leftfront')""")
-        walk(page, keyboard["standing"]["x"], keyboard["standing"]["z"], speed=1.8)
-        face(page, keyboard["x"], keyboard["z"])
-        selected(page, keyboard["id"], keyboard["label"])
+    instrument_id = {"casio-keyboard-bench": "S15-leftfront", "casio-grand-piano-bench": "S15-focal"}.get(seat_id)
+    if instrument_id:
+        instrument = page.evaluate("""async id => (await __mall.testShopActions())
+            .find(item => item.id === id)""", instrument_id)
+        walk(page, instrument["standing"]["x"], instrument["standing"]["z"], speed=1.8)
+        face(page, instrument["x"], instrument["z"])
+        selected(page, instrument["id"], instrument["label"])
         activate(page, touch)
-        page.wait_for_function("id => __mall.testShopState(id)?.phase === 'done'", arg=keyboard["id"])
-        assert page.locator("#nearby-name").inner_text() == keyboard["done"]
+        page.wait_for_function("id => __mall.testShopState(id)?.phase === 'done'", arg=instrument_id)
+        assert page.locator("#nearby-name").inner_text() == instrument["done"]
         walk(page, *route[0], speed=1.8)
     page.wait_for_function("zone => __mall.state.doors[zone] > .9", arg=zone, timeout=7000)
     # The normal arrival point is inside the door sensor. Continue into the arcade.

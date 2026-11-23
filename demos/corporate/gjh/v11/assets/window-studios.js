@@ -28,10 +28,11 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
   const back=-depth/2+.38, front=depth/2-.18, side=width/2-.23, span=front-back, mid=(front+back)/2;
   const replace = t.replaceDisplay ?? (build => build());
   const cabinet = (x,z,w,h,d,body,cap) => {
-    block(x,(h+.26)/2,z,w+.09,h+.26,d+.09);
+    const footprint=block(x,(h+.26)/2,z,w+.09,h+.26,d+.09);
     box(x,.12,z,w-.1,.23,d-.1,brass);
     box(x,.18+h/2,z,w,h,d,body);
     box(x,.21+h,z,w+.09,.095,d+.09,cap);
+    return footprint;
   };
   function ovalCounter(x,z,width,depth,height,color) {
     const radius=depth/2, straight=width-depth;
@@ -389,7 +390,10 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       plant(-side+.81,front-.85,1.61);break;
     case 15: { // Casio: walnut slatted ceiling, instrument gallery and bench.
       for(let i=-5;i<=5;i++)box(i*.58,4.04,mid,.23,.065,span-.28,0xcaaf8e);
-      replace(() => cabinet(-1.05,mid-.59,1.78,.9,1.11,walnut,oak),walnut);
+      replace(() => {
+        const footprint=cabinet(-1.05,mid-.59,1.78,.9,1.11,walnut,oak);
+        t.grandCabinet?.(footprint);
+      },walnut);
       block(1.1,.65,mid-.9,1.64,1.29,.92);
       const benchX=1.10, benchZ=mid+.16, width=.99, depth=.49, cushionY=.61, cushionHeight=.16;
       const bench=block(benchX,.34,benchZ,1.01,.70,.50);

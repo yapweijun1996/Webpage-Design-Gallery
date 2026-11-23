@@ -599,7 +599,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     pushing=true;capsule.setShape(cartShape);controller.disableAutostep();character.setCart(true);clearInput();injected=null;sync();character.update('idle',0);return true;
   }
   const rotation={x:0,y:0,z:0,w:1};
-  function clearAt(position,ignoreBench=false){return !physics.intersectionWithShape(position,rotation,walkingShape,undefined,undefined,capsule,body,ignoreBench?c=>c.handle!==seat.collider:undefined);}
+  function clearAt(position,ignoreBench=false){return !physics.intersectionWithShape(position,rotation,walkingShape,undefined,undefined,capsule,body,ignoreBench?c=>c.handle!==seat.collider && c.handle!==seat.cabinetCollider:undefined);}
   function clearPath(from,to,ignoreBench=false){const steps=Math.max(1,Math.ceil(Math.hypot(to.x-from.x,to.y-from.y,to.z-from.z)/.08));for(let i=0;i<=steps;i++){const t=i/steps;if(!clearAt({x:from.x+(to.x-from.x)*t,y:from.y+(to.y-from.y)*t,z:from.z+(to.z-from.z)*t},ignoreBench))return false;}return true;}
   function moveSeat(position){body.setTranslation(position,true);body.setNextKinematicTranslation(position);}
   const seatBodyTarget = seat => ({x:seat.x, y:seat.floor+.89, z:seat.z});
@@ -618,7 +618,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if(t===1){if(seatPhase==='align'){seatPhase='sit';seatTime=0;seatFrom={...body.translation()};seatStartAngle=seat.angle;}else if(seatPhase==='sit'){seatPhase='seated';character.setSeated(true);}else finishStand();}
   }
   function sit(id) {
-    if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate)return false;
+    if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate||candidate.modelVisible?.()===false)return false;
     if(Math.abs(p.y-.875-candidate.floor)>.5||Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>candidate.clearance.interactionRadius||!isInFrontOfSeat(candidate,p))return false;
     seat=candidate;const exit={x:seat.exitX,y:seat.floor+.91,z:seat.exitZ},target=seatBodyTarget(seat);
     if(!clearPath(p,exit)||!clearPath(exit,target,true)){seat=null;return false;}

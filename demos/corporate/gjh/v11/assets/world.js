@@ -35,6 +35,7 @@ import {interiorFloorColour,interiorStores,worldInteriorBox,worldInteriorPoint} 
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {gogoStoolSeat} from './interiors/gogo-seats.js';
+import {createGrandBenchMount} from './interiors/casio-grand-seat.js';
 import {createProceduralSeat} from './interiors/procedural-seats.js';
 import {createGigasetBacklessSeat,createGigasetLoungeSeat} from './gallery-east-shops.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
@@ -1198,9 +1199,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     activeDeck=false;
     const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility,artworkTier,detailsEnabled,waitForSlice);
     interiorModels=interiors;
+    let pianoHandle, cabinetHandle;
     for(const footprint of interiors.collisionBoxes) {
       const {x,y,z,width,height,depth} = footprint;
       const shape = collider(x,y,z,width,height,depth);
+      if (footprint === interiors.grandCabinetBox) cabinetHandle=shape.handle;
       if (footprint === interiors.gigasetSeatBox)
         seats.push(createGigasetLoungeSeat(shape.handle,footprint),createGigasetBacklessSeat(shape.handle,footprint));
       const nativeSeat = interiors.nativeStudioSeats.get(footprint);
@@ -1214,22 +1217,35 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       if (y === 4.19 && height === .18) bakedCeilings.push({...rect,y:y-height/2-.003});
     }
     shopLodUpdates.push(interiors.update);
+    function interiorCollider({center:[x,y,z],size:[w,h,d],yaw}) {
+      return physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
+        .setRotation({x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}));
+    }
+    function installSeat(seat) {
+      const entry=seatInteraction(seat), removeRecord=registerShopSeat?.(seat);
+      seats.push(seat);
+      interactables.push(entry);
+      return () => {
+        removeRecord?.();
+        seats.splice(seats.indexOf(seat),1);
+        interactables.splice(interactables.indexOf(entry),1);
+      };
+    }
+    const mountGrand=createGrandBenchMount(T,interiorStores.S15,spec=>{
+      const guard=interiorCollider(spec);
+      return ()=>physics.removeCollider(guard,false);
+    },installSeat);
     interiorKit = createInteriorKit(T, scene, {
       assetBase:new URL('.',import.meta.url), packshot:textures.get('new-moon-nz-425g-front.jpg'), artworkTier, waitForSlice,
-      prepareModel, registerCollider({center:[x,y,z],size:[w,h,d],yaw},store,footprint) {
-        // The camera sweep already uses these oriented Rapier boxes.
-        const box = physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
-          .setRotation({x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}));
-        const seat = createProceduralSeat(store,footprint,box.handle);
-        if (!seat) return () => physics.removeCollider(box,false);
-        const entry = seatInteraction(seat);
-        const removeRecord = registerShopSeat?.(seat);
-        seats.push(seat);
-        interactables.push(entry);
+      prepareModel, showGrandBench:model=>mountGrand(model,pianoHandle,cabinetHandle),
+      registerCollider(spec,store,footprint) {
+        const box=interiorCollider(spec);
+        if(footprint.grandPiano) pianoHandle=box.handle;
+        const seat=createProceduralSeat(store,footprint,box.handle);
+        const removeSeat=seat && installSeat(seat);
         return () => {
-          seats.splice(seats.indexOf(seat),1);
-          interactables.splice(interactables.indexOf(entry),1);
-          removeRecord?.();
+          removeSeat?.();
+          if(footprint.grandPiano) pianoHandle=undefined;
           physics.removeCollider(box,false);
         };
       }
