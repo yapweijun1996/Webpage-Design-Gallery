@@ -36,6 +36,38 @@ feature boxes as the offline test. The 5.2 m score is informational.
 
 [2.5 m browser comparison](chrome-comparison-2.5m.png) · [5.2 m browser comparison](chrome-comparison-5.2m.png) · [Native-pixel measurements](chrome-metrics.json) · [Capture settings](chrome-capture.json)
 
+## Artwork trials
+
+Two isolated SVG revisions from `8e013cb5` were baked from the original 4K
+source through the existing UV and LOD pipeline. The first revised the brows,
+smile and frame and simplified lens reflections. The second also revised the
+iris outline, lower iris color and existing catchlights. Both were rendered
+against the archived Round 2 asset and the shipped 2K atlas with the same
+headed Chrome 158 C1 settings and native measurement boxes. Matched oblique
+views rotated the portrait camera by 40° in each direction.
+
+| Distance | Shipped vs. Round 2 | Trial 1 vs. Round 2 | Trial 2 vs. Round 2 |
+| --- | ---: | ---: | ---: |
+| 2.5 m | 1.510× | 1.383× | 1.308× |
+| 5.2 m | 0.991× | 1.084× | 1.091× |
+
+At 2.5 m the first trial's eye, brow and mouth ratios relative to the shipped
+render were 0.959×, 1.059× and 1.191×. The second measured 0.863×, 1.061× and
+1.195×. The broader rim and smile stayed easier to distinguish obliquely.
+Both trials remained below the 2× near target and were held. All three LODs
+kept identical non-image GLB buffers. The four matched views used 37, 41, 50
+and 39 draw calls respectively. These still captures cover the asset and draw
+budgets. Gameplay frame timing is a separate test.
+
+[Native crop comparisons](chrome-trial-contact.png) show the shipped artwork
+and both trials at 2.5 m, 5.2 m and both oblique headings. SHA-256 identifies
+the candidate desktop atlases and the original native frontal captures.
+
+| Trial | Desktop WebP SHA-256 | Native 2.5 m PNG SHA-256 |
+| --- | --- | --- |
+| 1 | `91c0ccdd605c56f2719958a629e34df82942434b02a82278c8a42f098384416f` | `5c9851f141d376e766da07b8b3805b2758b3d1869bcd897cd46008d9012723fc` |
+| 2 | `e6a8a31bf0a94c76c1c00e1541dbf91ccfef9c38e12a3be5684ec755cf80a987` | `c10cddbdd1d87be7cb7801eba3c312d830234b2babc955fce91b3868231b28b7` |
+
 ## Reproduce
 
 Use the guarded Blender invocation in [the signage documentation](../../gjh-v11-signage-assets.md). Supply a Round 2 baseline GLB with the hash recorded in `before.json`.
