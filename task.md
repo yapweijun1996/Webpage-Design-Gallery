@@ -116,7 +116,7 @@ Rejected or retired: GJH landing v20, v21, v23, v24, v25 (ImageGen collage mocku
 - [x] Allow Auto to trial Detailed after sustained movement near 60 FPS. On mobile, keep the current tier at a sustained 24 FPS and lower quality below the floor. Back off repeated failed trials. Physical-device FPS validation remains open.
 - [x] Bring the tested desktop Detailed shop and lift route within 200 calls, including the full turn on the upper deck.
 - [x] Keep the storefront display and visitor in frame on the portrait S04 approach.
-- [ ] Investigate first-use GPU upload and shader compilation stalls.
+- [x] Investigated first-use stalls. A headed Detailed trace recorded a 247 ms synchronous shader query during warm-up and about 98 ms in live draws. The scene now polls parallel shader links between batches and makes synchronous diagnostics opt-in. Three subsequent Detailed walks had zero intervals at or above 50 ms. The separate quiet-machine and physical-device timing checks remain open. [Trace, fix and measured runs](docs/gjh-v11-late-asset-uploads.md#first-visits-to-already-resident-geometry).
 - [x] Allow browser zoom in the gallery and V11 viewport; Chrome mobile-emulated pinch and Lighthouse viewport audits passed.
 - [ ] Validate zoom and interaction on physical devices; see [the browser review](docs/console-e2e-review.md).
 
@@ -845,28 +845,28 @@ See docs/gjh-v11-stage9-theme-infrastructure.md and docs/evidence/gjh-stage9-acc
 At this historical point the 45-request gate failed at 82; stage 11b later addressed it. Candidate brand permission and physical-device/AT limits remain open.
 
 ## 2026-11-17 follow-up: shop displays, lighting, zoom lock (owner request)
-- [x] Zoom lock on v11 index/offline viewport (46a5df6, live, Pages deploy green); test `tests/gjh_v11_zoom_lock.test.mjs`.
-- [x] Integrate 8 of 15 new Blender models (pharmacy counter, soundbar, TV x3, keyboard, battery rack, cordless phone); 6 skipped with no matching shop; ice-cream cart and piano NOT FOUND. Committed on `omp/v11-newmodels-1117`, not pushed.
+- [x] The original viewport lock shipped at `46a5df6`. Later accessibility work restored browser zoom. The current [gallery tests](tests/test_gallery.py) cover viewport zoom.
+- [x] The original Blender integration supplied the pharmacy counter, soundbar, three TVs, keyboard, battery rack and cordless phone. The November 17 release below brought the displays to main. Later interior assets added the ice-cream cart and piano.
 - [x] Tiered lighting/atmosphere (main light, per-shop lights, procedural env, desktop-only bloom, faint fog); tests pass, draw calls max 200.
-- [ ] Taste gate: new displays still small/hidden behind mullions, scene still flat beige. Round 2: larger displays, stronger key-light contrast, re-inspect screenshots at 390 and 1440.
-- [ ] Push to main only after the taste gate passes; confirm Pages deploy and live version.
-- [ ] P1 model requests for the owner's AI agent: grand piano, chilled drinks/ice-cream freezer, ice-cream cart, mullion-free glazed storefront module, canned-food pyramid display.
-- [ ] Physical-device acceptance (deferred); public redistribution terms of the new model licences unspecified.
+- [~] Round 2 adjusted display framing and light. Later work produced [17 concept and runtime comparisons](docs/mall-design-anchors/README.md#interior-comparison-at-the-shop-entrances) and [desktop and 390 px showroom checks](docs/goh-joo-hin/README.md#published-showroom-verification). The original visual review scored 4/10. A five-advisor sign-off across all shops remains open.
+- [x] The owner approved publishing the November 17 release with the visual finding outstanding. The release log below records the successful Pages deployment.
+- [~] The S03 ice-cream cart, S07 stacked-can pyramid and S15 grand piano shipped. GOGO uses a procedural cold chest. A dedicated chilled freezer and mullion-free glazed storefront module still lack delivery evidence. [Entrance and asset inventory](docs/gjh-v11-interior-program.md#how-to-verify).
+- [ ] Physical-device checks remain deferred. The recorded project-specific permission covers the [11 Tripo additions](data/gjh-interior-additions.json). Other third-party models still require separate redistribution evidence.
 
 ## 2026-11-17 QA loop (owner-approved)
 See [docs/gjh-v11-qa-loop.md](docs/gjh-v11-qa-loop.md).
 - [x] Decide authority, pass bar, step size, rework cap, advisor roles and release rule (concept image; mood-level pass; one shop per round, S01 first; 5 rounds then downgrade; 5 advisors; push without asking when advisors and manager pass).
-- [ ] Finish round-2 OMP work (visibility, contrast) and use it as the loop's starting point.
-- [ ] Derive per-shop acceptance checklists (S01-S17) from the concept images and store them in KB-MCP.
-- [ ] Advisor review of round-2 screenshots against checklist and concept image.
+- [x] Round 2 changed framing and lighting at `fd738f46a` and supplied the baseline for the recorded 4/10 visual review.
+- [x] Reviewed the concept board and the 17 individual storefront references. The [shopfront checklist](docs/gjh-v11-qa-loop.md#shopfront-review-checklist) records display placement and material/light observations for every shop. KB-MCP stores the same criteria in the `gjh-virtual-mall` project in groups S01–S05, S06–S11 and S12–S17.
+- [~] The Round 2 visual advisor and [later interior advisors](docs/gjh-v11-interior-10-advisors.md) reviewed different scopes. The five required reviews for each shop still need recorded scores.
 - [ ] Per-shop rounds, S01 first: change, evidence, advisor review, rework, push, record.
 - [ ] 20-minute SGT progress reports until the loop is finished.
-- [ ] Interaction rules (owner 2026-11-17): audit every chair, stool and bench for Sit support; doors Open; products Inspect; keep walls, decor and ordinary lights static. See docs/gjh-v11-qa-loop.md.
-- [ ] Vision upgrade (owner 2026-11-17): Singapore-Malaysia Virtual World. Phases P0 mall quality, P1 multi-floor and enterable shops, P2 district streaming architecture, P3 Singapore districts, P4 Malaysia districts. See docs/gjh-v11-qa-loop.md. Open: enterable interiors supersede the glazed-only decision.
+- [~] The [interaction probe](docs/verify_interactions.py) and [headed results](docs/gjh-v11-session-summary-2026-11-20.md) cover 65/65 registered actions. The audit of every modelled seat and product against the interaction registry remains open.
+- [~] The upper floor, working lift and 17 enterable shops shipped. Escalators, streamed districts and Singapore/Malaysia neighbourhoods remain on the [world roadmap](docs/gjh-v11-qa-loop.md#full-vision-owner-2026-11-17-singapore-malaysia-virtual-world).
 - [x] Model inventory for the Singapore-Malaysia world: docs/sg-my-world-model-inventory.md (names only, quality not verified).
-- [ ] Goal and engine (owner 2026-11-17): goal.md created. Modular 3D World Engine on Three.js (reusable behaviors Sit/Inspect/Open/Pick Up with seat anchors, world streaming, shared camera/movement/collision). Next: write the engine design (interaction registry, seat-anchor spec, streaming chunks) and audit what v11 already has before extracting modules (P2).
+- [~] The [engine interaction design](docs/gjh-v11-engine-interactions.md) covers the registry, seat anchors and reusable actions. District streaming design and implementation remain open.
 
 ## 2026-11-17 release log
 - [x] Pushed to main (a05c0bb, Pages deploy green, live bundle verified): new model displays (S04/S05, S13-S17), tiered lighting, interaction registry, seat anchors (upper-deck benches sittable except one overlapping the lift shaft was moved), shop-door Open, goal.md, QA loop docs, model inventory. Owner chose to push all although the terra visual advisor scored the mall 4/10 FAIL.
-- [ ] Visual quality is still below the concept (flat mood, small hero displays); waits for P1 models: glazed storefront module, chilled freezer, grand piano, ice-cream cart, canned-food pyramid.
+- The 4/10 score describes this release. See the shop display and model entries above for subsequent deliveries and outstanding visual verification.
 - [~] Engine steps: travel, physical pickup, shoe customisation and NPCs shipped in later updates. Escalators and district streaming (P2) remain future work.

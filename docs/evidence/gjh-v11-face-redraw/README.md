@@ -89,6 +89,16 @@ and judge its reflection and silhouette at all three headings.
 
 [Matched rim crops and ownership legend](chrome-rim-ownership.png)
 
+A second coating trial applied a single normal-driven amethyst finish to the
+raised wire in the original 4K UVs. The upper band read more continuously at
+0° and ±40°, with both iris catchlights preserved. In matched native Chrome
+captures, the 2.5 m face score fell from 1.510× to 1.474× against Round 2
+while the eye region rose from 1.707× to 1.799×. At 5.2 m the full face rose
+from 0.991× to 1.060×. Draw counts matched at all four poses (38, 42, 51,
+40), and all three GLBs retained identical non-image buffers. The trial
+missed the 2× near target and was held. Its 2K WebP SHA-256 was
+`3953298d09029bb20b48d7ad80ecc4a06cf4a68554c005bb8a8e5d3b64511937`.
+
 ## Reproduce
 
 Use the guarded Blender invocation in [the signage documentation](../../gjh-v11-signage-assets.md). Supply a Round 2 baseline GLB with the hash recorded in `before.json`.
