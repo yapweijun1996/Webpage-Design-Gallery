@@ -15,6 +15,8 @@ from verify_mall_support import face, probe_url, walk
 
 # These waypoints follow the clear aisles from the door to each seat's front.
 # The final standing point and cushion come from the live registered seat.
+STOREFRONT_BENCH = "casio-storefront-piano-bench"
+
 ROUTES = {
     "S08-leftmid": ((-16, 20), (-18.45, 20), (-18.45, 21.45)),
     "S13-backleft": ((35.9, 12), (39.25, 13.85), (42.6, 13.85), (42.6, 11.15), (42.2, 10.85)),
@@ -23,6 +25,7 @@ ROUTES = {
     "lg-studio-sofa": ((35.9, 20), (37.4, 20), (38.55, 19.3)),
     "casio-keyboard-bench": ((35, 28), (37.1, 29)),
     "casio-grand-piano-bench": ((35, 28), (38.9, 28.1)),
+    STOREFRONT_BENCH: ((35.9, 28), (36.7, 27.5)),
     "S15-backleft": ((35, 28), (37.1, 29), (40, 30.6), (41.7, 30.5), (42.9, 27.9),
                      (43.2, 26.4), (43.1, 25.9)),
 }
@@ -37,8 +40,9 @@ def pose(page):
     }""")
 
 
-def exercise(page, seat_id, touch, out=None):
-    store = {"lg-studio-sofa": "14", "casio-keyboard-bench": "15", "casio-grand-piano-bench": "15"}.get(seat_id, seat_id[1:3])
+def exercise(page, seat_id, touch, out=None, while_seated=None):
+    store = {"lg-studio-sofa": "14", "casio-keyboard-bench": "15", "casio-grand-piano-bench": "15",
+             STOREFRONT_BENCH: "15"}.get(seat_id, seat_id[1:3])
     zone = f"planned-space-{store}"
     route = ROUTES[seat_id]
     assert_teleport(page, zone)
@@ -70,13 +74,18 @@ def exercise(page, seat_id, touch, out=None):
         assert abs(math.remainder(seated["facing"] + math.pi / 2, math.tau)) < .02, seated
     if seat_id == "casio-grand-piano-bench":
         assert abs(math.remainder(seated["facing"] + math.radians(105), math.tau)) < .02, seated
+    if seat_id == STOREFRONT_BENCH:
+        assert abs(math.remainder(seated["facing"] + math.pi/2 - .22, math.tau)) < .02, seated
     # These fixtures obscure the seated visitor in a straight-on view.
     offsets = {"S08-leftmid": -60, "S13-backleft": 75, "S15-backleft": -60, "casio-keyboard-bench": -60,
-               "casio-grand-piano-bench": -60}
+               "casio-grand-piano-bench": -60, STOREFRONT_BENCH: -60}
     camera_offset = math.radians(offsets.get(seat_id, 0))
     assert abs(math.remainder(seated["yaw"] - seated["facing"] - math.pi - camera_offset, math.tau)) < .03, seated
     if out:
         page.screenshot(path=out / f'{page.viewport_size["width"]}-{seat_id}-seated.png')
+
+    if while_seated:
+        while_seated(page)
 
     if touch:
         assert page.locator("#inspect-verb").inner_text() == "Stand"
@@ -109,6 +118,7 @@ def exercise(page, seat_id, touch, out=None):
     page.wait_for_function("zone => __mall.state.doors[zone] < .1", arg=zone, timeout=7000)
     exited = pose(page)
     assert exited["zone"] == "atrium" and exited["seatId"] is None and exited["capsuleEnabled"], exited
+    return {"seat": seat, "approach": before, "seated": seated, "stood": stood, "exited": exited}
 
 
 def run():

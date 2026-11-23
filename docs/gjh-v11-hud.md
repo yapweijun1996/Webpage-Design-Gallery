@@ -2,6 +2,12 @@
 
 The HUD uses the existing GJH deep green, brass and cream tokens with SVGs from the mall icon registry. The header sits above the scene, Objectives and Tools occupy its upper corners, and the bottom context slot shares the movement-control area. Tools contains Help, language, graphics quality, cart, theme, mini-map, Performance and camera controls.
 
+## Roaming disclosure
+
+“Unofficial concept” stays beside the scene readouts while walking. The language control also offers “非官方概念” and “Konsep tidak rasmi”. Open the menu or About for the full statement. On short landscape screens the caption sits beside Objectives. In narrow portrait first person, held-item controls follow the readouts vertically.
+
+Chrome covered 320, 390, 667, 768 and 1440 CSS px, with real pickup and return at the two narrowest widths. At 390 px the observed touch targets measured 44 × 44 px for More, 56 × 56 for Inspect, 95 × 56 for Pickup, 46 × 44 for Drop, 104 × 44 for Bag and 117 × 44 for Return. All six centers were reachable and clear of the caption. [Roaming and held-product views](evidence/gjh-v11-roaming-disclosure.webp)
+
 ## Layout and interaction
 
 In the classic mall below 600 CSS px, a projected room plaque clears the Tools button by at least 8 CSS px. The plaque hides while it crosses that boundary and returns as the visitor walks back into the arcade. In a 390 × 844 Chrome viewport, the header ended at y=48 and the separate Tools target extended from y=60 to 104. The New Moon, MILI and GOGO plaques previously reached y=93, 90 and 83 at their respective entrances. [New Moon before](evidence/gjh-classic-room-plaque/newmoon-before.png) · [New Moon after](evidence/gjh-classic-room-plaque/newmoon-after.png)

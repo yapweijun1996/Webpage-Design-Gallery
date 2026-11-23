@@ -6,7 +6,8 @@ import {interiorFloorColour,interiorStores,worldInteriorPoint} from './interiors
 import {createSeatAnchor} from './seat-placements.js';
 import {setupMaterialArtwork} from './artwork-textures.js';
 import {westShopPlacements} from './gallery-west-shops.js';
-import {eastShopPlacements,gigasetLoungeSofa,gigasetSofaFallback,hasGigasetSeatCushions} from './gallery-east-shops.js';
+import {casioStorefrontPiano,eastShopPlacements,gigasetLoungeSofa,gigasetSofaFallback,hasGigasetSeatCushions} from './gallery-east-shops.js';
+import {measureStorefrontPiano} from './interiors/casio-grand-seat.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {parseWarmGLTF} from './gltf-warmup.js';
 
@@ -39,7 +40,7 @@ function displayPlacements(number, heroX, heroZ) {
 
 // Furniture is vertex-coloured and merged; model displays load in the background.
 // Coordinates inside each bay have the glazed front on local +Z.
-export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => 'low', detailsEnabled = () => true, waitForSlice) {
+export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => 'low', detailsEnabled = () => true, waitForSlice, showStorefrontBench = () => {}) {
   const slots = expandedLayout.slots.filter(slot => Number(slot.number) >= 4 && Number(slot.number) <= 17);
   const material = new T.MeshStandardMaterial({vertexColors:true, roughness:.65});
   const woodFinishes = new Set([0xb18356,0x66412f,0x69442c,0x8b5a38,0xb28a5c,0xc59d69,0x8e4d35,0x66482f,0x604534,0x694635,0xaa8464]);
@@ -68,7 +69,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   };
   const studioParts = [];
   const shops = [], collisionBoxes = [], nativeStudioSeats = new Map();
-  let gigasetSeatBox, grandCabinetBox;
+  let gigasetSeatBox, grandCabinetBox, storefrontPianoBox;
   const models = new Map(), loadedScenes = new Map(), gltfLoader = new GLTFLoader();
   const modelStates = new Map(slots.flatMap(slot => {
     const number=Number(slot.number);
@@ -335,6 +336,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       const [w,h,d]=size.map(value=>value*scale);
       const c=Math.abs(Math.cos(yaw)), sn=Math.abs(Math.sin(yaw));
       const footprint=block(x,y+h/2,z,c*w+sn*d,h,sn*w+c*d);
+      if (placement === casioStorefrontPiano) storefrontPianoBox=footprint;
       if (placement === gigasetLoungeSofa) {
         gigasetSeatBox = footprint;
         parts = [];
@@ -356,6 +358,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
           const {file,position,yaw=0,scale=1} = placement;
           try {
             const model = (await loadModel(`./${file}`)).clone(true);
+            const bench=placement===casioStorefrontPiano ? measureStorefrontPiano(T,model) : null;
             model.position.set(...position);
             model.rotation.y = yaw;
             model.scale.setScalar(scale);
@@ -365,9 +368,11 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             group.add(model);
             model.updateWorldMatrix(true,true);
             gallery.push({model, bounds:new T.Box3().setFromObject(model)});
+            if (placement === casioStorefrontPiano) showStorefrontBench(model,bench);
             if (placement === gigasetLoungeSofa) sofaMounted = true;
             shopState.galleryLoaded++;
           } catch (error) {
+            if (placement === casioStorefrontPiano) showStorefrontBench(null);
             shopState.galleryFailed++;
             console.warn(`Unavailable shop furnishing: ${file}`, error);
           }
@@ -402,7 +407,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) schedulePrefetch(); });
   schedulePrefetch();
-  return {collisionBoxes,gigasetSeatBox,grandCabinetBox,nativeStudioSeats,getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
+  return {collisionBoxes,gigasetSeatBox,grandCabinetBox,storefrontPianoBox,nativeStudioSeats,getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
     return {models:Object.fromEntries(modelStates), shops:shops.map(shop => ({...shop.state})),
       settled:shops.filter(shop => shop.state.status==='settled').length, total:shops.length};
   }, update(visitor, view) {

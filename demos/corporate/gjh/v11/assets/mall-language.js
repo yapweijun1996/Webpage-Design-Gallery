@@ -515,6 +515,7 @@ const messages = new Map([
   ['Your bag is empty. Open a New Moon product and choose Add to demo bag.','购物袋为空。打开 New Moon 商品并选择「加入演示购物袋」。','Beg anda kosong. Buka produk New Moon dan pilih Tambah ke beg demo.'],
   ['Your bag is empty.','购物袋为空。','Beg anda kosong.'], ['Explore this store in 3D','在 3D 中探索此店','Terokai kedai ini dalam 3D'],
   ['3D mall open. Location: Courtyard. Open Help for controls.','3D 商场已打开。当前位置：中庭。打开帮助可查看操作说明。','Pusat beli-belah 3D dibuka. Lokasi: Laman. Buka Bantuan untuk kawalan.'],
+  ['Unofficial concept','非官方概念','Konsep tidak rasmi'],
   ['Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.','独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。','Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd.'],
   ['Preparing the mall…','正在准备商场…','Menyediakan pusat beli-belah…'], ['Browse the store directory','浏览商店目录','Layari direktori kedai'],
   ['Retry 3D mall','重试 3D 商场','Cuba semula pusat beli-belah 3D'],

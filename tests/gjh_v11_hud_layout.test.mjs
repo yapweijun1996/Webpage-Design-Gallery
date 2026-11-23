@@ -166,3 +166,15 @@ test('the objective summary reserves room for all progress dots', () => {
   assert.ok(rule('.hud-objective-dots').includes('flex:none'));
   assert.ok(rule(cornerChips).includes('white-space:nowrap'));
 });
+
+test('the unofficial-concept caption has no action and keeps the full menu disclosure', () => {
+  const html = read('../demos/corporate/gjh/v11/index.html');
+  const language = read('../demos/corporate/gjh/v11/assets/mall-language.js');
+  const readouts = html.split('class="scene-readouts"')[1].split('</div>')[0];
+  assert.match(readouts, /<p id="hud-concept-note">Unofficial concept<\/p>/);
+  assert.match(rule('#hud-concept-note'), /pointer-events:none/);
+  assert.match(language, /\['Unofficial concept','非官方概念','Konsep tidak rasmi'\]/);
+  const full = 'Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.';
+  assert.ok(html.split('class="menu-disclaimer"')[1].split('</section>')[0].includes(full));
+  assert.ok(html.split('data-menu-page="about"')[1].split('</section>')[0].includes(full));
+});

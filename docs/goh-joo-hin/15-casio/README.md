@@ -49,7 +49,7 @@ The CT-S1 keyboard has a 0.690 m-high bench. Approach from the aisle and sit fac
 
 The brown bench belongs to the central recital grand. Enter from the side aisle and sit at its 0.726 m cushion, then stand to play the original piano phrase. The walking collision around the instrument stays in place. On a failed tier download the current piano remains usable. If the replacement loads without a bench, the visitor stands at the clear aisle point before the seat is removed. Returning to a valid model restores one seat. [Phone and desktop seated views](recital-grand-bench.webp) · [Missing-bench and recovery test](../../../tests/browser_gjh_grand_tier.py)
 
-The smaller black grand near the storefront has its own dark bench. Its seat is visible and remains on the interaction backlog.
+The black grand near the storefront has a separate bench with a cushion 0.512 m above the floor (world Y 0.593 m). Use the inner aisle to sit facing its keys and stand at the same clear point. The bench offers Sit when the loaded model shows its cushion. Chrome verified touch and keyboard seating, a live Detailed-to-Low switch while seated, and the missing-model and missing-cushion paths. [Seated views at both widths](storefront-piano-bench.webp) · [Storefront bench and neighboring seat test](../../../tests/browser_gjh_storefront_bench.py)
 
 ## Catalogue exhibit
 

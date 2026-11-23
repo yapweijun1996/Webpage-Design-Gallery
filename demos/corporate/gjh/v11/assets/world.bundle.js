@@ -5286,6 +5286,7 @@ async function createShell(T) {
 import { fetchStartupAsset as fetchStartupAsset3 } from "./startup-asset-pack.js";
 
 // demos/corporate/gjh/v11/assets/gallery-east-shops.js
+var casioStorefrontPiano = { file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.081, 2.47], yaw: 0.22, scale: 0.93 };
 var gigasetLoungeSofa = galleryFixture("S17", "leftfront", "lounge-sofa-bench", 0.86);
 var loungeContact = [-0.95, 0.481, -0.23];
 var backlessCushion = { center: [0.3, 0.4, 0.56], size: [1.58, 0.1, 0.35], color: 10191732 };
@@ -5353,7 +5354,7 @@ var eastShopPlacements = {
   12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.081, 2.92], yaw: 0.11, scale: 1.14 }],
   13: [galleryFixture("S13", "leftfront", "headphone-display-stand", 1.2)],
   14: [{ file: "gallery-assets/refrigerator.glb", position: [-2.48, 0.081, 2.58], yaw: 0.08, scale: 1.03 }],
-  15: [{ file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.081, 2.47], yaw: 0.22, scale: 0.93 }],
+  15: [casioStorefrontPiano],
   16: [{ file: "gallery-assets/shelf-electronics-display.glb", position: [-2.13, 0.081, 2.81], yaw: 0.12, scale: 0.96 }],
   17: [gigasetLoungeSofa]
 };
@@ -7435,6 +7436,190 @@ function buildLateShopAnchorDetails(n, t, width, depth) {
   }
 }
 
+// demos/corporate/gjh/v11/assets/interiors/casio-grand-seat.js
+var guardNames = ["Case_and_action", "Keyboard_and_music_rest", "Raised_lid"];
+function measureGrandPiano(T, scene) {
+  scene.updateMatrixWorld(true);
+  const visible = new Set;
+  scene.traverseVisible((node) => {
+    if (node.isMesh && node.material.visible)
+      visible.add(node);
+  });
+  const nodes = ["Bench", ...guardNames].map((name) => scene.getObjectByName(name));
+  if (visible.size !== nodes.length || nodes.some((node) => !visible.has(node) || !node.geometry.attributes.position?.count))
+    return null;
+  const bounds = nodes.map((node) => new T.Box3().setFromObject(node));
+  if (bounds.some((box) => ![...box.min, ...box.max].every(Number.isFinite) || box.getSize(new T.Vector3).toArray().some((size) => size <= 0)))
+    return null;
+  const [bench, ...guards] = bounds;
+  const centre = bench.getCenter(new T.Vector3);
+  if (guards.some((box) => box.max.z + 0.3 >= centre.z))
+    return null;
+  centre.y = bench.max.y + 0.05;
+  const [hit] = new T.Raycaster(centre, new T.Vector3(0, -1, 0)).intersectObject(nodes[0]);
+  if (!hit || Math.abs(hit.point.y - bench.max.y) > 0.002)
+    return null;
+  return { source: nodes[0], bench, guards };
+}
+var storefrontLacquer = "MESH_Black_lacquer";
+function measureStorefrontPiano(T, scene) {
+  scene.updateMatrixWorld(true);
+  const meshes = [];
+  scene.traverseVisible((node) => {
+    if (node.isMesh && node.material.visible && node.material.opacity > 0)
+      meshes.push(node);
+  });
+  const names = [storefrontLacquer, "MESH_Ivory_keys", "MESH_Warm_brass"];
+  if (meshes.length !== names.length || names.some((name) => !meshes.some((mesh) => mesh.name === name)))
+    return null;
+  const bench = new T.Box3, body = new T.Box3;
+  const triangle = Array.from({ length: 3 }, () => new T.Vector3);
+  for (const mesh of meshes) {
+    const { attributes: { position }, index } = mesh.geometry;
+    if (!position?.count)
+      return null;
+    const count = index?.count ?? position.count;
+    for (let i = 0;i < count; i += 3) {
+      for (let j = 0;j < 3; j++)
+        triangle[j].fromBufferAttribute(position, index ? index.getX(i + j) : i + j).applyMatrix4(mesh.matrixWorld);
+      const onBench = triangle[0].z > 0.7;
+      if (triangle.some(({ x, y, z }) => !Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z) || z > 0.7 !== onBench) || onBench && mesh.name !== storefrontLacquer)
+        return null;
+      const box = onBench ? bench : body;
+      for (const point2 of triangle)
+        box.expandByPoint(point2);
+    }
+  }
+  if (bench.isEmpty() || body.isEmpty())
+    return null;
+  const centre = bench.getCenter(new T.Vector3), size = bench.getSize(new T.Vector3);
+  if (size.x < 0.6 || size.z < 0.3 || bench.min.y < -0.001 || bench.min.y > 0.02 || bench.max.y < 0.5 || bench.max.y > 0.61 || body.max.z + 0.34 >= centre.z || Math.max(Math.abs(body.min.x), Math.abs(body.max.x), Math.abs(bench.min.x), Math.abs(bench.max.x)) > 0.751 || Math.max(Math.abs(body.min.z), Math.abs(bench.max.z)) > 1.175 || body.min.y < -0.001 || body.max.y > 1.82)
+    return null;
+  const source = meshes.find((mesh) => mesh.name === storefrontLacquer);
+  const ray = new T.Raycaster(new T.Vector3, new T.Vector3(0, -1, 0), 0, 0.06);
+  for (const [x, z] of [[0, 0], [-0.22, -0.11], [-0.22, 0.11], [0.22, -0.11], [0.22, 0.11]]) {
+    ray.ray.origin.set(centre.x + x, bench.max.y + 0.04, centre.z + z);
+    const [hit] = ray.intersectObject(source);
+    if (!hit || Math.abs(hit.point.y - bench.max.y) > 0.002)
+      return null;
+  }
+  return { bench, guards: [body] };
+}
+function sameBox(a, b) {
+  return a.min.distanceToSquared(b.min) < 0.0000000001 && a.max.distanceToSquared(b.max) < 0.0000000001;
+}
+function createGrandBenchMount(T, store2, addGuard, registerSeat) {
+  const { position_m: position, yaw_deg: yaw } = store2.anchor;
+  return createPianoBenchMount(T, store2, addGuard, registerSeat, {
+    position,
+    localYaw: radians(yaw),
+    id: "casio-grand-piano-bench",
+    name: "Casio grand piano bench",
+    standing: (point2, centre, bench) => point2(centre.x + 0.9, bench.min.y, centre.z + 0.85),
+    draw: (model, profile2) => model.children[profile2.drawIndex],
+    needsCabinet: true,
+    cameraOffset: -Math.PI / 3
+  });
+}
+function createStorefrontBenchMount(T, store2, { position, yaw, scale }, addGuard, registerSeat) {
+  return createPianoBenchMount(T, store2, addGuard, registerSeat, {
+    position,
+    localYaw: yaw,
+    scale,
+    id: "casio-storefront-piano-bench",
+    name: "Casio storefront piano bench",
+    standing: () => worldInteriorPoint(store2, [-1.02, 0, 3.35]),
+    draw: (model) => model.getObjectByName(storefrontLacquer),
+    cameraOffset: -Math.PI / 3
+  });
+}
+function createPianoBenchMount(T, store2, addGuard, registerSeat, {
+  position: [ax, ay, az],
+  localYaw,
+  scale = 1,
+  id,
+  name,
+  standing,
+  draw: draw2,
+  needsCabinet = false,
+  cameraOffset
+}) {
+  const c = Math.cos(localYaw), s = Math.sin(localYaw);
+  const yaw = radians(store2.frame.yaw_world_deg) + localYaw;
+  const point2 = (x, y, z) => worldInteriorPoint(store2, [ax + scale * (c * x + s * z), ay + scale * y, az + scale * (-s * x + c * z)]);
+  function installGuards(boxes) {
+    const removals = [];
+    try {
+      for (const box of boxes) {
+        const centre = box.getCenter(new T.Vector3);
+        removals.push(addGuard({ center: point2(...centre), size: box.getSize(new T.Vector3).multiplyScalar(scale).toArray(), yaw }));
+      }
+    } catch (error) {
+      removals.forEach((undo) => undo());
+      throw error;
+    }
+    return () => removals.forEach((undo) => undo());
+  }
+  let active, seat, removeSeat, removeGuards;
+  return function show(model, pianoHandle, cabinetHandle, profile2 = model?.userData.grandPiano) {
+    const previous = active?.profile;
+    if (profile2 && previous && seat.collider === pianoHandle && seat.cabinetCollider === cabinetHandle && sameBox(profile2.bench, previous.bench)) {
+      if (profile2.guards.length !== previous.guards.length || !profile2.guards.every((box, i) => sameBox(box, previous.guards[i]))) {
+        const releaseNew = installGuards(profile2.guards);
+        removeGuards();
+        removeGuards = releaseNew;
+      }
+      active = { model, profile: profile2 };
+      return;
+    }
+    removeSeat?.();
+    removeGuards?.();
+    removeSeat = removeGuards = active = seat = null;
+    if (!model || !profile2 || pianoHandle == null || needsCabinet && cabinetHandle == null)
+      return;
+    const { bench, guards } = profile2;
+    const centre = bench.getCenter(new T.Vector3), size = bench.getSize(new T.Vector3).multiplyScalar(scale);
+    const [x, top, z] = point2(centre.x, bench.max.y, centre.z);
+    const floor = store2.frame.world_origin_m[1] + store2.frame.floor_surface_y_m;
+    const [exitX, , exitZ] = standing(point2, centre, bench);
+    seat = createSeatAnchor({
+      id,
+      name,
+      x,
+      z,
+      floor,
+      accessible: true,
+      exit: { x: exitX, y: floor, z: exitZ },
+      pose: { facing: 1, angle: yaw, approachAngle: Math.atan2(x - exitX, z - exitZ), cameraOffset },
+      clearance: { interactionRadius: 0.7, capsuleRadius: 0.3, colliderWidth: size.x, colliderDepth: size.z }
+    }, pianoHandle, { size: size.toArray(), top: top - floor, seatCentre: 0, front: -size.z / 2 }, 1);
+    seat.cabinetCollider = cabinetHandle;
+    const mountedSeat = seat;
+    seat.modelVisible = () => {
+      if (mountedSeat !== seat || !active?.model.parent?.visible)
+        return false;
+      let node = draw2(active.model, active.profile);
+      if (!node?.material.visible || node.material.opacity <= 0)
+        return false;
+      while (node && node.visible) {
+        if (node === active.model)
+          return true;
+        node = node.parent;
+      }
+      return false;
+    };
+    removeGuards = installGuards(guards);
+    active = { model, profile: profile2 };
+    try {
+      removeSeat = registerSeat(seat);
+    } catch (error) {
+      removeGuards();
+      removeGuards = active = seat = null;
+      throw error;
+    }
+  };
+}
+
 // demos/corporate/gjh/v11/assets/expanded-interiors.js
 import { GLTFLoader as GLTFLoader4 } from "../vendor/GLTFLoader.js";
 
@@ -7492,7 +7677,7 @@ function displayPlacements(number, heroX, heroZ) {
   const scale = number === 17 ? 1.5 : number === 13 || number === 15 || number === 16 ? 1.3 : 0.7;
   return [[heroX, height, heroZ, scale]];
 }
-async function createExpandedInteriors(T, expandedLayout2, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => "low", detailsEnabled = () => true, waitForSlice) {
+async function createExpandedInteriors(T, expandedLayout2, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => "low", detailsEnabled = () => true, waitForSlice, showStorefrontBench = () => {}) {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
   const material = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.65 });
   const woodFinishes = new Set([11633494, 6701359, 6898732, 9132600, 11700828, 12950889, 9325877, 6703151, 6309172, 6899253, 11175012]);
@@ -7522,7 +7707,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
   };
   const studioParts = [];
   const shops = [], collisionBoxes = [], nativeStudioSeats = new Map;
-  let gigasetSeatBox, grandCabinetBox;
+  let gigasetSeatBox, grandCabinetBox, storefrontPianoBox;
   const models2 = new Map, loadedScenes = new Map, gltfLoader = new GLTFLoader4;
   const modelStates = new Map(slots.flatMap((slot2) => {
     const number = Number(slot2.number);
@@ -7852,6 +8037,8 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       const [w, h, d] = size.map((value) => value * scale);
       const c = Math.abs(Math.cos(yaw)), sn = Math.abs(Math.sin(yaw));
       const footprint = block(x, y + h / 2, z, c * w + sn * d, h, sn * w + c * d);
+      if (placement === casioStorefrontPiano)
+        storefrontPianoBox = footprint;
       if (placement === gigasetLoungeSofa) {
         gigasetSeatBox = footprint;
         parts = [];
@@ -7871,6 +8058,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
           const { file, position, yaw = 0, scale = 1 } = placement;
           try {
             const model = (await loadModel(`./${file}`)).clone(true);
+            const bench = placement === casioStorefrontPiano ? measureStorefrontPiano(T, model) : null;
             model.position.set(...position);
             model.rotation.y = yaw;
             model.scale.setScalar(scale);
@@ -7880,10 +8068,14 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
             group.add(model);
             model.updateWorldMatrix(true, true);
             gallery.push({ model, bounds: new T.Box3().setFromObject(model) });
+            if (placement === casioStorefrontPiano)
+              showStorefrontBench(model, bench);
             if (placement === gigasetLoungeSofa)
               sofaMounted = true;
             shopState.galleryLoaded++;
           } catch (error) {
+            if (placement === casioStorefrontPiano)
+              showStorefrontBench(null);
             shopState.galleryFailed++;
             console.warn(`Unavailable shop furnishing: ${file}`, error);
           }
@@ -7944,7 +8136,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       schedulePrefetch();
   });
   schedulePrefetch();
-  return { collisionBoxes, gigasetSeatBox, grandCabinetBox, nativeStudioSeats, getPreloadedModels() {
+  return { collisionBoxes, gigasetSeatBox, grandCabinetBox, storefrontPianoBox, nativeStudioSeats, getPreloadedModels() {
     return [...loadedScenes].map(([name, scene2]) => ({ name: new URL(name, import.meta.url).href, scene: scene2 }));
   }, get preloadState() {
     return {
@@ -8347,103 +8539,6 @@ function* prepareInteriorDecoration(T, store2, materials2, detail = 0, hasGogoFr
       group.add(new T.Mesh(geometry, material));
   }
   return group;
-}
-
-// demos/corporate/gjh/v11/assets/interiors/casio-grand-seat.js
-var guardNames = ["Case_and_action", "Keyboard_and_music_rest", "Raised_lid"];
-function measureGrandPiano(T, scene) {
-  scene.updateMatrixWorld(true);
-  const visible = new Set;
-  scene.traverseVisible((node) => {
-    if (node.isMesh && node.material.visible)
-      visible.add(node);
-  });
-  const nodes = ["Bench", ...guardNames].map((name) => scene.getObjectByName(name));
-  if (visible.size !== nodes.length || nodes.some((node) => !visible.has(node) || !node.geometry.attributes.position?.count))
-    return null;
-  const bounds = nodes.map((node) => new T.Box3().setFromObject(node));
-  if (bounds.some((box) => ![...box.min, ...box.max].every(Number.isFinite) || box.getSize(new T.Vector3).toArray().some((size) => size <= 0)))
-    return null;
-  const [bench, ...guards] = bounds;
-  const centre = bench.getCenter(new T.Vector3);
-  if (guards.some((box) => box.max.z + 0.3 >= centre.z))
-    return null;
-  centre.y = bench.max.y + 0.05;
-  const [hit] = new T.Raycaster(centre, new T.Vector3(0, -1, 0)).intersectObject(nodes[0]);
-  if (!hit || Math.abs(hit.point.y - bench.max.y) > 0.002)
-    return null;
-  return { source: nodes[0], bench, guards };
-}
-function sameBox(a, b) {
-  return a.min.distanceToSquared(b.min) < 0.0000000001 && a.max.distanceToSquared(b.max) < 0.0000000001;
-}
-function createGrandBenchMount(T, store2, addGuard, registerSeat) {
-  const [ax, ay, az] = store2.anchor.position_m;
-  const localYaw = radians(store2.anchor.yaw_deg), c = Math.cos(localYaw), s = Math.sin(localYaw);
-  const yaw = radians(store2.frame.yaw_world_deg) + localYaw;
-  const point2 = (x, y, z) => worldInteriorPoint(store2, [ax + c * x + s * z, ay + y, az - s * x + c * z]);
-  function installGuards(boxes) {
-    const removals = [];
-    try {
-      for (const box of boxes) {
-        const centre = box.getCenter(new T.Vector3);
-        removals.push(addGuard({ center: point2(...centre), size: box.getSize(new T.Vector3).toArray(), yaw }));
-      }
-    } catch (error) {
-      removals.forEach((undo) => undo());
-      throw error;
-    }
-    return () => removals.forEach((undo) => undo());
-  }
-  let active, seat, removeSeat, removeGuards;
-  return function show(model, pianoHandle, cabinetHandle) {
-    const profile2 = model?.userData.grandPiano, previous = active?.userData.grandPiano;
-    if (profile2 && previous && seat.collider === pianoHandle && seat.cabinetCollider === cabinetHandle && sameBox(profile2.bench, previous.bench)) {
-      if (!profile2.guards.every((box, i) => sameBox(box, previous.guards[i]))) {
-        const releaseNew = installGuards(profile2.guards);
-        removeGuards();
-        removeGuards = releaseNew;
-      }
-      active = model;
-      return;
-    }
-    removeSeat?.();
-    removeGuards?.();
-    removeSeat = removeGuards = active = seat = null;
-    if (!profile2 || pianoHandle == null || cabinetHandle == null)
-      return;
-    const { bench, guards } = profile2;
-    const centre = bench.getCenter(new T.Vector3), size = bench.getSize(new T.Vector3);
-    const [x, top, z] = point2(centre.x, bench.max.y, centre.z);
-    const floor = store2.frame.world_origin_m[1] + store2.frame.floor_surface_y_m;
-    const [exitX, , exitZ] = point2(centre.x + 0.9, bench.min.y, centre.z + 0.85);
-    seat = createSeatAnchor({
-      id: "casio-grand-piano-bench",
-      name: "Casio grand piano bench",
-      x,
-      z,
-      floor,
-      accessible: true,
-      exit: { x: exitX, y: floor, z: exitZ },
-      pose: { facing: 1, angle: yaw, approachAngle: Math.atan2(x - exitX, z - exitZ), cameraOffset: -Math.PI / 3 },
-      clearance: { interactionRadius: 0.7, capsuleRadius: 0.3, colliderWidth: size.x, colliderDepth: size.z }
-    }, pianoHandle, { size: size.toArray(), top: top - floor, seatCentre: 0, front: -size.z / 2 }, 1);
-    seat.cabinetCollider = cabinetHandle;
-    const mountedSeat = seat;
-    seat.modelVisible = () => {
-      const draw2 = active?.children[active.userData.grandPiano.drawIndex];
-      return Boolean(mountedSeat === seat && active?.parent?.visible && active.visible && draw2?.visible && draw2.material.visible);
-    };
-    removeGuards = installGuards(guards);
-    active = model;
-    try {
-      removeSeat = registerSeat(seat);
-    } catch (error) {
-      removeGuards();
-      removeGuards = active = seat = null;
-      throw error;
-    }
-  };
 }
 
 // demos/corporate/gjh/v11/assets/interiors/baked-layout.js
@@ -10897,6 +10992,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         seats.splice(seats.indexOf(seat), 1);
         interactables.splice(interactables.indexOf(entry), 1);
       };
+    }, installPianoGuard = function(spec) {
+      const guard = interiorCollider(spec);
+      return () => physics.removeCollider(guard, false);
     };
     signage = await addShopSignAtlas(T, expandedLayout, scene);
     slide = addExpandedStorefronts(T, expandedLayout, scene, signage.configs, plainFinish);
@@ -11051,14 +11149,17 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       collider(x, liftLayout.upper + 0.25, z, 0.68, 0.5, 0.68);
     }
     activeDeck = false;
-    const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials2.shellFloor.map, prepareModel, shopVisibility, artworkTier, detailsEnabled, waitForSlice);
+    let pianoHandle, cabinetHandle, storefrontHandle;
+    const mountStorefront = createStorefrontBenchMount(T, interiorStores.S15, casioStorefrontPiano, installPianoGuard, installSeat);
+    const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials2.shellFloor.map, prepareModel, shopVisibility, artworkTier, detailsEnabled, waitForSlice, (model, profile2) => mountStorefront(model, storefrontHandle, undefined, profile2));
     interiorModels = interiors;
-    let pianoHandle, cabinetHandle;
     for (const footprint of interiors.collisionBoxes) {
       const { x, y, z, width, height, depth } = footprint;
       const shape = collider(x, y, z, width, height, depth);
       if (footprint === interiors.grandCabinetBox)
         cabinetHandle = shape.handle;
+      if (footprint === interiors.storefrontPianoBox)
+        storefrontHandle = shape.handle;
       if (footprint === interiors.gigasetSeatBox)
         seats.push(createGigasetLoungeSeat(shape.handle, footprint), createGigasetBacklessSeat(shape.handle, footprint));
       const nativeSeat = interiors.nativeStudioSeats.get(footprint);
@@ -11075,10 +11176,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         bakedCeilings.push({ ...rect, y: y - height / 2 - 0.003 });
     }
     shopLodUpdates.push(interiors.update);
-    const mountGrand = createGrandBenchMount(T, interiorStores.S15, (spec) => {
-      const guard = interiorCollider(spec);
-      return () => physics.removeCollider(guard, false);
-    }, installSeat);
+    const mountGrand = createGrandBenchMount(T, interiorStores.S15, installPianoGuard, installSeat);
     interiorKit = createInteriorKit(T, scene, {
       assetBase: new URL(".", import.meta.url),
       packshot: textures.get("new-moon-nz-425g-front.jpg"),

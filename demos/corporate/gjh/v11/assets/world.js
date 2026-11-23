@@ -35,9 +35,9 @@ import {interiorFloorColour,interiorStores,worldInteriorBox,worldInteriorPoint} 
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {gogoStoolSeat} from './interiors/gogo-seats.js';
-import {createGrandBenchMount} from './interiors/casio-grand-seat.js';
+import {createGrandBenchMount,createStorefrontBenchMount} from './interiors/casio-grand-seat.js';
 import {createProceduralSeat} from './interiors/procedural-seats.js';
-import {createGigasetBacklessSeat,createGigasetLoungeSeat} from './gallery-east-shops.js';
+import {casioStorefrontPiano,createGigasetBacklessSeat,createGigasetLoungeSeat} from './gallery-east-shops.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere, shopLampTint} from './mall-atmosphere.js';
 import {createMallBakedLighting, createSkylightDapple} from './mall-baked-lighting.js';
@@ -1197,13 +1197,16 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       collider(x,liftLayout.upper+.25,z,.68,.5,.68);
     }
     activeDeck=false;
-    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility,artworkTier,detailsEnabled,waitForSlice);
+    let pianoHandle, cabinetHandle, storefrontHandle;
+    const mountStorefront=createStorefrontBenchMount(T,interiorStores.S15,casioStorefrontPiano,installPianoGuard,installSeat);
+    const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility,
+      artworkTier,detailsEnabled,waitForSlice,(model,profile)=>mountStorefront(model,storefrontHandle,undefined,profile));
     interiorModels=interiors;
-    let pianoHandle, cabinetHandle;
     for(const footprint of interiors.collisionBoxes) {
       const {x,y,z,width,height,depth} = footprint;
       const shape = collider(x,y,z,width,height,depth);
       if (footprint === interiors.grandCabinetBox) cabinetHandle=shape.handle;
+      if (footprint === interiors.storefrontPianoBox) storefrontHandle=shape.handle;
       if (footprint === interiors.gigasetSeatBox)
         seats.push(createGigasetLoungeSeat(shape.handle,footprint),createGigasetBacklessSeat(shape.handle,footprint));
       const nativeSeat = interiors.nativeStudioSeats.get(footprint);
@@ -1231,10 +1234,11 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         interactables.splice(interactables.indexOf(entry),1);
       };
     }
-    const mountGrand=createGrandBenchMount(T,interiorStores.S15,spec=>{
+    function installPianoGuard(spec) {
       const guard=interiorCollider(spec);
       return ()=>physics.removeCollider(guard,false);
-    },installSeat);
+    }
+    const mountGrand=createGrandBenchMount(T,interiorStores.S15,installPianoGuard,installSeat);
     interiorKit = createInteriorKit(T, scene, {
       assetBase:new URL('.',import.meta.url), packshot:textures.get('new-moon-nz-425g-front.jpg'), artworkTier, waitForSlice,
       prepareModel, showGrandBench:model=>mountGrand(model,pianoHandle,cabinetHandle),
