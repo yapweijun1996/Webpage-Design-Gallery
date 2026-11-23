@@ -265,6 +265,30 @@ test('Christmas Low shadow contrast fades out and resets on a theme change', () 
   assert.equal(sample(center,'low'),original);
 });
 
+test('New Moon exposure is confined to Low in Everyday and Christmas', () => {
+  const scene=new T.Scene(), renderer={toneMappingExposure:.8};
+  const {atrium,slots}=expandedLayout;
+  const atmosphere=createMallAtmosphere(T,renderer,scene,slots,{atrium});
+  const store={x:-10,y:.9,z:2.4};
+  const sample=(position,tier)=>{
+    atmosphere.update(position,500,tier);
+    return renderer.toneMappingExposure;
+  };
+
+  atmosphere.applyTheme({id:'everyday',lighting:{exposure:.8}});
+  const everyday=sample(store,'low');
+  assert.ok(everyday < .8);
+  atmosphere.applyTheme({id:'christmas',lighting:{exposure:.8}});
+  const christmas=sample(store,'low');
+  assert.ok(christmas < everyday);
+  assert.ok(sample({...store,z:3.5},'low') > christmas);
+  assert.equal(sample({...store,z:4.6},'low'),.8);
+  assert.equal(sample({...store,y:7.2},'low'),.8);
+  assert.equal(sample(store,'balanced'),.8);
+  atmosphere.applyTheme({id:'cny',lighting:{exposure:.8}});
+  assert.equal(sample(store,'low'),.8);
+});
+
 test('bundled world starts and submits expanded Low, Balanced and Detailed frames with browser stubs', async t => {
   const noop=()=>{};
   const gradient={addColorStop:noop};

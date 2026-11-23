@@ -3930,6 +3930,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     };
   });
   const gogoSlot = expanded && bays.find((bay) => bay.slot.number === "03")?.slot;
+  const newMoonSlot = expanded && bays.find((bay) => bay.slot.number === "01")?.slot;
   const lgSlot = expanded && bays.find((bay) => bay.slot.number === "14")?.slot;
   const lights = Array.from({ length: 2 }, (_, index) => {
     const light = new T.PointLight(16770497, 0, shopLightReach, 2);
@@ -3981,10 +3982,11 @@ function createMallAtmosphere(T, renderer, scene, slots, {
   }
   let focus = null, strength = 0, previousTime, baseAmbient = hemisphere?.intensity;
   let baseDaylight = daylight?.intensity, baseExposure = renderer?.toneMappingExposure;
-  let christmas = false;
+  let christmas = false, newMoonExposure = 1;
   const applyFocusColors = () => lights.forEach((light, index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
     christmas = theme?.id === "christmas";
+    newMoonExposure = christmas ? 0.71 : theme?.id === "everyday" ? 0.78 : 1;
     baseAmbient = theme?.lighting?.ambient ?? baseAmbient;
     baseDaylight = theme?.lighting?.keyIntensity ?? baseDaylight;
     const key = new T.Color(theme?.lighting?.key ?? 16770497);
@@ -4024,13 +4026,16 @@ function createMallAtmosphere(T, renderer, scene, slots, {
         daylight.intensity = baseDaylight * keyScale;
       if (Number.isFinite(baseExposure)) {
         let shopExposure = 1;
-        if (gogoSlot && (tier === "balanced" || tier === "low") && Math.abs(y) < 4) {
-          const halfWidth = (gogoSlot.maxX - gogoSlot.minX) / 2;
-          const lateral = Math.abs(x - (gogoSlot.minX + halfWidth));
-          const depth = Math.max(gogoSlot.minZ - z, z - gogoSlot.maxZ, 0);
+        const newMoonLow = tier === "low" && newMoonExposure !== 1 && newMoonSlot && x > newMoonSlot.minX && x < newMoonSlot.maxX;
+        const exposureSlot = newMoonLow ? newMoonSlot : gogoSlot;
+        if (exposureSlot && (tier === "balanced" || tier === "low") && Math.abs(y) < 4) {
+          const halfWidth = (exposureSlot.maxX - exposureSlot.minX) / 2;
+          const lateral = Math.abs(x - (exposureSlot.minX + halfWidth));
+          const depth = Math.max(exposureSlot.minZ - z, z - exposureSlot.maxZ, 0);
           const frontage = 1 - T.MathUtils.smoothstep(lateral, halfWidth * 0.55, halfWidth);
           const approach = 1 - T.MathUtils.smoothstep(depth, 2.5, 4.5);
-          shopExposure = T.MathUtils.lerp(1, tier === "low" ? 0.68 : 0.86, frontage * approach);
+          const exposure = newMoonLow ? newMoonExposure : tier === "low" ? 0.68 : 0.86;
+          shopExposure = T.MathUtils.lerp(1, exposure, frontage * approach);
         }
         renderer.toneMappingExposure = baseExposure * T.MathUtils.lerp(1, 0.82, tier === "balanced" ? courtyard : 0) * shopExposure;
       }
