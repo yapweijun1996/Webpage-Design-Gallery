@@ -70,8 +70,8 @@ Command errors exit 1. Use `--port` to override the CLI port.
 
 Log in with the selected runner before starting a turn. Runner processes and
 readiness probes receive an allowlist of local environment variables for paths,
-locale and CLI configuration. Server API keys and other environment variables
-are kept out of runner processes.
+locale and CLI configuration. Worker turns also receive the current Swarm port
+for the local image helper. Server API keys stay out of runner processes.
 
 ## Settings workspace
 

@@ -156,7 +156,7 @@ const slot = {
 function withPreamble(promptText, a, label, appearance) {
   let pre = S.preamble(settings);
   try { const sp = STAFF.preamble({ staffDir: path.join(PROJECT, 'staff'), agentId: a.id, step: label }); if (sp) pre = (pre ? pre + '\n' : '') + sp; } catch (_) { /* no staff files in this project: skip */ }
-  const rendering = `Inspect the same live rendering as Studio at ${previewUrl(appearance)}.`;
+  const rendering = `Inspect the same live rendering as Studio at \`${previewUrl(appearance)}\`.`;
   pre = pre ? `${pre}\n${rendering}` : rendering;
   if (promptText.startsWith('STEP:')) { const i = promptText.indexOf('\n'); return i < 0 ? promptText + '\n' + pre : promptText.slice(0, i + 1) + pre + '\n' + promptText.slice(i + 1); }
   return pre + '\n' + promptText;
@@ -198,7 +198,8 @@ function runOnce(a, label, promptText, appearance) {
     catch (e) { emit({ type: 'chat', msg: chat ? chat.post({ from: 'system', kind: 'system', text: `Cannot start ${a.name}: ${e.message}` }) : { id: 0 } }); return resolve(false); }
     const parser = runner.createParser();
     const before = resolved.runner === 'pi' ? G.snapshot(PROJECT) : null; // pi has no sandbox: compare the tree after the turn
-    const p = spawn(cmd.command, cmd.args, { cwd: cmd.cwd || PROJECT, env: R.childEnvironment(process.env), stdio: ['pipe', 'pipe', 'ignore'] });
+    const env = { ...R.childEnvironment(process.env), SWARM_PORT: String(PORT) };
+    const p = spawn(cmd.command, cmd.args, { cwd: cmd.cwd || PROJECT, env, stdio: ['pipe', 'pipe', 'ignore'] });
     children.set(a.id, p);
     let fatal = false, settled = false;
     let reportedUsage = false;

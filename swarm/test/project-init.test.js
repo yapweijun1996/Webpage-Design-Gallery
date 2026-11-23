@@ -194,7 +194,7 @@ test('preserves the live project on staging and activation failures and allows a
 });
 
 test('checks for an active run again after a concurrent initialization body arrives', async t => {
-  const f = fixture(t, { environment: { PATH: '/usr/bin', OPENAI_API_KEY: 'fixture-key', FAKE_FAIL_AGENT: '01' } });
+  const f = fixture(t, { environment: { PATH: '/usr/bin', SWARM_PORT: '8821', OPENAI_API_KEY: 'fixture-key', FAKE_FAIL_AGENT: '01' } });
   const delayedBody = new PassThrough();
   const delayed = f.request('/api/init', delayedBody);
   assert.deepEqual(await f.request('/api/run', JSON.stringify({ ...f.target, brief: 'Run brief.' })), { status: 200, body: { ok: true } });
@@ -204,7 +204,7 @@ test('checks for an active run again after a concurrent initialization body arri
   assert.equal(state.phase, 'running');
   assert.equal(state.brief, 'Run brief.');
   assert.equal(fs.readFileSync(path.join(f.project, 'brief.md'), 'utf8'), 'Run brief.');
-  assert.deepEqual(f.spawns[0].options.env, { PATH: '/usr/bin' });
+  assert.deepEqual(f.spawns[0].options.env, { PATH: '/usr/bin', SWARM_PORT: '8821' });
   assert.deepEqual(f.errors, []);
   await f.request('/api/stop', '{}');
 });
@@ -218,7 +218,7 @@ test('the scoped Studio appearance reaches the preview URL in the running agent 
   }));
   assert.equal(response.status, 200);
   const prompt = f.spawns[0].child.stdin.read().toString();
-  const previewLink = prompt.match(/Inspect the same live rendering as Studio at (\S+)\./)?.[1];
+  const previewLink = prompt.match(/Inspect the same live rendering as Studio at `([^`]+)`/)?.[1];
   assert.equal(previewLink, 'http://127.0.0.1:8800/studio.html?preview=1&theme=light&brand=forest-gold&lang=ms');
   assert.match(prompt, /^STEP: Triage/);
   assert.match(prompt, /Review this section\.$/);
