@@ -6,7 +6,7 @@ import {interiorFloorColour,interiorStores,worldInteriorPoint} from './interiors
 import {createSeatAnchor} from './seat-placements.js';
 import {setupMaterialArtwork} from './artwork-textures.js';
 import {westShopPlacements} from './gallery-west-shops.js';
-import {eastShopPlacements,gigasetLoungeSofa,gigasetSofaFallback} from './gallery-east-shops.js';
+import {eastShopPlacements,gigasetLoungeSofa,gigasetSofaFallback,hasGigasetSeatCushions} from './gallery-east-shops.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {parseWarmGLTF} from './gltf-warmup.js';
 
@@ -91,6 +91,9 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
           });
           throw new Error('Model load timed out');
         }
+        // Keep the existing fallback assembly if the downloaded model cannot support both seat anchors.
+        if (name === `./${gigasetLoungeSofa.file}` && !hasGigasetSeatCushions(T,gltf.scene))
+          throw new Error('Gigaset furnishing is missing a usable seat cushion');
         const materials = new Set();
         gltf.scene.traverse(mesh => {
           if (mesh.isMesh) for (const material of [].concat(mesh.material)) materials.add(material);
@@ -147,16 +150,25 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     }
     const tools = {
       block,
-      nativeSeat(footprint,{id,name,centre,size,standDistance}) {
+      nativeSeat(footprint,{id,name,centre,width,height,depth,standDistance,seatedYaw,cameraOffset}) {
         const store = interiorStores['S'+slot.number];
         const floor = store.frame.world_origin_m[1]+store.frame.floor_surface_y_m;
         const [x,top,z] = worldInteriorPoint(store,centre);
         const [exitX,,exitZ] = worldInteriorPoint(store,[centre[0],0,centre[2]+standDistance]);
+        const aisleAngle = group.rotation.y+Math.PI;
+        const pose = {facing:1,angle:aisleAngle};
+        if (seatedYaw !== undefined) {
+          // A player mounts the backless bench from the aisle and faces the keys.
+          pose.approachAngle = aisleAngle;
+          pose.angle = group.rotation.y+seatedYaw;
+        }
+        if (cameraOffset) pose.cameraOffset = cameraOffset;
+        const size = [width,height ?? top-floor,depth];
         const placement = {id,name,x,z,floor,accessible:true,exit:{x:exitX,y:floor,z:exitZ},
-          pose:{facing:1,angle:group.rotation.y+Math.PI},clearance:{interactionRadius:.7,capsuleRadius:.3,
+          pose,clearance:{interactionRadius:.7,capsuleRadius:.3,
             colliderWidth:footprint.width,colliderDepth:footprint.depth}};
         nativeStudioSeats.set(footprint,collider=>createSeatAnchor(placement,collider,
-          {size,top:top-floor,seatCentre:0,front:-size[2]/2},1));
+          {size,top:top-floor,seatCentre:0,front:-depth/2},1));
       },
       opaqueWall(x,y,z,w,h,d,color) {
         box(x,y,z,w,h,d,color);

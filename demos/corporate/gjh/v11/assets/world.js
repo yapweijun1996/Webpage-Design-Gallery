@@ -36,7 +36,7 @@ import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {gogoStoolSeat} from './interiors/gogo-seats.js';
 import {createProceduralSeat} from './interiors/procedural-seats.js';
-import {createGigasetLoungeSeat} from './gallery-east-shops.js';
+import {createGigasetBacklessSeat,createGigasetLoungeSeat} from './gallery-east-shops.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere, shopLampTint} from './mall-atmosphere.js';
 import {createMallBakedLighting, createSkylightDapple} from './mall-baked-lighting.js';
@@ -1201,7 +1201,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     for(const footprint of interiors.collisionBoxes) {
       const {x,y,z,width,height,depth} = footprint;
       const shape = collider(x,y,z,width,height,depth);
-      if (footprint === interiors.gigasetSeatBox) seats.push(createGigasetLoungeSeat(shape.handle,footprint));
+      if (footprint === interiors.gigasetSeatBox)
+        seats.push(createGigasetLoungeSeat(shape.handle,footprint),createGigasetBacklessSeat(shape.handle,footprint));
       const nativeSeat = interiors.nativeStudioSeats.get(footprint);
       if (nativeSeat) seats.push(nativeSeat(shape.handle));
       shopObstacles.push({min:{x:x-width/2,y:y-height/2,z:z-depth/2},

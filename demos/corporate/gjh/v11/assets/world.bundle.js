@@ -5282,27 +5282,30 @@ import { fetchStartupAsset as fetchStartupAsset3 } from "./startup-asset-pack.js
 
 // demos/corporate/gjh/v11/assets/gallery-east-shops.js
 var gigasetLoungeSofa = galleryFixture("S17", "leftfront", "lounge-sofa-bench", 0.86);
+var loungeContact = [-0.95, 0.481, -0.23];
+var backlessCushion = { center: [0.3, 0.4, 0.56], size: [1.58, 0.1, 0.35], color: 10191732 };
+var backlessContact = [0.1, backlessCushion.center[1] + backlessCushion.size[1] / 2, backlessCushion.center[2]];
 var gigasetSofaFallback = [
   { center: [-0.5, 0.29, -0.23], size: [1.58, 0.32, 0.58], color: 8941408 },
   { center: [-0.5, 0.432, -0.23], size: [1.58, 0.098, 0.54], color: 10191732 },
   { center: [-0.5, 0.6, -0.57], size: [1.59, 0.4, 0.21], color: 8941408 },
   { center: [-1.39, 0.37, -0.23], size: [0.2, 0.48, 0.74], color: 8941408 },
   { center: [0.3, 0.29, 0.56], size: [1.58, 0.28, 0.35], color: 8941408 },
-  { center: [0.3, 0.4, 0.56], size: [1.58, 0.1, 0.35], color: 10191732 },
+  backlessCushion,
   { center: [1.075, 0.45, 0.235], size: [0.85, 0.1, 0.22], color: 7558210 }
 ];
-function createGigasetLoungeSeat(collider, footprint) {
+function createGigasetSeat(collider, footprint, { id, name, contact: [cx, cy, cz], exit, depth, frontDepth }) {
   const { position: [ox, oy, oz], yaw, scale } = gigasetLoungeSofa;
   const c = Math.cos(yaw), s = Math.sin(yaw);
   const point2 = (x2, z2) => worldInteriorPoint(interiorStores.S17, [ox + scale * (x2 * c + z2 * s), 0, oz + scale * (-x2 * s + z2 * c)]);
-  const [x, , z] = point2(-0.95, -0.23);
-  const [exitX, , exitZ] = point2(-1.95, 1.12);
+  const [x, , z] = point2(cx, cz);
+  const [exitX, , exitZ] = point2(...exit);
   const { world_origin_m: origin, floor_surface_y_m: surface, yaw_world_deg: shopYaw } = interiorStores.S17.frame;
   const floor = origin[1] + surface;
   const angle = shopYaw * Math.PI / 180 + yaw - Math.PI;
   return createSeatAnchor({
-    id: "gigaset-lounge-sofa",
-    name: "Gigaset lounge sofa",
+    id,
+    name,
     x,
     z,
     floor,
@@ -5310,7 +5313,36 @@ function createGigasetLoungeSeat(collider, footprint) {
     exit: { x: exitX, y: floor, z: exitZ },
     pose: { angle, facing: 1 },
     clearance: { interactionRadius: 0.7, capsuleRadius: 0.3, colliderWidth: footprint.width, colliderDepth: footprint.depth }
-  }, collider, { size: [1.58 * scale, footprint.height, 0.58 * scale], top: oy - surface + 0.481 * scale, seatCentre: 0, front: -0.282 * scale }, 1);
+  }, collider, { size: [1.58 * scale, footprint.height, depth * scale], top: oy - surface + cy * scale, seatCentre: 0, front: -frontDepth * scale }, 1);
+}
+function createGigasetLoungeSeat(collider, footprint) {
+  return createGigasetSeat(collider, footprint, {
+    id: "gigaset-lounge-sofa",
+    name: "Gigaset lounge sofa",
+    contact: loungeContact,
+    exit: [-1.95, 1.12],
+    depth: 0.58,
+    frontDepth: 0.282
+  });
+}
+function createGigasetBacklessSeat(collider, footprint) {
+  return createGigasetSeat(collider, footprint, {
+    id: "gigaset-backless-bench",
+    name: "Gigaset backless bench",
+    contact: backlessContact,
+    exit: [0.33, 1.5],
+    depth: backlessCushion.size[2],
+    frontDepth: backlessCushion.size[2] / 2
+  });
+}
+function hasGigasetSeatCushions(T, scene) {
+  scene.updateMatrixWorld(true);
+  const ray = new T.Raycaster(new T.Vector3, new T.Vector3(0, -1, 0), 0, 0.08);
+  return [loungeContact, backlessContact].every(([x, y, z]) => {
+    ray.ray.origin.set(x, y + 0.04, z);
+    const [contact] = ray.intersectObject(scene, true);
+    return contact && Math.abs(contact.point.y - y) < 0.006;
+  });
 }
 var eastShopPlacements = {
   12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.081, 2.92], yaw: 0.11, scale: 1.14 }],
@@ -6836,7 +6868,7 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
     for (const k of [-1, 1])
       box(x + k * 0.75, 0.52, z, 0.16, 0.32, 0.71, c);
     if (seat)
-      t.nativeSeat?.(footprint, { ...seat, centre: [x, cushionY + cushionHeight / 2, z], size: [width2, height, depth2] });
+      t.nativeSeat?.(footprint, { ...seat, centre: [x, cushionY + cushionHeight / 2, z], width: width2, height, depth: depth2 });
   }
   block(0, 2.12, back, side * 2, 4.18, 0.13);
   block(0, 4.19, mid, side * 2, 0.18, span);
@@ -7114,21 +7146,33 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
       }
       plant(-side + 0.81, front - 0.85, 1.61);
       break;
-    case 15:
+    case 15: {
       for (let i = -5;i <= 5; i++)
         box(i * 0.58, 4.04, mid, 0.23, 0.065, span - 0.28, 13283214);
       replace(() => cabinet(-1.05, mid - 0.59, 1.78, 0.9, 1.11, walnut, oak), walnut);
       block(1.1, 0.65, mid - 0.9, 1.64, 1.29, 0.92);
-      block(1.1, 0.34, mid + 0.16, 1.01, 0.7, 0.5);
+      const benchX = 1.1, benchZ = mid + 0.16, width2 = 0.99, depth2 = 0.49, cushionY = 0.61, cushionHeight = 0.16;
+      const bench = block(benchX, 0.34, benchZ, 1.01, 0.7, 0.5);
       for (const x of [0.46, 1.73])
         box(x, 0.51, mid - 0.87, 0.13, 0.84, 0.13, charcoal);
       box(1.1, 1.1, mid - 0.93, 1.63, 0.36, 0.72, charcoal);
       block(1.55, 0.5625, -4, 1.434, 0.963, 0.489);
-      box(1.1, 0.61, mid + 0.16, 0.99, 0.16, 0.49, charcoal);
+      box(benchX, cushionY, benchZ, width2, cushionHeight, depth2, charcoal);
+      t.nativeSeat?.(bench, {
+        id: "casio-keyboard-bench",
+        name: "Casio keyboard bench",
+        centre: [benchX, cushionY + cushionHeight / 2, benchZ],
+        width: width2,
+        depth: depth2,
+        standDistance: 0.9,
+        seatedYaw: 0,
+        cameraOffset: -Math.PI / 3
+      });
       for (const x of [0.74, 1.46])
         box(x, 0.33, mid + 0.16, 0.08, 0.48, 0.36, walnut);
       pendant(-1.36, mid - 1.3, 2.94, 0.26, brass);
       break;
+    }
     case 16:
       replace(() => cabinet(-1.62, island, 1.48, 0.78, 0.98, base, white), base);
       cabinet(1.62, island + 0.32, 1.48, 0.78, 0.98, base, white);
@@ -7490,6 +7534,8 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
           });
           throw new Error("Model load timed out");
         }
+        if (name === `./${gigasetLoungeSofa.file}` && !hasGigasetSeatCushions(T, gltf.scene))
+          throw new Error("Gigaset furnishing is missing a usable seat cushion");
         const materials2 = new Set;
         gltf.scene.traverse((mesh) => {
           if (mesh.isMesh)
@@ -7586,11 +7632,20 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     }
     const tools = {
       block,
-      nativeSeat(footprint, { id, name, centre, size, standDistance }) {
+      nativeSeat(footprint, { id, name, centre, width: width2, height, depth: depth2, standDistance, seatedYaw, cameraOffset }) {
         const store2 = interiorStores["S" + slot2.number];
         const floor = store2.frame.world_origin_m[1] + store2.frame.floor_surface_y_m;
         const [x, top, z] = worldInteriorPoint(store2, centre);
         const [exitX, , exitZ] = worldInteriorPoint(store2, [centre[0], 0, centre[2] + standDistance]);
+        const aisleAngle = group.rotation.y + Math.PI;
+        const pose = { facing: 1, angle: aisleAngle };
+        if (seatedYaw !== undefined) {
+          pose.approachAngle = aisleAngle;
+          pose.angle = group.rotation.y + seatedYaw;
+        }
+        if (cameraOffset)
+          pose.cameraOffset = cameraOffset;
+        const size = [width2, height ?? top - floor, depth2];
         const placement = {
           id,
           name,
@@ -7599,7 +7654,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
           floor,
           accessible: true,
           exit: { x: exitX, y: floor, z: exitZ },
-          pose: { facing: 1, angle: group.rotation.y + Math.PI },
+          pose,
           clearance: {
             interactionRadius: 0.7,
             capsuleRadius: 0.3,
@@ -7607,7 +7662,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
             colliderDepth: footprint.depth
           }
         };
-        nativeStudioSeats.set(footprint, (collider) => createSeatAnchor(placement, collider, { size, top: top - floor, seatCentre: 0, front: -size[2] / 2 }, 1));
+        nativeStudioSeats.set(footprint, (collider) => createSeatAnchor(placement, collider, { size, top: top - floor, seatCentre: 0, front: -depth2 / 2 }, 1));
       },
       opaqueWall(x, y, z, w, h, d, color) {
         box(x, y, z, w, h, d, color);
@@ -10863,7 +10918,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       const { x, y, z, width, height, depth } = footprint;
       const shape = collider(x, y, z, width, height, depth);
       if (footprint === interiors.gigasetSeatBox)
-        seats.push(createGigasetLoungeSeat(shape.handle, footprint));
+        seats.push(createGigasetLoungeSeat(shape.handle, footprint), createGigasetBacklessSeat(shape.handle, footprint));
       const nativeSeat = interiors.nativeStudioSeats.get(footprint);
       if (nativeSeat)
         seats.push(nativeSeat(shape.handle));

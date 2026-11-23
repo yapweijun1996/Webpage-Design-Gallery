@@ -162,7 +162,7 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
     const footprint = block(x,height/2,z,width,height,depth);
     box(x,cushionY,z,1.6,cushionHeight,.77,c);box(x,.59,z-.32,1.61,.47,.19,c);
     for(const k of [-1,1])box(x+k*.75,.52,z,.16,.32,.71,c);
-    if (seat) t.nativeSeat?.(footprint,{...seat,centre:[x,cushionY+cushionHeight/2,z],size:[width,height,depth]});
+    if (seat) t.nativeSeat?.(footprint,{...seat,centre:[x,cushionY+cushionHeight/2,z],width,height,depth});
   }
   // Floors, side walls and a separate ceiling create real depth when the
   // visitor walks obliquely past the glazing. Aligned reveals frame each view.
@@ -387,18 +387,22 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
         box(x,1.24,mid+1,.61,2.23,.64,silver);box(x,1.44,mid+1.34,.49,.035,.04,charcoal);
       }
       plant(-side+.81,front-.85,1.61);break;
-    case 15: // Casio: walnut slatted ceiling, instrument gallery and bench.
+    case 15: { // Casio: walnut slatted ceiling, instrument gallery and bench.
       for(let i=-5;i<=5;i++)box(i*.58,4.04,mid,.23,.065,span-.28,0xcaaf8e);
       replace(() => cabinet(-1.05,mid-.59,1.78,.9,1.11,walnut,oak),walnut);
       block(1.1,.65,mid-.9,1.64,1.29,.92);
-      block(1.10,.34,mid+.16,1.01,.70,.50);
+      const benchX=1.10, benchZ=mid+.16, width=.99, depth=.49, cushionY=.61, cushionHeight=.16;
+      const bench=block(benchX,.34,benchZ,1.01,.70,.50);
       for(const x of [.46,1.73])box(x,.51,mid-.87,.13,.84,.13,charcoal);
       box(1.1,1.1,mid-.93,1.63,.36,.72,charcoal);
       // The full-size hybrid cabinet is installed by the room GLB.
       block(1.55,.5625,-4.00,1.434,.963,.489);
-      box(1.10,.61,mid+.16,.99,.16,.49,charcoal);
+      box(benchX,cushionY,benchZ,width,cushionHeight,depth,charcoal);
+      t.nativeSeat?.(bench,{id:'casio-keyboard-bench',name:'Casio keyboard bench',
+        centre:[benchX,cushionY+cushionHeight/2,benchZ],width,depth,standDistance:.90,seatedYaw:0,cameraOffset:-Math.PI/3});
       for(const x of [.74,1.46])box(x,.33,mid+.16,.08,.48,.36,walnut);
       pendant(-1.36,mid-1.3,2.94,.26,brass);break;
+    }
     case 16: // GP: white modular product wall, lime base cabinets and stepped demonstration tables.
       replace(() => cabinet(-1.62,island,1.48,.78,.98,base,white),base);
       cabinet(1.62,island+.32,1.48,.78,.98,base,white);

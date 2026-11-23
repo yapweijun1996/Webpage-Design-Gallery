@@ -23,6 +23,8 @@ from verify_mall_support import capture, face, probe_url, walk
 
 ZONE = "planned-space-17"
 SOFA = "gigaset-lounge-sofa"
+BENCH = "gigaset-backless-bench"
+BENCH_AISLE = ((38.9, 44), (38.9, 42.5))
 HANDSET = "S17-handset"
 STORY = "gigaset-phone-story"
 SOFA_ASSET = "gallery-assets/lounge-sofa-bench.glb"
@@ -41,8 +43,8 @@ class QuietServer(http.server.SimpleHTTPRequestHandler):
 
 
 def pose(page):
-    return page.evaluate("() => {const {x,z,zone,seatId,seatPhase,seated,nearby,doors} = __mall.state;"
-                         "return {x,z,zone,seatId,seatPhase,seated,nearby,door:doors['planned-space-17'],"
+    return page.evaluate("() => {const {x,y,z,zone,seatId,seatPhase,seated,nearby,doors} = __mall.state;"
+                         "return {x,y,z,zone,seatId,seatPhase,seated,nearby,door:doors['planned-space-17'],"
                          "capsule:__mall.state.capsuleEnabled, seatWeight:__mall.state.character.seatWeight};}")
 
 
@@ -86,31 +88,26 @@ def sofa_model(page, fallback):
     return model["status"]
 
 
-def scenario(page, out, width, touch, fallback, switch_tier):
-    assert_teleport(page, ZONE)
-    start = pose(page)
-    assert math.dist((start["x"], start["z"]), (32.6, 44)) < .12, start
-    walk(page, 35.9, 44, speed=1.9)
-    assert pose(page)["zone"] == ZONE and pose(page)["door"] > .9, pose(page)
-    page.wait_for_function("() => Boolean(__mall.testShopActions())", timeout=20000)
-
-    sofa = page.evaluate("id => __mall.state.seats.find(seat => seat.id === id)", SOFA)
-    assert sofa, "The Gigaset lounge sofa needs a registered native seat"
-    walk(page, 38.13, 44, speed=1.9)
-    walk(page, sofa["exitX"], sofa["exitZ"], speed=1.8)
-    face(page, sofa["x"], sofa["z"])
-    selected(page, SOFA, "Sit")
+def exercise_seat(page, out, label, touch, fallback, seat_id):
+    seats = page.evaluate("id => __mall.state.seats.filter(seat => seat.id === id)", seat_id)
+    assert len(seats) == 1, (seat_id, seats)
+    seat = seats[0]
+    walk(page, seat["exitX"], seat["exitZ"], speed=1.8)
+    approach = pose(page)
+    assert approach["capsule"] and abs(approach["y"] - seat["bounds"]["min"]["y"]) < .016, approach
+    face(page, seat["x"], seat["z"])
+    selected(page, seat_id, "Sit")
     asset_status = sofa_model(page, fallback)
     activate(page, touch)
     try:
         page.wait_for_function("id => __mall.state.seated && __mall.state.seatId === id"
-                               " && __mall.state.seatPhase === 'seated'", arg=SOFA, timeout=7000)
+                               " && __mall.state.seatPhase === 'seated'", arg=seat_id, timeout=7000)
     except Exception as error:
-        raise AssertionError((pose(page), page.locator("#nearby-name").inner_text(), sofa)) from error
+        raise AssertionError((seat_id, pose(page), page.locator("#nearby-name").inner_text(), seat)) from error
     seated = pose(page)
     assert not seated["capsule"] and seated["seatWeight"] == 1, seated
-    assert math.dist((seated["x"], seated["z"]), (sofa["x"], sofa["z"])) < .10, (seated, sofa)
-    capture(page, out, f"{width}-seated")
+    assert math.dist((seated["x"], seated["z"]), (seat["x"], seat["z"])) < .10, (seated, seat)
+    capture(page, out, f"{label}-seated")
 
     if touch:
         activate(page, True)
@@ -119,9 +116,26 @@ def scenario(page, out, width, touch, fallback, switch_tier):
         page.keyboard.press("Escape")
     page.wait_for_function("() => !__mall.state.seated && __mall.state.seatPhase === 'idle'")
     standing = pose(page)
-    assert standing["zone"] == ZONE and standing["seatId"] != SOFA and standing["capsule"], standing
-    assert math.dist((standing["x"], standing["z"]), (sofa["exitX"], sofa["exitZ"])) < .10, (standing, sofa)
-    capture(page, out, f"{width}-standing")
+    assert standing["zone"] == ZONE and standing["seatId"] is None and standing["capsule"], standing
+    assert math.dist((standing["x"], standing["z"]), (seat["exitX"], seat["exitZ"])) < .10, (standing, seat)
+    capture(page, out, f"{label}-standing")
+    return {"seatId":seat_id,"anchor":seat,"approach":approach,"seated":seated,"stood":standing,"sofaAsset":asset_status}
+
+
+def scenario(page, out, width, touch, fallback, switch_tier):
+    assert_teleport(page, ZONE)
+    start = pose(page)
+    assert math.dist((start["x"], start["z"]), (32.6, 44)) < .12, start
+    walk(page, 35.9, 44, speed=1.9)
+    assert pose(page)["zone"] == ZONE and pose(page)["door"] > .9, pose(page)
+    page.wait_for_function("() => Boolean(__mall.testShopActions())", timeout=20000)
+
+    walk(page, 38.13, 44, speed=1.9)
+    sofa = exercise_seat(page, out, width, touch, fallback, SOFA)
+    walk(page, 38.13, 44, speed=1.8)
+    for x, z in BENCH_AISLE:
+        walk(page, x, z, speed=1.8)
+    bench = exercise_seat(page, out, f"{width}-bench", touch, fallback, BENCH)
 
     switched_to = None
     if switch_tier and not touch:
@@ -129,12 +143,22 @@ def scenario(page, out, width, touch, fallback, switch_tier):
         page.locator("#graphics-quality").select_option("low")
         wait_for_quality(page, "low")
         close_menu(page)
-        face(page, sofa["x"], sofa["z"])
+        face(page, bench["anchor"]["x"], bench["anchor"]["z"])
+        selected(page, BENCH, "Sit")
+        sofa_model(page, fallback)
+        capture(page, out, f"{width}-bench-switched-low")
+        switched_to = "low"
+
+    for x, z in reversed(BENCH_AISLE):
+        walk(page, x, z, speed=1.8)
+    if switched_to:
+        walk(page, 38.13, 44, speed=1.8)
+        seat = sofa["anchor"]
+        walk(page, seat["exitX"], seat["exitZ"], speed=1.8)
+        face(page, seat["x"], seat["z"])
         selected(page, SOFA, "Sit")
         sofa_model(page, fallback)
         capture(page, out, f"{width}-switched-low")
-        switched_to = "low"
-
     handset = approach_handset(page)
     selected(page, HANDSET, handset["label"])
     activate(page, touch)
@@ -164,9 +188,8 @@ def scenario(page, out, width, touch, fallback, switch_tier):
     assert exited["zone"] != ZONE and not exited["seated"], exited
     page.wait_for_function("zone => __mall.state.doors[zone] < .1", arg=ZONE)
     capture(page, out, f"{width}-exited")
-    return {"seatId": SOFA, "anchor": sofa, "entrance": start, "seated": seated, "stood": standing, "exited": exited,
-            "sofaAsset": asset_status, "switchedTo": switched_to, "handset": handset_state,
-            "catalogue": catalogue_title, "standInput": "touch" if touch else "Escape"}
+    return {**sofa, "bench":bench, "entrance":start, "exited":exited, "switchedTo":switched_to,
+            "handset":handset_state, "catalogue":catalogue_title, "standInput":"touch" if touch else "Escape"}
 
 
 def run():

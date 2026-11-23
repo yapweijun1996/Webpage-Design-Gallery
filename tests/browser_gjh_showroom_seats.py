@@ -21,6 +21,7 @@ ROUTES = {
     "S14-leftmid": ((35.9, 20), (39.8, 21.8), (41.5, 21.8), (41.75, 21.4), (41.75, 18.0)),
     "S14-leftfront": ((35.9, 20), (37.2, 19.1)),
     "lg-studio-sofa": ((35.9, 20), (37.4, 20), (38.55, 19.3)),
+    "casio-keyboard-bench": ((35, 28), (37.1, 29)),
     "S15-backleft": ((35, 28), (37.1, 29), (40, 30.6), (41.7, 30.5), (42.9, 27.9),
                      (43.2, 26.4), (43.1, 25.9)),
 }
@@ -36,7 +37,8 @@ def pose(page):
 
 
 def exercise(page, seat_id, touch, out=None):
-    zone = "planned-space-14" if seat_id == "lg-studio-sofa" else f"planned-space-{seat_id[1:3]}"
+    store = {"lg-studio-sofa": "14", "casio-keyboard-bench": "15"}.get(seat_id, seat_id[1:3])
+    zone = f"planned-space-{store}"
     route = ROUTES[seat_id]
     assert_teleport(page, zone)
     arrival = pose(page)
@@ -58,8 +60,11 @@ def exercise(page, seat_id, touch, out=None):
     seated = pose(page)
     assert seated["seated"] and not seated["capsuleEnabled"] and seated["weight"] == 1, seated
     assert math.dist((seated["x"], seated["z"]), (seat["x"], seat["z"])) < .1, (seated, seat)
-    # The jar display, headphone rack and piano lid each obscure a straight-on view.
-    camera_offset = math.radians({"S08-leftmid": -60, "S13-backleft": 75, "S15-backleft": -60}.get(seat_id, 0))
+    if seat_id == "casio-keyboard-bench":
+        assert abs(math.remainder(seated["facing"] + math.pi / 2, math.tau)) < .02, seated
+    # These fixtures obscure the seated visitor in a straight-on view.
+    offsets = {"S08-leftmid": -60, "S13-backleft": 75, "S15-backleft": -60, "casio-keyboard-bench": -60}
+    camera_offset = math.radians(offsets.get(seat_id, 0))
     assert abs(math.remainder(seated["yaw"] - seated["facing"] - math.pi - camera_offset, math.tau)) < .03, seated
     if out:
         page.screenshot(path=out / f'{page.viewport_size["width"]}-{seat_id}-seated.png')
@@ -77,6 +82,16 @@ def exercise(page, seat_id, touch, out=None):
 
     for x, z in reversed(route):
         walk(page, x, z, speed=1.8)
+    if seat_id == "casio-keyboard-bench":
+        keyboard = page.evaluate("""async () => (await __mall.testShopActions())
+            .find(item => item.id === 'S15-leftfront')""")
+        walk(page, keyboard["standing"]["x"], keyboard["standing"]["z"], speed=1.8)
+        face(page, keyboard["x"], keyboard["z"])
+        selected(page, keyboard["id"], keyboard["label"])
+        activate(page, touch)
+        page.wait_for_function("id => __mall.testShopState(id)?.phase === 'done'", arg=keyboard["id"])
+        assert page.locator("#nearby-name").inner_text() == keyboard["done"]
+        walk(page, *route[0], speed=1.8)
     page.wait_for_function("zone => __mall.state.doors[zone] > .9", arg=zone, timeout=7000)
     # The normal arrival point is inside the door sensor. Continue into the arcade.
     outside_x = arrival["x"] + math.copysign(1.2, arrival["x"] - route[0][0])

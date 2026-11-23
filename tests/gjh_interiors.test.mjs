@@ -12,7 +12,7 @@ import {createSeatPlacements,isInFrontOfSeat} from '../demos/corporate/gjh/v11/a
 import {createProceduralSeat} from '../demos/corporate/gjh/v11/assets/interiors/procedural-seats.js';
 import {createGigasetLoungeSeat,gigasetLoungeSofa,gigasetSofaFallback} from '../demos/corporate/gjh/v11/assets/gallery-east-shops.js';
 import {
-  interiorAsset,interiorRoutes,interiorStores,interiorTiers,radians,worldInteriorBox
+  interiorAsset,interiorRoutes,interiorStores,interiorTiers,radians,worldInteriorBox,worldInteriorPoint
 } from '../demos/corporate/gjh/v11/assets/interiors/config.js';
 import {buildInteriorDecoration,interiorMaterials} from '../demos/corporate/gjh/v11/assets/interiors/decoration.js';
 import {floorFinish} from '../demos/corporate/gjh/v11/assets/interiors/surfaces.js';
@@ -986,7 +986,7 @@ test('Gigaset fallback ranges draw only near the shop until the gallery sofa is 
   assert.equal(fallbackIndices(),0);
 });
 
-test('the visible LG studio sofa uses its existing solid footprint and a clear native front exit', async t => {
+test('visible LG and Casio studio seats use their own cushions, solid footprints and clear aisle exits', async t => {
   mockInteriorDownloads(t);
   globalThis.window = {requestIdleCallback() {}};
   globalThis.document = {addEventListener() {}};
@@ -994,48 +994,183 @@ test('the visible LG studio sofa uses its existing solid footprint and a clear n
   await R.init();
   const scene = new T.Scene();
   const studio = await createExpandedInteriors(T,expandedLayout,scene);
-  const footprint = studio.collisionBoxes.find(box =>
-    Math.abs(box.x-39.9) < 1e-6 && Math.abs(box.z-19.14) < 1e-6 && box.height === .78);
-  assert(footprint);
-  assert.equal(typeof studio.nativeStudioSeats?.get(footprint),'function');
-  assert.equal(studio.nativeStudioSeats.size,1,'Sony replacement proxies must not expose Sit');
-
   const physics = new R.World({x:0,y:0,z:0});
   t.after(()=>physics.free());
   const makeBox = ([x,y,z],[w,h,d],yaw) => physics.createCollider(
     R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
       .setRotation({x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}));
-  let collider;
+  const handles = new Map();
   for (const box of studio.collisionBoxes) {
     const solid = makeBox([box.x,box.y,box.z],[box.width,box.height,box.depth],0);
-    if (box === footprint) collider = solid;
+    handles.set(box,solid.handle);
   }
-  const store = interiorStores.S14;
-  for (const box of store.colliders) {
+  for (const store of [interiorStores.S14,interiorStores.S15]) for (const box of store.colliders) {
     const {center,size,yaw} = worldInteriorBox(store,box);
     makeBox(center,size,yaw);
   }
   physics.step();
-  const seat = studio.nativeStudioSeats.get(footprint)(collider.handle);
-  assert.equal(seat.id,'lg-studio-sofa');
-  assert.deepEqual([seat.x,seat.y,seat.z,seat.floor,seat.exitX,seat.exitZ].map(round),[39.9,.52,19.14,.081,38.9,19.14]);
-  assert.equal(seat.collider,collider.handle);
-  assert(isInFrontOfSeat(seat,seat.exit));
-
-  studio.update({x:seat.exitX,y:0,z:seat.exitZ});
-  scene.updateMatrixWorld(true);
-  const batch = scene.getObjectByName('Concourse window studios');
-  const [cushion] = new T.Raycaster(new T.Vector3(seat.x,.56,seat.z),new T.Vector3(0,-1,0)).intersectObject(batch);
-  assert(Math.abs(cushion.point.y-seat.y) < .0001);
+  const ids = [...studio.nativeStudioSeats.values()].map(anchor=>anchor(0).id).sort();
+  assert.deepEqual(ids,['casio-keyboard-bench','lg-studio-sofa'],'only visible native studio seats register');
 
   const orientation = {x:0,y:0,z:0,w:1};
   const capsule = new R.Capsule(.55,.3);
-  const standing = new T.Vector3(seat.exitX,seat.floor+.91,seat.exitZ);
-  const seated = new T.Vector3(seat.x,seat.floor+.89,seat.z);
-  assert.equal(physics.intersectionWithShape(standing,orientation,capsule),null);
-  for (let step=0; step<=20; step++) {
-    const position = new T.Vector3().lerpVectors(standing,seated,step/20);
-    assert.equal(physics.intersectionWithShape(position,orientation,capsule,undefined,undefined,undefined,undefined,
-      shape=>shape.handle!==seat.collider),null,`blocked sit/stand sample ${step}`);
+  for (const [id,x,y,z,height,exitX] of [
+    ['lg-studio-sofa',39.9,.52,19.14,.78,38.9],
+    ['casio-keyboard-bench',39.74,.69,29.1,.70,38.84]
+  ]) {
+    const box = studio.collisionBoxes.find(box=>Math.abs(box.x-x)<1e-6 && Math.abs(box.z-z)<1e-6 && box.height===height);
+    assert(box,id);
+    const seat = studio.nativeStudioSeats.get(box)(handles.get(box));
+    assert.equal(seat.id,id);
+    assert.equal(seat.collider,handles.get(box));
+    assert.deepEqual([seat.x,seat.y,seat.z,seat.floor,seat.exitX,seat.exitZ].map(round),[x,y,z,.081,exitX,z]);
+    assert(isInFrontOfSeat(seat,seat.exit));
+    assert(!isInFrontOfSeat(seat,{x:2*x-exitX,z}),'do not mount through the keyboard or the sofa back');
+    studio.update({x:seat.exitX,y:0,z:seat.exitZ});
+    scene.updateMatrixWorld(true);
+    const batch = scene.getObjectByName('Concourse window studios');
+    const [cushion] = new T.Raycaster(new T.Vector3(x,y+.04,z),new T.Vector3(0,-1,0)).intersectObject(batch);
+    assert(Math.abs(cushion.point.y-y)<.0001,id);
+    const standing = new T.Vector3(exitX,seat.floor+.91,z);
+    const seated = new T.Vector3(x,seat.floor+.89,z);
+    assert.equal(physics.intersectionWithShape(standing,orientation,capsule),null);
+    for (let step=0; step<=20; step++) {
+      const position = new T.Vector3().lerpVectors(standing,seated,step/20);
+      assert.equal(physics.intersectionWithShape(position,orientation,capsule,undefined,undefined,undefined,undefined,
+        shape=>shape.handle!==seat.collider),null,`${id} blocked sit/stand sample ${step}`);
+    }
+    if (id==='lg-studio-sofa') {
+      assert(Math.abs(seat.angle-Math.PI/2)<1e-6);
+      continue;
+    }
+    assert.equal(seat.footY,seat.floor);
+    assert.equal(seat.bounds.max.y,seat.y);
+    const store = interiorStores.S15;
+    const load = createInteriorModelLoader(T,assets,new GLTFLoader(),()=>'low');
+    const room = await load(roomDetails.S15,new AbortController().signal);
+    t.after(()=>disposeInteriorModel(room));
+    room.position.set(...store.frame.world_origin_m);
+    room.rotation.y=radians(store.frame.yaw_world_deg);
+    room.updateMatrixWorld(true);
+    // Front ivory surface of CT-S1 white key 19, on the installed room instrument.
+    const key = new T.Vector3(...worldInteriorPoint(store,[1.111675,1.326,-.505]));
+    const eye = new T.Vector3(x,y+.80,z);
+    const playingDirection = key.clone().sub(eye).setY(0).normalize();
+    assert(playingDirection.dot(new T.Vector3(-Math.sin(seat.angle),0,-Math.cos(seat.angle)))>.999);
+    const [hit] = new T.Raycaster(eye,key.clone().sub(eye).normalize()).intersectObject(room,true);
+    assert(hit && hit.point.distanceTo(key)<.001,'the keys must be visible from the seated eye');
+    const color = new T.Color().fromBufferAttribute(hit.object.geometry.attributes.color,hit.face.a);
+    assert.equal(color.getHexString(),'f0eee8');
   }
+  const withoutCasio = {...expandedLayout,slots:expandedLayout.slots.filter(slot=>slot.number!=='15')};
+  const absent = await createExpandedInteriors(T,withoutCasio,new T.Scene());
+  assert(![...absent.nativeStudioSeats.values()].some(anchor=>anchor(0).id==='casio-keyboard-bench'));
+});
+
+test('Gigaset backless bench has a supported cushion and clear walk and stand on the shared fixture', async t => {
+  const gallery = await import('../demos/corporate/gjh/v11/assets/gallery-east-shops.js');
+  assert.equal(typeof gallery.createGigasetBacklessSeat,'function');
+  mockInteriorDownloads(t);
+  globalThis.window = {requestIdleCallback() {}};
+  globalThis.document = {addEventListener() {}};
+  t.after(()=>{ delete globalThis.window; delete globalThis.document; });
+  await R.init();
+  const scene = new T.Scene();
+  const studio = await createExpandedInteriors(T,expandedLayout,scene);
+  const footprint = studio.gigasetSeatBox;
+  assert(studio.collisionBoxes.includes(footprint));
+  const physics = new R.World({x:0,y:0,z:0});
+  t.after(()=>physics.free());
+  const addBox = ([x,y,z],[w,h,d],yaw=0) => physics.createCollider(
+    R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
+      .setRotation({x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}));
+  let body;
+  for (const box of studio.collisionBoxes) {
+    const collider = addBox([box.x,box.y,box.z],[box.width,box.height,box.depth]);
+    if (box === footprint) body=collider;
+  }
+  const store = interiorStores.S17;
+  for (const footprint of store.colliders) {
+    const {center,size,yaw} = worldInteriorBox(store,footprint);
+    addBox(center,size,yaw);
+  }
+  physics.step();
+  const seat = gallery.createGigasetBacklessSeat(body.handle,footprint);
+  const sofa = gallery.createGigasetLoungeSeat(body.handle,footprint);
+  assert.equal(seat.id,'gigaset-backless-bench');
+  assert.notEqual(seat.id,sofa.id);
+  assert.equal(seat.collider,sofa.collider);
+  assert.equal(seat.floor,.081);
+  assert.deepEqual([seat.x,seat.y,seat.z].map(round),[38.037448,.468,41.841578]);
+  assert(isInFrontOfSeat(seat,seat.exit));
+  assert(Math.hypot(seat.exitX-sofa.exitX,seat.exitZ-sofa.exitZ) > seat.clearance.interactionRadius+sofa.clearance.interactionRadius);
+
+  const bytes = readFileSync(new URL(gigasetLoungeSofa.file,assets));
+  const {scene:assembly} = await new GLTFLoader().parseAsync(Uint8Array.from(bytes).buffer,'');
+  assert(gallery.hasGigasetSeatCushions(T,assembly));
+  const sofaOnly = new T.Mesh(new T.BoxGeometry(.9,.10,.4));
+  sofaOnly.position.set(-.95,.431,-.23);
+  const missingBench = new T.Group().add(sofaOnly);
+  assert(!gallery.hasGigasetSeatCushions(T,missingBench));
+  assembly.position.set(footprint.x,seat.floor,footprint.z);
+  assembly.rotation.y = gigasetLoungeSofa.yaw-Math.PI/2;
+  assembly.scale.setScalar(gigasetLoungeSofa.scale);
+  assembly.updateMatrixWorld(true);
+  studio.update({x:seat.exitX,y:0,z:seat.exitZ});
+  scene.updateMatrixWorld(true);
+  const fallback = scene.getObjectByName('Concourse window studios');
+  const ray = new T.Raycaster(new T.Vector3(seat.x,seat.y+.04,seat.z),new T.Vector3(0,-1,0));
+  for (const [variant, target] of [['actual GLB',assembly],['visible fallback',fallback]]) {
+    const [cushion] = ray.intersectObject(target,true);
+    assert(Math.abs(cushion.point.y-seat.y) < .0001,variant);
+  }
+
+  const capsule = new R.Capsule(.55,.3), upright = {x:0,y:0,z:0,w:1};
+  const standY = seat.floor+.91;
+  const point = (x,z,y=standY) => new T.Vector3(x,y,z);
+  const approach = [point(35.9,44),point(38.9,44),point(38.9,42.5),point(seat.exitX,seat.exitZ)];
+  const clear = (from,to,exclude) => {
+    const steps = Math.ceil(from.distanceTo(to)/.05);
+    for(let i=0;i<=steps;i++) {
+      const cursor = new T.Vector3().lerpVectors(from,to,i/steps);
+      assert.equal(physics.intersectionWithShape(cursor,upright,capsule,undefined,undefined,undefined,undefined,
+        collider=>!exclude||collider.handle!==seat.collider),null,`capsule overlap at ${cursor.toArray()}`);
+    }
+  };
+  for(let i=1;i<approach.length;i++) clear(approach[i-1],approach[i],false);
+  clear(approach.at(-1),point(seat.x,seat.z,seat.floor+.89),true);
+});
+
+test('a decoded Gigaset replacement without both cushions preserves the usable fallback', async t => {
+  const gallery = await import('../demos/corporate/gjh/v11/assets/gallery-east-shops.js');
+  mockInteriorDownloads(t);
+  const readFixture = globalThis.fetch;
+  const validStool = readFileSync(new URL('gogo-bar-stool.glb',assets));
+  t.mock.method(globalThis,'fetch',(input,options)=>{
+    if (new URL(input.url??input).pathname.endsWith(gigasetLoungeSofa.file))
+      return Promise.resolve(new Response(validStool,{headers:{'Content-Type':'model/gltf-binary'}}));
+    return readFixture(input,options);
+  });
+  let idle;
+  const fallback = t.mock.method(console,'warn',()=>{});
+  globalThis.window = {requestIdleCallback(callback) { idle=callback; }};
+  globalThis.document = {addEventListener() {}};
+  t.after(()=>{ delete globalThis.window; delete globalThis.document; });
+  const scene = new T.Scene();
+  const studio = await createExpandedInteriors(T,expandedLayout,scene);
+  const seat = gallery.createGigasetBacklessSeat(1,studio.gigasetSeatBox);
+  const observer = {x:seat.exitX,y:0,z:seat.exitZ};
+  studio.update(observer);
+  idle();
+  const asset = `./${gigasetLoungeSofa.file}`;
+  for(let attempt=0;attempt<30 && studio.preloadState.models[asset]!=='fallback';attempt++) await new Promise(setImmediate);
+  assert.equal(studio.preloadState.models[asset],'fallback');
+  for(let attempt=0;attempt<30 && fallback.mock.callCount()===0;attempt++) await new Promise(setImmediate);
+  assert.match(fallback.mock.calls[0].arguments[1].message,/missing a usable seat cushion/);
+  assert.equal(scene.getObjectByName(`S17 gallery: ${gigasetLoungeSofa.file}`),undefined);
+  studio.update(observer);
+  scene.updateMatrixWorld(true);
+  const ray = new T.Raycaster(new T.Vector3(seat.x,seat.y+.04,seat.z),new T.Vector3(0,-1,0));
+  const [contact] = ray.intersectObject(scene.getObjectByName('Concourse window studios'));
+  assert(Math.abs(contact.point.y-seat.y)<.0001);
 });

@@ -44,7 +44,7 @@ Khronos glTF Validator 2.0.0-dev.3.10 reported zero errors and warnings for GLB 
 
 ## Adding a seat
 
-Add a placement to `assets/seat-placements.js` with its floor, position, facing and name. The world uses the placement to create the model and collider and derives the seat and exit anchors. The player checks the capsule path to the anchor and the exit before allowing a sit or stand. Verify both approaches against actual surrounding colliders and the floor; a nominal anchor alone does not prove accessibility. Existing ground-floor seats and all three upper-deck benches share this path.
+Add a placement to `assets/seat-placements.js` with its floor, position, facing and name. The world uses the placement to create the model and collider and derives the seat and exit anchors. The player checks the capsule path to the anchor and the exit before allowing a sit or stand. Verify both approaches against actual surrounding colliders and the floor; a nominal anchor alone does not prove accessibility. Existing ground-floor seats and all three upper-deck benches share this path. A backless bench can supply `pose.approachAngle` when its safe aisle is on the opposite side from the direction the visitor faces. The Casio keyboard bench uses this to keep the keys in front and its standing point in the aisle.
 
 The third upper-deck bench is at `(-3, 6)`, facing its exit at `(-3, 7.2)` between the bench and the lift's south guard. This moves it off the shaft and registers it as a seat. The placement tests check the slab and guard clearance; the browser test exercises the sit/stand route against the actual colliders.
 

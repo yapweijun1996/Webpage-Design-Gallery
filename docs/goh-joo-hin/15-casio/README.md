@@ -45,6 +45,8 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 
 The audience chair beside the piano offers **Sit** from the side aisle. The visitor sits at world Y 0.601 m. **Stand** on touch or **Escape** on the keyboard restores the visitor to the clear floor beside the instrument. At 390 and 1440 px, Chrome completed the seat transition, the piano phrase and the walk back to the arcade. The seated view looks past the raised piano lid so the visitor and chair stay visible. [Seated touch view](seat-touch.webp)
 
+The CT-S1 keyboard has a 0.690 m-high bench. Approach from the aisle and sit facing the keys. The seated camera shows the visitor in profile. Stand and approach the keyboard to play the C4, E4 and G4 phrase. [Seated view on touch and desktop](keyboard-bench-runtime.webp)
+
 ## Catalogue exhibit
 
 The recital grand remains the room's architectural anchor. The adjacent station holds the CT-S1BK form study. The separate GP-510BP cabinet sits in the rear alcove. The story compares the portable keyboard with the three-pedal GP-510BP cabinet form and links to Casio Music Singapore.

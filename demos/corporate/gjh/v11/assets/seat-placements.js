@@ -95,6 +95,7 @@ export function createSeatAnchor(placement, collider, profile = loungeBench, sca
 }
 
 export function isInFrontOfSeat(seat, {x,z}) {
-  const depth = (x-seat.x)*Math.sin(seat.angle) + (z-seat.z)*Math.cos(seat.angle);
+  const angle = seat.pose?.approachAngle ?? seat.angle;
+  const depth = (x-seat.x)*Math.sin(angle) + (z-seat.z)*Math.cos(angle);
   return depth <= -seat.frontEdge;
 }
