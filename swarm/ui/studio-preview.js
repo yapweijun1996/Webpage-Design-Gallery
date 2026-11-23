@@ -11,6 +11,8 @@
   let hosts = {}, cur = {}, seed = {}, order = [];
   let overlays = false;
   let ready = false, anchor;
+  let tokens = document.getElementById('project-tokens');
+  let pendingTokens, tokenRevision = 0;
 
   function node(tag, className, value) {
     const el = document.createElement(tag);
@@ -22,6 +24,26 @@
   function fetchText(url) {
     return fetch(url, { cache: 'no-store', credentials: 'omit' })
       .then(response => response.ok ? response.text() : '').catch(() => '');
+  }
+
+  function refreshSharedStyle() {
+    pendingTokens?.remove();
+    const next = node('link');
+    next.rel = 'stylesheet';
+    next.href = '/tokens.css?swarm_shared=' + Date.now() + '-' + (++tokenRevision);
+    next.addEventListener('load', () => {
+      if (pendingTokens !== next) return;
+      tokens.remove();
+      tokens = next;
+      pendingTokens = null;
+      reportView(false);
+    }, { once: true });
+    next.addEventListener('error', () => {
+      if (pendingTokens === next) pendingTokens = null;
+      next.remove();
+    }, { once: true });
+    pendingTokens = next;
+    tokens.after(next);
   }
 
   function build(agents) {
@@ -363,6 +385,9 @@
         place(data, data);
         mark(data, data);
         load(data, true);
+        break;
+      case 'shared-style':
+        refreshSharedStyle();
         break;
       case 'asset': {
         const asset = typeof data === 'string' && /^assets\/generated\/(?:(\d{2})-)?[\w][\w.-]*\.(?:svg|png|webp|gif|avif|jpe?g|ico)$/.exec(data);

@@ -7,7 +7,8 @@ const os = require('node:os');
 const path = require('node:path');
 const { test } = require('node:test');
 const { crc32, deflateSync } = require('node:zlib');
-const { impact, compareWidth, summarizeWidths } = require('../tools/impact-check');
+const { impact, compareWidth, summarizeWidths, sharedTokensImpact, summarizeSharedTokens, captureStableShared } = require('../tools/impact-check');
+const { decodePng } = require('../tools/anchor-qa');
 
 const HEADER = '01-header';
 const HERO = '02-hero';
@@ -195,6 +196,147 @@ test('the CLI does not expose the component restore policy', () => {
   const result = spawnSync(process.execPath, [TOOL, '--before', 'before', '--after', 'after', '--component-restore'], { encoding: 'utf8' });
   assert.equal(result.status, 2);
   assert.match(result.stderr, /Unknown option.*--component-restore/);
+});
+
+const approvalAppearance = { theme: 'dark', brand: 'forest-gold', lang: 'ms', colorScheme: 'light' };
+
+test('shared captures wait for matching consecutive paints and stop at a bounded deadline', async () => {
+  const frames = [original, tinted, tinted];
+  const calls = [];
+  const image = await captureStableShared(async () => {
+    calls.push('capture');
+    return frames.shift();
+  }, async () => { calls.push('settle'); });
+  assert.equal(image, tinted);
+  assert.deepEqual(calls, ['settle', 'capture', 'settle', 'capture', 'settle', 'capture']);
+
+  const staleFrames = [original, null, original, tinted, tinted];
+  assert.equal(await captureStableShared(async () => staleFrames.shift(), async () => {}), tinted);
+
+  let attempts = 0;
+  await assert.rejects(captureStableShared(async () => Buffer.from([attempts++]), async () => {}),
+    /did not paint a stable screenshot/);
+  assert.equal(attempts, 5);
+
+  const controller = new AbortController();
+  await assert.rejects(captureStableShared(async () => assert.fail('A cancelled capture must stop before taking another image.'),
+    async () => controller.abort(), controller.signal), { name: 'AbortError' });
+});
+
+function tokensView(sections, { horizontalOverflow = 0, consoleErrors = [], resources = [] } = {}) {
+  return { ...snapshot(sections, horizontalOverflow, consoleErrors), png: original, resources };
+}
+
+test('shared token review binds all section images, loaded resources and exact appearances to the approval digest', () => {
+  const ids = [HEADER, HERO];
+  const before = tokensView({ [HEADER]: section(0), [HERO]: section(1) });
+  const after = tokensView({ [HEADER]: section(0, tinted), [HERO]: section(2, tinted) });
+  const makeReport = (candidate = after, appearance = approvalAppearance) =>
+    summarizeSharedTokens([{ width: 393, height: 844, before, after: candidate }], ids, appearance);
+  const report = makeReport();
+  assert.equal(report.ok, true);
+  assert.equal(compareWidth(before, after, HEADER).unexpected.includes(HERO), true);
+  assert.deepEqual(report.widths, [393]);
+  assert.deepEqual(report.problems, []);
+  assert.deepEqual(report.evidence[393].sections[HERO], { before: original, after: tinted });
+  assert.equal(report.perSection[1].widths[0].diffRatio, 0.5);
+  assert.equal(report.perSection[1].widths[0].boxDelta.y, 1);
+  assert.notEqual(report.perSection[1].widths[0].before.sha256, report.perSection[1].widths[0].after.sha256);
+  assert.equal(makeReport().digest, report.digest);
+  assert.notEqual(makeReport(after, { ...approvalAppearance, lang: 'en' }).digest, report.digest);
+  assert.notEqual(makeReport({ ...after, resources: [{ path: '/tokens.css', status: 200, sha256: 'different' }] }).digest, report.digest);
+});
+
+test('shared token review rejects missing expected evidence, overflow and candidate runtime errors', () => {
+  const error = { section: null, message: 'Uncaught fixture failure' };
+  const before = tokensView({ [HEADER]: section(0), [HERO]: section(1), [FOOTER]: null }, { consoleErrors: [error] });
+  const after = tokensView({ [HEADER]: section(0, original, {}, 1), [HERO]: null, [FOOTER]: null }, {
+    horizontalOverflow: 1, consoleErrors: [error],
+  });
+  const result = summarizeSharedTokens([{ width: 393, height: 844, before, after }], [HEADER, HERO, FOOTER], approvalAppearance);
+  assert.equal(result.ok, false);
+  assert.deepEqual(result.problems, [
+    '393px: 01-header has horizontal overflow.',
+    '393px: 02-hero is missing or not visible in one of the previews.',
+    '393px: 10-footer is missing or not visible in one of the previews.',
+    '393px: the proposed preview has horizontal overflow.',
+    '393px: the proposed preview has browser errors.',
+  ]);
+  assert.deepEqual(result.evidence[393].sections[HERO], { before: original, after: null });
+  assert.deepEqual(result.perWidth[0].consoleErrors.added, []);
+});
+
+test('preserves intentionally hidden sections and empty scaffold roots at a breakpoint', () => {
+  const placeholder = { box: {x: 0, y: 100, width: 393, height: 0}, hidden: true, horizontalOverflow: 0 };
+  const hidden = tokensView({ [HEADER]: placeholder });
+  const visible = tokensView({ [HEADER]: section(0) });
+  const assess = (before, after) => summarizeSharedTokens([{ width: 393, height: 844, before, after }], [HEADER], {});
+  assert.equal(assess(hidden, hidden).ok, true);
+  assert.equal(assess(hidden, visible).ok, true);
+  assert.equal(assess(visible, hidden).ok, false);
+  assert.equal(assess(hidden, tokensView({ [HEADER]: null })).ok, false);
+});
+
+test('shared token review validates its scope and Studio appearance before opening a browser', async () => {
+  const args = ['does-not-exist', 'does-not-exist'];
+  await assert.rejects(sharedTokensImpact(...args, { expectedSections: [HEADER, '01-duplicate'] }), /distinct expected Studio section IDs/);
+  await assert.rejects(sharedTokensImpact(...args, { expectedSections: [HEADER], appearance: { theme: 'bad' } }), /valid Studio appearance/);
+  await assert.rejects(sharedTokensImpact(...args, { signal: AbortSignal.abort() }), { name: 'AbortError' });
+});
+
+test('shared token approval captures three opaque Studio viewports and reproduces its approval digest in Chrome', {
+  skip: process.env.SWARM_SHARED_TOKENS_CHROME_TEST !== '1' && 'Set SWARM_SHARED_TOKENS_CHROME_TEST=1 to run the Chrome proof',
+}, async t => {
+  const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-shared-tokens-test-'));
+  t.after(() => fs.rmSync(scratch, { recursive: true, force: true }));
+  function makeProject(name, color) {
+    const dir = path.join(scratch, name);
+    const sections = path.join(dir, 'sections');
+    const assets = path.join(dir, 'assets/generated');
+    fs.mkdirSync(sections, { recursive: true });
+    fs.mkdirSync(assets, { recursive: true });
+    fs.writeFileSync(path.join(assets, 'token-sample.svg'), '<svg xmlns="http://www.w3.org/2000/svg" width="5" height="5"><rect width="5" height="5" fill="gray"/></svg>');
+    fs.writeFileSync(path.join(dir, 'tokens.css'), `
+      :root { --shared-fixture-color: #000; }
+      @media (prefers-color-scheme: light) and (prefers-reduced-motion: reduce) {
+        :root[data-theme=dark][data-brand=forest-gold][lang=ms] { --shared-fixture-color: ${color}; }
+      }
+    `);
+    fs.writeFileSync(path.join(sections, HEADER + '.html'), `
+      <header id="${HEADER}" class="s-01"><p data-i18n="fixture.heading">Default words</p><img src="/assets/generated/token-sample.svg" alt=""></header>
+    `);
+    fs.writeFileSync(path.join(sections, HERO + '.html'), `
+      <section id="${HERO}" class="s-02"><h1>Beyond the first viewport</h1></section>
+    `);
+    fs.writeFileSync(path.join(sections, HEADER + '.css'), '.s-01 { position: relative; height: 1700px; background: #eee; } .s-01::after { content: ""; position: absolute; inset: 1400px 0 auto; height: 100px; background: var(--shared-fixture-color); } .s-01 p { margin: 0; }');
+    fs.writeFileSync(path.join(sections, HERO + '.css'), '.s-02 { height: 120.171875px; background-color: var(--shared-fixture-color); } .s-02 h1 { margin: 0; }');
+    fs.mkdirSync(path.join(dir, 'i18n'));
+    fs.writeFileSync(path.join(dir, 'i18n/ms.json'), JSON.stringify({ messages: { 'fixture.heading': 'Tajuk ujian' } }));
+    return dir;
+  }
+  const before = makeProject('before', '#224466');
+  const after = makeProject('after', '#662244');
+  const options = { appearance: approvalAppearance, expectedSections: [HERO, HEADER] };
+  const result = await sharedTokensImpact(before, after, options);
+  assert.equal(result.ok, true, result.problems.join('\n'));
+  assert.deepEqual(result.perWidth.map(({ width, height }) => [width, height]), [[393, 844], [768, 1024], [1440, 900]]);
+  for (const { width, height, resources } of result.perWidth) {
+    const { before: left, after: right, sections } = result.evidence[width];
+    assert.deepEqual([decodePng(left).width, decodePng(right).height], [width, height]);
+    const middle = decodePng(sections[HEADER].after);
+    assert.equal(middle.height, 1700);
+    const pixel = (1450 * middle.width + 100) * 3;
+    assert.deepEqual([...middle.rgb.subarray(pixel, pixel + 3)], [102, 34, 68]);
+    assert.deepEqual([...decodePng(sections[HERO].before).rgb.subarray(-3)], [34, 68, 102]);
+    assert.deepEqual([...decodePng(sections[HERO].after).rgb.subarray(-3)], [102, 34, 68]);
+    for (const resource of ['/i18n/ms.json', '/assets/generated/token-sample.svg', '/ds/themes.css', '/p/sections/01-header.html']) {
+      assert.ok(resources.before.find(entry => entry.path === resource && entry.status === 200), resource);
+      assert.deepEqual(resources.before.find(entry => entry.path === resource), resources.after.find(entry => entry.path === resource));
+    }
+  }
+  assert.equal(result.perSection.find(({ id }) => id === HERO).widths.every(({ diffRatio }) => diffRatio > 0.8), true);
+  const replay = await sharedTokensImpact(makeProject('replay-before', '#224466'), makeProject('replay-after', '#662244'), options);
+  assert.equal(replay.digest, result.digest);
 });
 
 // Run explicitly where headless Chrome is permitted: SWARM_IMPACT_CHROME_TEST=1 node --test swarm/test/impact-check.test.js

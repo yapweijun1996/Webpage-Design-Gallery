@@ -3,7 +3,7 @@
 A viewer stacks 10 section fragments into ONE page and hot-swaps each one whenever its files change. A manager (Claude) is watching live and may leave you instructions. Read `brief.md` for the business. Design tokens and components come from the Swarm Design System (SDS, folder `design-system/`, rules in `design-system/STANDARD.md`, API in `design-system/SDS_SPEC.md`). Never hard-code colors, font sizes, spacing, radii, durations or easings.
 
 ## Ownership (strict)
-- You own exactly: `sections/NN-name.html`, `sections/NN-name.css`, and `notes/NN.md`. Touch nothing else. Never edit another agent's files. You may READ everything, including `inbox/NN.md` (manager messages for you).
+- You own exactly: `sections/NN-name.html`, `sections/NN-name.css`, and `notes/NN.md`. The launch prompt also identifies any private outbox or proposal file used to send a message to the server. Never edit another agent’s files or the shared stylesheet. You may READ everything, including `inbox/NN.md` (manager messages for you).
 - `NN-name.html` is a FRAGMENT: one root `<section class="s-NN" id="NN-name">` (the header may use `<header>`). No html/head/body, no scripts, no external requests, no web fonts.
 - All CSS must be scoped under `.s-NN`. Assume `*{box-sizing:border-box}` and page background `var(--dc-bg)` are already set. Sections are full width; center content with `max-width: var(--dc-container)`.
 - Anchors: every section root has id `NN-section` (see `sections/` file names, e.g. `#02-hero`). Link to other sections only with those ids.

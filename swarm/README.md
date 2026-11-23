@@ -163,6 +163,26 @@ keeps the token out of runner environments and the isolated preview. The control
 assumes a trusted local account, including processes running as that account.
 The generation and advisor actions require explicit confirmation in Studio.
 
+## Shared style proposals
+
+During an implementation turn a section owner can propose a change to an
+existing custom property in the project’s `tokens.css`. Write
+`token-proposal.json` in the worker workspace. For example, this proposal
+updates the second declaration of the same token in stylesheet order.
+
+```json
+[{ "name": "--dc-brand", "occurrence": 1, "value": "#246248" }]
+```
+
+The server saves the proposal when the worker turn passes its publication
+checks. In Studio, open **Review → Shared style proposals** to compare the CSS
+and measure its effects. Chrome captures the selected appearance at 393, 768
+and 1440 px. Inspect the viewport and section screenshots before approving.
+Approval repeats the capture and requires matching evidence, input files and
+anchor. Rejecting a proposal leaves the live stylesheet intact. An approved
+decision records the operator, time and undo snapshot. Automated visual QA
+repairs continue to edit only their assigned section.
+
 ## Component history
 
 Open **Review** and select a component under **Component history**. Each row
@@ -183,6 +203,8 @@ python swarm/test/browser_fast_path.py
 python swarm/test/browser_studio_anchors.py
 python swarm/test/browser_studio_anchor_repair.py
 python swarm/test/browser_studio_component_history.py
+python swarm/test/browser_studio_shared_proposals.py
+SWARM_SHARED_PROPOSALS_E2E_TEST=1 node --test swarm/test/shared-proposals-e2e.test.js
 ```
 
 The browser checks use Python Playwright with Chrome. Set `GALLERY_CHROME`

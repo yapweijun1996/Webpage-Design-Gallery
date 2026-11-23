@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="/studio.css">
   <link rel="stylesheet" href="/studio-anchors.css">
   <link rel="stylesheet" href="/studio-components.css">
+  <link rel="stylesheet" href="/studio-shared-proposals.css">
   <script defer src="/ds/runtime.js"></script>
   <script defer src="/ds/i18n.js"></script>
   <script defer src="/channel.js"></script>
@@ -26,6 +27,7 @@
   <script defer src="/studio-compare.js"></script>
   <script defer src="/studio-anchors.js"></script>
   <script defer src="/studio-components.js"></script>
+  <script defer src="/studio-shared-proposals.js"></script>
   <script defer src="/studio.js"></script>
 </head>
 <body class="studio" data-workspace="design" data-mobile-pane="preview" data-sidebar="open" data-inspector="open">
@@ -185,6 +187,11 @@
           <p id="anchor-access" hidden></p>
           <p id="anchor-status" role="status"></p>
         </section>
+        <section id="shared-proposals" class="studio-card studio-shared-proposals" aria-labelledby="shared-proposals-title">
+          <h3 id="shared-proposals-title" tabindex="-1">Shared style proposals</h3>
+          <p id="shared-proposals-message" role="status">Loading proposals…</p>
+          <ul id="shared-proposals-list" aria-label="Shared style proposals"></ul>
+        </section>
         <section id="component-history" class="studio-card studio-component-history" aria-labelledby="component-history-title">
           <h3 id="component-history-title">Component history</h3>
           <p>Restore a section’s files to their state before a publication.</p>
@@ -343,6 +350,58 @@
         <button type="submit" class="studio-button" id="component-restore-confirm" disabled>Restore component</button>
       </footer>
     </form>
+  </dialog>
+  <dialog id="shared-proposal-dialog" class="studio-shared-dialog" aria-labelledby="shared-proposal-title">
+    <header>
+      <h2 id="shared-proposal-title" tabindex="-1">Review shared tokens</h2>
+      <button type="button" id="shared-proposal-close" class="ibtn" data-icon="close" aria-label="Close proposal"></button>
+    </header>
+    <div class="studio-shared-dialog-body">
+      <p id="shared-proposal-context"></p>
+      <section id="shared-proposal-changes" aria-labelledby="shared-proposal-changes-title" hidden>
+        <h3 id="shared-proposal-changes-title">Token changes</h3>
+        <div class="studio-shared-sources">
+          <pre tabindex="0" aria-label="Previous token lines"><code id="shared-proposal-previous-lines"></code></pre>
+          <pre tabindex="0" aria-label="Proposed token lines"><code id="shared-proposal-proposed-lines"></code></pre>
+        </div>
+        <p id="shared-proposal-changes-limit" hidden>Showing the first 16 changed lines per version. The full CSS follows.</p>
+      </section>
+      <div class="studio-shared-sources">
+        <section aria-labelledby="shared-proposal-before-title">
+          <h3 id="shared-proposal-before-title">Before · tokens.css</h3>
+          <pre tabindex="0" aria-labelledby="shared-proposal-before-title"><code id="shared-proposal-before"></code></pre>
+        </section>
+        <section aria-labelledby="shared-proposal-after-title">
+          <h3 id="shared-proposal-after-title">Proposed · tokens.css</h3>
+          <pre tabindex="0" aria-labelledby="shared-proposal-after-title"><code id="shared-proposal-after"></code></pre>
+        </section>
+      </div>
+      <section class="studio-shared-impact" aria-labelledby="shared-proposal-impact-title">
+        <h3 id="shared-proposal-impact-title">Preview impact</h3>
+        <p id="shared-proposal-impact-status"></p>
+        <p id="shared-proposal-appearance" hidden></p>
+        <ul id="shared-proposal-problems" hidden></ul>
+        <ul id="shared-proposal-widths" aria-label="Impact by viewport"></ul>
+      </section>
+      <section id="shared-proposal-confirmation" class="studio-shared-confirmation" aria-labelledby="shared-proposal-confirm-title" hidden>
+        <h3 id="shared-proposal-confirm-title" tabindex="-1"></h3>
+        <p id="shared-proposal-confirm-context"></p>
+        <p>Review revision <code id="shared-proposal-revision"></code></p>
+      </section>
+      <p id="shared-proposal-operation" role="status" tabindex="-1"></p>
+      <p id="shared-proposal-busy" role="status" hidden>Proposal actions are available when the project is idle.</p>
+    </div>
+    <footer>
+      <div id="shared-proposal-actions">
+        <button type="button" class="studio-button" id="shared-proposal-review">Measure preview impact</button>
+        <button type="button" class="studio-button" id="shared-proposal-reject">Reject…</button>
+        <button type="button" class="studio-button" id="shared-proposal-approve">Approve…</button>
+      </div>
+      <div id="shared-proposal-decision" hidden>
+        <button type="button" class="studio-button" id="shared-proposal-back">Back</button>
+        <button type="button" class="studio-button" id="shared-proposal-confirm"></button>
+      </div>
+    </footer>
   </dialog>
   <dialog id="setdlg" aria-label="Settings">
     <header><h2>Settings</h2><button class="ibtn" id="setclose" type="button" data-icon="close" aria-label="Close settings"></button></header>

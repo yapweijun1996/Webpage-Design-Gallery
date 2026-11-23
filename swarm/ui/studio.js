@@ -44,8 +44,8 @@
 
   function reviewAppearance() {
     const selected = appearance();
-    if (selected.theme === 'auto') selected.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    return selected;
+    const colorScheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return { ...selected, theme: selected.theme === 'auto' ? colorScheme : selected.theme, colorScheme };
   }
 
   function previewAgents() {
@@ -132,6 +132,7 @@
         if (event.type === 'state') publishState(event.state);
         else if (event.type === 'edit') refreshPreview(send, event);
         else if (event.type === 'asset') send('asset', event.file);
+        else if (event.type === 'shared-style') send('shared-style');
       });
     }
     return;
@@ -367,6 +368,7 @@
     if (previous !== name) updateSettingsPlacement();
     window.StudioAnchors?.show(name === 'review', reviewAppearance);
     window.StudioComponentHistory?.show(name === 'review');
+    window.StudioSharedProposals?.show(name === 'review');
     const compareModule = enhancement('StudioCompare');
     if (name === 'review' && !compareIsMounted && compareModule) {
       $('compare').replaceChildren();
@@ -787,7 +789,7 @@
     const scope = currentScope();
     if (!scope) return;
     const selected = reviewAppearance();
-    const key = [scope.sections.join(','), scope.primary, selected.theme, selected.brand, selected.lang].join('|');
+    const key = [scope.sections.join(','), scope.primary, selected.theme, selected.brand, selected.lang, selected.colorScheme].join('|');
     if (!force && key === lastReport) return;
     lastReport = key;
     fetch('/api/focus', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...scope, appearance: selected }) }).catch(function () {});
@@ -1029,10 +1031,14 @@
         root: $('chan'), agents, onJump: jump,
         send(text) {
           const sc = currentScope();
+          const selected = reviewAppearance();
           return fetch('/api/chat', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ from: 'owner', text, scope: sc ? { sections: sc.sections, elements: sc.elements, appearance: reviewAppearance() } : undefined })
+            body: JSON.stringify({
+              from: 'owner', text, appearance: selected,
+              scope: sc ? { sections: sc.sections, elements: sc.elements, appearance: selected } : undefined,
+            }),
           });
         }
       });
@@ -1069,6 +1075,7 @@
       loadVersions();
       window.StudioAnchors?.refresh();
       window.StudioComponentHistory?.refresh(busy);
+      window.StudioSharedProposals?.refresh(busy);
       return;
     }
 
@@ -1121,13 +1128,23 @@
         loadVersions();
         window.StudioAnchors?.refresh();
         window.StudioComponentHistory?.refresh(busy);
+        window.StudioSharedProposals?.refresh(busy);
         break;
       case 'anchor':
         window.StudioAnchors?.refresh();
+        window.StudioSharedProposals?.refresh();
         break;
       case 'versions':
         loadVersions();
         window.StudioComponentHistory?.refresh();
+        break;
+      case 'shared-proposals':
+        window.StudioSharedProposals?.refresh();
+        break;
+      case 'shared-style':
+        publishPreview('shared-style');
+        window.StudioAnchors?.previewChanged();
+        window.StudioSharedProposals?.refresh();
         break;
       case 'doc':
         if (typeof event.file === 'string') window.SwarmDocs?.refresh(event.file.split('/').pop());

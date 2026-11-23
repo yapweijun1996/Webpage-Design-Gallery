@@ -14,7 +14,7 @@ function scopeLine(scope) {
 function buildPrompt(agent, label, owner, assignment, isManager) {
   const { id, name, section, lane } = agent;
   const currentLane = owner.fastPreview && section ? `Review and improve the existing ${section} section.` : lane;
-  const sectionOwnership = `Edit only sections/${id}-${section}.html, sections/${id}-${section}.css, and notes/${id}.md.`;
+  const sectionOwnership = `Edit only sections/${id}-${section}.html, sections/${id}-${section}.css, and notes/${id}.md. Use the launch instructions for private submissions to the server.`;
   const done = 'Finally append one kind:"done" line to your outbox stating what changed in one sentence.';
   const task = {
     Triage: `Answer a question directly. For a build or redesign request, if direction.md is empty or missing, first write direction.md (max 60 lines). Include the concept and feeling, a shared visual system covering background alternation, type scale use, spacing rhythm, accent use, and image treatment, the section order with an explicit HANDOFF line for each neighbouring pair, each agent's unique contribution, and the top risks. If work is needed, then post a short plan and one kind:"assign" line per worker, with exactly that worker ID in to, a one-sentence summary in text, and the concrete task in task (always include both text and task). Keep other worker mentions out of assignment lines.`,

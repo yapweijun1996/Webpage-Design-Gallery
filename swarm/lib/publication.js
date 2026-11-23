@@ -72,12 +72,13 @@ function createPublication(projectDir, checkImpact = impact) {
     });
   }
 
-  function publish(ws, { anchor, workerId, owner, cancelled, checkOutbox, restore }) {
+  function publish(ws, { anchor, workerId, owner, cancelled, checkOutbox, restore, sharedProposal }) {
     const operation = tail.then(async () => {
       if (cancelled()) return reject('cancelled', 'The turn was stopped.');
       const result = await integrator.publish(projectDir, ws, {
         anchorId: anchor?.id,
-        ...(restore && { canCommit: () => !cancelled() }),
+        sharedProposal,
+        ...((restore || sharedProposal) && { canCommit: () => !cancelled() }),
         async accept({ before, after, outbox }) {
           try { checkOutbox(outbox); }
           catch (error) { return reject('channel', error.message); }

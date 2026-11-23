@@ -23,6 +23,7 @@ const SKILLS = require('./lib/skills');
 const { createUsage, normalizeUsage, addUsage } = require('./lib/usage');
 const ownership = require('./lib/ownership');
 const integrator = require('./lib/integrator');
+const sharedTokens = require('./lib/shared-tokens');
 const { approvedAnchor, canRestore, createPublication } = require('./lib/publication');
 const publication = createPublication(PROJECT);
 const SETTINGS_PATH = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS) || path.join(ROOT, '.run', 'settings.json'); // override only in test mode
@@ -184,7 +185,7 @@ ${task}`;
   }[step.key];
   return `You are ${a.name} (worker ${a.id} of ${n}) on a team building ONE shared page that other agents edit at the same time, led by the Manager. ${common}
 Your lane: ${a.lane}
-You may edit ONLY: ${own}. Other agents and the manager edit their own files at the same time.
+Your project edits are limited to ${own}. The launch instructions describe private submissions to the server.
 ${task}`;
 }
 
@@ -243,6 +244,8 @@ function runOnce(a, label, promptText, appearance, launchChannel, execution) {
     const imageToken = a.squad?.id === 'image-gen' ? randomUUID() : null;
     const warn = text => launchChannel?.post({ from: 'system', kind: 'system', text });
     const cancelled = () => stopped || chat !== launchChannel || execution?.isCurrent?.() === false;
+    const sectionId = manager ? null : a.base || `${a.id}-${a.section}`;
+    const allowProposal = !execution && role === 'worker' && !a.squad && IMPLEMENTATION_PHASES.has(label);
     let runner, workspace, anchor, p;
     try {
       if (cancelled()) return resolve(false);
@@ -304,8 +307,11 @@ function runOnce(a, label, promptText, appearance, launchChannel, execution) {
       try {
         if (!ok || fatal || cancelled() || unfinishedImage || (managerChannel && !managerPosts)) return resolve(false);
         const managerOptions = { allowAssignments: label !== 'Summary' };
-        const result = await publication.publish(workspace, { anchor, workerId: a.id,
-          owner: manager ? null : a.base || `${a.id}-${a.section}`,
+        const sharedProposal = allowProposal ? sharedTokens.takeRequest(workspace, {
+          sectionId, workerId: a.id, appearance: { theme: 'light', brand: 'none', lang: 'en', ...cleanAppearance(appearance) },
+          anchor: anchor || null, projectId: TARGET.projectId,
+        }) : null;
+        const result = await publication.publish(workspace, { anchor, workerId: a.id, owner: sectionId, sharedProposal,
           cancelled,
           checkOutbox(outbox) {
             if (managerChannel) launchChannel.validateManagerPosts(managerPosts, managerOptions);
@@ -319,6 +325,10 @@ function runOnce(a, label, promptText, appearance, launchChannel, execution) {
         }
         const visual = result.merged.some(file => file.startsWith('sections/') || file.startsWith('assets/'));
         execution?.published(visual);
+        if (sharedProposal) {
+          emit({ type: 'shared-proposals' });
+          warn(`${a.name} proposed shared token changes for Studio Review.`);
+        }
         if (managerChannel) launchChannel.publishManager(managerPosts, managerOptions);
         else if (!manager) launchChannel.publishWorker(a.id, result.outbox);
         if (visual) ensureExport(true);
@@ -333,7 +343,8 @@ function runOnce(a, label, promptText, appearance, launchChannel, execution) {
     p.on('error', () => finish(false));
     p.stdin.on('error', () => {});
     const anchorContext = anchor ? `\nFollow locked anchor ${anchor.id}. Read anchors/${anchor.id}/contract.json and ${anchor.files.map(file => `anchors/${anchor.id}/${file}`).join(', ')} before editing.\n` : '';
-    const guidance = anchorContext + (resolved.runner === 'codex' ? skills.text : '');
+    const proposalGuidance = allowProposal ? '\nFor a shared design-token change, leave tokens.css untouched and write token-proposal.json in the workspace root. Supply a JSON array such as [{"name":"--dc-brand","occurrence":0,"value":"#246248"}]. Occurrences start at zero in stylesheet order. Studio will ask the operator to review and approve it.\n' : '';
+    const guidance = anchorContext + proposalGuidance + (resolved.runner === 'codex' ? skills.text : '');
     p.stdin.end(withPreamble(promptText, a, label, { appearance, position, guidance }));
     p.stdout.on('data', d => { try { handle(parser.push(d)); } catch (_) { /* parser errors must not kill the run */ } });
     p.on('close', code => { try { handle(parser.end()); } catch (_) {} finish(code === 0); });
@@ -499,7 +510,7 @@ function prepare({ brief, roster }, replace) {
 }
 
 const normalBusy = () => inFlight > 0 || running > 0 || imageWrites > 0 || state.phase === 'running';
-const projectBusy = () => normalBusy() || fastPath.busy() || anchorRoutes.busy() || componentRoutes.busy();
+const projectBusy = () => normalBusy() || fastPath.busy() || anchorRoutes.busy() || componentRoutes.busy() || sharedRoutes.busy();
 async function runAll() {
   state.phase = 'running';
   emit({ type: 'state', state });
@@ -522,6 +533,7 @@ function stopAll() {
   fastPath.cancel();
   anchorRoutes.cancel();
   componentRoutes.cancel();
+  sharedRoutes.cancel();
   imageTurns.clear();
   for (const p of children.values()) p.kill('SIGTERM');
 }
@@ -530,8 +542,9 @@ function stopAll() {
 // ---------- live preview export, screen focus and autopilot ----------
 function cleanAppearance(input) {
   // The SDS runtime owns the supported values. Limit the transport to short preference identifiers.
-  return Object.fromEntries(['theme', 'brand', 'lang'].flatMap(key => {
+  return Object.fromEntries(['theme', 'brand', 'lang', 'colorScheme'].flatMap(key => {
     const value = input?.[key];
+    if (key === 'colorScheme' && !['light', 'dark'].includes(value)) return [];
     return typeof value === 'string' && /^[a-z0-9-]{1,32}$/i.test(value) ? [[key, value]] : [];
   }));
 }
@@ -679,7 +692,7 @@ const { install } = require('./lib/versions');
 const { loadAll } = require('./lib/recipes');
 const fastPath = createFastPath({
   projectDir: PROJECT, projectId: TARGET.projectId,
-  busy: () => normalBusy() || anchorRoutes.busy() || componentRoutes.busy(), stageFast, install,
+  busy: () => normalBusy() || anchorRoutes.busy() || componentRoutes.busy() || sharedRoutes.busy(), stageFast, install,
   fallback: submitMessage,
   published({ text, from, appearance, candidate }) {
     refreshPreviewSections();
@@ -747,7 +760,7 @@ async function runAnchorRepair({ sectionId, ownerId, evidence, anchor, appearanc
 const anchorRoutes = createAnchorRoutes({
   projectDir: PROJECT,
   projectId: TARGET.projectId,
-  busy: () => normalBusy() || fastPath.busy() || componentRoutes.busy(),
+  busy: () => normalBusy() || fastPath.busy() || componentRoutes.busy() || sharedRoutes.busy(),
   changed() {
     emit({ type: 'anchor' });
     emit({ type: 'busy', busy: projectBusy() });
@@ -763,7 +776,7 @@ const anchorRoutes = createAnchorRoutes({
 const { createComponentRoutes, matches: isComponentRoute } = require('./lib/component-routes');
 const componentRoutes = createComponentRoutes({
   projectDir: PROJECT, projectId: TARGET.projectId, catalog: componentCatalog,
-  busy: () => normalBusy() || fastPath.busy() || anchorRoutes.busy(),
+  busy: () => normalBusy() || fastPath.busy() || anchorRoutes.busy() || sharedRoutes.busy(),
   authorize: anchorRoutes.authorize, publish: publication.publish,
   changed(result) {
     if (result) {
@@ -772,6 +785,28 @@ const componentRoutes = createComponentRoutes({
       emit({ type: 'state', state });
       emit({ type: 'versions' });
     }
+    emit({ type: 'busy', busy: projectBusy() });
+  },
+});
+const { createSharedRoutes, matches: isSharedRoute } = require('./lib/shared-routes');
+const sharedRoutes = createSharedRoutes({
+  projectDir: PROJECT, projectId: TARGET.projectId, authorize: anchorRoutes.authorize,
+  busy: () => normalBusy() || fastPath.busy() || anchorRoutes.busy() || componentRoutes.busy(),
+  sections: () => {
+    const { manifest } = componentCatalog();
+    return previewSections().map(({ id, section }) => {
+      const base = `${id}-${section}`;
+      return { id: base, owner: manifest.owned[`sections/${base}.html`] };
+    });
+  },
+  measure: (...args) => require('./tools/impact-check').sharedTokensImpact(...args),
+  changed(action) {
+    if (action === 'approve') {
+      ensureExport(true);
+      emit({ type: 'shared-style' });
+      emit({ type: 'anchor' });
+    }
+    emit({ type: 'shared-proposals' });
     emit({ type: 'busy', busy: projectBusy() });
   },
 });
@@ -791,7 +826,7 @@ function submitMessage(input) {
   const from = input.from === 'owner' ? 'owner' : 'claude';
   if (!text) throw new FastPathError(400, 'empty');
   if (!chat) throw new FastPathError(409, 'channel not ready');
-  if (anchorRoutes.busy() || componentRoutes.busy()) throw new FastPathError(409, 'Wait until the current review task finishes.');
+  if (anchorRoutes.busy() || componentRoutes.busy() || sharedRoutes.busy()) throw new FastPathError(409, 'Wait until the current review task finishes.');
   if (normalBusy() && !inFlight) throw new FastPathError(409, 'Wait for the fixed-phase run to finish.');
   if (stopped && normalBusy()) throw new FastPathError(409, 'Wait for the stopped turn to finish.');
   fastPath.cancel('A newer request replaced this Fast Path preview.');
@@ -831,6 +866,7 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/state') return send(res, 200, state);
   if (isSkillRoute(p)) return skillRoutes(req, res, p, send);
   if (isVersionRoute(p)) return versionRoutes(req, res, p, send);
+  if (isSharedRoute(p)) return sharedRoutes.handle(req, res, url, send);
   if (isComponentRoute(p)) return componentRoutes.handle(req, res, url, send);
   if (isAnchorRoute(p)) return anchorRoutes.handle(req, res, p, send);
   if (p === '/api/fast' || p === '/api/metrics') return fastPath.handle(req, res, p, send);

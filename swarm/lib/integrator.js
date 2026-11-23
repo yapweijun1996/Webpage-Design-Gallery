@@ -12,7 +12,8 @@ const { ProjectBusyError, withProjectLock } = require('./project-init');
 const MAX_FILE_BYTES = 1024 * 1024;
 const MAX_OUTBOX_BYTES = 64 * 1024;
 const MAX_SKILL_BYTES = 32 * 1024;
-const READ_FLAGS = fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK;
+const { Violation, unsafe, projectRoot, entry, directory, readFile, stageFile, walk, copyRoots } = require('./project-files');
+const sharedTokens = require('./shared-tokens');
 const WORKSPACES = '.run/ws';
 const SNAPSHOTS = '.run/component-snapshots';
 const SCOPE_RULES = new Set(['layer-scope', 'unscoped-selector', 'css-scope']);
@@ -24,124 +25,6 @@ const PREVIEW_ROOTS = ['sections', 'assets', 'tokens.css', 'brief.md', ...CATALO
     .map(file => `design-system/${file}`)];
 const sessions = new WeakMap();
 const active = new Map();
-
-class Violation extends Error {
-  constructor(code, relative, message) {
-    super(message);
-    this.detail = { code, path: relative, message };
-  }
-}
-
-function unsafe(relative) {
-  return new Violation('forbidden', relative, 'Unsafe path, link, or file type.');
-}
-
-function projectRoot(directory) {
-  const root = path.resolve(directory);
-  if (!fs.lstatSync(root).isDirectory()) throw unsafe(directory);
-  return fs.realpathSync.native(root);
-}
-
-function entry(root, relative) {
-  if (!isSafePath(relative)) throw unsafe(relative);
-  const parts = relative.split('/');
-  let current = root;
-  let stat;
-  for (const [index, part] of parts.entries()) {
-    current = path.join(current, part);
-    stat = fs.lstatSync(current, { throwIfNoEntry: false });
-    if (!stat) return { file: path.join(root, relative), stat };
-    const regular = index === parts.length - 1 && stat.isFile() && stat.nlink === 1;
-    if ((!stat.isDirectory() && !regular) || fs.realpathSync.native(current) !== current) throw unsafe(relative);
-  }
-  return { file: current, stat };
-}
-
-function directory(root, relative, created = []) {
-  const parts = relative.split('/');
-  for (const [index] of parts.entries()) {
-    const prefix = parts.slice(0, index + 1).join('/');
-    const { file, stat } = entry(root, prefix);
-    if (stat?.isDirectory()) continue;
-    if (stat) throw unsafe(relative);
-    fs.mkdirSync(file, { mode: 0o700 });
-    created.push(file);
-  }
-  return path.join(root, relative);
-}
-
-function readFile(root, relative, { hashOnly = false, maxBytes = Infinity } = {}) {
-  const { file, stat } = entry(root, relative);
-  if (!stat) return null;
-  if (!stat.isFile()) throw unsafe(relative);
-  let fd;
-  try {
-    fd = fs.openSync(file, READ_FLAGS);
-  } catch (error) {
-    if (error.code === 'ELOOP') throw unsafe(relative);
-    throw error;
-  }
-  try {
-    const actual = fs.fstatSync(fd);
-    if (!actual.isFile() || actual.nlink !== 1 || actual.ino !== stat.ino || actual.dev !== stat.dev) {
-      throw unsafe(relative);
-    }
-    const limit = () => new Violation('size', relative, `File exceeds the ${maxBytes} byte limit.`);
-    if (actual.size > maxBytes) throw limit();
-
-    const hash = createHash('sha256');
-    const buffer = Buffer.allocUnsafe(Math.min(actual.size || 1, 64 * 1024));
-    const chunks = [];
-    let size = 0;
-    for (let count; (count = fs.readSync(fd, buffer, 0, buffer.length, null)) > 0;) {
-      size += count;
-      if (size > maxBytes) throw limit();
-      const chunk = buffer.subarray(0, count);
-      hash.update(chunk);
-      if (!hashOnly) chunks.push(Buffer.from(chunk));
-    }
-    return { sha256: hash.digest('hex'), mode: actual.mode & 0o777, size,
-      ...(hashOnly ? {} : { data: Buffer.concat(chunks, size) }) };
-  } finally {
-    fs.closeSync(fd);
-  }
-}
-
-function stageFile(root, relative, record) {
-  const parent = path.posix.dirname(relative);
-  if (parent !== '.') directory(root, parent);
-  const file = entry(root, relative).file;
-  fs.writeFileSync(file, record.data, { flag: 'wx', mode: 0o600 });
-  fs.chmodSync(file, record.mode);
-}
-
-function walk(root, roots, visit, onUnsafe = error => { throw error; }) {
-  function descend(relative) {
-    try {
-      const { file, stat } = entry(root, relative);
-      if (!stat) return;
-      visit(relative, stat);
-      if (stat.isDirectory()) {
-        for (const name of fs.readdirSync(file).sort()) descend(`${relative}/${name}`);
-      }
-    } catch (error) {
-      if (!(error instanceof Violation)) throw error;
-      onUnsafe(error);
-    }
-  }
-  for (const relative of roots ?? fs.readdirSync(root).sort()) descend(relative);
-}
-
-function copyRoots(from, to, roots, recordBase = () => {}, modeFor = () => 0o600) {
-  walk(from, roots, (relative, stat) => {
-    if (stat.isDirectory()) directory(to, relative);
-    else {
-      const record = readFile(from, relative);
-      stageFile(to, relative, { ...record, mode: modeFor(relative, record) });
-      recordBase(relative, record);
-    }
-  });
-}
 
 function launchManifest(manifest) {
   return Object.freeze({
@@ -369,9 +252,8 @@ function validate(ws, manifest, opts) {
   return { ok: !violations.length, violations };
 }
 
-function commit(project, plan) {
+function commit(project, plan, id = randomUUID()) {
   if (!plan.length) return null;
-  const id = randomUUID();
   const storage = directory(project, SNAPSHOTS);
   const staging = fs.mkdtempSync(path.join(storage, '.staging-'));
   const undo = path.join(staging, 'undo');
@@ -520,7 +402,7 @@ function affectedSections(plan, manifest) {
   return [...owners].sort();
 }
 
-async function publish(projectDir, ws, { accept, anchorId, maxFileBytes, canCommit } = {}) {
+async function publish(projectDir, ws, { accept, anchorId, maxFileBytes, canCommit, sharedProposal } = {}) {
   const session = getSession(ws);
   if (!session.launched) throw new TypeError('Publication requires a launch workspace.');
   if (typeof accept !== 'function') throw new TypeError('Publication requires acceptance checks.');
@@ -596,7 +478,8 @@ async function publish(projectDir, ws, { accept, anchorId, maxFileBytes, canComm
         throw new Violation('stale', session.outbox, 'The worker outbox changed during acceptance.');
       }
 
-      const snapshotId = commit(project, plan);
+      const pending = sharedProposal ? sharedTokens.pendingFile(project, sharedProposal) : null;
+      const snapshotId = commit(project, pending ? [...plan, pending] : plan);
       session.published = true;
       recordOverlap(project, changed, session);
       return { ok: true, merged: [...changed], rejected: [], snapshotId, outbox };
@@ -613,6 +496,51 @@ async function publish(projectDir, ws, { accept, anchorId, maxFileBytes, canComm
       catch { console.warn('Could not clean up publication preview copies.'); }
     }
   }
+}
+
+// Both review and approval render clean copies. Recheck their exact inputs under the
+// project lock before persisting evidence or applying an operator decision.
+async function inspectSharedTokens(projectDir, proposal, measure, finish) {
+  const project = projectRoot(projectDir);
+  const roots = [...publicationRoots(proposal.anchor?.id, true), 'agents.json'];
+  const baseline = inputState(project, roots);
+  const scratch = fs.mkdtempSync(path.join(fs.realpathSync.native(os.tmpdir()), 'swarm-shared-review-'));
+  try {
+    const before = directory(scratch, 'before');
+    const after = directory(scratch, 'after');
+    const sourceMode = (_relative, record) => record.mode;
+    copyRoots(project, before, roots, undefined, sourceMode);
+    requireInputs(baseline, before, roots, 'The project changed while preparing the style review.');
+    copyRoots(before, after, roots, undefined, sourceMode);
+    const file = readFile(before, 'tokens.css');
+    if (!file || file.sha256 !== proposal.baseHash || file.mode !== proposal.baseMode) {
+      throw new Violation('stale', 'tokens.css', 'The shared stylesheet changed. Request a fresh proposal.');
+    }
+    fs.unlinkSync(entry(after, 'tokens.css').file);
+    stageFile(after, 'tokens.css', { mode: file.mode, data: Buffer.from(proposal.after) });
+    const candidate = inputState(after, roots);
+    const inputs = createHash('sha256').update(JSON.stringify([...baseline])).digest('hex');
+    const impact = await measure(before, after);
+    return withProjectLock(project, () => {
+      requireInputs(baseline, project, roots, 'The project changed during the style review.');
+      requireInputs(baseline, before, roots, 'The review baseline changed during capture.');
+      requireInputs(candidate, after, roots, 'The style candidate changed during capture.');
+      return finish(impact, inputs);
+    });
+  } finally {
+    fs.rmSync(scratch, { force: true, recursive: true });
+  }
+}
+
+function applySharedDecision(project, proposal, decision) {
+  const before = readFile(project, 'tokens.css');
+  if (before?.sha256 !== proposal.baseHash || before.mode !== proposal.baseMode) {
+    throw new Violation('stale', 'tokens.css', 'The reviewed stylesheet is no longer current.');
+  }
+  const id = commit(project, [{ relative: 'tokens.css', before,
+    after: { mode: before.mode, data: Buffer.from(proposal.after) } }, decision], proposal.decision.undoSnapshotId);
+  recordOverlap(project, ['tokens.css']);
+  return id;
 }
 
 function snapshotRecords(project, snapshotId, paths, hashOnly = false) {
@@ -738,4 +666,4 @@ function close(ws) {
   }
 }
 
-module.exports = { open, diff, workerOutbox, validate, merge, publish, rollback, close, componentHistory, stageComponentRestore };
+module.exports = { open, diff, workerOutbox, validate, merge, publish, rollback, close, componentHistory, stageComponentRestore, inspectSharedTokens, applySharedDecision };
