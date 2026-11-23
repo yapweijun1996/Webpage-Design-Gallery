@@ -25,7 +25,7 @@ export function interiorMaterials(T) {
   };
 }
 
-export function* prepareInteriorDecoration(T, store, materials, detail = 0) {
+export function* prepareInteriorDecoration(T, store, materials, detail = 0, hasGogoFreezer) {
   const [dominant,secondary,pale,accent] = store.palette.map(({hex}) => new T.Color(hex));
   const warm = kelvinColour(T,store.accent_kelvin);
   const opaque = [], glow = [];
@@ -215,7 +215,7 @@ export function* prepareInteriorDecoration(T, store, materials, detail = 0) {
     }
   }
   for (const prop of store.props) {
-    fixture(prop,prop.position_m);
+    if (!hasGogoFreezer || prop.socket !== 'cold') fixture(prop,prop.position_m);
     yield;
   }
   if (detail) {

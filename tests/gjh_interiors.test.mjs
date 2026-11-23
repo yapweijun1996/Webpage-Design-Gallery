@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
 import {readFileSync, readdirSync} from 'node:fs';
 import {test} from 'node:test';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
@@ -159,6 +160,7 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
   }
   graphicsTier = 'balanced';
   const modules = new Map(), atlasSources = new Set(), craftMaterials = new Set();
+  let gogoFreezer;
   for (const receipt of manifest.round2.details) {
     const asset = roomDetails[receipt.store], bytes = readFileSync(new URL(asset.file,folder));
     assert.deepEqual(asset,{roomDetail:true,file:receipt.file,bytes:receipt.bytes});
@@ -225,6 +227,7 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     assert(slices >= measured.calls, receipt.file);
     assert(measured.calls<=4);
     modules.set(receipt.store,measured);
+    if (receipt.store === 'S03') gogoFreezer = model.userData.gogoFreezer;
     disposeInteriorModel(model);
   }
   assert.equal(atlasSources.size,1);
@@ -241,7 +244,7 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
       const photoFaces = store.id === 'S01' ? 1 : 0;
       const total = {triangles:anchor.triangles+photoFaces*2,calls:anchor.calls+photoFaces};
       for (let i=0;i<=level;i++) {
-        const detail = buildInteriorDecoration(T,store,materials,i);
+        const detail = buildInteriorDecoration(T,store,materials,i,store.id === 'S03' ? gogoFreezer : undefined);
         const decor = counts(detail);
         total.triangles += decor.triangles;
         total.calls += decor.calls;
@@ -253,6 +256,9 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
       const dressing = modules.get(store.id);
       total.triangles += dressing.triangles;
       total.calls += dressing.calls;
+      if (store.id === 'S03') {
+        assert(total.triangles <= budget.triangles, 'The installed freezer must fit the issued S03 shop budget');
+      }
       const [triangleCap, drawCap] = plan.kitLimits[tier];
       assert(total.triangles <= triangleCap && total.calls <= drawCap,store.id+' '+tier);
       if (tier === 'low') {
@@ -287,6 +293,81 @@ test('every tier fits its programme budget using parsed GLBs and the actual merg
     summary.push({tier,triangles,calls,bytes,maxShop,largest,maxCalls,anchorTriangles,textureBytes,perShop});
   }
   t.diagnostic(JSON.stringify(summary));
+});
+
+test('GOGO bakes its freezer in the existing room request and keeps the original chest for a legacy room', async t => {
+  mockInteriorDownloads(t);
+  const asset = roomDetails.S03, bytes = readFileSync(new URL(asset.file,folder));
+  const headerLength = bytes.readUInt32LE(12);
+  const gltf = JSON.parse(bytes.subarray(20,20+headerLength));
+  const node = gltf.nodes.find(node=>node.extras?.fixture === 'S03-cold');
+  assert.ok(node,'Expected the baked freezer in the existing room asset');
+  // A legacy room omits the appended freezer faces and its marker. The padded
+  // fixture retains the declared transfer length, like a self-consistent cache.
+  delete node.extras.fixture;
+  const indices = gltf.meshes[node.mesh].primitives[0].indices;
+  gltf.accessors[indices].count -= 128*3;
+  const legacy = Buffer.from(bytes);
+  legacy.write(JSON.stringify(gltf).padEnd(headerLength),20,headerLength);
+  // A full history checkout can exercise the actual released bytes without
+  // shipping a second copy of the room. The marker-free fixture also runs in a source archive.
+  let release;
+  try {
+    release = execFileSync('git',['show','47af724f:demos/corporate/gjh/v11/assets/interiors/'+asset.file],
+      {cwd:new URL('../',import.meta.url),stdio:['ignore','pipe','ignore']});
+  } catch {}
+  const seen = [], serve = globalThis.fetch;
+  let response;
+  t.mock.method(globalThis,'fetch',async (url,options) => {
+    seen.push(url.pathname.split('/').pop());
+    if (response && url.pathname.endsWith(asset.file)) return new Response(response);
+    return serve(url,options);
+  });
+  const load = createInteriorModelLoader(T,assets), {signal} = new AbortController();
+  const store = interiorStores.S03, prop = store.props.find(p=>p.socket==='cold');
+  const [x,y,z] = prop.position_m, [w,h,d] = prop.envelope_whd_m;
+  const box = new T.Box3(new T.Vector3(x-w/2,y,z-d/2),new T.Vector3(x+w/2,y+h,z+d/2)).expandByScalar(.00001);
+  function inside(root) {
+    const bounds = new T.Box3(), colors = new Set();
+    let triangles = 0;
+    root.traverse(mesh => {
+      if (!mesh.isMesh) return;
+      const {geometry} = mesh, {position,color} = geometry.attributes;
+      const count = geometry.index?.count ?? position.count;
+      for (let i=0;i<count;i+=3) {
+        const ids = [i,i+1,i+2].map(index=>geometry.index?.getX(index) ?? index);
+        const points = ids.map(id=>new T.Vector3().fromBufferAttribute(position,id));
+        if (!points.every(point=>box.containsPoint(point))) continue;
+        triangles++;
+        for (const point of points) bounds.expandByPoint(point);
+        if (color) colors.add(new T.Color().fromBufferAttribute(color,ids[0]).getHex());
+      }
+    });
+    return {triangles,bounds,colors};
+  }
+  const materials = interiorMaterials(T);
+  for (response of [null,legacy,...(release ? [release] : [])]) {
+    const useLegacy = Boolean(response);
+    const room = await load(asset,signal), baked = inside(room);
+    if (release && response === release) assert.equal(room.userData.receivedBytes,93580);
+    assert.equal(Boolean(room.userData.gogoFreezer),!useLegacy);
+    assert.equal(baked.triangles,useLegacy ? 0 : 128);
+    if (!useLegacy) {
+      assert.equal(baked.colors.size,4,'Ivory, rubber, steel and transit blue');
+      assert(Math.abs(baked.bounds.min.y-y)<.00001);
+      assert(baked.bounds.max.y-y>1);
+    }
+    const decor = buildInteriorDecoration(T,store,materials,0,room.userData.gogoFreezer);
+    assert.equal(inside(decor).triangles,useLegacy ? 60 : 0);
+    assert.equal(counts(room).calls,3);
+    decor.traverse(mesh=>mesh.geometry?.dispose());
+    disposeInteriorModel(room);
+  }
+  response = Buffer.alloc(93580);
+  await assert.rejects(load(asset,signal),/size mismatch/);
+  assert.deepEqual(seen.sort(),[...Array(release ? 4 : 3).fill(asset.file),'showroom-atlas.png'].sort());
+  Object.values(materials).forEach(material=>material.dispose());
+  load.dispose();
 });
 
 function distanceToBox(point, box) {
@@ -369,6 +450,37 @@ function runBuild(work, onSlice = () => {}) {
   }
   return step.value;
 }
+
+test('a retried S03 room chooses its loaded freezer before caching the decoration', async t => {
+  const store=interiorStores.S03, roomFile=roomDetails.S03.file, files=[];
+  let now=0;
+  const kit=createInteriorKit(T,new T.Scene(),{
+    now:()=>now, registerCollider:()=>{},
+    async loadModel({file}) {
+      files.push(file);
+      if (file===roomFile && !now) throw new Error('First room request failed');
+      const model=new T.Group();
+      if (file===roomFile) model.userData.gogoFreezer=true;
+      return model;
+    }
+  });
+  t.after(()=>kit.dispose());
+  const frame=async()=>{kit.runFrame(); await new Promise(resolve=>setImmediate(resolve));};
+  const done=kit.prepare('low',()=>({build:work=>runBuild(work),prepare:async()=>{},runFrame:()=>0,dispose(){}}));
+  for (let i=0;i<20;i++) await frame();
+  assert.equal(kit.report().preinstalled.shops,16);
+  assert.equal(kit.groups[2].visible,false);
+  now=15001;
+  await frame();
+  assert.equal((await done).shops,17);
+  assert.equal(files.filter(file=>file===roomFile).length,2);
+  assert.equal(files.filter(file=>file===store.files.low.file).length,1);
+  const materials=interiorMaterials(T);
+  const expected=buildInteriorDecoration(T,store,materials,0,true);
+  assert.deepEqual(counts(kit.groups[2]),counts(expected),'The old procedural chest must not overlap the recovered bake');
+  expected.traverse(mesh=>mesh.geometry?.dispose());
+  Object.values(materials).forEach(material=>material.dispose());
+});
 
 test('installed interior instance bounds contain every instance across all 17 stores', async t => {
   mockInteriorDownloads(t);

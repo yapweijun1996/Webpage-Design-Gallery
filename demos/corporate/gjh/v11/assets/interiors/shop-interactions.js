@@ -45,7 +45,8 @@ function point(shop, xyz, yaw = 0) {
 }
 
 export function createShopInteractionTarget(slot, shop, item) {
-  const [x, y, z] = point(shop,[item.xyz[0],item.xyz[1] + item.size[1]/2,item.xyz[2]]);
+  const labelY = item.xyz[1] + item.size[1] * (item.a11y.labelAtTop ? 1 : .5);
+  const [x, y, z] = point(shop,[item.xyz[0],labelY,item.xyz[2]]);
   const [sx, floor, sz] = point(shop,[item.standing[0],shop.frame.floor_surface_y_m,item.standing[1]]);
   const zone = shopsBySlot[slot] ?? slot;
   const seat = item.action.includes('sit');

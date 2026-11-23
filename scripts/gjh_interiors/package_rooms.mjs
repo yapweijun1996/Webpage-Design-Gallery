@@ -37,11 +37,12 @@ assert.equal(png.readUInt32BE(16),256);
 assert.equal(png.readUInt32BE(20),256);
 assert.equal(names.length,17);
 
-const source = (slug, file) => {
+const source = (slug, file, directory = 'exports') => {
   const dir = path.join(gallery,'models',slug);
   const {author,rights} = JSON.parse(fs.readFileSync(path.join(dir,'metadata',slug+'.json')));
-  return {file:'models/'+slug+'/exports/'+file,sha256:sha(fs.readFileSync(path.join(dir,'exports',file))),author,rights};
+  return {file:'models/'+slug+'/'+directory+'/'+file,sha256:sha(fs.readFileSync(path.join(dir,directory,file))),author,rights};
 };
+const freezer = source('freezer-cabinet','freezer-cabinet.blend','sources');
 const lamp = source('chinese-lantern','chinese-lantern.glb');
 const plate = source('mamak-stainless-steel-plate','mamak-stainless-steel-plate.glb');
 for (const file of [...runtimeAnchors.map(a=>a.file),...names]) {
@@ -100,7 +101,7 @@ for (const file of [...runtimeAnchors.map(a=>a.file),...names]) {
   assert(draws<=4,file);
   details.push({store,file,bytes:bytes.length,sha256:sha(bytes),triangles,draws,instances,
     motion:gltf.materials.map(m=>m.name).filter(name=>['Pulse','Scroll'].includes(name)),
-    sources:slot===2?[plate]:[5,7].includes(slot)?[lamp]:[],
+    sources:slot===2?[plate]:slot===3?[freezer]:[5,7].includes(slot)?[lamp]:[],
     validator:{version:result.validatorVersion,errors,warnings}});
 }
 manifest.round2 = {version:1,coordinates:'Slot-local metres, +Y up, +Z toward entrance. Shared by all tiers.',

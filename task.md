@@ -850,7 +850,7 @@ At this historical point the 45-request gate failed at 82; stage 11b later addre
 - [x] Tiered lighting/atmosphere (main light, per-shop lights, procedural env, desktop-only bloom, faint fog); tests pass, draw calls max 200.
 - [~] Round 2 adjusted display framing and light. Later work produced [17 concept and runtime comparisons](docs/mall-design-anchors/README.md#interior-comparison-at-the-shop-entrances) and [desktop and 390 px showroom checks](docs/goh-joo-hin/README.md#published-showroom-verification). The original visual review scored 4/10. A five-advisor sign-off across all shops remains open.
 - [x] The owner approved publishing the November 17 release with the visual finding outstanding. The release log below records the successful Pages deployment.
-- [~] The S03 ice-cream cart, S07 stacked-can pyramid and S15 grand piano shipped. GOGO uses a procedural cold chest. A dedicated chilled freezer and mullion-free glazed storefront module still lack delivery evidence. [Entrance and asset inventory](docs/gjh-v11-interior-program.md#how-to-verify).
+- [~] The S03 ice-cream cart, S07 stacked-can pyramid and S15 grand piano shipped. GOGO’s rear-left freezer is now part of the existing room download. Its raised lid and two baskets use 128 triangles. The mullion-free storefront is still pending. [Entrance and asset inventory](docs/gjh-v11-interior-program.md#how-to-verify).
 - [ ] Physical-device checks remain deferred. The recorded project-specific permission covers the [11 Tripo additions](data/gjh-interior-additions.json). Other third-party models still require separate redistribution evidence.
 
 ## 2026-11-17 QA loop (owner-approved)

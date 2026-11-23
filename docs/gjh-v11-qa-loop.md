@@ -52,7 +52,7 @@ For S01, score the original red concept as a historical comparison. The later [N
 ## Status of the original gaps
 
 - Round 1 recorded small displays, obstructed sightlines and flat lighting. The [17 entrance comparisons](mall-design-anchors/README.md#interior-comparison-at-the-shop-entrances) and each shop's current checklist provide the basis for re-scoring these findings.
-- S03 has an ice-cream cart, S07 has a stacked-can pyramid and S15 has a grand piano. GOGO currently uses a procedural cold chest. A dedicated chilled-freezer model and a mullion-free glazed storefront module remain open. [Installed assets and entrances](gjh-v11-interior-program.md#how-to-verify)
+- S03 has an ice-cream cart, S07 has a stacked-can pyramid and S15 has a grand piano. GOGO’s rear bay uses the dedicated chest freezer with its procedural fallback. The mullion-free glazed storefront module remains open. [Installed assets and entrances](gjh-v11-interior-program.md#how-to-verify)
 - Physical-device acceptance remains open. The owner's [project-specific permission](../data/gjh-interior-additions.json) covers the 11 listed Tripo additions. Additional third-party models need their own redistribution evidence.
 
 ## Core experience (owner, 2026-11-17): the acceptance target

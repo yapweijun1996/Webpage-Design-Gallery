@@ -3936,16 +3936,17 @@
           ],
           "modelId": "freezer-cabinet",
           "lod": {
-            "low": "procedural:chest",
-            "balanced": "procedural:chest",
-            "detailed": "procedural:chest"
+            "low": "s03-gogo-details.glb",
+            "balanced": "s03-gogo-details.glb",
+            "detailed": "s03-gogo-details.glb"
           },
           "collision": "kit",
           "action": [
             "open"
           ],
           "a11y": {
-            "en": "White cold chest in the rear-left bay"
+            "en": "White cold chest in the rear-left bay",
+            "labelAtTop": true
           },
           "standing": [
             -2.6,

@@ -136,7 +136,7 @@ A scalloped parasol and compact ice-cream cart bring a street-side frozen-treat 
 | Three stools facing the counter | `mall-bar-stool` | (1.93, 0.025, 2.6) / (1.93, 0.025, 3.6) / (1.93, 0.025, 4.6) | 90° |
 | Twin lounge benches with existing sit actions | `gjh-lounge-bench` | (-3, 0, -0.8) / (3, 0, -0.8) | 180° |
 | Coconut globe above the bar | `mall-globe-pendant` | (2.7, 3.4, 2.3) | 0° |
-| White cold chest in the rear-left bay | `freezer-cabinet` | (-2.8, 0.025, -3.19) | 0° |
+| White cold chest in the rear-left bay | [Freezer cabinet](goh-joo-hin/03-gogo/model-inventory.md) | (-2.8, 0.025, -3.95) | 0° |
 | Ferns in the rear planter bed | `tropical-fern-cluster` | (3.78, 0.025, -3.1) | 0° |
 | Citrus tray at counter end | `food-tray` | (3.16, 1.26, 4.58) | -90° |
 

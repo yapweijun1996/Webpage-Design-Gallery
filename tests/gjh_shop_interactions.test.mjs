@@ -141,6 +141,16 @@ test('interaction lifecycle covers focus, completion, interruption, retry and sl
   assert.equal(state.read(action.id).phase,'done');
 });
 
+test('the cold chest View label sits above the baskets and retains its standing point', () => {
+  const chest = builds.find(target=>target.id==='S03-cold');
+  const {item,label} = chest.shopAction;
+  assert.equal(chest.y,item.xyz[1]+item.size[1]);
+  assert.deepEqual([chest.x,chest.z,chest.standing.x,chest.standing.z],[7.2,-9.95,7.4,-8.3]);
+  assert.equal(label,'View');
+  const cart = builds.find(target=>target.id==='S03-focal');
+  assert.equal(cart.y,cart.shopAction.item.xyz[1]+cart.shopAction.item.size[1]/2);
+});
+
 test('all three GOGO bar stools use the native seat contract and clear the sit/stand segment', () => {
   const shop = plan.stores[2], {frame,gogoStools:stools} = interiorStores.S03;
   assert.equal(stools.length,3);

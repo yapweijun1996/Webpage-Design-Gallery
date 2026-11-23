@@ -42,8 +42,8 @@ export function createInteriorKit(T, scene, {
     }
   }
 
-  function* decoration(store, detail) {
-    const base = yield* prepareInteriorDecoration(T,store,materials,0);
+  function* decoration(store, detail, hasGogoFreezer) {
+    const base = yield* prepareInteriorDecoration(T,store,materials,0,hasGogoFreezer);
     const batches = new Map(base.children.map(mesh => [mesh.material,[mesh.geometry]]));
     for (let level=1; level<=detail; level++) {
       const extra = yield* prepareInteriorDecoration(T,store,materials,level);
@@ -174,9 +174,12 @@ export function createInteriorKit(T, scene, {
       } finally {
         decoding = false;
       }
+      const roomFile = roomDetails[shop.store.id].file;
+      const room = freshModels.get(roomFile) ?? shop.models.get(roomFile);
       await build(function* () {
-        if (!shop.layers[detail]) {
-          freshDecoration = yield* decoration(shop.store,detail);
+        // A missing required S03 room is retried. Build its decoration only once its freezer decision is known.
+        if (!shop.layers[detail] && (shop.store.id !== 'S03' || room)) {
+          freshDecoration = yield* decoration(shop.store,detail,room?.userData.gogoFreezer);
           yield* measure(freshDecoration,shop.store.id);
         }
         for (const model of freshModels.values()) yield* measure(model,shop.store.id);
@@ -184,7 +187,7 @@ export function createInteriorKit(T, scene, {
       if (signal.aborted) return;
       const fresh = [freshDecoration,...freshModels.values()].filter(Boolean);
       const models = required.map(member => freshModels.get(member.file) ?? shop.models.get(member.file)).filter(Boolean);
-      const roots = [shop.layers[detail] ?? freshDecoration,...models];
+      const roots = [shop.layers[detail] ?? freshDecoration,...models].filter(Boolean);
       await installer.prepare(roots, {tier,priority,signal,prepareModel});
       if (signal.aborted) return;
       for (const root of fresh) { root.visible = false; shop.group.add(root); }
@@ -208,7 +211,7 @@ export function createInteriorKit(T, scene, {
         shop.models.set(member.file,root);
         if (member.roomDetail) shop.motion = root.userData.roomMotion;
         report.modelsLoaded++;
-        report.bytes += member.bytes;
+        report.bytes += root.userData.receivedBytes ?? member.bytes;
       }
       freshModels.clear();
       freshDecoration = undefined;

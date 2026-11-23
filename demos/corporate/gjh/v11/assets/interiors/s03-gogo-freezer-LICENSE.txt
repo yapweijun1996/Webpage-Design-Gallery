@@ -1,0 +1,10 @@
+GOGO freezer cabinet in s03-gogo-details.glb
+Author: Yap Wei Jun project / agent-assisted procedural modeling.
+Source: Blender-3D-Gallery, commit 0b71ed7ec0f79d9d938cf6edcd19d2fa74f7a4b3,
+models/freezer-cabinet/sources/freezer-cabinet.blend.
+Source SHA-256: 8fad1f874f8000691c4ee6e1f006a836be8c48fb238fba493550cf4becacbc57
+Source rights: models/freezer-cabinet/LICENSE.md and metadata/freezer-cabinet.json.
+
+The original procedural geometry and materials contain no third-party models, logos,
+or textures. Reuse of this baked derivative in the owner's projects is authorized.
+The owner has not specified public redistribution terms.

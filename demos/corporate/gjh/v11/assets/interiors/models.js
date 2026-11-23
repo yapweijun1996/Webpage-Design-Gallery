@@ -1,5 +1,5 @@
 import {bakedParts} from './baked-layout.js';
-import {roomAtlas} from './detail-files.js';
+import {roomAtlas,roomDetails} from './detail-files.js';
 import {GLTFLoader, mergeGeometries} from '../shop-sign-vendor.js';
 import {setupArtworkTexture, setupMaterialArtwork} from '../artwork-textures.js';
 import {decalHeight} from '../surface-decals.js';
@@ -63,6 +63,16 @@ function* mergeInteriorAnchor(T, scene) {
   }
 }
 
+// A Pages HTTP cache can return the previous release at this stable room URL.
+// Only its exact published payload is suitable for the marker-free chest.
+async function releasedGogoRoom(asset, buffer) {
+  if (!asset.roomDetail || asset.file !== roomDetails.S03.file ||
+      buffer.byteLength !== 93580 || !globalThis.crypto?.subtle) return false;
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256',buffer));
+  const hex = Array.from(digest,byte=>byte.toString(16).padStart(2,'0')).join('');
+  return hex === '0f574baab3ecc94be6b9a4fed02db53d2d720fb5c9b46b7576911c94c1f72ac7';
+}
+
 // Use the same bounded request for a fixture and for the shared print sheet.
 async function readMember(assetBase, asset, signal) {
   const url = new URL('interiors/'+asset.file,assetBase);
@@ -75,7 +85,7 @@ async function readMember(assetBase, asset, signal) {
     const response = await fetch(url,{signal:controller.signal});
     if (!response.ok) throw new Error(`Interior asset request failed: ${response.status}`);
     const buffer = await response.arrayBuffer();
-    if (buffer.byteLength !== asset.bytes) throw new Error('Interior asset size mismatch');
+    if (buffer.byteLength !== asset.bytes && !await releasedGogoRoom(asset,buffer)) throw new Error('Interior asset size mismatch');
     return buffer;
   } finally {
     clearTimeout(timer);
@@ -117,6 +127,7 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
     scene.traverse(mesh => { if (mesh.isMesh) meshes.push(mesh); });
     for (const mesh of meshes) {
       const m = mesh.material;
+      if (store?.id === 'S03' && mesh.userData.fixture === 'S03-cold') scene.userData.gogoFreezer = true;
       if (!mesh.isInstancedMesh && store) positionRoomInlays(mesh.geometry,store);
       // Keep the plate and its samples in their shared draw and preserve the shipped GLB.
       if (placement && m.name === placement.material && !mesh.isInstancedMesh) {
@@ -156,6 +167,7 @@ export function createInteriorModelLoader(T, assetBase, loader = new GLTFLoader(
     try {
       if (signal?.aborted) throw new DOMException('Interior asset cancelled','AbortError');
       const store = interiorStores[asset.file.slice(0,3).toUpperCase()];
+      if (buffer.byteLength !== asset.bytes) scene.userData.receivedBytes = buffer.byteLength;
       const work = function* () {
         const materials = new Set();
         scene.traverse(mesh => {

@@ -1,6 +1,6 @@
 # S03 · GOGO
 
-**Status: the cart exhibit is implemented.** The four concept views describe the wider showroom proposal. The cart uses the existing brand artwork and illustrates two historic flavours with unwrapped forms.
+The potong cart and rear-left freezer are installed. The four concept views describe the wider showroom proposal. The cart uses the existing brand artwork and illustrates two historic flavours with unwrapped forms.
 
 [GOGO brand research and product evidence](brand-research.md)
 
@@ -12,9 +12,9 @@ Turn the shop’s warm-weather drinks and frozen-treat identity into a compact p
 | --- | --- | --- |
 | Door and main aisle | Threshold XZ (0, 6.0), through (0, 2.55) to (0, −3.0) | The Expanded room keeps a clear centre path. The legacy three-store view retains its table. |
 | Potong cart | XYZ (−2.35, 0.025, 2.05), yaw 12° | Keep the canopy and cart facing the open aisle. The source logo sits above the counter lip. A pair of unwrapped samples sits to its left. |
-| Drinks counter and stools | Counter XZ (3.15, 3.6); stools X 1.93 at Z 2.6, 3.6, 4.6 | Retain the lounge/bar visual separation. Three counter stools are decorative today. Their future Sit approach must account for their front facing the bar. |
+| Drinks counter and stools | Counter XZ (3.15, 3.6); stools X 1.93 at Z 2.6, 3.6, 4.6 | All three counter stools support Sit and Stand. Each faces the bar and has an approach from the aisle. |
 | Lounge seats | XZ (−3, −0.8) and (3, −0.8) | Keep Sit and Stand anchors. The apron at Z 0.4 connects either seat to the centre aisle. |
-| Cold chest and brand artwork | Chest XZ (−2.8, −3.19); artwork rear centre | Keep chest and back-cover Inspect target as secondary stops. |
+| Cold chest and brand artwork | Chest XZ (−2.8, −3.95) and rear-centre artwork | View the ivory freezer, its blue handle and the twin wire baskets. Both exhibits remain accessible from the rear aisle. |
 
 World origin XYZ (10, 0, −6). Visitor movement follows the [interior programme](../../gjh-v11-interior-program.json). The baseline live desktop path stopped near world Z −4.37 at the centre table. The existing side routes led to the rear, and both bench interactions passed.
 
@@ -44,3 +44,11 @@ Four generated views describe one proposed room and its visitor circulation. Com
 The story is reachable from the entrance side of the cart. It links to the GJH brand page and identifies the 2016 records. The visitor can continue through the centre aisle to the existing rear GOGO artwork.
 
 On published build `077553e3b1a6c526`, desktop and 390 px touch-emulated Chrome verified the existing entrance, the cart story, the official link and the route through the open centre to the rear artwork. The desktop run also checked the story in Simplified Chinese and Malay. Both runs loaded the revised room GLB. [Runtime Chrome captures](cart-runtime.webp) · [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44549696669)
+
+## Rear-left freezer
+
+The raised lid reveals the two steel baskets under the blue handle. The 390 px touch view shows both baskets from the rear aisle. The active View label sits above the open lid. The 1440 px view looks in from the west, beyond the interaction prompt. Both Chrome routes reached **View** and walked back through the automatic door. [Runtime screenshots](freezer-runtime.webp)
+
+All three quality tiers share the 128-triangle model in the existing room file. A browser using the previous room file displays the original chest and keeps the same **View** action. The cart bell, drinks counter, stools and other S03 controls passed the ten-action walkthrough. [Model and source](model-inventory.md) · [Walkthrough](../../verify_interactions.py)
+
+Five independent reviewers checked this fixture. The phone review identified a label across the basket rims. Moving its pointer to the physical top of the lid cleared the projected steel by at least 70 CSS pixels at the normal standing point. The visual recheck passed, as did the mobile budget, source attribution, spatial and lighting checks. The whole-shop concept review remains open.

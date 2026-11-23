@@ -8061,7 +8061,7 @@ function interiorMaterials(T) {
     glow: new T.MeshBasicMaterial({ vertexColors: true, toneMapped: false })
   };
 }
-function* prepareInteriorDecoration(T, store2, materials2, detail = 0) {
+function* prepareInteriorDecoration(T, store2, materials2, detail = 0, hasGogoFreezer) {
   const [dominant, secondary, pale, accent] = store2.palette.map(({ hex }) => new T.Color(hex));
   const warm = kelvinColour(T, store2.accent_kelvin);
   const opaque = [], glow = [];
@@ -8254,7 +8254,8 @@ function* prepareInteriorDecoration(T, store2, materials2, detail = 0) {
     }
   }
   for (const prop of store2.props) {
-    fixture2(prop, prop.position_m);
+    if (!hasGogoFreezer || prop.socket !== "cold")
+      fixture2(prop, prop.position_m);
     yield;
   }
   if (detail) {
@@ -8296,7 +8297,7 @@ var roomDetails = {
   },
   S03: {
     file: "s03-gogo-details.glb",
-    bytes: 93580,
+    bytes: 103312,
     roomDetail: true
   },
   S04: {
@@ -8433,6 +8434,13 @@ function* mergeInteriorAnchor(T, scene) {
         mesh.geometry.dispose();
   }
 }
+async function releasedGogoRoom(asset, buffer) {
+  if (!asset.roomDetail || asset.file !== roomDetails.S03.file || buffer.byteLength !== 93580 || !globalThis.crypto?.subtle)
+    return false;
+  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", buffer));
+  const hex = Array.from(digest, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return hex === "0f574baab3ecc94be6b9a4fed02db53d2d720fb5c9b46b7576911c94c1f72ac7";
+}
 async function readMember(assetBase2, asset, signal) {
   const url = new URL("interiors/" + asset.file, assetBase2);
   const controller = new AbortController;
@@ -8447,7 +8455,7 @@ async function readMember(assetBase2, asset, signal) {
     if (!response.ok)
       throw new Error(`Interior asset request failed: ${response.status}`);
     const buffer = await response.arrayBuffer();
-    if (buffer.byteLength !== asset.bytes)
+    if (buffer.byteLength !== asset.bytes && !await releasedGogoRoom(asset, buffer))
       throw new Error("Interior asset size mismatch");
     return buffer;
   } finally {
@@ -8499,6 +8507,8 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3, artw
     });
     for (const mesh of meshes) {
       const m = mesh.material;
+      if (store2?.id === "S03" && mesh.userData.fixture === "S03-cold")
+        scene.userData.gogoFreezer = true;
       if (!mesh.isInstancedMesh && store2)
         positionRoomInlays(mesh.geometry, store2);
       if (placement && m.name === placement.material && !mesh.isInstancedMesh) {
@@ -8539,6 +8549,8 @@ function createInteriorModelLoader(T, assetBase2, loader = new GLTFLoader3, artw
       if (signal?.aborted)
         throw new DOMException("Interior asset cancelled", "AbortError");
       const store2 = interiorStores[asset.file.slice(0, 3).toUpperCase()];
+      if (buffer.byteLength !== asset.bytes)
+        scene.userData.receivedBytes = buffer.byteLength;
       const work = function* () {
         const materials2 = new Set;
         scene.traverse((mesh) => {
@@ -8664,8 +8676,8 @@ function createInteriorKit(T, scene, {
       yield;
     }
   }
-  function* decoration(store2, detail) {
-    const base = yield* prepareInteriorDecoration(T, store2, materials2, 0);
+  function* decoration(store2, detail, hasGogoFreezer) {
+    const base = yield* prepareInteriorDecoration(T, store2, materials2, 0, hasGogoFreezer);
     const batches = new Map(base.children.map((mesh) => [mesh.material, [mesh.geometry]]));
     for (let level = 1;level <= detail; level++) {
       const extra = yield* prepareInteriorDecoration(T, store2, materials2, level);
@@ -8799,9 +8811,11 @@ function createInteriorKit(T, scene, {
       } finally {
         decoding = false;
       }
+      const roomFile = roomDetails[shop.store.id].file;
+      const room = freshModels.get(roomFile) ?? shop.models.get(roomFile);
       await build(function* () {
-        if (!shop.layers[detail]) {
-          freshDecoration = yield* decoration(shop.store, detail);
+        if (!shop.layers[detail] && (shop.store.id !== "S03" || room)) {
+          freshDecoration = yield* decoration(shop.store, detail, room?.userData.gogoFreezer);
           yield* measure(freshDecoration, shop.store.id);
         }
         for (const model of freshModels.values())
@@ -8811,7 +8825,7 @@ function createInteriorKit(T, scene, {
         return;
       const fresh = [freshDecoration, ...freshModels.values()].filter(Boolean);
       const models2 = required.map((member) => freshModels.get(member.file) ?? shop.models.get(member.file)).filter(Boolean);
-      const roots = [shop.layers[detail] ?? freshDecoration, ...models2];
+      const roots = [shop.layers[detail] ?? freshDecoration, ...models2].filter(Boolean);
       await installer.prepare(roots, { tier, priority, signal, prepareModel });
       if (signal.aborted)
         return;
@@ -8843,7 +8857,7 @@ function createInteriorKit(T, scene, {
         if (member.roomDetail)
           shop.motion = root.userData.roomMotion;
         report.modelsLoaded++;
-        report.bytes += member.bytes;
+        report.bytes += root.userData.receivedBytes ?? member.bytes;
       }
       freshModels.clear();
       freshDecoration = undefined;

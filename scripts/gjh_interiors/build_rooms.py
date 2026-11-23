@@ -12,6 +12,7 @@ import bpy
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0,str(HERE))
 from california_mexico_tins import smooth_california_mexico_tins
+from gogo_freezer import add_freezer, source_faces
 from gp_power_models import smooth_gp_profiles
 from gulong_tins import smooth_gulong_tins
 from hormel_chili_tins import smooth_hormel_chili_tins
@@ -73,13 +74,18 @@ def file_glb(path, target):
 
 
 def export(slot, gallery, output):
+    freezer = source_faces(gallery/"models/freezer-cabinet/sources/freezer-cabinet.blend") if slot == 3 else None
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.context.scene.unit_settings.system = "METRIC"
     room = build(slot,gallery/"models")
+    if freezer:
+        add_freezer(room,freezer)
     atlas = bpy.data.images.load(str(output/"showroom-atlas.png"))
     finishes = {name:material(name,atlas) for name in room.batches}
     for name,batch in room.batches.items():
         obj = batch.object(f"S{slot:02} {name}",finishes[name],name == CRAFT)
+        if slot == 3 and name == CRAFT:
+            obj["fixture"] = "S03-cold"
         if slot == 2 and name == CRAFT:
             apply_mili_mock_duck_normals(obj, (room.mock_duck_face,))
         if slot == 7 and name == CRAFT:
@@ -115,7 +121,7 @@ def export(slot, gallery, output):
         path = Path(temp)/(name+".gltf")
         bpy.ops.export_scene.gltf(filepath=str(path),export_format="GLTF_SEPARATE",export_yup=True,
             export_animations=False,export_cameras=False,export_lights=False,export_gpu_instances=True,
-            export_image_format="AUTO",export_vertex_color="ACTIVE")
+            export_image_format="AUTO",export_vertex_color="ACTIVE",export_extras=slot==3)
         file_glb(path,output/(name+".glb"))
 
 
