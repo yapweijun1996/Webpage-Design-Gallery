@@ -77,7 +77,7 @@ The plaque is intended for close reading. Its text is too small to read across t
 | Visual composition | Partial | Both entrances frame the suspended copper hood, tile island, stocked wings and side passages. On the central axis the hood overlaps the rear food artwork. Framed side windows narrow the view across the storefront. |
 | Counter and mobile controls | Partial | The approach shows both capped bottles, the tin and the three-line guide. At the closest 390 px first-person stop, Objectives crosses the bottle bodies and the caps extend above the visible frame. The entire plaque remains readable. Story and Next stay reachable. |
 | Draw budget | Pass | Six phone stops used 43, 50, 45, 24, 22 and 25 draws. The matched desktop counts were 76, 73, 71, 49, 43 and 70. |
-| Network and frame time | Partial | The phone requested the same 163 local paths and desktop the same 198. The counter sign now uses 126,720 texels. Timing on a physical handset remains open. |
+| Network and frame time | Partial | The phone requested the same 163 local paths and desktop the same 198. The counter sign now uses 126,720 texels. Matched host frame timing covers the arrival, entrance and cookline. Timing on a physical handset remains open. [Frame samples](../../evidence/gjh-v11-shop-frame-timing/README.md) |
 
 | Additional area | Assessment | Finding |
 | --- | --- | --- |
