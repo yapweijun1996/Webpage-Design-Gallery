@@ -7,7 +7,7 @@ import {buildPublicArchitecture} from '../demos/corporate/gjh/v11/assets/public-
 import {addExpandedStorefronts} from '../demos/corporate/gjh/v11/assets/expanded-storefronts.js';
 import {expandedLayout, shopEntrance} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
 import {atriumLayout} from '../demos/corporate/gjh/v11/assets/atrium-layout.js';
-import {liftLayout} from '../demos/corporate/gjh/v11/assets/lift-layout.js';
+import {liftLayout,escalatorLayout,escalatorHeight} from '../demos/corporate/gjh/v11/assets/lift-layout.js';
 import {buildUpperLevel, deckPlanters} from '../demos/corporate/gjh/v11/assets/upper-level.js';
 import {createSeatPlacements} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
 import {NPC_ROUTES} from '../demos/corporate/gjh/v11/assets/npcs.js';
@@ -182,6 +182,25 @@ test('debug runtime mounts a closed line and animates the car from the station',
     assert.ok(Math.hypot(a.x-c.x,a.z-c.z)<1e-8);
   }
 });
+test('the occupied escalator corridor clears all public reservations and the moving tram',t=>{
+  const e=escalatorLayout, span=.10, cells=[], scenery=obstacles(t);
+  for(let left=e.upperEdge;left<e.lowerEdge-.001;left+=span){
+    const right=Math.min(left+span,e.lowerEdge);
+    const bottom=escalatorHeight(right)-.60,top=escalatorHeight(left)+2.10;
+    const cell=box('escalator', (left+right)/2,(bottom+top)/2,e.z,right-left,top-bottom,e.width);
+    cells.push(cell);
+    for(const obstacle of scenery){
+      if(obstacle.id==='upper slab')continue;
+      assert(gap(cell,obstacle)>.01,'escalator intersects '+obstacle.id+' at '+left);
+    }
+  }
+  for(let d=0;d<tramRoute.length;d+=.25){
+    for(const car of sampleTramEnvelopes(tramRoute,d))for(const cell of cells){
+      assert(gap(cell,car)>5,'escalator conflicts with tram '+car.id+' at '+d);
+    }
+  }
+});
+
 test('quarter-metre envelope sweep and nearest fascia views',t=>{
   const boxes=obstacles(t);
   const baseline=survey(nominal,boxes), adjusted=survey(tramRoute,boxes);

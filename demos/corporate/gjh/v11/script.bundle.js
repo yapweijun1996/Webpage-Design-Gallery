@@ -304,6 +304,19 @@ var liftLayout = freeze({
   showcase: { x: -7, z: 18 },
   facilities: { ...restroomParcel, status: "open" }
 });
+var escalatorLayout = freeze({
+  z: 9,
+  width: 1.6,
+  clearWidth: 1.34,
+  upperEdge: liftLayout.slab.maxX,
+  upperFlat: 4,
+  lowerFlat: 17.3,
+  lowerEdge: 18.5,
+  exitX: 2.3,
+  rise: liftLayout.upper,
+  speed: 1,
+  stepCount: 50
+});
 var shaftFinish = Object.freeze({
   west: liftLayout.shaft.minX - 0.27,
   east: liftLayout.shaft.maxX + 0.18,
@@ -3616,6 +3629,10 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
         setHudText(nearbyName, seatNotice || (cartBlocksSeat ? "Stow your cart from Bag before sitting" : `${records.get(nearby).name} · Sit here`));
         setHudText(inspectVerb, "Sit");
         labelInspect(`Sit on ${records.get(nearby).name}`);
+      } else if (selectedInteraction?.kind === "escalator") {
+        setHudText(nearbyName, selectedInteraction.boardingReason() || selectedInteraction.name);
+        setHudText(inspectVerb, selectedInteraction.prompt);
+        labelInspect("Ride the escalator to the upper deck");
       } else if (nearby && selectedInteraction?.kind === "travel") {
         const prompt = selectedInteraction.prompt;
         const action = typeof prompt === "function" ? prompt() : prompt;
@@ -3723,6 +3740,8 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
       records.set("visitor-elevator", { name: "Elevator · Change level", action: "elevator" });
       elevatorListener = listener;
       if (expanded) {
+        records.set("atrium-escalator", { name: "Upper deck escalator", action: "escalator" });
+        addMapService("upper-escalator", "E", "Upper deck escalator", { x: escalatorLayout.lowerEdge, z: escalatorLayout.z });
         floorRideListener = floorListener;
         const select = document.getElementById("map-destination");
         for (const [id, { label }] of Object.entries(floorDestinations))
@@ -6373,7 +6392,7 @@ function createSpatialHud({ expanded = false, root = document } = {}) {
       const floorLabel = upper ? "Floor 02 - Upper Level" : "Floor 01 - Atrium";
       const shop = !upper && shops.get(zone);
       setText(floor, shop ? `${floorLabel} · ${shop.label}` : floorLabel);
-      const mapContext = travelling ? "Ground-floor plan · Lift in transit" : upper ? "Ground-floor plan · You are on Floor 02" : "Ground-floor plan · You are here";
+      const mapContext = travelling === "escalator" ? "Ground-floor plan · Escalator in transit" : travelling ? "Ground-floor plan · Lift in transit" : upper ? "Ground-floor plan · You are on Floor 02" : "Ground-floor plan · You are here";
       setText(context, mapContext);
       setAttribute(map, "aria-label", mapContext);
       if (miniMap)
@@ -6915,10 +6934,16 @@ function hideGuidance() {
   ui.clearGuidance();
   spatialHud?.suspend();
 }
+function floorRideKind(pose) {
+  if (pose.escalatorTravel)
+    return "escalator";
+  return pose.elevatorTravel ? "lift" : null;
+}
 var pendingFloorRide;
 var nearby = null;
 var currentZone = "atrium";
 var wasRiding = false;
+var wasOnEscalator = false;
 function clearTransientState(event) {
   testWalk?.cancel("Test movement interrupted by a mode or focus change");
   if (event.kind === "interrupt")
@@ -7031,7 +7056,7 @@ function updateSpatialHud() {
     interaction: selectedInteraction,
     distance: interactionDistance,
     targetLabel: spatialTargetName.textContent,
-    travelling: Boolean(p.elevatorTravel),
+    travelling: floorRideKind(p),
     usable: !spatialInspectButton.disabled,
     active: ready && !modes.paused() && !windowBlurred && !document.hidden && document.body.classList.contains("is-3d") && ["explore", "cart"].includes(modes.current()) && !p.character.collection.active && !p.productApproaching
   });
@@ -7221,7 +7246,7 @@ async function startTestWalk(x, z, speed, face = false) {
   if (!canTest())
     throw new Error("Enter and focus the 3D mall before running a test command");
   const pose = player.state;
-  if (pose.elevatorTravel || pose.seated || pose.tramRide?.active || pose.productApproaching) {
+  if (floorRideKind(pose) || pose.seated || pose.tramRide?.active || pose.productApproaching) {
     throw new Error("The player is busy");
   }
   resumeTestSimulation();
@@ -7348,15 +7373,21 @@ Object.defineProperty(window, "__mall", { value: Object.freeze({
 }), writable: false });
 function updateHUD() {
   const p = player.state;
-  if (skipRide.hidden === p.elevatorTravel)
-    skipRide.hidden = !p.elevatorTravel;
-  const zone = elevator && p.y > elevator.upper / 2 ? "upper" : (expanded ? restroomAt(p.x, p.z) ?? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
-  if (zone !== currentZone || Boolean(p.elevatorTravel) !== wasRiding)
+  const travelling = Boolean(floorRideKind(p));
+  if (skipRide.hidden === travelling)
+    skipRide.hidden = !travelling;
+  if (p.escalatorTravel !== wasOnEscalator) {
+    if (p.escalatorTravel)
+      ui.announce("Ascending to the upper deck. The lift serves both floors.");
+    wasOnEscalator = p.escalatorTravel;
+  }
+  const zone = elevator && !p.escalatorTravel && p.y > elevator.upper / 2 ? "upper" : (expanded ? restroomAt(p.x, p.z) ?? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
+  if (zone !== currentZone || travelling !== wasRiding)
     quality.resetSampling();
   if (zone !== currentZone)
     mallAudio3.setZone(zone);
   currentZone = zone;
-  wasRiding = Boolean(p.elevatorTravel);
+  wasRiding = travelling;
   if (expanded && currentZone === "upper" && !brandWallStarted) {
     brandWallStarted = true;
     world.ensureBrandWall().then(({ records }) => {
@@ -7364,7 +7395,7 @@ function updateHUD() {
       updateHUD();
     }).catch((error) => console.error("Upper deck brand wall could not load:", error));
   }
-  const selection = interactions.nearest(p, { travelling: Boolean(p.elevatorTravel), player: p, zone });
+  const selection = interactions.nearest(p, { travelling, player: p, zone });
   selectedInteraction = selection.item;
   interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
@@ -7503,13 +7534,13 @@ function render(force = false) {
     mallHud.update({
       position: pose,
       zone: currentZone,
-      travelling: pose.elevatorTravel,
+      travelling: Boolean(floorRideKind(pose)),
       liftDocked: expanded && elevator?.height === 0 && !elevator.calling,
       enabled: !windowBlurred && !modes.paused() && document.body.classList.contains("is-3d") && startupOverlay.hidden,
       now,
       forward: { x: -matrix[8], z: -matrix[10] }
     });
-    const guiding = !windowBlurred && ["explore", "cart"].includes(modes.current()) && !pose.character.collection.active;
+    const guiding = !windowBlurred && !floorRideKind(pose) && ["explore", "cart"].includes(modes.current()) && !pose.character.collection.active;
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
     const target = label && selectedInteraction.id;
     if (target !== projectedTarget) {
@@ -7695,7 +7726,7 @@ function warmModels(pose, background = true) {
   const { physicalProduct, collection } = pose.character;
   const stableSeat = pose.seatPhase === "idle" || pose.seatPhase === "seated";
   const stableProduct = !physicalProduct || ["empty", "held"].includes(physicalProduct.phase);
-  if (!stableSeat || !stableProduct || pose.elevatorTravel || pose.productApproaching || collection.active)
+  if (!stableSeat || !stableProduct || floorRideKind(pose) || pose.productApproaching || collection.active)
     return 0;
   const started = performance.now();
   const remaining = () => Math.max(0, 4 - (performance.now() - started));
@@ -7817,7 +7848,7 @@ function animate(now) {
   player.takeQueryTimings(movementTimings);
   movementTimings.physicsMs = movementTimings.cameraMs = 0;
   simulationMs = simulationSteps = 0;
-  quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel && !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && entered && now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost && ["explore", "cart"].includes(modes.current())));
+  quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !floorRideKind(pose) && !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && entered && now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost && ["explore", "cart"].includes(modes.current())));
 }
 function resume() {
   if (ready && !frame && !document.hidden) {
@@ -7875,7 +7906,7 @@ function requestFloorRide(upper, arrival) {
   return result;
 }
 ui.onTeleport((zone) => {
-  if (!ready || player.state.elevatorTravel || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone)))
+  if (!ready || floorRideKind(player.state) || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone)))
     return false;
   pendingFloorRide = undefined;
   manual = false;
@@ -8462,6 +8493,28 @@ async function initialize() {
   });
   ui.setShelfFocus(shelfFocus);
   ui.setRestrooms(world.restrooms);
+  if (elevator?.escalator) {
+    player.enableEscalator();
+    const e = escalatorLayout;
+    world.interactables.push({
+      id: "atrium-escalator",
+      kind: "escalator",
+      x: e.lowerEdge + 0.65,
+      z: e.z,
+      y: 0,
+      radius: 1.1,
+      name: "Upper deck escalator",
+      prompt: "Ride up",
+      boardingReason: player.boardTransportReason,
+      availability: ({ player: p }) => p.x >= e.lowerEdge - 0.2 && Math.abs(p.z - e.z) <= e.clearWidth / 2 - 0.24,
+      handler: () => {
+        const ok = player.boardEscalator();
+        if (!ok)
+          ui.announce(player.boardTransportReason() || "Approach the lower landing.");
+        return ok;
+      }
+    });
+  }
   interactions = createInteractionRegistry(world.interactables, (item) => ui.describeInteraction(item));
   interactions.subscribe((item) => {
     if (item.kind === "pickup")
@@ -8522,7 +8575,7 @@ async function initialize() {
     requestRender();
     return ok;
   });
-  ui.onCollect((id) => Boolean(!player.state.seated && player.state.character.collection.available !== false && world.productAssets?.cans?.[id.replace("new-moon-", "").replace("-front", "")]?.status === "loaded"), (id) => {
+  ui.onCollect((id) => Boolean(!player.state.seated && !floorRideKind(player.state) && player.state.character.collection.available !== false && world.productAssets?.cans?.[id.replace("new-moon-", "").replace("-front", "")]?.status === "loaded"), (id) => {
     if (player.state.character.collection.active)
       return false;
     player.setCart(false);

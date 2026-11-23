@@ -1,0 +1,1811 @@
+{
+  "fullControlsBuild": "5a2cd605a3ea945f",
+  "finalHudBuild": "c5df12176dafbbcd",
+  "fullControls": {
+    "runtimeParent": "cd1258299a7d25e85a075f4e4acddaa953cedfc3",
+    "upperCopySHA256": "caa59b328732cd911c74f93b9d3522b3379c4b62962901d854026e37db44b8f2",
+    "escalatorSourceSHA256": "da466f88018c288dcf4ffcb33696f00fa64afd8d06150cb0f047a8641e611e86",
+    "mapDeltaSHA256": "0ca6dfd47ad2b919f9ac263d68fc42213721bc3b1366ad9394abebc3efab2d3a",
+    "downhillModuleSHA256": "2439d8322f8ae883ef29ea9e6af197a337158954a55a02c419ce972d337f365a",
+    "previousModuleSHA256": "3f576712dee78a39b3857339d0d132a54432197ad9777a953e389dac625c3428",
+    "cameraNote": "Camera, player and draw counters were sampled immediately before each Playwright PNG. Pixel-band measurements use the actual image centreline.",
+    "viewports": {
+      "390": {
+        "chrome": "158.0.8127.37",
+        "height": 844,
+        "quality": "low",
+        "physicalInputs": [
+          "touch Ride up",
+          "pause and standing ascent",
+          "both adjoining benches",
+          "step-free lift return",
+          "ground crossing beneath higher span",
+          "accessible restroom threshold and return",
+          "real held SKU and active cart refused at lower comb",
+          "reduced-motion landing"
+        ],
+        "viewDrawCalls": {
+          "entrance": 62,
+          "entrance-orbit": 63,
+          "lower": 39,
+          "lower-orbit": 51,
+          "ascent": 51,
+          "deck_down": 44,
+          "deck-orbit": 52,
+          "crossing": 49,
+          "restroom": 59
+        },
+        "storefrontMax": 71,
+        "storefrontDraws": {
+          "newmoon": [
+            57,
+            45,
+            57,
+            54
+          ],
+          "mili": [
+            42,
+            42,
+            58,
+            45
+          ],
+          "gogo": [
+            44,
+            47,
+            41,
+            42
+          ],
+          "planned-space-04": [
+            33,
+            53,
+            42,
+            29
+          ],
+          "planned-space-05": [
+            28,
+            59,
+            38,
+            34
+          ],
+          "planned-space-06": [
+            63,
+            41,
+            56,
+            61
+          ],
+          "planned-space-07": [
+            43,
+            44,
+            49,
+            66
+          ],
+          "planned-space-08": [
+            45,
+            46,
+            34,
+            58
+          ],
+          "planned-space-09": [
+            59,
+            40,
+            28,
+            48
+          ],
+          "planned-space-10": [
+            60,
+            41,
+            27,
+            44
+          ],
+          "planned-space-11": [
+            56,
+            35,
+            24,
+            32
+          ],
+          "planned-space-12": [
+            31,
+            71,
+            36,
+            36
+          ],
+          "planned-space-13": [
+            33,
+            66,
+            35,
+            47
+          ],
+          "planned-space-14": [
+            37,
+            63,
+            30,
+            47
+          ],
+          "planned-space-15": [
+            39,
+            63,
+            25,
+            41
+          ],
+          "planned-space-16": [
+            48,
+            53,
+            24,
+            44
+          ],
+          "planned-space-17": [
+            49,
+            36,
+            21,
+            36
+          ]
+        },
+        "carryBoundaries": {
+          "held": {
+            "x": 18.383583068847656,
+            "y": -1.4901161193847656e-06,
+            "z": 8.926587104797363,
+            "cart": false,
+            "held": "new-moon-nz-425g-front",
+            "riding": false
+          },
+          "cart": {
+            "x": 19.475082397460938,
+            "y": -0.026049673557281494,
+            "z": 9.178730964660645,
+            "cart": true,
+            "held": null,
+            "riding": false
+          }
+        },
+        "downhillImageMeasurements": {
+          "old-edge": {
+            "camera": {
+              "position": [
+                1.5510918301968424,
+                10.404989387980264,
+                8.999276312682019
+              ],
+              "quaternion": [
+                -0.31205433305118246,
+                -0.6346353729571466,
+                -0.3121974938303612,
+                0.6343443555842259
+              ],
+              "fov": 99.36293839047889,
+              "aspect": 0.4899497487437186
+            },
+            "canvas": [
+              0,
+              48,
+              390,
+              796
+            ],
+            "comparisonRows": [
+              383,
+              483
+            ],
+            "comparisonColumn": 195,
+            "centerColumnGoldBands": 0,
+            "centerColumnGoldPixels": 0,
+            "bandRows": []
+          },
+          "revised": {
+            "camera": {
+              "position": [
+                1.5499020729427515,
+                10.405038725726369,
+                9.00005290022404
+              ],
+              "quaternion": [
+                -0.31200600181596033,
+                -0.6345408711273463,
+                -0.31199564198310886,
+                0.6345619410926844
+              ],
+              "fov": 99.36293839047889,
+              "aspect": 0.4899497487437186
+            },
+            "canvas": [
+              0,
+              48,
+              390,
+              796
+            ],
+            "comparisonRows": [
+              383,
+              483
+            ],
+            "comparisonColumn": 195,
+            "centerColumnGoldBands": 21,
+            "centerColumnGoldPixels": 37,
+            "bandRows": [
+              386,
+              389,
+              391,
+              398,
+              401,
+              410,
+              413,
+              416,
+              418,
+              420,
+              423,
+              425,
+              428,
+              431,
+              434,
+              438,
+              442,
+              446,
+              452,
+              458,
+              470
+            ]
+          }
+        },
+        "mapCopy": {
+          "en": {
+            "marker": "E",
+            "legend": "D Directory · G Guest guide · F Featured collection · W Public restrooms · L Visitor lift · E Upper deck escalator"
+          },
+          "zh-Hans": {
+            "marker": "E",
+            "legend": "D 目录 · G 访客指南 · F 特色展品 · W 公共洗手间 · L 观光电梯 · E 前往上层的扶梯"
+          },
+          "ms": {
+            "marker": "E",
+            "legend": "D Direktori · G Panduan pengunjung · F Koleksi pilihan · W Tandas awam · L Lif pengunjung · E Eskalator ke aras atas"
+          }
+        },
+        "changedHTTPModulesVersusUpHillEdgeControl": [
+          "escalator.js",
+          "mall-language.js",
+          "script.bundle.js"
+        ],
+        "routeDistinctHTTPPathCount": 179,
+        "servedHashes": {
+          "/demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+          "/demos/corporate/gjh/v11/assets/mall-language.js": "af9d97fefa28c03287582865c6310055f26caba531cf8bcc2eb2a514fec3546d",
+          "/demos/corporate/gjh/v11/assets/elevator-v2.js": "108e74bbd21de8601d0110622fb3c8d1579b04b263b5baa4819c4fdb3a3a6ed5",
+          "/demos/corporate/gjh/v11/assets/player.bundle.js": "18ff93f83dbf693a44d9a87979c7f860b1f059f8d9eeb8c1501842f87de78d0f",
+          "/demos/corporate/gjh/v11/script.bundle.js": "391ed7b963a93d558b516b965dc10041cb25785d87c30cc4db2300566b8f1c29",
+          "/demos/corporate/gjh/v11/assets/world.bundle.js": "9785177b860b366b62eaf3d238f6a9b493044f5745b70ff8676d1b37988cea45",
+          "/demos/corporate/gjh/v11/assets/escalator.js": "2439d8322f8ae883ef29ea9e6af197a337158954a55a02c419ce972d337f365a",
+          "/demos/corporate/gjh/v11/assets/lift-layout.js": "720092660759fc1c00a79fba2c5b88165ec9837b968f6d54c63c35c33e1ed14a"
+        },
+        "previousNoEscalatorComparison": {
+          "baseline": "715e6e80",
+          "entrance": 62,
+          "entranceOrbitPeak": 63
+        }
+      },
+      "768": {
+        "chrome": "158.0.8127.37",
+        "height": 1024,
+        "quality": "balanced",
+        "physicalInputs": [
+          "touch Ride up",
+          "pause and standing ascent",
+          "both adjoining benches",
+          "step-free lift return",
+          "ground crossing beneath higher span",
+          "accessible restroom threshold and return",
+          "real held SKU and active cart refused at lower comb",
+          "reduced-motion landing"
+        ],
+        "viewDrawCalls": {
+          "entrance": 83,
+          "entrance-orbit": 85,
+          "lower": 33,
+          "lower-orbit": 62,
+          "ascent": 65,
+          "deck_down": 43,
+          "deck-orbit": 63,
+          "crossing": 54,
+          "restroom": 47
+        },
+        "storefrontMax": 83,
+        "storefrontDraws": {
+          "newmoon": [
+            63,
+            49,
+            61,
+            59
+          ],
+          "mili": [
+            48,
+            46,
+            74,
+            52
+          ],
+          "gogo": [
+            48,
+            52,
+            57,
+            48
+          ],
+          "planned-space-04": [
+            35,
+            55,
+            46,
+            32
+          ],
+          "planned-space-05": [
+            29,
+            73,
+            40,
+            35
+          ],
+          "planned-space-06": [
+            64,
+            39,
+            62,
+            74
+          ],
+          "planned-space-07": [
+            44,
+            42,
+            51,
+            75
+          ],
+          "planned-space-08": [
+            48,
+            43,
+            39,
+            75
+          ],
+          "planned-space-09": [
+            64,
+            37,
+            32,
+            64
+          ],
+          "planned-space-10": [
+            64,
+            37,
+            30,
+            45
+          ],
+          "planned-space-11": [
+            62,
+            35,
+            18,
+            38
+          ],
+          "planned-space-12": [
+            32,
+            83,
+            40,
+            36
+          ],
+          "planned-space-13": [
+            35,
+            81,
+            41,
+            49
+          ],
+          "planned-space-14": [
+            38,
+            80,
+            36,
+            47
+          ],
+          "planned-space-15": [
+            40,
+            75,
+            28,
+            41
+          ],
+          "planned-space-16": [
+            49,
+            54,
+            27,
+            45
+          ],
+          "planned-space-17": [
+            50,
+            41,
+            22,
+            38
+          ]
+        },
+        "carryBoundaries": {
+          "held": {
+            "x": 18.401681900024414,
+            "y": 9.924173355102539e-05,
+            "z": 8.927871704101562,
+            "cart": false,
+            "held": "new-moon-nz-425g-front",
+            "riding": false
+          },
+          "cart": {
+            "x": 19.475017547607422,
+            "y": -0.026231586933135986,
+            "z": 9.2101411819458,
+            "cart": true,
+            "held": null,
+            "riding": false
+          }
+        },
+        "downhillImageMeasurements": {
+          "old-edge": {
+            "camera": {
+              "position": [
+                2.08547164889831,
+                10.438275790353366,
+                8.999029039564382
+              ],
+              "quaternion": [
+                -0.37394426416596077,
+                -0.600312511578953,
+                -0.374300296741048,
+                0.5997414973125594
+              ],
+              "fov": 64,
+              "aspect": 0.7868852459016393
+            },
+            "canvas": [
+              0,
+              48,
+              768,
+              976
+            ],
+            "comparisonRows": [
+              337,
+              608
+            ],
+            "comparisonColumn": 384,
+            "centerColumnGoldBands": 0,
+            "centerColumnGoldPixels": 0,
+            "bandRows": []
+          },
+          "revised": {
+            "camera": {
+              "position": [
+                2.0878658191723707,
+                10.438602646243886,
+                8.999844588383256
+              ],
+              "quaternion": [
+                -0.37391527844038686,
+                -0.600186807880008,
+                -0.3739778039459577,
+                0.6000864623963892
+              ],
+              "fov": 64,
+              "aspect": 0.7868852459016393
+            },
+            "canvas": [
+              0,
+              48,
+              768,
+              976
+            ],
+            "comparisonRows": [
+              337,
+              608
+            ],
+            "comparisonColumn": 384,
+            "centerColumnGoldBands": 37,
+            "centerColumnGoldPixels": 92,
+            "bandRows": [
+              340,
+              342,
+              347,
+              351,
+              354,
+              356,
+              361,
+              363,
+              365,
+              367,
+              370,
+              372,
+              375,
+              377,
+              380,
+              383,
+              387,
+              390,
+              394,
+              398,
+              402,
+              407,
+              411,
+              417,
+              422,
+              429,
+              436,
+              443,
+              451,
+              460,
+              470,
+              482,
+              494,
+              509,
+              525,
+              544,
+              587
+            ]
+          }
+        },
+        "mapCopy": {
+          "en": {
+            "marker": "E",
+            "legend": "D Directory · G Guest guide · F Featured collection · W Public restrooms · L Visitor lift · E Upper deck escalator"
+          },
+          "zh-Hans": {
+            "marker": "E",
+            "legend": "D 目录 · G 访客指南 · F 特色展品 · W 公共洗手间 · L 观光电梯 · E 前往上层的扶梯"
+          },
+          "ms": {
+            "marker": "E",
+            "legend": "D Direktori · G Panduan pengunjung · F Koleksi pilihan · W Tandas awam · L Lif pengunjung · E Eskalator ke aras atas"
+          }
+        },
+        "changedHTTPModulesVersusUpHillEdgeControl": [
+          "escalator.js",
+          "mall-language.js",
+          "script.bundle.js"
+        ],
+        "routeDistinctHTTPPathCount": 213,
+        "servedHashes": {
+          "/demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+          "/demos/corporate/gjh/v11/assets/mall-language.js": "af9d97fefa28c03287582865c6310055f26caba531cf8bcc2eb2a514fec3546d",
+          "/demos/corporate/gjh/v11/assets/player.bundle.js": "18ff93f83dbf693a44d9a87979c7f860b1f059f8d9eeb8c1501842f87de78d0f",
+          "/demos/corporate/gjh/v11/script.bundle.js": "391ed7b963a93d558b516b965dc10041cb25785d87c30cc4db2300566b8f1c29",
+          "/demos/corporate/gjh/v11/assets/world.bundle.js": "9785177b860b366b62eaf3d238f6a9b493044f5745b70ff8676d1b37988cea45",
+          "/demos/corporate/gjh/v11/assets/elevator-v2.js": "108e74bbd21de8601d0110622fb3c8d1579b04b263b5baa4819c4fdb3a3a6ed5",
+          "/demos/corporate/gjh/v11/assets/lift-layout.js": "720092660759fc1c00a79fba2c5b88165ec9837b968f6d54c63c35c33e1ed14a",
+          "/demos/corporate/gjh/v11/assets/escalator.js": "2439d8322f8ae883ef29ea9e6af197a337158954a55a02c419ce972d337f365a"
+        }
+      },
+      "1440": {
+        "chrome": "158.0.8127.37",
+        "height": 900,
+        "quality": "detailed",
+        "physicalInputs": [
+          "keyboard walk-on",
+          "pause and standing ascent",
+          "both adjoining benches",
+          "step-free lift return",
+          "ground crossing beneath higher span",
+          "accessible restroom threshold and return",
+          "real held SKU and active cart refused at lower comb",
+          "reduced-motion landing"
+        ],
+        "viewDrawCalls": {
+          "entrance": 100,
+          "entrance-orbit": 100,
+          "lower": 60,
+          "lower-orbit": 76,
+          "ascent": 98,
+          "deck_down": 65,
+          "deck-orbit": 81,
+          "crossing": 69,
+          "restroom": 58
+        },
+        "storefrontMax": 112,
+        "storefrontDraws": {
+          "newmoon": [
+            86,
+            63,
+            94,
+            97
+          ],
+          "mili": [
+            76,
+            69,
+            87,
+            83
+          ],
+          "gogo": [
+            63,
+            81,
+            84,
+            64
+          ],
+          "planned-space-04": [
+            59,
+            93,
+            73,
+            42
+          ],
+          "planned-space-05": [
+            47,
+            94,
+            73,
+            51
+          ],
+          "planned-space-06": [
+            84,
+            65,
+            76,
+            112
+          ],
+          "planned-space-07": [
+            61,
+            59,
+            74,
+            93
+          ],
+          "planned-space-08": [
+            71,
+            56,
+            58,
+            95
+          ],
+          "planned-space-09": [
+            88,
+            58,
+            45,
+            90
+          ],
+          "planned-space-10": [
+            91,
+            57,
+            42,
+            72
+          ],
+          "planned-space-11": [
+            86,
+            43,
+            33,
+            65
+          ],
+          "planned-space-12": [
+            49,
+            101,
+            55,
+            49
+          ],
+          "planned-space-13": [
+            55,
+            96,
+            58,
+            63
+          ],
+          "planned-space-14": [
+            66,
+            98,
+            53,
+            61
+          ],
+          "planned-space-15": [
+            73,
+            94,
+            45,
+            56
+          ],
+          "planned-space-16": [
+            89,
+            91,
+            44,
+            56
+          ],
+          "planned-space-17": [
+            87,
+            87,
+            32,
+            50
+          ]
+        },
+        "carryBoundaries": {
+          "held": {
+            "x": 18.381494522094727,
+            "y": -1.4901161193847656e-06,
+            "z": 8.927666664123535,
+            "cart": false,
+            "held": "new-moon-nz-425g-front",
+            "riding": false
+          },
+          "cart": {
+            "x": 19.47500228881836,
+            "y": -0.026239633560180664,
+            "z": 9.153096199035645,
+            "cart": true,
+            "held": null,
+            "riding": false
+          }
+        },
+        "downhillImageMeasurements": {
+          "old-edge": {
+            "camera": {
+              "position": [
+                2.084409539893525,
+                10.438281018156744,
+                8.999831418379793
+              ],
+              "quaternion": [
+                -0.37395440609205943,
+                -0.6001618323137949,
+                -0.37401573704259405,
+                0.6000634180172697
+              ],
+              "fov": 64,
+              "aspect": 1.6901408450704225
+            },
+            "canvas": [
+              0,
+              48,
+              1440,
+              852
+            ],
+            "comparisonRows": [
+              292,
+              526
+            ],
+            "comparisonColumn": 720,
+            "centerColumnGoldBands": 0,
+            "centerColumnGoldPixels": 0,
+            "bandRows": []
+          },
+          "revised": {
+            "camera": {
+              "position": [
+                2.086253284005439,
+                10.438279015691425,
+                9.000870107873542
+              ],
+              "quaternion": [
+                -0.3743866212067094,
+                -0.5997045354995256,
+                -0.37406477821164935,
+                0.6002205175301755
+              ],
+              "fov": 64,
+              "aspect": 1.6901408450704225
+            },
+            "canvas": [
+              0,
+              48,
+              1440,
+              852
+            ],
+            "comparisonRows": [
+              292,
+              526
+            ],
+            "comparisonColumn": 720,
+            "centerColumnGoldBands": 36,
+            "centerColumnGoldPixels": 74,
+            "bandRows": [
+              297,
+              303,
+              311,
+              315,
+              318,
+              321,
+              323,
+              325,
+              327,
+              329,
+              331,
+              333,
+              335,
+              338,
+              341,
+              344,
+              347,
+              350,
+              353,
+              357,
+              361,
+              365,
+              370,
+              375,
+              381,
+              387,
+              393,
+              401,
+              409,
+              418,
+              428,
+              439,
+              452,
+              467,
+              487,
+              525
+            ]
+          }
+        },
+        "mapCopy": {
+          "en": {
+            "marker": "E",
+            "legend": "D Directory · G Guest guide · F Featured collection · W Public restrooms · L Visitor lift · E Upper deck escalator"
+          },
+          "zh-Hans": {
+            "marker": "E",
+            "legend": "D 目录 · G 访客指南 · F 特色展品 · W 公共洗手间 · L 观光电梯 · E 前往上层的扶梯"
+          },
+          "ms": {
+            "marker": "E",
+            "legend": "D Direktori · G Panduan pengunjung · F Koleksi pilihan · W Tandas awam · L Lif pengunjung · E Eskalator ke aras atas"
+          }
+        },
+        "changedHTTPModulesVersusUpHillEdgeControl": [
+          "escalator.js"
+        ],
+        "routeDistinctHTTPPathCount": 214,
+        "servedHashes": {
+          "/demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+          "/demos/corporate/gjh/v11/assets/mall-language.js": "af9d97fefa28c03287582865c6310055f26caba531cf8bcc2eb2a514fec3546d",
+          "/demos/corporate/gjh/v11/assets/player.bundle.js": "18ff93f83dbf693a44d9a87979c7f860b1f059f8d9eeb8c1501842f87de78d0f",
+          "/demos/corporate/gjh/v11/script.bundle.js": "391ed7b963a93d558b516b965dc10041cb25785d87c30cc4db2300566b8f1c29",
+          "/demos/corporate/gjh/v11/assets/world.bundle.js": "9785177b860b366b62eaf3d238f6a9b493044f5745b70ff8676d1b37988cea45",
+          "/demos/corporate/gjh/v11/assets/elevator-v2.js": "108e74bbd21de8601d0110622fb3c8d1579b04b263b5baa4819c4fdb3a3a6ed5",
+          "/demos/corporate/gjh/v11/assets/lift-layout.js": "720092660759fc1c00a79fba2c5b88165ec9837b968f6d54c63c35c33e1ed14a",
+          "/demos/corporate/gjh/v11/assets/escalator.js": "2439d8322f8ae883ef29ea9e6af197a337158954a55a02c419ce972d337f365a"
+        },
+        "previousNoEscalatorComparison": {
+          "baseline": "715e6e80",
+          "entrance": 100,
+          "entranceOrbitPeak": 100
+        }
+      }
+    },
+    "upperOnly768": {
+      "quality": "balanced",
+      "entrance": 83,
+      "entranceOrbitPeak": 85,
+      "servedHashes": {
+        "/demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "/demos/corporate/gjh/v11/assets/mall-language.js": "0462be909af287fb0b07baf5da688185c1e567bcf6364b3fbc7c37acc7fa71eb",
+        "/demos/corporate/gjh/v11/script.bundle.js": "0632e5a42f5d01e08d361902491d8e383aae268065129c0fea1e81867f8d43ed",
+        "/demos/corporate/gjh/v11/assets/world.bundle.js": "739689b0d69b57255c226e45f63d2c8b59b5cde985e625e03e128e01d5c126c1",
+        "/demos/corporate/gjh/v11/assets/elevator-v2.js": "968966eca27dc045f1769bc1d152c9aa6f772779263180f5d8b2a7ebea9716c9",
+        "/demos/corporate/gjh/v11/assets/player.bundle.js": "c4dba37082b8694c626ac708b0fb06649670219f568815d3eb6576a0f9cc263c",
+        "/demos/corporate/gjh/v11/assets/lift-layout.js": "4ac08ae33bb8cf8d3df28f3485764b8ddeb2558c3b3160ba79ff00761d5ad175"
+      },
+      "settledHTTPPathCount": 189
+    }
+  },
+  "finalHud": {
+    "390": {
+      "width": 390,
+      "height": 844,
+      "quality": "low",
+      "chrome": "158.0.8127.37",
+      "controls": [
+        "touch Ride up",
+        "pause and standing ascent",
+        "step-free lift return"
+      ],
+      "servedSHA256": {
+        "/demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "/demos/corporate/gjh/v11/assets/mall-language.js": "dadaf883c2634619bcc825e5e8137ec706768768fb81e6610d2eb8bb2807b9b6",
+        "/demos/corporate/gjh/v11/assets/player.bundle.js": "18ff93f83dbf693a44d9a87979c7f860b1f059f8d9eeb8c1501842f87de78d0f",
+        "/demos/corporate/gjh/v11/script.bundle.js": "4250d974e83c6c11fc71f5fc336d01801588fa0742ec1beef14d1bd88255d7c8",
+        "/demos/corporate/gjh/v11/assets/world.bundle.js": "9785177b860b366b62eaf3d238f6a9b493044f5745b70ff8676d1b37988cea45",
+        "/demos/corporate/gjh/v11/assets/elevator-v2.js": "108e74bbd21de8601d0110622fb3c8d1579b04b263b5baa4819c4fdb3a3a6ed5",
+        "/demos/corporate/gjh/v11/assets/lift-layout.js": "720092660759fc1c00a79fba2c5b88165ec9837b968f6d54c63c35c33e1ed14a",
+        "/demos/corporate/gjh/v11/assets/escalator.js": "2439d8322f8ae883ef29ea9e6af197a337158954a55a02c419ce972d337f365a"
+      },
+      "errors": [],
+      "guidance": {
+        "before": {
+          "contextVisible": true,
+          "kind": "nearby",
+          "hint": "Borsch Med · 3 m",
+          "map": "Ground-floor plan · You are here",
+          "skip": false,
+          "pose": {
+            "x": 19.29994010925293,
+            "y": -0.025423943996429443,
+            "z": 5.173610687255859,
+            "zone": "atrium",
+            "canvas": [
+              0,
+              48,
+              390,
+              796
+            ],
+            "riding": false,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 5.45749320192308,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                19.29608789031613,
+                3.435272624209763,
+                10.158772767556368
+              ],
+              "quaternion": [
+                -0.160307453823345,
+                -0.000383370442158305,
+                -6.22623753825009e-05,
+                0.9870670541554796
+              ],
+              "fov": 99.36293839047889,
+              "aspect": 0.4899497487437186
+            },
+            "draws": 36,
+            "triangles": 68791,
+            "mode": "explore",
+            "quality": "low",
+            "held": null,
+            "cart": false
+          }
+        },
+        "during": {
+          "contextVisible": false,
+          "kind": "interaction",
+          "hint": "Borsch Med · 6 m",
+          "map": "Ground-floor plan · Escalator in transit",
+          "skip": true,
+          "pose": {
+            "x": 13.691076278686523,
+            "y": 1.998394250869751,
+            "z": 9,
+            "zone": "atrium",
+            "canvas": [
+              0,
+              48,
+              390,
+              796
+            ],
+            "riding": true,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 5.4752564292194315,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                18.722472107752434,
+                5.423125957350294,
+                8.97756782693282
+              ],
+              "quaternion": [
+                -0.111272076349852,
+                0.699820259218447,
+                0.11177200455941352,
+                0.6966901383032408
+              ],
+              "fov": 99.36293839047889,
+              "aspect": 0.4899497487437186
+            },
+            "draws": 52,
+            "triangles": 131347,
+            "mode": "explore",
+            "quality": "low",
+            "held": null,
+            "cart": false
+          }
+        },
+        "deck": {
+          "contextVisible": false,
+          "kind": "interaction",
+          "hint": "Borsch Med · 6 m",
+          "map": "Ground-floor plan · You are on Floor 02",
+          "skip": false,
+          "pose": {
+            "x": 1.3933091163635254,
+            "y": 7.20004940032959,
+            "z": 8.999967575073242,
+            "zone": "upper",
+            "canvas": [
+              0,
+              48,
+              390,
+              796
+            ],
+            "riding": false,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 2.3337586873876583,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                0.33201196890213813,
+                10.47849131952773,
+                8.593971863515238
+              ],
+              "quaternion": [
+                -0.2829372129206886,
+                -0.5439811520897079,
+                -0.20150246608848357,
+                0.7638244535729962
+              ],
+              "fov": 99.36293839047889,
+              "aspect": 0.4899497487437186
+            },
+            "draws": 41,
+            "triangles": 58025,
+            "mode": "explore",
+            "quality": "low",
+            "held": null,
+            "cart": false
+          }
+        },
+        "after": {
+          "contextVisible": true,
+          "kind": "nearby",
+          "hint": "Borsch Med · 3 m",
+          "map": "Ground-floor plan · You are here",
+          "skip": false,
+          "pose": {
+            "x": 19.22396469116211,
+            "y": -0.020003676414489746,
+            "z": 5.100640296936035,
+            "zone": "atrium",
+            "canvas": [
+              0,
+              48,
+              390,
+              796
+            ],
+            "riding": false,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 5.456225841551104,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                14.240509372699425,
+                3.4413260745196737,
+                5.141884378634197
+              ],
+              "quaternion": [
+                -0.11386504146642715,
+                -0.6950489773335048,
+                -0.11292263208685603,
+                0.7008495919967954
+              ],
+              "fov": 99.36293839047889,
+              "aspect": 0.4899497487437186
+            },
+            "draws": 30,
+            "triangles": 48313,
+            "mode": "explore",
+            "quality": "low",
+            "held": null,
+            "cart": false
+          }
+        }
+      }
+    },
+    "768": {
+      "width": 768,
+      "height": 1024,
+      "quality": "balanced",
+      "chrome": "158.0.8127.37",
+      "controls": [
+        "touch Ride up",
+        "pause and standing ascent",
+        "step-free lift return"
+      ],
+      "servedSHA256": {
+        "/demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "/demos/corporate/gjh/v11/assets/mall-language.js": "dadaf883c2634619bcc825e5e8137ec706768768fb81e6610d2eb8bb2807b9b6",
+        "/demos/corporate/gjh/v11/assets/player.bundle.js": "18ff93f83dbf693a44d9a87979c7f860b1f059f8d9eeb8c1501842f87de78d0f",
+        "/demos/corporate/gjh/v11/script.bundle.js": "4250d974e83c6c11fc71f5fc336d01801588fa0742ec1beef14d1bd88255d7c8",
+        "/demos/corporate/gjh/v11/assets/world.bundle.js": "9785177b860b366b62eaf3d238f6a9b493044f5745b70ff8676d1b37988cea45",
+        "/demos/corporate/gjh/v11/assets/elevator-v2.js": "108e74bbd21de8601d0110622fb3c8d1579b04b263b5baa4819c4fdb3a3a6ed5",
+        "/demos/corporate/gjh/v11/assets/lift-layout.js": "720092660759fc1c00a79fba2c5b88165ec9837b968f6d54c63c35c33e1ed14a",
+        "/demos/corporate/gjh/v11/assets/escalator.js": "2439d8322f8ae883ef29ea9e6af197a337158954a55a02c419ce972d337f365a"
+      },
+      "errors": [],
+      "guidance": {
+        "before": {
+          "contextVisible": true,
+          "kind": "nearby",
+          "hint": "Borsch Med · 3 m",
+          "map": "Ground-floor plan · You are here",
+          "skip": false,
+          "pose": {
+            "x": 19.299976348876953,
+            "y": -0.02179056406021118,
+            "z": 5.173398971557617,
+            "zone": "atrium",
+            "canvas": [
+              0,
+              48,
+              768,
+              976
+            ],
+            "riding": false,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 5.650937968288715,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                19.297798732983512,
+                3.4641840738207006,
+                10.358828695738518
+              ],
+              "quaternion": [
+                -0.15759965507729937,
+                -0.0001955865251414325,
+                -3.1214453803789105e-05,
+                0.9875030680919858
+              ],
+              "fov": 64,
+              "aspect": 0.7868852459016393
+            },
+            "draws": 51,
+            "triangles": 74799,
+            "mode": "explore",
+            "quality": "balanced",
+            "held": null,
+            "cart": false
+          }
+        },
+        "during": {
+          "contextVisible": false,
+          "kind": "interaction",
+          "hint": "Borsch Med · 6 m",
+          "map": "Ground-floor plan · Escalator in transit",
+          "skip": true,
+          "pose": {
+            "x": 13.717601776123047,
+            "y": 1.9840328693389893,
+            "z": 9,
+            "zone": "atrium",
+            "canvas": [
+              0,
+              48,
+              768,
+              976
+            ],
+            "riding": true,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 5.664922765219806,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                18.93142855741036,
+                5.441504081758698,
+                8.976944162242944
+              ],
+              "quaternion": [
+                -0.10951233969984875,
+                0.700083551149479,
+                0.10999894285268444,
+                0.6969865862659709
+              ],
+              "fov": 64,
+              "aspect": 0.7868852459016393
+            },
+            "draws": 65,
+            "triangles": 156503,
+            "mode": "explore",
+            "quality": "balanced",
+            "held": null,
+            "cart": false
+          }
+        },
+        "deck": {
+          "contextVisible": false,
+          "kind": "interaction",
+          "hint": "Borsch Med · 6 m",
+          "map": "Ground-floor plan · You are on Floor 02",
+          "skip": false,
+          "pose": {
+            "x": 1.39311945438385,
+            "y": 7.19991397857666,
+            "z": 9.000031471252441,
+            "zone": "upper",
+            "canvas": [
+              0,
+              48,
+              768,
+              976
+            ],
+            "riding": false,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 2.4497703973865255,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                0.042873838137613474,
+                10.456202917234192,
+                9.335893962950701
+              ],
+              "quaternion": [
+                -0.25677817921218293,
+                -0.47092487447996606,
+                -0.14545459903549537,
+                0.8313469124835478
+              ],
+              "fov": 64,
+              "aspect": 0.7868852459016393
+            },
+            "draws": 45,
+            "triangles": 43917,
+            "mode": "explore",
+            "quality": "balanced",
+            "held": null,
+            "cart": false
+          }
+        },
+        "after": {
+          "contextVisible": true,
+          "kind": "nearby",
+          "hint": "Borsch Med · 3 m",
+          "map": "Ground-floor plan · You are here",
+          "skip": false,
+          "pose": {
+            "x": 19.224231719970703,
+            "y": -0.027734458446502686,
+            "z": 5.100648880004883,
+            "zone": "atrium",
+            "canvas": [
+              0,
+              48,
+              768,
+              976
+            ],
+            "riding": false,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 5.6571181717466645,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                14.032920950215347,
+                3.4596776216874514,
+                5.145403130485422
+              ],
+              "quaternion": [
+                -0.11189700353999145,
+                -0.6952620769418321,
+                -0.11093803834939432,
+                0.7012720275417305
+              ],
+              "fov": 64,
+              "aspect": 0.7868852459016393
+            },
+            "draws": 33,
+            "triangles": 46271,
+            "mode": "explore",
+            "quality": "balanced",
+            "held": null,
+            "cart": false
+          }
+        }
+      }
+    },
+    "1440": {
+      "width": 1440,
+      "height": 900,
+      "quality": "detailed",
+      "chrome": "158.0.8127.37",
+      "controls": [
+        "keyboard walk-on",
+        "pause and standing ascent",
+        "step-free lift return"
+      ],
+      "servedSHA256": {
+        "/demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "/demos/corporate/gjh/v11/assets/mall-language.js": "dadaf883c2634619bcc825e5e8137ec706768768fb81e6610d2eb8bb2807b9b6",
+        "/demos/corporate/gjh/v11/assets/player.bundle.js": "18ff93f83dbf693a44d9a87979c7f860b1f059f8d9eeb8c1501842f87de78d0f",
+        "/demos/corporate/gjh/v11/script.bundle.js": "4250d974e83c6c11fc71f5fc336d01801588fa0742ec1beef14d1bd88255d7c8",
+        "/demos/corporate/gjh/v11/assets/elevator-v2.js": "108e74bbd21de8601d0110622fb3c8d1579b04b263b5baa4819c4fdb3a3a6ed5",
+        "/demos/corporate/gjh/v11/assets/world.bundle.js": "9785177b860b366b62eaf3d238f6a9b493044f5745b70ff8676d1b37988cea45",
+        "/demos/corporate/gjh/v11/assets/lift-layout.js": "720092660759fc1c00a79fba2c5b88165ec9837b968f6d54c63c35c33e1ed14a",
+        "/demos/corporate/gjh/v11/assets/escalator.js": "2439d8322f8ae883ef29ea9e6af197a337158954a55a02c419ce972d337f365a"
+      },
+      "errors": [],
+      "guidance": {
+        "before": {
+          "contextVisible": true,
+          "kind": "nearby",
+          "hint": "Borsch Med · 3 m",
+          "map": "Ground-floor plan · You are here",
+          "skip": false,
+          "pose": {
+            "x": 19.299976348876953,
+            "y": -0.02159053087234497,
+            "z": 5.173398494720459,
+            "zone": "atrium",
+            "canvas": [
+              0,
+              48,
+              1440,
+              852
+            ],
+            "riding": false,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 5.646958254243152,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                19.297802853208577,
+                3.464058800732355,
+                10.354593896516958
+              ],
+              "quaternion": [
+                -0.1576744386094222,
+                -0.0001954081555292561,
+                -3.120116250168317e-05,
+                0.9874911302140104
+              ],
+              "fov": 64,
+              "aspect": 1.6901408450704225
+            },
+            "draws": 65,
+            "triangles": 163560,
+            "mode": "explore",
+            "quality": "detailed",
+            "held": null,
+            "cart": false
+          }
+        },
+        "during": {
+          "contextVisible": false,
+          "kind": "interaction",
+          "hint": "Borsch Med · 6 m",
+          "map": "Ground-floor plan · Escalator in transit",
+          "skip": true,
+          "pose": {
+            "x": 13.65157413482666,
+            "y": 2.0197625160217285,
+            "z": 9,
+            "zone": "atrium",
+            "canvas": [
+              0,
+              48,
+              1440,
+              852
+            ],
+            "riding": true,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 5.661042938862811,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                18.8589419853998,
+                5.480668369432415,
+                8.97522134292425
+              ],
+              "quaternion": [
+                -0.10970718657689069,
+                0.7001666391724021,
+                0.11023159559591808,
+                0.6968357094292633
+              ],
+              "fov": 64,
+              "aspect": 1.6901408450704225
+            },
+            "draws": 95,
+            "triangles": 301070,
+            "mode": "explore",
+            "quality": "detailed",
+            "held": null,
+            "cart": false
+          }
+        },
+        "deck": {
+          "contextVisible": false,
+          "kind": "interaction",
+          "hint": "Borsch Med · 6 m",
+          "map": "Ground-floor plan · You are on Floor 02",
+          "skip": false,
+          "pose": {
+            "x": 1.3931294679641724,
+            "y": 7.198829650878906,
+            "z": 9.000032424926758,
+            "zone": "upper",
+            "canvas": [
+              0,
+              48,
+              1440,
+              852
+            ],
+            "riding": false,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 2.3786814013260082,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                0.15266695584706147,
+                10.468384541191316,
+                8.9831530808829
+              ],
+              "quaternion": [
+                -0.2689862309688497,
+                -0.5046486457128576,
+                -0.16910166063919707,
+                0.8027333182934524
+              ],
+              "fov": 64,
+              "aspect": 1.6901408450704225
+            },
+            "draws": 76,
+            "triangles": 221230,
+            "mode": "explore",
+            "quality": "detailed",
+            "held": null,
+            "cart": false
+          }
+        },
+        "after": {
+          "contextVisible": true,
+          "kind": "nearby",
+          "hint": "Borsch Med · 3 m",
+          "map": "Ground-floor plan · You are here",
+          "skip": false,
+          "pose": {
+            "x": 19.224231719970703,
+            "y": -0.02763444185256958,
+            "z": 5.100648880004883,
+            "zone": "atrium",
+            "canvas": [
+              0,
+              48,
+              1440,
+              852
+            ],
+            "riding": false,
+            "nearby": null,
+            "seated": false,
+            "camera": {
+              "lift": 0,
+              "distance": 5.648408015796247,
+              "radius": 0.22,
+              "avatarVisible": true
+            },
+            "viewCamera": {
+              "position": [
+                14.042029265781947,
+                3.458970616016077,
+                5.145359369526709
+              ],
+              "quaternion": [
+                -0.11199412259421178,
+                -0.6952449790334303,
+                -0.11103376402039901,
+                0.7012583253556567
+              ],
+              "fov": 64,
+              "aspect": 1.6901408450704225
+            },
+            "draws": 43,
+            "triangles": 69234,
+            "mode": "explore",
+            "quality": "detailed",
+            "held": null,
+            "cart": false
+          }
+        }
+      }
+    }
+  },
+  "downhillBands": {
+    "old-edge-390": {
+      "camera": {
+        "position": [
+          1.5510918301968424,
+          10.404989387980264,
+          8.999276312682019
+        ],
+        "quaternion": [
+          -0.31205433305118246,
+          -0.6346353729571466,
+          -0.3121974938303612,
+          0.6343443555842259
+        ],
+        "fov": 99.36293839047889,
+        "aspect": 0.4899497487437186
+      },
+      "canvas": [
+        0,
+        48,
+        390,
+        796
+      ],
+      "comparisonRows": [
+        383,
+        483
+      ],
+      "comparisonColumn": 195,
+      "centerColumnGoldBands": 0,
+      "centerColumnGoldPixels": 0,
+      "bandRows": []
+    },
+    "revised-390": {
+      "camera": {
+        "position": [
+          1.5499020729427515,
+          10.405038725726369,
+          9.00005290022404
+        ],
+        "quaternion": [
+          -0.31200600181596033,
+          -0.6345408711273463,
+          -0.31199564198310886,
+          0.6345619410926844
+        ],
+        "fov": 99.36293839047889,
+        "aspect": 0.4899497487437186
+      },
+      "canvas": [
+        0,
+        48,
+        390,
+        796
+      ],
+      "comparisonRows": [
+        383,
+        483
+      ],
+      "comparisonColumn": 195,
+      "centerColumnGoldBands": 21,
+      "centerColumnGoldPixels": 37,
+      "bandRows": [
+        386,
+        389,
+        391,
+        398,
+        401,
+        410,
+        413,
+        416,
+        418,
+        420,
+        423,
+        425,
+        428,
+        431,
+        434,
+        438,
+        442,
+        446,
+        452,
+        458,
+        470
+      ]
+    },
+    "old-edge-768": {
+      "camera": {
+        "position": [
+          2.08547164889831,
+          10.438275790353366,
+          8.999029039564382
+        ],
+        "quaternion": [
+          -0.37394426416596077,
+          -0.600312511578953,
+          -0.374300296741048,
+          0.5997414973125594
+        ],
+        "fov": 64,
+        "aspect": 0.7868852459016393
+      },
+      "canvas": [
+        0,
+        48,
+        768,
+        976
+      ],
+      "comparisonRows": [
+        337,
+        608
+      ],
+      "comparisonColumn": 384,
+      "centerColumnGoldBands": 0,
+      "centerColumnGoldPixels": 0,
+      "bandRows": []
+    },
+    "revised-768": {
+      "camera": {
+        "position": [
+          2.0878658191723707,
+          10.438602646243886,
+          8.999844588383256
+        ],
+        "quaternion": [
+          -0.37391527844038686,
+          -0.600186807880008,
+          -0.3739778039459577,
+          0.6000864623963892
+        ],
+        "fov": 64,
+        "aspect": 0.7868852459016393
+      },
+      "canvas": [
+        0,
+        48,
+        768,
+        976
+      ],
+      "comparisonRows": [
+        337,
+        608
+      ],
+      "comparisonColumn": 384,
+      "centerColumnGoldBands": 37,
+      "centerColumnGoldPixels": 92,
+      "bandRows": [
+        340,
+        342,
+        347,
+        351,
+        354,
+        356,
+        361,
+        363,
+        365,
+        367,
+        370,
+        372,
+        375,
+        377,
+        380,
+        383,
+        387,
+        390,
+        394,
+        398,
+        402,
+        407,
+        411,
+        417,
+        422,
+        429,
+        436,
+        443,
+        451,
+        460,
+        470,
+        482,
+        494,
+        509,
+        525,
+        544,
+        587
+      ]
+    },
+    "old-edge-1440": {
+      "camera": {
+        "position": [
+          2.084409539893525,
+          10.438281018156744,
+          8.999831418379793
+        ],
+        "quaternion": [
+          -0.37395440609205943,
+          -0.6001618323137949,
+          -0.37401573704259405,
+          0.6000634180172697
+        ],
+        "fov": 64,
+        "aspect": 1.6901408450704225
+      },
+      "canvas": [
+        0,
+        48,
+        1440,
+        852
+      ],
+      "comparisonRows": [
+        292,
+        526
+      ],
+      "comparisonColumn": 720,
+      "centerColumnGoldBands": 0,
+      "centerColumnGoldPixels": 0,
+      "bandRows": []
+    },
+    "revised-1440": {
+      "camera": {
+        "position": [
+          2.086253284005439,
+          10.438279015691425,
+          9.000870107873542
+        ],
+        "quaternion": [
+          -0.3743866212067094,
+          -0.5997045354995256,
+          -0.37406477821164935,
+          0.6002205175301755
+        ],
+        "fov": 64,
+        "aspect": 1.6901408450704225
+      },
+      "canvas": [
+        0,
+        48,
+        1440,
+        852
+      ],
+      "comparisonRows": [
+        292,
+        526
+      ],
+      "comparisonColumn": 720,
+      "centerColumnGoldBands": 36,
+      "centerColumnGoldPixels": 74,
+      "bandRows": [
+        297,
+        303,
+        311,
+        315,
+        318,
+        321,
+        323,
+        325,
+        327,
+        329,
+        331,
+        333,
+        335,
+        338,
+        341,
+        344,
+        347,
+        350,
+        353,
+        357,
+        361,
+        365,
+        370,
+        375,
+        381,
+        387,
+        393,
+        401,
+        409,
+        418,
+        428,
+        439,
+        452,
+        467,
+        487,
+        525
+      ]
+    }
+  }
+}

@@ -1,7 +1,8 @@
 import {rideTime} from './elevator-ride.js';
 import {mallAudio} from './audio.js';
 import {createKitLoader} from './elevator-kit.js';
-import {liftLayout,shaftFinish,cutRectangle} from './lift-layout.js';
+import {liftLayout,shaftFinish,cutRectangle,deckEdgeSpans} from './lift-layout.js';
+import {buildEscalator} from './escalator.js';
 import {opaqueBatch} from './opaque-batch.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 // Experimental two-level test space. The static slabs own collision; during
@@ -86,11 +87,17 @@ function createExpandedElevator(T,R,physics,scene,motion) {
     obstacles.push({min:{x:x-sx/2,y:y-sy/2,z:z-sz/2},max:{x:x+sx/2,y:y+sy/2,z:z+sz/2}});
     const pane=new T.BoxGeometry(sx,sy,sz);pane.translate(x,y,z);deckGlassParts.push(pane);
   }
+  const escalator=buildEscalator(T,R,physics,scene,staticParts,deckGlassParts,geometry);
   for(const x of [slab.minX,slab.maxX]){
-    const length=slab.maxZ-slab.minZ;deckGuard(x,L.upper+.53,slabZ,.1,1.06,length);
-    fixed('rail',x,L.upper+1.08,slabZ,.12,.08,length);
-    fixed('rail',x,L.upper+.04,slabZ,.12,.08,length);
-    for(const z of [slab.minZ+1.5,slabZ,slab.maxZ-1.5])fixed('rail',x,L.upper+.55,z,.1,1.1,.1);
+    for(const [a,b] of deckEdgeSpans(x)){
+      const z=(a+b)/2,length=b-a;
+      deckGuard(x,L.upper+.53,z,.1,1.06,length);
+      fixed('rail',x,L.upper+1.08,z,.12,.08,length);
+      fixed('rail',x,L.upper+.04,z,.12,.08,length);
+      for(const post of [slab.minZ+1.5,slabZ,slab.maxZ-1.5]){
+        if(post>a && post<b)fixed('rail',x,L.upper+.55,post,.1,1.1,.1);
+      }
+    }
   }
   for(const z of [slab.minZ,slab.maxZ]){
     const length=slab.maxX-slab.minX;deckGuard(slabX,L.upper+.53,z,length,1.06,.1);
@@ -178,12 +185,13 @@ function createExpandedElevator(T,R,physics,scene,motion) {
     setDrawTier(tier){deckGlass.material.forceSinglePass=tier==='low';},
     get height(){return height;},
     get calling(){return Boolean(call);},
-    ...L, expanded:true,cameraObstacles:obstacles,applyMallTheme,
+    ...L, escalator, expanded:true,cameraObstacles:obstacles,applyMallTheme,
     interactables:floors.map(y=>({id:'visitor-elevator',x:L.exit.x,z:L.exit.z,y,radius:L.radius})),
     setHeight(y){height=y;sync();},
     setRiding(value){riding=value;sync();},
     call(floor){if(call||riding)return false;generation++;if(Math.abs(height-floor)<.001)return true;call={from:height,to:floor,elapsed:0,generation};sync();return true;},
     update(dt,player){
+      escalator.advance(dt,motion?.matches,player);
       if(!call)return;
       if(Math.hypot(player.x-L.exit.x,player.z-L.exit.z)>L.radius+.4||Math.abs(player.y-call.to)>.4){settle();return;}
       call.elapsed+=dt;const t=motion?.matches?1:Math.min(1,call.elapsed/2.5);

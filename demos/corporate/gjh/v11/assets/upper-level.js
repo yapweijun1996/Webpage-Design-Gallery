@@ -1,6 +1,6 @@
 import {createInstanceVisibility, createPackedDraw} from './packed-draw.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
-import {liftLayout as lift, shaftFinish} from './lift-layout.js';
+import {liftLayout as lift, shaftFinish, deckEdgeSpans} from './lift-layout.js';
 import {atriumLayout} from './atrium-layout.js';
 import {loadStaticAsset} from './static-asset.js';
 import {uvRect} from './signage/builder.js';
@@ -79,7 +79,7 @@ export function buildUpperLevel(T, {map, tier, models:loadedModels}, {collider,l
   function frame(rect,door) {
     const {minX,maxX,minZ,maxZ}=rect,cx=(minX+maxX)/2,cz=(minZ+maxZ)/2;
     for(const z of [minZ,maxZ])guard(cx,z,maxX-minX,.1);
-    guard(maxX,cz,.1,maxZ-minZ);
+    for(const [a,b] of deckEdgeSpans(maxX))guard(maxX,(a+b)/2,.1,b-a);
     if(!door)guard(minX,cz,.1,maxZ-minZ);
     else for(const [a,b] of [[minZ,door.minZ],[door.maxZ,maxZ]])guard(minX,(a+b)/2,.1,b-a);
   }

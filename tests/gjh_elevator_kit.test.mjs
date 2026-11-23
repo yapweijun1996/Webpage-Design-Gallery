@@ -146,7 +146,7 @@ test('a fresh Low landing mounts closed before Ride and completes the five-secon
     ? Promise.resolve(new Response(readFileSync(new URL(url)))) : realFetch(url,...options));
   const scene=new T.Scene();
   const physics={createCollider:()=>({setTranslation(){},setEnabled(){}})};
-  const R={ColliderDesc:{cuboid:()=>({setTranslation(){return this;}})}};
+  const R={ColliderDesc:{cuboid:()=>({setRotation(){return this;},setTranslation(){return this;}})}};
   const lift=createElevatorV2(T,R,physics,scene,true,async()=>{},'low');
   for(let i=0;i<200 && lift.kit.status==='pending';i++) await new Promise(resolve=>setTimeout(resolve,5));
   assert.equal(lift.kit.status,'loaded');

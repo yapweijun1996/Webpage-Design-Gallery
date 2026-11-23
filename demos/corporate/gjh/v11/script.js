@@ -13,7 +13,7 @@ import {spatial, storeAt} from './assets/spatial.js';
 import {expandedLayout, expandedStoreAt, expandedStoreArrival} from './assets/expanded-layout.js';
 import {allowMallLightWash, createMallAtmosphere} from './assets/mall-atmosphere.js';
 import {mallAudio} from './assets/audio.js';
-import {liftLayout} from './assets/lift-layout.js';
+import {liftLayout,escalatorLayout} from './assets/lift-layout.js';
 import {createModelWarmup} from './assets/model-warmup.js';
 import {createWarmReport, createWarmRunner, createTierQueue, prepareEntryFrame, prepareTier} from './assets/scene-warmup.js';
 import {emptyInteriorReport} from './assets/interiors/warmup.js';
@@ -159,8 +159,12 @@ let shopActionsLoad, shopActionsAttemptZone, shopActionsTime, testWalk;
 let cartWarming = false;
 let lastPreloadUpdate = -Infinity, preloadSettled = !expanded;
 function hideGuidance() { guidance?.hide(); shelfFocus?.hideNearby(); ui.clearGuidance(); spatialHud?.suspend(); }
+function floorRideKind(pose) {
+  if (pose.escalatorTravel) return 'escalator';
+  return pose.elevatorTravel ? 'lift' : null;
+}
 let pendingFloorRide;
-let nearby = null, currentZone = 'atrium', wasRiding = false;
+let nearby = null, currentZone = 'atrium', wasRiding = false, wasOnEscalator = false;
 function clearTransientState(event) {
   testWalk?.cancel('Test movement interrupted by a mode or focus change');
   if (event.kind === 'interrupt') pendingFloorRide = undefined;
@@ -243,7 +247,7 @@ function updateSpatialHud() {
   const p = player.state;
   spatialHud.update({position:p, zone:currentZone, interaction:selectedInteraction,
     distance:interactionDistance, targetLabel:spatialTargetName.textContent,
-    travelling:Boolean(p.elevatorTravel), usable:!spatialInspectButton.disabled,
+    travelling:floorRideKind(p), usable:!spatialInspectButton.disabled,
     active:ready && !modes.paused() && !windowBlurred && !document.hidden &&
       document.body.classList.contains('is-3d') && ['explore', 'cart'].includes(modes.current()) &&
       !p.character.collection.active && !p.productApproaching});
@@ -364,7 +368,7 @@ function resumeTestSimulation() {
 async function startTestWalk(x, z, speed, face = false) {
   if (!canTest()) throw new Error('Enter and focus the 3D mall before running a test command');
   const pose = player.state;
-  if (pose.elevatorTravel || pose.seated || pose.tramRide?.active || pose.productApproaching) {
+  if (floorRideKind(pose) || pose.seated || pose.tramRide?.active || pose.productApproaching) {
     throw new Error('The player is busy');
   }
   resumeTestSimulation();
@@ -458,18 +462,23 @@ Object.defineProperty(window, '__mall', {value: Object.freeze({
 }), writable: false});
 function updateHUD() {
   const p = player.state;
-  if (skipRide.hidden===p.elevatorTravel) skipRide.hidden=!p.elevatorTravel;
-  const zone = elevator && p.y > elevator.upper / 2 ? 'upper' : (expanded ? restroomAt(p.x,p.z) ?? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
-  if (zone !== currentZone || Boolean(p.elevatorTravel) !== wasRiding) quality.resetSampling();
+  const travelling=Boolean(floorRideKind(p));
+  if (skipRide.hidden===travelling) skipRide.hidden=!travelling;
+  if (p.escalatorTravel!==wasOnEscalator) {
+    if(p.escalatorTravel)ui.announce('Ascending to the upper deck. The lift serves both floors.');
+    wasOnEscalator=p.escalatorTravel;
+  }
+  const zone = elevator && !p.escalatorTravel && p.y > elevator.upper / 2 ? 'upper' : (expanded ? restroomAt(p.x,p.z) ?? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
+  if (zone !== currentZone || travelling !== wasRiding) quality.resetSampling();
   if (zone !== currentZone) mallAudio.setZone(zone);
   currentZone = zone;
-  wasRiding = Boolean(p.elevatorTravel);
+  wasRiding = travelling;
   if(expanded&&currentZone==='upper'&&!brandWallStarted){
     brandWallStarted=true;
     world.ensureBrandWall().then(({records})=>{ui.setBrandStories(records);updateHUD();})
       .catch(error=>console.error('Upper deck brand wall could not load:',error));
   }
-  const selection = interactions.nearest(p, {travelling: Boolean(p.elevatorTravel), player: p, zone});
+  const selection = interactions.nearest(p, {travelling, player: p, zone});
   selectedInteraction = selection.item; interactionDistance = selection.distance;
   nearby = selectedInteraction?.id || null;
   productControl?.update(p, interactions.productTarget(selectedInteraction), !selectedInteraction?.shopAction?.productId);
@@ -576,11 +585,11 @@ function render(force = false) {
       if (interactions.advanceShopActions(currentZone, Math.min(.1, (now-(shopActionsTime ?? now))/1000), reducedMotion.matches)) updateHUD();
       shopActionsTime = now;
     }
-    mallHud.update({position: pose, zone: currentZone, travelling: pose.elevatorTravel,
+    mallHud.update({position: pose, zone: currentZone, travelling: Boolean(floorRideKind(pose)),
       liftDocked: expanded && elevator?.height === 0 && !elevator.calling,
       enabled: !windowBlurred && !modes.paused() && document.body.classList.contains('is-3d') && startupOverlay.hidden,
       now, forward: {x: -matrix[8], z: -matrix[10]}});
-    const guiding = !windowBlurred && ['explore', 'cart'].includes(modes.current()) && !pose.character.collection.active;
+    const guiding = !windowBlurred && !floorRideKind(pose) && ['explore', 'cart'].includes(modes.current()) && !pose.character.collection.active;
     const label = ui.updateGuidance(selectedInteraction, interactionDistance, guiding);
     const target = label && selectedInteraction.id;
     if (target !== projectedTarget) {
@@ -737,7 +746,7 @@ function warmModels(pose, background = true) {
   const {physicalProduct, collection} = pose.character;
   const stableSeat = pose.seatPhase === 'idle' || pose.seatPhase === 'seated';
   const stableProduct = !physicalProduct || ['empty','held'].includes(physicalProduct.phase);
-  if (!stableSeat || !stableProduct || pose.elevatorTravel || pose.productApproaching || collection.active) return 0;
+  if (!stableSeat || !stableProduct || floorRideKind(pose) || pose.productApproaching || collection.active) return 0;
   const started = performance.now();
   const remaining = () => Math.max(0, 4 - (performance.now() - started));
   const traceStart = frameTrace?.start();
@@ -843,7 +852,7 @@ function animate(now) {
   player.takeQueryTimings(movementTimings);
   movementTimings.physicsMs = movementTimings.cameraMs = 0;
   simulationMs = simulationSteps = 0;
-  quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !pose.elevatorTravel &&
+  quality.sample(now, slotMs, callbackMs, Boolean(pose && advancing && !floorRideKind(pose) &&
     !warmRunner && !tierQueue?.pending && !uploadMs && preloadSettled && entered &&
     now - enteredAt >= 3000 && !windowBlurred && document.hasFocus() && !contextLost &&
     ['explore','cart'].includes(modes.current())));
@@ -886,7 +895,7 @@ function requestFloorRide(upper, arrival) {
   return result;
 }
 ui.onTeleport(zone => {
-  if (!ready || player.state.elevatorTravel || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone))) return false;
+  if (!ready || floorRideKind(player.state) || !(expanded ? expandedStoreArrival(zone) : spatial.arrival(zone))) return false;
   pendingFloorRide = undefined;
   manual = false; player.cancelCollection(); player.setInput(null);
   if (!player.teleport(zone)) return false;
@@ -1288,6 +1297,17 @@ async function initialize() {
     onRestore: resized => { if (resized) player.updateCamera(0, true); }});
   ui.setShelfFocus(shelfFocus);
   ui.setRestrooms(world.restrooms);
+  if(elevator?.escalator){
+    player.enableEscalator();
+    const e=escalatorLayout;
+    world.interactables.push({id:'atrium-escalator',kind:'escalator',x:e.lowerEdge+.65,z:e.z,y:0,radius:1.1,
+      name:'Upper deck escalator',prompt:'Ride up',boardingReason:player.boardTransportReason,availability:({player:p})=>p.x>=e.lowerEdge-.20 && Math.abs(p.z-e.z)<=e.clearWidth/2-.24,
+      handler:()=>{
+        const ok=player.boardEscalator();
+        if(!ok) ui.announce(player.boardTransportReason() || 'Approach the lower landing.');
+        return ok;
+      }});
+  }
   interactions = createInteractionRegistry(world.interactables, item => ui.describeInteraction(item));
   interactions.subscribe(item => {
     if (item.kind === 'pickup') mallAudio.play('pickup');
@@ -1331,7 +1351,7 @@ async function initialize() {
     if (pageEnded || fatal) return false;
     const ok=player.setCart(value);updateHUD();requestRender();return ok;
   });
-  ui.onCollect(id=>Boolean(!player.state.seated&&player.state.character.collection.available!==false&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
+  ui.onCollect(id=>Boolean(!player.state.seated&&!floorRideKind(player.state)&&player.state.character.collection.available!==false&&world.productAssets?.cans?.[id.replace('new-moon-','').replace('-front','')]?.status==='loaded'), id=>{
     if(player.state.character.collection.active)return false;
     player.setCart(false);player.clearInput();player.setInput(null);manual=false;
     if(reducedMotion.matches)return true;

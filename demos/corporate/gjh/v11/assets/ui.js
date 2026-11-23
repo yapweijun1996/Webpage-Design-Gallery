@@ -14,7 +14,7 @@ import {setupNewMoonPreview} from './newmoon-detail-preview.js';
 import {spatial, mapPoint, mapStoreRect, mapView} from './spatial.js';
 import {expandedLayout, expandedMapPoint} from './expanded-layout.js';
 import {storeDestinations} from './store-destinations.js';
-import {liftLayout} from './lift-layout.js';
+import {liftLayout,escalatorLayout} from './lift-layout.js';
 import {icon} from './icons.js';
 import {FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD} from './feature-kiosk.js';
 import {MALL_THEME_COPY} from './mall-theme-copy.js';
@@ -1258,6 +1258,10 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         setHudText(nearbyName, seatNotice || (cartBlocksSeat ? 'Stow your cart from Bag before sitting' : `${records.get(nearby).name} · Sit here`));
         setHudText(inspectVerb, 'Sit');
         labelInspect(`Sit on ${records.get(nearby).name}`);
+      } else if (selectedInteraction?.kind === 'escalator') {
+        setHudText(nearbyName, selectedInteraction.boardingReason() || selectedInteraction.name);
+        setHudText(inspectVerb, selectedInteraction.prompt);
+        labelInspect('Ride the escalator to the upper deck');
       } else if (nearby && selectedInteraction?.kind === 'travel') {
         const prompt = selectedInteraction.prompt;
         const action = typeof prompt === 'function' ? prompt() : prompt;
@@ -1338,6 +1342,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       records.set('visitor-elevator',{name:'Elevator · Change level',action:'elevator'});
       elevatorListener = listener;
       if (expanded) {
+        records.set('atrium-escalator',{name:'Upper deck escalator',action:'escalator'});
+        addMapService('upper-escalator','E','Upper deck escalator',{x:escalatorLayout.lowerEdge,z:escalatorLayout.z});
         floorRideListener = floorListener;
         const select = document.getElementById('map-destination');
         for (const [id, {label}] of Object.entries(floorDestinations)) select.add(new Option(label, id));

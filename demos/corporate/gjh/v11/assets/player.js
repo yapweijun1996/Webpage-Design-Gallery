@@ -2,7 +2,7 @@ import {mallAudio} from './audio.js';
 import {rideTime,sampleRide,elevatorRideBlockReason} from './elevator-ride.js';
 import {createCharacter} from './character.js';
 import {spatial, courtyardArrival} from './spatial.js';
-import {insideLiftShaft,liftLayout,upperLiftCameraBounds} from './lift-layout.js';
+import {insideLiftShaft,liftLayout,upperLiftCameraBounds,escalatorLayout as escalator,escalatorHeight} from './lift-layout.js';
 import {expandedLayout, expandedStoreArrival} from './expanded-layout.js';
 import {isShelfInReach} from './visitor-v2-contact.js';
 import {
@@ -51,6 +51,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   controller.setMaxSlopeClimbAngle(Math.PI / 4); controller.setMinSlopeSlideAngle(Math.PI / 3);
   const keys = new Set(); let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
   let seated = false, pushing=false, elevatorTravel=null;
+  let hasEscalator=false, ridingEscalator=false, skipEscalator=false;
   // Keep the push proxy narrow enough to clear a 2.48 m opening.
   const walkingShape=new R.Capsule(.55,.3), cartShape=new R.Cylinder(.85,MOVEMENT.cartRadius);
   let seat=null, seatPhase='idle', seatTime=0, seatFrom=null, seatExit=null, seatStartAngle=0, seatStartWeight=0;
@@ -311,7 +312,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   }
   function restoreActionView(){if(!actionView)return;yaw=actionView.previousYaw;actionView=null;}
   function updateActionView(dt){if(!actionView||actionView.settled)return;if(keys.has('KeyQ')||keys.has('KeyE')){actionView.settled=true;return;}actionView.elapsed+=dt;const t=Math.min(1,actionView.elapsed/.35),e=t*t*(3-2*t),v=actionView;const delta=Math.atan2(Math.sin(v.targetYaw-v.fromYaw),Math.cos(v.targetYaw-v.fromYaw));yaw=v.fromYaw+delta*e;v.pitch=v.fromPitch+(DEFAULT_PITCH-v.fromPitch)*e;if(t===1)v.settled=true;}
-  function startCollection(prop,id){if(seated||!character.startCollection(prop,id))return false;beginActionView('collection',facing+Math.PI+.55);return true;}
+  function startCollection(prop,id){if(seated||ridingEscalator||!character.startCollection(prop,id))return false;beginActionView('collection',facing+Math.PI+.55);return true;}
   function cancelCollection(){productApproach=null;character.cancelCollection();if(['collection','product'].includes(actionView?.kind))restoreActionView();}
   let gamepad = null;
   function update(dt) {
@@ -351,6 +352,20 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       }
       return;
     }
+    if (ridingEscalator) {
+      const p=body.translation();
+      if ((skipEscalator || reducedMotion.matches) && finishEscalator(true)) return;
+      const advance=Math.min(escalator.speed*dt,Math.max(0,p.x-escalator.exitX));
+      movement.x=-advance;
+      movement.z=Math.max(-dt,Math.min(dt,escalator.z-p.z));
+      movement.y=escalatorHeight(p.x-advance)-escalatorHeight(p.x)-.5*dt;
+      controller.computeColliderMovement(capsule,movement);
+      const travel=controller.computedMovement();
+      body.setNextKinematicTranslation({x:p.x+travel.x,y:p.y+travel.y,z:p.z+travel.z});
+      if (p.x<escalator.exitX+.05) finishEscalator(false);
+      character.update('idle',dt);
+      return;
+    }
     updateActionView(dt);
     if(gamepad){yaw-=gamepad.lookX*1.9*dt;if(gamepad.lookY)setPitch(currentPitch()+gamepad.lookY*1.4*dt);}
     if(seated){updateSeat(dt);yaw+=((keys.has('KeyQ')?1:0)-(keys.has('KeyE')?1:0))*MOVEMENT.turnRate*dt;updateSeatCharacter(dt);return;}
@@ -385,6 +400,16 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const grounded = controller.computedGrounded();
     vertical = grounded ? -.5 : Math.max(-18, vertical - 24 * dt);
     movement.x = velocity.x * dt; movement.y = vertical * dt; movement.z = velocity.z * dt;
+    if (hasEscalator) {
+      const p=previousPosition, foot=p.y-.875;
+      const inMouth=Math.abs(p.z+movement.z-escalator.z)<escalator.width/2+.3;
+      if (inMouth && foot<.2 && p.x>=escalator.lowerEdge-.12 && p.x+movement.x<escalator.lowerEdge-.12) {
+        if(boardTransportReason()) movement.x=0;
+        else if (Math.abs(p.z-escalator.z)<escalator.clearWidth/2-.24 && boardEscalator()) return;
+      }
+      // This single flight runs upward. Upper-floor visitors can always return by lift.
+      if(inMouth && foot>escalator.rise-.16 && p.x<=escalator.upperEdge-.18 && p.x+movement.x>escalator.upperEdge-.18) movement.x=0;
+    }
     const queryStart = performance.now();
     controller.computeColliderMovement(capsule, movement);
     const corrected = controller.computedMovement();
@@ -557,7 +582,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const inUpperCar=expanded && !elevatorTravel && visual.position.y>liftLayout.upper-.1 && insideLiftShaft(visual.position);
     const orbitHeight = seatView ? Math.max(.9, framing.height * .7) : actionView || inUpperCar ? 0 : framing.height * framingWeight;
     // The walking level also bounds the camera where the upper floor has no slab.
-    const floor = elevatorTravel?.height ?? (visual.position.y > liftLayout.upper / 2 ? liftLayout.upper : 0);
+    const floor = elevatorTravel?.height ?? (ridingEscalator ? visual.position.y : visual.position.y > liftLayout.upper / 2 ? liftLayout.upper : 0);
     const minimumY = floor + cameraRadius + .04;
     let length = cameraCandidate(orbitHeight, desired, minimumY, seatView);
     anchor.copy(candidateAnchor);
@@ -600,7 +625,30 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     presentView(mode, cameraClearance < (cameraOccluded && !changedMode ? 1.45 : 1.15), required);
     character.updateLOD?.(camera, lodViewportHeight);
   }
+  function boardTransportReason() {
+    return tramBoardReason({pushing,seated:seated || Boolean(beforeTram),elevatorTravel:elevatorTravel || ridingEscalator,
+      productApproaching:productApproach,character:character.state});
+  }
+  function boardEscalator() {
+    const p=body.translation(), x=escalator.lowerEdge-.14;
+    if(!hasEscalator || boardTransportReason() || Math.abs(p.y-.89)>.22 || p.x<escalator.lowerEdge-.25 || p.x>escalator.lowerEdge+1.55 ||
+       Math.abs(p.z-escalator.z)>escalator.clearWidth/2-.24) return false;
+    const start={x,y:.90,z:p.z};
+    if(!clearPath(p,start))return false;
+    moveSeat(start); clearInput();injected=null;facing=Math.PI/2;vertical=0;
+    ridingEscalator=true;skipEscalator=false;return true;
+  }
+  function finishEscalator(advance) {
+    if(advance){
+      const end={x:escalator.exitX,y:escalator.rise+.92,z:escalator.z};
+      if(!clearAt(end))return false;
+      moveSeat(end);resetInterpolation();
+    }
+    ridingEscalator=false;skipEscalator=false;vertical=0;clearInput();injected=null;
+    return true;
+  }
   function cartCapability() {
+    if(ridingEscalator)return {allowed:false,disabled:true,sceneDisabled:true,reasonCode:'escalator-travel',reason:'Wait until you reach the landing.'};
     if(expanded&&body.translation().y-.875>liftLayout.upper/2)return {allowed:false,disabled:true,sceneDisabled:true,reasonCode:'upper-landing',reason:'The upper landing is visitor-only. Return to the ground floor before using the cart.'};
     if(elevatorTravel)return {allowed:false,disabled:false,sceneDisabled:false,reasonCode:'elevator-travel',reason:'Wait for the elevator to stop.'};
     if(character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return {allowed:false,disabled:false,sceneDisabled:false,reasonCode:'held-product',reason:'Return the held product to its shelf or add it to your bag before using the cart.'};
@@ -639,7 +687,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     if(t===1){if(seatPhase==='align'){seatPhase='sit';seatTime=0;seatFrom={...body.translation()};seatStartAngle=seat.angle;}else if(seatPhase==='sit'){seatPhase='seated';character.setSeated(true);}else finishStand();}
   }
   function sit(id) {
-    if(seated||pushing||elevatorTravel||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate||candidate.modelVisible?.()===false)return false;
+    if(seated||pushing||elevatorTravel||ridingEscalator||character.state.physicalProduct&&character.state.physicalProduct.phase!=='empty')return false;const candidate=seats.find(s=>s.id===id),p=body.translation();if(!candidate||candidate.modelVisible?.()===false)return false;
     if(Math.abs(p.y-.875-candidate.floor)>.5||Math.hypot(p.x-candidate.exitX,p.z-candidate.exitZ)>candidate.clearance.interactionRadius||!isInFrontOfSeat(candidate,p))return false;
     seat=candidate;const exit={x:seat.exitX,y:seat.floor+.91,z:seat.exitZ},target=seatBodyTarget(seat);
     if(!clearPath(p,exit)||!clearPath(exit,target,true)){seat=null;return false;}
@@ -660,7 +708,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     resetInterpolation();updateSeatCharacter(0);updateCamera(0,instant||reduceSeatMotion());return true;
   }
   function teleport(zone) {
-    if (elevatorTravel || beforeTram) return false;
+    if (elevatorTravel || ridingEscalator || beforeTram) return false;
     const destination = zone === 'atrium' ? (expanded ? expandedLayout.courtyardArrival : courtyardArrival) : expanded && zone === 'entry' ? expandedLayout.entrance : expanded ? expandedStoreArrival(zone) : spatial.arrival(zone);
     if (!destination) return false;
     productApproach=null;
@@ -672,6 +720,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     resetInterpolation(); updateCamera(0, true); return true;
   }
   function useElevator(elevator, chime, {approach = false, target} = {}) {
+    if(ridingEscalator)return {reason:'Wait until you reach the landing.'};
     let p = body.translation();
     const from = p.y - .875 > elevator.upper / 2 ? elevator.upper : 0;
     const reason = elevatorRideBlockReason({pushing, seated, elevatorTravel,
@@ -711,8 +760,15 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       groundDoor:0,upperDoor:0,skip:false,chimed:false,chime,setHeight:elevator.setHeight};
     return {riding:true};
   }
-  function skipRide(){if(elevatorTravel)elevatorTravel.skip=true;}
+  function skipRide(){if(elevatorTravel)elevatorTravel.skip=true;else if(ridingEscalator)skipEscalator=true;}
   function interruptGraphics() {
+    if(ridingEscalator){
+      const halfway=body.translation().y-.875>escalator.rise/2;
+      if(halfway && finishEscalator(true))return;
+      const lower={x:escalator.lowerEdge+.8,y:.92,z:escalator.z};
+      if(clearAt(lower)){moveSeat(lower);finishEscalator(false);resetInterpolation();}
+      return;
+    }
     if (!elevatorTravel) return;
     const trip = elevatorTravel;
     // Graphics fallback must not retain a disabled capsule or resume an old trip.
@@ -727,8 +783,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   const tram = createPlayerTram({
     expanded, search:globalThis.location?.search, T, scene,
     getPosition: () => body.translation(),
-    getBoardReason: () => tramBoardReason({pushing, seated, elevatorTravel, productApproaching:productApproach,
-      character:character.state}),
+    getBoardReason: boardTransportReason,
     clearPath, prepareModel, tier:tramTier,
     enterSeat(rideSeat, pose) {
       clearInput(); injected = null; cancelCollection(); vertical = 0;
@@ -752,8 +807,8 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       character.update('idle', 0);
     }
   });
-  return {body, capsule, camera, contactShadow:contact, get visual() { return visual; }, get npcSource() { return character.npcSource; }, prepareCart:character.prepareCart, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
-    emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
+  return {body, capsule, camera, contactShadow:contact, get visual() { return visual; }, get npcSource() { return character.npcSource; }, prepareCart:character.prepareCart, sit, stand, setCart, cartCapability, interruptGraphics, update, sync, resetInterpolation, updateCamera, resizeCamera, teleport, useElevator, boardEscalator, boardTransportReason, enableEscalator(){hasEscalator=true;}, skipRide, clearInput, setBagCount:character.setBagCount, startCollection, cancelCollection,
+    emote: (name, options) => !seated && !elevatorTravel && !ridingEscalator && !productApproach && (character.emote?.(name, options) ?? false),
     setTramTier: tram?.selectTier,
     dispose() { tram?.dispose(); character.dispose?.(); },
     renderShelf(draw) {
@@ -791,7 +846,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     get movementPending() {
       return Boolean(keys.size || stick || drag || pinch || injected?.forward || injected?.right ||
         gamepad?.forward || gamepad?.right || gamepad?.lookX || gamepad?.lookY ||
-        Math.hypot(velocity.x, velocity.z) > .001 || elevatorTravel || productApproach ||
+        Math.hypot(velocity.x, velocity.z) > .001 || elevatorTravel || ridingEscalator || productApproach ||
         beforeTram || (seatPhase !== 'idle' && seatPhase !== 'seated'));
     },
     get collisionTicks() { return collisions; },
@@ -813,7 +868,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
       const required = Boolean(shelfOpen || chaseRequired());
       return {mode: view.mode(required), zoom: view.zoom(required)};
     },
-    get state() { const p = body.translation(); const state = {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, capsuleEnabled:capsule.isEnabled(), productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase:elevatorTravel?.phase||null, cartCapability:cartCapability(), cameraFocus:actionView?.kind||null,cameraDistance,cameraObstruction:{lift:cameraLift,distance:cameraClearance,radius:cameraRadius,avatarVisible:!cameraOccluded}, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state};
+    get state() { const p = body.translation(); const state = {x: p.x, y: p.y - .875, z: p.z, cameraOccluded, capsuleEnabled:capsule.isEnabled(), productApproaching:Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel),escalatorTravel:ridingEscalator, elevatorPhase:elevatorTravel?.phase||null, cartCapability:cartCapability(), cameraFocus:actionView?.kind||null,cameraDistance,cameraObstruction:{lift:cameraLift,distance:cameraClearance,radius:cameraRadius,avatarVisible:!cameraOccluded}, seatPhase, seatId:seat?.id||null, seatName:seat?.name||null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state};
       if (tram) {
         Object.defineProperty(state, 'tram', {value:tram.controls});
         state.tramRide = tram.controls.state;

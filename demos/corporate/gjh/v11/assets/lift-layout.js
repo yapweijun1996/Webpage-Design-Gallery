@@ -16,6 +16,20 @@ export const liftLayout = freeze({
   directory:{x:-5,z:45}, desk:{x:25,z:45}, showcase:{x:-7,z:18},
   facilities:{...restroomParcel,status:'open'},
 });
+// The ground-floor comb is east of the upper landing. All values are world metres.
+export const escalatorLayout = freeze({
+  z:9, width:1.6, clearWidth:1.34, upperEdge:liftLayout.slab.maxX,
+  upperFlat:4, lowerFlat:17.3, lowerEdge:18.5, exitX:2.30, rise:liftLayout.upper,
+  speed:1, stepCount:50
+});
+export function escalatorHeight(x) {
+  const e=escalatorLayout;
+  return e.rise*Math.max(0,Math.min(1,(e.lowerFlat-x)/(e.lowerFlat-e.upperFlat)));
+}
+export function deckEdgeSpans(x) {
+  const {slab}=liftLayout, e=escalatorLayout;
+  return x===slab.maxX ? [[slab.minZ,e.z-e.width/2],[e.z+e.width/2,slab.maxZ]] : [[slab.minZ,slab.maxZ]];
+}
 export const shaftFinish=Object.freeze({
   west:liftLayout.shaft.minX-.27,east:liftLayout.shaft.maxX+.18,
   north:liftLayout.shaft.minZ-.11,south:liftLayout.shaft.maxZ+.11,height:3.84

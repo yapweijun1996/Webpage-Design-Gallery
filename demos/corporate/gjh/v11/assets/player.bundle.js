@@ -446,6 +446,23 @@ var liftLayout = freeze({
   showcase: { x: -7, z: 18 },
   facilities: { ...restroomParcel, status: "open" }
 });
+var escalatorLayout = freeze({
+  z: 9,
+  width: 1.6,
+  clearWidth: 1.34,
+  upperEdge: liftLayout.slab.maxX,
+  upperFlat: 4,
+  lowerFlat: 17.3,
+  lowerEdge: 18.5,
+  exitX: 2.3,
+  rise: liftLayout.upper,
+  speed: 1,
+  stepCount: 50
+});
+function escalatorHeight(x) {
+  const e = escalatorLayout;
+  return e.rise * Math.max(0, Math.min(1, (e.lowerFlat - x) / (e.lowerFlat - e.upperFlat)));
+}
 var shaftFinish = Object.freeze({
   west: liftLayout.shaft.minX - 0.27,
   east: liftLayout.shaft.maxX + 0.18,
@@ -1454,6 +1471,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   const keys = new Set;
   let vertical = 0, runToggle = false, stickX = 0, stickY = 0, injected = null;
   let seated = false, pushing = false, elevatorTravel = null;
+  let hasEscalator = false, ridingEscalator = false, skipEscalator = false;
   const walkingShape = new R.Capsule(0.55, 0.3), cartShape = new R.Cylinder(0.85, MOVEMENT.cartRadius);
   let seat = null, seatPhase = "idle", seatTime = 0, seatFrom = null, seatExit = null, seatStartAngle = 0, seatStartWeight = 0;
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -1821,7 +1839,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       v.settled = true;
   }
   function startCollection(prop, id) {
-    if (seated || !character.startCollection(prop, id))
+    if (seated || ridingEscalator || !character.startCollection(prop, id))
       return false;
     beginActionView("collection", facing + Math.PI + 0.55);
     return true;
@@ -1886,6 +1904,22 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       }
       return;
     }
+    if (ridingEscalator) {
+      const p = body.translation();
+      if ((skipEscalator || reducedMotion.matches) && finishEscalator(true))
+        return;
+      const advance = Math.min(escalatorLayout.speed * dt, Math.max(0, p.x - escalatorLayout.exitX));
+      movement.x = -advance;
+      movement.z = Math.max(-dt, Math.min(dt, escalatorLayout.z - p.z));
+      movement.y = escalatorHeight(p.x - advance) - escalatorHeight(p.x) - 0.5 * dt;
+      controller.computeColliderMovement(capsule, movement);
+      const travel = controller.computedMovement();
+      body.setNextKinematicTranslation({ x: p.x + travel.x, y: p.y + travel.y, z: p.z + travel.z });
+      if (p.x < escalatorLayout.exitX + 0.05)
+        finishEscalator(false);
+      character.update("idle", dt);
+      return;
+    }
     updateActionView(dt);
     if (gamepad) {
       yaw -= gamepad.lookX * 1.9 * dt;
@@ -1937,6 +1971,18 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     movement.x = velocity.x * dt;
     movement.y = vertical * dt;
     movement.z = velocity.z * dt;
+    if (hasEscalator) {
+      const p = previousPosition, foot = p.y - 0.875;
+      const inMouth = Math.abs(p.z + movement.z - escalatorLayout.z) < escalatorLayout.width / 2 + 0.3;
+      if (inMouth && foot < 0.2 && p.x >= escalatorLayout.lowerEdge - 0.12 && p.x + movement.x < escalatorLayout.lowerEdge - 0.12) {
+        if (boardTransportReason())
+          movement.x = 0;
+        else if (Math.abs(p.z - escalatorLayout.z) < escalatorLayout.clearWidth / 2 - 0.24 && boardEscalator())
+          return;
+      }
+      if (inMouth && foot > escalatorLayout.rise - 0.16 && p.x <= escalatorLayout.upperEdge - 0.18 && p.x + movement.x > escalatorLayout.upperEdge - 0.18)
+        movement.x = 0;
+    }
     const queryStart = performance.now();
     controller.computeColliderMovement(capsule, movement);
     const corrected = controller.computedMovement();
@@ -2121,7 +2167,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const framingWeight = closeFraming * neutralFramingWeight(renderedPitch);
     const inUpperCar = expanded && !elevatorTravel && visual.position.y > liftLayout.upper - 0.1 && insideLiftShaft(visual.position);
     const orbitHeight = seatView ? Math.max(0.9, framing.height * 0.7) : actionView || inUpperCar ? 0 : framing.height * framingWeight;
-    const floor = elevatorTravel?.height ?? (visual.position.y > liftLayout.upper / 2 ? liftLayout.upper : 0);
+    const floor = elevatorTravel?.height ?? (ridingEscalator ? visual.position.y : visual.position.y > liftLayout.upper / 2 ? liftLayout.upper : 0);
     const minimumY = floor + cameraRadius + 0.04;
     let length = cameraCandidate(orbitHeight, desired, minimumY, seatView);
     anchor.copy(candidateAnchor);
@@ -2165,7 +2211,49 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     presentView(mode, cameraClearance < (cameraOccluded && !changedMode ? 1.45 : 1.15), required);
     character.updateLOD?.(camera, lodViewportHeight);
   }
+  function boardTransportReason() {
+    return tramBoardReason({
+      pushing,
+      seated: seated || Boolean(beforeTram),
+      elevatorTravel: elevatorTravel || ridingEscalator,
+      productApproaching: productApproach,
+      character: character.state
+    });
+  }
+  function boardEscalator() {
+    const p = body.translation(), x = escalatorLayout.lowerEdge - 0.14;
+    if (!hasEscalator || boardTransportReason() || Math.abs(p.y - 0.89) > 0.22 || p.x < escalatorLayout.lowerEdge - 0.25 || p.x > escalatorLayout.lowerEdge + 1.55 || Math.abs(p.z - escalatorLayout.z) > escalatorLayout.clearWidth / 2 - 0.24)
+      return false;
+    const start = { x, y: 0.9, z: p.z };
+    if (!clearPath(p, start))
+      return false;
+    moveSeat(start);
+    clearInput();
+    injected = null;
+    facing = Math.PI / 2;
+    vertical = 0;
+    ridingEscalator = true;
+    skipEscalator = false;
+    return true;
+  }
+  function finishEscalator(advance) {
+    if (advance) {
+      const end = { x: escalatorLayout.exitX, y: escalatorLayout.rise + 0.92, z: escalatorLayout.z };
+      if (!clearAt(end))
+        return false;
+      moveSeat(end);
+      resetInterpolation();
+    }
+    ridingEscalator = false;
+    skipEscalator = false;
+    vertical = 0;
+    clearInput();
+    injected = null;
+    return true;
+  }
   function cartCapability() {
+    if (ridingEscalator)
+      return { allowed: false, disabled: true, sceneDisabled: true, reasonCode: "escalator-travel", reason: "Wait until you reach the landing." };
     if (expanded && body.translation().y - 0.875 > liftLayout.upper / 2)
       return { allowed: false, disabled: true, sceneDisabled: true, reasonCode: "upper-landing", reason: "The upper landing is visitor-only. Return to the ground floor before using the cart." };
     if (elevatorTravel)
@@ -2268,7 +2356,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     }
   }
   function sit(id) {
-    if (seated || pushing || elevatorTravel || character.state.physicalProduct && character.state.physicalProduct.phase !== "empty")
+    if (seated || pushing || elevatorTravel || ridingEscalator || character.state.physicalProduct && character.state.physicalProduct.phase !== "empty")
       return false;
     const candidate = seats.find((s) => s.id === id), p = body.translation();
     if (!candidate || candidate.modelVisible?.() === false)
@@ -2330,7 +2418,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     return true;
   }
   function teleport(zone) {
-    if (elevatorTravel || beforeTram)
+    if (elevatorTravel || ridingEscalator || beforeTram)
       return false;
     const destination = zone === "atrium" ? expanded ? expandedLayout.courtyardArrival : courtyardArrival : expanded && zone === "entry" ? expandedLayout.entrance : expanded ? expandedStoreArrival(zone) : spatial.arrival(zone);
     if (!destination)
@@ -2365,6 +2453,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     return true;
   }
   function useElevator(elevator, chime, { approach = false, target: target2 } = {}) {
+    if (ridingEscalator)
+      return { reason: "Wait until you reach the landing." };
     let p = body.translation();
     const from = p.y - 0.875 > elevator.upper / 2 ? elevator.upper : 0;
     const reason = elevatorRideBlockReason({
@@ -2438,8 +2528,22 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   function skipRide() {
     if (elevatorTravel)
       elevatorTravel.skip = true;
+    else if (ridingEscalator)
+      skipEscalator = true;
   }
   function interruptGraphics() {
+    if (ridingEscalator) {
+      const halfway = body.translation().y - 0.875 > escalatorLayout.rise / 2;
+      if (halfway && finishEscalator(true))
+        return;
+      const lower = { x: escalatorLayout.lowerEdge + 0.8, y: 0.92, z: escalatorLayout.z };
+      if (clearAt(lower)) {
+        moveSeat(lower);
+        finishEscalator(false);
+        resetInterpolation();
+      }
+      return;
+    }
     if (!elevatorTravel)
       return;
     const trip = elevatorTravel;
@@ -2464,13 +2568,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     T,
     scene,
     getPosition: () => body.translation(),
-    getBoardReason: () => tramBoardReason({
-      pushing,
-      seated,
-      elevatorTravel,
-      productApproaching: productApproach,
-      character: character.state
-    }),
+    getBoardReason: boardTransportReason,
     clearPath,
     prepareModel,
     tier: tramTier,
@@ -2526,12 +2624,17 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     resizeCamera,
     teleport,
     useElevator,
+    boardEscalator,
+    boardTransportReason,
+    enableEscalator() {
+      hasEscalator = true;
+    },
     skipRide,
     clearInput,
     setBagCount: character.setBagCount,
     startCollection,
     cancelCollection,
-    emote: (name, options) => !seated && !elevatorTravel && !productApproach && (character.emote?.(name, options) ?? false),
+    emote: (name, options) => !seated && !elevatorTravel && !ridingEscalator && !productApproach && (character.emote?.(name, options) ?? false),
     setTramTier: tram?.selectTier,
     dispose() {
       tram?.dispose();
@@ -2615,7 +2718,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
       return tram?.controls.state;
     },
     get movementPending() {
-      return Boolean(keys.size || stick || drag || pinch || injected?.forward || injected?.right || gamepad?.forward || gamepad?.right || gamepad?.lookX || gamepad?.lookY || Math.hypot(velocity.x, velocity.z) > 0.001 || elevatorTravel || productApproach || beforeTram || seatPhase !== "idle" && seatPhase !== "seated");
+      return Boolean(keys.size || stick || drag || pinch || injected?.forward || injected?.right || gamepad?.forward || gamepad?.right || gamepad?.lookX || gamepad?.lookY || Math.hypot(velocity.x, velocity.z) > 0.001 || elevatorTravel || ridingEscalator || productApproach || beforeTram || seatPhase !== "idle" && seatPhase !== "seated");
     },
     get collisionTicks() {
       return collisions;
@@ -2650,7 +2753,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     },
     get state() {
       const p = body.translation();
-      const state = { x: p.x, y: p.y - 0.875, z: p.z, cameraOccluded, capsuleEnabled: capsule.isEnabled(), productApproaching: Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), elevatorPhase: elevatorTravel?.phase || null, cartCapability: cartCapability(), cameraFocus: actionView?.kind || null, cameraDistance, cameraObstruction: { lift: cameraLift, distance: cameraClearance, radius: cameraRadius, avatarVisible: !cameraOccluded }, seatPhase, seatId: seat?.id || null, seatName: seat?.name || null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state };
+      const state = { x: p.x, y: p.y - 0.875, z: p.z, cameraOccluded, capsuleEnabled: capsule.isEnabled(), productApproaching: Boolean(productApproach), seated, elevatorTravel: Boolean(elevatorTravel), escalatorTravel: ridingEscalator, elevatorPhase: elevatorTravel?.phase || null, cartCapability: cartCapability(), cameraFocus: actionView?.kind || null, cameraDistance, cameraObstruction: { lift: cameraLift, distance: cameraClearance, radius: cameraRadius, avatarVisible: !cameraOccluded }, seatPhase, seatId: seat?.id || null, seatName: seat?.name || null, pushing, animation: character.animation, yaw, facing, pitch: currentPitch(), character: character.state };
       if (tram) {
         Object.defineProperty(state, "tram", { value: tram.controls });
         state.tramRide = tram.controls.state;

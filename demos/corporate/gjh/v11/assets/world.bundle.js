@@ -1777,6 +1777,23 @@ var liftLayout = freeze({
   showcase: { x: -7, z: 18 },
   facilities: { ...restroomParcel, status: "open" }
 });
+var escalatorLayout = freeze({
+  z: 9,
+  width: 1.6,
+  clearWidth: 1.34,
+  upperEdge: liftLayout.slab.maxX,
+  upperFlat: 4,
+  lowerFlat: 17.3,
+  lowerEdge: 18.5,
+  exitX: 2.3,
+  rise: liftLayout.upper,
+  speed: 1,
+  stepCount: 50
+});
+function deckEdgeSpans(x) {
+  const { slab } = liftLayout, e = escalatorLayout;
+  return x === slab.maxX ? [[slab.minZ, e.z - e.width / 2], [e.z + e.width / 2, slab.maxZ]] : [[slab.minZ, slab.maxZ]];
+}
 var shaftFinish = Object.freeze({
   west: liftLayout.shaft.minX - 0.27,
   east: liftLayout.shaft.maxX + 0.18,
@@ -4014,7 +4031,8 @@ function buildUpperLevel(T, { map, tier, models: loadedModels }, { collider, lig
     const { minX, maxX, minZ, maxZ } = rect, cx2 = (minX + maxX) / 2, cz2 = (minZ + maxZ) / 2;
     for (const z2 of [minZ, maxZ])
       guard(cx2, z2, maxX - minX, 0.1);
-    guard(maxX, cz2, 0.1, maxZ - minZ);
+    for (const [a, b] of deckEdgeSpans(maxX))
+      guard(maxX, (a + b) / 2, 0.1, b - a);
     if (!door)
       guard(minX, cz2, 0.1, maxZ - minZ);
     else

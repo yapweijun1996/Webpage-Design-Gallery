@@ -76,6 +76,20 @@ for (const expanded of [false, true]) {
   });
 }
 
+test('escalator travel suspends ground location until the visitor returns to the ground floor', () => {
+  const f = fixture(true), position = {x:15,z:9};
+  f.hud.update({position, zone:'atrium', travelling:'escalator'});
+  assert.equal(f.context.textContent, 'Ground-floor plan · Escalator in transit');
+  assert.equal(f.dot.style.display, 'none');
+  assert.equal(f.heading.style.display, 'none');
+  f.hud.update({position, zone:'upper'});
+  assert.equal(f.context.textContent, 'Ground-floor plan · You are on Floor 02');
+  f.hud.update({position, zone:'atrium'});
+  assert.equal(f.context.textContent, 'Ground-floor plan · You are here');
+  assert.equal(f.dot.style.display, '');
+  assert.equal(f.heading.style.display, '');
+});
+
 test('upper-floor and travelling labels never misrepresent the ground-floor player position', () => {
   const f = fixture(true);
   f.hud.update({position:{x:10,z:12}, zone:'upper'});

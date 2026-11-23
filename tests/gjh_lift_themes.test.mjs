@@ -7,10 +7,10 @@ import {EVERYDAY,MALL_THEMES} from '../demos/corporate/gjh/v11/assets/mall-theme
 
 function fixture(){
  const colliders=[];
- const R={ColliderDesc:{cuboid:(...half)=>({half,setTranslation(x,y,z){this.position={x,y,z};return this;}})}};
+ const R={ColliderDesc:{cuboid:(...half)=>({half,setRotation(q){this.rotation=q;return this;},setTranslation(x,y,z){this.position={x,y,z};return this;}})}};
  const physics={createCollider(desc){const item={half:desc.half,position:desc.position,enabled:true,setEnabled(value){this.enabled=value;},setTranslation(value){this.position={...value};}};colliders.push(item);return item;}};
  const scene=new T.Scene(),lift=createElevatorV2(T,R,physics,scene,true);
- const meshes=scene.children.filter(node=>node.isMesh&&!node.userData.deckLod);
+ const meshes=scene.children.filter(node=>node.isMesh&&node.geometry.hasAttribute('obSurface')&&!node.userData.deckLod);
  const bytes=attribute=>createHash('sha256').update(new Uint8Array(attribute.array.buffer,attribute.array.byteOffset,attribute.array.byteLength)).digest('hex');
  const attributes=()=>meshes.map(mesh=>Object.fromEntries(['position','normal','color','obSurface'].map(key=>[key,bytes(mesh.geometry.getAttribute(key))])));
  const collisions=()=>colliders.map(({half,position,enabled})=>({half:[...half],position:{...position},enabled}));

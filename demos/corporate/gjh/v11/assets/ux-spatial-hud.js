@@ -63,7 +63,8 @@ export function createSpatialHud({expanded = false, root = document} = {}) {
       const floorLabel = upper ? 'Floor 02 - Upper Level' : 'Floor 01 - Atrium';
       const shop = !upper && shops.get(zone);
       setText(floor, shop ? `${floorLabel} · ${shop.label}` : floorLabel);
-      const mapContext = travelling ? 'Ground-floor plan · Lift in transit' : upper
+      const mapContext = travelling === 'escalator' ? 'Ground-floor plan · Escalator in transit'
+        : travelling ? 'Ground-floor plan · Lift in transit' : upper
         ? 'Ground-floor plan · You are on Floor 02' : 'Ground-floor plan · You are here';
       setText(context, mapContext);
       setAttribute(map, 'aria-label', mapContext);
@@ -76,7 +77,7 @@ export function createSpatialHud({expanded = false, root = document} = {}) {
         setAttribute(heading, 'transform', `translate(${point.x} ${point.y}) rotate(${angle})`);
       }
       // The cloned plan describes the ground floor only, just like the full map.
-      // Do not pretend an upper-floor or moving-lift position is on that floor.
+      // Do not pretend an upper-floor or in-transit position is on that floor.
       if (dot) dot.style.display = upper || travelling ? 'none' : '';
       if (heading) heading.style.display = upper || travelling ? 'none' : '';
       // Range/floor/availability are decided by the existing interaction registry.
