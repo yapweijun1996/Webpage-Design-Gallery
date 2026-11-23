@@ -9,6 +9,10 @@ const WORKER = /^[a-z0-9_-]+$/;
 const SHARED = ['CONTRACT.md', 'brief.md', 'contract.json', 'decisions.md', 'design-system/*',
   'direction.md', 'research.md', 'review.md', 'review1.md', 'review2.md', 'tokens.css'];
 const FORBIDDEN = ['.git/*', '.run/*', 'agents.json', 'anchors/*', 'ownership.json'];
+const LAUNCH_SHARED = ['channel.md', 'discussion/*', 'inbox/*', 'notes/*', 'staff/*'];
+const LAUNCH_FORBIDDEN = ['channel.jsonl', 'chat/00.jsonl', 'chat/.offsets.json', 'dist/*',
+  'integration/*', 'names.json', 'skills.json', 'skills/*'];
+const MANAGER_FILES = ['direction.md', 'decisions.md', 'research.md', 'review.md', 'review1.md', 'review2.md'];
 
 function isSafePath(relative) {
   return typeof relative === 'string' && !/[\\:\x00-\x1f\x7f]/.test(relative)
@@ -32,23 +36,32 @@ function sectionBase(value) {
   return base;
 }
 
-function build({ agents = [], squad = [], sections = [] } = {}) {
+function build({ agents = [], squad = [], sections = [], launchContext = false } = {}) {
   const modules = new Set(sections.map(sectionBase));
   const workers = new Set();
   const claims = new Map();
   const primary = new Set();
 
-  function addWorker(value) {
+  function addWorker(value, manager = false) {
     const id = workerId(value);
+    if (launchContext && id === '00' && !manager) throw new Error('Worker ID 00 is reserved for the Manager.');
     if (workers.has(id)) throw new Error(`Duplicate worker ID: ${id}`);
     workers.add(id);
-    claims.set(`notes/${id}.md`, id);
-    claims.set(`chat/${id}.jsonl`, id);
+    if (manager) {
+      for (const file of MANAGER_FILES) claims.set(file, id);
+    } else {
+      claims.set(`notes/${id}.md`, id);
+      claims.set(`chat/${id}.jsonl`, id);
+      if (launchContext) claims.set(`discussion/${id}.md`, id);
+    }
     return id;
   }
 
   for (const agent of agents) {
-    if (agent.id === '00' && !agent.section) continue;
+    if (agent.id === '00' && !agent.section) {
+      if (launchContext) addWorker(agent.id, true);
+      continue;
+    }
     const id = addWorker(agent.id);
     const section = agent.section;
     if (typeof section !== 'string' || !section) throw new Error(`Missing section for worker ${id}`);
@@ -80,8 +93,9 @@ function build({ agents = [], squad = [], sections = [] } = {}) {
     sections: [...modules].sort(),
     workers: [...workers].sort(),
     owned: Object.fromEntries([...claims.keys()].sort().map(glob => [glob, claims.get(glob)])),
-    shared: [...SHARED],
-    forbidden: [...FORBIDDEN],
+    shared: launchContext ? [...SHARED, ...LAUNCH_SHARED] : [...SHARED],
+    forbidden: launchContext ? [...FORBIDDEN, ...LAUNCH_FORBIDDEN] : [...FORBIDDEN],
+    ...(launchContext ? { launchContext: true } : {}),
   };
 }
 
@@ -92,7 +106,10 @@ function matchesTree(glob, relative) {
 }
 
 function classify(manifest, id, relative) {
-  if (!isSafePath(relative) || FORBIDDEN.some(glob => matchesTree(glob, relative.toLowerCase()))) return 'forbidden';
+  if (!isSafePath(relative)) return 'forbidden';
+  const key = relative.toLowerCase();
+  if (FORBIDDEN.some(glob => matchesTree(glob, key)) ||
+      (manifest.launchContext && LAUNCH_FORBIDDEN.some(glob => matchesTree(glob, key)))) return 'forbidden';
   if (typeof id !== 'string' || !isSafePath(id)) return 'foreign';
 
   let owner;
@@ -113,7 +130,8 @@ function classify(manifest, id, relative) {
     }
   }
   if (owner !== undefined) return owner === id ? 'owned' : 'foreign';
-  return SHARED.some(glob => matchesTree(glob, relative)) ? 'shared' : 'foreign';
+  return SHARED.some(glob => matchesTree(glob, relative)) ||
+    (manifest.launchContext && LAUNCH_SHARED.some(glob => matchesTree(glob, relative))) ? 'shared' : 'foreign';
 }
 
 function approvalRequired(manifest, id, changes) {

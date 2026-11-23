@@ -31,10 +31,12 @@ const fixture = {
   'design-system/tokens.json': '{}', 'notes/01.md': 'Header notes', 'notes/02.md': 'Hero notes',
   'chat/01.jsonl': '', 'chat/02.jsonl': '', '.run/secret': 'private',
 };
-const manifest = build({ agents: [
+const agents = [
   { id: '01', section: 'header' }, { id: '02', section: 'hero' },
   { id: '03', section: 'brands' }, { id: '04', section: 'footer' },
-] });
+];
+const manifest = build({ agents });
+const launchManifest = () => build({ agents: [{ id: '00' }, ...agents], launchContext: true });
 
 function write(dir, relative, data) {
   const file = path.join(dir, relative);
@@ -58,8 +60,8 @@ function setup(t) {
       fs.rmSync(root, { recursive: true, force: true });
     }
   });
-  return { root, project, open(id = '01') {
-    const ws = I.open(project, id, manifest);
+  return { root, project, open(id = '01', ownership = manifest) {
+    const ws = I.open(project, id, ownership);
     workspaces.push(ws);
     return ws;
   } };
@@ -107,6 +109,89 @@ test('isolates a writable Header workspace and merges only its hashed additions,
   I.close(ws);
   assert.equal(fs.existsSync(ws.dir), false);
   assert.throws(() => I.diff(ws), /closed workspace/);
+});
+
+test('launch copies only needed readonly context and stages a fresh worker outbox', t => {
+  const { project, open } = setup(t);
+  const active = launchManifest();
+  const outbox = 'chat/01.jsonl';
+  const oldPosts = '{"text":"Already accepted"}\n';
+  const newPosts = '{"text":"New handoff"}\n';
+  const readonly = {
+    'channel.md': 'Previous conversation', 'staff/handbook/qa.md': 'Verify the section',
+    'notes/02.md': 'Hero notes', 'discussion/02.md': 'Hero proposal', 'inbox/01.md': 'Owner request',
+    'assets/reference pack/新月.png': 'shared asset', [ANCHOR]: fixture[ANCHOR],
+  };
+  const privateFiles = {
+    'inbox/02.md': 'Another worker inbox', 'channel.jsonl': 'Canonical log',
+    'notes/99.md': 'Retired notes', 'chat/02.jsonl': 'Another worker outbox',
+    'chat/.offsets.json': '{}', 'names.json': '{}', 'skills.json': '{}',
+    'skills/local/SKILL.md': 'Resolver input', 'dist/index.html': 'Runtime bundle', '.run/secret': 'private',
+  };
+  for (const [file, data] of Object.entries({ ...readonly, ...privateFiles, [outbox]: oldPosts })) write(project, file, data);
+  const ws = open('01', active);
+  for (const [file, data] of Object.entries(readonly)) {
+    assert.equal(read(ws.dir, file), data, file);
+    const source = fs.statSync(path.join(project, file));
+    const copy = fs.statSync(path.join(ws.dir, file));
+    assert.notEqual(copy.ino, source.ino, file);
+    assert.equal(copy.nlink, 1, file);
+    assert.equal(copy.mode & 0o777, 0o400, file);
+  }
+  for (const file of Object.keys(privateFiles)) assert.equal(fs.existsSync(path.join(ws.dir, file)), false, file);
+  assert.deepEqual(I.diff(ws), { added: [], changed: [], removed: [] });
+  assert.equal(I.workerOutbox(ws).length, 0);
+
+  fs.appendFileSync(path.join(ws.dir, outbox), newPosts);
+  write(ws.dir, 'discussion/01.md', 'Header proposal');
+  write(ws.dir, HEADER, header('Accepted header'));
+  assert.equal(I.workerOutbox(ws).toString('utf8'), newPosts);
+  const result = I.merge(project, ws, active);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.merged, ['discussion/01.md', HEADER]);
+  assert.equal(read(project, outbox), oldPosts);
+  assert.equal(read(project, 'channel.jsonl'), privateFiles['channel.jsonl']);
+  assert.equal(read(project, 'discussion/01.md'), 'Header proposal');
+});
+
+test('launch freezes ownership and limits the worker transport to 64 KiB', t => {
+  const { project, open } = setup(t);
+  const active = launchManifest();
+  write(project, 'inbox/01.md', 'Original instruction');
+  const first = open('01', active);
+  const inbox = 'inbox/01.md';
+  fs.chmodSync(path.join(first.dir, inbox), 0o600);
+  write(first.dir, inbox, 'Edited instruction');
+  active.owned[inbox] = '01';
+  rejection(I.merge(project, first, active), 'shared', inbox);
+  assert.equal(read(project, inbox), 'Original instruction');
+
+  const second = open('01', launchManifest());
+  const workerBox = 'chat/01.jsonl';
+  write(second.dir, workerBox, 'x'.repeat(64 * 1024 + 1));
+  assert.throws(() => I.workerOutbox(second), /byte limit/);
+  rejection(I.merge(project, second, launchManifest()), 'size', workerBox);
+  assert.equal(read(project, workerBox), fixture[workerBox]);
+});
+
+test('Manager launch publishes planning documents and has no live outbox', t => {
+  const { project, open } = setup(t);
+  const active = launchManifest();
+  write(project, 'chat/00.jsonl', 'Archived Manager input');
+  write(project, 'inbox/00.md', 'Owner direction for the Manager');
+  write(project, 'discussion/01.md', 'Header proposal');
+  const ws = open('00', active);
+  assert.equal(I.workerOutbox(ws), null);
+  assert.equal(fs.existsSync(path.join(ws.dir, 'chat/00.jsonl')), false);
+  assert.equal(read(ws.dir, 'discussion/01.md'), 'Header proposal');
+  assert.equal(read(ws.dir, 'inbox/00.md'), 'Owner direction for the Manager');
+  write(ws.dir, 'direction.md', 'Direction');
+  write(ws.dir, 'review1.md', 'Review');
+  write(ws.dir, 'research.md', 'Research');
+  const result = I.merge(project, ws, active);
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.merged, ['direction.md', 'research.md', 'review1.md']);
+  assert.equal(read(project, 'chat/00.jsonl'), 'Archived Manager input');
 });
 
 for (const [relative, code] of [[HERO, 'foreign'], ['tokens.css', 'shared'], [ANCHOR, 'forbidden'],

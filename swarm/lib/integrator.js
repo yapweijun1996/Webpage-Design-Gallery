@@ -8,6 +8,7 @@ const { checkProject } = require('../tools/check-sections');
 const { classify, isSafePath } = require('./ownership');
 
 const MAX_FILE_BYTES = 1024 * 1024;
+const MAX_OUTBOX_BYTES = 64 * 1024;
 const READ_FLAGS = fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK;
 const WORKSPACES = '.run/ws';
 const SNAPSHOTS = '.run/component-snapshots';
@@ -123,15 +124,37 @@ function walk(root, roots, visit, onUnsafe = error => { throw error; }) {
   for (const relative of roots ?? fs.readdirSync(root).sort()) descend(relative);
 }
 
-function copyRoots(from, to, roots, recordBase = () => {}) {
+function copyRoots(from, to, roots, recordBase = () => {}, modeFor = () => 0o600) {
   walk(from, roots, (relative, stat) => {
     if (stat.isDirectory()) directory(to, relative);
     else {
       const record = readFile(from, relative);
-      stageFile(to, relative, { ...record, mode: 0o600 });
+      stageFile(to, relative, { ...record, mode: modeFor(relative) });
       recordBase(relative, record);
     }
   });
+}
+
+function launchManifest(manifest) {
+  return Object.freeze({
+    launchContext: true,
+    shared: Object.freeze([...manifest.shared]),
+    workers: Object.freeze([...manifest.workers]),
+    owned: Object.freeze({ ...manifest.owned }),
+  });
+}
+
+function readRoots(manifest, workerId) {
+  const shared = manifest.shared.map(glob => glob.replace(/\/\*$/, ''));
+  const context = ['anchors', 'assets', 'sections'];
+  if (!manifest.launchContext) {
+    return [...context, `notes/${workerId}.md`, `chat/${workerId}.jsonl`, ...shared];
+  }
+  // Copy only the current roster's notes and discussion, and only this launch's inbox.
+  const peers = manifest.workers.filter(id => id !== '00');
+  const rosterRoots = peers.flatMap(id => [`notes/${id}.md`, `discussion/${id}.md`]);
+  return [...context, ...rosterRoots, `inbox/${workerId}.md`,
+    ...shared.filter(root => !['notes', 'discussion', 'inbox'].includes(root))];
 }
 
 function open(projectDir, workerId, manifest) {
@@ -139,22 +162,29 @@ function open(projectDir, workerId, manifest) {
   const project = projectRoot(projectDir);
   const id = randomUUID();
   const relative = `${WORKSPACES}/${id}`;
+  const launched = manifest.launchContext ? launchManifest(manifest) : null;
+  const outbox = launched && workerId !== '00' ? `chat/${workerId}.jsonl` : null;
   const dir = directory(project, relative);
   const base = Object.create(null);
   const sizes = new Map();
-  const roots = ['anchors', 'assets', 'sections', `notes/${workerId}.md`, `chat/${workerId}.jsonl`,
-    ...manifest.shared.map(glob => glob.replace(/\/\*$/, ''))];
+  const recordBase = (name, { sha256, size }) => {
+    base[name] = Object.freeze({ sha256 });
+    sizes.set(name, size);
+  };
   try {
-    copyRoots(project, dir, roots, (name, { sha256, size }) => {
-      base[name] = Object.freeze({ sha256 });
-      sizes.set(name, size);
-    });
+    const modeFor = name => !launched || classify(launched, workerId, name) === 'owned' ? 0o600 : 0o400;
+    copyRoots(project, dir, readRoots(launched ?? manifest, workerId), recordBase, modeFor);
+    if (outbox) {
+      const data = Buffer.alloc(0);
+      stageFile(dir, outbox, { data, mode: 0o600 });
+      recordBase(outbox, { sha256: createHash('sha256').update(data).digest('hex'), size: 0 });
+    }
   } catch (error) {
     fs.rmSync(dir, { recursive: true, force: true });
     throw error;
   }
   const ws = Object.freeze({ id, dir, base: Object.freeze(base) });
-  const session = { project, workerId, relative, sizes, overlap: new Set() };
+  const session = { project, workerId, relative, launched, outbox, sizes, overlap: new Set() };
   sessions.set(ws, session);
   if (!active.has(project)) active.set(project, new Set());
   active.get(project).add(session);
@@ -205,6 +235,15 @@ function diff(ws) {
   return workspaceChanges(ws, getSession(ws)).changes;
 }
 
+function workerOutbox(ws) {
+  const session = getSession(ws);
+  if (!session.outbox) return null;
+  const { file, stat } = workspaceEntry(session);
+  if (!stat) throw unsafe(session.relative);
+  // Worker posts are a per-launch transport, capped at 64 KiB and never written to live files.
+  return readFile(file, session.outbox, { maxBytes: MAX_OUTBOX_BYTES })?.data ?? Buffer.alloc(0);
+}
+
 function balancedCss(data) {
   const css = data.toString('utf8');
   const tokens = /\/\*[\s\S]*?\*\/|"(?:\\[\s\S]|[^"\\\r\n\f])*"|'(?:\\[\s\S]|[^'\\\r\n\f])*'|\\[\s\S]|\/\*|["'{}()[\]]/g;
@@ -248,9 +287,15 @@ function prepare(ws, session, manifest, { maxFileBytes = MAX_FILE_BYTES } = {}) 
     const paths = [...changes.added, ...changes.changed, ...changes.removed].sort();
     for (const relative of paths) {
       if (unsafePaths.has(relative)) continue;
-      const code = classify(manifest, session.workerId, relative);
+      const code = classify(session.launched ?? manifest, session.workerId, relative);
       try {
         if (code !== 'owned') throw new Violation(code, relative, `Worker ${session.workerId} cannot modify this path.`);
+        if (relative === session.outbox) {
+          if (after.get(relative)?.size > MAX_OUTBOX_BYTES) {
+            throw new Violation('size', relative, `Worker outbox exceeds the ${MAX_OUTBOX_BYTES} byte limit.`);
+          }
+          continue;
+        }
         if (session.overlap.has(relative)) throw new Violation('overlap', relative, 'Another workspace already merged this path.');
         const next = after.get(relative);
         if (next?.size > maxFileBytes) throw new Violation('size', relative, `File exceeds the ${maxFileBytes} byte limit.`);
@@ -427,4 +472,4 @@ function close(ws) {
   }
 }
 
-module.exports = { open, diff, validate, merge, rollback, close };
+module.exports = { open, diff, workerOutbox, validate, merge, rollback, close };

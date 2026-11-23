@@ -21,6 +21,10 @@ I.close(ws)
 ```
 Scope validation of CSS reuses `tools/check-sections.js` (`checkProject`, rule `layer-scope`/unscoped selectors) on the merged candidate, in a temp copy, before touching the live project. Size caps per file. Nothing is deleted without a snapshot.
 
+To prepare a runner workspace, opt into `build({ agents, squad, sections, launchContext: true })` with the Manager in `agents`. `I.open` freezes that launch's ownership and copies the channel transcript, staff guidance, roster notes and discussion, and the runner's own inbox. Only the Manager can publish its planning documents outside a squad's delegated research lane. A worker's own `discussion/ID.md` remains writable. The Manager has no workspace outbox.
+
+For a worker launch, `I.workerOutbox(ws)` reads up to 64 KiB of its fresh JSONL outbox. The integrator excludes that file from publication. The server must ingest the returned posts using the launched identity after acceptance, while the existing canonical log and archive outboxes stay untouched. These workspace copies enforce publication ownership. Same-user Pi processes still need an operating-system boundary for independent filesystem isolation.
+
 ## Indirect impact detection (`tools/impact-check.js`)
 `node swarm/tools/impact-check.js --before dir --after dir [--widths 393,768,1440] [--json out.json]`: exports both project states (`tools/export-page.js`), renders each in headless Chrome at each width, measures every section's bounding box via DevTools and screenshots, and reports per section: moved/resized (box delta), pixel difference (reuse `tools/visual-compare.js` if present), JS console errors, horizontal overflow. API `impact(before, after, { owner })` returns `{ ok, perSection:[{id, owned, boxDelta, diffRatio}], unexpected:[ids] }` where `unexpected` = changed sections that the author does not own (cascade leaks, layout shifts below, overflow). A worker's merge is only accepted when `unexpected` is empty or explicitly approved.
 

@@ -50,6 +50,34 @@ test('uses the actual squad plan shape and assigns each specialist only their de
   assert.equal(classify(manifest, '01', 'assets/generated/01-header-nav.svg'), 'owned');
 });
 
+test('launch ownership reserves Manager planning documents and worker discussion drafts', () => {
+  const roster = [{ id: '00' }, ...agents];
+  const legacy = build({ agents: roster, sections });
+  assert.deepEqual(legacy.workers, ['01', '02']);
+  assert.equal(classify(legacy, '01', 'discussion/01.md'), 'foreign');
+
+  const active = build({ agents: roster, sections, launchContext: true });
+  assert.deepEqual(active.workers, ['00', '01', '02']);
+  for (const file of ['direction.md', 'decisions.md', 'review.md', 'review1.md', 'review2.md', 'research.md']) {
+    assert.equal(classify(active, '00', file), 'owned', file);
+    assert.equal(classify(active, '01', file), 'foreign', file);
+  }
+  assert.equal(classify(active, '01', 'discussion/01.md'), 'owned');
+  assert.equal(classify(active, '01', 'discussion/02.md'), 'foreign');
+  assert.equal(classify(active, '00', 'discussion/01.md'), 'foreign');
+  assert.equal(classify(active, '00', 'sections/01-header.html'), 'foreign');
+  for (const file of ['channel.md', 'inbox/01.md', 'staff/handbook/qa.md']) {
+    assert.equal(classify(active, '01', file), 'shared', file);
+    assert.equal(classify(active, '00', file), 'shared', file);
+  }
+  for (const file of ['channel.jsonl', 'chat/00.jsonl', 'chat/.offsets.json', 'dist/index.html',
+    'names.json', 'skills.json', 'skills/qa/SKILL.md', 'integration/log.jsonl']) {
+    assert.equal(classify(active, '01', file), 'forbidden', file);
+    assert.equal(classify(active, '00', file), 'forbidden', file);
+  }
+  assert.throws(() => build({ agents: [...roster, { id: '00', section: 'mock' }], launchContext: true }), /reserved/);
+});
+
 test('manifest serialization is deterministic across input order and duplicate section files', () => {
   const squad = roster().map(spec => ({ ...spec, base: '01-header' }));
   const first = build({ agents, sections, squad });
