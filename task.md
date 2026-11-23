@@ -16,9 +16,9 @@ Status legend: [x] done and verified, [~] in progress, [ ] not started.
 - [x] Viewer topbar: single 44px line, icon buttons with cursor-following tooltips, right panel on/off, responsive 320-1440 (verified in browser).
 - [~] Chat log redesign and composer redesign (worker L1).
 - [~] Swarm Design System v1, 11 parallel workers (A tokens, B components, C runtime, D i18n, E PWA, F lint ratchet, G standard, H and I handbook, J1 roster and tools, J2 playbooks).
-- [ ] SDS integration: inject position preambles into agent prompts, copy staff and design-system into each project, update CONTRACT.
-- [ ] SDS migration of the GJH home page through the channel (tokens, components, `data-i18n`, `data-reveal`), ratchet baseline to 0.
-- [ ] Runner and model settings: allowlist enforcement (codex and pi only; 6.2 Sol and 6.1 Terra; medium and xhigh), runner adapters, Settings page, CLI `settings` commands. Default effort changes from low to medium.
+- [~] SDS integration: project initialization copies staff and design-system files and writes the CONTRACT; runner prompts include position preambles. Confirm end-to-end acceptance through the channel.
+- [~] SDS migration of the GJH home page through the channel (tokens, components, `data-i18n`, `data-reveal`): some sections are migrated; the archived ratchet baseline still contains 412 rule counts and must reach 0.
+- [~] Runner and model settings: allowlist enforcement, adapters, Settings page and CLI commands are implemented; the default effort is medium. Focused settings, runner and staff tests pass; confirm the full browser and real-run acceptance.
 - [ ] Verification: browser matrix (390x844, 1440x900; themes x languages), offline reload of exported PWA, reduced motion, screenshots viewed.
 - [x] KB-MCP reflection (2026-11-21): new skill `agent:live-multi-agent-design-swarm` v1.0.0, `agent:parallel-coding-workers` updated to v1.4.0, 10 memories saved (project Webpage-Design-Gallery); verified by recall. Source text in `swarm/LESSONS.md`.
 - [x] Team editor in Settings (2026-11-21): parallel workers with job titles, per-worker runner/model/effort; `swarm/TEAM_SPEC.md`, `lib/team.js`, `/api/team`; Settings layout polished by a Codex worker. Verified: API round trip and live page.
@@ -27,7 +27,14 @@ Status legend: [x] done and verified, [~] in progress, [ ] not started.
 - [x] OpenAI image key and combobox (2026-11-21): key stored privately (`swarm/.run/secrets.json`), `/api/image`, `tools/gen-image.js`, models list endpoint; gpt-image-2 verified with a real image (95 s, 137 KB webp). Fast/quality choice: 2.6 flare vs sunburst (per OpenAI), not yet benchmarked here.
 - [x] Astra review (3 reviewers, 2026-11-21): reports in `swarm/reports/`. Fixed: local API guard, viewer fragment sanitizer, squad prompt dropping the owner request, viewer ignoring layer css, fixed bars covering the side panel.
 - [x] GJH Chinese New Year edition built through the swarm (10 sections), cny-red-gold SDS theme merged (WCAG AA both themes), design anchor `assets/generated/00-anchor-cny.webp`. Open: compare to anchor screen by screen, 3-language catalogs, v11 images, second improvement round.
-- [ ] NEXT (priority): P0/P1 from the Astra review: `start`/`/api/init` wipe guard, studio.html sanitizer or sandboxed preview, one assembled preview for agents and viewer, Manager outbox identity binding, child env allowlist; then WIRE the libraries into server.js (`/api/fast`, anchor gate, integrator merge gate with impact-check, versions/rollback API, project skills in runner args) with route-to-worker tests; Skills settings UI; real browser benchmark for the fast path.
+- Swarm reconciliation against `main` at `10107dcd` (2026-11-23):
+  - [x] Initialization protection: slug and input validation, staging, locking and failure rollback are covered by `swarm/test/project-init.test.js`. `start`, `/api/init` and `/api/run` check project identity, including same-name projects from different checkouts.
+  - [x] Studio and export previews use opaque sandboxed frames and restricted resources; `swarm/test/preview.test.js` passed, including its opt-in Chrome fixture.
+  - [x] Agent previews and Studio use the same isolated rendering stage. Scoped turns carry the Studio theme, brand and language. The Chrome fixture checks mobile, tablet and desktop geometry and styles and compares screenshot tool pixels with Studio.
+  - [x] Allowlist child process environment variables for worker launches and runner readiness probes. CLI probe fixtures and successful and failed fake runner scenarios pass.
+  - [ ] Bind Manager outbox messages to the launched identity. Review remaining worker filesystem isolation and secret handling against the security report.
+  - [ ] Wire `/api/fast`, the anchor gate, integrator merge and impact checks, versions/rollback, and project skills into the live server and runner paths. Add route-to-worker acceptance tests and the Skills settings UI.
+  - [ ] Benchmark the fast path in a real browser from the owner's submission through an interactive preview; the current composer benchmark excludes that full journey.
 
 Not verifiable headlessly (stays UNVERIFIED until a real device): iPhone gesture zoom lock, PWA install prompt on iOS, Safari service worker behaviour.
 
@@ -42,8 +49,8 @@ Open items:
 
 - [ ] Real-device checks by the owner on iPhone and Android: loader wait, first person hand and can, signage legibility, upper-level lift flow, tram ride, and the PWA 'Update now' path (Chrome could not reproduce the missing-stylesheet failure; the hardening is unproven on iOS).
 - [ ] Lighting score leftovers (Balanced): atrium mean 0.51 (target 0.42 +/- 0.08), New Moon saturation 0.46, GOGO p95 0.87, LG R/B 1.43 and dark 0.33, Low atrium saturation 0.45 and dark 0.39.
-- [ ] Character: Tripo boy NPC and other visitors still use the old soft face; player face sharpness measured 1.55x in game (target 2x).
-- [ ] `tests/browser_gjh_pwa.py` fails on main (expects the old 'Bag (1)' label after the top-bar change); update the test.
+- [ ] Character: remeasure player face sharpness against the 2x target. The Tripo boy, Visitor v2 and modular NPC faces were subsequently redrawn (`f1fd4e19`); details are in `docs/evidence/gjh-v11-npc-face/README.md`.
+- [x] Updated `tests/browser_gjh_pwa.py` for the current bag badge and deterministic CSS and loader cache recovery checks. The full journey passes in Chrome with ANGLE Metal, including same-tab bag retention, update consent, and single reload.
 - [ ] Detailed tier early-enter shows an occasional single frame of 50-130 ms under heavy machine load; re-measure on a quiet machine and on the owner's Windows laptop.
 - [ ] Phone: dynamic resolution and 30 FPS cap need real-phone numbers (export the performance JSON).
 - [ ] Optional: tram upper-level station, tram station audio/voice, modular chibi trial (C5), more shop interactions with sound, upper-level lounge detail.
@@ -71,9 +78,9 @@ Shipped to `main`:
 
 In progress or queued (each verified in headed Chrome before push):
 
-- [ ] S09 SPAM entrance blocked by a public-area tree crown at (-6.35, 27) (Sol).
-- [ ] Atmosphere pass: warm cove lighting and glossy floor (desktop stronger, phone minimal).
-- [ ] Chibi crowd integration through the existing NPC admission budget (owned by the "MacBook Air Blender 3D gallery" session, in its own worktree).
+- [x] S09 SPAM entrance foliage corrected (`da9b9a8d`); `tests/gjh_shop_arrival_foliage.test.mjs` passes.
+- [x] Atmosphere pass: warm cove lighting and floor sheen (`3e0c3279`); `tests/gjh_atmosphere_budget.test.mjs` passes. The separate lighting score checks remain open.
+- [x] Chibi crowd integrated through the NPC admission budget (`81fdcc39`); see `docs/gjh-v11-npcs.md`. Physical-device performance remains open.
 - [ ] Measure frame times and loader wait on the physical iPhone after the warm-up and interiors releases.
 - [ ] First-person hand and can visual check on a phone.
 
@@ -849,4 +856,4 @@ See [docs/gjh-v11-qa-loop.md](docs/gjh-v11-qa-loop.md).
 ## 2026-11-17 release log
 - [x] Pushed to main (a05c0bb, Pages deploy green, live bundle verified): new model displays (S04/S05, S13-S17), tiered lighting, interaction registry, seat anchors (upper-deck benches sittable except one overlapping the lift shaft was moved), shop-door Open, goal.md, QA loop docs, model inventory. Owner chose to push all although the terra visual advisor scored the mall 4/10 FAIL.
 - [ ] Visual quality is still below the concept (flat mood, small hero displays); waits for P1 models: glazed storefront module, chilled freezer, grand piano, ice-cream cart, canned-food pyramid.
-- [ ] Next engine steps: Pick Up and Travel through the registry, shoes in character customisation, NPCs, escalator, district streaming (P2).
+- [~] Engine steps: travel, physical pickup, shoe customisation and NPCs shipped in later updates. Escalators and district streaming (P2) remain future work.

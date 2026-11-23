@@ -7,7 +7,7 @@ import tempfile
 import threading
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 from browser_pwa import Handler, alternate_release, gallery
 
 
@@ -31,6 +31,7 @@ def run():
                 context = p.chromium.launch_persistent_context(user_data_dir=str(root / 'profile'), executable_path=os.environ['GALLERY_CHROME'], viewport={'width': 390, 'height': 844}, reduced_motion='reduce', headless=True, args=['--use-angle='+os.environ.get('GALLERY_WEBGL_BACKEND','swiftshader'), '--enable-unsafe-swiftshader'])
                 context.add_init_script("localStorage.setItem('gjh-v11-tutorial-v1', 'dismissed')")
                 page = context.new_page()
+                bag_count = page.locator('#bag-open .hud-bag-count')
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 # Install the parent first; the more specific mall registration must coexist.
@@ -81,9 +82,12 @@ def run():
                 assert {i['sizes'] for i in parsed['icons']} == {'192x192', '512x512'}
                 installability = context.new_cdp_session(page).send('Page.getInstallabilityErrors')
                 assert not installability.get('installabilityErrors'), installability
-                page.locator('.product-card [data-add]').first.click()
+                add_product = page.locator('.product-card [data-add]').first
+                product_id = add_product.get_attribute('data-add')
+                add_product.click()
                 saved = page.evaluate("sessionStorage.getItem('gjh-v11-demo-bag-v1')")
-                assert saved and '1' in saved
+                assert saved and json.loads(saved) == {product_id: 1}
+                expect(bag_count).to_have_text('1')
                 # True network failure, offline navigation, then recovery without losing the same-tab bag.
                 context.set_offline(True)
                 assert page.evaluate("fetch('pwa.js?offline-test=1').then(() => false).catch(() => true)")
@@ -98,7 +102,7 @@ def run():
                 page.locator('a', has_text='Try again').click()
                 page.locator('#arrival-walk').click()
                 page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
-                assert page.locator('#bag-open').inner_text() == 'Bag (1)'
+                expect(bag_count).to_have_text('1')
                 if page.locator('#experience').is_visible(): page.locator('#view-toggle').click()
                 other = context.new_page()
                 other.goto(url, wait_until='domcontentloaded')
@@ -163,16 +167,23 @@ def run():
                 page.wait_for_function('window.__sceneReady || window.__sceneFailed', timeout=90000)
                 assert len(navigations) == 1, navigations
                 assert page.evaluate("sessionStorage.getItem('gjh-v11-demo-bag-v1')") == saved
-                assert page.locator('#bag-open').inner_text() == 'Bag (1)'
+                expect(bag_count).to_have_text('1')
                 other.wait_for_function("() => !document.querySelector('#mall-update-notice').hidden")
                 assert 'another tab' in other.locator('#mall-update-message').inner_text()
                 assert not other_navigations, other_navigations
                 assert not errors, errors
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
                 probe = context.new_page()
+                # Keep the HTTP cache from masking the injected resource failures.
+                network = context.new_cdp_session(probe)
+                network.send('Network.enable')
+                network.send('Network.setCacheDisabled', {'cacheDisabled': True})
                 probe.goto(url)
                 assert probe.evaluate("getComputedStyle(document.querySelector('#app-loader')).position") == 'fixed'
                 assert probe.evaluate(delete_asset, [version_cache, css_url])
+                # Recovery clears the old cache, but fresh requests may recreate it.
+                recovery_marker = url + 'recovery-test-marker'
+                probe.evaluate("async ([name, marker]) => (await caches.open(name)).put(marker, new Response('old cache'))", [version_cache, recovery_marker])
                 server.mixed_files = {css_path: b"missing stylesheet"}
                 probe.reload()
                 assert probe.locator('#mall-recovery').is_visible()
@@ -182,9 +193,10 @@ def run():
                     probe.locator('#mall-recovery button').click()
                 assert probe.locator('#mall-recovery').is_hidden()
                 assert probe.evaluate("getComputedStyle(document.querySelector('#app-loader')).position") == 'fixed'
-                assert not probe.evaluate("(name) => caches.has(name)", version_cache)
+                assert probe.evaluate("async ([name, marker]) => !(await caches.match(marker, {cacheName: name}))", [version_cache, recovery_marker])
 
                 loader_path = "demos/corporate/gjh/v11/assets/loader.js"
+                probe.evaluate(delete_asset, [version_cache, url + 'assets/loader.js'])
                 server.mixed_files = {loader_path: b"missing module"}
                 probe.reload()
                 probe.get_by_role('button', name='Retry', exact=True).wait_for()
