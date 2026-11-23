@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {setImmediate as nextTurn} from 'node:timers/promises';
 import {GLTFLoader} from '../demos/corporate/gjh/v11/vendor/GLTFLoader.js';
 import {parseWarmGLTF} from '../demos/corporate/gjh/v11/assets/gltf-warmup.js';
+import {loadVisitorGLTF} from '../demos/corporate/gjh/v11/assets/visitor-gltf.js';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
 import {createWarmReport, createWarmRunner, createTierQueue, mallProbePoses, prepareEntryFrame, prepareScene} from '../demos/corporate/gjh/v11/assets/scene-warmup.js';
 import {createModelWarmup} from '../demos/corporate/gjh/v11/assets/model-warmup.js';
@@ -51,6 +52,41 @@ test('warm parsing dispatches each shipped shop mesh and visitor animation in se
     assert.deepEqual(meshes(model), meshes(direct));
     assert.equal(loader.pluginCallbacks.length, new GLTFLoader().pluginCallbacks.length);
   }
+});
+
+test('a stalled visitor transfer expires but a downloaded visitor can wait for the scene to resume', async t => {
+  const time = clock();
+  t.mock.method(globalThis, 'setTimeout', time.setTimer);
+  t.mock.method(globalThis, 'clearTimeout', time.clearTimer);
+  const visitor = {asset:{version:'2.0'}, scenes:[{nodes:[0]}], nodes:[{name:'Visitor'}], scene:0};
+  let transferSignal;
+  t.mock.method(globalThis, 'fetch', async (url, {signal}) => {
+    transferSignal = signal;
+    if (url.pathname === '/stalled.gltf') {
+      return new Response(new ReadableStream({start(body) {
+        signal.addEventListener('abort', () => body.error(signal.reason), {once:true});
+      }}));
+    }
+    return new Response(JSON.stringify(visitor));
+  });
+
+  const stalled = loadVisitorGLTF(new URL('https://example.invalid/stalled.gltf'));
+  const transferExpired = assert.rejects(stalled, /Visitor model timed out/);
+  await nextTurn();
+  time.advance(8000);
+  await transferExpired;
+  assert.equal(transferSignal.aborted, true);
+
+  let resume;
+  const loaded = loadVisitorGLTF(new URL('https://example.invalid/visitor.gltf'), () =>
+    new Promise(resolve => { resume = resolve; }));
+  await nextTurn();
+  assert.equal(typeof resume, 'function', 'the entire model arrived before the pause');
+  time.advance(12000);
+  resume();
+  const model = await loaded;
+  assert.equal(transferSignal.aborted, false);
+  assert.ok(model.scene.getObjectByName('Visitor'));
 });
 
 test('early entry draws once, waits for completion and releases a stalled fence at 300 ms', () => {

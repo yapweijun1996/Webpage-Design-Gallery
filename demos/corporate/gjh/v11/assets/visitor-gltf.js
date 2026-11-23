@@ -34,6 +34,8 @@ export async function loadVisitorGLTF(url, waitForSlice) {
       const response = await fetchStartupAsset(url, {signal: controller.signal});
       if (!response.ok) throw new Error('Visitor model unavailable');
       const buffer = await response.arrayBuffer();
+      // The bag or a background tab can pause local parsing until the scene resumes.
+      if (waitForSlice) clearTimeout(timer);
       const gltf = await parseWarmGLTF(new GLTFLoader(), buffer, new URL('.', url).href, waitForSlice, controller.signal);
       if (abandoned) disposeVisitorScene(gltf.scene);
       return gltf;

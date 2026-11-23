@@ -21,6 +21,8 @@ During live rendering, the scene sweep, room installer and model uploader share 
 
 ## Headed acceptance
 
+In desktop Chrome, opening the bag paused parsing of the fully downloaded 577,004-byte crowd model. After a 9.8-second pause, closing the bag previously left the mall without visitors for the full 30-second observation. With the corrected loader, the same route reported three active visitors within 1.9 seconds of the final paused sample. A stalled transfer still expires after eight seconds. [Transfer and resume regression](../tests/gjh_scene_warmup.test.mjs)
+
 Walk from entry through the atrium into MILI and New Moon with Low selected, collecting a fresh performance report for the walk. Use `window.__mall.performanceReport()` or **Download report (JSON)**.
 
 - `uploads.lateAdditions` counts completed late-asset batches released for placement, admission or LOD use. Startup-only prewarm batches are excluded.

@@ -182,6 +182,8 @@ async function loadVisitorGLTF(url, waitForSlice) {
       if (!response.ok)
         throw new Error("Visitor model unavailable");
       const buffer = await response.arrayBuffer();
+      if (waitForSlice)
+        clearTimeout(timer);
       const gltf = await parseWarmGLTF(new GLTFLoader, buffer, new URL(".", url).href, waitForSlice, controller2.signal);
       if (abandoned)
         disposeVisitorScene(gltf.scene);
