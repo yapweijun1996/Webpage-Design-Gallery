@@ -150,7 +150,13 @@ function lockup(ctx,w,h,c,logo,door,blade=false) {
   const relief=canvas(w,h), reliefCtx=relief.getContext('2d');
   const caption=fallback || (c.caption && c.lockup!=='monogram' && !blade);
   const stacked=c.lockup==='logo-top' || (blade && fallback);
-  const usable=h*(blade?.58:c.fasciaInkHeight), top=blade?h*.10:(h-usable)/2;
+  let usable=h*(blade?.58:c.fasciaInkHeight), top=blade?h*.10:(h-usable)/2;
+  if (!blade && c.fasciaInkTop!==undefined) {
+    // Leave the usual space below the mark when the approach needs more headroom.
+    const bottom=top;
+    top=h*c.fasciaInkTop;
+    usable=h-top-bottom;
+  }
   let labelX=w/2,labelY=top+usable*.52,labelW=w*.88;
   let markBounds=null;
   if(mark){

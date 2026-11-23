@@ -52,7 +52,8 @@ test('reject wrong slots, invalid size limits, contrast, types, foreign marks an
   for(const settings of [{preset:'store'}, {finish:'paper'}, {backlight:'laser'}, {typography:'unknown'},
     {lockup:'invent'}, {brand:''},{size:{height:.2}},{size:{width:9}},{size:{depth:.1}},{size:{width:NaN}},
     {blade:0},{pulse:1},{palette:{fascia:'#fff'}},{palette:{fascia:'#ffffff',letter:'#eeeeee'}},
-    {logo:'S02'},{poster:'../../remote'},{lodDistance:Infinity},{logoRegion:[0,0,2,1]},{logoModule:'wrong'}])
+    {logo:'S02'},{poster:'../../remote'},{lodDistance:Infinity},{logoRegion:[0,0,2,1]},{logoModule:'wrong'},
+    {fasciaInkTop:.01},{fasciaInkTop:.41},{fasciaInkTop:NaN}])
     assert.throws(()=>setup(0,settings));
   assert.throws(()=>resolveConfig('S02',{},bays[0],kit,receipts));
   assert.throws(()=>resolveConfig('S01',{}, {...bays[0],maxX:bays[0].minX+2},kit,receipts));

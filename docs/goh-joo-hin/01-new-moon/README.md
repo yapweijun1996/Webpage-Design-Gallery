@@ -44,6 +44,8 @@ The light interior was verified in headed Chrome on build `a793a237cd50e587`. De
 
 [Player walkthrough](browser-walkthrough.webp) · [Australia model in Inspect](installed-product-preview.webp)
 
+The shelf-to-Bag test follows the automatic doorway, checks all four physical pickups and confirms that each SKU keeps its own quantity. It also checks modal focus and the return to the arcade. The product detail test covers rotation at three viewport sizes. [Shelf-to-Bag test](../../../tests/browser_gjh_newmoon_pickup_bag.py) · [Product detail rotation test](../../../tests/browser_gjh_newmoon_detail.py)
+
 The recorded entry walks sampled p95 scene-frame intervals of 17.7 ms on the 1440 × 900 Detailed desktop and 34.3 ms under 390 × 844 Low touch emulation. The desktop sample had zero intervals at or above 50 ms. The phone emulation had one interval at 50 ms. Sampling ran with screen recording disabled. These checks cover the short route in Chrome.
 
 ## Interior viewpoints
@@ -54,6 +56,24 @@ Four generated views describe one proposed room and its visitor circulation. Com
 
 Published touch-emulated Chrome on build `95e5ba13a1d96807` used the joystick at the entrance and collision-aware waypoints inside. The route opened both stories, inspected and rotated all four 3D cans, picked up and returned each can, used Sit and Stand on both tasting stools and exited to the concourse. The Australia action added one item to the demo bag. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44555819324)
 
+### Storefront sign at the Map arrival
+
+Choose New Moon on the Map to reach the centre of the arcade in front of the flagship. The official yellow-and-blue mark sits lower in the green fascia. In 1440 × 900 Chrome on Detailed, the blue outline starts 13 CSS px below the header and the yellow crescent starts 26 px below it. On 390 × 844 Low, the whole mark spans 222 CSS px. It remains visible during the first part of the touch approach. Farther inside, the overhead sign leaves the desktop view and its ends leave the phone view. The smaller door plate stays visible.
+
+The before and after views use the same Map control and camera. The first row shows the earlier fascia and the second shows the refit, with phone on the left and desktop on the right. The right-hand island and the path to the four cabinets remain visible. [Map arrival before and after](map-arrival-fascia.webp) · [12 m signage measurements](../../gjh-v11-signage-system.md#name-size-at-12-m)
+
+Five independent reviewers passed the Map-arrival change within their respective scopes.
+
+| Review | Observation |
+| --- | --- |
+| Visual | The full crescent and wordmark are legible at both arrivals. The smaller phone mark leaves the cabinets and sampling island in view. |
+| Mobile performance | The 390 px arrival, approach and threshold stayed at 58, 66 and 60 draws. The same 159 request paths appeared before and after. At 1440 px the arrival stayed at 87 draws and the threshold at 85, with the same 194 request paths. |
+| Brand | The atlas uses the same source artwork and proportions. Both views retain the yellow fill, crescent profile and blue contour. |
+| Spatial flow | Touch and keyboard approaches crossed the fully open door. The HUD, four cabinet pickups and central aisle kept their positions. The smaller door plate serves visitors beneath the fascia. |
+| Lighting | The localized halo stays clear of the outline. The green fascia, warm shelf lighting and rear crescent retain their appearance on Low and Detailed. |
+
+These checks use Chrome with touch emulation and desktop keyboard input. The full-shop review also considers the prominence of the hero product and the remaining items in the [flagship checklist](../../gjh-v11-s01-newmoon-acceptance.md).
+
 ### Country labels on the four cabinets
 
-The upper light rail used to run across the lettering on all four country signs in the default expanded room. The signs now sit on the cabinet headers above the rail. At the same four stops from the entrance to the shelves, Chrome with ANGLE Metal recorded 58, 61, 55 and 42 draw calls at 390 × 844 on Low, and 87, 88, 77 and 66 at 1440 × 900 on Detailed, before and after the change. The four pickup points matched the baseline. The desktop arrival view still clips the top of the large fascia logo. [Native-pixel label comparison](cabinet-labels-comparison.png)
+The upper light rail used to run across the lettering on all four country signs in the default expanded room. The signs now sit on the cabinet headers above the rail. At the same four stops from the entrance to the shelves, Chrome with ANGLE Metal recorded 58, 61, 55 and 42 draw calls at 390 × 844 on Low, and 87, 88, 77 and 66 at 1440 × 900 on Detailed, before and after the change. The four pickup points matched the baseline. In those earlier cabinet captures, the desktop arrival also clipped the top of the large fascia logo. The later Map-arrival refit is documented above. [Native-pixel label comparison](cabinet-labels-comparison.png)

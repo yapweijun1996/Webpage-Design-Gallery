@@ -80,7 +80,7 @@ The CPU probe baked the local store artwork and parsed the delivered GLBs throug
 
 Low saves 16.00 MiB (75%) against the immediately preceding build. Its nominal 5.33 MiB is 5.87 MiB below the owner's approximately 11.2 MiB iPhone reference. The figures include RGBA8 mip levels and exclude CPU canvases, driver overhead and transient allocations. The updated Detailed frontage peaks at 14,528 submitted triangles, up 38 from 14,490. The ten GLBs transfer 141,076 bytes and contain 2,374 source triangles. Repeated placements account for the higher submission counts. Desktop bloom can add one face draw and 226 triangles. Renderer counters, GPU allocation and frame time require the headed run.
 
-Repeat the probe with `SIGNAGE_CANVAS` set to an installed `@napi-rs/canvas` directory and run `node tests/measure_gjh_signage.mjs`. An optional PNG path writes the fascia size proof. The probe checks requested filenames, loaded model counts, mipmapped allocation and the 10 CSS px minimum for each Low fascia.
+Repeat the probe with `SIGNAGE_CANVAS` set to an installed `@napi-rs/canvas@0.1.80` directory and run `node tests/measure_gjh_signage.mjs`. An optional PNG path writes the fascia size proof. The probe checks requested filenames, loaded model counts, mipmapped allocation and the 10 CSS px minimum for each Low fascia.
 
 ### Name size at 12 m
 
@@ -88,27 +88,27 @@ The CPU probe calls the production `playerCameraFraming` for the default Tripo v
 
 S04 and S16 retain their full official marks beside larger Latin captions. S05 allocates more width to its name, S10 fits two lines using measured ink bounds, and S02 uses more of its fascia height. All 17 Low samples reach 11 CSS px or more.
 
-![Low fascia faces at 12 m with the default portrait chase camera](evidence/gjh-v11-signage-low-12m.png)
+The active measurements below use the 848 × 96 px fascia cells introduced in `d83aa8768`. Replaying `b808ede90` with the same Canvas version reproduces all 17 original readings from the 861 × 106 px cells. Changing only the cell layout accounts for the one-pixel differences in eight shops. GOGO also received its darker finish in `975e3f3fc`. The S01 Map arrival adjustment changes its Low and full reading from 17 to 13 px. Every current Low reading exceeds the 10 px minimum. [Current Low fascia render](evidence/gjh-v11-signage-low-12m-current.png) · [Archived Low fascia render](evidence/gjh-v11-signage-low-12m.png)
 
-| Store | Glyph | Previous CSS px | Low CSS px |
-| --- | --- | ---: | ---: |
-| S01 New Moon | e | 17 | 17 |
-| S02 MILI | m | 10 | 12 |
-| S03 GOGO | O | 16 | 16 |
-| S04 Borsch Med | o | 6 | 13 |
-| S05 Pien Tze Huang | e | 8 | 11 |
-| S06 Flying Wheel | W | 12 | 12 |
-| S07 Gu Long | u | 13 | 13 |
-| S08 Skippy | S | 15 | 15 |
-| S09 SPAM | S | 19 | 19 |
-| S10 California Mexico | a | 7 | 12 |
-| S11 Hormel | o | 14 | 13 |
-| S12 Zeria | e | 13 | 13 |
-| S13 Sony | O | 28 | 28 |
-| S14 LG | G | 19 | 20 |
-| S15 Casio | A | 24 | 24 |
-| S16 GP Batteries | e | 7 | 11 |
-| S17 Gigaset | a | 17 | 17 |
+| Store | Glyph | Archived baseline CSS px | Current Low CSS px | Current full atlas CSS px |
+| --- | --- | ---: | ---: | ---: |
+| S01 New Moon | e | 17 | 13 | 13 |
+| S02 MILI | m | 10 | 12 | 12 |
+| S03 GOGO | O | 16 | 17 | 17 |
+| S04 Borsch Med | o | 6 | 13 | 13 |
+| S05 Pien Tze Huang | e | 8 | 12 | 12 |
+| S06 Flying Wheel | W | 12 | 11 | 12 |
+| S07 Gu Long | u | 13 | 13 | 13 |
+| S08 Skippy | S | 15 | 15 | 15 |
+| S09 SPAM | S | 19 | 20 | 20 |
+| S10 California Mexico | a | 7 | 11 | 11 |
+| S11 Hormel | o | 14 | 14 | 13 |
+| S12 Zeria | e | 13 | 13 | 13 |
+| S13 Sony | O | 28 | 28 | 28 |
+| S14 LG | G | 19 | 19 | 20 |
+| S15 Casio | A | 24 | 24 | 24 |
+| S16 GP Batteries | e | 7 | 11 | 11 |
+| S17 Gigaset | a | 17 | 17 | 17 |
 
 ### Release and diagnostics
 

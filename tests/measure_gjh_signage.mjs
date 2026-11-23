@@ -137,7 +137,7 @@ const after=lowProof.getContext('2d'),full=proof(bake.sheet).getContext('2d');
 // Refit captions move individual glyphs. These windows use the live phone
 // projection directly. The archived proof keeps its original chart registration.
 const movedGlyphs={
-  S02:['m','yellow',575,19,586,34], S04:['o','cream',576,98,588,118],
+  S01:['e','yellow',175,22,185,43], S02:['m','yellow',575,19,586,34], S04:['o','cream',576,98,588,118],
   S05:['e','cream',157,171,167,190], S10:['a','cream',585,317,593,334],
   S11:['o','cream',202,399,216,423], S16:['e','white',636,554,644,572]
 };

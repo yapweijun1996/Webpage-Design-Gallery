@@ -3481,7 +3481,7 @@ var presets = Object.freeze({
 // demos/corporate/gjh/v11/assets/signage/config.js
 var store = (preset2, options = {}) => ({ preset: preset2, ...options });
 var stores = Object.freeze({
-  S01: store("t1-classic", { relief: true, palette: { fascia: "#3d483f" }, faceGlaze: { colour: "#7d786d", opacity: 0.14 }, logoModule: "sign_logo3d_new_moon", logoRegion: [6 / 675, 5 / 139, 96 / 675, 129 / 139] }),
+  S01: store("t1-classic", { relief: true, fasciaInkTop: 0.27, palette: { fascia: "#3d483f" }, faceGlaze: { colour: "#7d786d", opacity: 0.14 }, logoModule: "sign_logo3d_new_moon", logoRegion: [6 / 675, 5 / 139, 96 / 675, 129 / 139] }),
   S02: store("t3-cafe", { relief: true, fasciaInkHeight: 0.88 }),
   S03: store("t8-kids", { letterInk: "dark", faceGlaze: { colour: "#000000", opacity: 0.15 }, palette: { fascia: "#ccbaa5" } }),
   S04: store("t6-beauty", { carrier: true, caption: true, letterInk: "pale", inkRegion: [0, 0, 1, 0.64] }),
@@ -3572,6 +3572,11 @@ function resolveConfig(id, settings, bay, kit, receipts) {
     throw Error(id + " invalid caption logo width");
   if (!(config.fasciaInkHeight >= 0.5 && config.fasciaInkHeight <= 0.92))
     throw Error(id + " invalid ink height");
+  if (config.fasciaInkTop !== undefined) {
+    const bottom = (1 - config.fasciaInkHeight) / 2;
+    if (!Number.isFinite(config.fasciaInkTop) || config.fasciaInkTop < bottom || config.fasciaInkTop > 0.5 - bottom)
+      throw Error(id + " invalid fascia ink top inset");
+  }
   if (config.captionText !== undefined && (typeof config.captionText !== "string" || !config.captionText.trim()))
     throw Error(id + " invalid caption");
   if (typeof config.brand !== "string" || !config.brand.trim())
@@ -5783,7 +5788,12 @@ function lockup(ctx, w, h, c, logo, door, blade = false) {
   const relief = canvas(w, h), reliefCtx = relief.getContext("2d");
   const caption = fallback || c.caption && c.lockup !== "monogram" && !blade;
   const stacked = c.lockup === "logo-top" || blade && fallback;
-  const usable = h * (blade ? 0.58 : c.fasciaInkHeight), top = blade ? h * 0.1 : (h - usable) / 2;
+  let usable = h * (blade ? 0.58 : c.fasciaInkHeight), top = blade ? h * 0.1 : (h - usable) / 2;
+  if (!blade && c.fasciaInkTop !== undefined) {
+    const bottom = top;
+    top = h * c.fasciaInkTop;
+    usable = h - top - bottom;
+  }
   let labelX = w / 2, labelY = top + usable * 0.52, labelW = w * 0.88;
   let markBounds = null;
   if (mark) {
@@ -6168,20 +6178,20 @@ async function loadModules(assetBase, files = modelFiles, loader = new GLTFLoade
 
 // demos/corporate/gjh/v11/assets/signage/phone-proof.js
 var samples = [
-  ["S01", 17, 17, 17],
+  ["S01", 17, 13, 13],
   ["S02", 10, 12, 12],
-  ["S03", 16, 16, 16],
-  ["S04", 6, 13, 12],
-  ["S05", 8, 11, 11],
-  ["S06", 12, 12, 12],
+  ["S03", 16, 17, 17],
+  ["S04", 6, 13, 13],
+  ["S05", 8, 12, 12],
+  ["S06", 12, 11, 12],
   ["S07", 13, 13, 13],
   ["S08", 15, 15, 15],
-  ["S09", 19, 19, 19],
-  ["S10", 7, 12, 12],
-  ["S11", 14, 13, 13],
+  ["S09", 19, 20, 20],
+  ["S10", 7, 11, 11],
+  ["S11", 14, 14, 13],
   ["S12", 13, 13, 13],
-  ["S13", 28, 28, 27],
-  ["S14", 19, 20, 20],
+  ["S13", 28, 28, 28],
+  ["S14", 19, 19, 20],
   ["S15", 24, 24, 24],
   ["S16", 7, 11, 11],
   ["S17", 17, 17, 17]
