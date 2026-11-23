@@ -30,7 +30,7 @@ The ground frame is at world XYZ (−10, 0, −6), with local Y up and +Z toward
 
 - **Light display models.** The [crescent header](../../../demos/corporate/gjh/v11/assets/interiors/s01-crescent-header-balanced.glb) has Low, Balanced and Detailed variants from [the editable Blender source](../../../models/gjh-new-moon-header/README.md). Its two material batches cover the warm surface colors and the luminous underside. The [room detail GLB](../../../demos/corporate/gjh/v11/assets/interiors/s01-new-moon-details.glb) adds tags and a floor crescent. Stools and the sampling island are procedural.
 - **Installed product models.** The four existing photo-derived demo tins remain at native demo size. The installed GLBs measure approximately 77.5 mm across and 124 mm high. The exact real package dimensions and current approval status are tracked per SKU. Product pages are the reference for label imagery. The repo records estimates and coverage in the [merchandising review](../../v11-newmoon-merchandising-density-review.md).
-- **Pending packaging upgrade.** Track NZ, AU, SA and MX independently. Each needs verified current edition, compatible front and back photography, and rights clearance before any wider reuse. MX additionally needs a flat or multi-view source to resolve the documented 121° photo-derived face. Keep geometry and asset IDs until a verified replacement has passed shelf, rotation and pickup checks.
+- **Pending packaging upgrade.** Track NZ, AU, SA and MX independently. Each needs verified current edition, compatible front and back photography, and rights clearance before any wider reuse. MX additionally needs a flat or multi-view source for the 121° sector left unprinted in the current model. Keep geometry and asset IDs until a verified replacement has passed shelf, rotation and pickup checks.
 
 ## Visual references
 
@@ -53,3 +53,7 @@ Four generated views describe one proposed room and its visitor circulation. Com
 [1. Entrance](interior-concept.webp) · [2. Signature display](signature-display.webp) · [3. Furniture and aisle](furniture-angle.webp) · [4. Back toward the entrance](reverse-to-entry.webp)
 
 Published touch-emulated Chrome on build `95e5ba13a1d96807` used the joystick at the entrance and collision-aware waypoints inside. The route opened both stories, inspected and rotated all four 3D cans, picked up and returned each can, used Sit and Stand on both tasting stools and exited to the concourse. The Australia action added one item to the demo bag. [Pages deployment](https://github.com/yapweijun1996/Webpage-Design-Gallery/actions/runs/44555819324)
+
+### Country labels on the four cabinets
+
+The upper light rail used to run across the lettering on all four country signs in the default expanded room. The signs now sit on the cabinet headers above the rail. At the same four stops from the entrance to the shelves, Chrome with ANGLE Metal recorded 58, 61, 55 and 42 draw calls at 390 × 844 on Low, and 87, 88, 77 and 66 at 1440 × 900 on Detailed, before and after the change. The four pickup points matched the baseline. The desktop arrival view still clips the top of the large fascia logo. [Native-pixel label comparison](cabinet-labels-comparison.png)

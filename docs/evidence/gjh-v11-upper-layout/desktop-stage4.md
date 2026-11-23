@@ -27,3 +27,9 @@ On desktop and mobile, the loading screen stayed visible until the response
 was released. Three simulated HTTP 503 responses exercised the directory and
 retry controls, and a real retry restored the scene. The table above covers
 the focused desktop route.
+
+## Cold first ride on Detailed
+
+On a first desktop ride, the original 10-second check expired before the 17 plaques appeared. The trace recorded 16 ms to load and decode the logos, 9 ms to compose their atlas and 12,663 ms between queuing the atlas and its first texture upload. Thirty jobs were already queued. After the deadline, the same running scene reached 17 plaques at 11.08 seconds from the start of the post-ride wait.
+
+The upload scheduler now prioritises the requested wall behind the lift landing and ahead of routine background props. In two cold Chrome/Metal runs with 30 jobs at enqueue, the first upload began after 210 and 242 ms. The plaques attached 1.494 and 1.528 seconds from the atlas request, or 0.20 and 0.21 seconds into the original post-ride check. These samples cover desktop Detailed under the tested load.

@@ -5284,13 +5284,44 @@ async function createShell(T) {
 import { fetchStartupAsset as fetchStartupAsset3 } from "./startup-asset-pack.js";
 
 // demos/corporate/gjh/v11/assets/gallery-east-shops.js
+var gigasetLoungeSofa = galleryFixture("S17", "leftfront", "lounge-sofa-bench", 0.86);
+var gigasetSofaFallback = [
+  { center: [-0.5, 0.29, -0.23], size: [1.58, 0.32, 0.58], color: 8941408 },
+  { center: [-0.5, 0.432, -0.23], size: [1.58, 0.098, 0.54], color: 10191732 },
+  { center: [-0.5, 0.6, -0.57], size: [1.59, 0.4, 0.21], color: 8941408 },
+  { center: [-1.39, 0.37, -0.23], size: [0.2, 0.48, 0.74], color: 8941408 },
+  { center: [0.3, 0.29, 0.56], size: [1.58, 0.28, 0.35], color: 8941408 },
+  { center: [0.3, 0.4, 0.56], size: [1.58, 0.1, 0.35], color: 10191732 },
+  { center: [1.075, 0.45, 0.235], size: [0.85, 0.1, 0.22], color: 7558210 }
+];
+function createGigasetLoungeSeat(collider, footprint) {
+  const { position: [ox, oy, oz], yaw, scale } = gigasetLoungeSofa;
+  const c = Math.cos(yaw), s = Math.sin(yaw);
+  const point2 = (x2, z2) => worldInteriorPoint(interiorStores.S17, [ox + scale * (x2 * c + z2 * s), 0, oz + scale * (-x2 * s + z2 * c)]);
+  const [x, , z] = point2(-0.95, -0.23);
+  const [exitX, , exitZ] = point2(-1.95, 1.12);
+  const { world_origin_m: origin, floor_surface_y_m: surface, yaw_world_deg: shopYaw } = interiorStores.S17.frame;
+  const floor = origin[1] + surface;
+  const angle = shopYaw * Math.PI / 180 + yaw - Math.PI;
+  return createSeatAnchor({
+    id: "gigaset-lounge-sofa",
+    name: "Gigaset lounge sofa",
+    x,
+    z,
+    floor,
+    accessible: true,
+    exit: { x: exitX, y: floor, z: exitZ },
+    pose: { angle, facing: 1 },
+    clearance: { interactionRadius: 0.7, capsuleRadius: 0.3, colliderWidth: footprint.width, colliderDepth: footprint.depth }
+  }, collider, { size: [1.58 * scale, footprint.height, 0.58 * scale], top: oy - surface + 0.481 * scale, seatCentre: 0, front: -0.282 * scale }, 1);
+}
 var eastShopPlacements = {
   12: [{ file: "gallery-assets/medicine-health-box-set.glb", position: [-2.24, 0.081, 2.92], yaw: 0.11, scale: 1.14 }],
   13: [galleryFixture("S13", "leftfront", "headphone-display-stand", 1.2)],
   14: [{ file: "gallery-assets/refrigerator.glb", position: [-2.48, 0.081, 2.58], yaw: 0.08, scale: 1.03 }],
   15: [{ file: "gallery-assets/grand-piano.glb", position: [-2.3, 0.081, 2.47], yaw: 0.22, scale: 0.93 }],
   16: [{ file: "gallery-assets/shelf-electronics-display.glb", position: [-2.13, 0.081, 2.81], yaw: 0.12, scale: 0.96 }],
-  17: [galleryFixture("S17", "leftfront", "lounge-sofa-bench", 0.86)]
+  17: [gigasetLoungeSofa]
 };
 
 // demos/corporate/gjh/v11/assets/gallery-west-shops.js
@@ -7432,6 +7463,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
   };
   const studioParts = [];
   const shops = [], collisionBoxes = [];
+  let gigasetSeatBox;
   const models2 = new Map, loadedScenes = new Map, gltfLoader = new GLTFLoader4;
   const modelStates = new Map(slots.flatMap((slot2) => {
     const number = Number(slot2.number);
@@ -7513,13 +7545,13 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     group.rotation.y = side === "west" ? Math.PI / 2 : side === "east" ? -Math.PI / 2 : 0;
     const front = depth / 2;
     let parts = [];
-    let heroOffset = 0, replaced = false;
+    let geometryXOffset = 0, replaced = false;
     function add(geometry, x, y, z, color, finish2 = color === shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0) {
       if (replaced) {
         geometry.dispose();
         return;
       }
-      geometry.translate(x + heroOffset, y, z);
+      geometry.translate(x + geometryXOffset, y, z);
       const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
       for (let i = 0;i < colors.length; i += 3) {
         colors[i] = c.r;
@@ -7539,7 +7571,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     }
     function block(x, y, z, w, h, d) {
       const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
-      collisionBoxes.push({
+      const box2 = {
         x: group.position.x + x * c + z * sn,
         y,
         z: group.position.z - x * sn + z * c,
@@ -7547,7 +7579,9 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
         height: h,
         depth: w * Math.abs(sn) + d * Math.abs(c),
         ...replaced && { replacedDisplay: true }
-      });
+      };
+      collisionBoxes.push(box2);
+      return box2;
     }
     const tools = {
       block,
@@ -7611,7 +7645,8 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     }
     addStudioParts(parts);
     parts = [];
-    heroOffset = side === "north" ? 3 : 2.55;
+    const heroOffset = side === "north" ? 3 : 2.55;
+    geometryXOffset = heroOffset;
     const heroZ = front - 1;
     block(heroOffset, 1.47, heroZ, 2.18, 2.94, 1.16);
     box(0, 0.12, heroZ, 2.06, 0.22, 0.98, creamStone(number));
@@ -7708,20 +7743,33 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     scene.add(group);
     const loadHero = loadDisplay;
     const placements = galleryPlacements[number];
-    for (const { file, position: [x, y, z], yaw = 0, scale = 1 } of placements) {
+    geometryXOffset = 0;
+    let sofaMounted = false;
+    for (const placement of placements) {
+      const { file, position: [x, y, z], yaw = 0, scale = 1 } = placement;
       const size = floorModelSize[file.split("/").pop().replace(/\.glb$/, "")];
       if (!size)
         continue;
       const [w, h, d] = size.map((value) => value * scale);
       const c = Math.abs(Math.cos(yaw)), sn = Math.abs(Math.sin(yaw));
-      block(x, y + h / 2, z, c * w + sn * d, h, sn * w + c * d);
+      const footprint = block(x, y + h / 2, z, c * w + sn * d, h, sn * w + c * d);
+      if (placement === gigasetLoungeSofa) {
+        gigasetSeatBox = footprint;
+        parts = [];
+        for (const { center, size: size2, color } of gigasetSofaFallback) {
+          const geometry = new T.BoxGeometry(...size2).translate(...center).scale(scale, scale, scale).rotateY(yaw);
+          add(geometry, x, y, z, color);
+        }
+        addStudioParts(parts, () => group.visible && !sofaMounted);
+      }
     }
     const shopState = { number: String(slot2.number), status: "pending", galleryLoaded: 0, galleryFailed: 0 };
     const gallery = [];
     async function loadShop() {
       await Promise.all([
         loadHero?.(),
-        ...placements.map(async ({ file, position, yaw = 0, scale = 1 }) => {
+        ...placements.map(async (placement) => {
+          const { file, position, yaw = 0, scale = 1 } = placement;
           try {
             const model = (await loadModel(`./${file}`)).clone(true);
             model.position.set(...position);
@@ -7733,6 +7781,8 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
             group.add(model);
             model.updateWorldMatrix(true, true);
             gallery.push({ model, bounds: new T.Box3().setFromObject(model) });
+            if (placement === gigasetLoungeSofa)
+              sofaMounted = true;
             shopState.galleryLoaded++;
           } catch (error) {
             shopState.galleryFailed++;
@@ -7794,7 +7844,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       schedulePrefetch();
   });
   schedulePrefetch();
-  return { collisionBoxes, getPreloadedModels() {
+  return { collisionBoxes, gigasetSeatBox, getPreloadedModels() {
     return [...loadedScenes].map(([name, scene2]) => ({ name: new URL(name, import.meta.url).href, scene: scene2 }));
   }, get preloadState() {
     return {
@@ -10406,8 +10456,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
             lightWash(shelfX, y - 0.2, shelfZ + 0.02, width * 0.9, 0.44, 0, 0, true);
           }
         }
+      const mountOnCabinet = expanded && productDisplay.assets.shelf.model === "GJH-M056";
       for (const [index, country] of ["NEW ZEALAND", "AUSTRALIA", "SOUTH AFRICA", "MEXICO"].entries()) {
-        sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, 0.16, true, expanded ? 78 : undefined);
+        const { max } = productDisplay.shelves[index];
+        const [y, z] = mountOnCabinet ? [max.y - 0.14, max.z + 0.028] : [2.04, -9.22];
+        sign(country, productDisplay.shelfPositions[index], y, z, 1.65, 0.16, true, expanded ? 78 : undefined);
       }
       staticProductCount = productDisplay.displayedProducts;
       worldProductAssets = productDisplay.assets;
@@ -10694,8 +10747,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     activeDeck = false;
     const interiors = await createExpandedInteriors(T, expandedLayout, scene, materials2.shellFloor.map, prepareModel, shopVisibility, artworkTier, detailsEnabled, waitForSlice);
     interiorModels = interiors;
-    for (const { x, y, z, width, height, depth } of interiors.collisionBoxes) {
-      collider(x, y, z, width, height, depth);
+    for (const footprint of interiors.collisionBoxes) {
+      const { x, y, z, width, height, depth } = footprint;
+      const shape = collider(x, y, z, width, height, depth);
+      if (footprint === interiors.gigasetSeatBox)
+        seats.push(createGigasetLoungeSeat(shape.handle, footprint));
       shopObstacles.push({
         min: { x: x - width / 2, y: y - height / 2, z: z - depth / 2 },
         max: { x: x + width / 2, y: y + height / 2, z: z + depth / 2 }

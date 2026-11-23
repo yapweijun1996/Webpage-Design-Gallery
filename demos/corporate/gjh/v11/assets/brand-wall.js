@@ -97,7 +97,8 @@ export async function addBrandWallAtlas(T, scene, deckY, prepareModel, artworkTi
   geometry.setIndex(indices); geometry.computeBoundingSphere();
   const mesh = new T.Mesh(geometry,decalMaterial(new T.MeshBasicMaterial({map:texture,toneMapped:false}),-1));
   mesh.name = 'Seventeen brand wall plaques'; mesh.userData.deckLod = true;
-  try { await prepareModel?.(mesh); }
+  // The requested wall follows the lift landing's -100 priority and precedes background props.
+  try { await prepareModel?.(mesh,{priority:()=>-90}); }
   catch (error) { geometry.dispose(); mesh.material.dispose(); texture.dispose(); throw error; }
   mesh.visible = false;
   scene.add(mesh);

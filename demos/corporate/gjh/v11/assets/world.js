@@ -36,6 +36,7 @@ import {interiorFloorColour,interiorStores,worldInteriorBox,worldInteriorPoint} 
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {gogoStoolSeat} from './interiors/gogo-seats.js';
+import {createGigasetLoungeSeat} from './gallery-east-shops.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere, shopLampTint} from './mall-atmosphere.js';
 import {createMallBakedLighting, createSkylightDapple} from './mall-baked-lighting.js';
@@ -917,8 +918,12 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
           lightWash(shelfX,y-.20,shelfZ+.02,width*.90,.44,0,0,true);
         }
       }
+      const mountOnCabinet = expanded && productDisplay.assets.shelf.model === 'GJH-M056';
       for (const [index, country] of ['NEW ZEALAND', 'AUSTRALIA', 'SOUTH AFRICA', 'MEXICO'].entries()) {
-        sign(country, productDisplay.shelfPositions[index], 2.04, -9.22, 1.65, .16, true, expanded ? 78 : undefined);
+        const {max} = productDisplay.shelves[index];
+        // Keep labels on the cabinet header above the upper stock light.
+        const [y, z] = mountOnCabinet ? [max.y - .14, max.z + .028] : [2.04, -9.22];
+        sign(country, productDisplay.shelfPositions[index], y, z, 1.65, .16, true, expanded ? 78 : undefined);
       }
       staticProductCount=productDisplay.displayedProducts;worldProductAssets = productDisplay.assets; shelves = productDisplay.shelves; createCollectProp = productDisplay.createCollectProp; reserveProduct = productDisplay.reserveProduct;
       plant(x - 3.6, -2.3);
@@ -1179,8 +1184,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     activeDeck=false;
     const interiors=await createExpandedInteriors(T,expandedLayout,scene,materials.shellFloor.map,prepareModel,shopVisibility,artworkTier,detailsEnabled,waitForSlice);
     interiorModels=interiors;
-    for(const {x,y,z,width,height,depth} of interiors.collisionBoxes) {
-      collider(x,y,z,width,height,depth);
+    for(const footprint of interiors.collisionBoxes) {
+      const {x,y,z,width,height,depth} = footprint;
+      const shape = collider(x,y,z,width,height,depth);
+      if (footprint === interiors.gigasetSeatBox) seats.push(createGigasetLoungeSeat(shape.handle,footprint));
       shopObstacles.push({min:{x:x-width/2,y:y-height/2,z:z-depth/2},
         max:{x:x+width/2,y:y+height/2,z:z+depth/2}});
       const rect = {minX:x-width/2,maxX:x+width/2,minZ:z-depth/2,maxZ:z+depth/2};

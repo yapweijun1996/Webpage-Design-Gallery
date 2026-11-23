@@ -7,7 +7,8 @@ import {GLTFLoader} from '../demos/corporate/gjh/v11/vendor/GLTFLoader.js';
 import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
 import {expandedLayout,shopEntrance} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
 import {createExpandedInteriors} from '../demos/corporate/gjh/v11/assets/expanded-interiors.js';
-import {createSeatPlacements} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
+import {createSeatPlacements,isInFrontOfSeat} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
+import {createGigasetLoungeSeat,gigasetLoungeSofa,gigasetSofaFallback} from '../demos/corporate/gjh/v11/assets/gallery-east-shops.js';
 import {
   interiorAsset,interiorRoutes,interiorStores,interiorTiers,radians,worldInteriorBox
 } from '../demos/corporate/gjh/v11/assets/interiors/config.js';
@@ -734,4 +735,88 @@ test('studio substitution retains the exact authored collision boxes', async t =
   assert.equal(footprints.length,188);
   assert.equal(sha(JSON.stringify(footprints.filter(box => box !== cabinet))),
     '320ca9b5beda1050df16f1a7b8ff868892b694d85eddd7a3980e5697cd1b5322');
+});
+
+
+test('Gigaset Sit uses the transformed sofa cushion and retains its solid footprint', async t => {
+  globalThis.window = {requestIdleCallback() {}};
+  globalThis.document = {addEventListener() {}};
+  t.after(()=>{ delete globalThis.window; delete globalThis.document; });
+  const {collisionBoxes,gigasetSeatBox:footprint} = await createExpandedInteriors(T,expandedLayout,new T.Scene());
+  assert(collisionBoxes.includes(footprint));
+
+  const bytes = readFileSync(new URL(gigasetLoungeSofa.file,assets));
+  const {scene} = await new GLTFLoader().parseAsync(Uint8Array.from(bytes).buffer,'');
+  scene.position.set(footprint.x,footprint.y-footprint.height/2,footprint.z);
+  scene.rotation.y = gigasetLoungeSofa.yaw-Math.PI/2;
+  scene.scale.setScalar(gigasetLoungeSofa.scale);
+  scene.updateMatrixWorld(true);
+
+  const seat = createGigasetLoungeSeat(17,footprint);
+  const ray = new T.Raycaster(new T.Vector3(seat.x,2,seat.z),new T.Vector3(0,-1,0));
+  const [cushion] = ray.intersectObject(scene,true);
+  assert.equal(cushion.object.material.name,'GreigeFabric');
+  assert(Math.abs(cushion.point.y-seat.y) < .001);
+  assert.equal(seat.collider,17);
+  const studioFloor = collisionBoxes.find(box => box.x === 39.9 && box.z === 44 && box.height === .08);
+  assert(Math.abs(seat.floor-studioFloor.y-studioFloor.height/2) < 1e-6);
+  assert(isInFrontOfSeat(seat,seat.exit));
+  const gap = Math.hypot(Math.max(0,Math.abs(seat.exit.x-footprint.x)-footprint.width/2),
+    Math.max(0,Math.abs(seat.exit.z-footprint.z)-footprint.depth/2));
+  assert(gap > seat.clearance.capsuleRadius);
+});
+
+
+test('Gigaset fallback ranges draw only near the shop until the gallery sofa is ready', async t => {
+  let runIdle, finishUpload;
+  globalThis.window = {requestIdleCallback(callback) { runIdle = callback; }};
+  globalThis.document = {addEventListener() {}};
+  t.after(()=>{ delete globalThis.window; delete globalThis.document; });
+  t.mock.method(globalThis,'fetch',async url => new Response(readFileSync(url)));
+  const scene = new T.Scene();
+  const studio = await createExpandedInteriors(T,expandedLayout,scene,undefined,async model => {
+    if (model.name.includes(gigasetLoungeSofa.file)) {
+      await new Promise(resolve => { finishUpload = resolve; });
+    }
+  });
+  const geometry = scene.getObjectByName('Concourse window studios').geometry;
+  const color = geometry.getAttribute('color');
+  const palette = Array.from(new Set(gigasetSofaFallback.map(part => part.color)),value => new T.Color(value));
+  function fallbackIndices() {
+    return geometry.index.array.subarray(0,geometry.drawRange.count).filter(i => palette.some(({r,g,b}) =>
+      Math.abs(color.getX(i)-r) < 1e-6 && Math.abs(color.getY(i)-g) < 1e-6 && Math.abs(color.getZ(i)-b) < 1e-6)).length;
+  }
+  const nearby = {x:38.05,y:0,z:43.67};
+  const distant = {x:0,y:0,z:0};
+  studio.update(distant);
+  assert.equal(fallbackIndices(),0);
+  studio.update(nearby);
+  assert.equal(fallbackIndices(),252);
+  runIdle();
+
+  async function waitFor(predicate) {
+    for (let attempt=0; attempt<20 && !predicate(); attempt++) await new Promise(setImmediate);
+    assert(predicate());
+  }
+  const handsetName = 'S17 cordless-phone-display';
+  await waitFor(() => finishUpload && scene.getObjectByName(handsetName));
+  const handset = scene.getObjectByName(handsetName);
+  const position = handset.getWorldPosition(new T.Vector3());
+  assert(position.distanceTo(new T.Vector3(36,.94,46.55)) < 1e-6);
+  studio.update(nearby);
+  assert.equal(fallbackIndices(),252);
+  const modelName = `S17 gallery: ${gigasetLoungeSofa.file}`;
+  assert.equal(scene.getObjectByName(modelName),undefined);
+  finishUpload();
+  await waitFor(() => scene.getObjectByName(modelName));
+  const model = scene.getObjectByName(modelName);
+  studio.update(nearby);
+  assert(model.visible && model.parent.visible);
+  assert.equal(fallbackIndices(),0);
+  studio.update(distant);
+  assert(!model.parent.visible);
+  assert.equal(fallbackIndices(),0);
+  studio.update(nearby);
+  assert(model.visible && model.parent.visible);
+  assert.equal(fallbackIndices(),0);
 });

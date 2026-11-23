@@ -27,6 +27,8 @@ Tests and draw-call budgets pass while the scene still looks flat and does not m
 
 Use the [mall concept board](references/gjh-mall-concept-board.png) for the overall light, circulation and S01 red flagship. The [individual shop references](mall-design-anchors/README.md#shop-lots) show the composition of the other storefronts and a closer interior view of S01. Start each review with a normal approach at 390 and 1440 CSS pixels. At each width, check whether the sign is legible, the main display is visible past the avatar and glazing, and the door and circulation path remain clear. Record a screenshot and a Pass, Partial or Fail for each of the two observations in the shop's row. A released interior can have a different fixture. Score its visual effect against the reference and use the [as-built entrance inventory](gjh-v11-interior-program.md#how-to-verify) to identify it.
 
+For S01, score the original red concept as a historical comparison. The later [New Moon showroom brief](goh-joo-hin/01-new-moon/README.md#interior-design) specifies honey oak, cream, blue accents and a yellow crescent. The [signage specification](gjh-v11-signage-system.md) assigns a green fascia and the official logo colours. Use those specifications for changes to the current room.
+
 | Shop and reference | Display and placement | Light, colour and material |
 | --- | --- | --- |
 | [S01 New Moon](mall-design-anchors/S01.webp) | From the atrium, read the red flagship sign and see a central tin or tasting display with stocked shelving behind it. | Warm light picks out red and gold product bays against wood or light stone. Apply the [full S01 checklist](gjh-v11-s01-newmoon-acceptance.md). |

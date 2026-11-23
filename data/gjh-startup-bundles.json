@@ -18,14 +18,14 @@
     "demos/corporate/gjh/v11/assets/context-navigation.js": "db27d70b34fa13da5b80ed7e220b7ce1455f1fbc99f86cbbb6d0f12d08f4b473",
     "demos/corporate/gjh/v11/assets/doorway-occupancy.js": "0145807206349de640608a83dcfff685b21f941dda655201a83b0e0ca219cf84",
     "demos/corporate/gjh/v11/assets/elevator-ride.js": "a3e9228f547fd1c4b4c3605ca32c1cc65454233c22dde919c097a60075975565",
-    "demos/corporate/gjh/v11/assets/expanded-interiors.js": "eb21358e115f752b95762a8a05d211b8c3400a99bbfdbc5d6163b67928f7fb2e",
+    "demos/corporate/gjh/v11/assets/expanded-interiors.js": "2175b1a027146bbef54da55318efbe86888db53c1a4f9220c23ebf104c3eb241",
     "demos/corporate/gjh/v11/assets/expanded-layout.js": "4923c7a6f9c0c74a73c24e25bddefcb5b27188d84351b3061fe01fae4875dc29",
     "demos/corporate/gjh/v11/assets/expanded-storefronts.js": "729708ad8d411bcfb7212c4715e85d0611eef97e15a15766b8d640bc67e84701",
     "demos/corporate/gjh/v11/assets/feature-kiosk.js": "63111aee89799aec9b897111aed1b4c49e88ee21125a8a910d55de06aa818106",
     "demos/corporate/gjh/v11/assets/festival-calendar.js": "a5322b62f3bce3498c9e273a416aab5e407c168f6ddd50a93e122dab85b623d1",
     "demos/corporate/gjh/v11/assets/frame-trace.js": "7b34d7d53fcb7a87ed023acda9788a5b91d98219943a3b435cdeced18cd85ae0",
     "demos/corporate/gjh/v11/assets/furnishings.js": "9fe565d9d472a133f07c3cb999c02ef8967f7761747c849d1326b83389232d10",
-    "demos/corporate/gjh/v11/assets/gallery-east-shops.js": "2167cfd782e421e0acddb4ceab14438a2c0d8a287ef4b24ef26720eb20c71b6b",
+    "demos/corporate/gjh/v11/assets/gallery-east-shops.js": "cb878f1ea8da43ceaacc76a7cbe175a3bb6cc097afe02a81ad836b237eb4795e",
     "demos/corporate/gjh/v11/assets/gallery-west-shops.js": "bc3b71cd3b49b4c13318a30fe3ac873b3364cb4dd30edc645dd0f36f3ffea2b6",
     "demos/corporate/gjh/v11/assets/gltf-warmup.js": "30a02330ddaa68665c2e6ab42ff93c4cfb028b455be8f3dff4f67a9197e2c835",
     "demos/corporate/gjh/v11/assets/gogo-exhibit.js": "d475adc9709ff58041efced8886e4f54689fa43e8054c1850c523bea2b96de51",
@@ -115,12 +115,12 @@
     "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "06f77543852578d8d3e11de82e8d0e6b9e063b32ac37e5655d986d3229da165d",
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "18296b3471b3c3cdb87e4e38c00415b84b24557a25514f77aabc3d6e4436fa27",
     "demos/corporate/gjh/v11/assets/window-studios.js": "2603bc84246f3c19f9e47d2fb380232a242bc856f493511e73219c18da924dc4",
-    "demos/corporate/gjh/v11/assets/world.js": "9e900b24490dc304cc2cb11dc65e1e40f136206e3aa853ec914660d238033b82",
+    "demos/corporate/gjh/v11/assets/world.js": "1b2bfa8c9f93b025c22c7c84e53c92f5f6dad7b51e40d20723aa552b828f4672",
     "demos/corporate/gjh/v11/script.js": "74c0742f3bb2b85dfb9388661fe62779f8472e84fefda75beb70cf5f854c28c4"
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "38f9df401c59a74e935b9e688215d0bee0046f15dedd3ef89bbf873af538bb57",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "7c4787b1fe08a69c937f51240911bd1a92d8ba5680b5ecfe177e09029033135c",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "a6e08066d56f926055e356ad4941f6a1dcce7cd96f82217e081f21ef1538613c",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "63da46ea1b0853d3c3da3020c1d149dd707a2b48d94d668587c5339bff7f193a",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "bee113f83473c8d8f0f5678a530ca146d9be0c2bd1c6c74e67f3f6f004065fc8"
   }

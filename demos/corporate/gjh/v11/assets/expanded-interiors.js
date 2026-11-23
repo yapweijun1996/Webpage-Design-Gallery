@@ -5,7 +5,7 @@ import {buildLateShopAnchorDetails} from './shop-anchor-details-last.js';
 import {interiorFloorColour,interiorStores} from './interiors/config.js';
 import {setupMaterialArtwork} from './artwork-textures.js';
 import {westShopPlacements} from './gallery-west-shops.js';
-import {eastShopPlacements} from './gallery-east-shops.js';
+import {eastShopPlacements,gigasetLoungeSofa,gigasetSofaFallback} from './gallery-east-shops.js';
 import {GLTFLoader} from '../vendor/GLTFLoader.js';
 import {parseWarmGLTF} from './gltf-warmup.js';
 
@@ -67,6 +67,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   };
   const studioParts = [];
   const shops = [], collisionBoxes = [];
+  let gigasetSeatBox;
   const models = new Map(), loadedScenes = new Map(), gltfLoader = new GLTFLoader();
   const modelStates = new Map(slots.flatMap(slot => {
     const number=Number(slot.number);
@@ -119,10 +120,10 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     group.rotation.y = side === 'west' ? Math.PI/2 : side === 'east' ? -Math.PI/2 : 0;
     const front = depth/2;
     let parts = [];
-    let heroOffset = 0, replaced = false;
+    let geometryXOffset = 0, replaced = false;
     function add(geometry, x, y, z, color, finish = color===shopLamp ? 1 : woodFinishes.has(color) ? -1 : 0) {
       if (replaced) { geometry.dispose(); return; }
-      geometry.translate(x + heroOffset, y, z);
+      geometry.translate(x + geometryXOffset, y, z);
       const c = new T.Color(color), colors = new Float32Array(geometry.attributes.position.count * 3);
       for (let i=0; i<colors.length; i+=3) { colors[i]=c.r; colors[i+1]=c.g; colors[i+2]=c.b; }
       geometry.setAttribute('color', new T.BufferAttribute(colors, 3));
@@ -135,11 +136,13 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     function cylinder(x,y,z,r,h,color) { add(new T.CylinderGeometry(r,r,h,12),x,y,z,color); }
     function block(x,y,z,w,h,d) {
       const a = group.rotation.y, c = Math.cos(a), sn = Math.sin(a);
-      collisionBoxes.push({
+      const box = {
         x:group.position.x+x*c+z*sn, y, z:group.position.z-x*sn+z*c,
         width:w*Math.abs(c)+d*Math.abs(sn), height:h, depth:w*Math.abs(sn)+d*Math.abs(c),
         ...(replaced && {replacedDisplay:true})
-      });
+      };
+      collisionBoxes.push(box);
+      return box;
     }
     const tools = {
       block,
@@ -196,7 +199,8 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     }
     addStudioParts(parts);
     parts = [];
-    heroOffset = side === 'north' ? 3 : 2.55;
+    const heroOffset = side === 'north' ? 3 : 2.55;
+    geometryXOffset = heroOffset;
     // The merchandise fixture sits inside a window, clear of the doorway.
     const heroZ = front - 1;
     block(heroOffset,1.47,heroZ,2.18,2.94,1.16);
@@ -295,12 +299,24 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     scene.add(group);
     const loadHero = loadDisplay;
     const placements = galleryPlacements[number];
-    for(const {file,position:[x,y,z],yaw=0,scale=1} of placements) {
+    geometryXOffset = 0;
+    let sofaMounted = false;
+    for(const placement of placements) {
+      const {file,position:[x,y,z],yaw=0,scale=1} = placement;
       const size=floorModelSize[file.split('/').pop().replace(/\.glb$/,'')];
       if(!size) continue; // Countertop pack displays share their supporting island.
       const [w,h,d]=size.map(value=>value*scale);
       const c=Math.abs(Math.cos(yaw)), sn=Math.abs(Math.sin(yaw));
-      block(x,y+h/2,z,c*w+sn*d,h,sn*w+c*d);
+      const footprint=block(x,y+h/2,z,c*w+sn*d,h,sn*w+c*d);
+      if (placement === gigasetLoungeSofa) {
+        gigasetSeatBox = footprint;
+        parts = [];
+        for (const {center,size,color} of gigasetSofaFallback) {
+          const geometry = new T.BoxGeometry(...size).translate(...center).scale(scale,scale,scale).rotateY(yaw);
+          add(geometry,x,y,z,color);
+        }
+        addStudioParts(parts, () => group.visible && !sofaMounted);
+      }
     }
     // Secondary furnishings belong to the bay, so they remain visible when a
     // visitor looks across adjoining windows and the nearest hero changes.
@@ -309,7 +325,8 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     async function loadShop() {
       await Promise.all([
         loadHero?.(),
-        ...placements.map(async ({file, position, yaw = 0, scale = 1}) => {
+        ...placements.map(async placement => {
+          const {file,position,yaw=0,scale=1} = placement;
           try {
             const model = (await loadModel(`./${file}`)).clone(true);
             model.position.set(...position);
@@ -321,6 +338,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             group.add(model);
             model.updateWorldMatrix(true,true);
             gallery.push({model, bounds:new T.Box3().setFromObject(model)});
+            if (placement === gigasetLoungeSofa) sofaMounted = true;
             shopState.galleryLoaded++;
           } catch (error) {
             shopState.galleryFailed++;
@@ -357,7 +375,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) schedulePrefetch(); });
   schedulePrefetch();
-  return {collisionBoxes, getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
+  return {collisionBoxes,gigasetSeatBox,getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
     return {models:Object.fromEntries(modelStates), shops:shops.map(shop => ({...shop.state})),
       settled:shops.filter(shop => shop.state.status==='settled').length, total:shops.length};
   }, update(visitor, view) {

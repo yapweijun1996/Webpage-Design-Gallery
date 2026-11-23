@@ -6,7 +6,7 @@
 
 ## Player walkthrough
 
-The telephone gable and handset silhouettes remain recognizable across views. The in-room sofa has no Sit registration.
+The telephone gable and handset silhouettes remain recognizable across views. The lounge sofa now offers Sit and Stand at the aisle end of the upholstered cushion.
 
 [Chrome player baseline](player-baseline.webp)
 
@@ -18,7 +18,7 @@ Keep the arched phone alcove and use softly illuminated cream shelving, smoked t
 | --- | --- |
 | Main display | Gabled private-call alcove with open front, local XYZ (-0.55, 0.081, -2.95), yaw -5°. Retain the telephone alcove as architecture, with separate slots for two reference devices. |
 | Visitor route | Threshold local XZ (0, 5). Guide visitors around the low central cabinet and toward the rear display from the right. |
-| Fixtures and use points | Keep the small sofa out of the approach. Any seat upgrade requires a clear stand anchor and collision sweep. |
+| Fixtures and use points | Keep the mall and handset routes clear. The sofa uses the gallery model’s scaled cushion and original collision footprint. Its stand point is on the aisle side at world XZ (38.046, 43.669), on the raised shop floor. |
 
 World origin (40, 0, 44), yaw -90°. Dimensions are authored metres. The [floor plan](floor-plan.webp) shows programme footprints and the [inventory](model-inventory.md) resolves fixture coordinates and upstream assets.
 
@@ -43,7 +43,9 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 
 ## Runtime acceptance
 
-Both Chrome input paths passed the story, tabletop views and exit. Sofa Sit remains separate work.
+In Chrome at 390 × 844 on Low, the visitor sat on the rendered cushion, stood with the touch control, answered the handset, opened the catalogue and walked back into the arcade. At 1440 × 900 on Detailed, the keyboard route used F to sit and Escape to stand. Both routes also passed with a deliberately truncated 4,096-byte sofa model. Switching from Detailed to Low kept both the loaded seat and its fallback visible and selectable. [Touch-emulated seated view](sofa-seated-touch.png)
+
+The walkthrough checks the existing handset and catalogue story, entry and exit, and native Sit and Stand with the keyboard and touch controls. The procedural seat remains visible and usable while the gallery GLB is loading or unavailable. Run `python tests/browser_gjh_gigaset_seat.py --out /tmp/gigaset-seat` with Chrome and Playwright installed. `--truncate-sofa` exercises a partial GLB response, and `--switch-tier` repeats the live seat-target check after switching from Detailed to Low.
 
 ## Catalogue exhibit
 

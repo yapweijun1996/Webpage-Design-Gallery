@@ -96,11 +96,12 @@ test('the brand wall warms before its mesh and story interactions are available'
   let revealMesh,finishUpload;
   const started=new Promise(resolve=>{revealMesh=resolve;});
   const upload=new Promise(resolve=>{finishUpload=resolve;});
-  const pending=addBrandWallAtlas(T,scene,L.upper,mesh=>{
-    revealMesh(mesh);
+  const pending=addBrandWallAtlas(T,scene,L.upper,(mesh,options)=>{
+    revealMesh({mesh,priority:options?.priority});
     return upload;
   });
-  const mesh=await started;
+  const {mesh,priority}=await started;
+  assert.equal(priority?.(),-90);
   assert.equal(mesh.parent,null);
   assert.equal(mesh.material.map.image.width,256);
   finishUpload();
