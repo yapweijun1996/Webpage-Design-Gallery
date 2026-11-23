@@ -7713,15 +7713,18 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     hero.userData.fallbackBounds = localBounds(parts);
     hero.userData.fallbackVisible = true;
     group.add(hero);
-    let loadDisplay, display, loaded = false;
+    let loadHero, display, loaded = false;
     addStudioParts(fixtureParts, () => group.visible);
     addStudioParts(parts, () => group.visible && (!loaded || !display?.visible));
     if (files) {
       display = new T.Group;
       display.visible = false;
-      loadDisplay = () => {
+      let preparation;
+      loadHero = () => {
+        if (preparation)
+          return preparation;
         const placements2 = displayPlacements(number, heroOffset, heroZ);
-        return Promise.all(files.map((name) => loadModel(`./${name}.glb`))).then(async (scenes) => {
+        preparation = Promise.all(files.map((name) => loadModel(`./${name}.glb`))).then(async (scenes) => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
             const [x, y, z, scale] = placements2[i];
@@ -7731,17 +7734,17 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
             mergeOpaqueMeshes(T, instance);
             display.add(instance);
           });
-          await prepareModel(display);
+          await prepareModel(display, { priority: () => display.visible ? -100 : 0 });
           hero.add(display);
           loaded = true;
           hero.userData.modelReady = true;
           hero.userData.fallbackVisible = !display.visible;
         }).catch(() => {});
+        return preparation;
       };
     }
     group.visible = false;
     scene.add(group);
-    const loadHero = loadDisplay;
     const placements = galleryPlacements[number];
     geometryXOffset = 0;
     let sofaMounted = false;
@@ -7794,6 +7797,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     shops.push({
       group,
       hero,
+      loadHero,
       number,
       gallery,
       x: group.position.x,
@@ -7872,6 +7876,8 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
         continue;
       const active = shop === nearest;
       shop.display.visible = active;
+      if (active && detailsEnabled() && !shop.isLoaded())
+        shop.loadHero();
       shop.hero.userData.fallbackVisible = !active || !shop.isLoaded();
     }
     studioBatch.update((part) => {
@@ -11029,7 +11035,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
   };
   sign("G O O D N E S S ,   A L L   A R O U N D", 0, 5.75, -0.3, 10, 0.48);
   const signPoint = new T.Vector3;
-  const signHUD = [".site-header", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
+  const signHUD = [".site-header", "#mall-tools", "#keyboard-help", "#mall-map"].map((selector) => document.querySelector(selector));
   function updateSigns(camera, canvas2, reducedMotion) {
     signage?.update(camera, reducedMotion, performance.now());
     const frame = canvas2.getBoundingClientRect();

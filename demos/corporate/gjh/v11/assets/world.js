@@ -1441,7 +1441,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   };
   sign('G O O D N E S S ,   A L L   A R O U N D', 0, 5.75, -.3, 10, .48);
   const signPoint = new T.Vector3();
-  const signHUD = ['.site-header', '#keyboard-help', '#mall-map'].map(selector => document.querySelector(selector));
+  const signHUD = ['.site-header', '#mall-tools', '#keyboard-help', '#mall-map'].map(selector => document.querySelector(selector));
   function updateSigns(camera, canvas, reducedMotion) {
     signage?.update(camera,reducedMotion,performance.now());
     const frame = canvas.getBoundingClientRect();

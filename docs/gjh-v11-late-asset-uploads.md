@@ -7,7 +7,7 @@ The Low-tier iPhone log showed 109–137 ms render submissions when new WebGL ge
 | Source | When it can first draw | Preparation |
 | --- | --- | --- |
 | Interior programme for all 17 shops | The fifth loader stage starts all selected-tier kits. On timeout or early entry, ready rooms can appear individually. | The shared uploader prepares the meshes. A sliced queue builds room layers, compiles room light variants and polls the GPU fence. Remaining requests follow the visitor. |
-| Expanded interiors and secondary gallery furnishings | Idle prefetch picks the nearest remaining shop. Each asset mounts after its existing load and validation. | The existing preparation hook now runs a sliced GPU job before mounting. Hero fallback stays eligible until release. |
+| Expanded interiors and secondary gallery furnishings | Entering the nearest shop's display range requests its main window model. Idle prefetch continues one shop's furnishings at a time. | The window and prefetch share the same preparation for that shop. Its GPU upload takes priority while the display is selected. The procedural version remains available during loading and after a failed transfer. |
 | MILI, New Moon and GOGO detail furniture | The existing shop-detail queue fetches static GLBs. | The final instanced batches go through the same hook before joining the LOD list. |
 | Concourse and atrium architecture | The paving map, lift-directory standee and chandelier complete independently of the first scene frame. | The mapped paving material and detached GLB meshes warm before replacing their stand-ins. |
 | Upper-deck plaques | The brand-wall module and its images load on the first upper-floor visit. | Its canvas atlas and mesh warm before attachment. The existing deck visibility rule owns later reveals. |
@@ -22,6 +22,8 @@ During live rendering, the scene sweep, room installer and model uploader share 
 ## Headed acceptance
 
 In desktop Chrome, opening the bag paused parsing of the fully downloaded 577,004-byte crowd model. After a 9.8-second pause, closing the bag previously left the mall without visitors for the full 30-second observation. With the corrected loader, the same route reported three active visitors within 1.9 seconds of the final paused sample. A stalled transfer still expires after eight seconds. [Transfer and resume regression](../tests/gjh_scene_warmup.test.mjs)
+
+In a 1440 × 900 walkthrough, a visitor walked 60 m to Borsch Med and waited 30 seconds at its window. Across 3,440 rendered frames, S17 stayed first in the background queue and the pharmacy counter was never requested. With the nearby display request enabled, the counter began loading on the approach while S17 continued in the background. All 14 measured windows from S04 to S17 then kept the entire exhibit in frame, clear of the avatar and within the 200-draw limit. [Demand and fallback regression](../tests/gjh_shop_hero_demand.test.mjs)
 
 Walk from entry through the atrium into MILI and New Moon with Low selected, collecting a fresh performance report for the walk. Use `window.__mall.performanceReport()` or **Download report (JSON)**.
 

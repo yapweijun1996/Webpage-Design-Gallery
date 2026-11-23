@@ -266,15 +266,17 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     hero.userData.fallbackBounds = localBounds(parts);
     hero.userData.fallbackVisible = true;
     group.add(hero);
-    let loadDisplay, display, loaded = false;
+    let loadHero, display, loaded = false;
     addStudioParts(fixtureParts, () => group.visible);
     addStudioParts(parts, () => group.visible && (!loaded || !display?.visible));
     if (files) {
       display = new T.Group();
       display.visible = false;
-      loadDisplay = () => {
+      let preparation;
+      loadHero = () => {
+        if (preparation) return preparation;
         const placements = displayPlacements(number, heroOffset, heroZ);
-        return Promise.all(files.map(name => loadModel(`./${name}.glb`))).then(async scenes => {
+        preparation = Promise.all(files.map(name => loadModel(`./${name}.glb`))).then(async scenes => {
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
             const [x, y, z, scale] = placements[i];
@@ -285,7 +287,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             display.add(instance);
           });
           // The LOD controller can select this display before it finishes loading.
-          await prepareModel(display);
+          await prepareModel(display, {priority: () => display.visible ? -100 : 0});
           hero.add(display);
           loaded = true;
           hero.userData.modelReady = true;
@@ -293,11 +295,11 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
         }).catch(() => {
           // Keep the procedural display if a model is unavailable.
         });
+        return preparation;
       };
     }
     group.visible = false;
     scene.add(group);
-    const loadHero = loadDisplay;
     const placements = galleryPlacements[number];
     geometryXOffset = 0;
     let sofaMounted = false;
@@ -347,7 +349,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
         })
       ]);
     }
-    shops.push({group, hero, number, gallery, x:group.position.x, z:group.position.z, display, isLoaded:() => loaded,
+    shops.push({group, hero, loadHero, number, gallery, x:group.position.x, z:group.position.z, display, isLoaded:() => loaded,
       loadDisplay: loadShop, state:shopState});
   });
   const studioBatch = createPackedDraw(T, studioParts, material);
@@ -396,6 +398,8 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       if (!shop.display) continue;
       const active = shop === nearest;
       shop.display.visible = active;
+      // A nearby window need not wait for another shop's background furnishings.
+      if (active && detailsEnabled() && !shop.isLoaded()) shop.loadHero();
       shop.hero.userData.fallbackVisible = !active || !shop.isLoaded();
     }
     studioBatch.update(part => {
