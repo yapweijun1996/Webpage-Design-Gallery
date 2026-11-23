@@ -2,8 +2,8 @@ import * as THREE from "../v11/vendor/three.module.min.js";
 import { paintedTexture, pavingTexture, streetTextures } from "./surfaces.js";
 
 const NIGHT = {
-  sky: "#46627c", haze: "#485f78", top: "#172e51", ground: "#a17664", ambient: "#93b5dc",
-  sun: "#a6c3f6", skyPower: 1.48, sunPower: 1.50, warmly: 1, glass: 1.28,
+  sky: "#56677d", haze: "#53617a", top: "#1d3151", ground: "#ad8270", ambient: "#9fb7d8",
+  sun: "#c3d0f5", skyPower: 1.60, sunPower: 1.28, warmly: 1, glass: 1.38,
 };
 const DAY = {
   sky: "#b5d8de", haze: "#aac9c7", top: "#508eaa", ground: "#ae9583", ambient: "#d4ebff",
@@ -33,8 +33,12 @@ export function buildWorld(scene, invalidate) {
   const wood = mapped("#6f4029", textures.wood, 0.61);
   const cane = mapped("#cb9259", textures.wood, 0.52);
   const brass = surface("#d6a364", 0.32);
+  const mortar = mapped("#6b4640", textures.plaster);
+  const curtain = mapped("#bd7149", textures.cloth);
+  const porcelain = surface("#e9cdab", 0.39);
+  const slate = surface("#244438");
   const brick = mapped("#8f5447", textures.plaster);
-  const redTiles = ["#9d5347", "#b16350", "#b97457", "#98583e", "#834236", "#b5694e"]
+  const redTiles = ["#9d5141", "#b66750", "#bc7458", "#9b543e", "#8b493a", "#b9674d"]
     .map((color) => mapped(color, textures.roof, 0.49));
   const foliage = ["#2e5c39", "#447640", "#5f8847", "#789a52", "#376f59"].map((color) => {
     const material = surface(color, 0.5);
@@ -49,10 +53,10 @@ export function buildWorld(scene, invalidate) {
   windowArt.height = 128;
   const windowInk = windowArt.getContext("2d");
   const shades = windowInk.createLinearGradient(0, 0, 0, 128);
-  shades.addColorStop(0, "#777");
-  shades.addColorStop(0.34, "#eee");
-  shades.addColorStop(0.67, "#aaa");
-  shades.addColorStop(1, "#555");
+  shades.addColorStop(0, "#aaa");
+  shades.addColorStop(0.25, "#f2e9d6");
+  shades.addColorStop(0.67, "#bd9f87");
+  shades.addColorStop(1, "#614e4b");
   windowInk.fillStyle = shades;
   windowInk.fillRect(0, 0, 128, 128);
   for (const x of [0, 34, 67, 101]) {
@@ -61,7 +65,7 @@ export function buildWorld(scene, invalidate) {
   }
   const glassTexture = new THREE.CanvasTexture(windowArt);
   glassTexture.colorSpace = THREE.SRGBColorSpace;
-  const windows = ["#e38335", "#ec9033", "#a84921", "#da7739"].map((color) => {
+  const windows = ["#f4ac61", "#e5994f", "#b76539", "#e49158"].map((color) => {
     const material = glow(color);
     material.map = glassTexture;
     material.emissiveMap = glassTexture;
@@ -69,11 +73,14 @@ export function buildWorld(scene, invalidate) {
   });
   const lampGlow = glow("#ffad5c");
   const neon = glow("#ffb653");
+  const roomGlow = glow("#ffad68");
   const displayColors = ["#da9cb0", "#f3c26d", "#76bdac", "#98ade3"].map(glow);
 
   const cube = new THREE.BoxGeometry(1, 1, 1);
   const plane = new THREE.PlaneGeometry(1, 1);
   const cylinder = new THREE.CylinderGeometry(1, 1, 1, 10);
+  const shadeGlass = new THREE.CylinderGeometry(0.65, 1, 1, 10);
+  const cupHandle = new THREE.TorusGeometry(1, 0.16, 4, 10);
   const barrelTile = new THREE.CylinderGeometry(1, 1, 1, 7, 1, false, Math.PI / 2, Math.PI);
   const ball = new THREE.SphereGeometry(1, 11, 7);
   const petal = new THREE.SphereGeometry(1, 7, 4);
@@ -114,14 +121,14 @@ export function buildWorld(scene, invalidate) {
   const haloTexture = new THREE.CanvasTexture(haloArt);
   haloTexture.colorSpace = THREE.SRGBColorSpace;
   const haloMaterial = new THREE.SpriteMaterial({
-    map: haloTexture, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.7,
+    map: haloTexture, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.56,
   });
   const pool = new THREE.MeshBasicMaterial({
     map: textures.lightPool, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   });
   const shade = new THREE.MeshBasicMaterial({ map: textures.occlusion, transparent: true, depthWrite: false });
   const glass = new THREE.MeshBasicMaterial({
-    color: "#b7cee4", opacity: 0.065, transparent: true, depthWrite: false,
+    color: "#c7d6e4", opacity: 0.075, transparent: true, depthWrite: false,
   });
   const litTimber = new THREE.MeshStandardMaterial({
     color: "#b57b47", map: textures.wood, emissive: "#9b4d20", emissiveMap: textures.wood, roughness: 0.64,
@@ -161,6 +168,17 @@ export function buildWorld(scene, invalidate) {
   const box = (material, ...pose) => stamp(cube, material, ...pose);
   const tube = (material, ...pose) => stamp(cylinder, material, ...pose);
   const ellipsoid = (material, ...pose) => stamp(ball, material, ...pose);
+
+  const upright = new THREE.Vector3(0, 1, 0);
+  function rod(material, from, to, radius) {
+    const direction = new THREE.Vector3().fromArray(to).sub(new THREE.Vector3().fromArray(from));
+    const length = direction.length();
+    const turn = new THREE.Euler().setFromQuaternion(
+      new THREE.Quaternion().setFromUnitVectors(upright, direction.normalize()),
+    );
+    tube(material, (from[0] + to[0]) / 2, (from[1] + to[1]) / 2, (from[2] + to[2]) / 2,
+      radius, length, radius, turn.x, turn.y, turn.z);
+  }
 
   function mesh(geometry, material, x, y, z, reflect = true) {
     const object = new THREE.Mesh(geometry, material);
@@ -228,6 +246,13 @@ export function buildWorld(scene, invalidate) {
     stamp(archProfiles.get(key), material, x, y, z, 1, 1, 1);
   }
 
+  function crescent(ctx, x, y, r) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, -0.94, 0.94, true);
+    ctx.quadraticCurveTo(x - r * 0.86, y, x + Math.cos(0.94) * r, y - Math.sin(0.94) * r);
+    ctx.fill();
+  }
+
   function sign(x, y, z, width, height, title, kind) {
     const canvas = document.createElement("canvas");
     canvas.width = 768;
@@ -251,10 +276,11 @@ export function buildWorld(scene, invalidate) {
     ctx.shadowColor = "#d89248";
     ctx.shadowBlur = 8;
     if (kind === "moon") {
-      ctx.font = `${h * 0.56}px Georgia`;
-      ctx.fillText(title, w * 0.50, h * 0.54);
+      crescent(ctx, w * 0.235, h * 0.51, h * 0.33);
+      ctx.font = `${h * 0.60}px Georgia`;
+      ctx.fillText(title, w * 0.54, h * 0.54);
       ctx.font = `${h * 0.24}px Georgia`;
-      for (const x of [0.16, 0.84]) ctx.fillText("✦", w * x, h * 0.50);
+      for (const x of [0.15, 0.85]) ctx.fillText("✦", w * x, h * 0.50);
     } else {
       ctx.font = `${h * 0.4}px Georgia`;
       ctx.fillText(title, w * 0.50, h * 0.52, w * 0.86);
@@ -265,8 +291,8 @@ export function buildWorld(scene, invalidate) {
       map: art, emissive: "#fff0cb", emissiveMap: art, emissiveIntensity: 0.65, roughness: 0.5,
     });
     signMaterials.push(material);
-    box(wood, x, y, z - 0.07, width + 0.08, height + 0.08, 0.13);
-    mesh(new THREE.PlaneGeometry(width, height), material, x, y, z + 0.006);
+    box(wood, x, y, z - 0.07, width + 0.15, height + 0.15, 0.13);
+    stamp(plane, material, x, y, z + 0.006, width, height, 1);
   }
 
   function lantern(x, y, z, size = 1) {
@@ -281,7 +307,7 @@ export function buildWorld(scene, invalidate) {
     tube(wood, x, y - 0.27 * size, z, 0.014 * size, 0.14 * size, 0.014 * size);
     const halo = new THREE.Sprite(haloMaterial);
     halo.position.set(x, y, z + 0.22 * size);
-    halo.scale.set(1.48 * size, 1.48 * size, 1);
+    halo.scale.set(1.66 * size, 1.66 * size, 1);
     scene.add(halo);
   }
 
@@ -373,23 +399,70 @@ export function buildWorld(scene, invalidate) {
     }
     box(wood, x, peak - rise - 0.11, z + depth, width + 0.60, 0.15, 0.25);
     box(cream, x, peak - rise - 0.22, z + depth - 0.07, width + 0.58, 0.095, 0.30);
+    tube(mortar, x, peak - rise - 0.085, z + depth + 0.15, 0.085, width + 0.60, 0.085, 0, 0, Math.PI / 2);
     for (let i = 0; i < count; i += 2) {
       box(wood, x - width / 2 + i * step, peak - rise - 0.25, z + depth - 0.09, 0.13, 0.19, 0.34);
     }
   }
 
+  function upperWall(x, z, width, bottom, top, windowY, offsets, material) {
+    // The front leaf of the wall has openings through its full thickness.
+    const shape = new THREE.Shape();
+    shape.moveTo(-width / 2, bottom);
+    shape.lineTo(width / 2, bottom);
+    shape.lineTo(width / 2, top);
+    shape.lineTo(-width / 2, top);
+    shape.closePath();
+    for (const offset of offsets) {
+      const hole = new THREE.Path();
+      hole.moveTo(offset + 0.61, windowY - 1.17);
+      hole.lineTo(offset + 0.61, windowY);
+      hole.absarc(offset, windowY, 0.61, 0, Math.PI, false);
+      hole.lineTo(offset - 0.61, windowY - 1.17);
+      hole.closePath();
+      shape.holes.push(hole);
+    }
+    const facade = new THREE.ExtrudeGeometry(shape, { depth: 0.34, bevelEnabled: false, curveSegments: 16 });
+    const uv = facade.getAttribute("uv");
+    for (let i = 0; i < uv.count; i += 1) {
+      uv.setXY(i, (uv.getX(i) + width / 2) / width, (uv.getY(i) - bottom) / (top - bottom));
+    }
+    mesh(facade, material, x, 0, z - 0.34);
+    box(material, x, (bottom + top) / 2, z - 2.25, width, top - bottom, 3.77);
+  }
+
   function upperWindow(x, y, z, index) {
     const half = 0.59;
-    arch(x, y, z + 0.024, half + 0.13, 0.105, 1.15, lightCream, 0.12);
-    arch(x, y, z + 0.026, half, 0.13, 1.16, ink, 0.22);
-    archedGlass(x, y, z + 0.030, half, 1.16, windows[index % windows.length]);
-    arch(x, y, z + 0.23, half + 0.025, 0.047, 1.16, lightGreen, 0.035);
-    box(deepGreen, x, y - 1.17, z + 0.12, 1.40, 0.15, 0.27);
+    arch(x, y, z - 0.36, half - 0.006, 0.044, 1.16, cane, 0.43);
+    arch(x, y, z + 0.005, half + 0.08, 0.09, 1.15, lightCream, 0.13);
+    arch(x, y, z + 0.115, half, 0.078, 1.16, deepGreen, 0.065);
+    archedGlass(x, y, z - 0.378, half + 0.021, 1.16, windows[index % windows.length]);
+    box(litTimber, x, y - 1.14, z - 0.15, 1.20, 0.08, 0.48);
+    box(deepGreen, x, y - 1.16, z + 0.12, 1.40, 0.15, 0.27);
+    box(stone, x, y + 0.713, z + 0.13, 0.18, 0.20, 0.13, 0, 0, 0.04);
     for (const offset of [-0.30, 0, 0.30]) {
-      box(wood, x + offset, y - 0.31, z + 0.13, 0.044, offset === 0 ? 1.67 : 1.56, 0.071);
+      box(cane, x + offset, y - 0.56, z + 0.061, 0.042, 1.18, 0.067);
     }
-    for (const offset of [-0.65, -0.22, 0.03]) {
-      box(wood, x, y + offset, z + 0.13, 1.17, 0.056, 0.064);
+    for (const offset of [-0.65, -0.25, 0.015]) {
+      box(cane, x, y + offset, z + 0.061, 1.17, 0.05, 0.064);
+    }
+    for (const angle of [0.55, Math.PI / 2, 2.59]) {
+      rod(cane, [x, y + 0.015, z + 0.063],
+        [x + Math.cos(angle) * half, y + Math.sin(angle) * half, z + 0.063], 0.019);
+    }
+    const litSide = index % 2 === 0 ? 1 : -1;
+    for (let fold = 0; fold < 5; fold += 1) {
+      const fx = x + litSide * (0.55 - fold * 0.048);
+      const length = 0.72 + fold * 0.07;
+      tube(curtain, fx, y - 0.19 - length * 0.5, z - 0.25 + (fold % 2) * 0.026, 0.033, length, 0.031);
+    }
+    const lampX = x - litSide * 0.14;
+    tube(wood, lampX, y + 0.22, z - 0.26, 0.013, 0.42, 0.013);
+    stamp(shadeGlass, roomGlow, lampX, y - 0.04, z - 0.26, 0.125, 0.15, 0.12);
+    tube(wood, lampX, y - 0.12, z - 0.26, 0.128, 0.021, 0.122);
+    tube(porcelain, x - litSide * 0.25, y - 1.045, z - 0.20, 0.089, 0.15, 0.08);
+    for (let i = 0; i < 3; i += 1) {
+      stamp(leaf, foliage[2], x - litSide * 0.25, y - 0.962, z - 0.20, 0.20, 0.21, 0.19, 0, i * 2.4, 0.64);
     }
     for (const side of [-1, 1]) {
       const tilt = side * -0.63;
@@ -403,7 +476,7 @@ export function buildWorld(scene, invalidate) {
     }
     box(stone, x, y - 1.285, z + 0.16, 1.51, 0.084, 0.32);
     box(cream, x, y - 1.217, z + 0.18, 1.70, 0.093, 0.41);
-    if (index % 2 === 0) hangingGreenery(x, y - 0.98, z + 0.38, 1);
+    if (index % 2 === 0) hangingGreenery(x, y - 1.02, z + 0.35, 1.12);
   }
 
   function pier(x, z, height) {
@@ -455,6 +528,16 @@ export function buildWorld(scene, invalidate) {
     });
   }
 
+  function teaService(x, y, z) {
+    ellipsoid(porcelain, x, y + 0.115, z, 0.139, 0.11, 0.104);
+    tube(porcelain, x, y + 0.219, z, 0.083, 0.026, 0.080);
+    ellipsoid(brass, x, y + 0.239, z, 0.021, 0.019, 0.020);
+    rod(porcelain, [x - 0.09, y + 0.11, z], [x - 0.22, y + 0.19, z], 0.033);
+    stamp(cupHandle, porcelain, x + 0.137, y + 0.133, z, 0.069, 0.063, 0.063);
+    tube(porcelain, x + 0.29, y + 0.018, z + 0.095, 0.093, 0.022, 0.090);
+    tube(lightGreen, x + 0.29, y + 0.071, z + 0.095, 0.063, 0.087, 0.063);
+  }
+
   function shopfront(x, z, width) {
     const left = x - width / 2;
     const right = x + width / 2;
@@ -464,26 +547,39 @@ export function buildWorld(scene, invalidate) {
     // Shell stops at the opening. The back wall and side returns define the view through the door.
     box(wood, x, 1.64, z - 2.09, width, 3.0, 0.15);
     box(litTimber, x, floor - 0.05, z - 0.79, width, 0.18, 2.95);
-    box(cream, x, 2.96, z - 0.93, width, 0.14, 2.57);
+    box(litTimber, x, 2.94, z - 0.93, width, 0.14, 2.57);
+    for (const dx of [-2.5, -1.3, 0, 1.3, 2.5]) {
+      box(wood, x + dx, 2.85, z - 0.89, 0.12, 0.15, 2.75);
+    }
     for (const side of [-1, 1]) {
       const jamb = x + side * width * 0.5;
       box(wood, jamb, 1.44, z - 0.92, 0.20, 2.57, 2.10);
       box(deepGreen, jamb, 0.56, face + 0.02, 0.24, 0.81, 0.16);
     }
-    box(ink, x, 2.70, face - 0.04, width + 0.10, 0.095, 0.14);
+    box(deepGreen, x, 2.69, face + 0.03, width + 0.10, 0.15, 0.23);
+    box(brass, x, 2.62, face + 0.16, width + 0.07, 0.025, 0.055);
+    const doorZ = face - 0.29;
+    for (const side of [-1, 1]) {
+      box(litTimber, door + side * 0.55, 1.41, face - 0.13, 0.071, 2.43, 0.39);
+      box(deepGreen, door + side * 0.61, 1.42, face + 0.046, 0.105, 2.48, 0.17);
+    }
     for (const dx of [0, -0.55, 0.55]) {
       const jamb = door + dx;
-      box(deepGreen, jamb, 1.40, face, 0.073, 2.45, 0.118);
-      box(brass, jamb, 1.67, face + 0.066, 0.030, 0.021, 0.011);
+      box(deepGreen, jamb, 1.40, doorZ, 0.073, 2.45, 0.118);
+      box(brass, jamb, 1.67, doorZ + 0.066, 0.030, 0.021, 0.011);
     }
-    box(deepGreen, door, 0.34, face, 1.12, 0.28, 0.13);
-    box(lightGreen, door, 0.34, face + 0.080, 0.97, 0.17, 0.023);
-    box(deepGreen, door, 2.20, face, 1.12, 0.083, 0.12);
-    box(deepGreen, door, 1.07, face, 1.12, 0.049, 0.10);
+    box(deepGreen, door, 0.43, doorZ, 1.12, 0.48, 0.13);
+    box(deepGreen, door, 2.20, doorZ, 1.12, 0.083, 0.12);
+    box(deepGreen, door, 1.07, doorZ, 1.12, 0.049, 0.10);
     for (const dx of [-0.073, 0.073]) {
-      tube(brass, door + dx, 1.23, face + 0.096, 0.022, 0.27, 0.026);
+      tube(brass, door + dx, 1.23, doorZ + 0.096, 0.022, 0.27, 0.026);
     }
-    glassPane(door, 1.52, face + 0.009, 1.04, 1.97);
+    for (const dx of [-0.27, 0.27]) {
+      box(lightGreen, door + dx, 0.47, doorZ + 0.080, 0.39, 0.27, 0.031);
+    }
+    glassPane(door, 1.64, doorZ + 0.009, 1.04, 1.91);
+    box(brass, door + 0.27, 1.88, doorZ + 0.080, 0.27, 0.13, 0.021, 0, 0, -0.07);
+    box(wood, door + 0.27, 1.88, doorZ + 0.096, 0.22, 0.082, 0.016, 0, 0, -0.07);
 
     for (const [start, end, divisions] of [[left, door - 0.55, 2], [door + 0.55, right, 1]]) {
       const span = end - start;
@@ -491,6 +587,7 @@ export function buildWorld(scene, invalidate) {
       box(deepGreen, mid, 0.42, face, span, 0.43, 0.17);
       box(brass, mid, 0.67, face + 0.039, span, 0.055, 0.12);
       box(deepGreen, mid, 2.20, face, span, 0.085, 0.14);
+      box(litTimber, mid, 2.31, face - 0.14, span, 0.15, 0.26);
       for (let pane = 0; pane <= divisions; pane += 1) {
         const px = start + pane * span / divisions;
         box(deepGreen, px, 1.53, face, 0.077, 2.32, 0.13);
@@ -498,13 +595,18 @@ export function buildWorld(scene, invalidate) {
       for (let pane = 0; pane < divisions; pane += 1) {
         const px = start + (pane + 0.5) * span / divisions;
         box(lightGreen, px, 0.43, face + 0.093, span / divisions - 0.17, 0.24, 0.028);
+        for (const side of [-1, 1]) {
+          box(deepGreen, px + side * (span / divisions - 0.23) / 2, 0.43, face + 0.111, 0.041, 0.22, 0.022);
+        }
         glassPane(px, 1.65, face + 0.010, span / divisions - 0.08, 1.94);
         if (start === left && pane === 1) {
-          shelf(px - 0.16, z - 0.47, span / divisions - 0.51, [0.73, 1.18], 0.081, true);
-          tins(px + 0.36, 0.73, z - 0.24, 2, 3, 0.077);
-          box(cane, px + 0.44, 0.67, z - 0.24, 0.43, 0.11, 0.32);
+          box(deepGreen, px, 0.61, z - 0.38, 1.51, 0.75, 0.55);
+          box(litTimber, px, 1.014, z - 0.38, 1.58, 0.089, 0.60);
+          for (let i = -5; i <= 5; i += 1) box(cane, px + i * 0.126, 0.79, z - 0.096, 0.043, 0.37, 0.030);
+          teaService(px + 0.24, 1.06, z - 0.32);
+          tins(px - 0.57, 1.06, z - 0.34, 3, 0, 0.079);
         } else {
-          shelf(px, z - 0.24, span / divisions - 0.18, [0.73, 1.16, 1.57], 0.077, true);
+          shelf(px, z - 0.39, span / divisions - 0.18, [0.73, 1.18, 1.65], 0.077, true);
         }
       }
     }
@@ -517,15 +619,19 @@ export function buildWorld(scene, invalidate) {
     box(wood, door - 0.72, 0.59, z - 0.88, 0.69, 0.84, 0.56);
     box(cane, door - 0.72, 1.01, z - 0.88, 0.78, 0.085, 0.61);
     tins(door - 0.96, 1.06, z - 0.85, 3, 0, 0.083);
-    for (const dx of [-2.11, -0.19, 1.88]) {
+    for (const dx of [-2.11, -0.41, 1.88]) {
       const px = x + dx;
-      tube(wood, px, 2.59, z - 0.63, 0.015, 0.63, 0.015);
-      ellipsoid(brass, px, 2.31, z - 0.63, 0.24, 0.12, 0.24);
-      ellipsoid(lampGlow, px, 2.25, z - 0.63, 0.15, 0.062, 0.15);
-      decal(pool, px, 1.55, z - 1.90, 1.91, 2.59);
+      tube(ink, px, 2.53, z - 0.48, 0.015, 0.63, 0.015);
+      stamp(shadeGlass, roomGlow, px, 2.17, z - 0.48, 0.205, 0.19, 0.205);
+      tube(brass, px, 2.073, z - 0.48, 0.212, 0.027, 0.212);
+      ellipsoid(lampGlow, px, 2.08, z - 0.48, 0.12, 0.061, 0.12);
+      decal(pool, px, 1.55, z - 1.90, 2.19, 2.47);
     }
-    box(cream, door, 0.134, face + 0.21, 1.31, 0.13, 0.61);
-    box(stone, door, 0.092, face + 0.49, 1.43, 0.074, 0.21);
+    box(stone, door, 0.128, face + 0.07, 1.36, 0.172, 0.78);
+    box(cream, door, 0.113, face + 0.49, 1.47, 0.077, 0.28);
+    for (let tile = -2; tile <= 2; tile += 1) {
+      stamp(plane, encaustic, door + tile * 0.23, 0.216, face + 0.15, 0.229, 0.229, 1, -Math.PI / 2);
+    }
   }
 
   function shutters(x, z, width) {
@@ -547,12 +653,12 @@ export function buildWorld(scene, invalidate) {
     const points = [];
     const uv = [];
     const indices = [];
-    const profile = [[0, 0], [0.27, -0.06], [0.63, -0.18], [1, -0.35], [1.003, -0.49]];
+    const profile = [[0, 0], [0.23, -0.035], [0.62, -0.15], [1, -0.32], [1.004, -0.49]];
     for (let row = 0; row < profile.length; row += 1) {
       const [depth, y] = profile[row];
       for (let column = 0; column <= 4; column += 1) {
         const arch = Math.sin(column * Math.PI / 4);
-        points.push(column / 4 - 0.5, y + arch * (row === 4 ? -0.055 : 0.018), depth * 1.24);
+        points.push(column / 4 - 0.5, y + arch * (row === 4 ? -0.086 : 0.029), depth * 1.24);
         uv.push(column / 4, 1 - row / profile.length);
         if (row && column) {
           const i = row * 5 + column;
@@ -567,51 +673,64 @@ export function buildWorld(scene, invalidate) {
     for (const material of fabric) material.side = THREE.DoubleSide;
     const count = 17;
     const step = width / count;
-    tube(wood, x, 2.61, z + 1.24, 0.034, width + 0.16, 0.034, 0, 0, Math.PI / 2);
+    tube(wood, x, 2.60, z + 1.233, 0.037, width + 0.16, 0.037, 0, 0, Math.PI / 2);
+    tube(brass, x, 2.91, z - 0.022, 0.030, width + 0.12, 0.030, 0, 0, Math.PI / 2);
     for (let i = 0; i < count; i += 1) {
       const tx = x - width / 2 + (i + 0.5) * step;
       stamp(stripe, fabric[i % 2], tx, 2.95, z, step + 0.002, 1, 1);
     }
-    for (const dx of [-width * 0.45, 0, width * 0.45]) {
-      box(ink, x + dx, 2.66, z + 0.62, 0.037, 0.043, 1.27, 0.20);
-      box(brass, x + dx, 2.68, z - 0.038, 0.13, 0.38, 0.047);
+    for (const dx of [-width * 0.47, -width * 0.16, width * 0.16, width * 0.47]) {
+      rod(wood, [x + dx, 2.911, z], [x + dx, 2.589, z + 1.23], 0.030);
+      tube(brass, x + dx, 2.599, z + 1.23, 0.055, 0.074, 0.054, 0, 0, Math.PI / 2);
+    }
+    for (const dx of [-width * 0.47, width * 0.47]) {
+      const px = x + dx;
+      box(wood, px, 2.53, z - 0.008, 0.105, 0.70, 0.082);
+      rod(brass, [px, 2.24, z + 0.013], [px, 2.43, z + 0.56], 0.027);
+      rod(wood, [px, 2.43, z + 0.56], [px, 2.614, z + 1.03], 0.031);
+      for (const y of [2.27, 2.79]) ellipsoid(brass, px, y, z + 0.043, 0.028, 0.029, 0.015);
     }
   }
 
   function house(x, width, z, wall, peak, shop = false) {
-    box(wall, x, 4.45, z - 2.06, width, 2.42, 4.16);
+    const windowY = shop ? 4.96 : 4.84;
+    const sillSpacing = width * 0.274;
+    const bays = [-sillSpacing, 0, sillSpacing];
+    upperWall(x, z, width, 3.24, 5.66, windowY, bays, wall);
     if (!shop) box(wall, x, 1.64, z - 2.06, width, 3.26, 4.16);
     box(stone, x, 0.13, z - 1.88, width + 0.12, 0.25, 4.25);
     box(cream, x, 3.65, z + 0.08, width + 0.17, 0.12, 0.42);
     box(stone, x, 3.73, z + 0.035, width + 0.16, 0.062, 0.29);
-    const windowY = shop ? 4.96 : 4.84;
-    const sillSpacing = width * 0.274;
     box(lightCream, x, windowY + 0.80, z + 0.06, width + 0.22, 0.088, 0.28);
     box(brick, x, windowY + 0.75, z + 0.02, width + 0.23, 0.062, 0.17);
     const lintel = Math.ceil(width / 0.36);
     for (let i = 0; i < lintel; i += 1) {
       const dx = (i + 0.5) * width / lintel - width / 2;
-      if ([-sillSpacing, 0, sillSpacing].every((offset) => Math.abs(dx - offset) > 0.74)) {
+      if (bays.every((offset) => Math.abs(dx - offset) > 0.74)) {
         box(i % 3 === 0 ? stone : cream, x + dx, windowY + 0.48, z + 0.066,
           width / lintel - 0.07, 0.084, 0.12);
       }
     }
     for (const side of [-1, 1]) pier(x + side * (width / 2 - 0.13), z + 0.11, 5.73);
-    for (let i = 0; i < 3; i += 1) {
-      upperWindow(x + (i - 1) * sillSpacing, windowY, z + 0.09, i + (shop ? 0 : 1));
-    }
+    bays.forEach((offset, index) => upperWindow(x + offset, windowY, z + 0.09, index + (shop ? 0 : 1)));
     roof(x, width, z - 2.15, peak);
     if (shop) {
       shopfront(x, z, width - 0.79);
       sign(x, 3.25, z + 0.28, width - 0.66, 0.78, "New Moon", "moon");
+      for (const side of [-1, 1]) {
+        const px = x + side * 2.12;
+        rod(ink, [px, 3.70, z + 0.12], [px, 3.74, z + 0.42], 0.019);
+        ellipsoid(brass, px, 3.70, z + 0.44, 0.105, 0.046, 0.081);
+        tube(roomGlow, px, 3.667, z + 0.46, 0.065, 0.022, 0.061);
+      }
       awning(x, z + 0.12, width - 0.6);
       for (const side of [-1, 1]) {
         const lx = x + side * (width / 2 - 0.20);
         lantern(lx, 2.49, z + 0.91, 1.22);
-        decal(pool, lx, 2.26, z + 0.307, 1.58, 2.63);
+        decal(pool, lx, 2.26, z + 0.307, 1.69, 2.87);
       }
-      light(x, 2.49, z - 0.20, 10, 4.8);
-      light(x - 2.54, 2.11, z + 0.98, 7, 4.5);
+      light(x, 2.12, z - 0.14, 8.8, 4.7);
+      light(x - 0.83, 3.69, z + 1.97, 9.3, 5.7);
       decal(pool, x + 0.15, 0.055, 0.92, width * 1.08, 1.93, -Math.PI / 2, 2);
       hit("shop", x, 1.84, z + 0.45, width - 0.60, 3.51, 0.68);
     } else {
@@ -621,7 +740,7 @@ export function buildWorld(scene, invalidate) {
   }
 
   function arcade(x, z) {
-    box(plaster[1], x, 4.82, z - 1.90, 5.46, 1.68, 3.95);
+    upperWall(x, z + 0.075, 5.46, 3.77, 5.72, 4.99, [-1.20, 1.18], plaster[1]);
     box(wood, x, 1.99, z - 2.10, 5.46, 3.98, 0.36);
     box(wood, x, 3.99, z - 0.85, 5.34, 0.13, 2.10);
     for (let i = 0; i < 7; i += 1) {
@@ -638,12 +757,22 @@ export function buildWorld(scene, invalidate) {
         box(i === 5 ? lightCream : plaster[0], px + Math.cos(angle) * 1.085, 2.89 + Math.sin(angle) * 1.085,
           z + 0.357, 0.088, i === 5 ? 0.24 : 0.153, 0.078, 0, 0, angle + Math.PI / 2);
       }
-      archedGlass(px, 2.84, z - 1.91, 0.77, 2.66, windows[offset < 0 ? 2 : 3]);
+      archedGlass(px, 2.84, z - 1.91, 0.77, 2.66, windows[offset < 0 ? 1 : 3]);
+      box(deepGreen, px, 0.58, z - 1.79, 1.59, 0.91, 0.12);
+      for (const side of [-1, 1]) {
+        box(litTimber, px + side * 0.39, 0.58, z - 1.713, 0.58, 0.48, 0.04);
+        box(brass, px + side * 0.096, 1.32, z - 1.71, 0.048, 0.25, 0.055);
+      }
       for (const dx of [-0.45, 0, 0.45]) {
         box(wood, x + offset + dx, 1.81, z - 1.87, 0.071, 3.19, 0.081);
       }
       box(wood, x + offset, 2.60, z - 1.87, 1.54, 0.10, 0.08);
+      box(cane, px, 1.04, z - 1.70, 1.60, 0.075, 0.15);
+      for (const dx of [-0.57, 0.57]) {
+        box(mortar, px + dx, 3.89, z - 0.91, 0.107, 0.15, 1.56);
+      }
       lantern(x + offset, 2.68, z - 0.70, 0.74);
+      decal(pool, px, 1.65, z - 1.66, 1.65, 2.79);
       decal(pool, px, 0.058, z - 0.55, 1.8, 2.28, -Math.PI / 2, 2);
     }
     for (const dx of [-2.52, 0, 2.52]) {
@@ -659,7 +788,8 @@ export function buildWorld(scene, invalidate) {
 
   function cornerShop(x, z) {
     const wall = plaster[3];
-    box(wall, x, 2.76, z - 1.95, 4.29, 5.52, 3.88);
+    box(wall, x, 1.72, z - 1.95, 4.29, 3.44, 3.88);
+    upperWall(x, z, 4.29, 3.44, 5.52, 4.79, [-0.88, 0.89], wall);
     box(cream, x, 3.54, z + 0.06, 4.52, 0.23, 0.42);
     box(cream, x, 5.47, z + 0.09, 4.50, 0.13, 0.32);
     box(wood, x, 2.32, z - 0.05, 3.73, 0.20, 0.36);
@@ -706,6 +836,8 @@ export function buildWorld(scene, invalidate) {
     box(cream, x - 0.108, 1.40, z + 0.407, 0.75, 1.06, 0.032);
     box(ink, x - 0.108, 1.42, z + 0.428, 0.66, 0.94, 0.017);
     sign(x, 2.12, z + 0.432, 0.99, 0.26, "VENDING");
+    box(lightGreen, x, 2.349, z + 0.045, 1.24, 0.065, 0.83);
+    box(brass, x, 2.336, z + 0.46, 1.16, 0.032, 0.035);
     for (let row = 0; row < 5; row += 1) {
       const y = 1.08 + row * 0.175;
       box(neon, x - 0.108, y - 0.068, z + 0.45, 0.65, 0.018, 0.03);
@@ -725,8 +857,24 @@ export function buildWorld(scene, invalidate) {
     box(wood, x, 0.23, z + 0.422, 0.75, 0.19, 0.038);
     for (let i = 0; i < 5; i += 1) box(brass, x, 0.16 + i * 0.031, z + 0.446, 0.66, 0.012, 0.013);
     box(lightGreen, x - 0.618, 1.30, z, 0.022, 1.80, 0.56);
-    box(brass, x - 0.632, 1.72, z, 0.014, 0.035, 0.44);
-    box(brass, x - 0.632, 1.16, z, 0.014, 0.035, 0.44);
+    const badge = paintedTexture(96, 96, (ctx) => {
+      ctx.fillStyle = "#e4bf6f";
+      crescent(ctx, 49, 48, 28);
+      ctx.strokeStyle = "#ad8758";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(48, 48, 38, 0, 2 * Math.PI);
+      ctx.stroke();
+    });
+    const badgeMaterial = new THREE.MeshBasicMaterial({
+      map: badge, transparent: true, opacity: 0.89, depthWrite: false,
+    });
+    const plate = mesh(plane, badgeMaterial, x - 0.642, 1.52, z);
+    plate.scale.set(0.47, 0.47, 1);
+    plate.rotation.y = -Math.PI / 2;
+    for (let i = 0; i < 5; i += 1) {
+      box(ink, x - 0.632, 0.52 + i * 0.036, z, 0.013, 0.014, 0.40);
+    }
     decal(pool, x, 0.056, z + 0.93, 1.55, 1.91, -Math.PI / 2, 2);
     hit("vending", x, 1.17, z + 0.16, 1.24, 2.34, 0.79);
   }
@@ -752,6 +900,16 @@ export function buildWorld(scene, invalidate) {
     arch(x, spring, z + 0.463, radius + 0.49, 0.077, 2.28, brass, 0.041);
     arch(x, spring - 0.09, z - 1.04, radius - 0.21, 0.054, 2.15, windows[3], 0.27);
     arch(x, spring - 0.16, z - 1.83, radius - 0.34, 0.067, 2.10, windows[2], 0.23);
+    for (const side of [-1, 1]) {
+      for (let bay = 0; bay < 3; bay += 1) {
+        const pz = z - 0.36 - bay * 0.59;
+        const px = x + side * 2.45;
+        box(stone, px, 1.29, pz, 0.10, 2.10, 0.053);
+        box(brass, px, 2.58, pz, 0.18, 0.053, 0.14);
+      }
+    }
+    box(deepGreen, x, 0.63, z - 2.38, 4.58, 0.55, 0.12);
+    for (const offset of [-0.25, 0.25]) box(brass, x + offset, 1.36, z - 2.365, 0.079, 0.32, 0.035);
     for (let i = -10; i <= 10; i += 1) {
       const dx = i * 0.221;
       const top = spring + Math.sqrt(radius ** 2 - dx ** 2);
@@ -772,11 +930,28 @@ export function buildWorld(scene, invalidate) {
     tube(ink, x, 1.78 * size, z, 0.073 * size, 3.47 * size, 0.073 * size);
     tube(ink, x, 0.29 * size, z, 0.16 * size, 0.55 * size, 0.16 * size);
     tube(brass, x, 0.54 * size, z, 0.12 * size, 0.075 * size, 0.12 * size);
-    const hook = mesh(new THREE.TorusGeometry(0.37 * size, 0.037 * size, 7, 24, Math.PI), ink,
-      x + 0.36 * size, 3.44 * size, z);
-    hook.rotation.y = -0.12;
-    lantern(x + size * 0.71, 3.17 * size, z, 1.09 * size);
+    stamp(lampHook, ink, x + 0.36 * size, 3.44 * size, z, size, size, size, 0, -0.12);
+    tube(ink, x, 1.15 * size, z, 0.092 * size, 0.16 * size, 0.092 * size);
+    const lx = x + size * 0.71;
+    const y = 3.18 * size;
+    const radius = 0.163 * size;
+    stamp(shadeGlass, lampGlow, lx, y, z, radius, 0.27 * size, radius);
+    for (const dx of [-0.11, 0.11]) {
+      for (const dz of [-0.11, 0.11]) {
+        rod(ink, [lx + dx * size * 0.71, y + 0.12 * size, z + dz * size * 0.71],
+          [lx + dx * size, y - 0.13 * size, z + dz * size], 0.013 * size);
+      }
+    }
+    stamp(shadeGlass, ink, lx, y + 0.19 * size, z, radius * 1.22, 0.135 * size, radius * 1.22);
+    tube(brass, lx, y - 0.148 * size, z, radius * 1.06, 0.038 * size, radius * 1.06);
+    ellipsoid(ink, lx, y - 0.185 * size, z, radius * 0.32, 0.055 * size, radius * 0.32);
+    const halo = new THREE.Sprite(haloMaterial);
+    halo.position.set(lx, y, z + 0.23 * size);
+    halo.scale.set(1.72 * size, 1.72 * size, 1);
+    scene.add(halo);
   }
+
+  const lampHook = new THREE.TorusGeometry(0.37, 0.037, 5, 16, Math.PI);
 
   function palm(x, z, height) {
     for (let i = 0; i < 8; i += 1) {
@@ -806,8 +981,8 @@ export function buildWorld(scene, invalidate) {
     const coat = surface("#e3ae4e");
     const face = surface("#e4ae8c");
     const hair = surface("#392a2d");
-    const umbrella = ["#7898b8", "#a6becd"].map((color) => new THREE.MeshStandardMaterial({
-      color, side: THREE.DoubleSide, roughness: 0.42, transparent: true, opacity: 0.81,
+    const umbrella = ["#7c94b5", "#a9bfd1"].map((color) => new THREE.MeshStandardMaterial({
+      color, side: THREE.DoubleSide, roughness: 0.41, transparent: true, opacity: 0.62,
     }));
     const angle = -0.39;
     const shoulder = 0.81;
@@ -821,12 +996,16 @@ export function buildWorld(scene, invalidate) {
     ellipsoid(face, x - 0.055, 1.11, z + 0.062, 0.233, 0.25, 0.205, 0, angle);
     ellipsoid(hair, x + 0.017, 1.22, z - 0.035, 0.253, 0.242, 0.200, 0, angle);
     ellipsoid(hair, x - 0.13, 1.23, z + 0.182, 0.15, 0.077, 0.067, 0, angle, 0.32);
+    ellipsoid(hair, x + 0.20, 1.15, z - 0.055, 0.111, 0.143, 0.103);
     for (const offset of [-0.113, 0.03]) {
       ellipsoid(ink, x + offset - 0.071, 1.095, z + 0.248, 0.024, 0.034, 0.018);
     }
     for (const y of [0.55, 0.68, 0.80]) {
       ellipsoid(wood, x - 0.014, y, z + 0.162, 0.022, 0.024, 0.017);
     }
+    stamp(cupHandle, wood, x - 0.25, 0.67, z + 0.06, 0.081, 0.145, 0.075, 0, -0.19, -0.14);
+    box(porcelain, x - 0.26, 0.48, z + 0.065, 0.244, 0.25, 0.105, 0, -0.19, -0.14);
+    box(deepGreen, x - 0.26, 0.385, z + 0.078, 0.244, 0.056, 0.111, 0, -0.19, -0.14);
     const handleX = x + 0.27;
     ellipsoid(face, handleX - 0.073, 0.91, z + 0.109, 0.068, 0.063, 0.059);
     tube(brass, handleX, 1.38, z + 0.045, 0.020, 1.05, 0.020, 0, 0, -0.15);
@@ -857,31 +1036,68 @@ export function buildWorld(scene, invalidate) {
     }
   }
 
+  function cafeTable(x, z) {
+    tube(ink, x, 0.39, z, 0.061, 0.71, 0.061);
+    tube(cane, x, 0.765, z, 0.36, 0.065, 0.36);
+    tube(wood, x, 0.737, z, 0.37, 0.035, 0.37);
+    for (let i = 0; i < 3; i += 1) {
+      const angle = i * Math.PI * 2 / 3;
+      rod(ink, [x, 0.31, z], [x + Math.cos(angle) * 0.27, 0.07, z + Math.sin(angle) * 0.27], 0.028);
+    }
+    teaService(x - 0.09, 0.80, z);
+    const sx = x + 0.61;
+    tube(wood, sx, 0.43, z - 0.08, 0.22, 0.064, 0.22);
+    for (const dx of [-0.13, 0.13]) {
+      for (const dz of [-0.13, 0.13]) {
+        rod(ink, [sx + dx, 0.41, z - 0.08 + dz], [sx + dx * 1.3, 0.063, z - 0.08 + dz * 1.30], 0.023);
+      }
+    }
+    decal(shade, x + 0.14, 0.047, z, 1.44, 0.95, -Math.PI / 2, 1);
+  }
+
   function skyline() {
-    const blockColors = ["#374a61", "#3f4c64", "#3f5267", "#526075"].map((color) => surface(color));
-    const distantLight = glow("#b6a086");
+    const blockColors = ["#424e65", "#414c63", "#4b586c", "#526075"].map((color) => surface(color));
+    const distantLight = glow("#bca485");
     for (let i = 0; i < 29; i += 1) {
       const x = -22 + i * 3.25;
-      const z = -15 - random() * 14;
+      const z = -21 - random() * 13;
       const height = 4.7 + random() * 6.0;
       const w = 1.0 + random() * 2.6;
       box(blockColors[i % 4], x, height / 2, z, w, height, 2.25);
+      if (i % 3 === 0) box(blockColors[i % 4], x - w * 0.16, height + 0.20, z - 0.14, w * 0.54, 0.40, 1.64);
       for (let row = 0; row < Math.floor(height / 0.49); row += 1) {
         for (let col = -1; col <= 1; col += 1) {
-          if (random() > 0.67) box(distantLight, x + col * w / 3, row * 0.48 + 0.64, z + 1.129, w * 0.11, 0.11, 0.014);
+          if (random() > 0.70) box(distantLight, x + col * w / 3, row * 0.48 + 0.64, z + 1.129, w * 0.13, 0.16, 0.014);
         }
       }
     }
     for (const x of [17.8, 20.2]) {
-      const z = -16.4;
-      tube(blockColors[3], x, 5.78, z, 0.77, 11.56, 0.83);
+      const z = -21.4;
+      tube(blockColors[3], x, 3.65, z, 0.81, 7.30, 0.87);
       for (let tier = 0; tier < 11; tier += 1) {
         const taper = tier <= 6 ? 1 : 1 - (tier - 6) * 0.16;
         tube(blockColors[2], x, 5.54 + tier * 0.60, z, 0.86 * taper, 0.51, 0.91 * taper);
-        tube(distantLight, x, 5.80 + tier * 0.60, z, 0.81 * taper, 0.033, 0.89 * taper);
+        tube(distantLight, x, 5.80 + tier * 0.60, z, 0.84 * taper, 0.036, 0.90 * taper);
       }
       tube(blockColors[3], x, 12.27, z, 0.113, 1.43, 0.12);
       ellipsoid(neon, x, 13.00, z, 0.06, 0.08, 0.06);
+    }
+    // The distant row closes the perspective beyond the covered walk.
+    for (let i = 0; i < 4; i += 1) {
+      const x = 29.9 + i * 3.81;
+      const z = -6.35 + i * 1.30;
+      const wall = blockColors[i];
+      const height = [4.63, 5.15, 4.87, 5.41][i];
+      box(wall, x, height / 2, z - 1.1, 3.65, height, 2.21);
+      box(mortar, x, height + 0.11, z - 0.86, 3.91, 0.26, 2.62, 0.17);
+      box(wall, x, 2.58, z + 0.09, 3.75, 0.16, 0.23);
+      for (const dx of [-0.99, 0, 0.99]) {
+        box(deepGreen, x + dx, 3.56, z + 0.05, 0.66, 1.01, 0.15);
+        box(windows[(i + 1) % 4], x + dx, 3.58, z + 0.137, 0.48, 0.79, 0.035);
+        box(wood, x + dx, 3.62, z + 0.168, 0.049, 0.79, 0.036);
+        box(ink, x + dx, 1.25, z + 0.08, 0.74, 1.95, 0.14);
+        box(windows[2], x + dx, 1.73, z + 0.158, 0.55, 0.79, 0.028);
+      }
     }
   }
 
@@ -901,6 +1117,15 @@ export function buildWorld(scene, invalidate) {
     for (let i = -22; i < 22; i += 1) {
       box(stone, i * 0.73, 0.006, 1.90, 0.711, 0.075, 0.28);
       box(cream, i * 0.73, 0.046, 1.84, 0.716, 0.032, 0.17);
+      box(mortar, i * 0.73, -0.012, 2.15, 0.718, 0.035, 0.23);
+    }
+    for (let i = 0; i < 18; i += 1) {
+      const t = i / 17;
+      const x = 15.95 + i * 0.68;
+      const z = 1.88 - 4.45 * t ** 1.45;
+      const angle = 0.55 * t ** 0.45;
+      box(stone, x, 0.013, z, 0.72, 0.083, 0.27, 0, angle);
+      box(cream, x - 0.022, 0.05, z - 0.05, 0.721, 0.028, 0.15, 0, angle);
     }
     for (let col = 0; col < 21; col += 1) {
       for (let row = 0; row < 3; row += 1) {
@@ -910,8 +1135,14 @@ export function buildWorld(scene, invalidate) {
       }
     }
     for (const x of [-7.78, -3.76, -0.72, 4.47, 9.97]) {
-      box(ink, x, 0.003, 2.08, 0.47, 0.022, 0.26);
-      for (let i = -3; i <= 3; i += 1) box(stone, x + i * 0.057, 0.016, 2.08, 0.018, 0.013, 0.235);
+      box(ink, x, 0.014, 2.15, 0.47, 0.022, 0.29);
+      for (let i = -3; i <= 3; i += 1) box(brass, x + i * 0.057, 0.029, 2.15, 0.016, 0.009, 0.242);
+    }
+    for (let i = 0; i < 20; i += 1) {
+      const x = -10.4 + i * 0.77 + random() * 0.39;
+      const z = 1.48 + random() * 1.17;
+      const y = z < 1.78 ? 0.051 : 0.023;
+      stamp(petal, flowers[i % flowers.length], x, y, z, 0.047, 0.012, 0.027, 0.03, i * 2.4);
     }
   }
 
@@ -942,8 +1173,11 @@ export function buildWorld(scene, invalidate) {
         vec3 dir = normalize(vSky);
         float height = smoothstep(-0.03, 0.48, dir.y);
         vec2 p = vec2(atan(dir.x, -dir.z), dir.y) * vec2(5.7, 13.0);
-        float cloud = cloudNoise(p) * 0.64 + cloudNoise(p * 2.8) * 0.36 - 0.47;
-        gl_FragColor = vec4(mix(bottom, top, height) * (1.0 + cloud * 0.48), 1.0);
+        float cloud = cloudNoise(p * vec2(0.73, 1.36)) * 0.64 + cloudNoise(p * 2.8) * 0.36 - 0.47;
+        float horizon = exp(-abs(dir.y - 0.03) * 9.0);
+        vec3 color = mix(bottom, top, height) * (1.0 + cloud * 0.48);
+        color += bottom * horizon * vec3(0.16, 0.08, 0.04);
+        gl_FragColor = vec4(color, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
       }`,
@@ -968,7 +1202,7 @@ export function buildWorld(scene, invalidate) {
   house(18.56, 6.80, -5.78, plaster[2], 6.78);
   house(25.29, 6.60, -7.20, plaster[3], 7.15);
   vending(-0.89, -0.05);
-  planter(-8.73, 1.26, 1.46);
+  planter(-8.73, 1.26, 1.38);
   planter(-9.21, 1.55, 0.69, false);
   planter(-7.68, 0.87, 0.73, false);
   planter(-1.87, 1.16, 0.88);
@@ -980,10 +1214,14 @@ export function buildWorld(scene, invalidate) {
   planter(14.97, -1.83, 1.27, false);
   planter(20.81, -2.28, 1.48);
   planter(-11.30, 1.37, 1.08, false);
-  bench(-10.44, 0.44);
+  bench(-10.74, 0.40);
+  cafeTable(-9.59, 0.72);
   streetLamp(15.46, -2.82, 1.20);
   streetLamp(3.77, 1.85, 0.99);
   streetLamp(-12.71, 1.81, 1.00);
+  streetLamp(3.05, 8.68, 1.08);
+  decal(pool, 3.70, 0.054, 8.77, 2.66, 2.88, -Math.PI / 2, 2);
+  light(4.47, 3.00, 1.93, 5.7, 4.7);
   palm(7.12, -5.11, 6.20);
   palm(16.22, -5.95, 6.82);
   palm(21.54, -3.48, 6.18);
@@ -996,20 +1234,33 @@ export function buildWorld(scene, invalidate) {
     tube(ink, x, 0.30, z, 0.066, 0.53, 0.066);
     ellipsoid(brass, x, 0.56, z, 0.092, 0.063, 0.092);
   }
-  box(stone, 6.15, 0.045, 10.49, 6.20, 0.11, 3.15);
+  box(stone, 6.02, 0.023, 10.26, 6.37, 0.055, 3.58);
   planter(3.74, 9.40, 2.08, false, 0.10);
   planter(4.16, 9.85, 1.52, true, 0.10);
   visitor(1.13, 3.25);
   decal(shade, 1.13, 0.016, 3.25, 0.95, 0.71, -Math.PI / 2, 1);
 
-  const slate = surface("#244438");
   const boardTilt = -0.16;
-  box(wood, -2.83, 0.53, 1.39, 0.69, 1.00, 0.11, boardTilt, 0.30);
-  box(slate, -2.83, 0.55, 1.45, 0.55, 0.79, 0.034, boardTilt, 0.30);
-  box(wood, -2.83, 0.52, 1.17, 0.69, 1.02, 0.085, 0.28, 0.30);
-  for (const y of [0.42, 0.55, 0.66]) {
-    box(brass, -2.81, y, 1.475 - (y - 0.55) * 0.16, 0.36, 0.025, 0.006, boardTilt, 0.30);
-  }
+  const boardTurn = -0.26;
+  box(cane, -2.83, 0.54, 1.39, 0.75, 0.92, 0.086, boardTilt, boardTurn);
+  box(slate, -2.84, 0.54, 1.446, 0.63, 0.79, 0.040, boardTilt, boardTurn);
+  box(wood, -2.83, 0.52, 1.17, 0.72, 0.95, 0.075, 0.28, boardTurn);
+  const boardArt = paintedTexture(128, 160, (ctx, w, h) => {
+    ctx.strokeStyle = "#d7a66d";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(7, 7, w - 14, h - 14);
+    ctx.fillStyle = "#f0cb87";
+    crescent(ctx, w / 2, 51, 25);
+    ctx.textAlign = "center";
+    ctx.font = "20px Georgia";
+    ctx.fillText("New Moon", w / 2, 104);
+    ctx.font = "11px Georgia";
+    ctx.fillText("MINI STREET", w / 2, 124);
+  });
+  const boardInk = new THREE.MeshBasicMaterial({
+    map: boardArt, transparent: true, depthWrite: false,
+  });
+  stamp(plane, boardInk, -2.844, 0.534, 1.471, 0.57, 0.69, 1, boardTilt, boardTurn);
 
   for (const [geometry, materials] of instances) {
     for (const [material, matrices] of materials) {
@@ -1035,10 +1286,11 @@ export function buildWorld(scene, invalidate) {
     labels.emissiveIntensity = night ? 0.33 : 0.08;
     litTimber.emissiveIntensity = night ? 0.65 : 0.22;
     displayLight.emissiveIntensity = night ? 2.2 : 0.32;
-    pool.opacity = night ? 0.78 : 0.10;
+    pool.opacity = night ? 0.66 : 0.10;
     lampGlow.emissiveIntensity = night ? 3.3 : 0.27;
+    roomGlow.emissiveIntensity = night ? 1.85 : 0.11;
     neon.emissiveIntensity = night ? 2.85 : 0.41;
-    haloMaterial.opacity = night ? 0.7 : 0;
+    haloMaterial.opacity = night ? 0.58 : 0;
     for (const material of signMaterials) material.emissiveIntensity = night ? 0.77 : 0.14;
   }
 

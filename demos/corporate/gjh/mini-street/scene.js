@@ -93,16 +93,17 @@ function wetRoad(scene) {
         vec2 uv = vMirror.xy / vMirror.w * 0.5 + 0.5;
         if (vMirror.w < 0.0 || any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) discard;
         vec2 p = vPosition.xz;
-        float pools = smoothstep(0.24, 0.76, noise(p * 1.18) * 0.8 + noise(p * 5.1) * 0.2);
-        float ripples = noise(p * vec2(11.0, 39.0)) - 0.5;
-        float smear = noise(p * vec2(3.5, 13.4)) - 0.5;
+        float gutter = (1.0 - smoothstep(2.18, 2.66, p.y)) * (1.0 - smoothstep(14.5, 16.0, p.x));
+        float pools = smoothstep(0.29, 0.71, noise(p * vec2(1.19, 0.76)) * 0.82 + noise(p * 5.1) * 0.18);
+        float ripples = noise(p * vec2(14.0, 37.0)) - 0.5;
+        float smear = noise(p * vec2(4.5, 13.4)) - 0.5;
         float facing = 1.0 - abs(normalize(cameraPosition - vPosition).y);
-        uv += vec2(ripples * 0.012 + smear * 0.008, smear * 0.012);
-        vec2 spread = vec2(0.0024 + 0.003 * (1.0 - pools), 0.011);
+        uv += vec2(ripples * mix(0.003, 0.011, pools) + smear * 0.003, smear * 0.008);
+        vec2 spread = vec2(0.002 + 0.0025 * (1.0 - pools), 0.009);
         vec3 color = texture2D(reflection, uv).rgb * 0.46;
         color += texture2D(reflection, uv + spread).rgb * 0.27;
         color += texture2D(reflection, uv - spread).rgb * 0.27;
-        float alpha = strength * (0.32 + pools * 0.41 + facing * 0.27);
+        float alpha = strength * (0.16 + max(pools, gutter * 0.82) * 0.54 + facing * 0.30);
         alpha *= smoothstep(1.96, 2.15, p.y) * (1.0 - smoothstep(12.0, 24.0, p.y));
         gl_FragColor = vec4(color, alpha);
         #include <tonemapping_fragment>
@@ -211,9 +212,9 @@ export function createStreet({ canvas, stops, activate, fail }) {
   function updateView() {
     const narrow = portrait.matches;
     const wideFocus = THREE.MathUtils.clamp(1.9 - camera.aspect * 1.5, -0.46, 1.72);
-    const focus = (narrow ? -4.29 : wideFocus) + azimuth * (narrow ? 10.1 : 7.1);
+    const focus = (narrow ? -4.15 : wideFocus) + azimuth * (narrow ? 10.1 : 7.1);
     const distance = narrow ? 16.6 : THREE.MathUtils.clamp(20.7 / camera.aspect, 16.9, 25.1);
-    const angle = (narrow ? -0.45 : -0.61) + azimuth * 0.28;
+    const angle = (narrow ? -0.50 : -0.69) + azimuth * 0.28;
     camera.position.set(focus + Math.sin(angle) * distance, 4.73 + elevation, 0.12 + Math.cos(angle) * distance);
     camera.lookAt(focus, narrow ? 2.78 : 3.00, -0.40);
     camera.updateMatrixWorld();
