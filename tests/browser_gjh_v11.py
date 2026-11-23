@@ -131,9 +131,12 @@ def ux_hud_coverage(browser, url):
         page.wait_for_function("document.querySelector('#guide-count').textContent==='3/3'")
         assert page.evaluate('__mall.teleport("mili")')
         assert drive(page, 1000)['doors']['mili'] > .99
-        walk_to(page, -3, -5.6)
+        # Use the onboarding approach around the table to the MILI display.
+        for x, z in ((1.4, -3.5), (1.4, -7.8), (0, -7.8)):
+            walk_to(page, x, z)
         drive(page, 17)
-        assert page.locator('#inspect-prompt button').first.is_visible()
+        assert state(page)['nearby'] == 'mili'
+        assert page.locator('#inspect').is_visible()
         assert 'Nearest:' in page.locator('#nearest-target').inner_text()
         page.locator('#scene').focus()
         page.keyboard.press('f')
