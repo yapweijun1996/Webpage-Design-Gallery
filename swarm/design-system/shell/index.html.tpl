@@ -6,6 +6,7 @@
   <meta name="theme-color" content="{{THEME_COLOR}}">
   <title>{{TITLE}}</title>
   <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   {{SCRIPTS}}
   {{STYLES}}

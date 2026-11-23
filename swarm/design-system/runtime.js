@@ -217,8 +217,13 @@
   let requestedWorker;
   let reloading = false;
 
+  function waitingUpdate() {
+    // The first installation can briefly be waiting with no previous active version.
+    return registration?.active && registration.waiting !== registration.active ? registration.waiting : null;
+  }
+
   function announceUpdate() {
-    const waiting = registration.waiting;
+    const waiting = waitingUpdate();
     if (waiting && waiting !== announcedWorker) {
       announcedWorker = waiting;
       emit('updateavailable');
@@ -257,8 +262,8 @@
   }
 
   async function applyUpdate() {
-    const current = await getRegistration();
-    const waiting = current && current.waiting;
+    await getRegistration();
+    const waiting = waitingUpdate();
     if (!waiting || waiting === requestedWorker || reloading) return;
     serviceWorkers.addEventListener('controllerchange', reloadAfterUpdate);
     requestedWorker = waiting;

@@ -603,6 +603,7 @@ function serviceWorkerFixture() {
   let reloads = 0;
   let failCheck = false;
   const messages = [];
+  registration.active = new EventTargetStub();
   registration.update = async () => {
     checks += 1;
     if (failCheck) throw new Error('Update check failed');
@@ -625,6 +626,31 @@ function serviceWorkerFixture() {
     }
   };
 }
+
+test('first installation stays silent until a replacement for the active worker is waiting', async () => {
+  const fixture = serviceWorkerFixture();
+  const { page, registration, ready } = fixture;
+  const first = fixture.worker();
+  registration.active = null;
+  registration.installing = first;
+  registration.waiting = first;
+  const announcements = [];
+  page.win.addEventListener('updateavailable', () => announcements.push(registration.waiting));
+  page.runRuntime();
+  page.domReady();
+  ready.resolve(registration);
+  await flush();
+  await page.sds.update.apply();
+  assert.deepEqual(fixture.messages, []);
+  registration.active = first;
+  first.dispatchEvent(new EventStub('statechange'));
+  assert.deepEqual(announcements, []);
+  const replacement = fixture.worker();
+  registration.installing = replacement;
+  registration.waiting = replacement;
+  registration.dispatchEvent(new EventStub('updatefound'));
+  assert.deepEqual(announcements, [replacement]);
+});
 
 test('already waiting updates are announced once and activate only on request with one reload', async () => {
   const fixture = serviceWorkerFixture();

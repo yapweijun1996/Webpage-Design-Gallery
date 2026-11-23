@@ -6,6 +6,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 from tempfile import TemporaryDirectory
 from threading import Thread
@@ -52,6 +53,7 @@ def verify(browser, base, catalogs, width):
         expect(page.get_by_role('heading')).to_have_text('Welcome')
         page.wait_for_function('navigator.serviceWorker.controller?.scriptURL === new URL("sw.js", location.href).href')
         assert page.evaluate('navigator.serviceWorker.ready.then(reg => reg.scope)') == base
+        expect(page.locator('[data-sds-update-toast]')).to_be_hidden()
         context.set_offline(True)
         for lang, (title, region, language_label) in catalogs.items():
             page.locator('[data-sds-select=lang]').select_option(lang)
@@ -74,6 +76,32 @@ def verify(browser, base, catalogs, width):
         context.close()
 
 
+def verify_update(browser, root, base):
+    output = root / 'site' / 'update'
+    shutil.copytree(root / 'site' / 'example', output)
+    # SimpleHTTPRequestHandler validates If-Modified-Since to the nearest second.
+    os.utime(output / 'sw.js', (1_700_000_000, 1_700_000_000))
+    context = browser.new_context()
+    try:
+        page = context.new_page()
+        page.add_init_script("sessionStorage.loads = String(Number(sessionStorage.loads || 0) + 1)")
+        page.goto(base)
+        page.wait_for_function('!!navigator.serviceWorker.controller')
+        toast = page.locator('[data-sds-update-toast]')
+        expect(toast).to_be_hidden()
+        subprocess.run(['node', str(SWARM / 'tools/export-page.js'), str(root / 'project'), '--sds',
+                        '--out', str(output), '--title', 'Updated export'], check=True)
+        page.get_by_role('button', name='Check updates').click()
+        expect(toast).to_be_visible()
+        assert page.evaluate('sessionStorage.loads') == '1'
+        page.get_by_role('button', name='Update now').click()
+        expect(page).to_have_title('Updated export')
+        expect(toast).to_be_hidden()
+        assert page.evaluate('sessionStorage.loads') == '2'
+    finally:
+        context.close()
+
+
 def main():
     with TemporaryDirectory(prefix='swarm-export-browser-') as tmp:
         root = Path(tmp)
@@ -90,6 +118,8 @@ def main():
                         for width in (390, 1440):
                             verify(browser, f'http://127.0.0.1:{server.server_port}/example/', catalogs, width)
                             print(f'PASS exported PWA translation and offline reload at {width}px', flush=True)
+                        verify_update(browser, root, f'http://127.0.0.1:{server.server_port}/update/')
+                        print('PASS first install and user-approved PWA replacement', flush=True)
                     finally:
                         browser.close()
             finally:
