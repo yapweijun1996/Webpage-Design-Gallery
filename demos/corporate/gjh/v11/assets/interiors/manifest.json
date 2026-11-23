@@ -479,56 +479,40 @@
       "provenance": {
         "kind": "NEW",
         "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+        "finish": "solid-pbr",
         "credit": [
           {
-            "credit": "Original procedural fixture geometry, colour atlas and material finishes created for this project."
+            "credit": "Original two-leaf sloping folio, paper inset and oxblood-topped display plinth."
           }
         ],
-        "method": "Extrude three folded leaf profiles with returned corners, perforation shading and a level front sample ledge on a stepped ash counter.",
-        "generator": "models/patch-folio/generate.py",
-        "licence_reference": "models/packing-station/LICENSE.md",
-        "editable_source": "models/patch-folio/sources/patch-folio.blend",
-        "licence_text": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.\nOriginal procedural geometry/materials, no external assets.\n"
+        "generator": "models/gjh-borsch-folio/generate.py",
+        "licence_reference": "models/gjh-borsch-folio/README.md",
+        "licence_text": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
       },
-      "triangles": 204,
-      "bytes": 26892,
-      "vertices": 408,
+      "triangles": 114,
+      "bytes": 9928,
+      "vertices": 224,
       "materials": [
-        "Patch library | shared finish atlas"
+        "Patch folio | paper, oxblood and oak"
       ],
-      "primitives": 5,
+      "primitives": 1,
       "groups": [
-        "Ash counter",
-        "Plum outer leaf",
-        "Porcelain centre leaf",
-        "Sage outer leaf",
-        "Sample ledge"
+        "Open patch folio"
       ],
       "bounds_m": {
         "min": [
-          -1.19,
+          -1.1699999570846558,
           0,
-          -0.56
+          -0.546999990940094
         ],
         "max": [
-          1.19,
-          2.35,
-          0.56
+          1.1699999570846558,
+          2.007999897003174,
+          0.5529999732971191
         ]
       },
-      "textures": [
-        {
-          "name": "patch-folio-colour",
-          "width": 256,
-          "height": 256
-        },
-        {
-          "name": "patch-folio-finish",
-          "width": 4,
-          "height": 4
-        }
-      ],
-      "sha256": "2fdb69a463e3d44d9e199065c78c50e23b14a6f853630efc2841c2f521276f78",
+      "textures": [],
+      "sha256": "72d9380d75bafdd81fde56ffcf3a432f8b236b944ffa9cd5bc4986767c1f7ac3",
       "triangle_cap": 660,
       "validator": {
         "version": "2.0.0-dev.3.10",
@@ -547,56 +531,40 @@
       "provenance": {
         "kind": "NEW",
         "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+        "finish": "solid-pbr",
         "credit": [
           {
-            "credit": "Original procedural fixture geometry, colour atlas and material finishes created for this project."
+            "credit": "Original two-leaf sloping folio, paper inset and oxblood-topped display plinth."
           }
         ],
-        "method": "Extrude three folded leaf profiles with returned corners, perforation shading and a level front sample ledge on a stepped ash counter.",
-        "generator": "models/patch-folio/generate.py",
-        "licence_reference": "models/packing-station/LICENSE.md",
-        "editable_source": "models/patch-folio/sources/patch-folio.blend",
-        "licence_text": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.\nOriginal procedural geometry/materials, no external assets.\n"
+        "generator": "models/gjh-borsch-folio/generate.py",
+        "licence_reference": "models/gjh-borsch-folio/README.md",
+        "licence_text": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
       },
-      "triangles": 844,
-      "bytes": 75300,
-      "vertices": 1830,
+      "triangles": 162,
+      "bytes": 13672,
+      "vertices": 320,
       "materials": [
-        "Patch library | shared finish atlas"
+        "Patch folio | paper, oxblood and oak"
       ],
-      "primitives": 5,
+      "primitives": 1,
       "groups": [
-        "Ash counter",
-        "Plum outer leaf",
-        "Porcelain centre leaf",
-        "Sage outer leaf",
-        "Sample ledge"
+        "Open patch folio"
       ],
       "bounds_m": {
         "min": [
-          -1.19,
+          -1.1699999570846558,
           0,
-          -0.56
+          -0.546999990940094
         ],
         "max": [
-          1.19,
-          2.35,
-          0.56
+          1.1699999570846558,
+          2.007999897003174,
+          0.5529999732971191
         ]
       },
-      "textures": [
-        {
-          "name": "patch-folio-colour",
-          "width": 256,
-          "height": 256
-        },
-        {
-          "name": "patch-folio-finish",
-          "width": 4,
-          "height": 4
-        }
-      ],
-      "sha256": "4ecc18d73587b7fa7638e33914ee945132f6efd3b6826fa866b9a402a2365cc6",
+      "textures": [],
+      "sha256": "324e9fa6b7158d5b34f12a59a87a251924c813d1736143b679dc51d670bb0366",
       "triangle_cap": 1850,
       "validator": {
         "version": "2.0.0-dev.3.10",
@@ -615,56 +583,40 @@
       "provenance": {
         "kind": "NEW",
         "author": "Yap Wei Jun project / agent-assisted procedural modeling",
+        "finish": "solid-pbr",
         "credit": [
           {
-            "credit": "Original procedural fixture geometry, colour atlas and material finishes created for this project."
+            "credit": "Original two-leaf sloping folio, paper inset and oxblood-topped display plinth."
           }
         ],
-        "method": "Extrude three folded leaf profiles with returned corners, perforation shading and a level front sample ledge on a stepped ash counter.",
-        "generator": "models/patch-folio/generate.py",
-        "licence_reference": "models/packing-station/LICENSE.md",
-        "editable_source": "models/patch-folio/sources/patch-folio.blend",
-        "licence_text": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.\nOriginal procedural geometry/materials, no external assets.\n"
+        "generator": "models/gjh-borsch-folio/generate.py",
+        "licence_reference": "models/gjh-borsch-folio/README.md",
+        "licence_text": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
       },
-      "triangles": 1524,
-      "bytes": 103268,
-      "vertices": 2614,
+      "triangles": 226,
+      "bytes": 18668,
+      "vertices": 448,
       "materials": [
-        "Patch library | shared finish atlas"
+        "Patch folio | paper, oxblood and oak"
       ],
-      "primitives": 5,
+      "primitives": 1,
       "groups": [
-        "Ash counter",
-        "Plum outer leaf",
-        "Porcelain centre leaf",
-        "Sage outer leaf",
-        "Sample ledge"
+        "Open patch folio"
       ],
       "bounds_m": {
         "min": [
-          -1.19,
+          -1.1699999570846558,
           0,
-          -0.56
+          -0.546999990940094
         ],
         "max": [
-          1.19,
-          2.35,
-          0.56
+          1.1699999570846558,
+          2.007999897003174,
+          0.5529999732971191
         ]
       },
-      "textures": [
-        {
-          "name": "patch-folio-colour",
-          "width": 256,
-          "height": 256
-        },
-        {
-          "name": "patch-folio-finish",
-          "width": 4,
-          "height": 4
-        }
-      ],
-      "sha256": "7e0143edad3b28c75083092727c8938f72a204c3c4390cc4808b58e1f0c1dc82",
+      "textures": [],
+      "sha256": "9cc865aeb321ef69e3a76a42ae967ef3ad0a100250ca207908b89c6f28f5f18e",
       "triangle_cap": 4800,
       "validator": {
         "version": "2.0.0-dev.3.10",
@@ -2948,9 +2900,9 @@
     }
   ],
   "totals": {
-    "low_anchor_triangles": 8820,
-    "low_anchor_bytes": 759180,
-    "projected_full_low_triangles": 31066,
+    "low_anchor_triangles": 8730,
+    "low_anchor_bytes": 742216,
+    "projected_full_low_triangles": 30976,
     "projected_max_per_shop": 2480
   },
   "round2": {

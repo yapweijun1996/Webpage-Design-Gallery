@@ -10,6 +10,10 @@ The measured peak across the 42 sampled walks was 51 draws on phone, 49 on table
 
 The subsequent Sony camera repair clears the visitor and threshold at all three reviewed widths. Its upper-floor plaque now attributes the product description to Sony in all three visitor languages. The original scores below retain the findings from the baseline. The linked comparison records the remaining tablet sign overlap and side-display contrast. [Sony follow-up and route measurements](goh-joo-hin/13-sony/README.md#map-arrival-and-upper-floor-plaque)
 
+## Borsch Med follow-up
+
+The original three raised racks have been replaced with an open folio on a burgundy plinth. The carton, pouch, backing sheet and separate Lingzhi stop retain their positions. The shop report records all 18 matched views, three quality levels and the remaining differences from the concept. [Folio comparisons](goh-joo-hin/04-borsch-med/README.md#open-folio)
+
 ## Composition
 
 | Shop | Score | Visible from this route | Difference from the references |

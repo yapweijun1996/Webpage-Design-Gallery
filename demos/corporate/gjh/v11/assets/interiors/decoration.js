@@ -49,6 +49,8 @@ export function* prepareInteriorDecoration(T, store, materials, detail = 0, hasG
     // The room GLB owns the suspended luminaire. Its old forward-facing
     // rectangular diffuser projected across the rear brand sign from the door.
     if (kind === 'retain' || prop.socket === 'ceiling') return;
+    // S04's room detail already supplies the carton, pouch and patch sheet.
+    if (store.id === 'S04' && prop.socket === 'sample') return;
     origin = position;
     yaw = radians(prop.yaw_deg);
     const [w,h,d] = prop.envelope_whd_m;

@@ -20,11 +20,24 @@ const anchors = path.join(gallery,'exports/gjh-v11-interiors');
 const anchorManifest = fs.readFileSync(path.join(anchors,'manifest.json'),'utf8').trimEnd();
 const manifest = JSON.parse(anchorManifest);
 const planBytes = fs.readFileSync(new URL('../../docs/gjh-v11-interior-program.json', import.meta.url));
-const newMoon = JSON.parse(planBytes).stores.find(store => store.id === 'S01');
-const focal = newMoon.items.find(item => item.id === newMoon.focal);
+const localAnchors = {
+  S01: {
+    root:'models/gjh-new-moon-header', editable:'s01-crescent-header.blend', lowCap:960,
+    credit:'Original scalloped crown, oak bead, underside light, crescent and category lettering.'
+  },
+  S04: {
+    root:'models/gjh-borsch-folio',
+    credit:'Original two-leaf sloping folio, paper inset and oxblood-topped display plinth.'
+  },
+};
+const localFocals = new Map(JSON.parse(planBytes).stores.filter(store => localAnchors[store.id])
+  .map(store => [store.id,store.items.find(item => item.id === store.focal)]));
 const originalAnchors = manifest.assets;
-const runtimeAnchors = originalAnchors.map(asset => values['models-only'] || asset.store !== 'S01' ? asset : {
-  ...asset, file:focal.lod[asset.tier.toLowerCase()], model:focal.modelId
+const runtimeAnchors = originalAnchors.map(asset => {
+  const focal = localFocals.get(asset.store);
+  return values['models-only'] || !focal ? asset : {
+    ...asset, file:focal.lod[asset.tier.toLowerCase()], model:focal.modelId
+  };
 });
 const brands = path.resolve(values.brands ?? path.join(output,'../brands'));
 const sources = JSON.parse(fs.readFileSync(path.join(brands,'logo-sources.json')));
@@ -56,7 +69,8 @@ for (const file of [...runtimeAnchors.map(a=>a.file),...names]) {
   const gltf = JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)));
   if (!names.includes(file)) {
     const asset = runtimeAnchors.find(a=>a.file===file);
-    if (asset.store !== 'S01' || values['models-only']) {
+    const local = localAnchors[asset.store];
+    if (!local || values['models-only']) {
       assert.equal(sha(bytes),asset.sha256,file);
     } else {
       const primitives = gltf.meshes.flatMap(mesh => mesh.primitives);
@@ -67,15 +81,16 @@ for (const file of [...runtimeAnchors.map(a=>a.file),...names]) {
         max:[0,1,2].map(axis => Math.max(...positions.map(value => value.max[axis])))
       };
       const triangles = primitives.reduce((sum,primitive) => sum + gltf.accessors[primitive.indices].count/3,0);
-      const root = 'models/gjh-new-moon-header';
+      const {root,editable,lowCap,credit} = local;
+      const focal = localFocals.get(asset.store);
       Object.assign(asset,{
         triangles, bytes:bytes.length, vertices:positions.reduce((sum,position) => sum+position.count,0),
         materials:gltf.materials.map(material=>material.name), primitives:primitives.length,
         groups:gltf.nodes.map(node=>node.name), bounds_m, textures:[], sha256:sha(bytes),
-        triangle_cap:asset.tier==='Low'?960:asset.triangle_cap,
+        triangle_cap:asset.tier === 'Low' ? (lowCap ?? asset.triangle_cap) : asset.triangle_cap,
         provenance:{kind:'NEW',author:'Yap Wei Jun project / agent-assisted procedural modeling', finish:'solid-pbr',
-          credit:[{credit:'Original scalloped crown, oak bead, underside light, crescent and category lettering.'}],
-          generator:`${root}/generate.py`, editable_source:`${root}/s01-crescent-header.blend`,
+          credit:[{credit}], generator:`${root}/generate.py`,
+          ...(editable && {editable_source:`${root}/${editable}`}),
           licence_reference:`${root}/README.md`, licence_text:asset.licence},
         validator:{version:result.validatorVersion,errors,warnings}
       });
@@ -111,13 +126,15 @@ manifest.round2 = {version:1,coordinates:'Slot-local metres, +Y up, +Z toward en
 if (values['models-only']) {
   emit('manifest.json',JSON.stringify(manifest.round2,null,2)+'\n');
 } else {
-  const previousLow = originalAnchors.find(asset=>asset.store==='S01' && asset.tier==='Low');
-  const currentLow = runtimeAnchors.find(asset=>asset.store==='S01' && asset.tier==='Low');
   manifest.anchor_source_plan_sha256 = manifest.plan_sha256;
   manifest.plan_sha256 = sha(planBytes);
-  manifest.totals.low_anchor_triangles += currentLow.triangles-previousLow.triangles;
-  manifest.totals.low_anchor_bytes += currentLow.bytes-previousLow.bytes;
-  manifest.totals.projected_full_low_triangles += currentLow.triangles-previousLow.triangles;
+  for (const store of localFocals.keys()) {
+    const previous = originalAnchors.find(asset=>asset.store===store && asset.tier==='Low');
+    const current = runtimeAnchors.find(asset=>asset.store===store && asset.tier==='Low');
+    manifest.totals.low_anchor_triangles += current.triangles-previous.triangles;
+    manifest.totals.low_anchor_bytes += current.bytes-previous.bytes;
+    manifest.totals.projected_full_low_triangles += current.triangles-previous.triangles;
+  }
   manifest.assets = runtimeAnchors;
   emit('manifest.json',JSON.stringify(manifest,null,2)+'\n');
 }

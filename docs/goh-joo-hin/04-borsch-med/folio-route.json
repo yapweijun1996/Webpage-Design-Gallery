@@ -1,0 +1,785 @@
+{
+  "comparisonBase": "fce4ea8fa74fc693eebae10de179dcfdf9a67a26",
+  "integratedBuild": "252b08e3d824edf8",
+  "comparison": {
+    "390": {
+      "quality": "low",
+      "browser": "158.0.8127.37",
+      "poses": {
+        "map": {
+          "maximumPositionErrorXZMetres": 0.0,
+          "door": 1,
+          "zone": "atrium",
+          "draws": [
+            27,
+            27
+          ],
+          "triangles": [
+            38069,
+            37931
+          ],
+          "sha256": [
+            "281931a222ba80578ed360ea40ad4b3042fd8f4fb13ac6c566fa695099f8b48c",
+            "603cc3efe719840a140f88142ce3191a6f8205e903ce0b9935e9226134a6e209"
+          ]
+        },
+        "threshold": {
+          "maximumPositionErrorXZMetres": 6.8e-05,
+          "door": 1,
+          "zone": "planned-space-04",
+          "draws": [
+            35,
+            35
+          ],
+          "triangles": [
+            43223,
+            43097
+          ],
+          "sha256": [
+            "12525a43b6499b230469d8b88b24d6d769056e7e8c49e99cc6cd158584dc08c4",
+            "2c99d6a9b7715616873e472b29b047b478cef0dedbabbffffd8ca8c57eefaddc"
+          ]
+        },
+        "inside": {
+          "maximumPositionErrorXZMetres": 0.000131,
+          "door": 1,
+          "zone": "planned-space-04",
+          "draws": [
+            34,
+            34
+          ],
+          "triangles": [
+            42741,
+            42603
+          ],
+          "sha256": [
+            "6359e0af1b29e8ada1520e3f2d9f85a6deb9326b520a142324e8d17ab6585cee",
+            "d042e58946644db1d5f477d7209728ce0f592ee6f79593ba443301ec5a6d8ad0"
+          ]
+        },
+        "near": {
+          "maximumPositionErrorXZMetres": 8.8e-05,
+          "door": 0,
+          "zone": "planned-space-04",
+          "draws": [
+            25,
+            25
+          ],
+          "triangles": [
+            33037,
+            32899
+          ],
+          "sha256": [
+            "194d3672deffbf4cab3bbf2a1e700ecd598a880ef895e861bd1aa489329d8191",
+            "91a2a227090986d9e791e6e7dc9804c29268c5b1295c112c3430be683d855df7"
+          ]
+        },
+        "right-aisle": {
+          "maximumPositionErrorXZMetres": 8.5e-05,
+          "door": 0,
+          "zone": "planned-space-04",
+          "draws": [
+            21,
+            21
+          ],
+          "triangles": [
+            14013,
+            13875
+          ],
+          "sha256": [
+            "fac328799f279df13b55478ba9e17316f3e317f44d3488c3c6ae7419f372ff7e",
+            "0bf910e85528a4e1b6a5a1128b7ae114be5e71b673470f16229048fd10c66f62"
+          ]
+        },
+        "exit": {
+          "maximumPositionErrorXZMetres": 0.005197,
+          "door": 0,
+          "zone": "atrium",
+          "draws": [
+            31,
+            31
+          ],
+          "triangles": [
+            61662,
+            61440
+          ],
+          "sha256": [
+            "161cb02ecad531d89755428a94e1520e5d9790c4b6a4fbf44d50549010618ea7",
+            "71206ea5936167818fb46fc54a33c5da684d247d67f70188f2664496b1dd0133"
+          ]
+        }
+      },
+      "observedBefore": {
+        "demos/corporate/gjh/v11/index.html": "72ba0976a1e40bb65598712d6baad63ac3aab5937a6dd1545a0484ea752a7fbe",
+        "demos/corporate/gjh/v11/style.bundle.css": "dc8b7ae1d0deac7cd6e2a95e1b43dd9a9f329734d0c99cdb1217dfcd7d4eea96",
+        "demos/corporate/gjh/v11/script.bundle.js": "6486e0a21aabaab319364a8028af4034eee2341c81cdd07cf527fd5bef34246c",
+        "demos/corporate/gjh/v11/assets/player.bundle.js": "00a7644a0978006f86f9fedd9508f31a4414254e779d43931fbda17adcc38f95",
+        "demos/corporate/gjh/v11/assets/world.bundle.js": "ad05a1cd5ea72b747a9ba7dee58ece21ddc88bf1b2cfa8587be970586c55ec69",
+        "demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-low.glb": "2fdb69a463e3d44d9e199065c78c50e23b14a6f853630efc2841c2f521276f78",
+        "demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2"
+      },
+      "observedAfter": {
+        "demos/corporate/gjh/v11/index.html": "72ba0976a1e40bb65598712d6baad63ac3aab5937a6dd1545a0484ea752a7fbe",
+        "demos/corporate/gjh/v11/style.bundle.css": "dc8b7ae1d0deac7cd6e2a95e1b43dd9a9f329734d0c99cdb1217dfcd7d4eea96",
+        "demos/corporate/gjh/v11/assets/player.bundle.js": "00a7644a0978006f86f9fedd9508f31a4414254e779d43931fbda17adcc38f95",
+        "demos/corporate/gjh/v11/script.bundle.js": "7774fd8cfdb3ec083e2ea33ae1f7ddb9e726446d23670a7b38c0e23a27b4180e",
+        "demos/corporate/gjh/v11/assets/world.bundle.js": "44bb425acee10462175f2922e901ac855581de744e82728b4f1c36415c96f23e",
+        "demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-low.glb": "72d9380d75bafdd81fde56ffcf3a432f8b236b944ffa9cd5bc4986767c1f7ac3",
+        "demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2"
+      }
+    },
+    "768": {
+      "quality": "balanced",
+      "browser": "158.0.8127.37",
+      "poses": {
+        "map": {
+          "maximumPositionErrorXZMetres": 0.0,
+          "door": 1,
+          "zone": "atrium",
+          "draws": [
+            28,
+            28
+          ],
+          "triangles": [
+            32767,
+            32037
+          ],
+          "sha256": [
+            "5f5d5b966f29a51c69698e12512d4e15ffb62679fbcc9ddabc136434feee4f4f",
+            "1a448a06635b42aaf7c099661ca59a18cdfdbc8287260f093c30570ee411d0dd"
+          ]
+        },
+        "threshold": {
+          "maximumPositionErrorXZMetres": 6.8e-05,
+          "door": 1,
+          "zone": "planned-space-04",
+          "draws": [
+            37,
+            37
+          ],
+          "triangles": [
+            44447,
+            43717
+          ],
+          "sha256": [
+            "4a4cb148365435886e0d7597649d770b3740342fc8ec9c042098a03c73b421bd",
+            "f8c07c51e029d45d32cf0bd4f624cc2c1804bb3e087f393a6e81148505efb76c"
+          ]
+        },
+        "inside": {
+          "maximumPositionErrorXZMetres": 8.9e-05,
+          "door": 1,
+          "zone": "planned-space-04",
+          "draws": [
+            36,
+            36
+          ],
+          "triangles": [
+            43769,
+            43039
+          ],
+          "sha256": [
+            "a978969ac79290851c8d27b022d2f770aadc986c670a4c4ce77ef3a0638100ae",
+            "5be751a74a061cbd9e1f0f9bb430b0827acd9a927b90c34eaf4aa782f2a89d70"
+          ]
+        },
+        "near": {
+          "maximumPositionErrorXZMetres": 9.6e-05,
+          "door": 0,
+          "zone": "planned-space-04",
+          "draws": [
+            29,
+            29
+          ],
+          "triangles": [
+            35229,
+            34499
+          ],
+          "sha256": [
+            "da0b05795ad217e146661ea9e769e106d5eee6f8e9fb5554820924757b348ec0",
+            "03804106ff8afb39d2b6c8bba6fc8083f5ab077a2a73ee3fc6a5424badd6cf7f"
+          ]
+        },
+        "right-aisle": {
+          "maximumPositionErrorXZMetres": 0.000255,
+          "door": 0,
+          "zone": "planned-space-04",
+          "draws": [
+            22,
+            22
+          ],
+          "triangles": [
+            22735,
+            22005
+          ],
+          "sha256": [
+            "010f7165f87745287e053b20faf63b28768faff86f3bcb5caa1218819240e6bb",
+            "8f49a3eb3421fe37a5bcf249f258433292e0c32648e88e9e2dde71fe63a5b364"
+          ]
+        },
+        "exit": {
+          "maximumPositionErrorXZMetres": 0.0028,
+          "door": 0,
+          "zone": "atrium",
+          "draws": [
+            37,
+            37
+          ],
+          "triangles": [
+            73669,
+            73669
+          ],
+          "sha256": [
+            "b8e3f3a613b1bcb508df1ff0ba24329d84b6071de5aebe9742846466437938ae",
+            "6c7036cb72f132433d2d84bc52025582e8966dd861755bceba8cd77a8b1ea6d0"
+          ]
+        }
+      },
+      "observedBefore": {
+        "demos/corporate/gjh/v11/index.html": "72ba0976a1e40bb65598712d6baad63ac3aab5937a6dd1545a0484ea752a7fbe",
+        "demos/corporate/gjh/v11/style.bundle.css": "dc8b7ae1d0deac7cd6e2a95e1b43dd9a9f329734d0c99cdb1217dfcd7d4eea96",
+        "demos/corporate/gjh/v11/script.bundle.js": "6486e0a21aabaab319364a8028af4034eee2341c81cdd07cf527fd5bef34246c",
+        "demos/corporate/gjh/v11/assets/player.bundle.js": "00a7644a0978006f86f9fedd9508f31a4414254e779d43931fbda17adcc38f95",
+        "demos/corporate/gjh/v11/assets/world.bundle.js": "ad05a1cd5ea72b747a9ba7dee58ece21ddc88bf1b2cfa8587be970586c55ec69",
+        "demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-balanced.glb": "4ecc18d73587b7fa7638e33914ee945132f6efd3b6826fa866b9a402a2365cc6",
+        "demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2"
+      },
+      "observedAfter": {
+        "demos/corporate/gjh/v11/index.html": "72ba0976a1e40bb65598712d6baad63ac3aab5937a6dd1545a0484ea752a7fbe",
+        "demos/corporate/gjh/v11/style.bundle.css": "dc8b7ae1d0deac7cd6e2a95e1b43dd9a9f329734d0c99cdb1217dfcd7d4eea96",
+        "demos/corporate/gjh/v11/assets/player.bundle.js": "00a7644a0978006f86f9fedd9508f31a4414254e779d43931fbda17adcc38f95",
+        "demos/corporate/gjh/v11/script.bundle.js": "7774fd8cfdb3ec083e2ea33ae1f7ddb9e726446d23670a7b38c0e23a27b4180e",
+        "demos/corporate/gjh/v11/assets/world.bundle.js": "44bb425acee10462175f2922e901ac855581de744e82728b4f1c36415c96f23e",
+        "demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-balanced.glb": "324e9fa6b7158d5b34f12a59a87a251924c813d1736143b679dc51d670bb0366",
+        "demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2"
+      }
+    },
+    "1440": {
+      "quality": "detailed",
+      "browser": "158.0.8127.37",
+      "poses": {
+        "map": {
+          "maximumPositionErrorXZMetres": 0.0,
+          "door": 1,
+          "zone": "atrium",
+          "draws": [
+            38,
+            38
+          ],
+          "triangles": [
+            76161,
+            74815
+          ],
+          "sha256": [
+            "f4cd29efbbcff9d1481d65b2691646dee5b01aad0dac61520f7fe99ed895e7c6",
+            "120a68938cfe0e7528ee7031d6547f11a521275d29aade456db6fb3b82ae3506"
+          ]
+        },
+        "threshold": {
+          "maximumPositionErrorXZMetres": 0.004173,
+          "door": 1,
+          "zone": "planned-space-04",
+          "draws": [
+            60,
+            60
+          ],
+          "triangles": [
+            143140,
+            141794
+          ],
+          "sha256": [
+            "59a71e3f218e43acef8f50191a373186f04ad5dce14ba8243e8cdc6064203f09",
+            "7d1942d9df50479123ef1aae714dde41c1aa5d2e0bf8c5952a6af25b6fd39183"
+          ]
+        },
+        "inside": {
+          "maximumPositionErrorXZMetres": 0.000919,
+          "door": 1,
+          "zone": "planned-space-04",
+          "draws": [
+            53,
+            53
+          ],
+          "triangles": [
+            120634,
+            119288
+          ],
+          "sha256": [
+            "816bf90ce0ad1b8ae4237985201eaf562711e967f333ca45e52d23a4b2e5cb9d",
+            "6ab024d958dfe6ec9ed39678b89e6c2343565bd3a88ad15aa11d4c9953738e50"
+          ]
+        },
+        "near": {
+          "maximumPositionErrorXZMetres": 0.003545,
+          "door": 0,
+          "zone": "planned-space-04",
+          "draws": [
+            40,
+            40
+          ],
+          "triangles": [
+            88458,
+            87112
+          ],
+          "sha256": [
+            "d870b9a9cfa06fd602591c261ba4c3387b26b16ff2c772b70552cb474c4d5759",
+            "e352f91b61b6fd8bc4d3c0eb550775635d965b72d05bb29ad982c7673900793b"
+          ]
+        },
+        "right-aisle": {
+          "maximumPositionErrorXZMetres": 0.000288,
+          "door": 0,
+          "zone": "planned-space-04",
+          "draws": [
+            34,
+            34
+          ],
+          "triangles": [
+            55068,
+            53722
+          ],
+          "sha256": [
+            "90bf3723f4d9291d466e66203e85d2d798d0f6d2a92f11a3df98045ebae7a6f5",
+            "6f41b4d14b9153ab2a0e4e3d14ce15a31551ecbcc5f577d65f418b0b3b6a7090"
+          ]
+        },
+        "exit": {
+          "maximumPositionErrorXZMetres": 0.000713,
+          "door": 0,
+          "zone": "atrium",
+          "draws": [
+            50,
+            50
+          ],
+          "triangles": [
+            171254,
+            171218
+          ],
+          "sha256": [
+            "d0b0ef6062078d597d129c84db75b07af48b5e91fed300aec3a219f38bf016c7",
+            "e09ea10a63ba616d84f89f35692ef1b9a30028854560a1c4fa4c26a9d387c33f"
+          ]
+        }
+      },
+      "observedBefore": {
+        "demos/corporate/gjh/v11/index.html": "72ba0976a1e40bb65598712d6baad63ac3aab5937a6dd1545a0484ea752a7fbe",
+        "demos/corporate/gjh/v11/style.bundle.css": "dc8b7ae1d0deac7cd6e2a95e1b43dd9a9f329734d0c99cdb1217dfcd7d4eea96",
+        "demos/corporate/gjh/v11/script.bundle.js": "6486e0a21aabaab319364a8028af4034eee2341c81cdd07cf527fd5bef34246c",
+        "demos/corporate/gjh/v11/assets/player.bundle.js": "00a7644a0978006f86f9fedd9508f31a4414254e779d43931fbda17adcc38f95",
+        "demos/corporate/gjh/v11/assets/world.bundle.js": "ad05a1cd5ea72b747a9ba7dee58ece21ddc88bf1b2cfa8587be970586c55ec69",
+        "demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-detailed.glb": "7e0143edad3b28c75083092727c8938f72a204c3c4390cc4808b58e1f0c1dc82",
+        "demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2"
+      },
+      "observedAfter": {
+        "demos/corporate/gjh/v11/index.html": "72ba0976a1e40bb65598712d6baad63ac3aab5937a6dd1545a0484ea752a7fbe",
+        "demos/corporate/gjh/v11/style.bundle.css": "dc8b7ae1d0deac7cd6e2a95e1b43dd9a9f329734d0c99cdb1217dfcd7d4eea96",
+        "demos/corporate/gjh/v11/script.bundle.js": "7774fd8cfdb3ec083e2ea33ae1f7ddb9e726446d23670a7b38c0e23a27b4180e",
+        "demos/corporate/gjh/v11/assets/player.bundle.js": "00a7644a0978006f86f9fedd9508f31a4414254e779d43931fbda17adcc38f95",
+        "demos/corporate/gjh/v11/assets/world.bundle.js": "44bb425acee10462175f2922e901ac855581de744e82728b4f1c36415c96f23e",
+        "demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-detailed.glb": "9cc865aeb321ef69e3a76a42ae967ef3ad0a100250ca207908b89c6f28f5f18e",
+        "demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2"
+      }
+    }
+  },
+  "integrated": {
+    "390": {
+      "entryControl": "touch joystick",
+      "entry": {
+        "x": 19.998394012451172,
+        "z": -0.5300474166870117,
+        "zone": "planned-space-04",
+        "capsule": true
+      },
+      "served": {
+        "demos/corporate/gjh/v11/index.html": "94cca84f14b639237aad39679833ecac9c962b1fa8b0f742c2fa1fdff8bf99a0",
+        "demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "demos/corporate/gjh/v11/assets/player.bundle.js": "c4dba37082b8694c626ac708b0fb06649670219f568815d3eb6576a0f9cc263c",
+        "demos/corporate/gjh/v11/script.bundle.js": "0632e5a42f5d01e08d361902491d8e383aae268065129c0fea1e81867f8d43ed",
+        "demos/corporate/gjh/v11/assets/world.bundle.js": "739689b0d69b57255c226e45f63d2c8b59b5cde985e625e03e128e01d5c126c1",
+        "demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-low.glb": "72d9380d75bafdd81fde56ffcf3a432f8b236b944ffa9cd5bc4986767c1f7ac3",
+        "demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2"
+      },
+      "stories": [
+        {
+          "target": "borsch-patch-story",
+          "title": "18-patch pack",
+          "source": "https://www.gjheshop.com/product/borsch-med-mosquito-repellent-patch-18-patches/",
+          "description": "Goh Joo Hin lists the Borsch Med Mosquito Repellent Patch in an 18-patch pack. The official gallery shows the carton, pouch and sticker sheet. This folio illustrates those three pack forms."
+        },
+        {
+          "target": "borsch-lingzhi-story",
+          "title": "Lingzhi twin pack",
+          "source": "https://www.gjheshop.com/product/borsch-med-100-lingzhi-cracked-spores-powder-capsule-200mg-x-60-capsules-twin-pack/",
+          "description": "The Borsch Med Lingzhi Cracked Spores Powder Capsule twin pack has its own catalogue entry. The gallery shows its pack front and side views."
+        }
+      ],
+      "route": {
+        "map": {
+          "x": 19.999998092651367,
+          "y": -0.019904017448425293,
+          "z": 2.400001049041748,
+          "zone": "atrium",
+          "calls": 31,
+          "triangles": 47717,
+          "door": 1,
+          "cap": true,
+          "tier": "low"
+        },
+        "threshold": {
+          "x": 19.999645233154297,
+          "y": 0.07971853017807007,
+          "z": -0.8224141597747803,
+          "zone": "planned-space-04",
+          "calls": 36,
+          "triangles": 43087,
+          "door": 1,
+          "cap": true,
+          "tier": "low"
+        },
+        "inside": {
+          "x": 19.99991798400879,
+          "y": 0.08105558156967163,
+          "z": -1.6476911306381226,
+          "zone": "planned-space-04",
+          "calls": 35,
+          "triangles": 42605,
+          "door": 1,
+          "cap": true,
+          "tier": "low"
+        },
+        "near": {
+          "x": 19.520084381103516,
+          "y": 0.08099925518035889,
+          "z": -5.126854419708252,
+          "zone": "planned-space-04",
+          "calls": 26,
+          "triangles": 32925,
+          "door": 0,
+          "cap": true,
+          "tier": "low"
+        },
+        "right-aisle": {
+          "x": 23.224878311157227,
+          "y": 0.08005642890930176,
+          "z": -6.495209693908691,
+          "zone": "planned-space-04",
+          "calls": 22,
+          "triangles": 13685,
+          "door": 0,
+          "cap": true,
+          "tier": "low"
+        },
+        "exit": {
+          "x": 19.999731063842773,
+          "y": -0.019931316375732422,
+          "z": 4.224020004272461,
+          "zone": "atrium",
+          "calls": 32,
+          "triangles": 61130,
+          "door": 0,
+          "cap": true,
+          "tier": "low"
+        }
+      }
+    },
+    "768": {
+      "entryControl": "touch joystick",
+      "entry": {
+        "x": 19.999467849731445,
+        "z": -0.6337371468544006,
+        "zone": "planned-space-04",
+        "capsule": true
+      },
+      "served": {
+        "demos/corporate/gjh/v11/index.html": "94cca84f14b639237aad39679833ecac9c962b1fa8b0f742c2fa1fdff8bf99a0",
+        "demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "demos/corporate/gjh/v11/assets/player.bundle.js": "c4dba37082b8694c626ac708b0fb06649670219f568815d3eb6576a0f9cc263c",
+        "demos/corporate/gjh/v11/assets/world.bundle.js": "739689b0d69b57255c226e45f63d2c8b59b5cde985e625e03e128e01d5c126c1",
+        "demos/corporate/gjh/v11/script.bundle.js": "0632e5a42f5d01e08d361902491d8e383aae268065129c0fea1e81867f8d43ed",
+        "demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-balanced.glb": "324e9fa6b7158d5b34f12a59a87a251924c813d1736143b679dc51d670bb0366",
+        "demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2"
+      },
+      "stories": [
+        {
+          "target": "borsch-patch-story",
+          "title": "18-patch pack",
+          "source": "https://www.gjheshop.com/product/borsch-med-mosquito-repellent-patch-18-patches/",
+          "description": "Goh Joo Hin lists the Borsch Med Mosquito Repellent Patch in an 18-patch pack. The official gallery shows the carton, pouch and sticker sheet. This folio illustrates those three pack forms."
+        },
+        {
+          "target": "borsch-lingzhi-story",
+          "title": "Lingzhi twin pack",
+          "source": "https://www.gjheshop.com/product/borsch-med-100-lingzhi-cracked-spores-powder-capsule-200mg-x-60-capsules-twin-pack/",
+          "description": "The Borsch Med Lingzhi Cracked Spores Powder Capsule twin pack has its own catalogue entry. The gallery shows its pack front and side views."
+        }
+      ],
+      "route": {
+        "map": {
+          "x": 19.999998092651367,
+          "y": -0.01990407705307007,
+          "z": 2.400001049041748,
+          "zone": "atrium",
+          "calls": 34,
+          "triangles": 43201,
+          "door": 1,
+          "cap": true,
+          "tier": "balanced"
+        },
+        "threshold": {
+          "x": 19.999828338623047,
+          "y": 0.08103466033935547,
+          "z": -0.8224108219146729,
+          "zone": "planned-space-04",
+          "calls": 38,
+          "triangles": 43721,
+          "door": 1,
+          "cap": true,
+          "tier": "balanced"
+        },
+        "inside": {
+          "x": 19.999950408935547,
+          "y": 0.07985430955886841,
+          "z": -1.6428909301757812,
+          "zone": "planned-space-04",
+          "calls": 37,
+          "triangles": 43043,
+          "door": 1,
+          "cap": true,
+          "tier": "balanced"
+        },
+        "near": {
+          "x": 19.51932716369629,
+          "y": 0.08103722333908081,
+          "z": -5.129552841186523,
+          "zone": "planned-space-04",
+          "calls": 30,
+          "triangles": 34503,
+          "door": 0,
+          "cap": true,
+          "tier": "balanced"
+        },
+        "right-aisle": {
+          "x": 23.224245071411133,
+          "y": 0.0804557204246521,
+          "z": -6.49521017074585,
+          "zone": "planned-space-04",
+          "calls": 23,
+          "triangles": 21919,
+          "door": 0,
+          "cap": true,
+          "tier": "balanced"
+        },
+        "exit": {
+          "x": 19.999879837036133,
+          "y": -0.020003914833068848,
+          "z": 4.223164081573486,
+          "zone": "atrium",
+          "calls": 47,
+          "triangles": 90109,
+          "door": 0,
+          "cap": true,
+          "tier": "balanced"
+        }
+      }
+    },
+    "1440": {
+      "entryControl": "keyboard W",
+      "entry": {
+        "x": 19.999591827392578,
+        "z": -0.5973292589187622,
+        "zone": "planned-space-04",
+        "capsule": true
+      },
+      "served": {
+        "demos/corporate/gjh/v11/index.html": "94cca84f14b639237aad39679833ecac9c962b1fa8b0f742c2fa1fdff8bf99a0",
+        "demos/corporate/gjh/v11/style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "demos/corporate/gjh/v11/script.bundle.js": "0632e5a42f5d01e08d361902491d8e383aae268065129c0fea1e81867f8d43ed",
+        "demos/corporate/gjh/v11/assets/world.bundle.js": "739689b0d69b57255c226e45f63d2c8b59b5cde985e625e03e128e01d5c126c1",
+        "demos/corporate/gjh/v11/assets/player.bundle.js": "c4dba37082b8694c626ac708b0fb06649670219f568815d3eb6576a0f9cc263c",
+        "demos/corporate/gjh/v11/assets/interiors/s04-patch-folio-detailed.glb": "9cc865aeb321ef69e3a76a42ae967ef3ad0a100250ca207908b89c6f28f5f18e",
+        "demos/corporate/gjh/v11/assets/interiors/s04-borsch-details.glb": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2"
+      },
+      "stories": [
+        {
+          "target": "borsch-patch-story",
+          "title": "18-patch pack",
+          "source": "https://www.gjheshop.com/product/borsch-med-mosquito-repellent-patch-18-patches/",
+          "description": "Goh Joo Hin lists the Borsch Med Mosquito Repellent Patch in an 18-patch pack. The official gallery shows the carton, pouch and sticker sheet. This folio illustrates those three pack forms."
+        },
+        {
+          "target": "borsch-lingzhi-story",
+          "title": "Lingzhi twin pack",
+          "source": "https://www.gjheshop.com/product/borsch-med-100-lingzhi-cracked-spores-powder-capsule-200mg-x-60-capsules-twin-pack/",
+          "description": "The Borsch Med Lingzhi Cracked Spores Powder Capsule twin pack has its own catalogue entry. The gallery shows its pack front and side views."
+        }
+      ],
+      "route": {
+        "map": {
+          "x": 19.999998092651367,
+          "y": -0.019904136657714844,
+          "z": 2.4000015258789062,
+          "zone": "atrium",
+          "calls": 58,
+          "triangles": 164916,
+          "door": 1,
+          "cap": true,
+          "tier": "detailed"
+        },
+        "threshold": {
+          "x": 19.99984359741211,
+          "y": 0.08103471994400024,
+          "z": -0.8260129690170288,
+          "zone": "planned-space-04",
+          "calls": 65,
+          "triangles": 163394,
+          "door": 1,
+          "cap": true,
+          "tier": "detailed"
+        },
+        "inside": {
+          "x": 20.000003814697266,
+          "y": 0.0809553861618042,
+          "z": -1.6429659128189087,
+          "zone": "planned-space-04",
+          "calls": 57,
+          "triangles": 131266,
+          "door": 1,
+          "cap": true,
+          "tier": "detailed"
+        },
+        "near": {
+          "x": 19.519285202026367,
+          "y": 0.0809597373008728,
+          "z": -5.129477024078369,
+          "zone": "planned-space-04",
+          "calls": 44,
+          "triangles": 99094,
+          "door": 0,
+          "cap": true,
+          "tier": "detailed"
+        },
+        "right-aisle": {
+          "x": 23.22555160522461,
+          "y": 0.08015638589859009,
+          "z": -6.495254993438721,
+          "zone": "planned-space-04",
+          "calls": 35,
+          "triangles": 53698,
+          "door": 0,
+          "cap": true,
+          "tier": "detailed"
+        },
+        "exit": {
+          "x": 20.000534057617188,
+          "y": -0.020003914833068848,
+          "z": 4.223631381988525,
+          "zone": "atrium",
+          "calls": 70,
+          "triangles": 206556,
+          "door": 0,
+          "cap": true,
+          "tier": "detailed"
+        }
+      }
+    }
+  },
+  "geometry": {
+    "supportHeightMetres": 1.15,
+    "productDetailSha256": "aae6f66ddf2b2cba1335128685ba9141e5a8cc9fa2ec9bd699c937dc305dace2",
+    "focalPlacement": {
+      "id": "S04-focal",
+      "socket": "focal",
+      "zone": "left",
+      "anchor": "floor",
+      "xyz": [
+        -0.48,
+        0.081,
+        -0.63
+      ],
+      "yawDeg": 7,
+      "scale": [
+        1,
+        1,
+        1
+      ],
+      "size": [
+        2.38,
+        2.35,
+        1.12
+      ],
+      "modelId": "patch-folio",
+      "lod": {
+        "low": "s04-patch-folio-low.glb",
+        "balanced": "s04-patch-folio-balanced.glb",
+        "detailed": "s04-patch-folio-detailed.glb"
+      },
+      "collision": "kit",
+      "action": [
+        "open"
+      ],
+      "a11y": {
+        "en": "Fan-fold patch folio counter",
+        "action": "Turn a patch folio page",
+        "result": "The next patch design is on display."
+      },
+      "standing": [
+        -0.5,
+        0.8
+      ],
+      "reachDistance": 1.65,
+      "placementNote": "Registered to the immovable room-detail artwork."
+    },
+    "retainedOvalCollider": {
+      "center": [
+        -0.58,
+        0.65,
+        -0.63
+      ],
+      "size": [
+        2.91,
+        1.28,
+        1.33
+      ]
+    },
+    "baseline": [
+      {
+        "file": "s04-patch-folio-low.glb",
+        "triangles": 204,
+        "bytes": 26892,
+        "sha256": "2fdb69a463e3d44d9e199065c78c50e23b14a6f853630efc2841c2f521276f78"
+      },
+      {
+        "file": "s04-patch-folio-balanced.glb",
+        "triangles": 844,
+        "bytes": 75300,
+        "sha256": "4ecc18d73587b7fa7638e33914ee945132f6efd3b6826fa866b9a402a2365cc6"
+      },
+      {
+        "file": "s04-patch-folio-detailed.glb",
+        "triangles": 1524,
+        "bytes": 103268,
+        "sha256": "7e0143edad3b28c75083092727c8938f72a204c3c4390cc4808b58e1f0c1dc82"
+      }
+    ],
+    "candidate": [
+      {
+        "file": "s04-patch-folio-low.glb",
+        "triangles": 114,
+        "bytes": 9928,
+        "sha256": "72d9380d75bafdd81fde56ffcf3a432f8b236b944ffa9cd5bc4986767c1f7ac3"
+      },
+      {
+        "file": "s04-patch-folio-balanced.glb",
+        "triangles": 162,
+        "bytes": 13672,
+        "sha256": "324e9fa6b7158d5b34f12a59a87a251924c813d1736143b679dc51d670bb0366"
+      },
+      {
+        "file": "s04-patch-folio-detailed.glb",
+        "triangles": 226,
+        "bytes": 18668,
+        "sha256": "9cc865aeb321ef69e3a76a42ae967ef3ad0a100250ca207908b89c6f28f5f18e"
+      }
+    ]
+  }
+}

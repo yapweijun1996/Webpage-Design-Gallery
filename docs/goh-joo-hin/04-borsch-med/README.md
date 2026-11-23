@@ -6,9 +6,23 @@
 
 ## Player walkthrough
 
-Chrome entry and the shop’s right-side circulation passed on desktop and in touch emulation. The main patch folio reads as a display, while the existing rows of generic packs carry no verified SKU identity.
+Chrome entry and the shop’s right-side circulation passed on desktop and in touch emulation. Two inclined leaves and a centre gutter identify the patch folio from the doorway. The surrounding generic shelf stock remains contextual display dressing.
 
 [Chrome player baseline](player-baseline.webp)
+
+## Open folio
+
+From the Map entrance the central display now shows two cream pages meeting at a dark spine on a burgundy plinth. At 390 px the spread occupied about 50 CSS px on arrival and 70 at the door. The left page carries an unprinted patch-shaped inset. The catalogue’s carton, pouch and 2 × 3 backing sheet sit on the 1.15 m front ledge. The right aisle leads separately to the Lingzhi twin pack.
+
+| Matched views in Chrome | Arrival | Door | Inside | Folio | Right aisle | Exit |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| [390 px, Low](folio-comparison-390.webp) | 27 | 35 | 34 | 25 | 21 | 31 |
+| [768 px, Balanced](folio-comparison-768.webp) | 28 | 37 | 36 | 29 | 22 | 37 |
+| [1440 px, Detailed](folio-comparison-1440.webp) | 38 | 60 | 53 | 40 | 34 | 50 |
+
+The table shows draw calls with NPCs disabled for the before-and-after comparison. The door was fully open for both arrival frames and all 18 pairs had equal draw counts. The folio uses one draw at every quality level and 114, 162 and 226 triangles respectively. The integrated run kept the normal NPC setting, crossed the door with the touch joystick or W key, followed the right aisle, opened both Story dialogs and returned to the arcade. Seven requested file hashes per profile identify the build and models used. [Routes, geometry and source files](folio-route.json)
+
+Five advisers accepted the display change. A small patch remains difficult to see from the corridor, and the dense, symmetrical shelving differs from the off-centre folio and quieter right-hand passage in the later concept. The original right-hand walking line remains clear. Retail print and the physical patch-pack dimensions still require source material. [Product research](brand-research.md)
 
 ## Interior design
 
@@ -16,7 +30,7 @@ Turn the pale space into a quiet product library. Use warm bone plaster, brushed
 
 | Element | Placement and interaction |
 | --- | --- |
-| Main display | Fan-fold patch folio counter, local XYZ (-0.48, 0.081, -0.63), yaw 7°. Keep it aimed into the left part of the view; keep the carton, pouch and sticker study on the existing ledge. |
+| Main display | Open two-leaf patch folio on a rose and oxblood plinth, local XYZ (-0.48, 0.081, -0.63), yaw 7°. The existing carton, pouch and sticker study remain on the 1.15 m ledge. |
 | Visitor route | Threshold local XZ (0, 6). Keep the tested right aisle beside the folio open from the entry through to the rear cabinets. |
 | Fixtures and use points | Shallow wall stock rails and the service shelf stay off the walking route. The Lingzhi story opens from the right aisle near the cabinet. |
 
@@ -26,7 +40,7 @@ World origin (20, 0, -6), yaw 0°. Dimensions are authored metres. The [floor pl
 
 | Reference | Proposed placement | Model status |
 | --- | --- | --- |
-| Borsch Med Mosquito Repellent Patch, 18 patches | Open folio and an adjacent flush shelf socket | Unprinted carton with a through-hanger, sealed pouch and six rounded-square patches on a 2 × 3 backing sheet. Physical dimensions and retail surfaces remain pending. |
+| Borsch Med Mosquito Repellent Patch, 18 patches | Front ledge of the open folio | Unprinted carton with a through-hanger, sealed pouch and six rounded-square patches on a 2 × 3 backing sheet. Physical dimensions and retail surfaces remain pending. |
 | Lingzhi Cracked Spores Powder Capsule 200 mg × 60 twin pack | Right product library shelf | Two unprinted cartons use the catalogue's single-box dimensions and twin-pack envelope. The pack photographs remain in the separate catalogue listing. |
 
 The [editable packaging studies](../../../models/gjh-borsch-packs/README.md) link the official references and describe the dimensional evidence. The proposal presents the products without treatment, dosing or performance claims.

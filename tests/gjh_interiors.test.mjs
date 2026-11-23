@@ -130,6 +130,34 @@ function assertArtworkTexture(map,tier) {
   assert.equal(map.premultiplyAlpha,false);
 }
 
+test('Borsch folio shows two inclined pages and supports the existing patch display at every tier', async t => {
+  mockInteriorDownloads(t);
+  const load = createInteriorModelLoader(T,assets);
+  const store = interiorStores.S04;
+  const signal = new AbortController().signal;
+  const rotation = radians(store.anchor.yaw_deg);
+  const patchParts = [[-.89,-.23],[-.59,-.205],[-.36,-.22]];
+  for (const tier of interiorTiers) {
+    const folio = await load(interiorAsset(store,tier),signal);
+    folio.updateMatrixWorld(true);
+    const cast = (point,direction) => new T.Raycaster(point,direction).intersectObject(folio)[0];
+    assert.equal(counts(folio).calls,1,tier);
+    for (const x of [-.95,-.64,-.28,.28,.64,.95]) {
+      const hit = cast(new T.Vector3(x,1.55,2),new T.Vector3(0,0,-1));
+      assert(hit?.face.normal.y > .40 && hit.face.normal.z > .65,`${tier} readable inclined paper at ${x}`);
+    }
+    const gutter = cast(new T.Vector3(0,1.60,2),new T.Vector3(0,0,-1));
+    assert.equal(gutter,undefined,`${tier} visible gutter between leaves`);
+    const [ax,ay,az] = store.anchor.position_m;
+    for (const [x,z] of patchParts) {
+      const point = new T.Vector3(x-ax,1.153-ay+.01,z-az).applyAxisAngle(new T.Vector3(0,1,0),-rotation);
+      const hit = cast(point,new T.Vector3(0,-1,0));
+      assert(hit && Math.abs(hit.point.y+ay-1.15)<1e-5,`${tier} keeps the three pack parts supported`);
+    }
+    disposeInteriorModel(folio);
+  }
+});
+
 test('every tier fits its programme budget using parsed GLBs and the actual merged room meshes', async t => {
   mockInteriorDownloads(t);
   let graphicsTier = 'low';
