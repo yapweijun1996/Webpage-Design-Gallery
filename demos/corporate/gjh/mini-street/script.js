@@ -18,24 +18,62 @@ let previousFocus;
 let street;
 
 if (typeof dialog.showModal === "function") {
+  const sectionsByHash = new Map(sections.map((section) => [`#${section.id}`, section]));
+  const historyMarker = "__gjhMiniStreetStop";
+  let pendingOpener = null;
+  function decodedHash() {
+    try { return decodeURIComponent(location.hash); }
+    catch { return ""; }
+  }
   dialog.append(...sections);
-  for (const stop of stops.filter((link) => link.hash)) {
+
+  function syncLocation() {
+    const hash = decodedHash();
+    const selected = sectionsByHash.get(hash);
+    if (!selected) {
+      pendingOpener = null;
+      if (dialog.open) dialog.close();
+      return;
+    }
+    previousFocus = pendingOpener || stops.find((stop) => stop.hash === hash);
+    pendingOpener = null;
+    if (dialog.open && !selected.hidden) return;
+    for (const section of sections) section.hidden = section !== selected;
+    dialog.setAttribute("aria-labelledby", selected.getAttribute("aria-labelledby"));
+    result.textContent = "";
+    for (const capsule of capsules) capsule.setAttribute("aria-pressed", "false");
+    if (!dialog.open) dialog.showModal();
+    dialog.scrollTop = 0;
+    street?.setPaused(true);
+    selected.querySelector("h2").focus();
+  }
+
+  for (const stop of stops.filter((link) => sectionsByHash.has(link.hash))) {
     stop.addEventListener("click", (event) => {
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      const selected = document.querySelector(stop.hash);
-      previousFocus = stop;
-      for (const section of sections) section.hidden = section !== selected;
-      dialog.setAttribute("aria-labelledby", selected.getAttribute("aria-labelledby"));
-      result.textContent = "";
-      for (const capsule of capsules) capsule.setAttribute("aria-pressed", "false");
-      dialog.showModal();
-      dialog.scrollTop = 0;
-      street?.setPaused(true);
-      selected.querySelector("h2").focus();
+      pendingOpener = stop;
+      if (decodedHash() !== stop.hash) {
+        const previousState = history.state;
+        const state = previousState && typeof previousState === "object" && !Array.isArray(previousState)
+          ? {...previousState} : {};
+        state[historyMarker] = true;
+        history.pushState(state, "", stop.hash);
+      }
+      syncLocation();
     });
   }
+  window.addEventListener("hashchange", syncLocation);
   dialog.addEventListener("close", () => {
+    if (dialog.open) return;
+    if (sectionsByHash.has(decodedHash())) {
+      if (history.state?.[historyMarker]) history.back();
+      else {
+        const url = new URL(location.href);
+        url.hash = "";
+        history.replaceState(history.state, "", url);
+      }
+    }
     street?.setPaused(false);
     previousFocus?.focus();
   });
@@ -44,6 +82,14 @@ if (typeof dialog.showModal === "function") {
       event.preventDefault();
       dialog.close();
     });
+  }
+  syncLocation();
+  if (document.readyState !== "complete") {
+    window.addEventListener("load", () => requestAnimationFrame(() => {
+      if (dialog.open && !dialog.contains(document.activeElement)) {
+        dialog.querySelector(".detail:not([hidden]) h2")?.focus();
+      }
+    }), {once: true});
   }
 }
 
