@@ -1,0 +1,204 @@
+[
+  {
+    "distance": 2.5,
+    "poseDelta": {
+      "camera": 0.0,
+      "focus": 0.0,
+      "head": 0.0,
+      "leftHand": 0.0,
+      "rightHand": 0.0
+    },
+    "metrics": {
+      "face": [
+        886,
+        294,
+        1033,
+        385
+      ],
+      "skin": [
+        [
+          949,
+          280,
+          970,
+          302
+        ]
+      ],
+      "before": {
+        "size": [
+          1920,
+          900
+        ],
+        "laplacian_variance": 2655.454754003542,
+        "mean_skin_luminance": 0.5550377634494056,
+        "mean_skin_srgb_luma": 0.7694817044393516
+      },
+      "after": {
+        "size": [
+          1920,
+          900
+        ],
+        "laplacian_variance": 4010.022772132701,
+        "mean_skin_luminance": 0.5686939941566838,
+        "mean_skin_srgb_luma": 0.778005473219591
+      },
+      "sharpness_ratio": 1.5101077380764711,
+      "target": 2,
+      "sharpness_pass": false,
+      "features": {
+        "eye": {
+          "boxes": [
+            [
+              898,
+              318,
+              948,
+              364
+            ],
+            [
+              968,
+              318,
+              1020,
+              364
+            ]
+          ],
+          "before": 3986.344663985261,
+          "after": 6805.646028896193,
+          "ratio": 1.7072397403019328
+        },
+        "brow": {
+          "boxes": [
+            [
+              903,
+              294,
+              941,
+              312
+            ],
+            [
+              976,
+              294,
+              1017,
+              312
+            ]
+          ],
+          "before": 4026.309299036232,
+          "after": 3838.425306559503,
+          "ratio": 0.9533359266458485
+        },
+        "mouth": {
+          "boxes": [
+            [
+              940,
+              366,
+              976,
+              386
+            ]
+          ],
+          "before": 3103.6174708975955,
+          "after": 2428.513554179055,
+          "ratio": 0.7824783746550782
+        }
+      },
+      "skin_not_darker": true,
+      "skin_in_range": true
+    }
+  },
+  {
+    "distance": 5.2,
+    "poseDelta": {
+      "camera": 0.0,
+      "focus": 0.0,
+      "head": 0.0,
+      "leftHand": 0.0,
+      "rightHand": 0.0
+    },
+    "metrics": {
+      "face": [
+        924,
+        377,
+        993,
+        421
+      ],
+      "skin": [
+        [
+          955,
+          370,
+          964,
+          379
+        ]
+      ],
+      "before": {
+        "size": [
+          1920,
+          900
+        ],
+        "laplacian_variance": 6491.996316912185,
+        "mean_skin_luminance": 0.5599080259374036,
+        "mean_skin_srgb_luma": 0.7724148729121277
+      },
+      "after": {
+        "size": [
+          1920,
+          900
+        ],
+        "laplacian_variance": 6433.925732564128,
+        "mean_skin_luminance": 0.5701530341253702,
+        "mean_skin_srgb_luma": 0.7787613943355121
+      },
+      "sharpness_ratio": 0.9910550497083959,
+      "features": {
+        "eye": {
+          "boxes": [
+            [
+              928,
+              388,
+              953,
+              412
+            ],
+            [
+              962,
+              388,
+              989,
+              412
+            ]
+          ],
+          "before": 10208.7272531535,
+          "after": 10351.369966609527,
+          "ratio": 1.013972624590589
+        },
+        "brow": {
+          "boxes": [
+            [
+              934,
+              377,
+              951,
+              386
+            ],
+            [
+              967,
+              377,
+              985,
+              386
+            ]
+          ],
+          "before": 10371.347440074218,
+          "after": 7609.472307830459,
+          "ratio": 0.7337014165033126
+        },
+        "mouth": {
+          "boxes": [
+            [
+              950,
+              412,
+              968,
+              422
+            ]
+          ],
+          "before": 4801.0432257238435,
+          "after": 2569.488663135615,
+          "ratio": 0.535193819828235
+        }
+      },
+      "skin_not_darker": true,
+      "skin_in_range": true
+    }
+  }
+]

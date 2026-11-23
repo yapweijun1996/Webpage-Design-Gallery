@@ -15,6 +15,27 @@ The full-face target is 2× at 2.5 m. At 5.2 m the smaller mouth projects to few
 
 [2.5 m contact sheet](contact-2.5m.png) · [5.2 m contact sheet](contact-5.2m.png) · [Oblique contact sheet](contact-oblique.png)
 
+## Mall runtime recheck
+
+Headed Chrome 158 with ANGLE Metal measured the shipped runtime at commit
+`130f8ea377`. The 2.5 m score reached **1.51×** against the **2.00×** target.
+
+| Camera distance | Baseline variance | Shipped variance | Face ratio | Eye ratio | Brow ratio | Mouth ratio |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 2.5 m | 2,655.45 | 4,010.02 | **1.51×** | 1.71× | 0.95× | 0.78× |
+| 5.2 m | 6,492.00 | 6,433.93 | 0.99× | 1.01× | 0.73× | 0.54× |
+
+The test loaded the archived Round 2 rig from `dbad8a11b` and staged it at the
+same player placement as the shipped `gjh-tripo-entry.glb`. It waited for the
+shipped `gjh-tripo-portrait-2k.webp` to load before capture. Both rigs used
+2048² atlases, the same material shader and texture sampling, and the same
+1920 × 900 native buffer at render scale 1. The Detailed tier used Everyday
+atrium lighting, ACES exposure 0.72 and bloom. Camera, focus, head and hand
+positions matched at both distances. The table uses the same native face and
+feature boxes as the offline test. The 5.2 m score is informational.
+
+[2.5 m browser comparison](chrome-comparison-2.5m.png) · [5.2 m browser comparison](chrome-comparison-5.2m.png) · [Native-pixel measurements](chrome-metrics.json) · [Capture settings](chrome-capture.json)
+
 ## Reproduce
 
 Use the guarded Blender invocation in [the signage documentation](../../gjh-v11-signage-assets.md). Supply a Round 2 baseline GLB with the hash recorded in `before.json`.

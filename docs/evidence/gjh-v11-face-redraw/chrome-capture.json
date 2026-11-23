@@ -1,0 +1,341 @@
+{
+  "baselineGLBSHA256": "c18ad275c1c255e02cd6d0bd5750f796ab9945f982f3ec68487209c6a3b81ff9",
+  "poses": [
+    {
+      "side": "before",
+      "pose": {
+        "head": [
+          0.4999996775742472,
+          0.44199537841950515
+        ],
+        "leftHand": [
+          0.5764037592342307,
+          0.48602167455424816
+        ],
+        "rightHand": [
+          0.42411188818880735,
+          0.48598321303514197
+        ],
+        "torso": 0.1300405633923169,
+        "camera": [
+          9.996978443357538,
+          0.8841483497204498,
+          9.385629070721349
+        ],
+        "focus": [
+          9.996675244280889,
+          0.8841483497204498,
+          11.885629052335412
+        ],
+        "buffer": [
+          1920,
+          900
+        ],
+        "renderScale": 1,
+        "model": "tripo_node_405dc0a0",
+        "distance": 2.5,
+        "subject": "player"
+      },
+      "runtime": {
+        "asset": "assets/gjh-tripo-entry.glb",
+        "model": "gjh-tripo-visitor",
+        "tier": "detailed",
+        "theme": "everyday",
+        "buffer": [
+          1920,
+          900
+        ],
+        "exposure": 0.72,
+        "renderScale": 1,
+        "zone": "atrium",
+        "position": [
+          10,
+          0.014999985694885254,
+          12
+        ],
+        "bloom": true,
+        "pixelRatio": 1,
+        "lod": {
+          "level": 0,
+          "distance": 6.197430199716676,
+          "available": true,
+          "failed": false
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 900,
+          "pixelRatio": 1
+        }
+      },
+      "file": "chrome-before-2.5m.png",
+      "sha256": "45e4b88597818ba6a7b591b195bb20d3217d61b1758b9055ddea71454ec8015d"
+    },
+    {
+      "side": "after",
+      "pose": {
+        "head": [
+          0.4999996775742472,
+          0.44199537841950515
+        ],
+        "leftHand": [
+          0.5764037592342307,
+          0.48602167455424816
+        ],
+        "rightHand": [
+          0.42411188818880735,
+          0.48598321303514197
+        ],
+        "torso": 0.1300405633923169,
+        "camera": [
+          9.996978443357538,
+          0.8841483497204498,
+          9.385629070721349
+        ],
+        "focus": [
+          9.996675244280889,
+          0.8841483497204498,
+          11.885629052335412
+        ],
+        "buffer": [
+          1920,
+          900
+        ],
+        "renderScale": 1,
+        "model": "tripo_node_405dc0a0",
+        "distance": 2.5,
+        "subject": "player"
+      },
+      "runtime": {
+        "asset": "assets/gjh-tripo-entry.glb",
+        "model": "gjh-tripo-visitor",
+        "tier": "detailed",
+        "theme": "everyday",
+        "buffer": [
+          1920,
+          900
+        ],
+        "exposure": 0.72,
+        "renderScale": 1,
+        "zone": "atrium",
+        "position": [
+          10,
+          0.014999985694885254,
+          12
+        ],
+        "bloom": true,
+        "pixelRatio": 1,
+        "lod": {
+          "level": 0,
+          "distance": 6.197430199716676,
+          "available": true,
+          "failed": false
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 900,
+          "pixelRatio": 1
+        }
+      },
+      "file": "chrome-after-2.5m.png",
+      "sha256": "7e50be891e43d67dbb89e8d649c2c4df245e1f02789ac316227406f2cb7785c0"
+    },
+    {
+      "side": "before",
+      "pose": {
+        "head": [
+          0.499999844411595,
+          0.47200953560915737
+        ],
+        "leftHand": [
+          0.5364675651076756,
+          0.49332813596610503
+        ],
+        "rightHand": [
+          0.46377855375035865,
+          0.49330977825745037
+        ],
+        "torso": 0.06246462351702653,
+        "camera": [
+          9.997305898360318,
+          0.8841483497204498,
+          6.685629090578159
+        ],
+        "focus": [
+          9.996675244280889,
+          0.8841483497204498,
+          11.885629052335412
+        ],
+        "buffer": [
+          1920,
+          900
+        ],
+        "renderScale": 1,
+        "model": "tripo_node_405dc0a0",
+        "distance": 5.2,
+        "subject": "player"
+      },
+      "runtime": {
+        "asset": "assets/gjh-tripo-entry.glb",
+        "model": "gjh-tripo-visitor",
+        "tier": "detailed",
+        "theme": "everyday",
+        "buffer": [
+          1920,
+          900
+        ],
+        "exposure": 0.72,
+        "renderScale": 1,
+        "zone": "atrium",
+        "position": [
+          10,
+          0.014999985694885254,
+          12
+        ],
+        "bloom": true,
+        "pixelRatio": 1,
+        "lod": {
+          "level": 0,
+          "distance": 6.197430199716676,
+          "available": true,
+          "failed": false
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 900,
+          "pixelRatio": 1
+        }
+      },
+      "file": "chrome-before-5.2m.png",
+      "sha256": "21856072b7b277115b4a9ad0c649b93ddd2e5a3a530998f754faaed8e1c8fcb2"
+    },
+    {
+      "side": "after",
+      "pose": {
+        "head": [
+          0.499999844411595,
+          0.47200953560915737
+        ],
+        "leftHand": [
+          0.5364675651076756,
+          0.49332813596610503
+        ],
+        "rightHand": [
+          0.46377855375035865,
+          0.49330977825745037
+        ],
+        "torso": 0.06246462351702653,
+        "camera": [
+          9.997305898360318,
+          0.8841483497204498,
+          6.685629090578159
+        ],
+        "focus": [
+          9.996675244280889,
+          0.8841483497204498,
+          11.885629052335412
+        ],
+        "buffer": [
+          1920,
+          900
+        ],
+        "renderScale": 1,
+        "model": "tripo_node_405dc0a0",
+        "distance": 5.2,
+        "subject": "player"
+      },
+      "runtime": {
+        "asset": "assets/gjh-tripo-entry.glb",
+        "model": "gjh-tripo-visitor",
+        "tier": "detailed",
+        "theme": "everyday",
+        "buffer": [
+          1920,
+          900
+        ],
+        "exposure": 0.72,
+        "renderScale": 1,
+        "zone": "atrium",
+        "position": [
+          10,
+          0.014999985694885254,
+          12
+        ],
+        "bloom": true,
+        "pixelRatio": 1,
+        "lod": {
+          "level": 0,
+          "distance": 6.197430199716676,
+          "available": true,
+          "failed": false
+        },
+        "viewport": {
+          "width": 1920,
+          "height": 900,
+          "pixelRatio": 1
+        }
+      },
+      "file": "chrome-after-5.2m.png",
+      "sha256": "ad787661bfecd55295079257aac2116ff968f82ad72ccb660b698299aadf3b48"
+    }
+  ],
+  "requests": [
+    {
+      "file": "gjh-tripo-portrait-2k.webp",
+      "status": 200
+    },
+    {
+      "file": "__benchmark-round2.glb",
+      "status": 200
+    }
+  ],
+  "pageErrors": [],
+  "browserVersion": "158.0.8127.37",
+  "rigs": {
+    "archive": {
+      "mesh": "tripo_node_405dc0a0",
+      "vertices": 15920,
+      "triangles": 13997,
+      "atlas": [
+        2048,
+        2048
+      ],
+      "lift": 0.55,
+      "shader": "gjh-tripo-portrait-v1",
+      "anisotropy": 4,
+      "mag": 1006,
+      "min": 1008
+    },
+    "live": {
+      "mesh": "tripo_node_405dc0a0",
+      "vertices": 13967,
+      "triangles": 11763,
+      "atlas": [
+        2048,
+        2048
+      ],
+      "lift": 0.55,
+      "shader": "gjh-tripo-portrait-v1",
+      "anisotropy": 4,
+      "mag": 1006,
+      "min": 1008
+    },
+    "placement": {
+      "position": [
+        0,
+        -0.0022649125630899245,
+        0
+      ],
+      "quaternion": [
+        0,
+        1,
+        0,
+        6.123233995736766e-17
+      ],
+      "scale": [
+        1.738926566168221,
+        1.738926566168221,
+        1.738926566168221
+      ]
+    }
+  }
+}
