@@ -48,6 +48,73 @@ def extrude_strip(name, pairs, front, depth, material):
     return obj
 
 
+def add_category_lettering(crown, material):
+    """Fit original block lettering into the crown's existing cream face."""
+    def rectangle(left, bottom, right, top):
+        return ((left,bottom),(right,bottom),(right,top),(left,top))
+
+    def rim(outer, inner, closed=False):
+        return [(outer[i-1],outer[i],inner[i],inner[i-1])
+                for i in range(0 if closed else 1,len(outer))]
+
+    a = [
+        ((0,0),(.18,0),(.52,1),(.31,1)),
+        ((.67,0),(.85,0),(.52,1),(.435,.75)),
+        ((.282,.30),(.576,.30),(.523,.47),(.3398,.47)),
+    ]
+    b = [rectangle(0,0,.20,1)] + rim(
+        ((.20,1),(.60,1),(.83,.84),(.67,.50),(.20,.50)),
+        ((.20,.82),(.53,.82),(.65,.78),(.56,.66),(.20,.66)),
+    ) + rim(
+        ((.20,.50),(.67,.50),(.88,.34),(.69,0),(.20,0)),
+        ((.20,.33),(.59,.33),(.69,.29),(.60,.17),(.20,.17)),
+    )
+    o = rim(
+        ((.19,0),(.66,0),(.85,.19),(.85,.81),(.66,1),(.19,1),(0,.81),(0,.19)),
+        ((.28,.18),(.57,.18),(.66,.27),(.66,.73),(.57,.82),(.28,.82),(.19,.73),(.19,.27)),
+        closed=True,
+    )
+    glyphs = {
+        'A': a,
+        'B': b,
+        'L': [rectangle(0,0,.20,1), rectangle(.20,0,.76,.18)],
+        'O': o,
+        'N': [rectangle(0,0,.18,1), rectangle(.67,0,.85,1),
+              ((.18,1),(.18,.72),(.67,0),(.67,.28))],
+        'E': [rectangle(0,0,.20,1), rectangle(.20,0,.79,.18),
+              rectangle(.20,.41,.65,.59), rectangle(.20,.82,.79,1)],
+    }
+    word = 'ABALONE'
+    advances = [.85,.88,.85,.76,.85,.85,.79]
+    cap_height, tracking = .45,.24
+    offset = -(sum(advances) + tracking*(len(word)-1))/2
+    vertices, faces = [], []
+    for letter, advance in zip(word,advances):
+        for quad in glyphs[letter]:
+            start = len(vertices)
+            # Face the aisle and stay ahead of the painted crown by 3 mm.
+            vertices.extend(((offset+x)*cap_height,.025,.185+y*cap_height) for x,y in quad)
+            area = sum(x*v-y*u for (x,y),(u,v) in zip(quad,quad[1:]+quad[:1]))
+            face = tuple(range(start,start+4))
+            faces.append(face if area>0 else face[::-1])
+        offset += advance+tracking
+
+    mesh = bpy.data.meshes.new('Abalone lettering')
+    mesh.from_pydata(vertices,[],faces)
+    mesh.update()
+    ink = bpy.data.objects.new('Abalone lettering',mesh)
+    bpy.context.collection.objects.link(ink)
+    mesh.materials.append(material)
+    colour = mesh.color_attributes.new(name='Finish',type='FLOAT_COLOR',domain='CORNER')
+    for loop in colour.data:
+        loop.color = (.018,.032,.09,1)
+    crown.select_set(True)
+    ink.select_set(True)
+    bpy.context.view_layer.objects.active = crown
+    bpy.ops.object.join()
+    crown.select_set(False)
+
+
 def build(samples, crescent_segments):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     bpy.context.scene.unit_settings.system = 'METRIC'
@@ -62,11 +129,12 @@ def build(samples, crescent_segments):
         values = obj.data.color_attributes.new(name='Finish', type='FLOAT_COLOR', domain='CORNER')
         for loop in values.data:
             loop.color = (*tint, 1)
+        return obj
 
     glow = finish('Warm white concealed underside', (1,.84,.54), emission=.58)
     count = samples * 6
     edge = [(WIDTH*(index/count-.5),.09*(1-cos(index/count*pi*12))) for index in range(count+1)]
-    coloured('Scalloped cream crown', [(p,(p[0],HEIGHT)) for p in edge], .028, DEPTH-.028, (.88,.77,.59))
+    crown = coloured('Scalloped cream crown', [(p,(p[0],HEIGHT)) for p in edge], .028, DEPTH-.028, (.88,.77,.59))
     coloured('Oak profile bead', [(p,(p[0],p[1]+.038)) for p in edge], .013, .032, (.55,.31,.125))
     extrude_strip('Bounced cabinet light strip', [(p,(p[0],p[1]+.018)) for p in edge], .003, .019, glow)
 
@@ -96,6 +164,8 @@ def build(samples, crescent_segments):
         bmesh.ops.recalc_face_normals(data, faces=list(data.faces))
         data.to_mesh(mesh)
         data.free()
+    # Only the closed forms need outward normals recalculated.
+    add_category_lettering(crown,opaque)
 
 
 def add_preview(output):

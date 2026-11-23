@@ -74,7 +74,7 @@ for (const file of [...runtimeAnchors.map(a=>a.file),...names]) {
         groups:gltf.nodes.map(node=>node.name), bounds_m, textures:[], sha256:sha(bytes),
         triangle_cap:asset.tier==='Low'?960:asset.triangle_cap,
         provenance:{kind:'NEW',author:'Yap Wei Jun project / agent-assisted procedural modeling', finish:'solid-pbr',
-          credit:[{credit:'Original scalloped fascia, oak bead, underside light and crescent geometry.'}],
+          credit:[{credit:'Original scalloped crown, oak bead, underside light, crescent and category lettering.'}],
           generator:`${root}/generate.py`, editable_source:`${root}/s01-crescent-header.blend`,
           licence_reference:`${root}/README.md`, licence_text:asset.licence},
         validator:{version:result.validatorVersion,errors,warnings}

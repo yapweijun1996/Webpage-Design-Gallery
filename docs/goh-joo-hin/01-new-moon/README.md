@@ -74,6 +74,26 @@ Five independent reviewers passed the Map-arrival change within their respective
 
 These checks use Chrome with touch emulation and desktop keyboard input. The full-shop review also considers the prominence of the hero product and the remaining items in the [flagship checklist](../../gjh-v11-s01-newmoon-acceptance.md).
 
+### Finding the abalone cabinets from the entrance
+
+The cream crown above the four pickup cabinets carries the word **ABALONE** in dark blue. At the unturned Map arrival, its capitals measured 10 CSS px high on a 390 px phone viewport and 20 px on a 1440 px desktop viewport. At the cabinet aisle they measured 20 and 40 px. The measured letter-to-panel contrast in these four views ranged from 8.39:1 to 9.41:1. [Phone comparison](cabinet-crown-phone.webp) · [Desktop comparison](cabinet-crown-desktop.webp)
+
+Two independent image readers each saw the arrival at both widths. The reader assigned the earlier room inferred shellfish from the opened tin in the window. The reader assigned the revised room read “ABALONE” on the crown and identified the cabinets beneath it as the place to browse. Both were agent reviews. The Map view establishes the product category. Individual pack names become legible closer to the shelves or in the product viewer.
+
+The lettering uses 64 triangles in each existing header model. Both captures requested the same 159 paths on phone and 194 on desktop. Phone Map and cabinet-aisle draw counts held at 58 and 43. Desktop draws attributable to the scene without NPCs held at 87 and 64 at the same two stops. [Editable model and export instructions](../../../models/gjh-new-moon-header/README.md)
+
+Five advisers independently reviewed the category sign at the sampled viewpoints.
+
+| Review | Observation |
+| --- | --- |
+| Visual | The doorway frames the crown and four cabinets. The yellow crescent and country strips remain distinct in the closer view. |
+| Mobile | The sign clears the HUD at arrival and at the shelves. Touch input exercised all four products, both stories and the two stools. |
+| Brand | The shared category accurately covers the four stocked origins. The blue-and-yellow New Moon exterior mark still identifies the shop. |
+| Spatial flow | Both routes crossed the fully open door and reached the real pickup cabinets. The pendant, island and stools leave a clear view along the aisle. |
+| Lighting | Dark-blue letters on cream maintain measured contrast on Low and Detailed in the Everyday theme. The existing crescent, oak trim and illuminated shelf edges remain distinct. |
+
+The original concept also called for a large stacked or fanned display. At Map distance the life-size tins still read as small rows. The [original checklist](../../gjh-v11-s01-newmoon-acceptance.md) keeps that composition visible for the wider shop review.
+
 ### Country labels on the four cabinets
 
 The upper light rail used to run across the lettering on all four country signs in the default expanded room. The signs now sit on the cabinet headers above the rail. At the same four stops from the entrance to the shelves, Chrome with ANGLE Metal recorded 58, 61, 55 and 42 draw calls at 390 × 844 on Low, and 87, 88, 77 and 66 at 1440 × 900 on Detailed, before and after the change. The four pickup points matched the baseline. In those earlier cabinet captures, the desktop arrival also clipped the top of the large fascia logo. The later Map-arrival refit is documented above. [Native-pixel label comparison](cabinet-labels-comparison.png)

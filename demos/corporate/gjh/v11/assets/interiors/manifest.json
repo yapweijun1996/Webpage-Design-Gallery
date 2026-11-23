@@ -15,7 +15,7 @@
         "finish": "solid-pbr",
         "credit": [
           {
-            "credit": "Original scalloped fascia, oak bead, underside light and crescent geometry."
+            "credit": "Original scalloped crown, oak bead, underside light, crescent and category lettering."
           }
         ],
         "generator": "models/gjh-new-moon-header/generate.py",
@@ -23,9 +23,9 @@
         "licence_reference": "models/gjh-new-moon-header/README.md",
         "licence_text": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
       },
-      "triangles": 896,
-      "bytes": 50244,
-      "vertices": 1310,
+      "triangles": 960,
+      "bytes": 55236,
+      "vertices": 1438,
       "materials": [
         "Cream enamel, honey oak and yellow finish",
         "Warm white concealed underside"
@@ -50,7 +50,7 @@
         ]
       },
       "textures": [],
-      "sha256": "b50e7473ab01d2f75349ea4103101dc9b4175d723fd10985fff72303fe9992a9",
+      "sha256": "e520bfff0b1ca492c8b23afca0cfab251da00eda435481a60287ffb62948313f",
       "triangle_cap": 960,
       "validator": {
         "version": "2.0.0-dev.3.10",
@@ -72,7 +72,7 @@
         "finish": "solid-pbr",
         "credit": [
           {
-            "credit": "Original scalloped fascia, oak bead, underside light and crescent geometry."
+            "credit": "Original scalloped crown, oak bead, underside light, crescent and category lettering."
           }
         ],
         "generator": "models/gjh-new-moon-header/generate.py",
@@ -80,9 +80,9 @@
         "licence_reference": "models/gjh-new-moon-header/README.md",
         "licence_text": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
       },
-      "triangles": 1408,
-      "bytes": 72472,
-      "vertices": 1922,
+      "triangles": 1472,
+      "bytes": 77464,
+      "vertices": 2050,
       "materials": [
         "Cream enamel, honey oak and yellow finish",
         "Warm white concealed underside"
@@ -107,7 +107,7 @@
         ]
       },
       "textures": [],
-      "sha256": "6790b5483c48a128a7e2a36e593705e3b02edf294e6bea8aefa11f1c287e5bcc",
+      "sha256": "008a3241a14dc1b2b99f369c3d37a5bc33a55f8d2d93114da38ba8ed5d70eb4b",
       "triangle_cap": 2400,
       "validator": {
         "version": "2.0.0-dev.3.10",
@@ -129,7 +129,7 @@
         "finish": "solid-pbr",
         "credit": [
           {
-            "credit": "Original scalloped fascia, oak bead, underside light and crescent geometry."
+            "credit": "Original scalloped crown, oak bead, underside light, crescent and category lettering."
           }
         ],
         "generator": "models/gjh-new-moon-header/generate.py",
@@ -137,9 +137,9 @@
         "licence_reference": "models/gjh-new-moon-header/README.md",
         "licence_text": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified."
       },
-      "triangles": 2080,
-      "bytes": 106456,
-      "vertices": 2882,
+      "triangles": 2144,
+      "bytes": 111452,
+      "vertices": 3010,
       "materials": [
         "Cream enamel, honey oak and yellow finish",
         "Warm white concealed underside"
@@ -164,7 +164,7 @@
         ]
       },
       "textures": [],
-      "sha256": "22a6e2a9a5d886b5f532b8fcd0f9991493ef4fecb417b1066049e86c622d1ae6",
+      "sha256": "90d2459638ca953917d0a5480099d9c4c66ffb0ea918235d35f88fcb5544d654",
       "triangle_cap": 6000,
       "validator": {
         "version": "2.0.0-dev.3.10",
@@ -2948,9 +2948,9 @@
     }
   ],
   "totals": {
-    "low_anchor_triangles": 8756,
-    "low_anchor_bytes": 754188,
-    "projected_full_low_triangles": 31002,
+    "low_anchor_triangles": 8820,
+    "low_anchor_bytes": 759180,
+    "projected_full_low_triangles": 31066,
     "projected_max_per_shop": 2480
   },
   "round2": {

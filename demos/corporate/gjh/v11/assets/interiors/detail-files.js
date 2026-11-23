@@ -87,4 +87,4 @@ export const roomDetails = {
     "roomDetail": true
   }
 };
-export const newMoonAnchorBytes = {"low":50244,"balanced":72472,"detailed":106456};
+export const newMoonAnchorBytes = {"low":55236,"balanced":77464,"detailed":111452};

@@ -2,7 +2,7 @@
 
 Original fixture geometry and finishes created for this virtual shop. The asset may be reused within the owner’s projects. Public redistribution terms have not been specified. The wall art uses a stylized crescent and contains no package photography or third-party typography.
 
-The source and exports use metres, with +Y up and +Z toward the aisle after export. Each tier has the same envelope and three batched surface colors and one luminous finish. The narrow luminous face simulates cabinet lighting without adding a dynamic light. Lower tiers simplify the scallop and crescent curves.
+The source and exports use metres, with +Y up and +Z toward the aisle after export. The dark blue ABALONE lettering is part of the existing cream crown mesh and shares its material and draw. Each tier keeps the same envelope and one luminous finish. The narrow luminous face simulates cabinet lighting without adding a dynamic light. Lower tiers simplify the scallop and crescent curves.
 
 To regenerate the GLBs and editable checkpoint with Blender 5.1:
 
