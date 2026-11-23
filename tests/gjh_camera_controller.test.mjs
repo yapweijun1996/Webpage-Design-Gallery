@@ -122,6 +122,26 @@ test('Tripo chase damps toward both pitches, clears the floor and roof, and reta
     pointer.get('pointerup')({...start, type: 'pointerup', clientY: toY});
   };
 
+  await t.test('the east gallery Map arrivals keep the visitor visible beyond the restroom roof', () => {
+    const roof = new T.Box3(new T.Vector3(21, 2.85, 6), new T.Vector3(29, 2.95, 14));
+    const hit = new T.Vector3();
+    const reach = [];
+    for (const number of [12, 13, 14]) {
+      assert.ok(player.teleport(`planned-space-${number}`));
+      const position = player.camera.position;
+      const {x,y,z} = player.state;
+      reach.push(Math.hypot(x - position.x, z - position.z));
+      for (const height of [.3, .95, 1.55]) {
+        const target = new T.Vector3(x, y + height, z);
+        const ray = new T.Ray(position, target.clone().sub(position).normalize());
+        assert.ok(!ray.intersectBox(roof, hit) || position.distanceTo(hit) > position.distanceTo(target),
+          `The restroom roof blocks the visitor at S${number}, height ${height}`);
+      }
+    }
+    assert.ok(Math.max(...reach) - Math.min(...reach) < .1, 'A clear elevated orbit keeps the usual horizontal framing');
+    player.teleport('atrium');
+  });
+
   player.resizeCamera(393, 648);
   player.teleport('atrium');
   const neutral = lookPitch();

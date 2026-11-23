@@ -141,7 +141,8 @@ Research notes for the 17 V11 shop lots. Product facts are limited to the source
 
 **Pages read**
 
-- [Sony official: MDR-E9LP White wired in-ear headphones](https://electronics.sony.com/audio/headphones/in-ear/p/mdre9lp-whi?sku=mdre9lp-blk)
+- [Sony Singapore: MDR-E9LP in-ear headphones and cable specifications](https://www.sony.com.sg/electronics/in-ear-headphones/mdr-e9lp)
+- [Sony Electronics: white MDR-E9LP](https://electronics.sony.com/audio/headphones/in-ear/p/mdre9lp-whi)
 - [GJH corporate: Sony](https://www.gjh.com.sg/sony/)
 - [GJH eShop brand directory](https://www.gjheshop.com/shop/)
 

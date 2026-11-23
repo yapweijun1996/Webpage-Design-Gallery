@@ -3,7 +3,7 @@
 var NAMES = ["GJH_ARC_001.glb", "GJH_CEI_001.glb", "GJH_COR_001.glb", "GJH_LGT_009.glb", "GJH_PUB_002.glb", "GJH_PUB_005.glb", "GJH_PUB_008.glb", "GJH_PUB_017.glb", "GJH_STF_002.glb", "GJH_STF_008.glb", "GJH_VER_017.glb", "brand-kit/S01-hero.webp", "brand-kit/S02-hero.webp", "brand-kit/S03-hero.webp", "brand-kit/S04-hero.webp", "brand-kit/S05-hero.webp", "brand-kit/S06-hero.webp", "brand-kit/S07-hero.webp", "brand-kit/S08-hero.webp", "brand-kit/S09-hero.webp", "brand-kit/S10-hero.webp", "brand-kit/S11-hero.webp", "brand-kit/S12-hero.webp", "brand-kit/S13-hero.webp", "brand-kit/S14-hero.webp", "brand-kit/S15-hero.webp", "brand-kit/S16-hero.webp", "brand-kit/S17-hero.webp", "brand-kit/brand-kit.json", "brands/S02-mili.webp", "brands/S03-gogo.webp", "brands/S04-borsch-med.webp", "brands/S05-pien-tze-huang.webp", "brands/S06-flying-wheel.webp", "brands/S07-gu-long.webp", "brands/S08-skippy.webp", "brands/S09-spam.webp", "brands/S10-california-mexico.webp", "brands/S11-hormel.webp", "brands/S12-zeria.webp", "brands/S13-sony.webp", "brands/S14-lg.webp", "brands/S15-casio.webp", "brands/S16-gp.webp", "brands/S17-gigaset.webp", "brands/logo-sources.json", "elevator/low.glb", "gjh-m056-shelf-lod1.glb", "gjh-tripo-entry.glb", "gogo-bar-stool.glb", "mall-glass-showcase.glb", "mall-service-desk.glb", "mall-wayfinding-ceiling-sign.glb", "new-moon-can-au-425g-lod1.glb", "new-moon-can-mx-454g-lod1.glb", "new-moon-can-nz-425g-lod1.glb", "new-moon-can-sa-425g-lod1.glb", "new-moon-logo.svg"];
 var known = new Set(NAMES);
 var packURL = new URL("./startup-assets.pack", import.meta.url);
-var startupPackBytes = 2545064;
+var startupPackBytes = 2544984;
 var MAX_BYTES = 10 * 1024 * 1024;
 var shared = null;
 var controller = null;

@@ -1,18 +1,19 @@
 import {createDoorwayOccupancy} from './doorway-occupancy.js';
-import {restroomAt, restroomParcel, restroomRooms} from './restroom-layout.js';
+import {restroomAt, restroomParcel, restroomRoof, restroomRooms} from './restroom-layout.js';
 
 export function buildRestrooms(T,R,physics,scene,{box,cylinder,collider,sign,materials,doors,interactables}) {
   const {minX,maxX,minZ,maxZ} = restroomParcel;
   const roomWidth = maxX-minX;
   const centreX = (minX+maxX)/2;
-  const roomHeight = 2.85;
+  const roomHeight = restroomRoof.min.y;
+  const roofDepth = restroomRoof.max.y - roomHeight;
   const centreZ = (minZ+maxZ)/2;
   const wall = (x,z,w,d) => box('ivory',x,roomHeight/2,z,w,roomHeight,d,true);
   const mirror = 'restroomMirror';
   materials[mirror] = new T.MeshStandardMaterial({color:0xaecbd4,roughness:.28,metalness:.27});
   wall(minX,centreZ,.17,maxZ-minZ);
   for (const z of [minZ,...restroomRooms.map(room=>room.maxZ)]) wall(centreX,z,roomWidth,.16);
-  box('cream',centreX,roomHeight+.05,centreZ,roomWidth,.10,maxZ-minZ,true);
+  box('cream',centreX,roomHeight+roofDepth/2,centreZ,roomWidth,roofDepth,maxZ-minZ,true);
 
   const actions = new Map();
   const effectMaterial = new T.MeshBasicMaterial({color:0xb0e8f1});

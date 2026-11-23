@@ -13,8 +13,10 @@ import {advanceVelocity, interpolate, interpolateAngle, MOVEMENT, MOVEMENT_KEYS,
 import {createPlayerTram, tramBoardReason} from './tram-ride.js';
 import {seatEyeHeight} from './tram-layout.js';
 import {isInFrontOfSeat} from './seat-placements.js';
+import {restroomRoof} from './restroom-layout.js';
 
 const CAMERA_LIFTS = [1.1, 2.2];
+const roofSightlineBounds = [restroomRoof];
 const ZOOM_STEP = .2;
 const CHASE_NEAR = .08;
 const EYE_HEIGHT = 1.55;
@@ -64,6 +66,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
   let renderedPitch = DEFAULT_PITCH;
   const target = new T.Vector3(), desired = new T.Vector3(), offset = new T.Vector3(), direction = new T.Vector3(), safe = new T.Vector3();
   const sightline = new T.Vector3();
+  const roofSubject = new T.Vector3();
   let lodViewportHeight = canvas.clientHeight;
   let framing = playerCameraFraming(model, expanded, canvas.clientWidth, canvas.clientHeight);
   const cameraBall=new R.Ball(.22),cameraRotation={x:0,y:0,z:0,w:1};
@@ -447,6 +450,15 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     }
     return bounded;
   }
+  function restroomSightlineFraction(point) {
+    // A clear orbit arm above the roof can still look through it toward the visitor's feet.
+    roofSubject.copy(visual.position); roofSubject.y += .12;
+    direction.copy(point).sub(roofSubject);
+    const distance = direction.length();
+    if (!distance) return 1;
+    direction.multiplyScalar(1 / distance);
+    return limitCameraByObstacles(roofSubject, direction, distance, .04, roofSightlineBounds) / distance;
+  }
   function cameraCandidate(lift, out, minimumY, seatView) {
     candidateAnchor.copy(target); candidateAnchor.y += lift;
     // The seat target can start inside the bench. Use its authored raised pivot.
@@ -454,6 +466,14 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     out.copy(candidateAnchor).add(offset);
     const length = sweepCamera(candidateAnchor, out, minimumY);
     out.copy(candidateAnchor).addScaledVector(direction, length);
+    if (expanded && !seatView) {
+      const visible = restroomSightlineFraction(out);
+      if (visible < 1) {
+        // Try the existing lifted orbits first; keep a clear, shorter view if none fit.
+        out.lerpVectors(roofSubject, out, visible);
+        return 0;
+      }
+    }
     return length;
   }
   function resizeCamera(width, height) {
@@ -567,6 +587,7 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const allowed=sweepCamera(anchor,safe,minimumY);safe.copy(anchor).addScaledVector(direction,allowed);
     // A newly blocked interpolation must contract immediately to a known clear candidate.
     if(allowed<.9&&length>=2)safe.copy(desired);
+    if (expanded && !seatView && restroomSightlineFraction(safe) < 1) safe.copy(desired);
     // A distant walking target beyond the cabin wall can fill the screen
     // after the arm contracts. Frame the visitor inside the docked cabin.
     const lookAhead=actionView || inUpperCar ? 0 : framing.lookAhead * framingWeight;

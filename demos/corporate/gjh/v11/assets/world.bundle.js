@@ -580,6 +580,10 @@ function createDoorwayOccupancy(R, physics, center, halfExtents, leaves) {
 
 // demos/corporate/gjh/v11/assets/restroom-layout.js
 var restroomParcel = Object.freeze({ minX: 21, maxX: 29, minZ: 6, maxZ: 14 });
+var restroomRoof = Object.freeze({
+  min: Object.freeze({ x: restroomParcel.minX, y: 2.85, z: restroomParcel.minZ }),
+  max: Object.freeze({ x: restroomParcel.maxX, y: 2.95, z: restroomParcel.maxZ })
+});
 var restroomArrival = Object.freeze({ x: 31.4, z: 10, yaw: Math.PI / 2 });
 var restroomRooms = Object.freeze([
   Object.freeze({ id: "restroom-men", label: "Men", sign: "MEN  ·  男厕  ·  LELAKI", minZ: 6, maxZ: 8.5, doorWidth: 1.27 }),
@@ -597,7 +601,8 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
   const { minX, maxX, minZ, maxZ } = restroomParcel;
   const roomWidth = maxX - minX;
   const centreX = (minX + maxX) / 2;
-  const roomHeight = 2.85;
+  const roomHeight = restroomRoof.min.y;
+  const roofDepth = restroomRoof.max.y - roomHeight;
   const centreZ = (minZ + maxZ) / 2;
   const wall = (x, z, w, d) => box("ivory", x, roomHeight / 2, z, w, roomHeight, d, true);
   const mirror = "restroomMirror";
@@ -605,7 +610,7 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
   wall(minX, centreZ, 0.17, maxZ - minZ);
   for (const z of [minZ, ...restroomRooms.map((room) => room.maxZ)])
     wall(centreX, z, roomWidth, 0.16);
-  box("cream", centreX, roomHeight + 0.05, centreZ, roomWidth, 0.1, maxZ - minZ, true);
+  box("cream", centreX, roomHeight + roofDepth / 2, centreZ, roomWidth, roofDepth, maxZ - minZ, true);
   const actions = new Map;
   const effectMaterial = new T.MeshBasicMaterial({ color: 11593969 });
   const leafMaterial = new T.MeshStandardMaterial({ color: 4615012, roughness: 0.67 });

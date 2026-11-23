@@ -1,0 +1,524 @@
+{
+  "baseline": "607615f4f6d0a8fcbd11e52a95cefd73fc5cc7a6",
+  "runtimeBuild": "fe3ffdcda5562985",
+  "theme": "everyday",
+  "widths": [
+    {
+      "width": 390,
+      "browser": "158.0.8127.37",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "quality": "low",
+      "baselineCamera": [
+        27.624977647730965,
+        3.3692681766952948,
+        11.999998477905894
+      ],
+      "candidateCamera": {
+        "position": [
+          27.624977647730965,
+          4.469437307394964,
+          11.999998682322781
+        ],
+        "quaternion": [
+          -0.15880433238986874,
+          -0.6890436913068633,
+          -0.1588043410498027,
+          0.6890436537318649
+        ],
+        "fov": 99.36293839047889,
+        "aspect": 0.4899497487437186
+      },
+      "baselineFirstHits": {
+        "feet": {
+          "mesh": "box plain/Scene",
+          "point": [
+            28.3,
+            2.95,
+            12
+          ]
+        },
+        "torso": {
+          "mesh": "box plain/Scene",
+          "point": [
+            28.48,
+            2.95,
+            12
+          ]
+        },
+        "head": {
+          "mesh": "box plain/Scene",
+          "point": [
+            28.759,
+            2.95,
+            12
+          ]
+        }
+      },
+      "candidateFirstHits": {
+        "feet": {
+          "mesh": "Mesh/Scene",
+          "point": [
+            32.873,
+            0.05,
+            12
+          ]
+        },
+        "torso": {
+          "mesh": "tripo_node_405dc0a0/Armature/Scene/Group/Group",
+          "point": [
+            32.254,
+            1.176,
+            12
+          ]
+        },
+        "head": {
+          "mesh": "tripo_node_405dc0a0/Armature/Scene/Group/Group",
+          "point": [
+            32.473,
+            1.605,
+            12
+          ]
+        }
+      },
+      "liftMetres": 1.1,
+      "mapPose": [
+        32.6,
+        -0.02,
+        12.0,
+        -1.571
+      ],
+      "routes": {
+        "12": {
+          "arrival": 36,
+          "threshold": 31,
+          "inside": 29,
+          "doorOnEntry": 1,
+          "doorAfterExit": 0
+        },
+        "13": {
+          "arrival": 47,
+          "threshold": 36,
+          "inside": 35,
+          "doorOnEntry": 1,
+          "doorAfterExit": 0
+        },
+        "14": {
+          "arrival": 48,
+          "threshold": 42,
+          "inside": 39,
+          "doorOnEntry": 1,
+          "doorAfterExit": 0
+        }
+      },
+      "freeRoamCameraLiftMetres": [
+        1.1,
+        1.1,
+        0,
+        1.1
+      ],
+      "accessibleRestroom": {
+        "entered": "restroom-accessible",
+        "exited": true,
+        "views": {
+          "inward": {
+            "eye": {
+              "position": [
+                28.502713600447393,
+                2.607911274878658,
+                12.499782514058545
+              ],
+              "quaternion": [
+                -0.2211998605340717,
+                0.6716363490410092,
+                0.2212134825326578,
+                0.671594990669484
+              ],
+              "fov": 99.36293839047889,
+              "aspect": 0.4899497487437186
+            },
+            "close": true
+          },
+          "outward": {
+            "eye": {
+              "position": [
+                28.145886049009967,
+                2.60798817072914,
+                12.49978567742578
+              ],
+              "quaternion": [
+                -0.22119304617808574,
+                -0.6716333250012099,
+                -0.22120277483730358,
+                0.6716037860781874
+              ],
+              "fov": 99.36293839047889,
+              "aspect": 0.4899497487437186
+            },
+            "close": true
+          }
+        }
+      },
+      "responsesSha256": {
+        "index.html": "94cca84f14b639237aad39679833ecac9c962b1fa8b0f742c2fa1fdff8bf99a0",
+        "script.bundle.js": "7b88d5c6202e59f8a5ff03c1a5ca7a2c39b271147d0534272f721e66eb8d48a1",
+        "style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "assets/world.bundle.js": "a02e97bb6e0e94f25b09f6aafe3af12077ec68b1cd37081c58b40224d70e346f",
+        "assets/player.bundle.js": "c4dba37082b8694c626ac708b0fb06649670219f568815d3eb6576a0f9cc263c",
+        "assets/startup-assets.pack": "7018283f8aca8baeb73a3e21f1a86a7a6c7c37bbdcc8c5d757ecb526d7b911fe"
+      },
+      "upperPlaque": {
+        "en": "GJH lists Sony in its brand directory. Sony describes its MDR-E9LP as wired in-ear headphones available in white.",
+        "zh-Hans": "GJH 的品牌目录列有索尼。索尼将 MDR-E9LP 介绍为有白色款的有线入耳式耳机。",
+        "ms": "Direktori jenama GJH menyenaraikan Sony. Menurut Sony, MDR-E9LP ialah fon telinga dalam telinga berwayar yang tersedia dalam warna putih."
+      }
+    },
+    {
+      "width": 768,
+      "browser": "158.0.8127.37",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "quality": "balanced",
+      "baselineCamera": [
+        27.42597681467536,
+        3.389247619086723,
+        11.99999858417852
+      ],
+      "candidateCamera": {
+        "position": [
+          27.42597681467536,
+          4.489319262021504,
+          11.999998584329036
+        ],
+        "quaternion": [
+          -0.15567128420154297,
+          -0.6897582741337211,
+          -0.15567129297948393,
+          0.6897582352398618
+        ],
+        "fov": 64,
+        "aspect": 0.7868852459016393
+      },
+      "baselineFirstHits": {
+        "feet": {
+          "mesh": "box plain/Scene",
+          "point": [
+            28.157,
+            2.95,
+            12
+          ]
+        },
+        "torso": {
+          "mesh": "box plain/Scene",
+          "point": [
+            28.35,
+            2.95,
+            12
+          ]
+        },
+        "head": {
+          "mesh": "box plain/Scene",
+          "point": [
+            28.648,
+            2.95,
+            12
+          ]
+        }
+      },
+      "candidateFirstHits": {
+        "feet": {
+          "mesh": "Mesh/Scene",
+          "point": [
+            32.883,
+            0.05,
+            12
+          ]
+        },
+        "torso": {
+          "mesh": "tripo_node_405dc0a0/Armature/Scene/Group/Group",
+          "point": [
+            32.251,
+            1.17,
+            12
+          ]
+        },
+        "head": {
+          "mesh": "tripo_node_405dc0a0/Armature/Scene/Group/Group",
+          "point": [
+            32.47,
+            1.604,
+            12
+          ]
+        }
+      },
+      "liftMetres": 1.1,
+      "mapPose": [
+        32.6,
+        -0.02,
+        12.0,
+        -1.571
+      ],
+      "routes": {
+        "12": {
+          "arrival": 37,
+          "threshold": 32,
+          "inside": 32,
+          "doorOnEntry": 1,
+          "doorAfterExit": 0
+        },
+        "13": {
+          "arrival": 50,
+          "threshold": 39,
+          "inside": 39,
+          "doorOnEntry": 1,
+          "doorAfterExit": 0
+        },
+        "14": {
+          "arrival": 48,
+          "threshold": 44,
+          "inside": 51,
+          "doorOnEntry": 1,
+          "doorAfterExit": 0
+        }
+      },
+      "freeRoamCameraLiftMetres": [
+        1.1,
+        1.1,
+        0,
+        1.1
+      ],
+      "accessibleRestroom": {
+        "entered": "restroom-accessible",
+        "exited": true,
+        "views": {
+          "inward": {
+            "eye": {
+              "position": [
+                28.501176057820636,
+                2.60797229110501,
+                12.499777123608238
+              ],
+              "quaternion": [
+                -0.22114948892733527,
+                0.6716537681383123,
+                0.22116372060540068,
+                0.6716105478480522
+              ],
+              "fov": 64,
+              "aspect": 0.7868852459016393
+            },
+            "close": true
+          },
+          "outward": {
+            "eye": {
+              "position": [
+                28.14400975545051,
+                2.6079947469026648,
+                12.499781465791882
+              ],
+              "quaternion": [
+                -0.22122408425820766,
+                -0.6716233824150984,
+                -0.22123402199836698,
+                0.671593213372385
+              ],
+              "fov": 64,
+              "aspect": 0.7868852459016393
+            },
+            "close": true
+          }
+        }
+      },
+      "responsesSha256": {
+        "index.html": "94cca84f14b639237aad39679833ecac9c962b1fa8b0f742c2fa1fdff8bf99a0",
+        "script.bundle.js": "7b88d5c6202e59f8a5ff03c1a5ca7a2c39b271147d0534272f721e66eb8d48a1",
+        "style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "assets/world.bundle.js": "a02e97bb6e0e94f25b09f6aafe3af12077ec68b1cd37081c58b40224d70e346f",
+        "assets/player.bundle.js": "c4dba37082b8694c626ac708b0fb06649670219f568815d3eb6576a0f9cc263c",
+        "assets/startup-assets.pack": "7018283f8aca8baeb73a3e21f1a86a7a6c7c37bbdcc8c5d757ecb526d7b911fe"
+      }
+    },
+    {
+      "width": 1440,
+      "browser": "158.0.8127.37",
+      "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M4, Unspecified Version)",
+      "quality": "detailed",
+      "baselineCamera": [
+        27.42597681467536,
+        3.389200517039421,
+        11.999998587669943
+      ],
+      "candidateCamera": {
+        "position": [
+          27.42597681467536,
+          4.489208298841817,
+          11.99999847378454
+        ],
+        "quaternion": [
+          -0.15566297754186764,
+          -0.6897601122035627,
+          -0.1556629689110652,
+          0.6897601504476185
+        ],
+        "fov": 64,
+        "aspect": 1.6901408450704225
+      },
+      "baselineFirstHits": {
+        "feet": {
+          "mesh": "box plain/Scene",
+          "point": [
+            28.157,
+            2.95,
+            12
+          ]
+        },
+        "torso": {
+          "mesh": "box plain/Scene",
+          "point": [
+            28.35,
+            2.95,
+            12
+          ]
+        },
+        "head": {
+          "mesh": "box plain/Scene",
+          "point": [
+            28.648,
+            2.95,
+            12
+          ]
+        }
+      },
+      "candidateFirstHits": {
+        "feet": {
+          "mesh": "Mesh/Scene",
+          "point": [
+            32.883,
+            0.05,
+            12
+          ]
+        },
+        "torso": {
+          "mesh": "tripo_node_405dc0a0/Armature/Scene/Group/Group",
+          "point": [
+            32.264,
+            1.161,
+            12
+          ]
+        },
+        "head": {
+          "mesh": "tripo_node_405dc0a0/Armature/Scene/Group/Group",
+          "point": [
+            32.472,
+            1.603,
+            12
+          ]
+        }
+      },
+      "liftMetres": 1.1,
+      "mapPose": [
+        32.6,
+        -0.02,
+        12.0,
+        -1.571
+      ],
+      "routes": {
+        "12": {
+          "arrival": 50,
+          "threshold": 44,
+          "inside": 41,
+          "doorOnEntry": 1,
+          "doorAfterExit": 0
+        },
+        "13": {
+          "arrival": 63,
+          "threshold": 93,
+          "inside": 44,
+          "doorOnEntry": 1,
+          "doorAfterExit": 0
+        },
+        "14": {
+          "arrival": 71,
+          "threshold": 56,
+          "inside": 51,
+          "doorOnEntry": 1,
+          "doorAfterExit": 0
+        }
+      },
+      "freeRoamCameraLiftMetres": [
+        1.1,
+        1.1,
+        0,
+        1.1
+      ],
+      "accessibleRestroom": {
+        "entered": "restroom-accessible",
+        "exited": true,
+        "views": {
+          "inward": {
+            "eye": {
+              "position": [
+                28.50222439474023,
+                2.607975490264044,
+                12.499849203816197
+              ],
+              "quaternion": [
+                -0.22115849040359037,
+                0.6716448039598247,
+                0.22116829029399265,
+                0.6716150436110002
+              ],
+              "fov": 64,
+              "aspect": 1.6901408450704225
+            },
+            "close": true
+          },
+          "outward": {
+            "eye": {
+              "position": [
+                28.144482965772056,
+                2.607998503477411,
+                12.499852940488664
+              ],
+              "quaternion": [
+                -0.22117511988409672,
+                -0.6716352351769246,
+                -0.22118189712379313,
+                0.6716146555859338
+              ],
+              "fov": 64,
+              "aspect": 1.6901408450704225
+            },
+            "close": true
+          }
+        }
+      },
+      "responsesSha256": {
+        "index.html": "94cca84f14b639237aad39679833ecac9c962b1fa8b0f742c2fa1fdff8bf99a0",
+        "script.bundle.js": "7b88d5c6202e59f8a5ff03c1a5ca7a2c39b271147d0534272f721e66eb8d48a1",
+        "style.bundle.css": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538",
+        "assets/world.bundle.js": "a02e97bb6e0e94f25b09f6aafe3af12077ec68b1cd37081c58b40224d70e346f",
+        "assets/player.bundle.js": "c4dba37082b8694c626ac708b0fb06649670219f568815d3eb6576a0f9cc263c",
+        "assets/startup-assets.pack": "7018283f8aca8baeb73a3e21f1a86a7a6c7c37bbdcc8c5d757ecb526d7b911fe"
+      }
+    }
+  ],
+  "classicRegression": {
+    "newmoon": {
+      "insideZ": -0.6765022873878479,
+      "draws": 128,
+      "closed": 0
+    },
+    "mili": {
+      "insideZ": -0.6772116422653198,
+      "draws": 138,
+      "closed": 0
+    },
+    "gogo": {
+      "insideZ": -0.8648287653923035,
+      "draws": 120,
+      "closed": 0
+    },
+    "playerHash": "c4dba37082b8694c626ac708b0fb06649670219f568815d3eb6576a0f9cc263c",
+    "keyboardTurning": "passed",
+    "chrome": "158.0.8127.37"
+  }
+}

@@ -6,6 +6,10 @@ These are baseline findings for commit `22d7c788`, captured in Chrome 158 on App
 
 The measured peak across the 42 sampled walks was 51 draws on phone, 49 on tablet and 81 on desktop. All 126 sampled poses stayed below the 200-draw limit. Physical-handset frame timing, full shopping actions and deep circulation have separate acceptance criteria. [Route coordinates and render counts](evidence/gjh-v11-showroom-tour/routes.json) · [Owner checklist and reference boards](gjh-v11-qa-loop.md#shopfront-review-checklist)
 
+## Sony follow-up
+
+The subsequent Sony camera repair clears the visitor and threshold at all three reviewed widths. Its upper-floor plaque now attributes the product description to Sony in all three visitor languages. The original scores below retain the findings from the baseline. The linked comparison records the remaining tablet sign overlap and side-display contrast. [Sony follow-up and route measurements](goh-joo-hin/13-sony/README.md#map-arrival-and-upper-floor-plaque)
+
 ## Composition
 
 | Shop | Score | Visible from this route | Difference from the references |

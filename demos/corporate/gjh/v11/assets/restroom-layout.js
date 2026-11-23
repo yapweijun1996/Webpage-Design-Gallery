@@ -1,4 +1,8 @@
 export const restroomParcel = Object.freeze({minX:21,maxX:29,minZ:6,maxZ:14});
+export const restroomRoof = Object.freeze({
+  min:Object.freeze({x:restroomParcel.minX,y:2.85,z:restroomParcel.minZ}),
+  max:Object.freeze({x:restroomParcel.maxX,y:2.95,z:restroomParcel.maxZ})
+});
 export const restroomArrival = Object.freeze({x:31.4,z:10,yaw:Math.PI/2});
 export const restroomRooms = Object.freeze([
   Object.freeze({id:'restroom-men',label:'Men',sign:'MEN  ·  男厕  ·  LELAKI',minZ:6,maxZ:8.5,doorWidth:1.27}),

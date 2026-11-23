@@ -411,6 +411,10 @@ var courtyardArrival = Object.freeze({ x: -2, z: 12 });
 
 // demos/corporate/gjh/v11/assets/restroom-layout.js
 var restroomParcel = Object.freeze({ minX: 21, maxX: 29, minZ: 6, maxZ: 14 });
+var restroomRoof = Object.freeze({
+  min: Object.freeze({ x: restroomParcel.minX, y: 2.85, z: restroomParcel.minZ }),
+  max: Object.freeze({ x: restroomParcel.maxX, y: 2.95, z: restroomParcel.maxZ })
+});
 var restroomArrival = Object.freeze({ x: 31.4, z: 10, yaw: Math.PI / 2 });
 var restroomRooms = Object.freeze([
   Object.freeze({ id: "restroom-men", label: "Men", sign: "MEN  ·  男厕  ·  LELAKI", minZ: 6, maxZ: 8.5, doorWidth: 1.27 }),
@@ -1412,6 +1416,7 @@ function isInFrontOfSeat(seat, { x, z }) {
 
 // demos/corporate/gjh/v11/assets/player.js
 var CAMERA_LIFTS = [1.1, 2.2];
+var roofSightlineBounds = [restroomRoof];
 var ZOOM_STEP = 0.2;
 var CHASE_NEAR = 0.08;
 var EYE_HEIGHT = 1.55;
@@ -1463,6 +1468,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
   let renderedPitch = DEFAULT_PITCH;
   const target = new T.Vector3, desired = new T.Vector3, offset = new T.Vector3, direction = new T.Vector3, safe = new T.Vector3;
   const sightline = new T.Vector3;
+  const roofSubject = new T.Vector3;
   let lodViewportHeight = canvas.clientHeight;
   let framing = playerCameraFraming(model, expanded, canvas.clientWidth, canvas.clientHeight);
   const cameraBall = new R.Ball(0.22), cameraRotation = { x: 0, y: 0, z: 0, w: 1 };
@@ -2003,6 +2009,16 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     }
     return bounded;
   }
+  function restroomSightlineFraction(point2) {
+    roofSubject.copy(visual.position);
+    roofSubject.y += 0.12;
+    direction.copy(point2).sub(roofSubject);
+    const distance = direction.length();
+    if (!distance)
+      return 1;
+    direction.multiplyScalar(1 / distance);
+    return limitCameraByObstacles(roofSubject, direction, distance, 0.04, roofSightlineBounds) / distance;
+  }
   function cameraCandidate(lift, out, minimumY, seatView) {
     candidateAnchor.copy(target);
     candidateAnchor.y += lift;
@@ -2011,6 +2027,13 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     out.copy(candidateAnchor).add(offset);
     const length = sweepCamera(candidateAnchor, out, minimumY);
     out.copy(candidateAnchor).addScaledVector(direction, length);
+    if (expanded && !seatView) {
+      const visible = restroomSightlineFraction(out);
+      if (visible < 1) {
+        out.lerpVectors(roofSubject, out, visible);
+        return 0;
+      }
+    }
     return length;
   }
   function resizeCamera(width, height) {
@@ -2129,6 +2152,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const allowed = sweepCamera(anchor, safe, minimumY);
     safe.copy(anchor).addScaledVector(direction, allowed);
     if (allowed < 0.9 && length >= 2)
+      safe.copy(desired);
+    if (expanded && !seatView && restroomSightlineFraction(safe) < 1)
       safe.copy(desired);
     const lookAhead = actionView || inUpperCar ? 0 : framing.lookAhead * framingWeight;
     sightline.copy(target);

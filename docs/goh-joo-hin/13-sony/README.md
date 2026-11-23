@@ -10,6 +10,22 @@ The six-headphone anchor loads. An existing dark display rack cuts across the li
 
 [Chrome player baseline](player-baseline.webp)
 
+## Map arrival and upper-floor plaque
+
+Choosing Sony on the Map places the visitor at the same concourse position facing the entrance. Previously the orbit camera cleared the accessible restroom while its view of the visitor passed through the roof. The roof hid the character and lower doorway at all three widths. The camera now checks its view towards the visitor’s feet and raises the existing orbit by 1.10 m where needed.
+
+| Chrome viewport and quality | Sony arrival draws | What is visible |
+| --- | ---: | --- |
+| 390 × 844, Low | 47 | Both shoes, the threshold, the full fascia and the rear headphone panel. A strip of roof remains below the walking surface. |
+| 768 × 1024, Balanced | 50 | The visitor and portal are clear. Objectives and Tools still overlap parts of the outer sign letters. |
+| 1440 × 900, Detailed | 63 | Both windows, the concourse and adjacent frontages fit around the visitor. The right-hand screen has low contrast through the glass. |
+
+At each width the visitor entered and exited Sony, Zeria and LG. On all nine visits the shop door opened fully and closed after departure. The accessible restroom opened, admitted the visitor and closed after exit in all three profiles. At 390 and 1440 px, matched inward and outward camera positions inside the restroom differed by less than 3 mm from baseline. On the upper floor, the 390 px visitor took the lift and opened the Sony plaque in English, Simplified Chinese and Malay. Each language attributes the brand directory to GJH and the white wired MDR-E9LP description to Sony. Exact model availability through GJH remains unverified.
+
+Five independent advisers accepted the scoped arrival repair. The visual and lighting reviews found the visitor, doorway and rear panels legible. The circulation review confirmed open doors and clear returns. The mobile review recorded the retained tablet HUD overlap and a closer phone view where the disclosure crosses the O. The brand review verified the attribution and disclosure and found that the plaque kind and subtitle still appeared in English when Chinese or Malay was selected. The fact paragraph was translated correctly. A separate classic-layout run exercised keyboard turning and all three original storefronts, with the doors closing after return.
+
+The headphone array remains small from the concourse. Frame timing on physical devices remains open. [Matched Map screenshots](map-sightline.webp) · [Camera rays, routes and loaded files](map-sightline.json) · [Product sources](../../../demos/corporate/gjh/v11/assets/brand-kit/brand-kit-sources.md#s13--sony)
+
 ## Interior design
 
 Build a restrained listening gallery in graphite and smoked oak with soft rim strips behind the products. Keep a clear view of the central headphone array from the entry.
