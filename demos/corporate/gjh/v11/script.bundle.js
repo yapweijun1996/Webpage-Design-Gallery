@@ -2576,6 +2576,7 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
   const productShop = document.getElementById("product-shop");
   const defaultShop = { href: productShop.href, label: productShop.textContent };
   const productKind = document.getElementById("product-kind");
+  const sampleMenu = document.getElementById("exhibit-samples");
   const layoutLink = document.getElementById("layout-preview-link");
   const layoutURL = new URL(location.href);
   if (expanded)
@@ -2838,6 +2839,7 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
   let nearby = null;
   let interactionRegistry = null, selectedInteraction = null, tramHud = null;
   let returnFocus = null, productInspectListener = null;
+  let inspectFocusId = null;
   let brandArtworkDescription = null;
   let teleportListener = null;
   let viewListener = null;
@@ -3022,34 +3024,63 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
       return opened;
     }
   };
+  function showStory(record) {
+    const choices = sampleMenu.querySelector("div");
+    choices.replaceChildren();
+    sampleMenu.open = false;
+    sampleMenu.hidden = !record.samples?.length;
+    function showSample(sample) {
+      productTitle.textContent = `${record.brand} · ${sample ? sample.name : record.tagline}`;
+      productDescription.textContent = sample ? sample.story : record.story;
+      productShop.href = sample?.source || record.source || defaultShop.href;
+      productShop.textContent = sample ? "View the official product listing" : record.sourceLabel || defaultShop.label;
+    }
+    if (record.samples?.length) {
+      for (const sample of [null, ...record.samples]) {
+        const button2 = document.createElement("button");
+        button2.type = "button";
+        button2.textContent = sample ? sample.name : "Cookline overview";
+        button2.setAttribute("aria-pressed", String(!sample));
+        button2.addEventListener("click", () => {
+          showSample(sample);
+          for (const choice of choices.children)
+            choice.setAttribute("aria-pressed", String(choice === button2));
+          sampleMenu.open = false;
+          sampleMenu.querySelector("summary").focus({ preventScroll: true });
+        });
+        choices.append(button2);
+      }
+    }
+    showSample(null);
+  }
   function inspect(id) {
     const record = records.get(id);
     if (!record || dialog.open || bag.open || amenityPanel.dialog.open)
       return false;
     shelfFocus?.close();
-    productShop.href = record.source || defaultShop.href;
-    productShop.textContent = record.sourceLabel || defaultShop.label;
     brandArtworkDescription = record.artworkDescription;
+    bag.select(id);
+    returnFocus = { element: document.activeElement, id };
+    inspectFocusId = null;
     if (record.action === "brand-story") {
-      returnFocus = document.activeElement;
-      productTitle.textContent = `${record.brand} · ${record.tagline}`;
+      showStory(record);
       productImage.src = record.image;
       productImage.alt = record.alt;
       productKind.textContent = record.kind;
-      productDescription.textContent = record.story;
       dialog.showModal();
       newMoonPreview.open(id);
       closeButton.focus({ preventScroll: true });
       notifyMode();
       return true;
     }
+    sampleMenu.hidden = true;
+    productShop.href = record.source || defaultShop.href;
+    productShop.textContent = record.sourceLabel || defaultShop.label;
     productTitle.textContent = record.name;
     productImage.src = record.image;
     productImage.alt = record.alt;
     productKind.textContent = record.kind;
     productDescription.textContent = brandArtworkDescription?.textContent ?? record.description;
-    bag.select(id);
-    returnFocus = document.activeElement;
     dialog.showModal();
     newMoonPreview.open(id);
     if (id.startsWith("new-moon-"))
@@ -3178,18 +3209,17 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
   });
   closeButton.addEventListener("click", () => dialog.close());
   dialog.addEventListener("close", () => {
-    const target = returnFocus;
+    const opener = returnFocus;
+    const target = opener?.element;
     returnFocus = null;
     notifyMode();
     if (target instanceof HTMLElement && target.isConnected && target.getClientRects().length) {
       target.focus({ preventScroll: true });
-    } else {
+    }
+    if (document.activeElement !== target) {
       (showing3D ? scene : listTitle).focus({ preventScroll: true });
       if (target === inspectButton && showing3D)
-        requestAnimationFrame(() => {
-          if (document.activeElement === scene && inspectButton.getClientRects().length)
-            inspectButton.focus({ preventScroll: true });
-        });
+        inspectFocusId = opener.id;
     }
   });
   dialog.addEventListener("keydown", (event) => {
@@ -3633,6 +3663,14 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
       const promptHidden = inspectHidden && !holdingProduct || collectionActive;
       if (inspectPrompt.hidden !== promptHidden)
         inspectPrompt.hidden = promptHidden;
+      if (inspectFocusId && nearby) {
+        if (nearby !== inspectFocusId || document.activeElement !== scene)
+          inspectFocusId = null;
+        else if (inspectButton.getClientRects().length) {
+          inspectButton.focus({ preventScroll: true });
+          inspectFocusId = null;
+        }
+      }
       notifyMode();
     },
     handleGamepad(pad) {

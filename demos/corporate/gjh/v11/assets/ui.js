@@ -476,6 +476,7 @@ export function createUI(expanded = false, onMenuOpen = () => {}) {
   const productShop = document.getElementById('product-shop');
   const defaultShop = {href:productShop.href,label:productShop.textContent};
   const productKind = document.getElementById('product-kind');
+  const sampleMenu = document.getElementById('exhibit-samples');
   const layoutLink=document.getElementById('layout-preview-link');
   const layoutURL=new URL(location.href);
   if(expanded) layoutURL.searchParams.set('layout','classic'); else layoutURL.searchParams.delete('layout');
@@ -660,6 +661,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   let nearby = null;
   let interactionRegistry = null, selectedInteraction = null, tramHud = null;
   let returnFocus = null, productInspectListener = null;
+  let inspectFocusId = null;
   let brandArtworkDescription = null;
   let teleportListener = null;
   let viewListener = null;
@@ -795,28 +797,58 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     map: () => {const opened=openMap();if (opened) announce(expanded?'The directory kiosk shows the expanded mall map.':'The kiosk screen is decorative. Use this three-store map to choose an entrance.');return opened;},
   };
 
+  function showStory(record) {
+    const choices = sampleMenu.querySelector('div');
+    choices.replaceChildren();
+    sampleMenu.open = false;
+    sampleMenu.hidden = !record.samples?.length;
+    function showSample(sample) {
+      productTitle.textContent = `${record.brand} · ${sample ? sample.name : record.tagline}`;
+      productDescription.textContent = sample ? sample.story : record.story;
+      productShop.href = sample?.source || record.source || defaultShop.href;
+      productShop.textContent = sample ? 'View the official product listing' : record.sourceLabel || defaultShop.label;
+    }
+    if (record.samples?.length) {
+      for (const sample of [null, ...record.samples]) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = sample ? sample.name : 'Cookline overview';
+        button.setAttribute('aria-pressed', String(!sample));
+        button.addEventListener('click', () => {
+          showSample(sample);
+          for (const choice of choices.children) choice.setAttribute('aria-pressed', String(choice === button));
+          sampleMenu.open = false;
+          sampleMenu.querySelector('summary').focus({preventScroll:true});
+        });
+        choices.append(button);
+      }
+    }
+    showSample(null);
+  }
+
   function inspect(id) {
     const record = records.get(id);
     if (!record || dialog.open || bag.open || amenityPanel.dialog.open) return false;
     shelfFocus?.close();
-    productShop.href = record.source || defaultShop.href;
-    productShop.textContent = record.sourceLabel || defaultShop.label;
     brandArtworkDescription = record.artworkDescription;
+    bag.select(id);
+    returnFocus = {element: document.activeElement, id};
+    inspectFocusId = null;
     if(record.action==='brand-story'){
-      returnFocus=document.activeElement;
-      productTitle.textContent=`${record.brand} · ${record.tagline}`;
+      showStory(record);
       productImage.src=record.image;productImage.alt=record.alt;
-      productKind.textContent=record.kind;productDescription.textContent=record.story;
+      productKind.textContent=record.kind;
       dialog.showModal();newMoonPreview.open(id);closeButton.focus({preventScroll:true});notifyMode();
       return true;
     }
+    sampleMenu.hidden = true;
+    productShop.href = record.source || defaultShop.href;
+    productShop.textContent = record.sourceLabel || defaultShop.label;
     productTitle.textContent = record.name;
     productImage.src = record.image;
     productImage.alt = record.alt;
     productKind.textContent = record.kind;
     productDescription.textContent = brandArtworkDescription?.textContent ?? record.description;
-    bag.select(id);
-    returnFocus = document.activeElement;
     dialog.showModal();
     newMoonPreview.open(id);
     if (id.startsWith('new-moon-')) productInspectListener?.(id);
@@ -916,16 +948,16 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   inspectButton.addEventListener('click', () => { if(seated){seatNotice=null;if(!seatListener?.(false)){seatNotice='Exit blocked. Use the map to leave safely.';setHudText(nearbyName, seatNotice);announce('Exit blocked. Use the map to leave safely.');}scene.focus({preventScroll:true});}else if (nearby) inspectNearby(nearby); });
   closeButton.addEventListener('click', () => dialog.close());
   dialog.addEventListener('close', () => {
-    const target = returnFocus;
+    const opener = returnFocus;
+    const target = opener?.element;
     returnFocus = null;
     notifyMode();
     if (target instanceof HTMLElement && target.isConnected && target.getClientRects().length) {
       target.focus({ preventScroll: true });
-    } else {
+    }
+    if (document.activeElement !== target) {
       (showing3D ? scene : listTitle).focus({ preventScroll: true });
-      if (target === inspectButton && showing3D) requestAnimationFrame(() => {
-        if (document.activeElement === scene && inspectButton.getClientRects().length) inspectButton.focus({preventScroll: true});
-      });
+      if (target === inspectButton && showing3D) inspectFocusId = opener.id;
     }
   });
   dialog.addEventListener('keydown', (event) => {
@@ -1266,6 +1298,14 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       holdingProduct = hasHeldProduct;
       const promptHidden = (inspectHidden && !holdingProduct) || collectionActive;
       if (inspectPrompt.hidden !== promptHidden) inspectPrompt.hidden = promptHidden;
+      // The physical prompt can reappear several frames after a product modal closes.
+      if (inspectFocusId && nearby) {
+        if (nearby !== inspectFocusId || document.activeElement !== scene) inspectFocusId = null;
+        else if (inspectButton.getClientRects().length) {
+          inspectButton.focus({preventScroll: true});
+          inspectFocusId = null;
+        }
+      }
       notifyMode();
     },
     handleGamepad(pad) {

@@ -776,11 +776,27 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
 }
 
 // demos/corporate/gjh/v11/assets/mili-exhibit.js
-var miliCooklineLabels = [
-  "Left · Oyster Sauce 510 g",
-  "Centre · Vegetarian Oyster Sauce 510 g",
-  "Right · Vegetarian Mock Duck 280 g"
+var cooklineSamples = [
+  {
+    position: "Left",
+    name: "Oyster Sauce 510 g",
+    story: "The regular sauce lists oyster extract. The left bottle is an unprinted shape study. The image shows a prepared MILI dish.",
+    source: "https://www.gjheshop.com/product/mili-oyster-sauce-510g/"
+  },
+  {
+    position: "Centre",
+    name: "Vegetarian Oyster Sauce 510 g",
+    story: "The vegetarian sauce lists mushroom extract. The centre bottle is an unprinted shape study. The image shows a prepared MILI dish.",
+    source: "https://www.gjheshop.com/product/mili-vegetarian-oyster-sauce-510g/"
+  },
+  {
+    position: "Right",
+    name: "Vegetarian Mock Duck 280 g",
+    story: "The right-hand tin is an unprinted study of the tall can and its rolled rims. Its dimensions are estimated. The image shows a prepared MILI dish.",
+    source: "https://www.gjheshop.com/product/mili-vegetarian-mock-duck-280g/"
+  }
 ];
+var miliCooklineLabels = cooklineSamples.map((sample) => `${sample.position} · ${sample.name}`);
 var miliExhibit = {
   "mili-sauce-story": {
     brand: "MILI",
@@ -791,6 +807,7 @@ var miliExhibit = {
     story: "Goh Joo Hin introduced its MILI house brand in 1981. At the cookline, compare two 510 g sauces: MILI Oyster Sauce lists oyster extract, while Vegetarian Oyster Sauce lists mushroom extract. MILI also lists a 280 g Vegetarian Mock Duck tin in its pantry range.",
     source: "https://www.gjheshop.com/product-category/sauce/",
     sourceLabel: "View the official sauce catalogue",
+    samples: cooklineSamples,
     action: "brand-story"
   }
 };
