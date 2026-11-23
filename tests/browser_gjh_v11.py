@@ -21,9 +21,9 @@ ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / 'demos/corporate/gjh/v11'
 ARGS = ['--use-angle=' + os.environ.get('GALLERY_WEBGL_BACKEND', 'swiftshader'), '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
 
-# This texture is awaited by createWorld and is not a decorative-only asset.
-# Hold it at the HTTP server so screenshots capture a genuinely incomplete load.
-LOADER_TEXTURE = '/gallery/demos/corporate/gjh/v11/assets/mili-brand-cover.jpg'
+# createWorld awaits the WebP brand cover, including when the page preloads it.
+# Hold that transfer so screenshots capture a genuinely incomplete load.
+LOADER_TEXTURE = '/gallery/demos/corporate/gjh/v11/assets/mili-brand-cover.webp'
 loader_request = threading.Event()
 loader_release = threading.Event()
 hold_loader_texture = False
@@ -750,7 +750,7 @@ def loader_coverage(browser, url):
         def fail_texture(route):
             failures.append(route.request.url)
             route.fulfill(status=503, body='Startup texture unavailable')
-        pattern = '**/assets/mili-brand-cover.jpg*'
+        pattern = f'**{LOADER_TEXTURE}*'
         page.route(pattern, fail_texture)
         page.goto(url, wait_until='domcontentloaded', timeout=90000)
         page.wait_for_function('window.__sceneFailed === true', timeout=90000)

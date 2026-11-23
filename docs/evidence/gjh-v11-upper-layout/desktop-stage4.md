@@ -21,6 +21,9 @@ GALLERY_CHROME='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' \
 GALLERY_WEBGL_BACKEND=metal python tests/browser_gjh_v11.py --upper-deck
 ```
 
-The full legacy invocation stopped in its preliminary loader fixture while
-waiting for a standalone `mili-brand-cover.jpg` request. This receipt covers
+The full suite previously waited for an obsolete standalone JPG before reaching
+the deck. Its loader fixture now holds the WebP that the scene actually awaits.
+On desktop and mobile, the loading screen stayed visible until the response
+was released. Three simulated HTTP 503 responses exercised the directory and
+retry controls, and a real retry restored the scene. The table above covers
 the focused desktop route.
