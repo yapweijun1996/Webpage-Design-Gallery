@@ -2,9 +2,9 @@ import * as THREE from "../v11/vendor/three.module.min.js";
 import { buildWorld, REFLECTED } from "./world.js";
 
 const LANDMARKS = {
-  shop: [-5.62, 2.34, 1.05],
-  vending: [-0.89, 2.46, 0.50],
-  mall: [8.3, 1.76, -0.92],
+  shop: [-4.71, 2.07, 0.53],
+  vending: [-0.89, 2.40, 0.50],
+  mall: [11.98, 1.70, -1.86],
 };
 
 function rain(scene) {
@@ -18,8 +18,8 @@ function rain(scene) {
         vec3 p = position;
         float y = mod(p.y - time * (4.6 + fract(p.z * 2.6)), 13.0);
         p.x += -(13.0 - y) * 0.12 - tail * 0.026;
-        p.y = y + tail * 0.24;
-        opacity = mix(0.24, 0.05, tail) * smoothstep(0.0, 1.2, y) * (1.0 - smoothstep(6.0, 13.0, y));
+        p.y = y + tail * (0.18 + 0.22 * fract(p.x * 3.1));
+        opacity = mix(0.29, 0.02, tail) * smoothstep(0.0, 1.2, y) * (1.0 - smoothstep(8.0, 13.0, y));
         gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
       }`,
     fragmentShader: `
@@ -79,20 +79,31 @@ function wetRoad(scene) {
       uniform float strength;
       varying vec4 vMirror;
       varying vec3 vPosition;
+      float hash(vec2 p) {
+        return fract(sin(dot(p, vec2(93.7, 187.1))) * 27159.4);
+      }
+      float noise(vec2 p) {
+        vec2 cell = floor(p);
+        vec2 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(cell), hash(cell + vec2(1, 0)), f.x),
+                   mix(hash(cell + vec2(0, 1)), hash(cell + 1.0), f.x), f.y);
+      }
       void main() {
         vec2 uv = vMirror.xy / vMirror.w * 0.5 + 0.5;
         if (vMirror.w < 0.0 || any(lessThan(uv, vec2(0.0))) || any(greaterThan(uv, vec2(1.0)))) discard;
-        float x = vPosition.x;
-        float z = vPosition.z;
-        float ripples = sin(z * 47.0 + sin(x * 4.8) * 2.1) + sin(z * 57.1 + x * 8.8);
-        float pools = smoothstep(-0.9, 0.9, sin(z * 5.5 + sin(x * 2.6) * 2.1) * sin(x * 4.6 - z * 2.2));
-        uv.x += ripples * 0.0033 * (0.6 + pools);
-        uv.y += sin(x * 21.0 + z * 12.0) * 0.002;
-        vec3 color = texture2D(reflection, uv).rgb * 0.52;
-        color += texture2D(reflection, uv + vec2(0.006, 0.002)).rgb * 0.24;
-        color += texture2D(reflection, uv - vec2(0.006, 0.002)).rgb * 0.24;
-        float alpha = strength * (0.40 + pools * 0.60);
-        alpha *= smoothstep(1.98, 2.34, z) * (1.0 - smoothstep(13.0, 24.0, z));
+        vec2 p = vPosition.xz;
+        float pools = smoothstep(0.24, 0.76, noise(p * 1.18) * 0.8 + noise(p * 5.1) * 0.2);
+        float ripples = noise(p * vec2(11.0, 39.0)) - 0.5;
+        float smear = noise(p * vec2(3.5, 13.4)) - 0.5;
+        float facing = 1.0 - abs(normalize(cameraPosition - vPosition).y);
+        uv += vec2(ripples * 0.012 + smear * 0.008, smear * 0.012);
+        vec2 spread = vec2(0.0024 + 0.003 * (1.0 - pools), 0.011);
+        vec3 color = texture2D(reflection, uv).rgb * 0.46;
+        color += texture2D(reflection, uv + spread).rgb * 0.27;
+        color += texture2D(reflection, uv - spread).rgb * 0.27;
+        float alpha = strength * (0.32 + pools * 0.41 + facing * 0.27);
+        alpha *= smoothstep(1.96, 2.15, p.y) * (1.0 - smoothstep(12.0, 24.0, p.y));
         gl_FragColor = vec4(color, alpha);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -107,11 +118,11 @@ function wetRoad(scene) {
 
   return {
     resize(width, height) {
-      const scale = Math.min(0.55, 720 / width, 560 / height);
-      target.setSize(Math.round(width * scale), Math.round(height * scale));
+      const scale = Math.min(0.51, 640 / width, 448 / height);
+      target.setSize(Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale)));
     },
     update(renderer, camera, night) {
-      material.uniforms.strength.value = night ? 0.71 : 0.28;
+      material.uniforms.strength.value = night ? 0.79 : 0.29;
       mirror.position.copy(camera.position);
       mirror.position.y = 2 * roadY - camera.position.y;
       camera.getWorldDirection(forward);
@@ -140,7 +151,7 @@ export function createStreet({ canvas, stops, activate, fail }) {
 
   const world = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.15, 150);
-  const street = buildWorld(world);
+  const street = buildWorld(world, invalidate);
   const rainLines = rain(world);
   const reflection = wetRoad(world);
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -168,7 +179,7 @@ export function createStreet({ canvas, stops, activate, fail }) {
     renderer.setSize(width, height, false);
     reflection.resize(width, height);
     camera.aspect = width / height;
-    camera.fov = portrait.matches ? 42 : 38;
+    camera.fov = portrait.matches ? THREE.MathUtils.clamp(53 - camera.aspect * 9, 43, 50) : 43;
     camera.updateProjectionMatrix();
     invalidate();
   }
@@ -199,11 +210,12 @@ export function createStreet({ canvas, stops, activate, fail }) {
 
   function updateView() {
     const narrow = portrait.matches;
-    const focus = (narrow ? -3.90 : 0.05) + azimuth * (narrow ? 10.1 : 7.1);
-    const distance = narrow ? 17.9 : THREE.MathUtils.clamp(31.8 / camera.aspect, 19.5, 34);
-    const angle = -0.34 + azimuth * 0.28;
-    camera.position.set(focus + Math.sin(angle) * distance, 5.25 + elevation, 0.12 + Math.cos(angle) * distance);
-    camera.lookAt(focus, narrow ? 2.72 : 3.02, -0.40);
+    const wideFocus = THREE.MathUtils.clamp(1.9 - camera.aspect * 1.5, -0.46, 1.72);
+    const focus = (narrow ? -4.29 : wideFocus) + azimuth * (narrow ? 10.1 : 7.1);
+    const distance = narrow ? 16.6 : THREE.MathUtils.clamp(20.7 / camera.aspect, 16.9, 25.1);
+    const angle = (narrow ? -0.45 : -0.61) + azimuth * 0.28;
+    camera.position.set(focus + Math.sin(angle) * distance, 4.73 + elevation, 0.12 + Math.cos(angle) * distance);
+    camera.lookAt(focus, narrow ? 2.78 : 3.00, -0.40);
     camera.updateMatrixWorld();
     placeStops();
     reflection.update(renderer, camera, night);
@@ -216,8 +228,8 @@ export function createStreet({ canvas, stops, activate, fail }) {
     const elapsed = now - lastPaint;
     if (dirty || (moving && elapsed >= 32)) {
       if (moving) rainTime += Math.min(elapsed, 60) / 1000;
-      rainLines.visible = moving;
-      rainLines.material.uniforms.time.value = rainTime;
+      rainLines.visible = night;
+      rainLines.material.uniforms.time.value = motion.matches ? 0 : rainTime;
       if (dirty) updateView();
       renderer.render(world, camera);
       lastPaint = now;

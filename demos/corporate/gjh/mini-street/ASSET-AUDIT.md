@@ -13,4 +13,17 @@ Inspected 2026-11-23 against Blender-3D-Gallery main commit `2e97b66bbf8eba6d146
 
 Source base: https://github.com/yapweijun1996/Blender-3D-Gallery/tree/2e97b66bbf8eba6d14653f70d7021e6d9377cfce
 
-These are candidates, not a statement they were integrated. The puddle is a static asset, not a rain or water simulation. No vending-machine model was identified in the inspected top-level model directories. The existing v11 area already contains an areca planter and lounge bench. Before importing any asset, confirm model appearance, dimensions, browser performance, rights/provenance and changes to the intended composition.
+The six local candidate files were checked against the recorded byte counts and SHA-256 values for this pass. Their simplified material palettes and prebuilt proportions were less suitable for the continuous storefront, arcade and recessed retail interior. The flat puddle would duplicate the street's camera-dependent reflection. Mini Street uses its own geometry for these features. The v11 lounge bench and areca planter were reviewed as existing in-repository alternatives. The street uses original props tailored to the narrow pavement.
+
+## New Moon label atlas
+
+The four existing v11 can LOD1 models contain one JPEG each, derived from official packshot panels. The corresponding `*.metadata.json` files identify the packshot sources and record owner-confirmed use in the owner's project. Packaging artwork belongs to GJH / New Moon and the records do not supply a separate public redistribution license. The atlas reuses those label pixels in the same project. It adds no copy, prices, marks or products. The original 768 px front packshots serve the accessible shop dialog.
+
+| Atlas row, top to bottom | v11 source under `assets/` | Verified bytes | Verified SHA-256 |
+| --- | --- | ---: | --- |
+| New Zealand 425 g | `new-moon-can-nz-425g-lod1.glb` | 158528 | `fcb92b1c62e10338a3295cb56006365da747ad7f25d6b6bec0964d600b742cdb` |
+| Australia 425 g | `new-moon-can-au-425g-lod1.glb` | 153464 | `d1ae9ff1b35a65c6bb4cafb4a70ff3dd746bf3f70c8ffdac3f93546478feacde` |
+| South Africa 425 g | `new-moon-can-sa-425g-lod1.glb` | 156540 | `7728989f5e4c695c7b4765d219501349898ca1e72f0630bde13c66fc9811e0b5` |
+| Mexico 454 g | `new-moon-can-mx-454g-lod1.glb` | 119196 | `52f8952ca698cc77c6aaf8f1ef5c607a31c401817e6bf6741426e17510164acb` |
+
+Each embedded JPEG was resolved by `images[0].bufferView` in its GLB and resampled to 512 × 92 with Pillow Lanczos. Two copies of the nearest edge row pad the top and bottom of each strip. The stacked strips were encoded together at WebP quality 87 and method 6. Output `assets/new-moon-label-atlas.webp` is 512 × 384 and 70,654 bytes with SHA-256 `d0c5781dcacbfd84af914143453dd485c10405c25fcb90a1418582ea21eab5a3`.

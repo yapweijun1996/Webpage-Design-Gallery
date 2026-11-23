@@ -273,8 +273,9 @@ class GalleryTests(unittest.TestCase):
             self.assertEqual(mini_street["status"], "concept")
             street = Path("demos/corporate/gjh/mini-street")
             street_files = {Path(name) for name in (
-                "index.html", "style.css", "script.js", "scene.js", "world.js", "assets/theme.css",
-                "assets/thumbnail.webp", "assets/mini-street-anchor.webp",
+                "index.html", "style.css", "script.js", "scene.js", "world.js", "surfaces.js",
+                "assets/theme.css", "assets/thumbnail.webp", "assets/mini-street-anchor.webp",
+                "assets/new-moon-label-atlas.webp",
                 "screenshots/1440.png", "screenshots/768.png", "screenshots/390.png",
             )}
             self.assertEqual({file.relative_to(output / street) for file in (output / street).rglob("*")
