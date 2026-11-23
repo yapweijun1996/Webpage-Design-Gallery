@@ -289,6 +289,27 @@ test('New Moon exposure is confined to Low in Everyday and Christmas', () => {
   assert.equal(sample(store,'low'),.8);
 });
 
+test('LG exposure tapers before nearby storefronts and leaves Detailed unchanged', () => {
+  const scene=new T.Scene(), renderer={toneMappingExposure:.8};
+  const {atrium,slots}=expandedLayout;
+  const atmosphere=createMallAtmosphere(T,renderer,scene,slots,{atrium});
+  const lg=slots.find(slot=>slot.number==='14');
+  const approach={x:lg.minX-2.4,y:.9,z:(lg.minZ+lg.maxZ)/2};
+  const sample=(position,tier)=>{
+    atmosphere.update(position,500,tier);
+    return renderer.toneMappingExposure;
+  };
+
+  const adjusted=sample(approach,'balanced');
+  assert.ok(adjusted < .8);
+  assert.equal(sample(approach,'low'),adjusted);
+  assert.ok(sample({...approach,x:lg.minX-3.5},'low') > adjusted);
+  assert.equal(sample({...approach,x:lg.minX-4.6},'low'),.8);
+  assert.equal(sample({...approach,z:lg.maxZ+.1},'balanced'),.8);
+  assert.equal(sample({...approach,y:7.2},'balanced'),.8);
+  assert.equal(sample(approach,'detailed'),.8);
+});
+
 test('bundled world starts and submits expanded Low, Balanced and Detailed frames with browser stubs', async t => {
   const noop=()=>{};
   const gradient={addColorStop:noop};

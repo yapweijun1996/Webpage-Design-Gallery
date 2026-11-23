@@ -4037,6 +4037,14 @@ function createMallAtmosphere(T, renderer, scene, slots, {
           const exposure = newMoonLow ? newMoonExposure : tier === "low" ? 0.68 : 0.86;
           shopExposure = T.MathUtils.lerp(1, exposure, frontage * approach);
         }
+        if (lgSlot && (tier === "balanced" || tier === "low") && Math.abs(y) < 4) {
+          const halfWidth = (lgSlot.maxZ - lgSlot.minZ) / 2;
+          const lateral = Math.abs(z - (lgSlot.minZ + halfWidth));
+          const depth = Math.max(lgSlot.minX - x, x - lgSlot.maxX, 0);
+          const frontage = 1 - T.MathUtils.smoothstep(lateral, halfWidth * 0.55, halfWidth);
+          const approach = 1 - T.MathUtils.smoothstep(depth, 2.5, 4.5);
+          shopExposure *= T.MathUtils.lerp(1, 0.86, frontage * approach);
+        }
         renderer.toneMappingExposure = baseExposure * T.MathUtils.lerp(1, 0.82, tier === "balanced" ? courtyard : 0) * shopExposure;
       }
     }
