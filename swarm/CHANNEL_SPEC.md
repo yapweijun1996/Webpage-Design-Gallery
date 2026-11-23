@@ -23,7 +23,7 @@ Goal: a Slack-like channel. The owner (human) or Claude types a request, the Man
 Project dir = `swarm/projects/<name>/` (called PROJECT below).
 - `PROJECT/channel.jsonl`: append-only canonical log, written ONLY by the server (`lib/chat.js`).
 - `PROJECT/channel.md`: server-maintained plain-text transcript of the last 80 messages, rewritten after each post, one line per message: `#17 [Agent 3 -> Agent 2,Agent 5] (assign) text...`. Agents READ this file to follow the conversation.
-- `PROJECT/chat/NN.jsonl`: outbox per worker (`NN` = worker id). Workers append one JSON line: `{"to":["02"],"kind":"msg","text":"...","task":"...","reply":12}` (only `text` required). The server watches worker outboxes, tracks byte offsets to ingest each line once, and stamps the sender from the filename. Malformed lines are skipped and reported as a `system` message.
+- `chat/NN.jsonl` in the launched worker's workspace is the outbox (`NN` = worker ID). Workers append one JSON object per line, for example `{"to":["02"],"kind":"msg","text":"...","reply":12}`. After a successful exit, the server validates up to 24 posts and 64 KiB and stamps the sender from the launched worker identity. A rejected batch or file change prevents publication of the entire turn. Project-level outboxes remain archived.
 - The Manager emits one final assistant response per channel step with the object `{"swarmChannel":[{"kind":"msg","text":"..."}]}`. An empty array is valid. The parser limits each completed Manager assistant text to 96 KiB of UTF-8. A response may contain bare JSON or a standalone fenced JSON block. The server accepts at most 24 posts per batch, binds their sender to the launched Manager process, and validates the whole batch before publishing after a successful exit. Assignments are accepted only during Triage, Decide, and Review. `chat/00.jsonl` is no longer a live input. Previous Manager posts remain in the channel history.
 - The server stamps canonical IDs and timestamps, appends published messages to `channel.jsonl`, refreshes `channel.md`, and emits SSE events. Manager process binding does not provide operating-system isolation for worker files.
 - Owner/Claude messages arrive over HTTP (below) and use the same `post()`.
@@ -36,8 +36,8 @@ Project dir = `swarm/projects/<name>/` (called PROJECT below).
 ## lib/chat.js contract
 ```js
 const { createChat, parseMentions } = require('./chat');
-const chat = createChat({ projectDir, agents, emit });   // agents: [{id,name,section,color}] including manager '00'
-chat.start();                 // creates channel files and watches worker outboxes
+const chat = createChat({ projectDir, agents, emit, workspaceOutboxes: true });   // agents include manager '00'
+chat.start();                 // opens the canonical channel log and transcript
 chat.stop();
 chat.post(partialMsg);        // -> full msg (id, ts assigned). partialMsg: {from, to?, text, kind?, task?, reply?}; parses @mentions into `to`
 chat.publishManager(posts, { allowAssignments }); // server-only publisher for one successfully completed Manager envelope
@@ -54,7 +54,7 @@ const turns = createTurns({ chat, runAgent, agents, managerId: '00', maxDiscussR
 await turns.onOwnerMessage(msg);   // msg = a posted message from owner/claude
 turns.busy();                      // -> boolean
 ```
-- `runAgent({ id, label, prompt })` is provided by the server: runs one Codex CLI turn for agent `id` with that prompt and resolves `true` (success) or `false`. In unit tests it is a fake.
+- `runAgent({ id, label, prompt })` launches the configured runner (Codex or Pi) from a fresh worker workspace. It resolves `true` after publication or `false` on failure. Tests use a fixture runner.
 - Messages that arrive while busy are queued (FIFO) and handled after the current one; none are lost.
 - Flow for one owner message M:
   1. TRIAGE: run the Manager with label `Triage`. The Manager reads `channel.md` and responds with a short plan and one `kind:"assign"` message per worker it wants involved (`to:[id]`, `task`) in the same envelope. If the Manager posts no assignment, the flow ends after its reply.

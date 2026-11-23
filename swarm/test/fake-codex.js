@@ -20,8 +20,8 @@ const [, label, id] = step;
 const emit = event => console.log(JSON.stringify(event));
 const assistant = text => emit({ type: 'item.completed', item: { type: 'agent_message', text } });
 const managerEnvelope = messages => assistant(JSON.stringify({ swarmChannel: messages }));
-if (process.env.FAKE_FAIL_AGENT === id) {
-  if (id === '00') managerEnvelope([{ kind: 'msg', text: 'Do not publish this failed response.' }]);
+if (process.env.FAKE_FAIL_AGENT === id && id === '00') {
+  managerEnvelope([{ kind: 'msg', text: 'Do not publish this failed response.' }]);
   process.exit(1);
 }
 
@@ -61,11 +61,9 @@ switch (label) {
     break;
   }
   case 'Discuss': {
-    const history = fs.existsSync(outbox)
-      ? fs.readFileSync(outbox, 'utf8').trim().split('\n').filter(Boolean).map(line => JSON.parse(line))
-      : [];
-    // A completed edit resets the discussion for the next owner request.
-    const first = history.findLastIndex(message => message.kind === 'done') === history.length - 1;
+    const history = fs.readFileSync(path.join(project, 'channel.md'), 'utf8').split('\n');
+    const turn = history.slice(history.findLastIndex(line => line.endsWith('(system) Triage started')));
+    const first = !turn.some(line => line.endsWith(id === '02' ? handoffQuestion : 'I am reviewing my section.'));
     if (id === '02') {
       post(first
         ? { kind: 'msg', to: ['05'], text: handoffQuestion }
@@ -100,8 +98,10 @@ switch (label) {
     const sections = path.join(project, 'sections');
     const file = fs.readdirSync(sections).find(name => name.startsWith(`${id}-`) && name.endsWith('.html'));
     if (!file) throw new Error(`No HTML section for agent ${id}`);
+    if (!prompt.includes(`sections/${file}`)) throw new Error(`The prompt did not identify ${file}.`);
     const action = label === 'Improve' ? 'Improved' : 'Updated';
     fs.writeFileSync(path.join(sections, file), `<section class="s-${id}" id="${path.basename(file, '.html')}"><h2>${action} by agent ${id}</h2></section>\n`);
+    if (process.env.FAKE_FAIL_AGENT === id) fs.writeFileSync(path.join(project, 'brief.md'), 'Reject these candidate changes.\n');
     post({ kind: 'done', text: `${action} ${file}.` });
     break;
   }

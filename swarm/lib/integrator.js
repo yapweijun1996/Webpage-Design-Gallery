@@ -5,15 +5,23 @@ const os = require('node:os');
 const path = require('node:path');
 const { createHash, randomUUID } = require('node:crypto');
 const { checkProject } = require('../tools/check-sections');
+const { parseSectionFile } = require('./layers');
 const { classify, isSafePath } = require('./ownership');
+const { ProjectBusyError, withProjectLock } = require('./project-init');
 
 const MAX_FILE_BYTES = 1024 * 1024;
 const MAX_OUTBOX_BYTES = 64 * 1024;
+const MAX_SKILL_BYTES = 32 * 1024;
 const READ_FLAGS = fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK;
 const WORKSPACES = '.run/ws';
 const SNAPSHOTS = '.run/component-snapshots';
 const SCOPE_RULES = new Set(['layer-scope', 'unscoped-selector', 'css-scope']);
 const UUID = /^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/;
+const ANCHOR_ID = /^v(?:00[1-9]|0[1-9]\d|[1-9]\d{2,})$/;
+const CATALOGS = ['i18n/en.json', 'i18n/zh-Hans.json', 'i18n/ms.json'];
+const PREVIEW_ROOTS = ['sections', 'assets', 'tokens.css', 'brief.md', ...CATALOGS,
+  ...['tokens.css', 'themes.css', 'components.css', 'runtime.js', 'i18n.js', ...CATALOGS]
+    .map(file => `design-system/${file}`)];
 const sessions = new WeakMap();
 const active = new Map();
 
@@ -129,7 +137,7 @@ function copyRoots(from, to, roots, recordBase = () => {}, modeFor = () => 0o600
     if (stat.isDirectory()) directory(to, relative);
     else {
       const record = readFile(from, relative);
-      stageFile(to, relative, { ...record, mode: modeFor(relative) });
+      stageFile(to, relative, { ...record, mode: modeFor(relative, record) });
       recordBase(relative, record);
     }
   });
@@ -140,6 +148,7 @@ function launchManifest(manifest) {
     launchContext: true,
     shared: Object.freeze([...manifest.shared]),
     workers: Object.freeze([...manifest.workers]),
+    sections: Object.freeze([...manifest.sections]),
     owned: Object.freeze({ ...manifest.owned }),
   });
 }
@@ -153,12 +162,37 @@ function readRoots(manifest, workerId) {
   // Copy only the current roster's notes and discussion, and only this launch's inbox.
   const peers = manifest.workers.filter(id => id !== '00');
   const rosterRoots = peers.flatMap(id => [`notes/${id}.md`, `discussion/${id}.md`]);
-  return [...context, ...rosterRoots, `inbox/${workerId}.md`,
-    ...shared.filter(root => !['notes', 'discussion', 'inbox'].includes(root))];
+  return [...context, ...CATALOGS, ...rosterRoots, `inbox/${workerId}.md`,
+    ...shared.filter(root => !['notes', 'discussion', 'i18n', 'inbox'].includes(root))];
 }
 
-function open(projectDir, workerId, manifest) {
+function copySkills(project, dir, skillDirs, recordBase) {
+  const builtin = path.join(fs.realpathSync.native(path.join(__dirname, '..')), 'skills');
+  const local = path.join(project, 'skills');
+  const ids = new Set();
+  return skillDirs.map(source => {
+    if (typeof source !== 'string' || !path.isAbsolute(source)) throw new TypeError('Invalid selected skill directory.');
+    const root = path.dirname(source);
+    const id = path.basename(source);
+    if ((root !== builtin && root !== local) || !/^[a-z0-9-]{2,40}$/.test(id) || !isSafePath(id) || ids.has(id)) {
+      throw new TypeError('Invalid selected skill directory.');
+    }
+    const record = readFile(root, `${id}/SKILL.md`, { maxBytes: MAX_SKILL_BYTES });
+    if (!record) throw new Error('Selected skill file is missing.');
+    const stage = `.launch-skills/${id}`;
+    const relative = `${stage}/SKILL.md`;
+    stageFile(dir, relative, { ...record, mode: 0o400 });
+    recordBase(relative, record);
+    ids.add(id);
+    return path.join(dir, stage);
+  });
+}
+
+function open(projectDir, workerId, manifest, { skillDirs = [] } = {}) {
   if (!isSafePath(workerId) || !manifest.workers.includes(workerId)) throw new Error('Unknown worker ID.');
+  if (!Array.isArray(skillDirs) || (!manifest.launchContext && skillDirs.length)) {
+    throw new TypeError('Selected skills require a launch workspace and a directory list.');
+  }
   const project = projectRoot(projectDir);
   const id = randomUUID();
   const relative = `${WORKSPACES}/${id}`;
@@ -171,6 +205,7 @@ function open(projectDir, workerId, manifest) {
     base[name] = Object.freeze({ sha256 });
     sizes.set(name, size);
   };
+  let stagedSkills;
   try {
     const modeFor = name => !launched || classify(launched, workerId, name) === 'owned' ? 0o600 : 0o400;
     copyRoots(project, dir, readRoots(launched ?? manifest, workerId), recordBase, modeFor);
@@ -179,11 +214,12 @@ function open(projectDir, workerId, manifest) {
       stageFile(dir, outbox, { data, mode: 0o600 });
       recordBase(outbox, { sha256: createHash('sha256').update(data).digest('hex'), size: 0 });
     }
+    if (launched) stagedSkills = Object.freeze(skillDirs.length ? copySkills(project, dir, skillDirs, recordBase) : []);
   } catch (error) {
     fs.rmSync(dir, { recursive: true, force: true });
     throw error;
   }
-  const ws = Object.freeze({ id, dir, base: Object.freeze(base) });
+  const ws = Object.freeze({ id, dir, base: Object.freeze(base), ...(launched ? { skillDirs: stagedSkills } : {}) });
   const session = { project, workerId, relative, launched, outbox, sizes, overlap: new Set() };
   sessions.set(ws, session);
   if (!active.has(project)) active.set(project, new Set());
@@ -424,6 +460,149 @@ function merge(projectDir, ws, manifest, opts) {
   }
 }
 
+function publicationRoots(anchorId, visual) {
+  const policy = ['contract.json', 'anchors/flow.json'];
+  if (anchorId !== undefined) {
+    if (typeof anchorId !== 'string' || !ANCHOR_ID.test(anchorId)) throw new TypeError('Invalid anchor ID.');
+    for (const file of ['meta.json', 'contract.json', 'anchor.desktop.png', 'anchor.tablet.png', 'anchor.mobile.png']) {
+      policy.push(`anchors/${anchorId}/${file}`);
+    }
+  }
+  return visual ? [...PREVIEW_ROOTS, ...policy] : policy;
+}
+
+function signature(record) {
+  return record ? `${record.sha256}:${record.mode}` : null;
+}
+
+function inputState(root, roots) {
+  if (projectRoot(root) !== root) throw unsafe(root);
+  const state = new Map();
+  walk(root, roots, (relative, stat) => {
+    state.set(relative, stat.isDirectory() ? 'directory' : signature(readFile(root, relative, { hashOnly: true })));
+  });
+  return state;
+}
+
+function changedInput(expected, actual) {
+  return [...new Set([...expected.keys(), ...actual.keys()])].find(key => expected.get(key) !== actual.get(key));
+}
+
+function requireInputs(expected, root, roots, message) {
+  const changed = changedInput(expected, inputState(root, roots));
+  if (changed) throw new Violation('stale', changed, message);
+}
+
+function planState(plan) {
+  return new Map(plan.map(({ relative, before, after }) => [relative, `${signature(before)}>${signature(after)}`]));
+}
+
+function visualPath(relative) {
+  return relative.startsWith('sections/') || relative.startsWith('assets/');
+}
+
+function affectedSections(plan, manifest) {
+  const owners = new Set();
+  for (const { relative } of plan) {
+    if (relative.startsWith('sections/')) {
+      const section = parseSectionFile(relative.slice('sections/'.length));
+      if (section) owners.add(section.base);
+    } else if (relative.startsWith('assets/generated/')) {
+      const named = manifest.sections.filter(base => relative.startsWith(`assets/generated/${base}-`));
+      const section = named.sort((a, b) => b.length - a.length)[0];
+      if (section) owners.add(section);
+    }
+  }
+  return [...owners].sort();
+}
+
+async function publish(projectDir, ws, { accept, anchorId, maxFileBytes } = {}) {
+  const session = getSession(ws);
+  if (!session.launched) throw new TypeError('Publication requires a launch workspace.');
+  if (typeof accept !== 'function') throw new TypeError('Publication requires acceptance checks.');
+  const rejected = violations => ({ ok: false, merged: [], rejected: violations, snapshotId: null, outbox: null });
+  if (session.publishing || session.published) {
+    return rejected([{ code: 'busy', path: '', message: 'This launch already has a publication.' }]);
+  }
+
+  session.publishing = true;
+  let scratch;
+  try {
+    const project = projectRoot(projectDir);
+    if (project !== session.project) throw unsafe(session.relative);
+    const { plan, violations } = prepare(ws, session, session.launched, { maxFileBytes });
+    if (violations.length) return rejected(violations);
+
+    const outbox = workerOutbox(ws);
+    const frozenPlan = planState(plan);
+    const visual = plan.filter(change => visualPath(change.relative));
+    const roots = publicationRoots(anchorId, visual.length > 0);
+    const baseline = inputState(project, roots);
+    let before = null;
+    let after = null;
+    let expectedAfter;
+    if (visual.length) {
+      scratch = fs.mkdtempSync(path.join(fs.realpathSync.native(os.tmpdir()), 'swarm-publication-'));
+      before = directory(scratch, 'before');
+      after = directory(scratch, 'after');
+      const sourceMode = (_relative, record) => record.mode;
+      copyRoots(project, before, roots, undefined, sourceMode);
+      requireInputs(baseline, before, roots, 'The preview baseline changed while it was copied.');
+      copyRoots(before, after, roots, undefined, sourceMode);
+      for (const { relative, after: desired } of visual) {
+        fs.rmSync(entry(after, relative).file, { force: true });
+        if (desired) stageFile(after, relative, desired);
+      }
+      expectedAfter = inputState(after, roots);
+    }
+
+    const changed = Object.freeze(plan.map(change => change.relative));
+    const sections = Object.freeze(affectedSections(visual, session.launched));
+    const review = Object.freeze({ before, after, anchorId, workerId: session.workerId,
+      changed, sections, outbox: outbox?.toString('utf8') ?? null });
+    const verdict = await accept(review);
+    if (verdict?.ok !== true) {
+      const reasons = Array.isArray(verdict?.rejected) && verdict.rejected.length ? verdict.rejected
+        : [{ code: 'acceptance', path: '', message: 'Publication checks did not accept the changes.' }];
+      return rejected(reasons);
+    }
+
+    return withProjectLock(project, () => {
+      if (sessions.get(ws) !== session || projectRoot(projectDir) !== project) {
+        throw new Violation('stale', '', 'The launch workspace changed while acceptance was pending.');
+      }
+      requireInputs(baseline, project, roots, 'The live preview inputs changed during acceptance.');
+      if (before) {
+        requireInputs(baseline, before, roots, 'The before preview changed during acceptance.');
+        requireInputs(expectedAfter, after, roots, 'The after preview changed during acceptance.');
+      }
+      const next = prepare(ws, session, session.launched, { maxFileBytes });
+      if (next.violations.length) return rejected(next.violations);
+      const edited = changedInput(frozenPlan, planState(next.plan));
+      if (edited) throw new Violation('stale', edited, 'The prepared changes no longer match the accepted candidate.');
+      if (outbox !== null && !outbox.equals(workerOutbox(ws))) {
+        throw new Violation('stale', session.outbox, 'The worker outbox changed during acceptance.');
+      }
+
+      const snapshotId = commit(project, plan);
+      session.published = true;
+      recordOverlap(project, changed, session);
+      return { ok: true, merged: [...changed], rejected: [], snapshotId, outbox };
+    });
+  } catch (error) {
+    if (error instanceof Violation) return rejected([error.detail]);
+    if (error instanceof ProjectBusyError) return rejected([{ code: 'busy', path: '', message: error.message }]);
+    if (typeof error.code === 'string') return rejected([{ code: 'io', path: '', message: error.message }]);
+    throw error;
+  } finally {
+    session.publishing = false;
+    if (scratch) {
+      try { fs.rmSync(scratch, { recursive: true, force: true }); }
+      catch { console.warn('Could not clean up publication preview copies.'); }
+    }
+  }
+}
+
 function rollback(projectDir, snapshotId, { paths } = {}) {
   if (typeof snapshotId !== 'string' || !UUID.test(snapshotId)) throw new Error('Invalid snapshot ID.');
   const project = projectRoot(projectDir);
@@ -472,4 +651,4 @@ function close(ws) {
   }
 }
 
-module.exports = { open, diff, workerOutbox, validate, merge, rollback, close };
+module.exports = { open, diff, workerOutbox, validate, merge, publish, rollback, close };

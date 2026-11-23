@@ -19,6 +19,7 @@ const ASSET_TYPES = {
 const PROJECT_TYPES = { ...ASSET_TYPES, '.html': 'text/html', '.md': 'text/plain', '.txt': 'text/plain' };
 const STAGE_SCRIPTS = ['/preview-bridge.js', '/studio-preview.js', '/ds/runtime.js', '/ds/i18n.js'];
 const ASSET_PATHS = ['/p/sections/', '/p/dist/', '/p/assets/', '/assets/generated/', '/gjh/', '/gjh-v11/', '/p/v11/', '/v11/'];
+const GENERATED_IMAGE = /(?<![\w/:.-])((?:(?:\/p)?\/|\.\.?\/)?assets\/generated\/)([\w][\w.-]*\.(?:svg|png|webp|gif|avif|jpe?g|ico))(?![\w./-])(\?)?/g;
 const SECTION_ID = /^[\w-]{1,100}$/;
 const INERT_DOCUMENT = "sandbox; default-src 'none'; style-src 'unsafe-inline'";
 const CAPTURE_HEAD = `<style>html:root{scroll-behavior:auto!important}</style>
@@ -117,14 +118,30 @@ addEventListener('hashchange', setSection);
 }
 
 function createPreview({ ui, project, designSystem, library, mall }) {
+  const generated = path.join(project, 'assets', 'generated');
   const assets = [
     ['/p/sections/', path.join(project, 'sections'), project],
     ['/p/dist/', path.join(project, 'dist'), project],
     ['/p/assets/', path.join(project, 'assets'), project],
-    ['/assets/generated/', path.join(project, 'assets', 'generated'), project],
+    ['/assets/generated/', generated, project],
     ['/gjh/', library],
     ...['/gjh-v11/', '/p/v11/', '/v11/'].map(prefix => [prefix, mall]),
   ];
+
+  function reviseImages(content) {
+    const revisions = new Map();
+    return content.replace(GENERATED_IMAGE, (url, prefix, name, query) => {
+      if (!revisions.has(name)) {
+        const file = locate(generated, name, project);
+        const stat = file && fs.statSync(file, { bigint: true, throwIfNoEntry: false });
+        // Change the browser URL for both atomic replacements and in-place edits.
+        const revision = stat?.isFile() ? `${stat.ino.toString(36)}-${stat.ctimeNs.toString(36)}` : '';
+        revisions.set(name, revision);
+      }
+      const revision = revisions.get(name);
+      return revision ? `${prefix}${name}?swarm_asset=${revision}${query ? '&' : ''}` : url;
+    });
+  }
 
   return function preview(req, res, origin) {
     if (!['GET', 'HEAD'].includes(req.method)) return false;
@@ -178,9 +195,15 @@ function createPreview({ ui, project, designSystem, library, mall }) {
     if (section) {
       const [, name, ext] = section;
       const root = path.join(project, 'sections');
-      if (ext === 'html') return file(root, name + '.html', 'text/plain; charset=utf-8', cors, project);
+      if (ext === 'html') {
+        if (!opaque) return file(root, name + '.html', 'text/plain; charset=utf-8', cors, project);
+        const content = readFile(root, name + '.html', project);
+        if (content === undefined) send(res, 404, 'not found');
+        else send(res, 200, reviseImages(content.toString('utf8')), 'text/plain; charset=utf-8', cors);
+        return true;
+      }
       const css = locate(root, '.', project) ? assembleCss(root, name) : '';
-      send(res, 200, css, 'text/css; charset=utf-8', cors);
+      send(res, 200, opaque ? reviseImages(css) : css, 'text/css; charset=utf-8', cors);
       return true;
     }
 

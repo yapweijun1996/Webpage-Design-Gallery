@@ -50,10 +50,17 @@
   }
 
   function previewAgents() {
-    return order.map(id => {
+    const catalog = Array.isArray(S.previewSections) ? new Map(S.previewSections.map(({ id, section }) => [id, section])) : null;
+    const assigned = order.map(id => {
       const { section, name, color, status, target } = S.agents[id];
-      return { id, section, name, color, status, target };
+      return { id, section: catalog ? catalog.get(id) || '' : section, name, color, status, target };
     });
+    if (catalog) {
+      for (const [id, section] of catalog) {
+        if (!S.agents[id]) assigned.push({ id, section, name: section, color: '#64748b', status: 'idle', target: id });
+      }
+    }
+    return assigned;
   }
 
   function setState(state) {
@@ -65,7 +72,8 @@
     if (event.kind !== 'sections') return;
     // A layer edit is attributed to its specialist, while the file identifies the section to refresh.
     const section = /^sections[\\/](\d{2})-/.exec(event.file)?.[1] || event.id;
-    if (S?.agents[section]?.section) send('edit', section);
+    const catalog = S?.previewSections;
+    if (Array.isArray(catalog) ? catalog.some(({ id }) => id === section) : S?.agents[section]?.section) send('edit', section);
   }
 
   if (query.get('preview')) {
@@ -123,6 +131,7 @@
       startEvents(event => {
         if (event.type === 'state') publishState(event.state);
         else if (event.type === 'edit') refreshPreview(send, event);
+        else if (event.type === 'asset') send('asset', event.file);
       });
     }
     return;
@@ -444,7 +453,7 @@
       else if (target === 'agents') selectWorkspace('team');
       else {
         selectWorkspace('design');
-        if (target === 'versions') $('versions').focus();
+        if (target === 'versions') openVersions(compact.matches ? $('drawerbtn') : button);
       }
       paintSelection('[data-nav]', 'nav', target, 'aria-current');
     };
@@ -462,6 +471,115 @@
   }
   $('review').querySelector('h2').tabIndex = -1;
   $('quick-compare').onclick = $('compare-btn').onclick = $('menu-review').onclick = openReview;
+
+  const versionsDialog = $('versions-dialog');
+  const versionInput = $('version-name');
+  const versionList = $('version-list');
+  const versionStatus = $('version-status');
+  const versionDate = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  let versionTrigger, versionCatalog, versionPending = false, versionReading = false, versionRead = 0;
+
+  function selectedVersion() { return versionList.querySelector('input:checked')?.value; }
+
+  function paintVersionActions() {
+    const working = versionCatalog?.busy || S?.phase === 'running' || busy;
+    const blocked = !versionCatalog || versionReading || versionPending || working;
+    $('version-busy').hidden = !working;
+    $('version-save-button').disabled = blocked;
+    $('version-restore').disabled = blocked || !selectedVersion();
+  }
+
+  async function loadVersions() {
+    if (!versionsDialog.open || versionPending) return;
+    const request = ++versionRead;
+    versionReading = true;
+    paintVersionActions();
+    try {
+      const { ok, json } = await api('/api/versions');
+      if (request !== versionRead) return;
+      if (!ok) throw new Error(json.error);
+      const previous = selectedVersion();
+      const hadRowFocus = versionList.contains(document.activeElement);
+      versionCatalog = json;
+      versionList.replaceChildren(...json.versions.map(({ id, label, createdAt }) => {
+        const row = node('li');
+        const choice = node('label');
+        const input = node('input');
+        input.type = 'radio';
+        input.name = 'saved-version';
+        input.value = id;
+        input.checked = id === previous;
+        const info = node('span');
+        info.append(node('strong', '', label || 'Saved version'));
+        const date = new Date(createdAt);
+        if (Number.isFinite(date.getTime())) {
+          const time = node('time', '', versionDate.format(date));
+          time.dateTime = createdAt;
+          info.append(time);
+        }
+        choice.append(input, info);
+        row.append(choice);
+        return row;
+      }));
+      if (hadRowFocus) (versionList.querySelector('input:checked') || versionInput).focus({ preventScroll: true });
+      $('version-empty').hidden = json.versions.length > 0;
+      $('version-empty').textContent = 'No saved versions yet.';
+    } catch {
+      if (request !== versionRead) return;
+      versionCatalog = null;
+      versionList.replaceChildren();
+      $('version-empty').hidden = false;
+      $('version-empty').textContent = 'Versions could not be loaded. Reopen this panel to try again.';
+    } finally {
+      if (request === versionRead) {
+        versionReading = false;
+        paintVersionActions();
+      }
+    }
+  }
+
+  function openVersions(trigger) {
+    versionTrigger = trigger;
+    versionStatus.textContent = '';
+    showPopover(null);
+    closeAsk();
+    versionsDialog.showModal();
+    versionInput.focus();
+    loadVersions();
+  }
+
+  async function changeVersion(restore) {
+    const action = $(restore ? 'version-restore' : 'version-save-button');
+    if (action.disabled) return;
+    const fields = restore ? { id: selectedVersion() } : { label: versionInput.value };
+    versionPending = true;
+    versionStatus.textContent = restore ? 'Restoring version…' : 'Saving version…';
+    paintVersionActions();
+    try {
+      const { ok, json } = await api(restore ? '/api/rollback' : '/api/versions', 'POST', { projectId: versionCatalog.projectId, ...fields });
+      if (!ok) throw new Error(json.error || 'The version change could not finish.');
+      if (!restore) versionInput.value = '';
+      versionStatus.textContent = restore ? 'Version restored. Your previous design was saved.' : 'Version saved.';
+    } catch (error) {
+      versionStatus.textContent = error.message;
+    } finally {
+      versionPending = false;
+      paintVersionActions();
+      loadVersions();
+    }
+  }
+
+  $('versions-open').onclick = event => openVersions(event.currentTarget);
+  $('versions-close').onclick = () => versionsDialog.close();
+  versionsDialog.addEventListener('click', event => { if (event.target === versionsDialog) versionsDialog.close(); });
+  versionsDialog.addEventListener('close', () => {
+    versionRead += 1;
+    versionReading = false;
+    if (versionTrigger?.getClientRects().length) versionTrigger.focus();
+  });
+  versionList.addEventListener('change', paintVersionActions);
+  $('version-save').onsubmit = event => { event.preventDefault(); changeVersion(false); };
+  $('version-restore').onclick = () => changeVersion(true);
 
   const popovers = { viewmenu: 'viewbtn', look: 'lookbtn', focuspop: 'focusbtn' };
   let activePopover;
@@ -859,6 +977,7 @@
     if (running) runningSince ||= timestamp || Date.now();
     else runningSince = 0;
     paintTimer();
+    if (versionsDialog.open) paintVersionActions();
   }
 
   function paintTimer() {
@@ -919,6 +1038,7 @@
       paintFocus();
       requestPreviewView();
       activityModule?.onEvent(event);
+      loadVersions();
       return;
     }
 
@@ -945,6 +1065,7 @@
       case 'phase':
         S.phase = event.phase;
         setPhase(event.ts);
+        loadVersions();
         break;
       case 'chat': {
         const message = event.msg;
@@ -965,6 +1086,10 @@
         busy = !!event.busy;
         window.SwarmChannel?.setBusy(busy);
         setPhase(event.ts);
+        loadVersions();
+        break;
+      case 'versions':
+        loadVersions();
         break;
       case 'doc':
         if (typeof event.file === 'string') window.SwarmDocs?.refresh(event.file.split('/').pop());
@@ -988,6 +1113,9 @@
         break;
       case 'edit':
         refreshPreview(publishPreview, event);
+        break;
+      case 'asset':
+        publishPreview('asset', event.file);
         break;
     }
   }

@@ -65,6 +65,8 @@ function fixture(t, { existing = true, environment = {} } = {}) {
     } },
     child_process: { spawnSync() {}, spawn(command, args, options) {
       assert.ok(fs.existsSync(path.join(project, 'channel.md')));
+      assert.equal(path.dirname(options.cwd), path.join(project, '.run', 'ws'));
+      assert.ok(fs.existsSync(path.join(options.cwd, 'channel.md')));
       child = Object.assign(new EventEmitter(), { stdin: new PassThrough(), stdout: new PassThrough() });
       spawns.push({ command, args, options, child });
       child.kill = () => child.emit('close', 1);
@@ -302,10 +304,12 @@ test('a worker with an explicit staff position gets its local skills through Pi'
   emitManagerPosts(first, [{ kind: 'assign', to: ['01'], text: 'Review the hero.', task: 'Check heading hierarchy.' }]);
   first.emit('close', 0);
   await new Promise(resolve => setImmediate(resolve));
-  const { command, args, child } = f.spawns[1];
+  const { command, args, options, child } = f.spawns[1];
   assert.equal(command, 'pi');
   assert.ok(args.includes('--no-skills'));
-  assert.deepEqual(args.slice(args.indexOf('--skill')), ['--skill', path.join(f.project, 'skills', 'fixture-hero')]);
+  const stagedSkill = path.join(options.cwd, '.launch-skills', 'fixture-hero');
+  assert.deepEqual(args.slice(args.indexOf('--skill')), ['--skill', stagedSkill]);
+  assert.match(fs.readFileSync(path.join(stagedSkill, 'SKILL.md'), 'utf8'), /Hero fixture marker\./);
   assert.doesNotMatch(child.stdin.read().toString(), /Hero fixture marker\./);
   child.emit('close', 0);
 });

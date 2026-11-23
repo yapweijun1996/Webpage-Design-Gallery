@@ -62,7 +62,7 @@
         <button type="button" data-nav="overview" data-icon="overview" aria-label="Overview" aria-current="page"><span>Overview</span></button>
         <button type="button" data-nav="tasks" data-icon="tasks" aria-label="Task board"><span>Task board</span></button>
         <button type="button" data-nav="agents" data-icon="team" aria-label="Agents"><span>Agents</span></button>
-        <button type="button" data-nav="versions" data-icon="versions" aria-label="Versions"><span>Versions</span></button>
+        <button type="button" data-nav="versions" data-icon="versions" aria-label="Versions" aria-haspopup="dialog" aria-controls="versions-dialog"><span>Versions</span></button>
         <button type="button" data-nav="assets" data-icon="assets" aria-label="Assets"><span>Assets</span></button>
         <button type="button" data-nav="settings" data-icon="gear" aria-label="Settings"><span>Settings</span></button>
       </nav>
@@ -106,7 +106,8 @@
           </div>
         </div>
         <section class="studio-versions" id="versions" tabindex="-1" aria-labelledby="versions-title">
-          <div><h2 id="versions-title">Versions</h2><p>No saved versions yet.</p></div>
+          <h2 id="versions-title">Versions</h2>
+          <button type="button" id="versions-open" class="studio-button" aria-haspopup="dialog" aria-controls="versions-dialog">Manage versions</button>
           <button type="button" class="sds-btn studio-button" id="compare-btn" data-icon="compare"><span>Compare</span></button>
         </section>
         <section class="studio-compose" aria-label="Prompt composer">
@@ -188,6 +189,30 @@
   <textarea id="asktext" aria-label="Your request" rows="3" maxlength="400" placeholder="Describe the change, or ask a question"></textarea>
   <div class="ab"><button type="submit" id="askchange" class="pri">Ask to change</button><button type="button" id="askwhy">Explain why</button></div>
 </form>
+  <dialog id="versions-dialog" aria-labelledby="versions-dialog-title">
+    <header class="studio-versions-head">
+      <h2 id="versions-dialog-title">Project versions</h2>
+      <button class="ibtn" id="versions-close" type="button" data-icon="close" aria-label="Close versions"></button>
+    </header>
+    <div class="studio-versions-body">
+      <form id="version-save" class="studio-version-save">
+        <label for="version-name">Version name
+          <input id="version-name" maxlength="80" placeholder="Optional">
+        </label>
+        <button class="studio-button" id="version-save-button" type="submit" disabled>Save version</button>
+      </form>
+      <p id="version-busy" role="status" hidden>Versions can be changed when the project is idle.</p>
+      <fieldset class="studio-version-history">
+        <legend>Saved versions</legend>
+        <p id="version-empty">Loading versions…</p>
+        <ul id="version-list"></ul>
+      </fieldset>
+    </div>
+    <footer class="studio-versions-footer">
+      <p id="version-status" role="status"></p>
+      <button class="studio-button" id="version-restore" type="button" disabled>Restore selected version</button>
+    </footer>
+  </dialog>
   <dialog id="setdlg" aria-label="Settings">
     <header><h2>Settings</h2><button class="ibtn" id="setclose" type="button" data-icon="close" aria-label="Close settings"></button></header>
     <div id="setroot"></div>

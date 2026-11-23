@@ -85,6 +85,19 @@ test('a layout shift below the owner is unexpected when the cropped pixels match
   assert.equal(result.perSection[2].resized, false);
 });
 
+test('initial insertion only permits unchanged peers in the same flow position without the owner', () => {
+  const shifted = (y, withoutOwnerY, pixels = original) => ({ ...section(y, pixels), withoutOwnerY });
+  const empty = y => ({ ...section(y, null, { height: 0 }), empty: true });
+  const before = snapshot({ [HEADER]: empty(0), [HERO]: empty(1), [FOOTER]: shifted(10, 10) });
+  const after = snapshot({ [HEADER]: empty(4), [HERO]: section(4), [FOOTER]: shifted(50, 10) });
+  const result = compareWidth(before, after, HERO);
+  assert.deepEqual(result.unexpected, []);
+  assert.deepEqual(result.perSection.filter(sample => sample.flowTranslation).map(sample => sample.id), [HEADER, FOOTER]);
+  for (const overridden of [shifted(50, 20), shifted(50, 10, tinted)]) {
+    assert.deepEqual(compareWidth(before, snapshot({ ...after.sections, [FOOTER]: overridden }), HERO).unexpected, [FOOTER]);
+  }
+});
+
 test('removed and added sections are reported and empty fragments stay unchanged', () => {
   const before = snapshot({ [HEADER]: section(0), [HERO]: section(1), '03-empty': null });
   const after = snapshot({ [HEADER]: section(0), '03-empty': null, [FOOTER]: section(2) });

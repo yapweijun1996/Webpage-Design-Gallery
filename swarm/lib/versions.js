@@ -9,6 +9,13 @@ const ENTRIES = ['sections', 'contract.json'];
 const ID = /^\d{13}-[a-f0-9-]{36}$/;
 const MANIFEST = 'snapshot.json';
 
+class VersionNotFoundError extends Error {}
+class VersionRestoreBlockedError extends Error {}
+
+function isVersionId(id) {
+  return typeof id === 'string' && ID.test(id);
+}
+
 function versionsDir(projectDir, create = false) {
   const project = path.resolve(projectDir);
   if (!fs.lstatSync(project).isDirectory()) throw new Error(`Expected a project directory: ${project}`);
@@ -35,7 +42,7 @@ function snapshotIds(storage) {
 function readManifest(storage, id) {
   const directory = path.join(storage, id);
   if (!fs.lstatSync(directory, { throwIfNoEntry: false })?.isDirectory()) {
-    throw new Error(`Unknown snapshot: ${id}`);
+    throw new VersionNotFoundError(`Unknown snapshot: ${id}`);
   }
   const file = path.join(directory, MANIFEST);
   if (!fs.lstatSync(file, { throwIfNoEntry: false })?.isFile()) {
@@ -75,28 +82,47 @@ function copyEntries(from, to, entries) {
   }
 }
 
+function nextVersion(storage) {
+  const latest = snapshotIds(storage)[0];
+  const now = Date.now();
+  // Keep insertion order when snapshots share a clock tick or the clock moves backward.
+  const sequence = latest ? Math.max(now, Number(latest.slice(0, 13)) + 1) : now;
+  const id = `${String(sequence).padStart(13, '0')}-${randomUUID()}`;
+  return { id, createdAt: new Date(now).toISOString() };
+}
+
+function prune(storage, pinned) {
+  try {
+    let remaining = RETENTION - (pinned ? 1 : 0);
+    for (const id of snapshotIds(storage)) {
+      if (id === pinned || remaining-- > 0) continue;
+      fs.rmSync(path.join(storage, id), { recursive: true, force: true });
+    }
+  } catch {
+    // Pruning is housekeeping. A saved or restored version remains committed.
+    console.warn('Version history cleanup could not finish.');
+  }
+}
+
+function cleanStage(staging) {
+  try { fs.rmSync(staging, { recursive: true, force: true }); }
+  catch { console.warn('Version staging cleanup could not finish.'); }
+}
+
 function snapshot(projectDir, label = '') {
   if (typeof label !== 'string') throw new TypeError('Snapshot label must be a string');
   const entries = inspectEntries(projectDir);
   const storage = versionsDir(projectDir, true);
-  const previous = snapshotIds(storage);
-  const now = Date.now();
-  // Keep insertion order when snapshots share a clock tick or the clock moves backward.
-  const sequence = previous.length ? Math.max(now, Number(previous[0].slice(0, 13)) + 1) : now;
-  const id = `${String(sequence).padStart(13, '0')}-${randomUUID()}`;
+  const { id, createdAt } = nextVersion(storage);
   const staging = fs.mkdtempSync(path.join(storage, '.snapshot-'));
   try {
     copyEntries(projectDir, staging, entries);
-    fs.writeFileSync(path.join(staging, MANIFEST), JSON.stringify({
-      label, createdAt: new Date(now).toISOString(), entries,
-    }));
+    fs.writeFileSync(path.join(staging, MANIFEST), JSON.stringify({ label, createdAt, entries }));
     fs.renameSync(staging, path.join(storage, id));
   } finally {
-    fs.rmSync(staging, { recursive: true, force: true });
+    cleanStage(staging);
   }
-  for (const old of previous.slice(RETENTION - 1)) {
-    fs.rmSync(path.join(storage, old), { recursive: true, force: true });
-  }
+  prune(storage);
   return id;
 }
 
@@ -109,10 +135,11 @@ function list(projectDir) {
   });
 }
 
-function rollback(projectDir, id) {
-  if (typeof id !== 'string' || !ID.test(id)) throw new Error('Invalid snapshot id');
+function rollback(projectDir, id, { backupLabel, canRestore } = {}) {
+  if (!isVersionId(id)) throw new Error('Invalid snapshot id');
+  if (backupLabel !== undefined && typeof backupLabel !== 'string') throw new TypeError('Snapshot label must be a string');
   const storage = versionsDir(projectDir);
-  if (!storage) throw new Error(`Unknown snapshot: ${id}`);
+  if (!storage) throw new VersionNotFoundError(`Unknown snapshot: ${id}`);
   const { entries } = readManifest(storage, id);
   const source = path.join(storage, id);
   const captured = inspectEntries(source);
@@ -121,7 +148,10 @@ function rollback(projectDir, id) {
   }
 
   const live = inspectEntries(projectDir);
+  const backup = backupLabel === undefined ? undefined : nextVersion(storage);
   const staging = fs.mkdtempSync(path.join(storage, '.rollback-'));
+  const candidate = path.join(staging, 'candidate');
+  const before = path.join(staging, 'before');
   const moves = [];
   let keepStaging = false;
   function move(from, to) {
@@ -130,12 +160,28 @@ function rollback(projectDir, id) {
   }
   try {
     // Complete all potentially failing copies before moving live entries.
-    copyEntries(source, staging, entries);
+    fs.mkdirSync(candidate);
+    fs.mkdirSync(before);
+    copyEntries(source, candidate, entries);
+    if (canRestore) {
+      const decision = canRestore({ id, source: candidate });
+      if (decision !== true) {
+        throw new VersionRestoreBlockedError(typeof decision === 'string' ? decision : 'This version cannot be restored.');
+      }
+    }
+    if (backup) {
+      fs.writeFileSync(path.join(before, MANIFEST), JSON.stringify({
+        label: backupLabel, createdAt: backup.createdAt, entries: live,
+      }));
+    }
     for (const name of ENTRIES) {
       const target = path.join(projectDir, name);
-      if (live.includes(name)) move(target, path.join(staging, `old-${name}`));
-      if (entries.includes(name)) move(path.join(staging, name), target);
+      if (live.includes(name)) move(target, path.join(before, name));
+      if (entries.includes(name)) move(path.join(candidate, name), target);
     }
+    // Publish the undo snapshot only after the replacement succeeds. Keep the
+    // restored version available at the history limit until the next save.
+    if (backup) move(before, path.join(storage, backup.id));
   } catch (error) {
     const failures = [];
     for (const [from, to] of moves.reverse()) {
@@ -151,8 +197,10 @@ function rollback(projectDir, id) {
     }
     throw error;
   } finally {
-    if (!keepStaging) fs.rmSync(staging, { recursive: true, force: true });
+    if (!keepStaging) cleanStage(staging);
   }
+  if (backup) prune(storage, id);
+  return backup?.id;
 }
 
-module.exports = { snapshot, list, rollback };
+module.exports = { snapshot, list, rollback, isVersionId, VersionNotFoundError, VersionRestoreBlockedError };

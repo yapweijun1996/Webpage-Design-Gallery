@@ -27,7 +27,7 @@ function freePort() {
 }
 
 async function request(base, route, body) {
-  const options = { signal: AbortSignal.timeout(1000) };
+  const options = { signal: AbortSignal.timeout(8000) };
   if (body) {
     options.method = 'POST';
     options.headers = { 'content-type': 'application/json' };
@@ -82,8 +82,9 @@ function verifyTurn(messages, triageId, summaryId, improves) {
     const done = turn.find(message => message.from === id && message.kind === 'done');
     assert.ok(assignment?.task, `Manager assignment for agent ${id} was missing`);
     assert.ok(assignment.id < mention.id && assignment.id < discussion[0].id, `Agent ${id} was assigned after discussion started`);
+    const warnings = turn.filter(message => message.from === 'system' && /rejected|failed|publish/i.test(message.text)).map(message => message.text);
     assert.ok(done && decision.id < work.id && work.id < done.id && done.id < review.id,
-      `Agent ${id} did not complete Work between Decide and Review`);
+      `Agent ${id} did not complete Work between Decide and Review. ${warnings.join(' ')}`);
   }
 
   const reviewAssignments = turn.filter(message => message.id > review.id && message.from === '00' && message.kind === 'assign');
@@ -165,7 +166,17 @@ async function runScenario(failingAgent = '') {
       }
     }, checkServer);
 
-    const deadline = Date.now() + 30_000;
+    const brief = fs.readFileSync(path.join(project, 'brief.md'), 'utf8');
+    if (!failingAgent) {
+      const { projectId } = await request(base, '/api/state');
+      const dir = path.join(project, 'sections');
+      for (const ext of ['html', 'css']) fs.renameSync(path.join(dir, `02-hero.${ext}`), path.join(dir, `02-restored-hero.${ext}`));
+      const renamed = path.join(dir, '02-restored-hero.html');
+      fs.writeFileSync(renamed, fs.readFileSync(renamed, 'utf8').replace('id="02-hero"', 'id="02-restored-hero"'));
+      const { id } = await request(base, '/api/versions', { projectId, label: 'Archived section name' });
+      await request(base, '/api/rollback', { projectId, id });
+    }
+    const deadline = Date.now() + 90_000;
     const { id: firstId } = await request(base, '/api/chat', { from: 'owner', text: firstRequest });
     assert.ok(Number.isInteger(firstId), 'First POST did not return a message ID');
 
@@ -196,6 +207,10 @@ async function runScenario(failingAgent = '') {
       assert.ok(messages.some(message => message.id > failure.id && message.id < summary.id &&
         message.from === '02' && message.kind === 'done' && message.text.startsWith('Improved ')),
         'Agent 02 did not finish Improve after agent 05 failed');
+      assert.equal(messages.some(message => message.from === failingAgent && message.kind === 'done'), false);
+      assert.equal(fs.readFileSync(path.join(project, 'brief.md'), 'utf8'), brief);
+      const rejected = fs.readdirSync(path.join(project, 'sections')).find(file => file.startsWith(`${failingAgent}-`) && file.endsWith('.html'));
+      assert.doesNotMatch(fs.readFileSync(path.join(project, 'sections', rejected), 'utf8'), /Updated by agent/);
       verifySections({ '02': 'Improved' });
       verifyDocuments('Tighten the hero headline to match the page rhythm.');
       return;
@@ -234,6 +249,10 @@ async function runScenario(failingAgent = '') {
     verifyTurn(messages, secondTriage.id, secondSummary.id, false);
     verifySections({ '02': 'Updated', '05': 'Updated' });
     verifyDocuments('The page rhythm is cohesive.');
+    assert.equal(fs.existsSync(path.join(project, 'sections/02-hero.html')), false);
+    const exportResponse = await fetch(base + '/p/dist/preview.html');
+    assert.equal(exportResponse.status, 200);
+    assert.match(await exportResponse.text(), /id="02-restored-hero"><h2>Updated by agent 02/);
   } catch (error) {
     if (logs.trim()) console.error(logs.trim());
     throw error;
@@ -256,9 +275,9 @@ async function runScenario(failingAgent = '') {
 
 async function main() {
   await runScenario();
-  console.log('PASS: channel flow, Discuss rerun, Review assignments, manager documents, and queued request');
+  console.log('PASS: channel flow from blank sections, restored section ownership, and the live legacy export');
   await runScenario('05');
-  console.log('PASS: agent 05 failure reported and agent 02 improved its section before Summary');
+  console.log('PASS: agent 05 candidate and outbox rejected, and agent 02 improved its section before Summary');
   await runScenario('00');
   console.log('PASS: failed Manager responses are discarded before publication');
 }

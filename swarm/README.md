@@ -25,7 +25,7 @@ and `projectId` of the intended target from `/api/state`.
 - Mentions such as `@03`, `@Agent 3`, `@hero`, and `@all` resolve to recipient IDs.
 - Messages carry a server-assigned ID and timestamp, sender, recipients, kind, and text, with optional task and reply fields.
 - The kinds are `msg`, `assign`, `decision`, `done`, and `system`.
-- Agents read `channel.md`. Workers post JSON lines to their own `chat/NN.jsonl` outbox. The Manager posts an assistant output envelope from its launched runner.
+- Agents read a workspace copy of `channel.md`. Workers post JSON lines to `chat/NN.jsonl` in that workspace. The Manager returns an assistant output envelope. The server publishes accepted posts after the turn exits successfully.
 - The server writes the canonical `channel.jsonl` log and refreshes the transcript.
 - HTTP handles posting and history. The SSE stream broadcasts live messages.
 - See [CHANNEL_SPEC.md](CHANNEL_SPEC.md) for the full protocol.
@@ -38,7 +38,7 @@ Run each command as `node swarm/cli.js <command>`.
 | --- | --- |
 | `start [--keep] [--brief "text" \| --brief-file file] [--agents file]` | Start the server if needed and prepare the selected project. `--keep` opens it as is. |
 | `status` | Show the current phase, round, and agent status. |
-| `say <id\|all> "message"` | Send a legacy inbox instruction. |
+| `say <id\|all> "message"` | Add a legacy inbox instruction for the next worker launch. |
 | `stop` | Stop active agents. |
 | `url` | Print the browser URL. |
 | `quit` | Stop the server. |
@@ -70,8 +70,10 @@ Command errors exit 1. Use `--port` to override the CLI port.
 
 Log in with the selected runner before starting a turn. Runner processes and
 readiness probes receive an allowlist of local environment variables for paths,
-locale and CLI configuration. Worker turns also receive the current Swarm port
-for the local image helper. Server API keys stay out of runner processes.
+locale and CLI configuration. The image specialist uses the local image helper
+to save a section-prefixed PNG or WebP of up to 1 MiB in its workspace. The
+image is published with the accepted turn. Server API keys stay out of runner
+processes.
 
 ## Settings workspace
 
@@ -110,12 +112,25 @@ Turn totals cannot identify individual long-context requests. The estimate
 covers reported model tokens and does not represent an account bill. The
 page marks the estimate as partial or unavailable when pricing data is missing.
 
+## Studio versions
+
+Open **Manage versions** beneath Studio's live preview, or choose **Versions**
+from the project menu. While the project is idle, save a named checkpoint or
+select a saved version and choose **Restore selected version**.
+
+A version captures the project's `sections/` and `contract.json`. Restoring
+updates the live preview and saves the replaced design as **Before restore** so
+you can recover it from the same panel. Versions preserve the active team,
+channel history, project notes and generated assets. The project keeps up to 20 versions. For a
+project with a locked design anchor, the restored design must match that anchor.
+
 ## Verification
 
 ```sh
 node swarm/test/e2e.js
 python swarm/test/browser_settings_skills.py
+python swarm/test/browser_studio_versions.py
 ```
 
-The Skills browser check uses Python Playwright with Chrome. Set `GALLERY_CHROME`
+The browser checks use Python Playwright with Chrome. Set `GALLERY_CHROME`
 if Chrome is installed at a different path.

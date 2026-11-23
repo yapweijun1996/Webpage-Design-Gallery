@@ -148,7 +148,7 @@ function startChrome(binary, profile, width) {
 }
 
 // This function runs inside Chrome. Measurements use document coordinates at the top of the page.
-async function measurePage(ids, width) {
+async function measurePage(ids, width, flowOwner) {
   if (window.innerWidth !== width) throw new Error(`Expected viewport ${width}px, got ${window.innerWidth}px`);
   await Promise.all([...document.images].map(image => {
     image.loading = 'eager';
@@ -185,13 +185,28 @@ async function measurePage(ids, width) {
     return pixels;
   }
 
+  const horizontalOverflow = Math.max(0, document.documentElement.scrollWidth - viewport);
+  const sections = Object.fromEntries(roots.map(([id, root]) => {
+    if (!root) return [id, null];
+    const { x, y, width, height } = root.getBoundingClientRect();
+    return [id, { box: { x, y, width, height }, horizontalOverflow: overflow(root, -Infinity, Infinity),
+      empty: Boolean(flowOwner && !height && !root.childElementCount && !root.textContent.trim()) }];
+  }));
+  const subject = flowOwner && document.getElementById(flowOwner);
+  if (subject) {
+    const style = subject.getAttribute('style');
+    try {
+      subject.style.setProperty('display', 'none', 'important');
+      for (const [id, root] of roots) {
+        if (root && id > flowOwner) sections[id].withoutOwnerY = root.getBoundingClientRect().y;
+      }
+    } finally {
+      if (style === null) subject.removeAttribute('style');
+      else subject.setAttribute('style', style);
+    }
+  }
   return {
-    horizontalOverflow: Math.max(0, document.documentElement.scrollWidth - viewport),
-    sections: Object.fromEntries(roots.map(([id, root]) => {
-      if (!root) return [id, null];
-      const { x, y, width, height } = root.getBoundingClientRect();
-      return [id, { box: { x, y, width, height }, horizontalOverflow: overflow(root, -Infinity, Infinity) }];
-    })),
+    horizontalOverflow, sections,
     scripts: [...document.scripts].map(script => ({
       section: roots.find(([, root]) => root?.contains(script))?.[0] ?? null,
       src: script.src,
@@ -230,7 +245,7 @@ function screenshotClip(box, width) {
   }
 }
 
-async function render(chrome, bundle, width) {
+async function render(chrome, bundle, width, flowOwner) {
   const { browserContextId } = await chrome.send('Target.createBrowserContext');
   const listeners = [];
   try {
@@ -279,7 +294,7 @@ async function render(chrome, bundle, width) {
     if (serveError) throw serveError;
 
     const data = await send('Runtime.evaluate', {
-      expression: `(${measurePage})(${JSON.stringify(bundle.ids)}, ${width})`, awaitPromise: true, returnByValue: true,
+      expression: `(${measurePage})(${JSON.stringify(bundle.ids)}, ${width}, ${JSON.stringify(flowOwner)})`, awaitPromise: true, returnByValue: true,
     });
     if (data.exceptionDetails) throw new Error(data.exceptionDetails.exception?.description ?? 'Chrome could not measure the page');
     const { horizontalOverflow, sections, scripts } = data.result.value;
@@ -336,10 +351,15 @@ function compareWidth(before, after, owner) {
     ]));
     const changed = presenceChanged || moved || resized || diffRatio > 0
       || horizontalOverflow.after !== horizontalOverflow.before || errors.added.length > 0;
-    return { id, owned: id === owner, boxDelta, diffRatio, moved, resized, presenceChanged, horizontalOverflow, consoleErrors: errors, changed };
+    const emptyPlaceholder = previous?.empty && current?.empty;
+    const normalPush = boxDelta?.y > 0 && Number.isFinite(previous.withoutOwnerY) && previous.withoutOwnerY === current.withoutOwnerY;
+    const flowTranslation = boxDelta?.x === 0 && moved && !resized && diffRatio === 0
+      && horizontalOverflow.after === horizontalOverflow.before && errors.added.length === 0
+      && (emptyPlaceholder || normalPush);
+    return { id, owned: id === owner, boxDelta, diffRatio, moved, resized, presenceChanged, horizontalOverflow, consoleErrors: errors, changed, flowTranslation };
   });
   return {
-    perSection, unexpected: perSection.filter(section => section.changed && !section.owned).map(section => section.id),
+    perSection, unexpected: perSection.filter(section => section.changed && !section.owned && !section.flowTranslation).map(section => section.id),
     horizontalOverflow: { before: before.horizontalOverflow, after: after.horizontalOverflow }, consoleErrors,
   };
 }
@@ -367,7 +387,7 @@ function summarizeWidths(comparisons) {
   return { ok: unexpected.size === 0, perSection, unexpected: [...unexpected].sort(), perWidth };
 }
 
-async function impact(before, after, { owner, widths = DEFAULT_WIDTHS } = {}) {
+async function impact(before, after, { owner, firstBuild = false, widths = DEFAULT_WIDTHS } = {}) {
   if (!Array.isArray(widths) || !widths.length || widths.some(width => !Number.isSafeInteger(width) || width < 1)) {
     throw new Error('Widths must be positive integers');
   }
@@ -382,10 +402,11 @@ async function impact(before, after, { owner, widths = DEFAULT_WIDTHS } = {}) {
     chrome = startChrome(binary, path.join(temp, 'profile'), Math.max(...widths));
     await chrome.send('Browser.getVersion');
     const comparisons = [];
+    const flowOwner = firstBuild ? owner : null;
     for (const width of new Set(widths)) {
       const started = performance.now();
-      const left = await render(chrome, original, width);
-      const right = await render(chrome, candidate, width);
+      const left = await render(chrome, original, width, flowOwner);
+      const right = await render(chrome, candidate, width, flowOwner);
       const report = compareWidth(left, right, owner);
       comparisons.push({ width, runtimeMs: performance.now() - started, ...report });
     }

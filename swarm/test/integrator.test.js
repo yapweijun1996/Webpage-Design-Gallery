@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { createHash } = require('node:crypto');
+const { setImmediate: nextTurn } = require('node:timers/promises');
 const test = require('node:test');
 const { build } = require('../lib/ownership');
 const I = require('../lib/integrator');
@@ -60,8 +61,8 @@ function setup(t) {
       fs.rmSync(root, { recursive: true, force: true });
     }
   });
-  return { root, project, open(id = '01', ownership = manifest) {
-    const ws = I.open(project, id, ownership);
+  return { root, project, open(id = '01', ownership = manifest, options) {
+    const ws = I.open(project, id, ownership, options);
     workspaces.push(ws);
     return ws;
   } };
@@ -121,12 +122,14 @@ test('launch copies only needed readonly context and stages a fresh worker outbo
     'channel.md': 'Previous conversation', 'staff/handbook/qa.md': 'Verify the section',
     'notes/02.md': 'Hero notes', 'discussion/02.md': 'Hero proposal', 'inbox/01.md': 'Owner request',
     'assets/reference pack/新月.png': 'shared asset', [ANCHOR]: fixture[ANCHOR],
+    'i18n/ms.json': '{"messages":{"heading":"Tajuk"}}',
   };
   const privateFiles = {
     'inbox/02.md': 'Another worker inbox', 'channel.jsonl': 'Canonical log',
     'notes/99.md': 'Retired notes', 'chat/02.jsonl': 'Another worker outbox',
     'chat/.offsets.json': '{}', 'names.json': '{}', 'skills.json': '{}',
     'skills/local/SKILL.md': 'Resolver input', 'dist/index.html': 'Runtime bundle', '.run/secret': 'private',
+    'i18n/local.md': 'Not a preview catalog',
   };
   for (const [file, data] of Object.entries({ ...readonly, ...privateFiles, [outbox]: oldPosts })) write(project, file, data);
   const ws = open('01', active);
@@ -192,6 +195,159 @@ test('Manager launch publishes planning documents and has no live outbox', t => 
   assert.equal(result.ok, true);
   assert.deepEqual(result.merged, ['direction.md', 'research.md', 'review1.md']);
   assert.equal(read(project, 'chat/00.jsonl'), 'Archived Manager input');
+});
+
+test('pins selected Pi skill files in the launch workspace without copying private or unselected content', async t => {
+  const { project, open } = setup(t);
+  const selected = 'skills/review-layout';
+  const original = '# Review the assigned layout';
+  write(project, `${selected}/SKILL.md`, original);
+  write(project, `${selected}/.history/1.0.0.md`, 'Previous content');
+  write(project, `${selected}/.ignore`, 'Ignored names');
+  write(project, 'skills/unselected/SKILL.md', 'Unselected instructions');
+  const local = fs.realpathSync.native(path.join(project, selected));
+  const builtin = fs.realpathSync.native(path.join(__dirname, '../skills/accessibility'));
+  const ws = open('01', launchManifest(), { skillDirs: [local, builtin] });
+  assert.ok(Object.isFrozen(ws.skillDirs));
+  assert.deepEqual(ws.skillDirs, ['review-layout', 'accessibility'].map(id => path.join(ws.dir, '.launch-skills', id)));
+  assert.equal(read(ws.skillDirs[0], 'SKILL.md'), original);
+  assert.equal(read(ws.skillDirs[1], 'SKILL.md'), read(builtin, 'SKILL.md'));
+  assert.deepEqual(fs.readdirSync(ws.skillDirs[0]), ['SKILL.md']);
+  assert.equal(fs.existsSync(path.join(ws.dir, 'skills')), false);
+  assert.equal(fs.statSync(path.join(ws.skillDirs[0], 'SKILL.md')).mode & 0o777, 0o400);
+  assert.deepEqual(I.diff(ws), { added: [], changed: [], removed: [] });
+  assert.throws(() => open('01', launchManifest(), { skillDirs: [path.dirname(local)] }), /Invalid selected skill directory/);
+
+  write(project, `${selected}/SKILL.md`, '# New instructions');
+  assert.equal(read(ws.skillDirs[0], 'SKILL.md'), original);
+  fs.chmodSync(path.join(ws.skillDirs[0], 'SKILL.md'), 0o600);
+  write(ws.skillDirs[0], 'SKILL.md', '# Changed inside the runner');
+  const result = await I.publish(project, ws, { accept: () => assert.fail('Skill edits must fail before acceptance') });
+  rejection(result, 'forbidden', '.launch-skills/review-layout/SKILL.md');
+  assert.equal(read(project, `${selected}/SKILL.md`), '# New instructions');
+});
+
+test('checks the exact rendered candidate and publishes only the checked bytes and private posts', async t => {
+  const { project, open } = setup(t);
+  const outbox = 'chat/01.jsonl';
+  const posts = '{"text":"Header is ready."}\n';
+  const catalog = 'i18n/ms.json';
+  const context = {
+    [catalog]: '{"messages":{"heading":"Tajuk"}}',
+    'design-system/themes.css': ':root { --background: white; }',
+    'assets/generated/03-brands-cover.webp': 'Existing image',
+    'anchors/v001/meta.json': '{"id":"v001"}',
+    'anchors/flow.json': '{"state":"locked"}',
+  };
+  for (const [file, data] of Object.entries(context)) write(project, file, data);
+  fs.chmodSync(path.join(project, ANCHOR), 0o444);
+  const ws = open('01', launchManifest());
+  write(ws.dir, HEADER, header('Checked header'));
+  write(ws.dir, ASSET, '<svg/>');
+  write(ws.dir, outbox, posts);
+  let parent;
+  const result = await I.publish(project, ws, { anchorId: 'v001', async accept(review) {
+    const { before, after } = review;
+    parent = path.dirname(before);
+    assert.notEqual(after, before);
+    assert.notEqual(before, project);
+    assert.equal(path.dirname(after), parent);
+    assert.equal(review.anchorId, 'v001');
+    assert.equal(review.workerId, '01');
+    assert.equal(review.outbox, posts);
+    assert.deepEqual(review.changed, [ASSET, HEADER]);
+    assert.deepEqual(review.sections, ['01-header']);
+    assert.ok(Object.isFrozen(review) && Object.isFrozen(review.changed) && Object.isFrozen(review.sections));
+    for (const dir of [before, after]) {
+      for (const [file, data] of Object.entries(context)) assert.equal(read(dir, file), data);
+      for (const file of [outbox, '.run/secret', 'channel.md', 'agents.json', 'anchors/log.jsonl']) {
+        assert.equal(fs.existsSync(path.join(dir, file)), false, file);
+      }
+      assert.equal(read(dir, 'contract.json'), fixture['contract.json']);
+      assert.equal(fs.statSync(path.join(dir, ANCHOR)).mode & 0o777, 0o444);
+    }
+    assert.equal(read(before, HEADER), fixture[HEADER]);
+    assert.equal(read(after, HEADER), header('Checked header'));
+    assert.equal(fs.existsSync(path.join(before, ASSET)), false);
+    assert.equal(read(after, ASSET), '<svg/>');
+    await nextTurn();
+    assert.equal(read(project, HEADER), fixture[HEADER]);
+    assert.equal(read(project, outbox), '');
+    return { ok: true };
+  } });
+  assert.equal(result.ok, true);
+  assert.ok(result.snapshotId);
+  assert.deepEqual(result.merged, [ASSET, HEADER]);
+  assert.equal(result.outbox.toString(), posts);
+  assert.equal(read(project, outbox), '');
+  assert.equal(read(project, HEADER), header('Checked header'));
+  assert.equal(fs.existsSync(parent), false);
+  rejection(await I.publish(project, ws, { accept: () => assert.fail('May not publish one launch twice') }), 'busy', '');
+});
+
+test('checks docs and outbox-only publication without allocating render copies', async t => {
+  const { project, open } = setup(t);
+  const ws = open('01', launchManifest());
+  write(ws.dir, 'discussion/01.md', 'Ready for the next wave.');
+  write(ws.dir, 'chat/01.jsonl', '{"text":"Ready."}\n');
+  const denied = await I.publish(project, ws, { accept({ before, after, sections, outbox }) {
+    assert.equal(before, null);
+    assert.equal(after, null);
+    assert.deepEqual(sections, []);
+    assert.equal(outbox, '{"text":"Ready."}\n');
+    return { ok: false, rejected: [{ code: 'closed', path: '', message: 'The owner closed the run.' }] };
+  } });
+  rejection(denied, 'closed', '');
+  assert.equal(denied.outbox, null);
+  assert.equal(fs.existsSync(path.join(project, 'discussion/01.md')), false);
+  assert.equal(fs.existsSync(path.join(project, STORE)), false);
+  const accepted = await I.publish(project, ws, { accept: () => ({ ok: true }) });
+  assert.equal(accepted.ok, true);
+  assert.deepEqual(accepted.merged, ['discussion/01.md']);
+  assert.equal(read(project, 'discussion/01.md'), 'Ready for the next wave.');
+});
+
+for (const [surface, relative, mutate] of [
+  ['live peer', HERO, ({ project }) => write(project, HERO, hero('A newer peer edit'))],
+  ['live anchor state', 'anchors/flow.json', ({ project }) => write(project, 'anchors/flow.json', '{"state":"goals"}')],
+  ['accepted preview', HEADER, ({ after }) => write(after, HEADER, header('Rendered from different bytes'))],
+  ['worker edit', HEADER, ({ ws }) => write(ws.dir, HEADER, header('Changed during review'))],
+  ['worker post', 'chat/01.jsonl', ({ ws }) => write(ws.dir, 'chat/01.jsonl', '{"text":"Newer post"}\n')],
+]) {
+  test(`rejects a pending acceptance if its ${surface} changes`, async t => {
+    const { project, open } = setup(t);
+    const ws = open('01', launchManifest());
+    write(ws.dir, HEADER, header('Candidate header'));
+    let parent;
+    const result = await I.publish(project, ws, { async accept({ before, after }) {
+      parent = path.dirname(before);
+      await nextTurn();
+      mutate({ after, project, ws });
+      return { ok: true };
+    } });
+    rejection(result, 'stale', relative);
+    assert.equal(result.outbox, null);
+    assert.equal(read(project, HEADER), fixture[HEADER]);
+    assert.equal(fs.existsSync(path.join(project, STORE)), false);
+    assert.equal(fs.existsSync(parent), false);
+  });
+}
+
+test('uses the project lock for the commit after acceptance', async t => {
+  const { project, open } = setup(t);
+  const ws = open('01', launchManifest());
+  const lock = path.join(path.dirname(project), '.project.init');
+  write(ws.dir, HEADER, header('Candidate header'));
+  const result = await I.publish(project, ws, { accept() {
+    fs.mkdirSync(lock);
+    return { ok: true };
+  } });
+  rejection(result, 'busy', '');
+  assert.equal(read(project, HEADER), fixture[HEADER]);
+  assert.equal(fs.existsSync(path.join(project, STORE)), false);
+  assert.equal(fs.statSync(lock).isDirectory(), true);
+  fs.rmdirSync(lock);
+  assert.equal((await I.publish(project, ws, { accept: () => ({ ok: true }) })).ok, true);
 });
 
 for (const [relative, code] of [[HERO, 'foreign'], ['tokens.css', 'shared'], [ANCHOR, 'forbidden'],

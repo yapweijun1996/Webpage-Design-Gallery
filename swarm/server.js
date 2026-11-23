@@ -6,6 +6,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { spawn, spawnSync } = require('child_process');
+const { randomUUID } = require('node:crypto');
 const { ProjectInputError, ProjectBusyError, projectPath, projectIdentity, parsePreparation, withProjectLock } = require('./lib/project-init');
 
 const ROOT = __dirname;
@@ -20,7 +21,10 @@ const S = require('./lib/settings');
 const R = require('./lib/runners');
 const SKILLS = require('./lib/skills');
 const { createUsage, normalizeUsage, addUsage } = require('./lib/usage');
-const G = require('./lib/guard');
+const ownership = require('./lib/ownership');
+const integrator = require('./lib/integrator');
+const { approvedAnchor, canRestore, createPublication } = require('./lib/publication');
+const publication = createPublication(PROJECT);
 const SETTINGS_PATH = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS) || path.join(ROOT, '.run', 'settings.json'); // override only in test mode
 const loaded = S.load(SETTINGS_PATH);
 let settings = loaded.settings;
@@ -53,6 +57,8 @@ const state = { ...TARGET, phase: 'idle', round: 0, rounds: PLAN.length, plan: P
 state.usage = { ...createUsage(), agents: Object.create(null) };
 const clients = new Set();
 const children = new Map();
+const imageTurns = new Map();
+let imageWrites = 0;
 let stopped = false;
 
 function emit(evt) {
@@ -60,6 +66,30 @@ function emit(evt) {
   if (!['edit', 'state', 'usage'].includes(evt.type)) { state.feed.push(evt); if (state.feed.length > 300) state.feed.shift(); }
   const line = 'data: ' + JSON.stringify(evt) + '\n\n';
   for (const c of clients) c.write(line);
+}
+
+function previewSections() {
+  const dir = path.join(PROJECT, 'sections');
+  const files = fs.lstatSync(dir, { throwIfNoEntry: false })?.isDirectory()
+    ? fs.readdirSync(dir, { withFileTypes: true }) : [];
+  return files.filter(file => file.isFile()).map(file => /^(\d{2})-([a-z0-9-]+)\.html$/.exec(file.name))
+    .filter(Boolean).sort((a, b) => a[0].localeCompare(b[0])).map(([, id, section]) => ({ id, section }));
+}
+
+function refreshPreviewSections() {
+  const catalog = previewSections();
+  if (JSON.stringify(catalog) === JSON.stringify(state.previewSections)) return false;
+  state.previewSections = catalog;
+  return true;
+}
+
+function workersForSections(roster) {
+  const available = previewSections();
+  return roster.map(agent => {
+    const found = available.filter(({ id }) => id === agent.id);
+    return found.length === 1 && found[0].section !== agent.section
+      ? { ...agent, section: found[0].section } : agent;
+  });
 }
 
 // Copy the staff handbook and the design system (text and icon assets only) into the project so agents can read them in their sandbox.
@@ -107,11 +137,18 @@ function createProjectWatcher() {
   return fs.watch(PROJECT, { recursive: true }, (_ev, file) => {
     if (!file) return;
     const m = /^(sections|notes)[\\/](\d\d)(?:-[a-z0-9-]+)?(?:\.(layout|type|color|imagery|icons|motion|polish))?\.(html|css|md)$/.exec(file);
-    const d = /^(?:(direction|decisions|review1|review2)\.md|discussion[\\/](\d\d)\.md)$/.exec(file);
-    if (!m && !d) return;
+    const d = /^(?:(direction|decisions|review|review1|review2|research)\.md|discussion[\\/](\d\d)\.md)$/.exec(file);
+    const asset = /^assets[\\/]generated[\\/][\w.-]+$/.test(file) && !/[\\/]\./.test(file);
+    if (!m && !d && !asset) return;
     const key = file;
     clearTimeout(debounce.get(key));
-    debounce.set(key, setTimeout(() => emit(m ? { type: 'edit', id: (m[3] && (squadAgents.find(x => x.squad.layer === m[3]) || {}).id) || m[2], kind: m[1], file } : { type: 'doc', id: d[2] || '00', file: file.replace(/\\/g, '/') }), 120));
+    debounce.set(key, setTimeout(() => {
+      debounce.delete(key);
+      if (asset) return emit({ type: 'asset', file: file.replace(/\\/g, '/') });
+      if (m?.[1] === 'sections' && refreshPreviewSections()) emit({ type: 'state', state });
+      else emit(m ? { type: 'edit', id: (m[3] && squadAgents.find(x => x.squad.layer === m[3])?.id) || m[2], kind: m[1], file }
+        : { type: 'doc', id: d[2] || '00', file: file.replace(/\\/g, '/') });
+    }, 120));
   });
 }
 
@@ -165,12 +202,6 @@ function withPreamble(promptText, a, label, { appearance, position, guidance }) 
   return pre + '\n' + promptText;
 }
 
-function ownedGlobs(a) {
-  if (a.id === MANAGER.id) return ['direction.md', 'decisions.md', 'review.md', 'review1.md', 'review2.md', 'research.md', 'inbox/00.md'];
-  if (a.squad) { let w = []; try { w = SQ.ownedGlobs(a.squad, a.base || '00-none'); } catch (_) { /* no section yet */ } return [...w, `chat/${a.id}.jsonl`, `notes/${a.id}.md`]; }
-  return [`sections/${a.id}-*.html`, `sections/${a.id}-*.css`, `notes/${a.id}.md`, `discussion/${a.id}.md`, `chat/${a.id}.jsonl`];
-}
-
 // Normalized runner events -> cursor moves and thought bubbles.
 function applyEvent(a, ev) {
   const ag = state.agents[a.id];
@@ -188,8 +219,11 @@ function applyEvent(a, ev) {
   }
 }
 
-// One process, one turn. Resolves true when the process exited cleanly without a fatal runner error.
-function runOnce(a, label, promptText, appearance, managerChannel) {
+const MANAGER_CHANNEL_PHASES = new Set(['Triage', 'Decide', 'Review', 'Summary']);
+const IMPLEMENTATION_PHASES = new Set(['Work', 'Improve', 'Build', 'Improve together', 'Apply feedback']);
+
+// A successful process exit is necessary before a workspace can enter publication checks.
+function runOnce(a, label, promptText, appearance, launchChannel) {
   return new Promise(resolve => {
     const role = label === 'Research' ? 'research' : (a.id === MANAGER.id ? 'manager' : 'worker');
     const base = S.resolve(settings, role);
@@ -197,14 +231,33 @@ function runOnce(a, label, promptText, appearance, managerChannel) {
     const resolved = { ...base, ...Object.fromEntries(Object.entries(own).filter(([, v]) => v)) }; // per-worker override, still checked against the allowlist by the runner
     const position = staffRoster.byId[a.position]?.id ?? staffRoster.byAgent(a.id)?.id;
     const skills = SKILLS.resolve({ projectDir: PROJECT, workerId: a.id, position, runner: resolved.runner });
-    let runner, cmd;
-    try { runner = R.get(resolved.runner); ensureExport(); // Keep the legacy export ready for existing callers.
-    cmd = runner.buildCommand({ model: resolved.model, effort: resolved.effort, projectDir: PROJECT, skillDirs: skills.dirs, research: label === 'Research' ? true : !!(settings.research && settings.research.web) }); }
-    catch (e) { emit({ type: 'chat', msg: chat ? chat.post({ from: 'system', kind: 'system', text: `Cannot start ${a.name}: ${e.message}` }) : { id: 0 } }); return resolve(false); }
-    const parser = runner.createParser({ managerChannel: !!managerChannel });
-    const before = resolved.runner === 'pi' ? G.snapshot(PROJECT) : null; // pi has no sandbox: compare the tree after the turn
-    const env = { ...R.childEnvironment(process.env), SWARM_PORT: String(PORT) };
-    const p = spawn(cmd.command, cmd.args, { cwd: cmd.cwd || PROJECT, env, stdio: ['pipe', 'pipe', 'ignore'] });
+    const manager = a.id === MANAGER.id;
+    const managerChannel = manager && MANAGER_CHANNEL_PHASES.has(label);
+    const imageToken = a.squad?.id === 'image-gen' ? randomUUID() : null;
+    const warn = text => launchChannel?.post({ from: 'system', kind: 'system', text });
+    let runner, workspace, anchor, p;
+    try {
+      try { anchor = approvedAnchor(PROJECT); }
+      catch (error) { if (IMPLEMENTATION_PHASES.has(label)) throw error; }
+      runner = R.get(resolved.runner);
+      ensureExport();
+      const manifest = a.launchManifest ?? ownership.build({ agents: [MANAGER, ...workersForSections(agentsDef)], launchContext: true });
+      workspace = integrator.open(PROJECT, a.id, manifest, { skillDirs: skills.dirs });
+      const cmd = runner.buildCommand({ model: resolved.model, effort: resolved.effort, projectDir: workspace.dir,
+        skillDirs: workspace.skillDirs, research: label === 'Research' || !!settings.research?.web });
+      const env = { ...R.childEnvironment(process.env), SWARM_PORT: String(PORT) };
+      if (imageToken) {
+        imageTurns.set(imageToken, { root: workspace.dir, base: a.base, pending: 0 });
+        env.SWARM_IMAGE_TURN = imageToken;
+      }
+      p = spawn(cmd.command, cmd.args, { cwd: cmd.cwd || workspace.dir, env, stdio: ['pipe', 'pipe', 'ignore'] });
+    } catch (error) {
+      if (imageToken) imageTurns.delete(imageToken);
+      if (workspace) integrator.close(workspace);
+      warn(`Cannot start ${a.name}: ${error.message}`);
+      return resolve(false);
+    }
+    const parser = runner.createParser({ managerChannel });
     children.set(a.id, p);
     let fatal = false, settled = false;
     let managerPosts;
@@ -233,33 +286,50 @@ function runOnce(a, label, promptText, appearance, managerChannel) {
         }
       }
     };
-    const finish = ok => {
+    const finish = async ok => {
       if (settled) return; settled = true;
       if (!reportedUsage) recordUsage(null);
       clearTimeout(timer); children.delete(a.id);
-      if (before && chat && !a.squad) { // squad agents run in parallel; layer files enforce ownership, a whole-tree diff would blame the wrong agent
-        try {
-          const bad = G.violations(before, G.snapshot(PROJECT), [...ownedGlobs(a), ...everyone().filter(o => o.id !== a.id && children.has(o.id)).flatMap(ownedGlobs)]); // files of agents running at the same time are theirs, not a violation
-          if (bad.length) chat.post({ from: 'system', kind: 'system', text: `${a.name} changed files outside its ownership: ${bad.slice(0, 5).join(', ')}${bad.length > 5 ? ' ...' : ''}` });
-        } catch (_) { /* guard problems must not fail the turn */ }
+      const unfinishedImage = imageTurns.get(imageToken)?.pending > 0;
+      if (imageToken) imageTurns.delete(imageToken);
+      try {
+        if (!ok || fatal || stopped || unfinishedImage || chat !== launchChannel || (managerChannel && !managerPosts)) return resolve(false);
+        const managerOptions = { allowAssignments: label !== 'Summary' };
+        const result = await publication.publish(workspace, { anchor, workerId: a.id,
+          owner: manager ? null : a.base || `${a.id}-${a.section}`,
+          cancelled: () => stopped || chat !== launchChannel,
+          checkOutbox(outbox) {
+            if (managerChannel) launchChannel.validateManagerPosts(managerPosts, managerOptions);
+            else if (!manager) launchChannel.validateWorkerOutbox(a.id, outbox);
+          },
+        });
+        if (!result.ok) {
+          const reason = result.rejected[0];
+          if (reason?.code !== 'cancelled') warn(`${a.name} changes rejected: ${reason?.message || 'Publication checks failed.'}`);
+          return resolve(false);
+        }
+        if (managerChannel) launchChannel.publishManager(managerPosts, managerOptions);
+        else if (!manager) launchChannel.publishWorker(a.id, result.outbox);
+        if (result.merged.some(file => file.startsWith('sections/') || file.startsWith('assets/'))) ensureExport(true);
+        return resolve(true);
+      } catch (error) {
+        warn(`Could not publish ${a.name}'s turn: ${error.message}`);
+        return resolve(false);
+      } finally {
+        try { integrator.close(workspace); } catch { console.warn('Could not close a worker workspace.'); }
       }
-      if (ok && !fatal && !stopped && managerChannel) {
-        try {
-          if (chat !== managerChannel || !managerPosts) return resolve(false);
-          managerChannel.publishManager(managerPosts, { allowAssignments: ['Triage', 'Decide', 'Review'].includes(label) });
-        } catch { return resolve(false); }
-      }
-      resolve(ok && !fatal && !stopped);
     };
     p.on('error', () => finish(false));
     p.stdin.on('error', () => {});
-    p.stdin.end(withPreamble(promptText, a, label, { appearance, position, guidance: resolved.runner === 'codex' ? skills.text : '' }));
+    const anchorContext = anchor ? `\nFollow locked anchor ${anchor.id}. Read anchors/${anchor.id}/contract.json and ${anchor.files.map(file => `anchors/${anchor.id}/${file}`).join(', ')} before editing.\n` : '';
+    const guidance = anchorContext + (resolved.runner === 'codex' ? skills.text : '');
+    p.stdin.end(withPreamble(promptText, a, label, { appearance, position, guidance }));
     p.stdout.on('data', d => { try { handle(parser.push(d)); } catch (_) { /* parser errors must not kill the run */ } });
     p.on('close', code => { try { handle(parser.end()); } catch (_) {} finish(code === 0); });
   });
 }
 
-async function runProcess(a, label, promptText, isLast, appearance, managerChannel) {
+async function runProcess(a, label, promptText, isLast, appearance, launchChannel = chat) {
   const ag = state.agents[a.id];
   if (!ag) return false;
   if (label === 'Research' && !(settings.research && settings.research.web)) {
@@ -272,7 +342,7 @@ async function runProcess(a, label, promptText, isLast, appearance, managerChann
     emit({ type: 'status', id: a.id, status: ag.status });
     await slot.acquire();
     let ok = false;
-    try { if (!stopped) ok = await runOnce(a, label, promptText, appearance, managerChannel); } finally { slot.release(); }
+    try { if (!stopped) ok = await runOnce(a, label, promptText, appearance, launchChannel); } finally { slot.release(); }
     if (stopped) return false;
     if (ok) {
       ag.status = isLast ? 'done' : 'waiting'; ag.action = '';
@@ -297,7 +367,6 @@ const { createSecrets } = require('./lib/secrets');
 const IMG = require('./lib/imagegen');
 const SECRETS_PATH = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS ? process.env.SWARM_SETTINGS + '.secrets' : path.join(ROOT, '.run', 'secrets.json'));
 const secrets = createSecrets(SECRETS_PATH);
-const imageLog = []; // timestamps of API image requests, a simple spend guard (30 per hour)
 function imageSettings() { const i = (settings && settings.images) || {}; return { provider: i.provider || 'codex', model: i.model || 'gpt-image-2', quality: i.quality || 'high', size: i.size || '1536x1024' }; }
 const SQ_COLORS = ['#38bdf8', '#a78bfa', '#f472b6', '#facc15', '#34d399', '#fb923c', '#94a3b8', '#f87171', '#22d3ee', '#c084fc'];
 const squadAgents = SQ_AGENTS_BUILD();
@@ -306,9 +375,9 @@ const SQ_FILE = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS ? 
 let squadOn = false;
 try { squadOn = !!JSON.parse(fs.readFileSync(SQ_FILE, 'utf8')).on; } catch (_) { /* default off */ }
 function setSquad(on) {
-  squadOn = !!on;
+  squadOn = !!on && availableSpecialists(agentsDef).length === squadAgents.length;
   try { fs.mkdirSync(path.dirname(SQ_FILE), { recursive: true }); fs.writeFileSync(SQ_FILE, JSON.stringify({ on: squadOn })); } catch (_) { /* best effort */ }
-  for (const a of squadAgents) {
+  for (const a of availableSpecialists(agentsDef)) {
     if (squadOn) state.agents[a.id] = state.agents[a.id] || { id: a.id, name: a.name, title: a.title, color: a.color, section: '', lane: a.lane, status: 'queued', thought: '', action: '', target: a.id };
     else delete state.agents[a.id];
   }
@@ -317,7 +386,8 @@ function setSquad(on) {
 // Plan one squad turn for the screen the owner looks at (first in-scope section).
 function squadPlan(owner) {
   const ids = owner.scope && Array.isArray(owner.scope.sections) ? owner.scope.sections : [];
-  const def = agentsDef.find(a => a.id === ids[0]);
+  const roster = workersForSections(agentsDef);
+  const def = roster.find(a => a.id === ids[0]);
   if (!def) return null;
   const base = def.id + '-' + def.section;
   // Full squad: every specialist works on the screen at once (owner request: see 10 agents working together).
@@ -325,8 +395,11 @@ function squadPlan(owner) {
   // Codex specialists (image generation, web research) take 60-100 s and set the pace of the whole wave: include them only when the request asks for them.
   const wanted = new Set(SQ.pickSquad(owner.scope, owner.text).map(sp => sp.id));
   const picked = all.filter(sp => sp.runner !== 'codex' || wanted.has(sp.id));
-  const members = picked.map(spec => squadAgents.find(a => a.squad.id === spec.id)).filter(Boolean);
+  const available = availableSpecialists(roster);
+  const members = picked.map(spec => available.find(a => a.squad.id === spec.id)).filter(Boolean);
   for (const m of members) m.base = base;
+  const launchManifest = ownership.build({ agents: [MANAGER, ...roster], squad: { base, members }, launchContext: true });
+  for (const m of members) m.launchManifest = launchManifest;
   const byId = new Map(members.map(m => [m.squad.id, m]));
   const lane = ids => ids.map(id => byId.get(id)).filter(Boolean);
   const first = picked.filter(sp => sp.id !== 'layout' && sp.id !== 'qa').map(sp => byId.get(sp.id));
@@ -344,42 +417,24 @@ function squadPlan(owner) {
   }
   return { single: waves.length === 1, base, members, waves, prompts, layoutId: (byId.get('layout') || {}).id };
 }
-const everyone = () => [MANAGER, ...agentsDef, ...squadAgents];
+const availableSpecialists = roster => squadAgents.filter(spec => !roster.some(worker => worker.id === spec.id));
+const everyone = roster => [MANAGER, ...workersForSections(roster), ...availableSpecialists(roster)];
 function createChannel(people) {
-  const channel = createChat({ projectDir: PROJECT, agents: people.map(a => ({ id: a.id, name: a.name, section: a.section, color: a.color })), emit });
+  const channel = createChat({ projectDir: PROJECT, agents: people.map(a => ({ id: a.id, name: a.name, section: a.section, color: a.color })), workspaceOutboxes: true, emit });
   const queue = createTurns({
     chat: channel, agents: people, managerId: MANAGER.id, maxDiscussRounds: 2, squad: { on: () => squadOn, plan: squadPlan },
-    // After each agent process exits, ingest its outbox immediately so the next step sees its messages (no watcher race).
     runAgent: ({ id, label, prompt: pr, previewAppearance }) => {
       const a = people.find(x => x.id === id);
       if (!a) return Promise.resolve(false);
-      const guard = a.squad ? scopeGuard(a) : null;
-      const managerChannel = a.id === MANAGER.id ? channel : undefined;
-      return runProcess(a, label, pr, false, previewAppearance, managerChannel).then(ok => { channel.sync(); if (guard) guard(); return ok; });
+      return runProcess(a, label, pr, false, previewAppearance, channel);
     }
   });
   return { chat: channel, turns: queue };
 }
 function setupChat() {
   if (chat) chat.stop();
-  ({ chat, turns } = createChannel(everyone()));
+  ({ chat, turns } = createChannel(everyone(agentsDef)));
   chat.start();
-}
-// Modularity guard: a squad specialist may only style its own section. If its layer file contains selectors that are not scoped
-// to the section, the file is restored to what it was before the turn, so one agent can never restyle another section.
-function scopeGuard(a) {
-  const layer = a.squad.layer; if (!layer || !a.base) return null;
-  const file = path.join(PROJECT, 'sections', a.base + '.' + layer + '.css');
-  let before = null; try { before = fs.readFileSync(file, 'utf8'); } catch (_) { /* new file */ }
-  return () => {
-    try {
-      const { checkProject } = require('./tools/check-sections');
-      const bad = (checkProject(PROJECT).findings || []).filter(f => f.rule === 'layer-scope' && String(f.file).endsWith(path.basename(file)));
-      if (!bad.length) return;
-      if (before === null) fs.unlinkSync(file); else fs.writeFileSync(file, before);
-      chat.post({ from: 'system', kind: 'system', text: a.name + ' wrote selectors outside its section (' + bad.length + '); its change to ' + path.basename(file) + ' was reverted.' });
-    } catch (_) { /* the guard must never fail the turn */ }
-  };
 }
 let inFlight = 0; // requests being handled or waiting in the queue
 function startTurn(msg, appearance) {
@@ -394,7 +449,7 @@ function openProject(roster) {
   const nextWatcher = createProjectWatcher();
   let channel;
   try {
-    channel = createChannel([MANAGER, ...roster, ...squadAgents]);
+    channel = createChannel(everyone(roster));
     channel.chat.start();
     return { watcher: nextWatcher, ...channel };
   } catch (error) {
@@ -418,11 +473,13 @@ function prepare({ brief, roster }, replace) {
   agentsDef = roster;
   state.brief = text;
   state.agents = nextAgents;
+  refreshPreviewSections();
+  if (squadOn) setSquad(true);
   state.feed = [];
   stopped = false;
 }
 
-const projectBusy = () => inFlight > 0 || running > 0 || state.phase === 'running';
+const projectBusy = () => inFlight > 0 || running > 0 || imageWrites > 0 || state.phase === 'running';
 async function runAll() {
   state.phase = 'running';
   emit({ type: 'state', state });
@@ -431,7 +488,7 @@ async function runAll() {
     const step = PLAN[i];
     state.round = i + 1;
     emit({ type: 'round', round: i + 1, label: step.label, meeting: !!step.meeting });
-    await Promise.all((step.who === 'manager' ? [MANAGER] : agentsDef).map(a => runWorker(a, step)));
+    await Promise.all((step.who === 'manager' ? [MANAGER] : workersForSections(agentsDef)).map(a => runWorker(a, step)));
   }
   // the manager finishes with the team: mark it done
   if (!stopped && state.agents[MANAGER.id]) { state.agents[MANAGER.id].status = 'done'; emit({ type: 'status', id: MANAGER.id, status: 'done' }); }
@@ -442,6 +499,7 @@ async function runAll() {
 
 function stopAll() {
   stopped = true;
+  imageTurns.clear();
   for (const p of children.values()) p.kill('SIGTERM');
 }
 
@@ -477,7 +535,7 @@ const AP_FILE = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS ? 
 function saveAutopilot() { try { fs.mkdirSync(path.dirname(AP_FILE), { recursive: true }); fs.writeFileSync(AP_FILE, JSON.stringify({ on: autopilot.on, scope: autopilot.scope, primary: autopilot.primary })); } catch (_) { /* best effort */ } }
 function loadAutopilot() { try { const d = JSON.parse(fs.readFileSync(AP_FILE, 'utf8')); autopilot.on = !!d.on; autopilot.scope = d.scope || null; autopilot.primary = d.primary || ''; autopilot.status = autopilot.on ? 'watching your screen' : 'off'; } catch (_) { /* first start */ } }
 const maxCycles = () => (settings.autopilot && settings.autopilot.maxCyclesPerScreen) || 2;
-const sectionName = id => (agentsDef.find(a => a.id === id) || {}).section || '';
+const sectionName = id => state.previewSections?.find(item => item.id === id)?.section || agentsDef.find(a => a.id === id)?.section || '';
 function autopilotView() { return { on: autopilot.on, primary: autopilot.primary, sections: autopilot.scope ? autopilot.scope.sections : [], cycle: autopilot.cycles[autopilot.primary] || 0, max: maxCycles(), status: autopilot.status }; }
 function emitAutopilot() { emit({ type: 'autopilot', ...autopilotView() }); }
 
@@ -540,8 +598,8 @@ function retireWorkerFiles(a) { // nothing is deleted: the section leaves the pa
 }
 function applyTeam(next) {
   const d = TEAM.diff(agentsDef, next);
-  d.removed.forEach(retireWorkerFiles);
-  d.added.forEach(createWorkerFiles);
+  workersForSections(d.removed).forEach(retireWorkerFiles);
+  workersForSections(d.added).forEach(createWorkerFiles);
   const old = state.agents;
   agentsDef = next;
   fs.writeFileSync(path.join(PROJECT, 'agents.json'), JSON.stringify(agentsDef, null, 1));
@@ -553,6 +611,8 @@ function applyTeam(next) {
   }
   syncDocs(); // CONTRACT lanes and staff copy
   setupChat(); // new participants for names, mentions and outboxes
+  refreshPreviewSections();
+  if (squadOn) setSquad(true);
   emit({ type: 'state', state });
   return d;
 }
@@ -561,7 +621,32 @@ function applyTeam(next) {
 const { createSkillRoutes, matches: isSkillRoute } = require('./lib/skills-routes');
 const skillRoutes = createSkillRoutes({
   projectDir: PROJECT, projectId: TARGET.projectId, busy: projectBusy,
-  workers: () => withTitles([...agentsDef, ...squadAgents]).map(({ id, name, title }) => ({ id, name, title })),
+  workers: () => withTitles([...agentsDef, ...availableSpecialists(agentsDef)]).map(({ id, name, title }) => ({ id, name, title })),
+});
+const { createImageRoute } = require('./lib/image-routes');
+const imageRoute = createImageRoute({
+  projectDir: PROJECT, turns: imageTurns, busy: projectBusy, settings: imageSettings,
+  generate: IMG.generate, key: () => secrets.getOpenAIKey(),
+  convert: (png, webp) => spawnSync('cwebp', ['-quiet', '-q', '82', png, '-o', webp], { timeout: 30000 }).status === 0,
+  startWrite() {
+    imageWrites += 1;
+    return () => { imageWrites -= 1; };
+  },
+});
+const { createVersionRoutes, matches: isVersionRoute } = require('./lib/version-routes');
+const versionRoutes = createVersionRoutes({
+  projectDir: PROJECT, projectId: TARGET.projectId, busy: projectBusy,
+  canRestore: ({ source }) => canRestore(PROJECT, source),
+  changed({ type }) {
+    if (type === 'rollback') {
+      refreshPreviewSections();
+      setupChat();
+      if (state.previewSections.length) ensureExport(true);
+      else fs.rmSync(path.join(PROJECT, 'dist', 'index.html'), { force: true });
+      emit({ type: 'state', state });
+    }
+    emit({ type: 'versions' });
+  },
 });
 const preview = require('./lib/preview').createPreview({
   ui: UI, project: PROJECT, designSystem: DS_DIR, library: GJH_ASSETS, mall: GJH_V11_ASSETS
@@ -593,6 +678,7 @@ const server = http.createServer(async (req, res) => {
   }
   if (p === '/api/state') return send(res, 200, state);
   if (isSkillRoute(p)) return skillRoutes(req, res, p, send);
+  if (isVersionRoute(p)) return versionRoutes(req, res, p, send);
   if (p === '/api/settings' && req.method === 'GET') return send(res, 200, { settings, allowlist: S.ALLOWLIST, resolved: { manager: S.resolve(settings, 'manager'), worker: S.resolve(settings, 'worker') }, status: readiness });
   if (p === '/api/settings' && req.method === 'PUT') {
     const r = S.save(SETTINGS_PATH, await body(req));
@@ -624,7 +710,7 @@ const server = http.createServer(async (req, res) => {
       const ids = [...new Set(b.scope.sections.map(String))].filter(id => agentsDef.some(a => a.id === id));
       if (ids.length) {
         scope = { sections: ids, elements: Array.isArray(b.scope.elements) ? b.scope.elements : [] };
-        const label = ids.map(id => `${id} ${(agentsDef.find(a => a.id === id) || {}).section || ''}`.trim()).join(', ');
+        const label = ids.map(id => `${id} ${sectionName(id)}`.trim()).join(', ');
         shown = `[Focus: ${label}] ${text}`.slice(0, 800);
       }
     }
@@ -642,6 +728,9 @@ const server = http.createServer(async (req, res) => {
     if (projectBusy()) return send(res, 409, { error: 'busy' });
     const r = TEAM.validate(b.agents, { allowlist: S.ALLOWLIST, existing: agentsDef });
     if (!r.ok) return send(res, 400, { errors: r.errors });
+    if (squadOn && availableSpecialists(r.value).length !== squadAgents.length) {
+      return send(res, 409, { errors: [{ path: 'agents', message: 'A worker ID overlaps the active squad. Disable squad before assigning that ID.' }] });
+    }
     try { const d = applyTeam(r.value); return send(res, 200, { agents: agentsDef, diff: d }); }
     catch (e) { return send(res, 500, { errors: [{ path: '$', message: 'Could not apply the team: ' + e.message }] }); }
   }
@@ -650,23 +739,17 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/secrets/openai' && req.method === 'DELETE') return send(res, 200, secrets.removeOpenAIKey());
   if (p === '/api/secrets/openai/test' && req.method === 'POST') return send(res, 200, await IMG.testKey({ apiKey: secrets.getOpenAIKey() }));
   if (p === '/api/secrets/openai/models' && req.method === 'GET') return send(res, 200, await IMG.listImageModels({ apiKey: secrets.getOpenAIKey() }));
-  if (p === '/api/image' && req.method === 'POST') {
-    const b = await body(req), cfg = imageSettings();
-    const name = String(b.name || '').toLowerCase();
-    if (!/^\d\d-[a-z0-9][a-z0-9-]{1,40}$/.test(name)) return send(res, 400, { ok: false, error: 'name must look like 02-hero-bg' });
-    if (cfg.provider !== 'openai') return send(res, 409, { ok: false, error: 'Image provider is Codex; set it to OpenAI API in Settings to use this endpoint.' });
-    const now = Date.now(); while (imageLog.length && now - imageLog[0] > 3600000) imageLog.shift();
-    if (imageLog.length >= 30) return send(res, 429, { ok: false, error: 'Image limit reached (30 per hour).' });
-    imageLog.push(now);
-    const dir = path.join(PROJECT, 'assets', 'generated'), png = path.join(dir, name + '.png');
-    const r = await IMG.generate({ apiKey: secrets.getOpenAIKey(), prompt: String(b.prompt || ''), model: cfg.model, size: b.size || cfg.size, quality: cfg.quality, outFile: png });
-    if (!r.ok) return send(res, 502, { ok: false, error: r.error });
-    let file = png, bytes = r.bytes; // shrink for the web: webp when cwebp exists
-    try { const webp = path.join(dir, name + '.webp'); const c = spawnSync('cwebp', ['-quiet', '-q', '82', png, '-o', webp], { timeout: 30000 }); if (c.status === 0 && fs.existsSync(webp)) { file = webp; bytes = fs.statSync(webp).size; fs.unlinkSync(png); } } catch (_) { /* keep the png */ }
-    return send(res, 200, { ok: true, path: 'assets/generated/' + path.basename(file), bytes, ms: r.ms });
-  }
+  if (p === '/api/image' && req.method === 'POST') return imageRoute(req, res, send);
   if (p === '/api/squad' && req.method === 'GET') return send(res, 200, { on: squadOn, specialists: squadAgents.map(a => ({ id: a.id, title: a.title, layer: a.squad.layer || '', runner: a.runner })) });
-  if (p === '/api/squad' && req.method === 'POST') { const b = await body(req); setSquad(b.on); return send(res, 200, { on: squadOn }); }
+  if (p === '/api/squad' && req.method === 'POST') {
+    const b = await body(req);
+    if (projectBusy()) return send(res, 409, { error: 'Wait for the current turn to finish.' });
+    if (b.on && availableSpecialists(agentsDef).length !== squadAgents.length) {
+      return send(res, 409, { error: 'A worker ID overlaps a squad specialist. Change the roster before enabling squad.' });
+    }
+    setSquad(b.on);
+    return send(res, 200, { on: squadOn });
+  }
   if (p === '/api/autopilot' && req.method === 'GET') return send(res, 200, autopilotView());
   if (p === '/api/autopilot' && req.method === 'POST') {
     const b = await body(req);
@@ -735,6 +818,7 @@ withProjectLock(PROJECT, (exists, replace) => {
   if (fs.existsSync(remembered)) agentsDef = JSON.parse(fs.readFileSync(remembered, 'utf8'));
   state.brief = fs.existsSync(path.join(PROJECT, 'brief.md')) ? fs.readFileSync(path.join(PROJECT, 'brief.md'), 'utf8') : '';
   state.agents = queuedAgents(agentsDef);
+  refreshPreviewSections();
   ({ watcher, chat, turns } = openProject(agentsDef));
 });
 if (squadOn) setSquad(true);

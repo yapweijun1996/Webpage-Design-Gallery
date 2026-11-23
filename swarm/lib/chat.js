@@ -52,7 +52,7 @@ function truncate(text, limit) {
   return Array.from(text).slice(0, limit).join('');
 }
 
-function createChat({ projectDir, agents, emit }) {
+function createChat({ projectDir, agents, emit, workspaceOutboxes = false }) {
   const chatDir = path.join(projectDir, 'chat');
   const logPath = path.join(projectDir, 'channel.jsonl');
   const transcriptPath = path.join(projectDir, 'channel.md');
@@ -67,6 +67,7 @@ function createChat({ projectDir, agents, emit }) {
   let separator = log && !log.endsWith('\n') ? '\n' : '';
   let watcher;
   let poll;
+  let started = false;
 
   // The log determines whether the last prepared outbox cursor was committed.
   if (pending) {
@@ -152,11 +153,10 @@ function createChat({ projectDir, agents, emit }) {
     return append(partialMsg);
   }
 
-  function publishManager(posts, { allowAssignments = false } = {}) {
+  function validateManagerPosts(posts, { allowAssignments = false } = {}) {
     if (!names.has('00')) throw new Error('The channel has no Manager participant.');
     if (!Array.isArray(posts) || posts.length > MAX_MANAGER_MESSAGES) throw new TypeError('Invalid Manager channel message batch.');
-    const lastId = messages.at(-1)?.id ?? 0;
-    const next = Array.from(posts, (post, index) => {
+    return Array.from(posts, post => {
       if (!post || typeof post !== 'object' || Array.isArray(post)) throw new TypeError('Invalid Manager channel message.');
       const { kind = 'msg', to = [], task, reply } = post;
       const text = post.text ?? (kind === 'assign' ? task : undefined);
@@ -165,17 +165,52 @@ function createChat({ projectDir, agents, emit }) {
           typeof text !== 'string' || !text.trim() || (task !== undefined && typeof task !== 'string')) {
         throw new TypeError('Invalid Manager channel message.');
       }
-      return createMessage({ from: '00', to, kind, text, task, reply }, lastId + index + 1);
+      return { from: '00', to, kind, text, task, reply };
     });
+  }
+
+  function publishManager(posts, options) {
+    const lastId = messages.at(-1)?.id ?? 0;
+    const next = validateManagerPosts(posts, options).map((post, index) => createMessage(post, lastId + index + 1));
+    return publishBatch(next, 'Manager');
+  }
+
+  function publishBatch(next, sender) {
     writeMessages(next);
     if (next.length) {
       // The canonical log has committed. A rendering or delivery failure must not retry these posts.
       try { refreshTranscript(); }
-      catch { console.warn('Manager messages saved, but the channel transcript could not be refreshed.'); }
+      catch { console.warn(`${sender} messages saved, but the channel transcript could not be refreshed.`); }
       try { for (const msg of next) emit({ type: 'chat', msg }); }
-      catch { console.warn('Manager messages saved, but the live channel could not deliver all updates.'); }
+      catch { console.warn(`${sender} messages saved, but the live channel could not deliver all updates.`); }
     }
     return next;
+  }
+
+  function validateWorkerOutbox(agentId, bytes) {
+    if (agentId === '00' || !agents.some(agent => agent.id === agentId)) throw new Error('Unknown worker outbox.');
+    if (typeof bytes !== 'string' && !Buffer.isBuffer(bytes)) throw new Error('Missing worker outbox.');
+    const source = bytes.toString();
+    if (Buffer.byteLength(source) > 64 * 1024 || (source.length && !source.endsWith('\n'))) {
+      throw new Error('A worker outbox must contain complete JSON lines and fit within 64 KiB.');
+    }
+    const lines = source.split('\n').filter(line => line.trim());
+    if (lines.length > 24) throw new Error('A worker may post at most 24 messages per turn.');
+    return lines.map(line => {
+      let message;
+      try { message = JSON.parse(line); } catch { throw new Error('The worker outbox contains an invalid message.'); }
+      const { kind = 'msg', to = [], text, reply } = message || {};
+      if (!['msg', 'done', 'research'].includes(kind) || typeof text !== 'string' || !text.trim()
+        || !Array.isArray(to) || to.length > agents.length + 3 || to.some(id => typeof id !== 'string')) {
+        throw new Error('The worker outbox contains an invalid message.');
+      }
+      return { from: agentId, kind, to, text, reply };
+    });
+  }
+
+  function publishWorker(agentId, bytes) {
+    const lastId = messages.at(-1)?.id ?? 0;
+    return publishBatch(validateWorkerOutbox(agentId, bytes).map((message, index) => createMessage(message, lastId + index + 1)), 'Worker');
   }
 
   function ingest(agentId) {
@@ -227,17 +262,19 @@ function createChat({ projectDir, agents, emit }) {
   }
 
   // Existing Manager records remain in the canonical history. Only worker outboxes are live inputs.
-  const outboxes = new Map(agents.filter(({ id }) => id !== '00').map(({ id }) => [`${id}.jsonl`, id]));
+  const outboxes = new Map(workspaceOutboxes ? [] : agents.filter(({ id }) => id !== '00').map(({ id }) => [`${id}.jsonl`, id]));
 
   function scan() {
     for (const agentId of outboxes.values()) ingest(agentId);
   }
 
   function start() {
-    if (poll) return;
+    if (started) return;
     fs.mkdirSync(chatDir, { recursive: true });
     fs.closeSync(fs.openSync(logPath, 'a'));
     fs.writeFileSync(transcriptPath, render());
+    started = true;
+    if (!outboxes.size) return;
     scan();
     try {
       watcher = fs.watch(chatDir, (_event, filename) => {
@@ -252,6 +289,7 @@ function createChat({ projectDir, agents, emit }) {
   }
 
   function stop() {
+    started = false;
     watcher?.close();
     watcher = undefined;
     clearInterval(poll);
@@ -263,7 +301,7 @@ function createChat({ projectDir, agents, emit }) {
   }
 
   // sync(): ingest every outbox right now (callers use it after an agent process exits, before reading history).
-  return { start, stop, post, publishManager, history, render, sync: scan };
+  return { start, stop, post, validateManagerPosts, publishManager, validateWorkerOutbox, publishWorker, history, render, sync: scan };
 }
 
 module.exports = { createChat, parseMentions };

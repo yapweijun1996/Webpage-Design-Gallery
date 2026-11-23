@@ -9,8 +9,8 @@ const WORKER = /^[a-z0-9_-]+$/;
 const SHARED = ['CONTRACT.md', 'brief.md', 'contract.json', 'decisions.md', 'design-system/*',
   'direction.md', 'research.md', 'review.md', 'review1.md', 'review2.md', 'tokens.css'];
 const FORBIDDEN = ['.git/*', '.run/*', 'agents.json', 'anchors/*', 'ownership.json'];
-const LAUNCH_SHARED = ['channel.md', 'discussion/*', 'inbox/*', 'notes/*', 'staff/*'];
-const LAUNCH_FORBIDDEN = ['channel.jsonl', 'chat/00.jsonl', 'chat/.offsets.json', 'dist/*',
+const LAUNCH_SHARED = ['channel.md', 'discussion/*', 'i18n/*', 'inbox/*', 'notes/*', 'staff/*'];
+const LAUNCH_FORBIDDEN = ['.launch-skills/*', 'channel.jsonl', 'chat/00.jsonl', 'chat/.offsets.json', 'dist/*',
   'integration/*', 'names.json', 'skills.json', 'skills/*'];
 const MANAGER_FILES = ['direction.md', 'decisions.md', 'research.md', 'review.md', 'review1.md', 'review2.md'];
 

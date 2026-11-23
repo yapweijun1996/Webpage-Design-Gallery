@@ -120,6 +120,51 @@ test('only the last 20 snapshots remain, including snapshots in the same clock t
   assertDesign(directory, 4);
 });
 
+test('restoring the oldest retained version installs it and saves the current design as undo', t => {
+  const directory = project(t);
+  const ids = [];
+  for (let number = 1; number <= 20; number++) {
+    writeDesign(directory, number);
+    ids.push(snapshot(directory, `Design ${number}`));
+  }
+  writeDesign(directory, 21);
+  write(directory, 'assets/retain.txt', 'outside both versions');
+
+  const undo = rollback(directory, ids[0], {
+    backupLabel: 'Before restore',
+    canRestore: ({ id, source }) => {
+      assert.equal(id, ids[0]);
+      assertDesign(source, 1);
+      assertDesign(directory, 21);
+      return true;
+    },
+  });
+  assertDesign(directory, 1);
+  const saved = list(directory);
+  assert.equal(saved.length, 20);
+  assert.equal(saved[0].id, undo);
+  assert.equal(saved.at(-1).id, ids[0]);
+  assertDesign(path.join(storage(directory), undo), 21);
+  assert.equal(read(directory, 'assets/retain.txt'), 'outside both versions');
+});
+
+test('a blocked restore does not save an undo or change live files', t => {
+  const directory = project(t);
+  writeDesign(directory, 1);
+  const id = snapshot(directory, 'Locked design');
+  writeDesign(directory, 2);
+
+  assert.throws(() => rollback(directory, id, {
+    backupLabel: 'Before restore',
+    canRestore: ({ source }) => {
+      assertDesign(source, 1);
+      return 'The approved anchor is different.';
+    },
+  }), /The approved anchor is different/);
+  assertDesign(directory, 2);
+  assert.deepEqual(fs.readdirSync(storage(directory)), [id]);
+});
+
 test('a missing snapshot entry is rejected before replacing either live path', t => {
   const directory = project(t);
   writeDesign(directory, 1);
@@ -157,7 +202,8 @@ test('a failure after switching sections restores both original live entries', t
   const rename = fs.renameSync;
   let injected = false;
   t.mock.method(fs, 'renameSync', (source, target) => {
-    if (path.basename(source) === 'contract.json' && target === path.join(directory, 'contract.json')) {
+    if (path.basename(path.dirname(source)) === 'candidate' &&
+        path.basename(source) === 'contract.json' && target === path.join(directory, 'contract.json')) {
       assert.equal(read(directory, 'sections/01-hero.html'), '<section>1</section>\n');
       injected = true;
       throw new Error('Injected install failure');
@@ -165,7 +211,7 @@ test('a failure after switching sections restores both original live entries', t
     return rename(source, target);
   });
 
-  assert.throws(() => rollback(directory, id), /Injected install failure/);
+  assert.throws(() => rollback(directory, id, { backupLabel: 'Before restore' }), /Injected install failure/);
   assert.equal(injected, true);
   assertDesign(directory, 2);
   assert.equal(read(directory, 'sections/02-footer.css'), 'current only');

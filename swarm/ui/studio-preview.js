@@ -364,6 +364,15 @@
         mark(data, data);
         load(data, true);
         break;
+      case 'asset': {
+        const asset = typeof data === 'string' && /^assets\/generated\/(?:(\d{2})-)?[\w][\w.-]*\.(?:svg|png|webp|gif|avif|jpe?g|ico)$/.exec(data);
+        if (!asset) break;
+        const [, owner] = asset;
+        for (const [id, host] of Object.entries(hosts)) {
+          if (id === owner || host.html.includes(data) || host.css.includes(data)) load(id, false);
+        }
+        break;
+      }
       case 'status':
         if (!cur[data.id]) break;
         cur[data.id].working = /^working/.test(data.status);
