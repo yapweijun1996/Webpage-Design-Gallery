@@ -598,6 +598,14 @@ html, body { margin: 0; }
   --ss-team-accent: var(--studio-success);
   color-scheme: inherit;
 }
+:root[data-studio-theme="light"] .studio .swarm-settings {
+  --ss-rail: var(--studio-elevated);
+  --ss-button-bg: var(--studio-elevated);
+  --ss-button-hover: var(--studio-selected);
+  --ss-primary-text: var(--sds-color-white);
+  --ss-primary-hover: var(--sds-color-blue-800);
+  --ss-error: var(--sds-color-red-800);
+}
 .studio .swarm-docs {
   --swarm-docs-bg: var(--studio-surface);
   --swarm-docs-text: var(--studio-text);

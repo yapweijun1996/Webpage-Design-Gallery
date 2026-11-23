@@ -123,14 +123,15 @@ test('runs every step in order and starts peer turns in parallel', { timeout: 10
   for (const { id, label, prompt } of calls) {
     assert.equal(prompt.split('\n')[0], `STEP: ${label} | AGENT: ${id}`);
     assert.ok(prompt.length <= 3600);
-    assert.ok(prompt.includes(`chat/${id}.jsonl`));
+    if (id !== '00') assert.ok(prompt.includes(`chat/${id}.jsonl`));
     assert.ok(prompt.includes(agents.find(agent => agent.id === id).lane));
     for (const filename of ['CONTRACT.md', 'brief.md', 'direction.md', 'decisions.md', 'channel.md']) {
       assert.ok(prompt.includes(filename));
     }
     assert.match(prompt, /one short sentence of intent/);
     if (id === '00') assert.match(prompt, /edit only direction\.md, decisions\.md, and review\.md/);
-    const example = JSON.parse(prompt.split('\n').find(line => line.startsWith('{')));
+    const payload = JSON.parse(prompt.split('\n').find(line => line.startsWith('{')));
+    const example = id === '00' ? payload.swarmChannel[0] : payload;
     assert.equal(example.kind, 'msg');
     assert.equal(example.reply, owner.id);
   }
@@ -303,6 +304,24 @@ test('false and rejected runs post failure notices and preserve the rest of the 
   ]);
   assert.equal(calls.at(-1).label, 'Summary');
   assert.equal(turns.busy(), false);
+});
+
+test('dispatch accepts only assignments from successful Manager phases of the current turn', async () => {
+  const { chat, turns, calls } = setup(({ id, label }, chat) => {
+    if (label === 'Triage') assign(chat, '01');
+    if (label === 'Discuss' && id === '01') assign(chat, '02', 'Outside of Manager phase');
+    if (label === 'Decide') {
+      assign(chat, '03', 'Failed decision phase');
+      return false;
+    }
+    if (label === 'Review') assign(chat, '01', 'Successful review phase');
+  });
+  assign(chat, '04', 'Earlier turn');
+  await turns.onOwnerMessage(chat.post({ from: 'owner', text: 'Review this work.' }));
+  assert.deepEqual(runLabels(calls), ['Triage:00', 'Discuss:01', 'Decide:00', 'Work:01', 'Review:00', 'Improve:01', 'Summary:00']);
+  assert.match(calls[0].prompt, /\{"swarmChannel":\[/);
+  assert.doesNotMatch(calls[0].prompt, /chat\/00\.jsonl/);
+  assert.match(calls.find(call => call.label === 'Work').prompt, /chat\/01\.jsonl/);
 });
 
 test('owner scope limits assignments and prompts to the sections the owner is looking at', async () => {

@@ -24,6 +24,7 @@
     research: 'm10.5 10.5-2-2M9 5.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 1 1 7 0',
     autopilot: 'M1 6h2l1.5-4 2 8 1.5-4H11',
     team: 'M7 10.5v-1A2.5 2.5 0 0 0 4.5 7h-1A2.5 2.5 0 0 0 1 9.5v1M6 3.5a2 2 0 1 1-4 0 2 2 0 1 1 4 0M9.5 5v4m-2-2h4',
+    skills: 'M1.5 2h3A1.5 1.5 0 0 1 6 3.5V10a1.5 1.5 0 0 0-1.5-1.5h-3zm9 0h-3A1.5 1.5 0 0 0 6 3.5V10a1.5 1.5 0 0 1 1.5-1.5h3z',
     images: 'M1.5 2h9v8h-9zM2 8l3-3 2 2 1-1 2 2',
     advanced: 'M1 3.5h10M1 8.5h10M4 2v3M8 7v3'
   };
@@ -1283,6 +1284,7 @@
     let advanced;
     let counter;
     let teamEditor;
+    let skillEditor;
 
     for (const group of settingsGroups) {
       group.addEventListener('input', () => {
@@ -1314,8 +1316,11 @@
       }
       const isTeam = next.heading === teamEditor?.heading;
       if (isTeam && (changed || focus)) teamEditor.showRoster();
-      dock.dataset.section = isTeam ? 'team' : 'settings';
+      const isSkills = next.heading === skillEditor?.heading;
+      if (isSkills && (changed || focus)) skillEditor.refresh();
+      dock.dataset.section = isTeam ? 'team' : isSkills ? 'skills' : 'settings';
       if (changed || focus) body.scrollTop = 0;
+      if (nav.scrollWidth > nav.clientWidth) next.link.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       if (focus) next.heading.focus({ preventScroll: true });
     }
 
@@ -1455,6 +1460,17 @@
         imagesGroup.before(teamEditor.section);
         dock.append(teamEditor.bar);
         teamLink = addShortcut('Team', teamEditor.heading, teamEditor.section, 'team');
+      }
+      if (window.SwarmSkillSettings) {
+        let skillLink;
+        nav.classList.add('ss-nav-has-skills');
+        skillEditor = window.SwarmSkillSettings.createEditor({ sectionId: id + '-skills', headingLevel, onDirty(pending) {
+          skillLink?.toggleAttribute('data-pending', pending);
+          if (pending) skillLink?.setAttribute('aria-description', 'Unsaved skill changes');
+          else skillLink?.removeAttribute('aria-description');
+        } });
+        imagesGroup.before(skillEditor.section);
+        skillLink = addShortcut('Skills', skillEditor.heading, skillEditor.section, 'skills');
       }
       if (hasImages) addShortcut('Images', imagesHeading, imagesGroup, 'images');
       else imagesGroup.hidden = true;
@@ -1747,6 +1763,7 @@
       open() {
         section.hidden = false;
         if (root.closest('#team-settings') && teamEditor) showSection(teamEditor.heading);
+        if (currentSection?.heading === skillEditor?.heading) skillEditor?.refresh();
         return refresh();
       },
       close() {

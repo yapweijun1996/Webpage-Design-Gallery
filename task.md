@@ -32,11 +32,11 @@ Status legend: [x] done and verified, [~] in progress, [ ] not started.
   - [x] Studio and export previews use opaque sandboxed frames and restricted resources; `swarm/test/preview.test.js` passed, including its opt-in Chrome fixture.
   - [x] Agent previews and Studio use the same isolated rendering stage. Scoped turns carry the Studio theme, brand and language. The Chrome fixture checks mobile, tablet and desktop geometry and styles and compares screenshot tool pixels with Studio.
   - [x] Allowlist child process environment variables for worker launches and runner readiness probes. CLI probe fixtures and successful and failed fake runner scenarios pass.
-  - [ ] Bind Manager messages and assignments to the launched process and current turn. Keep historical channel records readable and verify the active flow with fake runners.
+  - [x] Bind Manager messages to the launched process and accept assignments only from successful Triage, Decide and Review phases of the current turn. Keep canonical channel history readable. Fake runner flows verify failed and stopped responses are discarded.
   - [ ] Use per-worker workspaces and integrate accepted edits through ownership, impact and anchor checks. Stage worker-generated assets and resolve squad ID collisions. Verify OS-level isolation separately for Pi.
   - [ ] Expose versions and rollback through Studio. Restore atomically, preserve unrelated work and refresh the running preview after a successful rollback.
   - [ ] Wire `/api/fast` and `/fast` to the locked-anchor gate and staged composer. Connect background quality work after the worker publication checks are in place. Add route-to-worker acceptance tests.
-  - [ ] Resolve local project skills in the runner path and add Skills settings for editing, enabling and assignment.
+  - [x] Resolve enabled local skills from worker and position assignments. Codex receives bounded prompt text; Pi receives explicit skill directories. The Skills editor supports editing, enabling, removal and assignment. Verified with runner fixtures and real Chrome at 393 and 1440 pixels.
   - [ ] Benchmark the fast path in a real browser from the owner's submission through an interactive preview; the current composer benchmark excludes that full journey.
 
 Not verifiable headlessly (stays UNVERIFIED until a real device): iPhone gesture zoom lock, PWA install prompt on iOS, Safari service worker behaviour.

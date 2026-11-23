@@ -25,7 +25,7 @@ and `projectId` of the intended target from `/api/state`.
 - Mentions such as `@03`, `@Agent 3`, `@hero`, and `@all` resolve to recipient IDs.
 - Messages carry a server-assigned ID and timestamp, sender, recipients, kind, and text, with optional task and reply fields.
 - The kinds are `msg`, `assign`, `decision`, `done`, and `system`.
-- Agents read `channel.md` and post JSON lines to their own `chat/NN.jsonl` outbox.
+- Agents read `channel.md`. Workers post JSON lines to their own `chat/NN.jsonl` outbox. The Manager posts an assistant output envelope from its launched runner.
 - The server writes the canonical `channel.jsonl` log and refreshes the transcript.
 - HTTP handles posting and history. The SSE stream broadcasts live messages.
 - See [CHANNEL_SPEC.md](CHANNEL_SPEC.md) for the full protocol.
@@ -76,7 +76,7 @@ for the local image helper. Server API keys stay out of runner processes.
 ## Settings workspace
 
 Open **Settings** from the viewer to switch between Roles, Research, Autopilot,
-Team, and Advanced. The Images section appears when the server supports image
+Team, Skills, and Advanced. The Images section appears when the server supports image
 generation settings.
 
 Team shows workers' reported status, runner, and assigned section. Search by
@@ -84,6 +84,11 @@ worker or section, filter by runner or status, or select workers to change their
 runner in one draft. Select a worker to edit their settings and inspect the
 effective runner, model, and effort. On a phone, use **Workers** to return to
 the roster.
+
+Skills lets you add project guidance, edit or disable existing skills, and assign
+skills to staff positions or workers. Save edits and assignments while the team
+is idle. The next turn resolves the enabled skills for its assigned role. See
+[SKILLS_SPEC.md](SKILLS_SPEC.md) for the project storage and API contract.
 
 **Save team** applies the roster draft when the team is idle. **Save settings**
 applies the general settings draft separately. Saved changes apply from the
@@ -109,4 +114,8 @@ page marks the estimate as partial or unavailable when pricing data is missing.
 
 ```sh
 node swarm/test/e2e.js
+python swarm/test/browser_settings_skills.py
 ```
+
+The Skills browser check uses Python Playwright with Chrome. Set `GALLERY_CHROME`
+if Chrome is installed at a different path.

@@ -9,6 +9,10 @@
   --ss-accent: #8ab4ff;
   --ss-selection: #23324b;
   --ss-error: #ffaaa0;
+  --ss-button-bg: #202633;
+  --ss-button-hover: #2d374d;
+  --ss-primary-text: #13161c;
+  --ss-primary-hover: #aecbff;
   --ss-control-height: 40px;
   --ss-content-inset: max(30px, calc((100% - 1310px) / 2));
   --ss-rail-width: 208px;
@@ -730,14 +734,14 @@
   display: inline-grid;
   place-items: center;
   padding-inline: 16px;
-  background: #202633;
+  background: var(--ss-button-bg);
   font-size: 13px;
   font-weight: 650;
   cursor: pointer;
 }
 
 .swarm-settings .ss-button:not(:disabled, [aria-disabled="true"]):hover {
-  background: #2d374d;
+  background: var(--ss-button-hover);
 }
 
 .swarm-settings .ss-button:is(:disabled, [aria-disabled="true"]) {
@@ -754,11 +758,11 @@
 .swarm-settings .ss-primary:not(:disabled):hover {
   border-color: var(--ss-accent);
   background: var(--ss-accent);
-  color: #13161c;
+  color: var(--ss-primary-text);
 }
 
 .swarm-settings .ss-primary:not(:disabled):hover {
-  background: #aecbff;
+  background: var(--ss-primary-hover);
 }
 
 .swarm-settings .ss-dock {
@@ -766,6 +770,7 @@
 }
 
 .swarm-settings .ss-dock[data-section="team"] > .ss-footer,
+.swarm-settings .ss-dock[data-section="skills"] > .ss-footer,
 .swarm-settings .ss-dock:not([data-section="team"]) > .ss-team-bar {
   display: none;
 }
@@ -779,6 +784,53 @@
 .swarm-settings .ss-footer .ss-actions {
   margin: 0;
 }
+
+.swarm-settings .ss-skills { gap: 12px; overflow-wrap: anywhere; }
+.swarm-settings .ss-skills > .ss-button { justify-self: start; }
+.swarm-settings .ss-skills :is(.ss-error, .ss-help):empty {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.swarm-settings .ss-skill-form { display: grid; gap: 12px; padding-block: 16px; }
+.swarm-settings .ss-skill-form h3,
+.swarm-settings .ss-skill-form h4 { font-size: 17px; }
+.swarm-settings .ss-skill-catalog { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
+.swarm-settings .ss-skill-catalog > .ss-field { flex: 1 1 180px; }
+.swarm-settings .ss-skills .ss-field { min-inline-size: 0; }
+.swarm-settings .ss-skills input:not([type="checkbox"]) {
+  inline-size: 100%;
+  min-inline-size: 0;
+  min-block-size: var(--ss-control-height);
+  padding: 8px;
+  border: 1px solid var(--ss-line);
+  border-radius: 7px;
+  background: var(--ss-bg);
+  color: inherit;
+  font: inherit;
+}
+.swarm-settings .ss-skill-role-list { border-block: 1px solid var(--ss-border); }
+.swarm-settings .ss-skill-role-list summary { padding-block: 10px; cursor: pointer; }
+.swarm-settings .ss-skill-role-list summary::-webkit-details-marker { display: initial; }
+.swarm-settings .ss-skill-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 207px), 1fr));
+  gap: 2px 10px;
+  padding: 0;
+  border: 0;
+}
+.swarm-settings .ss-skill-options legend { padding: 0 0 6px; }
+.swarm-settings .ss-skill-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--ss-control-height);
+}
+.swarm-settings .ss-skill-check input { flex: none; margin: 0; accent-color: var(--ss-accent); }
+.swarm-settings .ss-skill-check:has(input:disabled) { color: var(--ss-muted); }
+.swarm-settings .ss-skill-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 8px; }
 
 .swarm-settings .ss-actions {
   display: flex;
@@ -1132,6 +1184,19 @@
   .swarm-settings .ss-worker-workspace:not([data-editing]) .ss-team-list,
   .swarm-settings .ss-worker-workspace[data-editing] .ss-worker-roster { display: none; }
   .swarm-settings .ss-button.ss-worker-back { display: inline-flex; justify-self: start; border-color: transparent; background: transparent; padding-inline: 8px; }
+}
+
+@container (width <= 560px) {
+  .swarm-settings .ss-nav-has-skills {
+    flex-wrap: nowrap;
+    max-inline-size: 100%;
+    padding: 2px;
+    overflow-x: auto;
+    contain: inline-size;
+    scrollbar-width: thin;
+  }
+  .swarm-settings .ss-nav-has-skills > button { flex: none; }
+  .swarm-settings .ss-nav-has-skills .ss-nav-button svg { display: none; }
 }
 
 @container (width <= 480px) {

@@ -18,6 +18,7 @@ const TARGET = { project: path.basename(PROJECT), projectId: projectIdentity(PRO
 // Agents run ONLY through the codex or pi CLI, with the allowlisted model and effort from the settings file (lib/settings.js).
 const S = require('./lib/settings');
 const R = require('./lib/runners');
+const SKILLS = require('./lib/skills');
 const { createUsage, normalizeUsage, addUsage } = require('./lib/usage');
 const G = require('./lib/guard');
 const SETTINGS_PATH = (process.env.SWARM_TEST === '1' && process.env.SWARM_SETTINGS) || path.join(ROOT, '.run', 'settings.json'); // override only in test mode
@@ -45,6 +46,7 @@ const GJH_ASSETS = path.resolve(ROOT, '..', 'assets', 'companies', 'gjh'); // re
 const DS_DIR = path.join(ROOT, 'design-system');
 const STAFF_DIR = path.join(ROOT, 'staff');
 const STAFF = require('./lib/staff');
+const staffRoster = STAFF.load();
 const GJH_V11_ASSETS = path.resolve(ROOT, '..', 'demos', 'corporate', 'gjh', 'v11', 'assets'); // read-only mall concept images for /gjh-v11/*
 let agentsDef = JSON.parse(fs.readFileSync(path.join(TEMPLATE, 'agents.json'), 'utf8'));
 const state = { ...TARGET, phase: 'idle', round: 0, rounds: PLAN.length, plan: PLAN, model: modelLabel(), brief: '', agents: {}, feed: [] };
@@ -153,17 +155,18 @@ const slot = {
 };
 
 // Standing owner rules and the channel language go after the STEP line (the first line must stay `STEP: ...`).
-function withPreamble(promptText, a, label, appearance) {
+function withPreamble(promptText, a, label, { appearance, position, guidance }) {
   let pre = S.preamble(settings);
-  try { const sp = STAFF.preamble({ staffDir: path.join(PROJECT, 'staff'), agentId: a.id, step: label }); if (sp) pre = (pre ? pre + '\n' : '') + sp; } catch (_) { /* no staff files in this project: skip */ }
+  try { const sp = STAFF.preamble({ staffDir: path.join(PROJECT, 'staff'), agentId: a.id, position, step: label }); if (sp) pre = (pre ? pre + '\n' : '') + sp; } catch (_) { /* no staff files in this project: skip */ }
   const rendering = `Inspect the same live rendering as Studio at \`${previewUrl(appearance)}\`.`;
   pre = pre ? `${pre}\n${rendering}` : rendering;
+  if (guidance) pre += `\n\nLocal skill guidance for this role. Permissions are defined by the project and runner.\n${guidance}`;
   if (promptText.startsWith('STEP:')) { const i = promptText.indexOf('\n'); return i < 0 ? promptText + '\n' + pre : promptText.slice(0, i + 1) + pre + '\n' + promptText.slice(i + 1); }
   return pre + '\n' + promptText;
 }
 
 function ownedGlobs(a) {
-  if (a.id === MANAGER.id) return ['direction.md', 'decisions.md', 'review.md', 'review1.md', 'review2.md', 'research.md', 'chat/00.jsonl', 'inbox/00.md'];
+  if (a.id === MANAGER.id) return ['direction.md', 'decisions.md', 'review.md', 'review1.md', 'review2.md', 'research.md', 'inbox/00.md'];
   if (a.squad) { let w = []; try { w = SQ.ownedGlobs(a.squad, a.base || '00-none'); } catch (_) { /* no section yet */ } return [...w, `chat/${a.id}.jsonl`, `notes/${a.id}.md`]; }
   return [`sections/${a.id}-*.html`, `sections/${a.id}-*.css`, `notes/${a.id}.md`, `discussion/${a.id}.md`, `chat/${a.id}.jsonl`];
 }
@@ -186,22 +189,25 @@ function applyEvent(a, ev) {
 }
 
 // One process, one turn. Resolves true when the process exited cleanly without a fatal runner error.
-function runOnce(a, label, promptText, appearance) {
+function runOnce(a, label, promptText, appearance, managerChannel) {
   return new Promise(resolve => {
     const role = label === 'Research' ? 'research' : (a.id === MANAGER.id ? 'manager' : 'worker');
     const base = S.resolve(settings, role);
     const own = role === 'worker' ? { runner: a.runner, model: a.model, effort: a.effort } : {};
     const resolved = { ...base, ...Object.fromEntries(Object.entries(own).filter(([, v]) => v)) }; // per-worker override, still checked against the allowlist by the runner
+    const position = staffRoster.byId[a.position]?.id ?? staffRoster.byAgent(a.id)?.id;
+    const skills = SKILLS.resolve({ projectDir: PROJECT, workerId: a.id, position, runner: resolved.runner });
     let runner, cmd;
     try { runner = R.get(resolved.runner); ensureExport(); // Keep the legacy export ready for existing callers.
-    cmd = runner.buildCommand({ model: resolved.model, effort: resolved.effort, projectDir: PROJECT, research: label === 'Research' ? true : !!(settings.research && settings.research.web) }); }
+    cmd = runner.buildCommand({ model: resolved.model, effort: resolved.effort, projectDir: PROJECT, skillDirs: skills.dirs, research: label === 'Research' ? true : !!(settings.research && settings.research.web) }); }
     catch (e) { emit({ type: 'chat', msg: chat ? chat.post({ from: 'system', kind: 'system', text: `Cannot start ${a.name}: ${e.message}` }) : { id: 0 } }); return resolve(false); }
-    const parser = runner.createParser();
+    const parser = runner.createParser({ managerChannel: !!managerChannel });
     const before = resolved.runner === 'pi' ? G.snapshot(PROJECT) : null; // pi has no sandbox: compare the tree after the turn
     const env = { ...R.childEnvironment(process.env), SWARM_PORT: String(PORT) };
     const p = spawn(cmd.command, cmd.args, { cwd: cmd.cwd || PROJECT, env, stdio: ['pipe', 'pipe', 'ignore'] });
     children.set(a.id, p);
     let fatal = false, settled = false;
+    let managerPosts;
     let reportedUsage = false;
     const recordUsage = usage => {
       const agentUsage = state.usage.agents[a.id] ??= { name: a.title || a.name, runners: [], ...createUsage() };
@@ -214,13 +220,17 @@ function runOnce(a, label, promptText, appearance) {
     const handle = evs => {
       for (const ev of evs) {
         if (ev.kind === 'error') fatal = true;
+        else if (ev.kind === 'manager-channel') managerPosts = ev.messages;
         else if (ev.kind === 'usage' || ev.kind === 'done') {
           const usage = normalizeUsage(resolved.runner, ev.usage, resolved.model);
           if (usage) {
             reportedUsage = true;
             recordUsage(usage);
           }
-        } else applyEvent(a, ev);
+        } else {
+          if (managerChannel && ev.kind === 'thought') managerPosts = undefined;
+          applyEvent(a, ev);
+        }
       }
     };
     const finish = ok => {
@@ -233,17 +243,23 @@ function runOnce(a, label, promptText, appearance) {
           if (bad.length) chat.post({ from: 'system', kind: 'system', text: `${a.name} changed files outside its ownership: ${bad.slice(0, 5).join(', ')}${bad.length > 5 ? ' ...' : ''}` });
         } catch (_) { /* guard problems must not fail the turn */ }
       }
-      resolve(ok && !fatal);
+      if (ok && !fatal && !stopped && managerChannel) {
+        try {
+          if (chat !== managerChannel || !managerPosts) return resolve(false);
+          managerChannel.publishManager(managerPosts, { allowAssignments: ['Triage', 'Decide', 'Review'].includes(label) });
+        } catch { return resolve(false); }
+      }
+      resolve(ok && !fatal && !stopped);
     };
     p.on('error', () => finish(false));
     p.stdin.on('error', () => {});
-    p.stdin.end(withPreamble(promptText, a, label, appearance));
+    p.stdin.end(withPreamble(promptText, a, label, { appearance, position, guidance: resolved.runner === 'codex' ? skills.text : '' }));
     p.stdout.on('data', d => { try { handle(parser.push(d)); } catch (_) { /* parser errors must not kill the run */ } });
     p.on('close', code => { try { handle(parser.end()); } catch (_) {} finish(code === 0); });
   });
 }
 
-async function runProcess(a, label, promptText, isLast, appearance) {
+async function runProcess(a, label, promptText, isLast, appearance, managerChannel) {
   const ag = state.agents[a.id];
   if (!ag) return false;
   if (label === 'Research' && !(settings.research && settings.research.web)) {
@@ -251,11 +267,12 @@ async function runProcess(a, label, promptText, isLast, appearance) {
     return true;
   }
   for (let attempt = 1; attempt <= 2; attempt += 1) {
+    if (stopped) return false;
     ag.status = 'working ' + label; ag.action = 'starting'; ag.target = a.id;
     emit({ type: 'status', id: a.id, status: ag.status });
     await slot.acquire();
     let ok = false;
-    try { ok = await runOnce(a, label, promptText, appearance); } finally { slot.release(); }
+    try { if (!stopped) ok = await runOnce(a, label, promptText, appearance, managerChannel); } finally { slot.release(); }
     if (stopped) return false;
     if (ok) {
       ag.status = isLast ? 'done' : 'waiting'; ag.action = '';
@@ -333,7 +350,13 @@ function createChannel(people) {
   const queue = createTurns({
     chat: channel, agents: people, managerId: MANAGER.id, maxDiscussRounds: 2, squad: { on: () => squadOn, plan: squadPlan },
     // After each agent process exits, ingest its outbox immediately so the next step sees its messages (no watcher race).
-    runAgent: ({ id, label, prompt: pr, previewAppearance }) => { const a = people.find(x => x.id === id); if (!a) return Promise.resolve(false); const guard = a.squad ? scopeGuard(a) : null; return runProcess(a, label, pr, false, previewAppearance).then(ok => { channel.sync(); if (guard) guard(); return ok; }); }
+    runAgent: ({ id, label, prompt: pr, previewAppearance }) => {
+      const a = people.find(x => x.id === id);
+      if (!a) return Promise.resolve(false);
+      const guard = a.squad ? scopeGuard(a) : null;
+      const managerChannel = a.id === MANAGER.id ? channel : undefined;
+      return runProcess(a, label, pr, false, previewAppearance, managerChannel).then(ok => { channel.sync(); if (guard) guard(); return ok; });
+    }
   });
   return { chat: channel, turns: queue };
 }
@@ -360,6 +383,7 @@ function scopeGuard(a) {
 }
 let inFlight = 0; // requests being handled or waiting in the queue
 function startTurn(msg, appearance) {
+  if (!projectBusy()) stopped = false;
   inFlight += 1;
   state.phase = 'running'; emit({ type: 'phase', phase: 'running' });
   emit({ type: 'busy', busy: true });
@@ -413,6 +437,7 @@ async function runAll() {
   if (!stopped && state.agents[MANAGER.id]) { state.agents[MANAGER.id].status = 'done'; emit({ type: 'status', id: MANAGER.id, status: 'done' }); }
   state.phase = stopped ? 'stopped' : 'done';
   emit({ type: 'phase', phase: state.phase });
+  if (!stopped) maybeAutopilot();
 }
 
 function stopAll() {
@@ -470,10 +495,10 @@ function autopilotText(scope, primary, cycle) {
 
 function maybeAutopilot() {
   clearTimeout(autopilot.timer);
-  if (!autopilot.on || !autopilot.scope || !autopilot.primary || !turns || !chat) return;
+  if (stopped || !autopilot.on || !autopilot.scope || !autopilot.primary || !turns || !chat) return;
   autopilot.timer = setTimeout(() => { // the screen must stay put for a moment before the team starts
-    if (!autopilot.on) return;
-    if (inFlight > 0) { autopilot.status = 'waiting for the current request'; return emitAutopilot(); }
+    if (stopped || !autopilot.on) return;
+    if (projectBusy()) { autopilot.status = 'waiting for the current request'; return emitAutopilot(); }
     const key = autopilot.primary, done = autopilot.cycles[key] || 0;
     if (done >= maxCycles()) { autopilot.status = 'screen finished: scroll down to continue'; return emitAutopilot(); }
     autopilot.cycles[key] = done + 1; autopilot.status = 'working on this screen'; emitAutopilot();
@@ -533,6 +558,11 @@ function applyTeam(next) {
 }
 
 // ---------- http ----------
+const { createSkillRoutes, matches: isSkillRoute } = require('./lib/skills-routes');
+const skillRoutes = createSkillRoutes({
+  projectDir: PROJECT, projectId: TARGET.projectId, busy: projectBusy,
+  workers: () => withTitles([...agentsDef, ...squadAgents]).map(({ id, name, title }) => ({ id, name, title })),
+});
 const preview = require('./lib/preview').createPreview({
   ui: UI, project: PROJECT, designSystem: DS_DIR, library: GJH_ASSETS, mall: GJH_V11_ASSETS
 });
@@ -552,7 +582,9 @@ const server = http.createServer(async (req, res) => {
     if (origin && origin !== 'http://' + req.headers.host) { res.writeHead(403, { 'content-type': 'text/plain' }); return res.end('forbidden origin'); }
     if (['POST', 'PUT', 'PATCH'].includes(req.method) && Number(req.headers['content-length'] || 0) > 0 && !/^application\/json/i.test(req.headers['content-type'] || '')) { res.writeHead(415, { 'content-type': 'text/plain' }); return res.end('json required'); } }
   const url = new URL(req.url, 'http://x');
-  const p = decodeURIComponent(url.pathname);
+  let p;
+  try { p = decodeURIComponent(url.pathname); }
+  catch { return send(res, 400, { error: 'Invalid request path.' }); }
   if (p === '/events') {
     res.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-store', connection: 'keep-alive' });
     res.write('data: ' + JSON.stringify({ type: 'state', state }) + '\n\n');
@@ -560,6 +592,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
   if (p === '/api/state') return send(res, 200, state);
+  if (isSkillRoute(p)) return skillRoutes(req, res, p, send);
   if (p === '/api/settings' && req.method === 'GET') return send(res, 200, { settings, allowlist: S.ALLOWLIST, resolved: { manager: S.resolve(settings, 'manager'), worker: S.resolve(settings, 'worker') }, status: readiness });
   if (p === '/api/settings' && req.method === 'PUT') {
     const r = S.save(SETTINGS_PATH, await body(req));
@@ -582,6 +615,8 @@ const server = http.createServer(async (req, res) => {
     const from = b.from === 'owner' ? 'owner' : 'claude';
     if (!text) return send(res, 400, { error: 'empty' });
     if (!chat) return send(res, 409, { error: 'channel not ready' });
+    if (projectBusy() && !inFlight) return send(res, 409, { error: 'Wait for the fixed-phase run to finish.' });
+    if (stopped && projectBusy()) return send(res, 409, { error: 'Wait for the stopped turn to finish.' });
     const ahead = inFlight;
     // Optional owner scope (what the owner is looking at): shown in the message and enforced by the turn orchestrator.
     let shown = text, scope = null;
@@ -604,6 +639,7 @@ const server = http.createServer(async (req, res) => {
     if (!TEAM) return send(res, 501, { error: 'team editor not available' });
     if (inFlight > 0 || state.phase === 'running') return send(res, 409, { error: 'busy' });
     const b = await body(req);
+    if (projectBusy()) return send(res, 409, { error: 'busy' });
     const r = TEAM.validate(b.agents, { allowlist: S.ALLOWLIST, existing: agentsDef });
     if (!r.ok) return send(res, 400, { errors: r.errors });
     try { const d = applyTeam(r.value); return send(res, 200, { agents: agentsDef, diff: d }); }
@@ -635,6 +671,7 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/autopilot' && req.method === 'POST') {
     const b = await body(req);
     autopilot.on = !!b.on; autopilot.status = autopilot.on ? 'watching your screen' : 'off';
+    if (autopilot.on && !projectBusy()) stopped = false;
     if (!autopilot.on) clearTimeout(autopilot.timer);
     saveAutopilot(); emitAutopilot(); if (autopilot.on) maybeAutopilot();
     return send(res, 200, autopilotView());

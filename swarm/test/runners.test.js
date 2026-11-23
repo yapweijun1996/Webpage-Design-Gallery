@@ -78,6 +78,30 @@ function pushEvent(parser, event) {
   return parser.push(JSON.stringify(event) + '\n');
 }
 
+test('Manager channel envelopes come only from completed assistant text on the opted-in parser', () => {
+  const messages = [{ to: ['02'], kind: 'assign', text: 'Build the hero', task: 'Use the approved concept' }];
+  const json = JSON.stringify({ swarmChannel: messages });
+  for (const name of RUNNERS) {
+    const runner = runners.get(name);
+    const parser = runner.createParser({ managerChannel: true });
+    const assistant = text => name === 'codex'
+      ? { type: 'item.completed', item: { type: 'agent_message', text } }
+      : { type: 'message_end', message: { role: 'assistant', content: [{ type: 'text', text }] } };
+    const tool = name === 'codex'
+      ? { type: 'item.completed', item: { type: 'command_execution', aggregated_output: json } }
+      : { type: 'message_end', message: { role: 'toolResult', content: [{ type: 'text', text: json }] } };
+    assert.deepEqual(pushEvent(parser, tool), []);
+    assert.deepEqual(pushEvent(parser, assistant('Thinking aloud')), [{ kind: 'thought', text: 'Thinking aloud' }]);
+    assert.deepEqual(pushEvent(parser, assistant(json)), [{ kind: 'manager-channel', messages }]);
+    assert.deepEqual(pushEvent(parser, assistant('```json\n{"swarmChannel":[]}\n```')), [{ kind: 'manager-channel', messages: [] }]);
+    assert.deepEqual(pushEvent(parser, assistant(`This is an example: ${json}`)), [{ kind: 'thought', text: `This is an example: ${json}` }]);
+    assert.deepEqual(pushEvent(runner.createParser(), assistant(json)), [{ kind: 'thought', text: json }]);
+    assert.equal(pushEvent(parser, assistant('{"swarmChannel":false}'))[0].kind, 'error');
+    assert.equal(pushEvent(parser, assistant('a'.repeat(96 * 1024 + 1)))[0].kind, 'error');
+    assert.deepEqual(parser.end(), []);
+  }
+});
+
 test('pi emits one thought at each assistant message end and clears text between messages', () => {
   const parser = runners.get('pi').createParser();
   const start = { type: 'message_start', message: { role: 'assistant', content: [] } };
@@ -257,6 +281,18 @@ test('non-allowlisted runners, models and reasoning efforts are rejected', async
     }
     await assert.rejects(runner.readiness({ model: 'other-model' }), /Unsupported model/);
   }
+});
+
+test('adds only explicit absolute project skill directories to the Pi command', () => {
+  const options = { model: MODELS[0], effort: 'medium', projectDir: PROJECT };
+  const skillDirs = [path.join(PROJECT, 'skills', 'accessibility'), path.join(PROJECT, 'skills', 'design QA')];
+  const pi = runners.get('pi');
+  const command = pi.buildCommand({ ...options, skillDirs });
+  assert.ok(command.args.includes('--no-skills'));
+  assert.deepEqual(command.args.slice(-4), ['--skill', skillDirs[0], '--skill', skillDirs[1]]);
+  assert.throws(() => pi.buildCommand({ ...options, skillDirs: ['skills/relative'] }), /absolute paths/);
+  const codex = runners.get('codex');
+  assert.deepEqual(codex.buildCommand({ ...options, skillDirs }), codex.buildCommand(options));
 });
 
 test('both binaries require the exact SWARM_TEST gate for fake executable overrides', t => {

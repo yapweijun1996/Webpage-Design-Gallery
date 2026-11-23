@@ -63,10 +63,10 @@ function fixture(t, { existing = true, environment = {} } = {}) {
       channels.push(channel);
       return channel;
     } },
-    child_process: { spawnSync() {}, spawn(_command, _args, options) {
+    child_process: { spawnSync() {}, spawn(command, args, options) {
       assert.ok(fs.existsSync(path.join(project, 'channel.md')));
       child = Object.assign(new EventEmitter(), { stdin: new PassThrough(), stdout: new PassThrough() });
-      spawns.push({ options, child });
+      spawns.push({ command, args, options, child });
       child.kill = () => child.emit('close', 1);
       return child;
     } }
@@ -79,9 +79,9 @@ function fixture(t, { existing = true, environment = {} } = {}) {
   loadServer(id => mocks[id] ?? serverRequire(id), root, { env: { SWARM_PROJECT: 'fixture', ...environment }, on() {} },
     { ...console, error: (...message) => errors.push(message) });
 
-  async function request(url, input) {
+  async function request(url, input, method = input === undefined ? 'GET' : 'POST') {
     const req = typeof input === 'string' ? Readable.from([Buffer.from(input)]) : (input ?? Readable.from([]));
-    Object.assign(req, { url, method: input === undefined ? 'GET' : 'POST', headers: { host: 'localhost', 'content-type': 'application/json' } });
+    Object.assign(req, { url, method, headers: { host: 'localhost', 'content-type': 'application/json' } });
     const response = {};
     await handler(req, {
       writeHead(status) { response.status = status; },
@@ -101,6 +101,11 @@ async function assertPreviousProject(f) {
   assert.deepEqual((await f.request('/api/chat')).body.messages, [savedMessage]);
   assert.deepEqual(fs.readdirSync(path.dirname(f.project)), ['fixture']);
   assert.equal(f.watchers[0].closed, false);
+}
+
+function emitManagerPosts(child, posts) {
+  const text = JSON.stringify({ swarmChannel: posts });
+  child.stdout.write(`${JSON.stringify({ type: 'item.completed', item: { type: 'agent_message', text } })}\n`);
 }
 
 test('starts a fresh project with the bundled roster format and ready channel files', async t => {
@@ -200,6 +205,7 @@ test('checks for an active run again after a concurrent initialization body arri
   assert.deepEqual(await f.request('/api/run', JSON.stringify({ ...f.target, brief: 'Run brief.' })), { status: 200, body: { ok: true } });
   delayedBody.end(JSON.stringify({ ...f.target, brief: 'Later brief.' }));
   assert.equal((await delayed).status, 409);
+  assert.equal((await f.request('/api/chat', '{"from":"owner","text":"Overlapping fixture request."}')).status, 409);
   const state = (await f.request('/api/state')).body;
   assert.equal(state.phase, 'running');
   assert.equal(state.brief, 'Run brief.');
@@ -222,7 +228,86 @@ test('the scoped Studio appearance reaches the preview URL in the running agent 
   assert.equal(previewLink, 'http://127.0.0.1:8800/studio.html?preview=1&theme=light&brand=forest-gold&lang=ms');
   assert.match(prompt, /^STEP: Triage/);
   assert.match(prompt, /Review this section\.$/);
+  emitManagerPosts(f.spawns[0].child, []);
   f.spawns[0].child.emit('close', 0);
+});
+
+test('only the successful Manager attempt can publish the staged response', async t => {
+  const f = fixture(t);
+  await f.request('/api/chat', '{"from":"owner","text":"Answer the fixture question."}');
+  const first = f.spawns[0].child;
+  emitManagerPosts(first, [{ kind: 'msg', text: 'An unfinished fixture response.' }]);
+  const managerPosts = async () => (await f.request('/api/chat')).body.messages.filter(message => message.from === '00');
+  assert.deepEqual(await managerPosts(), []);
+  first.emit('close', 1);
+  await new Promise(resolve => setImmediate(resolve));
+  const retry = f.spawns[1].child;
+  emitManagerPosts(retry, [{ kind: 'msg', to: ['owner'], text: 'The completed fixture response.' }]);
+  assert.deepEqual(await managerPosts(), []);
+  retry.emit('close', 0);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual((await managerPosts()).map(({ text }) => text), ['The completed fixture response.']);
+
+  await f.request('/api/chat', '{"from":"owner","text":"Start another fixture request."}');
+  emitManagerPosts(f.spawns[2].child, [{ kind: 'msg', text: 'The stopped fixture response.' }]);
+  await f.request('/api/stop', '{}');
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(f.spawns.length, 3);
+  assert.deepEqual((await managerPosts()).map(({ text }) => text), ['The completed fixture response.']);
+});
+
+test('Skills settings persist changes to the intended project and reach the next Codex turn', async t => {
+  const f = fixture(t);
+  const catalog = (await f.request('/api/skills')).body;
+  assert.equal(catalog.projectId, f.target.projectId);
+  assert.ok(catalog.positions.some(role => role.id === 'art-director'));
+  assert.ok(catalog.workers.some(worker => worker.id === '01'));
+  const route = '/api/skills/fixture-guidance';
+  const write = (url, method, options) => f.request(url, JSON.stringify({ projectId: catalog.projectId, ...options }), method);
+  const sample = { description: 'Marker for a test role.', body: 'Use the fixture guidance marker.', roles: ['art-director'] };
+  assert.equal((await write(route, 'PUT', { ...sample, projectId: 'different-project' })).status, 409);
+  assert.equal((await f.request(route)).status, 404);
+  assert.equal((await write(route, 'PUT', sample)).status, 200);
+  assert.equal((await f.request(route)).body.body, sample.body);
+  assert.equal((await write('/api/skill-assignments', 'PUT', { target: { worker: '77' }, ids: ['fixture-guidance'] })).status, 400);
+  assert.equal((await write('/api/skill-assignments', 'PUT', { target: { position: 'art-director' }, ids: ['fixture-guidance'] })).status, 200);
+  const changed = (await f.request('/api/skills')).body;
+  assert.deepEqual(changed.assignments.byPosition['art-director'], ['fixture-guidance']);
+  assert.equal((await write(route, 'PATCH', { enabled: false })).status, 200);
+  assert.equal((await f.request(route)).body.meta.enabled, false);
+  assert.equal((await write(route, 'PATCH', { enabled: true })).status, 200);
+
+  await f.request('/api/chat', '{"from":"owner","text":"Review the fixture."}');
+  const prompt = f.spawns[0].child.stdin.read().toString();
+  assert.match(prompt, /## Skill: fixture-guidance\nUse the fixture guidance marker\./);
+  assert.doesNotMatch(prompt, /## Skill: ui-ux-core/);
+  assert.equal((await write(route, 'DELETE', {})).status, 409);
+  emitManagerPosts(f.spawns[0].child, []);
+  f.spawns[0].child.emit('close', 0);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal((await write(route, 'DELETE', {})).status, 200);
+  assert.equal((await f.request(route)).status, 404);
+});
+
+test('a worker with an explicit staff position gets its local skills through Pi', async t => {
+  const f = fixture(t);
+  const workers = [{ ...roster[0], title: 'Fixture Designer', position: 'hero-designer', runner: 'pi' }];
+  assert.equal((await f.request('/api/team', JSON.stringify({ agents: workers }), 'PUT')).status, 200);
+  const write = (url, options) => f.request(url, JSON.stringify({ projectId: f.target.projectId, ...options }), 'PUT');
+  const route = '/api/skills/fixture-hero';
+  assert.equal((await write(route, { description: 'Local hero fixture.', body: 'Hero fixture marker.', roles: ['hero-designer'] })).status, 200);
+  assert.equal((await write('/api/skill-assignments', { target: { position: 'hero-designer' }, ids: ['fixture-hero'] })).status, 200);
+  await f.request('/api/chat', '{"from":"owner","text":"Review the hero.","scope":{"sections":["01"]}}');
+  const first = f.spawns[0].child;
+  emitManagerPosts(first, [{ kind: 'assign', to: ['01'], text: 'Review the hero.', task: 'Check heading hierarchy.' }]);
+  first.emit('close', 0);
+  await new Promise(resolve => setImmediate(resolve));
+  const { command, args, child } = f.spawns[1];
+  assert.equal(command, 'pi');
+  assert.ok(args.includes('--no-skills'));
+  assert.deepEqual(args.slice(args.indexOf('--skill')), ['--skill', path.join(f.project, 'skills', 'fixture-hero')]);
+  assert.doesNotMatch(child.stdin.read().toString(), /Hero fixture marker\./);
+  child.emit('close', 0);
 });
 
 test('requires a single name and a real directory for the project transaction', t => {

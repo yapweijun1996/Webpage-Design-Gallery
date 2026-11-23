@@ -25,7 +25,18 @@ K.migrate()   // converts the 10 staff handbook packs into builtin skills (idemp
 Security: ids are validated, no path traversal, symlinks rejected, bodies treated as untrusted text (no execution), size caps, prototype keys dropped. Skills never grant permissions.
 
 ## Orchestrator integration (manager side)
-`lib/runners.js` pi command gets repeated `--skill <dir>` from `resolve().dirs`; codex prompt gets `resolve().text` after the STEP line (budget 3000 chars). Settings API `/api/skills*` (list, get, save, enable, assign). Settings UI "Skills" section (list, add, edit markdown, enable/disable, assign to positions and workers) AFTER the current Settings worker finishes. Ownership, merge, rollback and visual QA stay in the Orchestrator (MODULAR_SPEC) regardless of any skill text.
+The server resolves the enabled skills once per runner attempt using its staff position and worker assignments. Pi receives repeated `--skill <dir>` flags while automatic discovery stays off. Codex receives up to 3,000 characters of skill text in its preamble. Ownership, merge, rollback and visual QA stay in the Orchestrator (MODULAR_SPEC).
+
+The **Skills** section in Settings reads and edits the active project's library. API mutations send a JSON object with the `projectId` returned by the catalog, and require an idle project.
+
+| Request | Purpose |
+| --- | --- |
+| `GET /api/skills` | List skills, positions, workers and effective assignments. |
+| `GET /api/skills/:id` | Read metadata and Markdown. |
+| `PUT /api/skills/:id` | Save `description`, `body`, `roles` and optional `enabled` as a project skill or override. |
+| `PATCH /api/skills/:id` | Change `enabled`. |
+| `DELETE /api/skills/:id` | Remove a project skill or override. |
+| `PUT /api/skill-assignments` | Save `ids` for exactly one `target.position` or `target.worker`. |
 
 ## Local lessons and task history (`lib/lessons.js`)
 `<project>/lessons/lessons.jsonl` entries `{ id, ts, title, text, evidence:[...required, non-empty], tags, status:'verified'|'proposed', supersedes? }`. `add` REQUIRES evidence and refuses empty or secret-looking text (api keys, tokens); `list`, `search(keywords)` (simple ranking), `forPrompt({tags, budget})` for injection; a verified lesson is never overwritten, a correction is a new entry that `supersedes` it. Task history = existing channel.jsonl, anchors/log.jsonl, integration/log.jsonl (no new store).

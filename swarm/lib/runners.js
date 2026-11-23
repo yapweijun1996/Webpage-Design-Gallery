@@ -1,10 +1,12 @@
 'use strict';
 
 const { execFile } = require('node:child_process');
+const path = require('node:path');
 const { StringDecoder } = require('node:string_decoder');
 const { ALLOWLIST } = require('./settings');
 
 const READINESS_LIMIT_MS = 10_000;
+const MANAGER_OUTPUT_LIMIT = 96 * 1024;
 const CHILD_ENV_KEYS = [
   'PATH', 'HOME', 'USER', 'LOGNAME', 'SHELL', 'TMPDIR', 'TMP', 'TEMP',
   'LANG', 'LC_ALL', 'LC_CTYPE', 'TERM', 'COLORTERM', 'TZ',
@@ -34,12 +36,26 @@ function thought(text) {
   if (typeof text === 'string' && text.trim()) return { kind: 'thought', text: text.trim() };
 }
 
+function assistantOutput(text, managerChannel) {
+  if (!managerChannel || typeof text !== 'string') return thought(text);
+  if (Buffer.byteLength(text) > MANAGER_OUTPUT_LIMIT) return { kind: 'error', text: 'Manager assistant output is too large.' };
+  const output = text.trim();
+  const fenced = /^```(?:json)?\s*\n([\s\S]*?)\n```$/i.exec(output);
+  let envelope;
+  try { envelope = JSON.parse(fenced?.[1] ?? output); } catch { return thought(text); }
+  if (envelope && Object.hasOwn(envelope, 'swarmChannel')) {
+    if (Array.isArray(envelope.swarmChannel)) return { kind: 'manager-channel', messages: envelope.swarmChannel };
+    return { kind: 'error', text: 'Expected a Manager channel message array.' };
+  }
+  return thought(text);
+}
+
 function errorText(value, fallback) {
   const text = typeof value === 'string' ? value : value?.message;
   return typeof text === 'string' && text.trim() ? text.trim() : fallback;
 }
 
-function codexEvent(event, completedSearches) {
+function codexEvent(event, completedSearches, managerChannel) {
   const item = event.item;
   if (event.type === 'item.started' && item?.type === 'command_execution') {
     if (typeof item.command !== 'string') return;
@@ -56,7 +72,7 @@ function codexEvent(event, completedSearches) {
     if (typeof item.id === 'string') completedSearches.add(item.id);
     return researchAction(target);
   }
-  if (event.type === 'item.completed' && item?.type === 'agent_message') return thought(item.text);
+  if (event.type === 'item.completed' && item?.type === 'agent_message') return assistantOutput(item.text, managerChannel);
   if (event.type === 'item.completed' && item?.type === 'error') {
     const text = errorText(item.message ?? item.text, 'Codex reported an error.');
     if (!/ignoring\s+(?:\d+\s+)?unrecognized configuration settings?/i.test(text)) return { kind: 'error', text };
@@ -71,7 +87,7 @@ function codexEvent(event, completedSearches) {
   }
 }
 
-function piEventParser() {
+function piEventParser(managerChannel) {
   let textDeltas = '';
 
   return event => {
@@ -89,7 +105,8 @@ function piEventParser() {
         : [];
       const text = parts.length ? parts.map(part => part.text).join('') : textDeltas;
       textDeltas = '';
-      const message = thought(text);
+      const hasToolCall = Array.isArray(content) && content.some(part => part?.type === 'toolCall');
+      const message = assistantOutput(text, managerChannel && !hasToolCall);
       const usage = event.message.usage;
       return [usage && { kind: 'usage', usage }, message].filter(Boolean);
     }
@@ -165,20 +182,21 @@ const adapters = {
       ...(research === true ? ['-c', 'web_search="live"'] : []),
       '-s', 'workspace-write', '--skip-git-repo-check', '-C', projectDir, '-',
     ],
-    parser() {
+    parser({ managerChannel = false } = {}) {
       const completedSearches = new Set();
-      return jsonLines(event => codexEvent(event, completedSearches));
+      return jsonLines(event => codexEvent(event, completedSearches, managerChannel));
     },
     authArgs: () => ['login', 'status'],
     loggedIn: ({ stdout, stderr }) => !/\bnot logged in\b/i.test(`${stdout}\n${stderr}`),
   },
   pi: {
     // pi has no sandbox and can access the network through its bash tool without extra flags.
-    args: ({ model, effort }) => [
+    args: ({ model, effort, skillDirs }) => [
       '-p', '--mode', 'json', '--model', `openai-codex/${model}`, '--thinking', effort,
       '--no-session', '--no-extensions', '--no-skills', '--no-context-files',
+      ...skillDirs.flatMap(dir => ['--skill', dir]),
     ],
-    parser: () => jsonLines(piEventParser()),
+    parser: ({ managerChannel = false } = {}) => jsonLines(piEventParser(managerChannel)),
     authArgs: model => ['auth', 'check', '--model', `openai-codex/${model}`, '--json'],
     loggedIn({ stdout }) {
       try { return JSON.parse(stdout)?.status === 'ready'; } catch { return false; }
@@ -201,10 +219,13 @@ function get(name) {
   return {
     name,
     binary,
-    buildCommand({ model, effort, projectDir, research }) {
+    buildCommand({ model, effort, projectDir, research, skillDirs = [] }) {
       assertModel(model);
       if (!ALLOWLIST.efforts.includes(effort)) throw new Error('Unsupported reasoning effort');
-      const args = adapter.args({ model, effort, projectDir, research });
+      if (!Array.isArray(skillDirs) || !Array.from(skillDirs).every(dir => typeof dir === 'string' && path.isAbsolute(dir) && !dir.includes('\0'))) {
+        throw new Error('Skill directories must be absolute paths.');
+      }
+      const args = adapter.args({ model, effort, projectDir, research, skillDirs });
       return { command: binary(), args, cwd: projectDir, input: 'stdin' };
     },
     createParser: adapter.parser,

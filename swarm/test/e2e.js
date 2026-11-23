@@ -169,6 +169,17 @@ async function runScenario(failingAgent = '') {
     const { id: firstId } = await request(base, '/api/chat', { from: 'owner', text: firstRequest });
     assert.ok(Number.isInteger(firstId), 'First POST did not return a message ID');
 
+    if (failingAgent === '00') {
+      const messages = await waitFor('failed manager attempt to settle', deadline, async () => {
+        const messages = await history();
+        return messages.some(message => message.text === 'Agent 00 failed in Triage') && messages;
+      }, checkServer);
+      verifyOwner(messages, firstId, firstRequest);
+      assert.equal(messages.some(message => message.from === '00'), false);
+      assert.equal(messages.some(message => message.text === 'Work started'), false);
+      return;
+    }
+
     if (failingAgent) {
       const messages = await waitFor('Summary after agent failure', deadline, async () => {
         const messages = await history();
@@ -248,6 +259,8 @@ async function main() {
   console.log('PASS: channel flow, Discuss rerun, Review assignments, manager documents, and queued request');
   await runScenario('05');
   console.log('PASS: agent 05 failure reported and agent 02 improved its section before Summary');
+  await runScenario('00');
+  console.log('PASS: failed Manager responses are discarded before publication');
 }
 
 main().catch(error => {

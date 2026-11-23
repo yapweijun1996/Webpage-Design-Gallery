@@ -27,15 +27,22 @@ function buildPrompt(agent, label, owner, assignment, isManager) {
   const example = JSON.stringify({
     to: [owner.from], kind: 'msg', text: 'The section handoff is ready to review.', reply: owner.id
   });
+  const posting = isManager ? [
+    'Put all channel posts for this step in one final JSON response. Use an empty swarmChannel array when there are no posts.',
+    `{"swarmChannel":[${example}]}`,
+    'Use assistant output for posts. The server maintains channel.md and channel.jsonl.',
+  ] : [
+    `To post, append exactly one JSON object per line to chat/${id}.jsonl. Example:`,
+    example,
+    'The server maintains channel.md and channel.jsonl. Use your outbox for channel posts.',
+  ];
   const instructions = [
     `STEP: ${label} | AGENT: ${id}`,
     `You are ${(name ?? id).slice(0, 100)}${agent.title ? ', job title: ' + String(agent.title).slice(0, 80) : ''}, agent ${id}. Your lane: ${(lane || section || 'Manager and team coordinator').slice(0, 300)}.`,
     'Read CONTRACT.md, brief.md, direction.md, decisions.md (if non-empty), and channel.md.',
-    `To post, append exactly one JSON object per line to chat/${id}.jsonl. Example:`,
-    example,
-    'The server maintains channel.md and channel.jsonl. Use your outbox for channel posts.',
+    ...posting,
     'Live narration rule: before each major step, write one short sentence of intent (max 20 words) in your live commentary.',
-    isManager && 'For channel turns, edit only direction.md, decisions.md, and review.md. Append channel posts to your outbox.',
+    isManager && 'For channel turns, edit only direction.md, decisions.md, and review.md.',
     scopeLine(owner.scope),
     task,
     assignment && `Your manager assignment (#${assignment.id}): ${(assignment.task || assignment.text).slice(0, 800)}`,
@@ -79,11 +86,12 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
   async function run(agent, label, owner, assignment) {
     const prompt = buildPrompt(agent, label, owner, assignment, agent.id === managerId);
     try {
-      if (await runAgent({ id: agent.id, label, prompt, previewAppearance: owner.previewAppearance })) return;
+      if (await runAgent({ id: agent.id, label, prompt, previewAppearance: owner.previewAppearance })) return true;
     } catch {
       // A failed agent must not prevent its peers or later steps from running.
     }
     notice(`Agent ${agent.id} failed in ${label}`);
+    return false;
   }
 
   let currentScope = null; // Set of section ids the owner is looking at, or null for the whole page
@@ -103,6 +111,12 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
       }
     }
     return assignments;
+  }
+
+  async function managerAssignments(label, owner) {
+    // The phase notice follows every prior run, even when owner requests arrived while busy.
+    const since = notice(`${label} started`).id;
+    return await run(manager, label, owner) ? getAssignments(since) : new Map();
   }
 
   async function handle(owner) {
@@ -130,10 +144,7 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
   }
 
   async function handleScoped(owner) {
-    // A queued owner message can precede assignments made for the previous turn.
-    const since = Math.max(owner.id, notice('Triage started').id);
-    await run(manager, 'Triage', owner);
-    const initialAssignments = getAssignments(since);
+    const initialAssignments = await managerAssignments('Triage', owner);
     if (!initialAssignments.size) return;
 
     // Fast lane: autopilot cycles and small scopes (two sections or fewer) skip discussion, decision, review and summary.
@@ -157,17 +168,14 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
       ));
     }
 
-    notice('Decide started');
-    await run(manager, 'Decide', owner);
+    const decisions = await managerAssignments('Decide', owner);
 
     notice('Work started');
-    const assignments = getAssignments(since);
+    const assignments = new Map([...initialAssignments, ...decisions]);
     await Promise.all([...assignments].map(([id, assignment]) => run(workers.get(id), 'Work', owner, assignment)));
 
     for (let round = 0; round < maxReviewRounds; round += 1) {
-      const reviewStart = notice('Review started').id;
-      await run(manager, 'Review', owner);
-      const improvements = getAssignments(reviewStart);
+      const improvements = await managerAssignments('Review', owner);
       if (!improvements.size) break;
 
       notice('Improve started');

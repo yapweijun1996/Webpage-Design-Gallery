@@ -17,14 +17,20 @@ if (!project || !step) {
 }
 
 const [, label, id] = step;
-if (process.env.FAKE_FAIL_AGENT === id) process.exit(1);
+const emit = event => console.log(JSON.stringify(event));
+const assistant = text => emit({ type: 'item.completed', item: { type: 'agent_message', text } });
+const managerEnvelope = messages => assistant(JSON.stringify({ swarmChannel: messages }));
+if (process.env.FAKE_FAIL_AGENT === id) {
+  if (id === '00') managerEnvelope([{ kind: 'msg', text: 'Do not publish this failed response.' }]);
+  process.exit(1);
+}
 
 const outbox = path.join(project, 'chat', `${id}.jsonl`);
 const handoffQuestion = '@05, can you match the compact hero?';
 const post = (...messages) => {
-  fs.appendFileSync(outbox, messages.map(message => JSON.stringify(message) + '\n').join(''));
+  if (id === '00') managerEnvelope(messages);
+  else fs.appendFileSync(outbox, messages.map(message => JSON.stringify(message) + '\n').join(''));
 };
-const emit = event => console.log(JSON.stringify(event));
 const intentions = {
   Triage: 'I will assign the section updates to agents 02 and 05.',
   Discuss: 'I will coordinate the section handoff.',
@@ -35,10 +41,9 @@ const intentions = {
   Summary: 'I will report the outcome to the owner.'
 };
 
-emit({ type: 'item.completed', item: { type: 'agent_message', text: intentions[label] } });
-emit({
-  type: 'item.started',
-  item: { type: 'command_execution', command: `append to chat/${id}.jsonl` }
+assistant(intentions[label]);
+if (id !== '00') emit({
+  type: 'item.started', item: { type: 'command_execution', command: `append to chat/${id}.jsonl` }
 });
 fs.mkdirSync(path.dirname(outbox), { recursive: true });
 
@@ -87,7 +92,7 @@ switch (label) {
     fs.writeFileSync(review, first ? 'Tighten the hero headline to match the page rhythm.\n' : 'The page rhythm is cohesive.\n');
     if (first) {
       post({ kind: 'assign', to: ['02'], text: 'Tighten the hero headline.', task: 'Tighten the hero headline to match the page rhythm.' });
-    }
+    } else post();
     break;
   }
   case 'Work':

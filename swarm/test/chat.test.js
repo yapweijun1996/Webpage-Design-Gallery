@@ -107,17 +107,76 @@ test('reports malformed outbox lines by agent name and continues processing', as
   assert.equal(valid.text, 'Valid');
 });
 
-test('ingests an assign line that has a task but no text (regression: assignments were dropped as malformed)', async (t) => {
-  const { projectDir, chat, events } = setup(t);
+test('keeps Manager history but reads only worker files at startup and on rescan', t => {
+  const { projectDir, openChat } = setup(t);
+  const archived = { id: 1, ts: 123, from: '00', to: ['02'], kind: 'assign', text: 'Previously accepted task' };
+  fs.writeFileSync(path.join(projectDir, 'channel.jsonl'), JSON.stringify(archived) + '\n');
+  const chatDir = path.join(projectDir, 'chat');
+  fs.mkdirSync(chatDir);
+  const archivedOutbox = path.join(chatDir, '00.jsonl');
+  fs.writeFileSync(archivedOutbox, '{"text":"Legacy Manager channel line"}\n');
+  const chat = openChat();
   chat.start();
-  fs.writeFileSync(path.join(projectDir, 'chat', '00.jsonl'), '{"to":["02"],"kind":"assign","task":"Apply the palette to the hero."}\n');
-  await waitFor(() => events.length >= 1);
-  const [assign] = chat.history();
+  fs.appendFileSync(archivedOutbox, '{"text":"Later legacy Manager channel line"}\n');
+  fs.writeFileSync(path.join(chatDir, '02.jsonl'), '{"text":"Worker update"}\n');
+  chat.sync();
+  assert.deepEqual(chat.history().map(({ id, from, text }) => [id, from, text]), [
+    [1, '00', archived.text], [2, '02', 'Worker update'],
+  ]);
+  assert.match(chat.render(), /Previously accepted task/);
+});
+
+test('publishes a bound Manager batch and keeps task-only assignment compatibility', t => {
+  const { chat, events } = setup(t);
+  chat.start();
+  assert.throws(() => chat.post({ from: '00', text: 'Unbound Manager post' }), /launched runner/);
+  const [assign, decision] = chat.publishManager([
+    { from: '05', to: ['02'], kind: 'assign', task: 'Apply the palette to the hero.' },
+    { kind: 'decision', text: 'Use the shared spacing.', reply: 1, scope: { sections: ['02'] } },
+  ], { allowAssignments: true });
   assert.equal(assign.from, '00');
   assert.equal(assign.kind, 'assign');
   assert.deepEqual(assign.to, ['02']);
   assert.equal(assign.task, 'Apply the palette to the hero.');
   assert.equal(assign.text, 'Apply the palette to the hero.');
+  assert.equal(decision.from, '00');
+  assert.equal(decision.reply, 1);
+  assert.equal(decision.scope, undefined);
+  assert.deepEqual(chat.history(), [assign, decision]);
+  assert.deepEqual(events, [assign, decision].map(msg => ({ type: 'chat', msg })));
+});
+
+test('validates the complete Manager batch before logging and gates assignments by phase', t => {
+  const { chat } = setup(t);
+  chat.start();
+  const valid = { text: 'Ready' };
+  assert.throws(() => chat.publishManager([valid, { text: '' }]), /Invalid Manager channel message/);
+  assert.throws(() => chat.publishManager([valid, { kind: 'assign', task: 'Later work' }]), /Invalid Manager channel message/);
+  assert.throws(() => chat.publishManager([valid, { kind: 'system', text: 'Not a Manager kind' }]), /Invalid Manager channel message/);
+  assert.throws(() => chat.publishManager(Array(25).fill(valid)), /Invalid Manager channel message batch/);
+  assert.deepEqual(chat.publishManager([]), []);
+  assert.deepEqual(chat.history(), []);
+});
+
+test('a transcript write failure does not retry an already committed Manager batch', t => {
+  const { chat, openChat, projectDir, events } = setup(t);
+  chat.start();
+  const write = fs.writeFileSync;
+  const transcript = path.join(projectDir, 'channel.md');
+  const failedWrite = t.mock.method(fs, 'writeFileSync', (file, ...args) => {
+    if (file === transcript) throw new Error('Transcript unavailable');
+    return write(file, ...args);
+  });
+  const warning = t.mock.method(console, 'warn', () => {});
+  const [message] = chat.publishManager([{ text: 'Committed reply' }]);
+  assert.deepEqual(events, [{ type: 'chat', msg: message }]);
+  assert.equal(warning.mock.callCount(), 1);
+  failedWrite.mock.restore();
+  chat.stop();
+  const reopened = openChat();
+  reopened.start();
+  assert.deepEqual(reopened.history(), [message]);
+  assert.match(fs.readFileSync(transcript, 'utf8'), /Committed reply/);
 });
 
 test('resumes ids and byte offsets from disk after creating a fresh store', (t) => {
