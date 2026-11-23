@@ -49,10 +49,11 @@ For S01, score the original red concept as a historical comparison. The later [N
 | [S16 GP](mall-design-anchors/S16.webp) | A compact display island sits between stocked side displays, with smaller products visible behind it. | Lime panels and product accents remain legible against the bright white shelving. |
 | [S17 Gigaset](mall-design-anchors/S17.webp) | See the low handset island, side display shelves and concentric signal arcs on the rear wall. | Warm highlights pick out the handsets and arcs against the darker rear wall. |
 
-## Known gaps carried in
-- Round-1 displays are small or hidden behind mullions; scene still flat beige.
-- Missing models (owner's AI agent): grand piano, chilled freezer, ice-cream cart, mullion-free glazed storefront module, canned-food pyramid display.
-- Physical-device acceptance deferred; new model licences have unspecified public redistribution terms.
+## Status of the original gaps
+
+- Round 1 recorded small displays, obstructed sightlines and flat lighting. The [17 entrance comparisons](mall-design-anchors/README.md#interior-comparison-at-the-shop-entrances) and each shop's current checklist provide the basis for re-scoring these findings.
+- S03 has an ice-cream cart, S07 has a stacked-can pyramid and S15 has a grand piano. GOGO currently uses a procedural cold chest. A dedicated chilled-freezer model and a mullion-free glazed storefront module remain open. [Installed assets and entrances](gjh-v11-interior-program.md#how-to-verify)
+- Physical-device acceptance remains open. The owner's [project-specific permission](../data/gjh-interior-additions.json) covers the 11 listed Tripo additions. Additional third-party models need their own redistribution evidence.
 
 ## Core experience (owner, 2026-11-17): the acceptance target
 1. GTA-style free roaming: third-person character, walk, run, camera orbit, explore the mall (not clicking product cards).
