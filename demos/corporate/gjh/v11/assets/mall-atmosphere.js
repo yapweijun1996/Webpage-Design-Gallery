@@ -211,8 +211,10 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
   }
   let focus = null, strength = 0, previousTime, baseAmbient = hemisphere?.intensity;
   let baseDaylight = daylight?.intensity, baseExposure = renderer?.toneMappingExposure;
+  let christmas = false;
   const applyFocusColors = () => lights.forEach((light,index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
+    christmas = theme?.id === 'christmas';
     baseAmbient = theme?.lighting?.ambient ?? baseAmbient;
     baseDaylight = theme?.lighting?.keyIntensity ?? baseDaylight;
     const key = new T.Color(theme?.lighting?.key ?? 0xffe5c1);
@@ -240,12 +242,15 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     const {x,y,z} = position;
     const inside = Math.abs(y) < 4 ? bays.find(bay => insideBay(x,z,bay.slot)) : null;
     const publicZone = publicEnvironmentZone(position,atrium);
+    let shadowFill = tier === 'low' && publicZone === 'atrium' ? .16 : 0;
     if (expanded) {
       setPortraitFill(inside,publicZone);
       // Keep the courtyard floor below the skylight highlights. Ease back to
       // ordinary lighting before the visitor reaches a shop or the upper deck.
       const courtyard = (tier === 'balanced' || tier === 'low') && !inside && Math.abs(y) < 4
         ? 1-T.MathUtils.smoothstep(Math.hypot(x-atrium.x,z-atrium.z),3,8) : 0;
+      // Preserve contrast in the Christmas skylight shadows on Low.
+      if (tier === 'low' && christmas) shadowFill -= .07*courtyard;
       const keyScale = T.MathUtils.lerp(1,tier === 'balanced' ? .55 : .90,courtyard);
       if (daylight) daylight.intensity = baseDaylight*keyScale;
       if (Number.isFinite(baseExposure)) {
@@ -262,7 +267,6 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
         renderer.toneMappingExposure = baseExposure*T.MathUtils.lerp(1,.82,tier === 'balanced' ? courtyard : 0)*shopExposure;
       }
     }
-    let shadowFill = tier === 'low' && publicZone === 'atrium' ? .16 : 0;
     if (lgSlot && Math.abs(y) < 4) {
       // Include the arcade in front of LG, where its navigation shortcut arrives.
       const dx = Math.max(lgSlot.minX-x,x-lgSlot.maxX,0);

@@ -3981,8 +3981,10 @@ function createMallAtmosphere(T, renderer, scene, slots, {
   }
   let focus = null, strength = 0, previousTime, baseAmbient = hemisphere?.intensity;
   let baseDaylight = daylight?.intensity, baseExposure = renderer?.toneMappingExposure;
+  let christmas = false;
   const applyFocusColors = () => lights.forEach((light, index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
+    christmas = theme?.id === "christmas";
     baseAmbient = theme?.lighting?.ambient ?? baseAmbient;
     baseDaylight = theme?.lighting?.keyIntensity ?? baseDaylight;
     const key = new T.Color(theme?.lighting?.key ?? 16770497);
@@ -4011,9 +4013,12 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     const { x, y, z } = position;
     const inside = Math.abs(y) < 4 ? bays.find((bay) => insideBay(x, z, bay.slot)) : null;
     const publicZone = publicEnvironmentZone(position, atrium);
+    let shadowFill = tier === "low" && publicZone === "atrium" ? 0.16 : 0;
     if (expanded) {
       setPortraitFill(inside, publicZone);
       const courtyard = (tier === "balanced" || tier === "low") && !inside && Math.abs(y) < 4 ? 1 - T.MathUtils.smoothstep(Math.hypot(x - atrium.x, z - atrium.z), 3, 8) : 0;
+      if (tier === "low" && christmas)
+        shadowFill -= 0.07 * courtyard;
       const keyScale = T.MathUtils.lerp(1, tier === "balanced" ? 0.55 : 0.9, courtyard);
       if (daylight)
         daylight.intensity = baseDaylight * keyScale;
@@ -4030,7 +4035,6 @@ function createMallAtmosphere(T, renderer, scene, slots, {
         renderer.toneMappingExposure = baseExposure * T.MathUtils.lerp(1, 0.82, tier === "balanced" ? courtyard : 0) * shopExposure;
       }
     }
-    let shadowFill = tier === "low" && publicZone === "atrium" ? 0.16 : 0;
     if (lgSlot && Math.abs(y) < 4) {
       const dx = Math.max(lgSlot.minX - x, x - lgSlot.maxX, 0);
       const dz = Math.max(lgSlot.minZ - z, z - lgSlot.maxZ, 0);

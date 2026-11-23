@@ -235,6 +235,36 @@ test('GOGO exposure is confined to the ground-floor frontage and approach', () =
   }
 });
 
+test('Christmas Low shadow contrast fades out and resets on a theme change', () => {
+  const scene=new T.Scene(), ambient=new T.HemisphereLight(0xffffff,0x222222,1);
+  const {atrium,slots}=expandedLayout;
+  scene.add(ambient);
+  const atmosphere=createMallAtmosphere(T,{},scene,slots,{atrium});
+  const center={...atrium,y:.9};
+  const edge={...center,z:center.z-6};
+  const out={...center,z:center.z-9};
+  const upper={...center,y:7.2};
+  const sample=(at,tier)=>{
+    atmosphere.update(at,400,tier);
+    return ambient.intensity;
+  };
+
+  atmosphere.applyTheme({id:'everyday',lighting:{ambient:1}});
+  const original=sample(center,'low');
+  const storefront={...expandedStoreArrival('gogo'),y:.9};
+  const originalStore=sample(storefront,'low');
+  atmosphere.applyTheme({id:'christmas',lighting:{ambient:1}});
+  const shaded=sample(center,'low');
+  const faded=sample(edge,'low');
+  assert.ok(shaded < faded && faded < original);
+  assert.equal(sample(out,'low'),original);
+  assert.equal(sample(upper,'low'),original);
+  assert.equal(sample(storefront,'low'),originalStore);
+  assert.equal(sample(center,'balanced'),1);
+  atmosphere.applyTheme({id:'everyday',lighting:{ambient:1}});
+  assert.equal(sample(center,'low'),original);
+});
+
 test('bundled world starts and submits expanded Low, Balanced and Detailed frames with browser stubs', async t => {
   const noop=()=>{};
   const gradient={addColorStop:noop};
