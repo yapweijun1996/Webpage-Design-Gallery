@@ -62,11 +62,11 @@ optional flags. Each tool ID below matches its name in the staff roster.
 
 ## live-preview
 
-`/p/dist/index.html`
+`/studio.html?preview=1`
 
-- **Use** on the active Swarm server after exporting its project to the default dist path. Open `http://127.0.0.1:8800/p/dist/index.html` with the default server address, or use the server's reported origin.
-- **Output** is the rendered export under the project route, including preference and update controls.
-- **Failure** can mean the server is inactive, it is serving a different project, the export is missing, or a relative resource path is broken.
+- **Use** on the active Swarm server. For example, run `node swarm/tools/shot.js 'http://127.0.0.1:8800/studio.html?preview=1#01-hero' 393 844 /tmp/swarm-hero.png` to capture a section at phone width. Add `theme`, `brand` and `lang` query parameters to match the owner's appearance choices when using a fresh Chrome profile.
+- **Output** is the current project rendered by the same sandboxed preview as Studio. For export-specific checks such as PWA installation and updates, export the project and test the generated bundle separately.
+- **Failure** can mean the server is inactive, it is serving a different project, a section is unavailable, or a resource path is broken.
 
 ## browser-inspection
 

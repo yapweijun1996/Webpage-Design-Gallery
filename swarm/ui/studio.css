@@ -753,6 +753,7 @@ body.studio-stage {
 body.studio-stage #stage { position: relative; min-height: 100vh; }
 body.studio-device-preview { overflow: hidden; }
 body.studio-device-preview > iframe { display: block; margin-inline: auto; border: 0; }
+body.studio-preview-capture > iframe { margin-inline: 0; }
 body.studio-stage #stage * { box-sizing: border-box; }
 body.studio-stage.picking #stage { cursor: crosshair; }
 body.studio-stage .host { position: relative; min-height: 56px; }

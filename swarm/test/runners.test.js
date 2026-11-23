@@ -344,6 +344,12 @@ test('readiness shares one timeout budget across both probes', async t => {
   assert.match(result.detail, /timed out after 8000 ms/i);
 });
 
+test('readiness passes CLI configuration without inheriting server credentials', async t => {
+  const runner = fakeRunner(t, 'codex', probeScript('codex', 'test "$CODEX_HOME" = "/fixture/codex" && test -z "${OPENAI_API_KEY:-}" && test -z "${SWARM_SETTINGS:-}"'));
+  setEnv(t, { CODEX_HOME: '/fixture/codex', OPENAI_API_KEY: 'fixture-key', SWARM_SETTINGS: '/fixture/settings.json' });
+  assert.equal((await runner.readiness({ model: MODELS[1] })).ok, true);
+});
+
 test('codex classifies a curl fetch that does not touch project files as researching', () => {
   const parser = runners.get('codex').createParser();
   const ev = parser.push(JSON.stringify({ type: 'item.started', item: { type: 'command_execution', command: '/bin/zsh -lc "curl -Ls https://example.com/x | rg -o logo > /tmp/out.txt"' } }) + '\n');

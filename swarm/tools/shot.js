@@ -8,6 +8,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { EXPORT } = require('../lib/preview');
+const LIVE = '/studio.html?preview=1';
 
 const CANDIDATES = [
   process.env.CHROME_BIN,
@@ -28,18 +29,33 @@ function buildArgs(url, width, height, out, profile) {
 function main(argv) {
   const [url, w = '393', h = '844', out = '/tmp/swarm-shot.png'] = argv;
   const m = url && /^(https?:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?)(\/[^#]*)(?:#([\w-]{1,100}))?$/.exec(url);
-  if (!m || m[2] !== EXPORT) { console.error('usage: shot.js <http://127.0.0.1:PORT' + EXPORT + '[#section-id]> [width] [height] [out.png]'); return 1; }
+  const source = m && URL.parse(url);
+  const live = source?.pathname === '/studio.html' && source.searchParams.get('preview') === '1';
+  if (!source || (!live && m[2] !== EXPORT)) {
+    console.error('usage: shot.js <http://127.0.0.1:PORT' + LIVE + '[#section-id]> [width] [height] [out.png]');
+    return 1;
+  }
   const width = Number(w), height = Number(h);
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 200 || width > 3000 || height < 200 || height > 4000) { console.error('width and height must be integers (200-3000, 200-4000)'); return 1; }
   const chrome = findChrome();
   if (!chrome) { console.error('Chrome not found; set CHROME_BIN'); return 2; }
-  // The swarm server's /frame page embeds the page in an iframe of the EXACT width (headless windows are at least ~500px wide,
-  // so a phone width would otherwise be laid out wider and cropped) and scrolls it to the #section.
-  const target = `${m[1]}/frame?w=${width}&h=${height}&src=${encodeURIComponent(m[2])}${m[3] ? '&at=' + encodeURIComponent(m[3]) : ''}`;
+  // Lay out the detached Studio frame at the exact dimensions even if Chrome enforces a wider minimum viewport.
+  const target = new URL(live ? LIVE : '/frame', m[1]);
+  target.searchParams.set('w', width);
+  target.searchParams.set('h', height);
+  if (live) {
+    for (const key of ['theme', 'brand', 'lang']) {
+      if (source.searchParams.has(key)) target.searchParams.set(key, source.searchParams.get(key));
+    }
+    if (m[3]) target.hash = m[3];
+  } else {
+    target.searchParams.set('src', EXPORT);
+    if (m[3]) target.searchParams.set('at', m[3]);
+  }
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-shot-'));
   try {
-    const r = spawnSync(chrome, buildArgs(target, Math.max(width, 500), height, out, profile), { stdio: 'ignore', timeout: 45000 });
-    if (r.status !== 0 || !fs.existsSync(out)) { console.error('screenshot failed (is the swarm server running with the /frame route?)'); return 3; }
+    const r = spawnSync(chrome, buildArgs(target.href, width, height, out, profile), { stdio: 'ignore', timeout: 45000 });
+    if (r.status !== 0 || !fs.existsSync(out)) { console.error('screenshot failed (is the Swarm server running?)'); return 3; }
   } finally {
     fs.rmSync(profile, { recursive: true, force: true });
   }

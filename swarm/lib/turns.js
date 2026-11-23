@@ -79,7 +79,7 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
   async function run(agent, label, owner, assignment) {
     const prompt = buildPrompt(agent, label, owner, assignment, agent.id === managerId);
     try {
-      if (await runAgent({ id: agent.id, label, prompt })) return;
+      if (await runAgent({ id: agent.id, label, prompt, previewAppearance: owner.previewAppearance })) return;
     } catch {
       // A failed agent must not prevent its peers or later steps from running.
     }
@@ -122,7 +122,7 @@ function createTurns({ chat, runAgent, agents, managerId = '00', maxDiscussRound
       notice(`Squad wave ${n}/${plan.waves.length}: ${wave.map(m => m.title).join(', ')}`);
       await Promise.all(wave.map(async member => {
         const prompt = squadPrompt(member, wave, n, plan, owner);
-        try { if (await runAgent({ id: member.id, label: 'Work', prompt })) return; } catch { /* a failed specialist must not block the squad */ }
+        try { if (await runAgent({ id: member.id, label: 'Work', prompt, previewAppearance: owner.previewAppearance })) return; } catch { /* a failed specialist must not block the squad */ }
         notice(`Agent ${member.id} (${member.title}) failed in squad wave ${n}`);
       }));
     }

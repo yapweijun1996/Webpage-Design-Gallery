@@ -43,6 +43,12 @@
     return { theme: SDS.theme.get(), brand: SDS.brand.get(), lang: SDS.lang.get() };
   }
 
+  function reviewAppearance() {
+    const selected = appearance();
+    if (selected.theme === 'auto') selected.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return selected;
+  }
+
   function previewAgents() {
     return order.map(id => {
       const { section, name, color, status, target } = S.agents[id];
@@ -68,32 +74,57 @@
     document.body.className = 'studio-stage studio-device-preview';
     document.body.replaceChildren(preview);
     const requestedWidth = Number(query.get('w'));
-    const width = Object.values(devices).includes(requestedWidth) ? requestedWidth : 0;
+    const requestedHeight = Number(query.get('h'));
+    const capture = Number.isInteger(requestedWidth) && requestedWidth >= 200 && requestedWidth <= 3000 &&
+      Number.isInteger(requestedHeight) && requestedHeight >= 200 && requestedHeight <= 4000;
+    const width = capture || Object.values(devices).includes(requestedWidth) ? requestedWidth : 0;
+    if (capture) document.body.classList.add('studio-preview-capture');
     function fitDevice() {
-      const scale = width ? Math.min(1, innerWidth / width) : 1;
+      const scale = !capture && width ? Math.min(1, innerWidth / width) : 1;
       preview.style.width = (width || innerWidth) + 'px';
       preview.style.zoom = scale;
-      preview.style.height = Math.floor(innerHeight / scale) + 'px';
+      preview.style.height = (capture ? requestedHeight : Math.floor(innerHeight / scale)) + 'px';
     }
     fitDevice();
     addEventListener('resize', fitDevice);
-    const publish = () => send('appearance', appearance());
+    if (!readStore('sds.theme')) SDS.theme.set('dark');
+    const publish = () => {
+      const selected = appearance();
+      for (const key of Object.keys(selected)) {
+        if (query.has(key)) selected[key] = query.get(key);
+      }
+      send('appearance', selected);
+    };
+    const publishAnchor = () => {
+      const id = location.hash.slice(1);
+      send('anchor', /^[\w-]{1,100}$/.test(id) ? id : '');
+    };
     const send = StudioPreview.connect(preview, null, () => {
       publish();
       if (S) send('roster', previewAgents());
+      publishAnchor();
     });
     preview.src = StudioPreview.stage;
+    addEventListener('hashchange', publishAnchor);
     for (const key of ['theme', 'brand', 'lang']) SDS.on(key + 'change', publish);
     addEventListener('storage', event => {
       const preference = { 'sds.theme': 'theme', 'sds.brand': 'brand', 'sds.lang': 'lang' }[event.key];
       if (preference) SDS[preference].set(event.newValue);
     });
-    startEvents(event => {
-      if (event.type === 'state') {
-        setState(event.state);
-        send('roster', previewAgents());
-      } else if (event.type === 'edit') refreshPreview(send, event);
-    });
+    function publishState(state) {
+      setState(state);
+      send('roster', previewAgents());
+    }
+    if (capture) {
+      // A screenshot uses one roster snapshot. An open event stream can keep headless Chrome waiting.
+      fetch('/api/state').then(response => response.ok ? response.json() : null)
+        .then(state => { if (state) publishState(state); });
+    } else {
+      startEvents(event => {
+        if (event.type === 'state') publishState(event.state);
+        else if (event.type === 'edit') refreshPreview(send, event);
+      });
+    }
     return;
   }
 
@@ -485,6 +516,7 @@
 
   function syncPreviewAppearance() {
     publishPreview('appearance', appearance());
+    if (autoOn) onViewChange(true);
   }
   $('themebtn').onclick = () => SDS.theme.set(document.documentElement.dataset.studioTheme === 'light' ? 'dark' : 'light');
   SDS.on('themechange', paintTheme);
@@ -632,9 +664,13 @@
   }
   function reportFocus(force) {
     if (!autoOn || !S) return;
-    var sc = currentScope(); if (!sc) return;
-    var key = sc.sections.join(',') + '|' + sc.primary; if (!force && key === lastReport) return; lastReport = key;
-    fetch('/api/focus', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(sc) }).catch(function () {});
+    const scope = currentScope();
+    if (!scope) return;
+    const selected = reviewAppearance();
+    const key = [scope.sections.join(','), scope.primary, selected.theme, selected.brand, selected.lang].join('|');
+    if (!force && key === lastReport) return;
+    lastReport = key;
+    fetch('/api/focus', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...scope, appearance: selected }) }).catch(function () {});
   }
   function onViewChange(report) {
     if (!(focusMode || autoOn)) return;
@@ -773,7 +809,9 @@
     var text = kind === 'change'
       ? head + 'Change request for ' + where + ': ' + t
       : head + 'Question, do not change anything, about ' + where + ': ' + (t || 'Why is it designed this way?') + ' Please answer in the channel.';
-    fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ from: 'owner', text: text.slice(0, 780), scope: { sections: [picked.agent.id], elements: [{ section: picked.item.section, tag: picked.item.tag, text: picked.item.text, path: picked.item.path }] } }) });
+    const { section, tag, path } = picked.item;
+    const scope = { sections: [picked.agent.id], elements: [{ section, tag, text: picked.item.text, path }], appearance: reviewAppearance() };
+    fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ from: 'owner', text: text.slice(0, 780), scope }) });
     closeAsk();
     showInspector('logs');
   }
@@ -847,7 +885,7 @@
           return fetch('/api/chat', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ from: 'owner', text, scope: sc ? { sections: sc.sections, elements: sc.elements } : undefined })
+            body: JSON.stringify({ from: 'owner', text, scope: sc ? { sections: sc.sections, elements: sc.elements, appearance: reviewAppearance() } : undefined })
           });
         }
       });

@@ -11,8 +11,11 @@ From the repository root, with Node.js 23 and Codex CLI available:
 node swarm/cli.js start
 ```
 
-Open the printed URL (default `http://127.0.0.1:8800/`). An existing project
-with the selected name is replaced when you start a new run.
+Open the printed URL (default `http://127.0.0.1:8800/`). `start` replaces an
+existing project with the selected name. Use `start --keep` to open that project
+and preserve its files. The CLI rejects a port already serving a different
+project or checkout. Direct initialization requests must include the `project`
+and `projectId` of the intended target from `/api/state`.
 
 ## Channel
 
@@ -33,7 +36,7 @@ Run each command as `node swarm/cli.js <command>`.
 
 | Command | Behavior |
 | --- | --- |
-| `start [--brief "text" \| --brief-file file] [--agents file]` | Start the server if needed and launch a run. |
+| `start [--keep] [--brief "text" \| --brief-file file] [--agents file]` | Start the server if needed and prepare the selected project. `--keep` opens it as is. |
 | `status` | Show the current phase, round, and agent status. |
 | `say <id\|all> "message"` | Send a legacy inbox instruction. |
 | `stop` | Stop active agents. |
@@ -61,9 +64,14 @@ Command errors exit 1. Use `--port` to override the CLI port.
 | --- | --- | --- |
 | `SWARM_PORT` | `8800` | Local server and CLI port. |
 | `SWARM_PROJECT` | `home` | Project directory name. |
-| `SWARM_MODEL` | `gpt-6.2-sol` | Codex model. |
-| `SWARM_EFFORT` | `low` | Codex reasoning effort. |
-| `SWARM_CODEX` | `codex` | Agent executable, including the test hook. |
+| `SWARM_MODEL` | `gpt-6.2-sol` | Model override when `SWARM_TEST=1`. Set the model in Settings for regular use. |
+| `SWARM_EFFORT` | `medium` | Reasoning effort override when `SWARM_TEST=1`. Settings accepts `medium` or `xhigh`. |
+| `SWARM_CODEX` | `codex` | Codex binary override when `SWARM_TEST=1`. |
+
+Log in with the selected runner before starting a turn. Runner processes and
+readiness probes receive an allowlist of local environment variables for paths,
+locale and CLI configuration. Server API keys and other environment variables
+are kept out of runner processes.
 
 ## Settings workspace
 

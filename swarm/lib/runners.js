@@ -5,6 +5,11 @@ const { StringDecoder } = require('node:string_decoder');
 const { ALLOWLIST } = require('./settings');
 
 const READINESS_LIMIT_MS = 10_000;
+const CHILD_ENV_KEYS = [
+  'PATH', 'HOME', 'USER', 'LOGNAME', 'SHELL', 'TMPDIR', 'TMP', 'TEMP',
+  'LANG', 'LC_ALL', 'LC_CTYPE', 'TERM', 'COLORTERM', 'TZ',
+  'CODEX_HOME', 'PI_CODING_AGENT_DIR', 'XDG_CONFIG_HOME', 'XDG_DATA_HOME', 'XDG_CACHE_HOME', 'XDG_STATE_HOME',
+];
 const SECTION_PATH = /(?:^|[\s/"'`=():<>;&|])(?:sections|notes|discussion)\/(\d{2})(?!\d)/g;
 const SHELL_WRAPPER = /^(?:\S*\/)?(?:zsh|bash|sh)\s+-l?c\s+["']?/;
 const WRITES = /(?:^|[\s;&|(])(?:tee\b|apply_patch\b|python3?\b.*write|perl\s+-pi\b|sed\s+-i\b)|>\s*\S|<<\s*["']?EOF/;
@@ -135,12 +140,17 @@ function jsonLines(normalize) {
   };
 }
 
+function childEnvironment(source = process.env) {
+  const keys = source.SWARM_TEST === '1' ? [...CHILD_ENV_KEYS, 'FAKE_FAIL_AGENT'] : CHILD_ENV_KEYS;
+  return Object.fromEntries(keys.filter(key => typeof source[key] === 'string').map(key => [key, source[key]]));
+}
+
 function probe(command, args, deadline) {
   const timeout = Math.floor(deadline - performance.now());
   if (timeout < 1) return Promise.resolve({ timedOut: true });
 
   return new Promise(resolve => {
-    const child = execFile(command, args, { timeout, killSignal: 'SIGKILL', maxBuffer: 65_536 }, (error, stdout, stderr) => {
+    const child = execFile(command, args, { env: childEnvironment(), timeout, killSignal: 'SIGKILL', maxBuffer: 65_536 }, (error, stdout, stderr) => {
       const timedOut = error?.killed === true && error.signal === 'SIGKILL' && error.code === null;
       resolve({ error, stdout: stdout.trim(), stderr: stderr.trim(), timedOut });
     });
@@ -224,4 +234,4 @@ function get(name) {
   };
 }
 
-module.exports = { get };
+module.exports = { get, childEnvironment };

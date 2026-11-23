@@ -2,6 +2,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { createHash } = require('node:crypto');
 const team = require('./team');
 
 class ProjectInputError extends Error {}
@@ -12,6 +13,10 @@ function projectPath(root, slug) {
     throw new ProjectInputError('SWARM_PROJECT must be a single project name of letters, digits, underscores or hyphens.');
   }
   return path.join(fs.realpathSync(root), 'projects', slug);
+}
+
+function projectIdentity(directory) {
+  return createHash('sha256').update(directory).digest('hex');
 }
 
 function isInside(dir, file) {
@@ -47,14 +52,17 @@ function loadRoster(root, file) {
   return result.value;
 }
 
-function parsePreparation(root, json) {
+function parsePreparation(root, json, expectedProject) {
   let input;
   try { input = JSON.parse(json || '{}'); }
   catch { throw new ProjectInputError('Expected valid JSON.'); }
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
     throw new ProjectInputError('Expected a project options object.');
   }
-  const { brief = '', agents = '' } = input;
+  const { project, projectId, brief = '', agents = '' } = input;
+  if (expectedProject && (project !== expectedProject.project || projectId !== expectedProject.projectId)) {
+    throw new ProjectInputError('Project initialization requires the project identity served on this port.');
+  }
   if (typeof brief !== 'string') throw new ProjectInputError('Brief must be a string.');
   if (typeof agents !== 'string') throw new ProjectInputError('Agents file path must be a string.');
   return { brief, roster: loadRoster(root, agents) };
@@ -116,4 +124,4 @@ function withProjectLock(project, operation) {
   }
 }
 
-module.exports = { ProjectInputError, ProjectBusyError, projectPath, parsePreparation, withProjectLock };
+module.exports = { ProjectInputError, ProjectBusyError, projectPath, projectIdentity, parsePreparation, withProjectLock };

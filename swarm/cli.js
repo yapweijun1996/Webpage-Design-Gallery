@@ -8,6 +8,7 @@ const { createInterface } = require('node:readline');
 const { Readable } = require('node:stream');
 const { setTimeout: delay } = require('node:timers/promises');
 const { parseArgs } = require('node:util');
+const { projectPath, projectIdentity } = require('./lib/project-init');
 
 const RUN = path.join(__dirname, '.run');
 const args = process.argv.slice(2);
@@ -25,7 +26,7 @@ const HISTORY_LIMIT = 20;
 const MAX_TIMER_MS = 2 ** 31 - 1;
 const PARTICIPANT_NAMES = { owner: 'Owner', claude: 'Claude', system: 'System' };
 const USAGE = `Usage: node swarm/cli.js <command> [--port 8800]
-  start [--brief "text" | --brief-file file] [--agents file]
+  start [--keep] [--brief "text" | --brief-file file] [--agents file]
   status
   say <id|all> "message"
   stop
@@ -71,7 +72,7 @@ async function api(path, method = 'GET', data, signal) {
   return json;
 }
 
-async function alive() { try { await api('/api/state'); return true; } catch (_) { return false; } }
+async function serverState() { try { return await api('/api/state'); } catch (_) { return null; } }
 
 function commandOptions(names, start = 1) {
   const options = Object.fromEntries([...names, 'port'].map(name => [name, { type: 'string' }]));
@@ -189,18 +190,28 @@ async function waitForIdle(idleMs, timeoutMs) {
 
 (async () => {
   if (cmd === 'start') {
-    if (!(await alive())) {
+    const directory = projectPath(__dirname, process.env.SWARM_PROJECT || 'home');
+    const project = path.basename(directory);
+    const projectId = projectIdentity(directory);
+    let active = await serverState();
+    if (!active) {
       fs.mkdirSync(RUN, { recursive: true });
       const out = fs.openSync(path.join(RUN, 'server.log'), 'a');
       const child = spawn(process.execPath, [path.join(__dirname, 'server.js')], { detached: true, stdio: ['ignore', out, out], env: { ...process.env, SWARM_PORT: String(PORT) } });
       child.unref();
       fs.writeFileSync(path.join(RUN, 'server.pid'), String(child.pid));
-      for (let i = 0; i < 50 && !(await alive()); i++) await delay(100);
-      if (!(await alive())) throw new Error('Server did not start. See swarm/.run/server.log');
+      for (let i = 0; i < 50 && !active; i++) {
+        await delay(100);
+        active = await serverState();
+      }
+      if (!active) throw new Error('Server did not start. See swarm/.run/server.log');
+    }
+    if (active.project !== project || active.projectId !== projectId) {
+      throw new Error(`The server on port ${PORT} does not serve project ${project} from this checkout. Use its port or restart the server from this checkout.`);
     }
     const brief = flag('brief-file') ? fs.readFileSync(flag('brief-file'), 'utf8') : flag('brief');
     if (args.includes('--keep')) { console.log(`server up, project kept as is. Watch live: ${BASE}/`); return; } // no init: keeps finished work
-    const body = { brief: brief || '', agents: flag('agents') ? path.resolve(flag('agents')) : undefined };
+    const body = { project, projectId, brief: brief || '', agents: flag('agents') ? path.resolve(flag('agents')) : undefined };
     if (args.includes('--legacy')) {
       await api('/api/run', 'POST', body); // fixed-phase pipeline (kickoff/proposals/build/review)
       console.log(`started the fixed-phase pipeline. Watch live: ${BASE}/`);

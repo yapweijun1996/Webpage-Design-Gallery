@@ -6,13 +6,15 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { spawn, spawnSync } = require('child_process');
-const { ProjectInputError, ProjectBusyError, projectPath, parsePreparation, withProjectLock } = require('./lib/project-init');
+const { ProjectInputError, ProjectBusyError, projectPath, projectIdentity, parsePreparation, withProjectLock } = require('./lib/project-init');
 
 const ROOT = __dirname;
 const TEMPLATE = path.join(ROOT, 'template');
 const UI = path.join(ROOT, 'ui');
 const PORT = Number(process.env.SWARM_PORT) || 8800;
+const LIVE_PREVIEW = `http://127.0.0.1:${PORT}/studio.html?preview=1`;
 const PROJECT = projectPath(ROOT, process.env.SWARM_PROJECT || 'home');
+const TARGET = { project: path.basename(PROJECT), projectId: projectIdentity(PROJECT) };
 // Agents run ONLY through the codex or pi CLI, with the allowlisted model and effort from the settings file (lib/settings.js).
 const S = require('./lib/settings');
 const R = require('./lib/runners');
@@ -45,7 +47,7 @@ const STAFF_DIR = path.join(ROOT, 'staff');
 const STAFF = require('./lib/staff');
 const GJH_V11_ASSETS = path.resolve(ROOT, '..', 'demos', 'corporate', 'gjh', 'v11', 'assets'); // read-only mall concept images for /gjh-v11/*
 let agentsDef = JSON.parse(fs.readFileSync(path.join(TEMPLATE, 'agents.json'), 'utf8'));
-const state = { project: path.basename(PROJECT), phase: 'idle', round: 0, rounds: PLAN.length, plan: PLAN, model: modelLabel(), brief: '', agents: {}, feed: [] };
+const state = { ...TARGET, phase: 'idle', round: 0, rounds: PLAN.length, plan: PLAN, model: modelLabel(), brief: '', agents: {}, feed: [] };
 state.usage = { ...createUsage(), agents: Object.create(null) };
 const clients = new Set();
 const children = new Map();
@@ -151,10 +153,11 @@ const slot = {
 };
 
 // Standing owner rules and the channel language go after the STEP line (the first line must stay `STEP: ...`).
-function withPreamble(promptText, a, label) {
+function withPreamble(promptText, a, label, appearance) {
   let pre = S.preamble(settings);
   try { const sp = STAFF.preamble({ staffDir: path.join(PROJECT, 'staff'), agentId: a.id, step: label }); if (sp) pre = (pre ? pre + '\n' : '') + sp; } catch (_) { /* no staff files in this project: skip */ }
-  if (!pre) return promptText;
+  const rendering = `Inspect the same live rendering as Studio at ${previewUrl(appearance)}.`;
+  pre = pre ? `${pre}\n${rendering}` : rendering;
   if (promptText.startsWith('STEP:')) { const i = promptText.indexOf('\n'); return i < 0 ? promptText + '\n' + pre : promptText.slice(0, i + 1) + pre + '\n' + promptText.slice(i + 1); }
   return pre + '\n' + promptText;
 }
@@ -183,19 +186,19 @@ function applyEvent(a, ev) {
 }
 
 // One process, one turn. Resolves true when the process exited cleanly without a fatal runner error.
-function runOnce(a, label, promptText) {
+function runOnce(a, label, promptText, appearance) {
   return new Promise(resolve => {
     const role = label === 'Research' ? 'research' : (a.id === MANAGER.id ? 'manager' : 'worker');
     const base = S.resolve(settings, role);
     const own = role === 'worker' ? { runner: a.runner, model: a.model, effort: a.effort } : {};
     const resolved = { ...base, ...Object.fromEntries(Object.entries(own).filter(([, v]) => v)) }; // per-worker override, still checked against the allowlist by the runner
     let runner, cmd;
-    try { runner = R.get(resolved.runner); ensureExport(); // agents can open the real rendering at /p/dist/index.html
+    try { runner = R.get(resolved.runner); ensureExport(); // Keep the legacy export ready for existing callers.
     cmd = runner.buildCommand({ model: resolved.model, effort: resolved.effort, projectDir: PROJECT, research: label === 'Research' ? true : !!(settings.research && settings.research.web) }); }
     catch (e) { emit({ type: 'chat', msg: chat ? chat.post({ from: 'system', kind: 'system', text: `Cannot start ${a.name}: ${e.message}` }) : { id: 0 } }); return resolve(false); }
     const parser = runner.createParser();
     const before = resolved.runner === 'pi' ? G.snapshot(PROJECT) : null; // pi has no sandbox: compare the tree after the turn
-    const p = spawn(cmd.command, cmd.args, { cwd: cmd.cwd || PROJECT, stdio: ['pipe', 'pipe', 'ignore'] });
+    const p = spawn(cmd.command, cmd.args, { cwd: cmd.cwd || PROJECT, env: R.childEnvironment(process.env), stdio: ['pipe', 'pipe', 'ignore'] });
     children.set(a.id, p);
     let fatal = false, settled = false;
     let reportedUsage = false;
@@ -233,13 +236,13 @@ function runOnce(a, label, promptText) {
     };
     p.on('error', () => finish(false));
     p.stdin.on('error', () => {});
-    p.stdin.end(withPreamble(promptText, a, label));
+    p.stdin.end(withPreamble(promptText, a, label, appearance));
     p.stdout.on('data', d => { try { handle(parser.push(d)); } catch (_) { /* parser errors must not kill the run */ } });
     p.on('close', code => { try { handle(parser.end()); } catch (_) {} finish(code === 0); });
   });
 }
 
-async function runProcess(a, label, promptText, isLast) {
+async function runProcess(a, label, promptText, isLast, appearance) {
   const ag = state.agents[a.id];
   if (!ag) return false;
   if (label === 'Research' && !(settings.research && settings.research.web)) {
@@ -251,7 +254,7 @@ async function runProcess(a, label, promptText, isLast) {
     emit({ type: 'status', id: a.id, status: ag.status });
     await slot.acquire();
     let ok = false;
-    try { ok = await runOnce(a, label, promptText); } finally { slot.release(); }
+    try { ok = await runOnce(a, label, promptText, appearance); } finally { slot.release(); }
     if (stopped) return false;
     if (ok) {
       ag.status = isLast ? 'done' : 'waiting'; ag.action = '';
@@ -329,7 +332,7 @@ function createChannel(people) {
   const queue = createTurns({
     chat: channel, agents: people, managerId: MANAGER.id, maxDiscussRounds: 2, squad: { on: () => squadOn, plan: squadPlan },
     // After each agent process exits, ingest its outbox immediately so the next step sees its messages (no watcher race).
-    runAgent: ({ id, label, prompt: pr }) => { const a = people.find(x => x.id === id); if (!a) return Promise.resolve(false); const guard = a.squad ? scopeGuard(a) : null; return runProcess(a, label, pr, false).then(ok => { channel.sync(); if (guard) guard(); return ok; }); }
+    runAgent: ({ id, label, prompt: pr, previewAppearance }) => { const a = people.find(x => x.id === id); if (!a) return Promise.resolve(false); const guard = a.squad ? scopeGuard(a) : null; return runProcess(a, label, pr, false, previewAppearance).then(ok => { channel.sync(); if (guard) guard(); return ok; }); }
   });
   return { chat: channel, turns: queue };
 }
@@ -355,11 +358,11 @@ function scopeGuard(a) {
   };
 }
 let inFlight = 0; // requests being handled or waiting in the queue
-function startTurn(msg) {
+function startTurn(msg, appearance) {
   inFlight += 1;
   state.phase = 'running'; emit({ type: 'phase', phase: 'running' });
   emit({ type: 'busy', busy: true });
-  Promise.resolve(turns.onOwnerMessage(msg)).catch(e => emit({ type: 'chat', msg: chat.post({ from: 'system', text: 'Turn failed: ' + e.message, kind: 'system' }) })).finally(() => { inFlight -= 1; const b = turns.busy(); emit({ type: 'busy', busy: b }); if (!b && state.phase === 'running') { state.phase = 'ready'; emit({ type: 'phase', phase: 'ready' }); } if (!b) maybeAutopilot(); });
+  Promise.resolve(turns.onOwnerMessage({ ...msg, previewAppearance: cleanAppearance(appearance) })).catch(e => emit({ type: 'chat', msg: chat.post({ from: 'system', text: 'Turn failed: ' + e.message, kind: 'system' }) })).finally(() => { inFlight -= 1; const b = turns.busy(); emit({ type: 'busy', busy: b }); if (!b && state.phase === 'running') { state.phase = 'ready'; emit({ type: 'phase', phase: 'ready' }); } if (!b) maybeAutopilot(); });
 }
 
 function openProject(roster) {
@@ -418,7 +421,22 @@ function stopAll() {
 
 
 // ---------- live preview export, screen focus and autopilot ----------
-// Agents inspect the real rendering through /p/dist/index.html; re-export (throttled) before each agent turn.
+function cleanAppearance(input) {
+  // The SDS runtime owns the supported values. Limit the transport to short preference identifiers.
+  return Object.fromEntries(['theme', 'brand', 'lang'].flatMap(key => {
+    const value = input?.[key];
+    return typeof value === 'string' && /^[a-z0-9-]{1,32}$/i.test(value) ? [[key, value]] : [];
+  }));
+}
+
+function previewUrl(appearance, section) {
+  const url = new URL(LIVE_PREVIEW);
+  for (const [key, value] of Object.entries(appearance || {})) url.searchParams.set(key, value);
+  if (section) url.hash = section;
+  return url.href;
+}
+
+// Keep a throttled legacy export for /p/dist/index.html and export-specific checks.
 let lastExport = 0;
 function ensureExport(force) {
   const now = Date.now();
@@ -439,10 +457,10 @@ function emitAutopilot() { emit({ type: 'autopilot', ...autopilotView() }); }
 
 function autopilotText(scope, primary, cycle) {
   const list = scope.sections.map(id => `${id} ${sectionName(id)}`.trim()).join(', ');
-  const url = `http://127.0.0.1:${PORT}/p/dist/index.html#${primary}-${sectionName(primary)}`;
+  const url = previewUrl(cleanAppearance(scope.appearance), `${primary}-${sectionName(primary)}`);
   return [
     `AUTOPILOT cycle ${cycle}/${maxCycles()} for the screen the owner is looking at: main section ${primary} ${sectionName(primary)} (on screen: ${list}).`,
-    `1) Look at the real rendering first: run \`node ${path.join(ROOT, 'tools', 'export-page.js')} ${PROJECT} --no-pwa\`, then \`node ${path.join(ROOT, 'tools', 'shot.js')} ${url} 393 844 /tmp/swarm-${primary}-m.png\` (and 1440 900 for desktop) and LOOK at the PNG with your image-capable read tool (a browser tool also works). Judge ONLY what is on this screen: hierarchy, image choice and crop, colour and contrast, brand fit, manga style consistency, text fit.`,
+    `1) Look at the live Studio rendering first: run \`node ${path.join(ROOT, 'tools', 'shot.js')} '${url}' 393 844 /tmp/swarm-${primary}-m.png\` (and 1440 900 for desktop) and LOOK at the PNG with your image-capable read tool (a browser tool also works). Judge ONLY what is on this screen: hierarchy, image choice and crop, colour and contrast, brand fit, manga style consistency, text fit.`,
     '2) If you are unsure what the brand is, what its colours or meaning are, or what style fits, do NOT guess: the Manager posts one kind:"research" message with the questions (a research agent with live web search answers in research.md with sources before work starts; everyone reads it).',
     '3) Decide the improvements yourselves: swap the background image from the library, change colours, layout or type. Assign concrete changes to the in-scope agents only; discuss briefly where sections touch.',
     '4) If this screen already looks good, say so in one line and assign nothing.'
@@ -462,7 +480,7 @@ function maybeAutopilot() {
     const scope = autopilot.scope;
     const label = scope.sections.map(id => `${id} ${sectionName(id)}`.trim()).join(', ');
     const msg = chat.post({ from: 'claude', text: `[Autopilot ${done + 1}/${maxCycles()}: ${label}] ${autopilotText(scope, key, done + 1)}`.slice(0, 800), scope: { ...scope, mode: 'autopilot' } });
-    startTurn(msg);
+    startTurn(msg, scope.appearance);
   }, 3000);
 }
 
@@ -470,7 +488,7 @@ function cleanScope(b) {
   const ids = [...new Set((Array.isArray(b.sections) ? b.sections : []).map(String))].filter(id => agentsDef.some(a => a.id === id));
   if (!ids.length) return null;
   const primary = ids.includes(String(b.primary)) ? String(b.primary) : ids[0];
-  return { primary, scope: { sections: ids, elements: Array.isArray(b.elements) ? b.elements : [] } };
+  return { primary, scope: { sections: ids, elements: Array.isArray(b.elements) ? b.elements : [], appearance: cleanAppearance(b.appearance) } };
 }
 
 
@@ -577,7 +595,7 @@ const server = http.createServer(async (req, res) => {
     const msg = chat.post({ from, text: shown, scope });
     // Requests are handled one at a time; say so, otherwise a waiting message looks ignored.
     if (ahead > 0) chat.post({ from: 'system', kind: 'system', text: `Queued: ${ahead} request${ahead > 1 ? 's' : ''} ahead. The team will start on #${msg.id} when it finishes the current one (about 5 to 10 minutes). \u5df2\u6392\u961f\uff0c\u56e2\u961f\u5904\u7406\u5b8c\u5f53\u524d\u8bf7\u6c42\u540e\u4f1a\u5f00\u59cb\u5904\u7406\u4f60\u7684\u6d88\u606f\u3002` });
-    startTurn(msg);
+    startTurn(msg, scope ? b.scope.appearance : undefined);
     return send(res, 200, { id: msg.id });
   }
   if (p === '/api/team' && req.method === 'GET') return send(res, 200, teamView());
@@ -642,7 +660,7 @@ const server = http.createServer(async (req, res) => {
       const chunks = [];
       for await (const chunk of req) chunks.push(chunk);
       if (projectBusy()) return busy(); // another request may have started work while this body was arriving
-      const input = parsePreparation(ROOT, Buffer.concat(chunks).toString('utf8'));
+      const input = parsePreparation(ROOT, Buffer.concat(chunks).toString('utf8'), TARGET);
       withProjectLock(PROJECT, (_exists, replace) => prepare(input, replace));
     } catch (error) {
       if (error instanceof ProjectInputError) return send(res, 400, { error: error.message });

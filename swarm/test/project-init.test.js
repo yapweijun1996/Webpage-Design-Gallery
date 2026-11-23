@@ -1,16 +1,19 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const { execFile } = require('node:child_process');
 const { EventEmitter } = require('node:events');
 const fs = require('node:fs');
+const http = require('node:http');
 const { createRequire } = require('node:module');
 const os = require('node:os');
 const path = require('node:path');
 const { PassThrough, Readable } = require('node:stream');
 const { test } = require('node:test');
+const { promisify } = require('node:util');
 const { compileFunction } = require('node:vm');
 const { createChat } = require('../lib/chat');
-const { projectPath, ProjectInputError, ProjectBusyError, withProjectLock } = require('../lib/project-init');
+const { projectPath, projectIdentity, ProjectInputError, ProjectBusyError, withProjectLock } = require('../lib/project-init');
 
 const serverFile = path.join(__dirname, '../server.js');
 const serverRequire = createRequire(serverFile);
@@ -18,7 +21,7 @@ const loadServer = compileFunction(fs.readFileSync(serverFile, 'utf8'), ['requir
 const roster = [{ id: '01', name: 'Sample Worker', section: 'hero', color: '#123abc', lane: 'Build the hero.' }];
 const savedMessage = { id: 1, from: 'system', to: [], kind: 'system', text: 'Saved message.' };
 
-function fixture(t, { existing = true } = {}) {
+function fixture(t, { existing = true, environment = {} } = {}) {
   const tmp = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-init-test-')));
   const root = path.join(tmp, 'swarm');
   const project = path.join(root, 'projects', 'fixture');
@@ -43,6 +46,7 @@ function fixture(t, { existing = true } = {}) {
   let child;
   let watchError;
   const watchers = [];
+  const spawns = [];
   const channels = [];
   const errors = [];
   const mocks = {
@@ -59,9 +63,10 @@ function fixture(t, { existing = true } = {}) {
       channels.push(channel);
       return channel;
     } },
-    child_process: { spawnSync() {}, spawn() {
+    child_process: { spawnSync() {}, spawn(_command, _args, options) {
       assert.ok(fs.existsSync(path.join(project, 'channel.md')));
       child = Object.assign(new EventEmitter(), { stdin: new PassThrough(), stdout: new PassThrough() });
+      spawns.push({ options, child });
       child.kill = () => child.emit('close', 1);
       return child;
     } }
@@ -71,7 +76,7 @@ function fixture(t, { existing = true } = {}) {
     for (const channel of channels) channel.stop();
     fs.rmSync(tmp, { recursive: true, force: true });
   });
-  loadServer(id => mocks[id] ?? serverRequire(id), root, { env: { SWARM_PROJECT: 'fixture' }, on() {} },
+  loadServer(id => mocks[id] ?? serverRequire(id), root, { env: { SWARM_PROJECT: 'fixture', ...environment }, on() {} },
     { ...console, error: (...message) => errors.push(message) });
 
   async function request(url, input) {
@@ -85,7 +90,8 @@ function fixture(t, { existing = true } = {}) {
     return response;
   }
 
-  return { root, project, tokens, write, request, watchers, errors, failWatcher(error) { watchError = error; } };
+  const target = { project: 'fixture', projectId: projectIdentity(project) };
+  return { root, project, tokens, write, request, target, watchers, spawns, errors, failWatcher(error) { watchError = error; } };
 }
 
 async function assertPreviousProject(f) {
@@ -110,7 +116,7 @@ test('rejects invalid initialization options and roster content while retaining 
   const agents = path.join(f.root, 'sample-roster.json');
   f.write(agents, JSON.stringify({ workers: roster }));
   for (const route of ['/api/init', '/api/run']) {
-    for (const body of ['{"brief":', '[]', '{"brief":42}', '{"agents":false}', JSON.stringify({ agents })]) {
+    for (const body of ['{"brief":', '[]', ...[{ brief: 42 }, { agents: false }, { agents }].map(input => JSON.stringify({ ...f.target, ...input }))]) {
       assert.equal((await f.request(route, body)).status, 400);
     }
   }
@@ -118,16 +124,57 @@ test('rejects invalid initialization options and roster content while retaining 
   assert.deepEqual(f.errors, []);
 });
 
+test('both initialization routes preserve the project when the expected identity is missing or different', async t => {
+  const f = fixture(t);
+  for (const route of ['/api/init', '/api/run']) {
+    for (const wrong of [{}, { project: 'another-project' }, { projectId: 'different-checkout' }]) {
+      const target = Object.keys(wrong).length ? { ...f.target, ...wrong } : {};
+      assert.equal((await f.request(route, JSON.stringify({ ...target, brief: 'New brief.' }))).status, 400);
+      await assertPreviousProject(f);
+    }
+  }
+  assert.deepEqual(f.errors, []);
+});
+
+test('the CLI refuses a port occupied by another project or checkout and targets the matching server', async t => {
+  const requests = [];
+  const target = { project: 'fixture', projectId: projectIdentity(projectPath(path.join(__dirname, '..'), 'fixture')) };
+  let served = { project: 'another-project', projectId: 'different-project' };
+  const server = http.createServer(async (req, res) => {
+    let body = '';
+    for await (const chunk of req) body += chunk;
+    requests.push({ method: req.method, url: req.url, body: body && JSON.parse(body) });
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(req.method === 'GET' ? served : { ok: true }));
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const start = (...flags) => promisify(execFile)(process.execPath, [path.join(__dirname, '../cli.js'), 'start', '--port', String(server.address().port), ...flags], {
+    env: { ...process.env, SWARM_PROJECT: 'fixture' },
+    timeout: 10000,
+  });
+
+  await assert.rejects(start('--brief', 'New brief.'), /does not serve project fixture/);
+  served = { project: 'fixture', projectId: 'different-checkout' };
+  await assert.rejects(start('--keep'), /does not serve project fixture/);
+  assert.deepEqual(requests.splice(0).map(({ method, url }) => [method, url]), [['GET', '/api/state'], ['GET', '/api/state']]);
+
+  served = target;
+  await start('--brief', 'New brief.');
+  assert.deepEqual(requests.map(({ method, url }) => [method, url]), [['GET', '/api/state'], ['POST', '/api/init']]);
+  assert.deepEqual(requests[1].body, { ...target, brief: 'New brief.' });
+});
+
 test('preserves the live project on staging and activation failures and allows a retry', async t => {
   const f = fixture(t);
   fs.unlinkSync(f.tokens);
-  assert.equal((await f.request('/api/init', '{"brief":"Replacement brief."}')).status, 500);
+  assert.equal((await f.request('/api/init', JSON.stringify({ ...f.target, brief: 'Replacement brief.' }))).status, 500);
   await assertPreviousProject(f);
   f.write(f.tokens, ':root {}');
 
   // Fail after promotion, while opening the watch handle for the replacement.
   f.failWatcher(new Error('Synthetic watcher failure'));
-  assert.equal((await f.request('/api/run', '{"brief":"Replacement brief."}')).status, 500);
+  assert.equal((await f.request('/api/run', JSON.stringify({ ...f.target, brief: 'Replacement brief.' }))).status, 500);
   await assertPreviousProject(f);
   assert.equal(f.errors.length, 2);
   f.failWatcher(undefined);
@@ -135,7 +182,7 @@ test('preserves the live project on staging and activation failures and allows a
   const agents = path.join(f.root, 'sample-roster.json');
   const customRoster = [{ ...roster[0], title: 'Sample Designer', runner: 'codex', effort: 'medium' }];
   f.write(agents, JSON.stringify(customRoster));
-  assert.deepEqual(await f.request('/api/init', JSON.stringify({ brief: 'Replacement brief.', agents })), { status: 200, body: { ok: true } });
+  assert.deepEqual(await f.request('/api/init', JSON.stringify({ ...f.target, brief: 'Replacement brief.', agents })), { status: 200, body: { ok: true } });
   const state = (await f.request('/api/state')).body;
   assert.equal(state.phase, 'ready');
   assert.equal(state.brief, 'Replacement brief.');
@@ -147,18 +194,35 @@ test('preserves the live project on staging and activation failures and allows a
 });
 
 test('checks for an active run again after a concurrent initialization body arrives', async t => {
-  const f = fixture(t);
+  const f = fixture(t, { environment: { PATH: '/usr/bin', OPENAI_API_KEY: 'fixture-key', FAKE_FAIL_AGENT: '01' } });
   const delayedBody = new PassThrough();
   const delayed = f.request('/api/init', delayedBody);
-  assert.deepEqual(await f.request('/api/run', '{"brief":"Run brief."}'), { status: 200, body: { ok: true } });
-  delayedBody.end('{"brief":"Later brief."}');
+  assert.deepEqual(await f.request('/api/run', JSON.stringify({ ...f.target, brief: 'Run brief.' })), { status: 200, body: { ok: true } });
+  delayedBody.end(JSON.stringify({ ...f.target, brief: 'Later brief.' }));
   assert.equal((await delayed).status, 409);
   const state = (await f.request('/api/state')).body;
   assert.equal(state.phase, 'running');
   assert.equal(state.brief, 'Run brief.');
   assert.equal(fs.readFileSync(path.join(f.project, 'brief.md'), 'utf8'), 'Run brief.');
+  assert.deepEqual(f.spawns[0].options.env, { PATH: '/usr/bin' });
   assert.deepEqual(f.errors, []);
   await f.request('/api/stop', '{}');
+});
+
+test('the scoped Studio appearance reaches the preview URL in the running agent prompt', async t => {
+  const f = fixture(t);
+  const response = await f.request('/api/chat', JSON.stringify({
+    from: 'owner',
+    text: 'Review this section.',
+    scope: { sections: ['01'], appearance: { theme: 'light', brand: 'forest-gold', lang: 'ms', extra: 'ignored' } },
+  }));
+  assert.equal(response.status, 200);
+  const prompt = f.spawns[0].child.stdin.read().toString();
+  const previewLink = prompt.match(/Inspect the same live rendering as Studio at (\S+)\./)?.[1];
+  assert.equal(previewLink, 'http://127.0.0.1:8800/studio.html?preview=1&theme=light&brand=forest-gold&lang=ms');
+  assert.match(prompt, /^STEP: Triage/);
+  assert.match(prompt, /Review this section\.$/);
+  f.spawns[0].child.emit('close', 0);
 });
 
 test('requires a single name and a real directory for the project transaction', t => {

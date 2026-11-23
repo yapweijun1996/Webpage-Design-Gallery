@@ -10,6 +10,7 @@
   let linksSvg, S, send, clip, focus, picking, selected, hovered;
   let hosts = {}, cur = {}, seed = {}, order = [];
   let overlays = false;
+  let ready = false, anchor;
 
   function node(tag, className, value) {
     const el = document.createElement(tag);
@@ -25,6 +26,9 @@
 
   function build(agents) {
     S = { agents: Object.fromEntries(agents.map(agent => [agent.id, agent])) };
+    const roster = S;
+    const sections = [];
+    ready = false;
     page.replaceChildren();
     layer.replaceChildren();
     linksSvg = stage.ownerDocument.createElementNS(ns, 'svg');
@@ -43,7 +47,7 @@
         host.append(node('div', 'stub', agent.name + ' · ' + agent.section), node('style'), node('div', 'body'));
         page.append(host);
         hosts[id] = { el: host, timer: 0, revision: 0, html: '', css: '' };
-        load(id, false);
+        sections.push(load(id, false));
       }
       const cursor = node('div', 'cursor');
       cursor.style.setProperty('--c', agent.color);
@@ -53,6 +57,18 @@
       cur[id] = { el: cursor, t: 0, working: /^working/.test(agent.status || '') };
       seed[id] = index * 7;
     }
+    Promise.all(sections).then(() => {
+      if (S !== roster) return;
+      ready = true;
+      scrollToAnchor();
+    });
+  }
+
+  function scrollToAnchor() {
+    if (!ready || anchor === undefined) return;
+    if (anchor) document.getElementById(anchor)?.scrollIntoView({ behavior: 'instant' });
+    else scrollTo({ top: 0, behavior: 'instant' });
+    anchor = undefined;
   }
 
   // A cursor is visible only while its agent is really working or did something in the last 6 s (no idle ghosts).
@@ -314,6 +330,10 @@
         break;
       case 'roster':
         build(data);
+        break;
+      case 'anchor':
+        anchor = data;
+        scrollToAnchor();
         break;
       case 'view':
         clip = data.clip;
