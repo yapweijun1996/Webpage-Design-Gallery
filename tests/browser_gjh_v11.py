@@ -168,6 +168,17 @@ def state(page):
     return page.evaluate('window.__mall.state')
 
 
+def wait_for_active_npcs(page, *, prepared_detailed=False):
+    # Let the deferred rig uploads progress before resuming deterministic steps.
+    page.evaluate('__mall.setInput(null)')
+    page.wait_for_function('''preparedDetailed => {
+        const s=__mall.state, probe=window.__npcBudgetProbe;
+        return s.npcs?.active>0 && (!preparedDetailed || s.graphics.shadows) &&
+          (!probe || probe.frames.some(frame=>frame.npcInitialized && frame.active>0));
+    }''', arg=prepared_detailed, timeout=120000)
+    page.evaluate('__mall.setInput({})')
+
+
 def drive(page, ms, **inputs):
     # Manual physics steps can submit frames much faster than SwiftShader draws
     # them. Wait for the actual GPU work instead of accumulating it until the
@@ -209,14 +220,18 @@ def walk_to(page, x, z, precise=False):
 def hero_visibility_gallery(page, width, height):
     """Measure the rendered display fixture and visitor in each planned bay."""
     setback = .48
+    side_offset = 2.6
     assert page.evaluate('__mall.teleport("entry")')
-    walk_to(page, 32, 42)
-    walk_to(page, 32, 3)
+    # Cross the concourse on the live controller so glTF parsing continues in transit.
+    for target in ((32, 42), (32, 3)):
+        page.evaluate('([x, z]) => __mall.testWalkTo(x, z)', target)
     results = []
 
     def measure(number, x, z, yaw):
-        walk_to(page, x, z)
+        walk_to(page, x, z, precise=True)
         drive(page, 500, yaw=yaw, pitch=.1)
+        # The display's deferred glTF parser and GPU uploader need live frames.
+        page.evaluate('__mall.setInput(null)')
         page.wait_for_function(
             'n => { const v=__mall.heroVisibility(n); return v && v.loaded && v.hero && v.avatar; }',
             arg=number, timeout=30000)
@@ -238,18 +253,19 @@ def hero_visibility_gallery(page, width, height):
         results.append(row)
         print(json.dumps(row), flush=True)
 
-    # Match the contact-sheet camera pose in each window.
+    # Offset the visitor along the storefront so the centred chase camera frames
+    # the fixture beside the avatar, including its animated idle silhouette.
     for number in (4, 5):
         center = -10 + (number-1)*10
-        measure(number, center+3-2.4, setback, -.2)
+        measure(number, center+3-side_offset, setback, -.2)
     for number in range(12, 18):
         center_z = (number-12)*8+4
-        measure(number, 35-setback, center_z+2.55-2.4, -math.pi/2-.2)
+        measure(number, 35-setback, center_z+2.55-side_offset, -math.pi/2-.2)
     walk_to(page, 32, 43)
     walk_to(page, -12, 43)
     for number in range(11, 5, -1):
         center_z = (number-6)*8+4
-        measure(number, -15+setback, center_z-2.55+2.4, math.pi/2-.2)
+        measure(number, -15+setback, center_z-2.55+side_offset, math.pi/2-.2)
     return results
 
 
@@ -262,6 +278,7 @@ def install_npc_budget_probe(page, cap):
       };
       const originalScene = T.Scene.prototype.onBeforeRender;
       const wrappedMeshes = new WeakSet(), instrumented = new WeakSet();
+      const isVisitorShadow=object=>object.isInstancedMesh && object.name==='Visitor contact shadows';
       const check = (ok, message, frame) => {
         if (!ok) probe.errors.push({message, frame});
       };
@@ -272,72 +289,135 @@ def install_npc_budget_probe(page, cap):
         // Run after the entire synchronous step/HUD/rAF callback, once the
         // application has committed this frame's admission and budget state.
         const s=__mall.state, b=s.renderBudget, n=s.npcs;
-        const world=submissions.filter(p=>p.scene===s.graphics.sceneId);
+        const isWorld=p=>p.scene===s.graphics.sceneId;
+        // Scene and model preparation can draw offscreen before the live frame.
+        const isWarmup=p=>!isWorld(p) && (p.name==='Model warmup' || p.name==='Mall scene warmup');
+        const live=submissions.filter(p=>!isWarmup(p));
+        const world=live.filter(isWorld);
         const npc=world.filter(p=>p.mask===4);
-        const total=submissions.reduce((sum,p)=>sum+p.calls,0);
-        const npcCalls=npc.reduce((sum,p)=>sum+p.calls,0);
+        const calls=(parts,field='calls')=>parts.reduce((sum,p)=>sum+p[field],0);
+        const total=calls(submissions), liveTotal=calls(live);
+        const warmupCalls=calls(submissions.filter(isWarmup)), npcCalls=calls(npc);
+        const liveCounterCalls=calls(live,'counterCalls'), npcCounterCalls=calls(npc,'counterCalls');
+        const nonNPC=calls(live.filter(p=>!isWorld(p) || p.mask!==4));
+        const visitorShadowCalls=npc.reduce((sum,p)=>sum+p.visitorShadowCalls,0);
+        const npcModelCalls=npcCalls-visitorShadowCalls;
         const frame={label:probe.label, tier:s.graphics.quality.tier,
+          npcInitialized:Boolean(n),
           active:n?.active, admitted:n?.admitted, visible:n?.visible,
-          perNPC:n?.callsPerNpc, nonNPC:total-npcCalls, npcCalls, total,
+          perNPC:n?.callsPerNpc, nonNPC, npcCalls, npcModelCalls, visitorShadowCalls,
+          total, liveTotal, warmupCalls, liveCounterCalls,
           bloom:b?.bloom, y:s.y, elevatorTravel:s.elevatorTravel,
           renderedNPCs:npc.flatMap(p=>p.visitors).length,
           submissions:submissions.map(({visitors,...p})=>p)};
         probe.frames.push(frame);
         check(Boolean(b), 'Missing renderBudget telemetry', frame);
-        check(Number.isInteger(total) && total<=200, 'Actual frame exceeds 200 calls', frame);
-        check(s.drawCalls===total, 'drawCalls omits renderer submissions', frame);
-        check(n?.limit===cap && n.active<=cap && n.active>=0,
-          'Simulation exceeds requested tier cap', frame);
-        check(Number.isInteger(n?.admitted) && n.admitted>=0 &&
-          n.admitted<=n.active && n.visible===n.admitted,
-          'Invalid admission/visibility count', frame);
-        if (!b) return;
-        const expectedBloom=s.graphics.quality.tier==='detailed' &&
-          innerWidth>=1000 && Math.abs(s.y)<5;
-        check(b.bloom===expectedBloom, 'Incorrect tier/floor Bloom path', frame);
-        check(b.totalCalls===total && b.nonNpcCalls===total-npcCalls &&
-          b.npcCalls===npcCalls && b.admitted===n.admitted,
-          'Budget telemetry differs from observed rendering', frame);
-        const submissionCount=Array.isArray(b.submissions)?b.submissions.length:b.submissions;
-        check(submissionCount===submissions.length, 'Submission telemetry mismatch', frame);
-        const expected=[1,...(b.bloom?[2]:[]),...(n.admitted>0?[4]:[])];
-        check(JSON.stringify(world.map(p=>p.mask))===JSON.stringify(expected),
-          'Repeated full-world submission or incorrect layer masks', frame);
-        const post=submissions.filter(p=>p.scene!==s.graphics.sceneId);
-        check(post.length===(b.bloom?2:0) && (!b.bloom ||
-          (post[0].name==='Mall glow filter' && post[1].name==='Mall glow composite' &&
-            submissions.at(-1)===post[1])),
-          'Bloom requires one filter and one final composite', frame);
+        check(submissions.every(p=>[p.beforeResetCalls,p.counterCalls].every(
+          count=>Number.isInteger(count) && count>=0) && p.calls===p.beforeResetCalls+p.counterCalls) && total<=200,
+          'Invalid renderer call count or actual frame exceeds 200 calls', frame);
+        check(total===liveTotal+warmupCalls && liveTotal===nonNPC+npcCalls,
+          'Renderer submission totals disagree', frame);
+        // Admission reserves one shared contact-shadow batch before budgeting the rigs.
+        check(visitorShadowCalls>=0 && visitorShadowCalls<=(n?.admitted>0 ? 1 : 0) &&
+          npcModelCalls>=0, 'Invalid shared visitor shadow cost', frame);
+        if (n) {
+          check(n.limit===cap && n.active<=cap && n.active>=0,
+            'Simulation exceeds requested tier cap', frame);
+          check(Number.isInteger(n.admitted) && n.admitted>=0 &&
+            n.admitted<=n.active && n.visible===n.admitted,
+            'Invalid admission/visibility count', frame);
+          check(frame.renderedNPCs<=n.visible, 'Rendered visitor count exceeds admission', frame);
+          check(npcModelCalls<=n.admitted*n.callsPerNpc,
+            'NPC template underestimates real draw calls', frame);
+          check(!n.admitted || (nonNPC+visitorShadowCalls<=n.nonNpcCalls &&
+            npcModelCalls<=n.drawCallBudget && n.nonNpcCalls+npcModelCalls<=n.totalCallCap),
+            'Actual NPC draws exceed admission headroom', frame);
+        } else {
+          check(npcCalls===0, 'NPC calls before initialization', frame);
+        }
         check(npc.every(p=>!p.autoClear && !p.shadowAutoUpdate && !p.background),
           'NPC overlay clears the base/depth or updates shadows', frame);
-        check(npcCalls<=n.admitted*n.callsPerNpc,
-          'NPC template underestimates real draw calls', frame);
+        if (!b || !live.length) return;
+        check(s.drawCalls===liveCounterCalls, 'drawCalls omits live renderer submissions', frame);
+        const expectedAdmitted=n ? n.admitted : 0;
+        // WebGL shadows mark the Detailed interiors as prepared for the live path.
+        const expectedBloom=s.graphics.quality.tier==='detailed' && s.graphics.shadows &&
+          innerWidth>=1000 && Math.abs(s.y)<5;
+        check(b.bloom===expectedBloom, 'Incorrect tier/floor Bloom path', frame);
+        check(b.totalCalls===liveCounterCalls && b.nonNpcCalls===liveCounterCalls-npcCounterCalls &&
+          b.npcCalls===npcCounterCalls && b.admitted===expectedAdmitted,
+          'Budget telemetry differs from observed rendering', frame);
+        const submissionCount=Array.isArray(b.submissions)?b.submissions.length:b.submissions;
+        check(submissionCount===live.length, 'Submission telemetry mismatch', frame);
+        const expected=[...(b.bloom?[2]:[]),1,...(expectedAdmitted>0?[4]:[])];
+        check(JSON.stringify(world.map(p=>p.mask))===JSON.stringify(expected),
+          'Repeated full-world submission or incorrect layer masks', frame);
+        const post=live.filter(p=>!isWorld(p));
+        check(post.length===(b.bloom?2:0) && (!b.bloom ||
+          (post[0].name==='Mall glow filter' && post[1].name==='Mall glow composite' &&
+            live[1]===post[0] && live.at(-1)===post[1])),
+          'Bloom requires one filter and one final composite', frame);
       }
       T.Scene.prototype.onBeforeRender=function(renderer,...args) {
         if (!instrumented.has(renderer)) {
           instrumented.add(renderer);
           probe.rendererObserved=true;
           const originalRender=renderer.render;
-          renderer.render=function(scene,camera) {
-            const before=this.info.render.calls, autoReset=this.info.autoReset;
-            const submission={scene:scene.uuid,name:scene.name,mask:camera.layers.mask,
-              autoClear:this.autoClear,shadowAutoUpdate:this.shadowMap.autoUpdate,
-              background:scene.background!==null,visitors:[]};
-            probe.current=submission;
-            const result=originalRender.call(this,scene,camera);
-            submission.calls=this.info.render.calls-(autoReset?0:before);
-            probe.current=null;
-            if (probe.enabled) {
-              probe.pending.push(submission);
-              if (!probe.queued) {probe.queued=true;queueMicrotask(finishFrame);}
+          const originalRenderBuffer=renderer.renderBufferDirect;
+          const info=renderer.info, originalReset=info.reset;
+          let active;
+          // Three can submit shadow depth before resetting info in the same render.
+          info.reset=function(...args) {
+            if (active) {
+              active.beforeResetCalls+=active.segmentCalls+this.render.calls-active.counter;
+              active.segmentCalls=0;
+              active.resets++;
             }
+            const result=originalReset.apply(this,args);
+            if (active) active.counter=this.render.calls;
             return result;
+          };
+          renderer.renderBufferDirect=function(camera,scene,geometry,material,object,group) {
+            const submission=probe.current;
+            if (submission?.mask!==4 || !isVisitorShadow(object)) {
+              return originalRenderBuffer.call(this,camera,scene,geometry,material,object,group);
+            }
+            const before=this.info.render.calls;
+            const result=originalRenderBuffer.call(this,camera,scene,geometry,material,object,group);
+            submission.visitorShadowCalls+=this.info.render.calls-before;
+            return result;
+          };
+          renderer.render=function(scene,camera) {
+            const parent=active, previous=probe.current;
+            if (parent) parent.segmentCalls+=info.render.calls-parent.counter;
+            const sample={counter:info.render.calls,segmentCalls:0,beforeResetCalls:0,resets:0};
+            const submission={scene:scene.uuid,name:scene.name,mask:camera.layers.mask,autoReset:info.autoReset,
+              autoClear:this.autoClear,shadowAutoUpdate:this.shadowMap.autoUpdate,
+              background:scene.background!==null,visitorShadowCalls:0,visitors:[]};
+            active=sample;
+            probe.current=submission;
+            try {
+              const result=originalRender.call(this,scene,camera);
+              submission.beforeResetCalls=sample.beforeResetCalls;
+              submission.counterCalls=sample.segmentCalls+info.render.calls-sample.counter;
+              submission.calls=submission.beforeResetCalls+submission.counterCalls;
+              submission.resets=sample.resets;
+              if (probe.enabled) {
+                probe.pending.push(submission);
+                if (!probe.queued) {probe.queued=true;queueMicrotask(finishFrame);}
+              }
+              return result;
+            } finally {
+              active=parent;
+              if (parent) parent.counter=info.render.calls;
+              probe.current=previous;
+            }
           };
         }
         // A mesh callback proves the visitor was actually submitted through the
         // camera/frustum tests; admitted-but-offscreen visitors do not qualify.
         this.traverse(node=>{
-          if (!node.isMesh || !(node.layers.mask&4) || wrappedMeshes.has(node)) return;
+          if (!node.isMesh || !(node.layers.mask&4) || isVisitorShadow(node) || wrappedMeshes.has(node)) return;
           wrappedMeshes.add(node);
           const original=node.onBeforeRender;
           node.onBeforeRender=function(renderer,scene,camera,...rest) {
@@ -367,18 +447,24 @@ def install_npc_budget_probe(page, cap):
     }''', cap)
 
 
-def npc_budget_frames(page):
-    result = page.evaluate('''() => ({
-      frames:__npcBudgetProbe.frames, errors:__npcBudgetProbe.errors
-    })''')
-    assert not result['errors'], result['errors'][:3]
+def npc_budget_frames(page, start=0):
+    result = page.evaluate('''start => ({
+      frames:__npcBudgetProbe.frames.slice(start), errors:__npcBudgetProbe.errors.slice(0,3)
+    })''', start)
+    assert not result['errors'], result['errors']
     assert result['frames'], 'No complete rendered frames observed'
     return result['frames']
 
 
+def npc_budget_start(page, label):
+    return page.evaluate('''label => {
+      __npcBudgetProbe.label=label;
+      return __npcBudgetProbe.frames.length;
+    }''', label)
+
+
 def npc_budget_sweep(page, label):
-    page.evaluate('label=>__npcBudgetProbe.label=label', label)
-    start = len(npc_budget_frames(page)) if page.evaluate('__npcBudgetProbe.frames.length') else 0
+    start = npc_budget_start(page, label)
     # In addition to a full orbit, jump directly across the expensive view:
     # the admission decision must use this frame, not yesterday's camera cost.
     before = drive(page, 17, yaw=0)
@@ -388,7 +474,7 @@ def npc_budget_sweep(page, label):
     for index in range(25):
         drive(page, 17, yaw=-math.pi + index * math.tau / 24)
     drive(page, 17, yaw=0)
-    frames = npc_budget_frames(page)[start:]
+    frames = npc_budget_frames(page, start)
     assert frames, label
     current = state(page)
     row = {'npcBudgetState':label, 'width':page.viewport_size['width'],
@@ -421,7 +507,7 @@ def npc_budget_screenshot(page, width):
             drive(page, 17, yaw=0)
         for index in range(32):
             drive(page, 17, yaw=-math.pi + index * math.tau / 32, pitch=.1)
-            frame = npc_budget_frames(page)[-1]
+            frame = npc_budget_frames(page, -1)[0]
             best = max(best, frame['renderedNPCs'])
             if frame['renderedNPCs'] >= 2:
                 destination = Path.home() / 'omp-tasks/out' / f'npc2-{width}.png'
@@ -455,7 +541,9 @@ def npc_budget_coverage(browser, url):
                 assert page.evaluate('__mall.teleport("atrium")')
                 for _ in range(56):
                     drive(page, 17)
+                wait_for_active_npcs(page, prepared_detailed=tier=='detailed' and width>=1000)
                 assert state(page)['npcs']['active'] > 0, state(page)['npcs']
+                npc_budget_frames(page, -1)
                 rows = [npc_budget_sweep(page, 'atrium')]
                 for zone in ('newmoon', 'mili', 'gogo'):
                     assert page.evaluate('zone=>__mall.teleport(zone)', zone)
@@ -478,7 +566,7 @@ def npc_budget_coverage(browser, url):
                 assert state(page)['nearby'] == 'visitor-elevator', state(page)
                 assert any(word in page.locator('#inspect').inner_text().lower()
                            for word in ('ride', 'call'))
-                page.evaluate('__npcBudgetProbe.label="elevator-travel"')
+                lift_start = npc_budget_start(page, 'elevator-travel')
                 page.locator('#inspect').click()
                 travel = []
                 for _ in range(65):
@@ -489,8 +577,7 @@ def npc_budget_coverage(browser, url):
                         break
                 assert travel and any(.2 < item['y'] < 7 for item in travel), travel
                 assert abs(current['y'] - 7.2) < .1 and not current['elevatorTravel'], current
-                frames = npc_budget_frames(page)
-                lift_frames = [frame for frame in frames if frame['label']=='elevator-travel']
+                lift_frames = npc_budget_frames(page, lift_start)
                 moving = [frame for frame in lift_frames
                           if frame['elevatorTravel'] and .2 < frame['y'] < 7]
                 assert moving, lift_frames
@@ -509,17 +596,32 @@ def npc_budget_coverage(browser, url):
                 assert lift_row['movingFrames'] > 0, lift_row
                 print(json.dumps(lift_row), flush=True)
                 rows.append(lift_row)
+                # The deck's lazy atlas upload queue needs live animation frames.
+                page.evaluate('__mall.setInput(null)')
                 page.wait_for_function('__mall.state.brandPlaqueCount===17', timeout=10000)
+                page.evaluate('__mall.setInput({})')
                 page.emulate_media(reduced_motion='reduce')
                 rows.append(npc_budget_sweep(page, 'upper-deck'))
-                frames = npc_budget_frames(page)
+                summary = page.evaluate('''() => {
+                    const {frames,errors}=__npcBudgetProbe;
+                    const ground=frames.filter(frame=>frame.label!=='setup' && Math.abs(frame.y)<.2);
+                    return {
+                      errors:errors.slice(0,3), groundCount:ground.length,
+                      groundWithoutBloom:ground.filter(frame=>!frame.bloom).slice(0,3),
+                      maxCalls:frames.reduce((max,frame)=>Math.max(max,frame.total),0),
+                      startupFrames:frames.filter(frame=>!frame.npcInitialized).length,
+                      resetCrossingFrames:frames.filter(frame=>frame.submissions.some(p=>p.beforeResetCalls>0)).length,
+                      renderedFrames:frames.length
+                    };
+                }''')
+                assert not summary['errors'], summary['errors']
                 if tier == 'detailed' and width == 1440:
-                    ground = [frame for frame in frames if abs(frame['y']) < .2]
-                    assert ground and all(frame['bloom'] for frame in ground), ground[:3]
+                    assert summary['groundCount'] and not summary['groundWithoutBloom'], summary['groundWithoutBloom']
                 assert not errors, errors
                 result = {'npcBudget':{'width':width, 'tier':tier, 'cap':cap, 'states':rows,
-                          'maxCalls':max(frame['total'] for frame in frames),
-                          'renderedFrames':len(frames), 'screenshot':screenshot}}
+                          'maxCalls':summary['maxCalls'], 'startupFrames':summary['startupFrames'],
+                          'renderedFrames':summary['renderedFrames'], 'resetCrossingFrames':summary['resetCrossingFrames'],
+                          'screenshot':screenshot}}
                 print(json.dumps(result), flush=True)
                 results.append(result)
             finally:
@@ -528,10 +630,8 @@ def npc_budget_coverage(browser, url):
 
 
 def upper_deck_gallery(page):
-    # Resume the real frame loop after the entrance sample so deferred NPCs can install.
-    page.evaluate('__mall.setInput(null)')
     assert page.evaluate('__mall.teleport("atrium")')
-    page.wait_for_function('window.__mall.state.npcs?.active > 0', timeout=120000)
+    wait_for_active_npcs(page)
     crowded = drive(page, 100)
     assert crowded['npcs']['active'] > 0, crowded['npcs']
     assert crowded['drawCalls'] <= 200, crowded['drawCalls']
@@ -656,7 +756,8 @@ def keyboard_turning(page):
     page.keyboard.up('q'); page.keyboard.up('e')
     assert abs(cancelled['yaw']-right['yaw']) < 1e-8
     page.keyboard.down('w'); page.keyboard.down('q'); page.keyboard.down('Shift')
-    moving = page.evaluate('__mall.step(300)')
+    # Include acceleration from rest while the held keys turn the visitor.
+    moving = page.evaluate('__mall.step(400)')
     page.keyboard.up('w'); page.keyboard.up('q'); page.keyboard.up('Shift')
     assert moving['yaw'] > cancelled['yaw']+.5 and moving['z'] < cancelled['z']-.5, moving
     assert moving['animation'] == 'run', moving
@@ -823,6 +924,9 @@ def run(capture=False, upper_deck=False):
                         if expected:
                             assert abs(initial['x'] - 10) < .1 and abs(initial['z'] - 45) < .1
                             dismiss_tutorial(page)
+                            # The visitor source parses on live frames before any manual store route.
+                            assert page.evaluate('__mall.teleport("atrium")')
+                            wait_for_active_npcs(page)
                             for zone in ('newmoon', 'mili', 'gogo'):
                                 assert page.evaluate('zone => __mall.teleport(zone)', zone)
                                 opened = drive(page, 1000)
@@ -878,7 +982,9 @@ def run(capture=False, upper_deck=False):
                             assert not mall_map.evaluate('el=>el.open')
                             page.locator('#mall-tools').click()
                             open_menu_page(page, "help")
-                            page.locator('#header-map').click()
+                            assert page.locator('#keyboard-help').evaluate('el=>el.matches(":modal")')
+                            page.locator('#menu-back').click()
+                            page.locator('#menu-map-expand').click()
                             page.wait_for_function('!document.querySelector("#keyboard-help").open')
                             assert mall_map.evaluate('el=>el.open')
                             targets(page)
@@ -894,18 +1000,27 @@ def run(capture=False, upper_deck=False):
                             page.keyboard.press('Escape')
                             assert not mall_map.evaluate('el=>el.open')
                             assert page.locator('#header-map').is_visible()
-                            assert page.locator('#header-map').evaluate('el=>el===document.activeElement')
+                            assert page.locator('#mall-tools').evaluate('el=>el===document.activeElement')
                         page.screenshot(path=str(review / f'atrium-{width}.png'), scale='css')
                         room_signs(page)
-                        page.locator('#mall-map').evaluate('el=>el.open=true')
+                        mall_map = page.locator('#mall-map')
+                        if not mall_map.evaluate('el=>el.open'):
+                            page.locator('#header-map').click()
                         page.evaluate('__mall.step(17)')
                         room_signs(page)
                         page.screenshot(path=str(review / f'map-{width}.png'), scale='css')
+                        page.locator('#map-close').click()
+                        assert not mall_map.evaluate('el=>el.open')
                         if width == 390:
-                            page.locator('#mall-map').evaluate('el=>el.open=false')
+                            assert page.locator('#header-map').evaluate('el=>el===document.activeElement')
                         if capture:
-                            (DEMO / 'screenshots').mkdir(exist_ok=True)
-                            page.screenshot(path=str(DEMO / f'screenshots/{width}.png'), scale='css')
+                            published = DEMO / f'screenshots/{width}.png'
+                            published.parent.mkdir(exist_ok=True)
+                            if width == 390:
+                                page.screenshot(path=str(published), scale='css')
+                            else:
+                                # The published wide views include the open wayfinding map.
+                                published.write_bytes((review / f'map-{width}.png').read_bytes())
                         keyboard_turning(page)
                         # Real keyboard input exercises the same capsule controller as deterministic input.
                         page.evaluate('__mall.setInput(null)'); page.locator('#scene').focus()
@@ -926,16 +1041,19 @@ def run(capture=False, upper_deck=False):
                             cdp.send('Input.dispatchTouchEvent', {'type':'touchMove','touchPoints':[{'x':x,'y':y-30,'id':1},{'x':width-110,'y':height*.5,'id':2}]})
                             page.wait_for_function('Math.abs(__mall.state.yaw)>.1')
                             cdp.send('Input.dispatchTouchEvent', {'type':'touchEnd','touchPoints':[]})
-                            page.locator('#run-toggle').click()
-                            assert page.locator('#run-toggle').get_attribute('aria-pressed')=='false'
-                            page.locator('#run-toggle').click()
+                            run_toggle = page.locator('#run-toggle')
+                            assert run_toggle.get_attribute('aria-pressed') == 'false'
+                            run_toggle.click()
+                            assert run_toggle.get_attribute('aria-pressed') == 'true'
+                            run_toggle.click()
+                            assert run_toggle.get_attribute('aria-pressed') == 'false'
                             page.evaluate('__mall.setInput({})')
                         page.evaluate('__mall.teleport("atrium")')
                         moved = drive(page, 800, right=1)
                         assert moved['x'] > before['x'] + 1.7 and moved['animation']=='walk', moved
                         page.screenshot(path=str(review / f'walking-{width}.png'), scale='css')
                         draw_calls['walking'] = moved['drawCalls']
-                        ran = drive(page, 300, right=1, run=True)
+                        ran = drive(page, 400, right=1, run=True)
                         assert ran['animation']=='run' and 1.8 < ran['x']-moved['x'] < 2.3, ran
                         # Repeated high-speed steps cannot tunnel through the outer wall.
                         stopped = drive(page, 6000, right=1, run=True)
@@ -958,11 +1076,14 @@ def run(capture=False, upper_deck=False):
                             draw_calls[f'{zone}-portal'] = opened['drawCalls']
                             room_signs(page)
                             page.screenshot(path=str(review / f'{zone}-portal-{width}.png'), scale='css')
-                            # Enter through a real opening; then strafe around the gathering table.
+                            # Sample the entrance plaque about one metre inside the doorway.
+                            # The later walk around the gathering table captures the shop interior.
                             for _ in range(15):
                                 inside = drive(page, 100, forward=1)
                                 max_draw_calls = max(max_draw_calls, inside['drawCalls'])
                                 room_signs(page)
+                                if inside['z'] <= -1:
+                                    break
                             assert inside['zone']==zone and inside['z'] < -.5, inside
                             draw_calls[zone] = inside['drawCalls']
                             page.screenshot(path=str(review / f'{zone}-{width}.png'), scale='css')
@@ -991,11 +1112,16 @@ def run(capture=False, upper_deck=False):
                             page.screenshot(path=str(review / f'{zone}-interior-{width}.png'), scale='css')
                             room_signs(page)
                             page.locator('#scene').focus()
-                            page.keyboard.down('e')
+                            page.keyboard.down('q')
                             turning_near = page.evaluate('__mall.step(100)')
-                            page.keyboard.up('e')
+                            page.keyboard.up('q')
                             assert not page.locator('#product-dialog').is_visible()
-                            assert turning_near['yaw'] < near['yaw']-.1
+                            assert turning_near['yaw'] > near['yaw']+.1
+                            # E becomes the nearby action while F remains its shortcut.
+                            page.keyboard.press('e')
+                            page.locator('#product-dialog').wait_for(state='visible')
+                            page.keyboard.press('Escape')
+                            page.wait_for_function("document.activeElement.id === 'scene'")
                             page.keyboard.press('f')
                             if zone == 'newmoon': shelf_details(page)
                             assert page.locator('#product-dialog').is_visible()
@@ -1028,10 +1154,12 @@ def run(capture=False, upper_deck=False):
                         draw_calls['max'] = max(max_draw_calls, *draw_calls.values())
                         assert max(draw_calls.values()) <= 200, draw_calls
                         evidence.append({'width':width, 'drawCalls':initial['drawCalls'], 'drawCallsByView':draw_calls, 'walkingCollisionDoorsInspection':'PASS', 'keyboardTurningAndFInspection':'PASS','errors':errors})
+                        context.close()
                     evidence.append(expanded_upper_deck_coverage(browser, base))
                     for width,height in ((390,844),(1440,900)):
                         context=browser.new_context(viewport={'width':width,'height':height},
                             device_scale_factor=2,has_touch=width<600,reduced_motion='reduce')
+                        context.add_init_script('window.__GJH_TEST = true')
                         page=context.new_page()
                         page.goto(base+'/gallery/demos/corporate/gjh/v11/#experience')
                         page.wait_for_function('window.__mall?.ready && window.__sceneReady')
