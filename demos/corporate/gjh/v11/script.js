@@ -60,7 +60,7 @@ let modelWarmup, tierQueue, requestedProfile;
 let warmRunner = null, warmKey, warmReport = createWarmReport(), sceneWarmFirst = true, entryPresentation;
 let lightWash=false;
 let productControl=null,shelfFocus=null,guidance=null,mallTheme=null,brandWallStarted=false,atmosphere=null,npcs=null,spatialHud=null;
-let themeStage = null;
+let themeStage = null, themeUploadSignal;
 let themeMidnightTimer;
 let initialized = false, fatal = false, contextLost = false, interrupted = false, restorePending = false, contextWaiter;
 let graphicsStatus = 'initializing', losses = 0, validations = 0;
@@ -820,14 +820,23 @@ function animate(now) {
   // Its non-preserved back buffer must be covered by a live draw before paint.
   // The mobile settings panel pauses walking, but its tier request still
   // needs the upload queue to finish before it can become the active tier.
-  const uploadMs = cartWarming || live || tierQueue?.pending || renderRequested && (forceRender || !modes.paused())
-    ? warmModels(player.state) : 0;
+  // The open theme dialog freezes the visitor. Only its decoration upload may
+  // progress during that pause, including when the visitor is mid-ride or seated.
+  const pausedTheme = themeUploadSignal && !themeUploadSignal.aborted && modes.paused() &&
+    !windowBlurred && !contextLost && !restorePending;
+  let uploadMs = 0;
+  if (pausedTheme) {
+    uploadMs = modelWarmup.runFrame(true, undefined, themeUploadSignal);
+    maxFrameUploadMs = Math.max(maxFrameUploadMs, uploadMs);
+  } else if (cartWarming || live || tierQueue?.pending || renderRequested && (forceRender || !modes.paused())) {
+    uploadMs = warmModels(player.state);
+  }
+  const coverWarmup = cartWarming || pausedTheme;
   let pose, callbackMs = 0;
-  if (live || renderRequested || cartWarming) {
-    // Tier preparation can exercise one real screen pixel. The live scene
-    // covers it in this same animation callback, before presentation.
+  if (live || renderRequested || coverWarmup) {
+    // Cover a direct-pass upload in this same callback even when walking is paused.
     const renderStart = performance.now();
-    const force = forceRender || cartWarming;
+    const force = forceRender || coverWarmup;
     renderRequested = forceRender = false;
     if (advancing && !modes.paused() && !shelfFocus?.open) {
       player.updateCamera(Math.min(.1, slotMs / 1000), false, fixedClock.alpha);
@@ -1235,8 +1244,10 @@ async function initialize() {
         if(signal.aborted)throw new Error('Theme preparation cancelled');
         const stage=pack[definition.prepare](T,world.scene,theme,{signal});
         if (ready) {
+          themeUploadSignal = signal;
           try { await prepareModel(stage.group, {signal}); }
           catch (error) { stage.dispose(); throw error; }
+          finally { if (themeUploadSignal === signal) themeUploadSignal = undefined; }
         }
         return stage;
       },commit(next,previous,stage){

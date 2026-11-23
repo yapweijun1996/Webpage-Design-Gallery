@@ -1,0 +1,193 @@
+{
+  "route": "Enter 3D mall → Settings → About → Mall theme",
+  "environment": "Headless Chrome on macOS with Metal and emulated viewports. Timings are single observations.",
+  "baseline": {
+    "width": 390,
+    "build": "3c1a49ca9e807431",
+    "chrome": "158.0.8127.37",
+    "seconds": 10.01,
+    "active": "everyday",
+    "pending": "lunar-new-year",
+    "status": "Preparing Lunar New Year…",
+    "paused": true,
+    "positionDuringChoice": [
+      10.000000953674316,
+      -0.019905924797058105,
+      45
+    ],
+    "positionBeforeChoice": [
+      10.000000953674316,
+      -0.019905924797058105,
+      45
+    ],
+    "themeAfterClose": "everyday",
+    "modeAfterClose": "explore",
+    "errors": [],
+    "moduleResponses": [
+      [
+        "lunar-new-year.js",
+        200
+      ]
+    ]
+  },
+  "initialFix": [
+    {
+      "width": 390,
+      "build": "c7f3801b9af08b9a",
+      "chrome": "158.0.8127.37",
+      "seconds": 0.78,
+      "active": "lunar-new-year",
+      "pending": null,
+      "status": "Lunar New Year is active.",
+      "paused": true,
+      "positionDuringChoice": [
+        10.000000953674316,
+        -0.019905924797058105,
+        45
+      ],
+      "positionBeforeChoice": [
+        10.000000953674316,
+        -0.019905924797058105,
+        45
+      ],
+      "themeAfterClose": "everyday",
+      "modeAfterClose": "explore",
+      "errors": [],
+      "moduleResponses": [
+        [
+          "lunar-new-year.js",
+          200
+        ]
+      ]
+    },
+    {
+      "width": 768,
+      "build": "c7f3801b9af08b9a",
+      "chrome": "158.0.8127.37",
+      "seconds": 0.4,
+      "active": "lunar-new-year",
+      "pending": null,
+      "status": "Lunar New Year is active.",
+      "paused": true,
+      "positionDuringChoice": [
+        10.000000953674316,
+        -0.019905924797058105,
+        45
+      ],
+      "positionBeforeChoice": [
+        10.000000953674316,
+        -0.019905924797058105,
+        45
+      ],
+      "themeAfterClose": "everyday",
+      "modeAfterClose": "explore",
+      "errors": [],
+      "moduleResponses": [
+        [
+          "lunar-new-year.js",
+          200
+        ]
+      ]
+    },
+    {
+      "width": 1440,
+      "build": "c7f3801b9af08b9a",
+      "chrome": "158.0.8127.37",
+      "seconds": 2.23,
+      "active": "lunar-new-year",
+      "pending": null,
+      "status": "Lunar New Year is active.",
+      "paused": true,
+      "positionDuringChoice": [
+        10.000000953674316,
+        -0.019905924797058105,
+        45
+      ],
+      "positionBeforeChoice": [
+        10.000000953674316,
+        -0.019905924797058105,
+        45
+      ],
+      "themeAfterClose": "everyday",
+      "modeAfterClose": "explore",
+      "errors": [],
+      "moduleResponses": [
+        [
+          "lunar-new-year.js",
+          200
+        ]
+      ]
+    }
+  ],
+  "liftAndCancellation": {
+    "pausedRide": {
+      "theme": "everyday",
+      "pending": null,
+      "paused": true,
+      "travel": true,
+      "phase": "board",
+      "x": -6.400000095367432,
+      "y": 0.014999985694885254,
+      "z": 10
+    },
+    "stillRiding": {
+      "theme": "christmas",
+      "pending": null,
+      "paused": true,
+      "travel": true,
+      "phase": "board",
+      "x": -6.400000095367432,
+      "y": 0.014999985694885254,
+      "z": 10
+    },
+    "landed": {
+      "theme": "christmas",
+      "pending": null,
+      "paused": false,
+      "travel": false,
+      "phase": null,
+      "x": -6.400000095367432,
+      "y": 7.215000152587891,
+      "z": 10
+    },
+    "cancelledRequest": {
+      "theme": "everyday",
+      "pending": "deepavali",
+      "paused": true,
+      "travel": false,
+      "phase": null,
+      "x": -6.400000095367432,
+      "y": 7.200096130371094,
+      "z": 10
+    },
+    "afterCancel": {
+      "theme": "everyday",
+      "pending": null,
+      "paused": false,
+      "travel": false,
+      "phase": null,
+      "x": -6.400000095367432,
+      "y": 7.200096130371094,
+      "z": 10
+    },
+    "afterRetry": {
+      "theme": "lunar-new-year",
+      "pending": null,
+      "paused": false,
+      "travel": false,
+      "phase": null,
+      "x": -6.400000095367432,
+      "y": 7.199976921081543,
+      "z": 10
+    }
+  },
+  "integratedReplay": {
+    "build": "73400e23cbd1fea0",
+    "command": "python tests/browser_gjh_theme_upload.py",
+    "results": [
+      "PASS 390x844: paused theme prepared, restored and closed",
+      "PASS 768x1024: paused theme prepared, restored and closed",
+      "PASS 1440x900: paused theme prepared, restored and closed"
+    ]
+  }
+}

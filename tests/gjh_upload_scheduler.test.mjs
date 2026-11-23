@@ -52,6 +52,24 @@ test('slices pick the current nearest priority and preserve submission order on 
   assert.equal(scheduler.report().lateAdditions, 2);
 });
 
+test('paused decoration work uses its own bounded slice and leaves other uploads queued', async () => {
+  const {scheduler, output, batch} = fixture();
+  const controller = new AbortController();
+  const store = batch('store', [1], {priority:() => -1});
+  const theme = batch('theme', [3, 3, 3], {signal:controller.signal});
+  scheduler.runFrame(false, 4, controller.signal);
+  assert.deepEqual(output, []);
+  scheduler.runFrame(true, 4, controller.signal);
+  assert.deepEqual(output, ['theme0', 'theme1']);
+  controller.abort();
+  await assert.rejects(theme, {name:'AbortError'});
+  scheduler.runFrame(true, 4, controller.signal);
+  assert.deepEqual(output, ['theme0', 'theme1']);
+  scheduler.runFrame(true);
+  await store;
+  assert.deepEqual(output, ['theme0', 'theme1', 'store0']);
+});
+
 test('a hidden or transitioning frame holds both the next upload and release', async () => {
   const {scheduler, output, batch} = fixture();
   let released = false;

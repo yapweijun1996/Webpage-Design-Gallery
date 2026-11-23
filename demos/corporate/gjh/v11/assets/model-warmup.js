@@ -27,17 +27,18 @@ export function createUploadScheduler({now = () => performance.now(), budgetMs =
     });
   }
 
-  function runFrame(canRun, remaining = budgetMs) {
+  function runFrame(canRun, remaining = budgetMs, onlySignal) {
     if (!canRun || !jobs.length) return 0;
     const start = now();
     let steps = 0;
     while (jobs.length && steps < maxSteps && now() - start < Math.min(budgetMs, remaining)) {
-      let job = jobs[0], priority = job.priority();
-      for (let i = 1; i < jobs.length; i++) {
-        const candidate = jobs[i];
+      let job, priority;
+      for (const candidate of jobs) {
+        if (onlySignal && candidate.signal !== onlySignal) continue;
         const rank = candidate.priority();
-        if (rank < priority) { job = candidate; priority = rank; }
+        if (!job || rank < priority) { job = candidate; priority = rank; }
       }
+      if (!job) break;
       try {
         job.iterator ??= job.makeSteps();
         const step = job.iterator.next();
@@ -383,7 +384,7 @@ export function createModelWarmup(T, renderer) {
     get arrivalRevision(){return arrivalRevision;},
     pendingMeshes:()=>Array.from(pendingBatches).flatMap(batch=>batch.map(entry=>entry.mesh)),
     report:scheduler.report,
-    runFrame(canRun, remaining) { return scheduler.runFrame(canRun && !renderer.getContext().isContextLost(), remaining); },
+    runFrame(canRun, remaining, onlySignal) { return scheduler.runFrame(canRun && !renderer.getContext().isContextLost(), remaining, onlySignal); },
     invalidate() { initialized = new WeakMap(); scheduler.invalidate(); },
     dispose() { scheduler.dispose(); target.dispose(); }};
 }

@@ -4558,21 +4558,24 @@ function createUploadScheduler({ now = () => performance.now(), budgetMs = 4, ma
       signal?.addEventListener("abort", job.cancel, { once: true });
     });
   }
-  function runFrame(canRun, remaining = budgetMs) {
+  function runFrame(canRun, remaining = budgetMs, onlySignal) {
     if (!canRun || !jobs.length)
       return 0;
     const start = now();
     let steps = 0;
     while (jobs.length && steps < maxSteps && now() - start < Math.min(budgetMs, remaining)) {
-      let job = jobs[0], priority = job.priority();
-      for (let i = 1;i < jobs.length; i++) {
-        const candidate = jobs[i];
+      let job, priority;
+      for (const candidate of jobs) {
+        if (onlySignal && candidate.signal !== onlySignal)
+          continue;
         const rank = candidate.priority();
-        if (rank < priority) {
+        if (!job || rank < priority) {
           job = candidate;
           priority = rank;
         }
       }
+      if (!job)
+        break;
       try {
         job.iterator ??= job.makeSteps();
         const step = job.iterator.next();
@@ -4961,8 +4964,8 @@ function createModelWarmup(T, renderer) {
     },
     pendingMeshes: () => Array.from(pendingBatches).flatMap((batch) => batch.map((entry) => entry.mesh)),
     report: scheduler.report,
-    runFrame(canRun, remaining) {
-      return scheduler.runFrame(canRun && !renderer.getContext().isContextLost(), remaining);
+    runFrame(canRun, remaining, onlySignal) {
+      return scheduler.runFrame(canRun && !renderer.getContext().isContextLost(), remaining, onlySignal);
     },
     invalidate() {
       initialized = new WeakMap;
@@ -6806,6 +6809,7 @@ var atmosphere = null;
 var npcs = null;
 var spatialHud = null;
 var themeStage = null;
+var themeUploadSignal;
 var themeMidnightTimer;
 var initialized = false;
 var fatal = false;
@@ -7817,11 +7821,19 @@ function animate(now) {
   if (!slotMs)
     return;
   const live = advancing && !modes.paused() || modes.current() === "shelf";
-  const uploadMs = cartWarming || live || tierQueue?.pending || renderRequested && (forceRender || !modes.paused()) ? warmModels(player.state) : 0;
+  const pausedTheme = themeUploadSignal && !themeUploadSignal.aborted && modes.paused() && !windowBlurred && !contextLost && !restorePending;
+  let uploadMs = 0;
+  if (pausedTheme) {
+    uploadMs = modelWarmup.runFrame(true, undefined, themeUploadSignal);
+    maxFrameUploadMs = Math.max(maxFrameUploadMs, uploadMs);
+  } else if (cartWarming || live || tierQueue?.pending || renderRequested && (forceRender || !modes.paused())) {
+    uploadMs = warmModels(player.state);
+  }
+  const coverWarmup = cartWarming || pausedTheme;
   let pose, callbackMs = 0;
-  if (live || renderRequested || cartWarming) {
+  if (live || renderRequested || coverWarmup) {
     const renderStart = performance.now();
-    const force = forceRender || cartWarming;
+    const force = forceRender || coverWarmup;
     renderRequested = forceRender = false;
     if (advancing && !modes.paused() && !shelfFocus?.open) {
       player.updateCamera(Math.min(0.1, slotMs / 1000), false, fixedClock.alpha);
@@ -8401,11 +8413,15 @@ async function initialize() {
           throw new Error("Theme preparation cancelled");
         const stage = pack[definition.prepare](T, world.scene, theme, { signal });
         if (ready) {
+          themeUploadSignal = signal;
           try {
             await prepareModel(stage.group, { signal });
           } catch (error) {
             stage.dispose();
             throw error;
+          } finally {
+            if (themeUploadSignal === signal)
+              themeUploadSignal = undefined;
           }
         }
         return stage;
