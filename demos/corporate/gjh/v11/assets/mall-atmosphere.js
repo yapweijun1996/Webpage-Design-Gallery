@@ -20,7 +20,7 @@ const SURFACES = {
 // Fixture tints are in display sRGB. Kelvin and focus coordinates still come
 // from the shop programme. These tints describe the light, not the brand paint.
 const SHOP_LAMPS = {
-  S01:0xffd193, S02:0xf5dfa5, S03:0xe9eab8,
+  S01:0xffe2c5, S02:0xf5dfa5, S03:0xe9eab8,
   S13:0xe3f1ff, S14:0xf8e3c2, S15:0xffc47d
 };
 

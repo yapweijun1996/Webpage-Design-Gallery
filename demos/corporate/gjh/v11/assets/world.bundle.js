@@ -8977,7 +8977,7 @@ var SURFACES = {
   detailed: { roughness: 0.85, emission: 1.1, washOpacity: 0.94 }
 };
 var SHOP_LAMPS = {
-  S01: 16765331,
+  S01: 16769733,
   S02: 16113573,
   S03: 15329976,
   S13: 14938623,

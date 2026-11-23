@@ -3858,7 +3858,7 @@ function allowMallLightWash(deviceClass, context) {
   return /GeForce|Quadro|NVIDIA RTX|Radeon RX (?!Vega |[0-9]+M Graphics)/i.test(adapter ?? "");
 }
 var SHOP_LAMPS = {
-  S01: 16765331,
+  S01: 16769733,
   S02: 16113573,
   S03: 15329976,
   S13: 14938623,
