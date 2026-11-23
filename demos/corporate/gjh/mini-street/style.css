@@ -275,33 +275,243 @@ dialog h2 { margin-right: 44px; }
 .pack-list strong, .pack-list span { padding-inline: 2px; }
 .pack-list span { color: var(--color-pack-meta); }
 .back { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-back-link); }
-.capsules {
+dialog[aria-labelledby="vending-title"] { width: min(100% - 26px, 510px); }
+#vending { padding-inline: clamp(12px, 4vw, 26px); }
+#vending-instructions { margin-block: 8px 14px; }
+.vending-machine {
+  position: relative;
+  isolation: isolate;
+  padding: clamp(9px, 2.8vw, 15px);
+  border: 1px solid var(--color-vending-cabinet-trim);
+  border-bottom: 5px solid var(--color-vending-cabinet-base);
+  border-radius: var(--radius-vending-cabinet);
+  background: var(--surface-vending-cabinet);
+  box-shadow: var(--shadow-vending-cabinet);
+}
+.vending-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-bottom: 9px;
+  border: 1px solid var(--color-vending-header-trim);
+  border-radius: var(--radius-vending-face-control);
+  background: var(--surface-vending-header);
+  box-shadow: var(--shadow-vending-header);
+  color: var(--color-vending-lit-text);
+  font: var(--font-vending-header);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-shadow: var(--shadow-vending-header-text);
+}
+.vending-moon {
+  width: 17px;
+  height: 17px;
+  border-radius: var(--radius-circle);
+  box-shadow: var(--shadow-vending-moon);
+  transform: rotate(-19deg);
+}
+.vending-face {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(78px, 26%, 115px);
+  gap: clamp(6px, 2.1vw, 10px);
+}
+.vending-stock {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px 3px;
+  padding: 7px 4px;
+  border: 2px solid var(--color-vending-stock-trim);
+  border-radius: var(--radius-vending-panel);
+  background: var(--surface-vending-stock);
+  box-shadow: var(--shadow-vending-stock);
 }
-.capsules button {
-  padding: 10px 4px;
-  background: var(--color-capsule-surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  font-size: var(--type-capsule);
+.vending-slot {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  justify-items: center;
+  align-items: start;
+  min-width: var(--radius-vending-bottle);
+  min-height: 100px;
+  padding: 4px 1px 3px;
+  border: 1px solid transparent;
+  border-bottom: 2px solid var(--color-vending-slot-trim);
+  border-radius: var(--radius-vending-inset);
+  color: var(--color-vending-slot-text);
+  background: var(--surface-vending-slot);
+  box-shadow: var(--shadow-vending-slot);
 }
-.capsules button:hover, .capsules button[aria-pressed="true"] { background: var(--color-capsule-hover); border-color: var(--gold); }
-.capsule-icon {
+.vending-slot:enabled:hover { border-color: var(--color-vending-slot-hover); }
+.vending-slot[aria-pressed="true"] {
+  border-color: var(--color-vending-slot-selected);
+  background: var(--surface-vending-slot-selected);
+  box-shadow: var(--shadow-vending-slot-selected);
+}
+.vending-slot[aria-pressed="true"]::before {
+  content: "";
+  position: absolute;
+  top: var(--radius-vending-face-control);
+  right: var(--radius-vending-inset);
+  width: var(--radius-vending-face-control);
+  height: var(--radius-vending-face-control);
+  border-radius: var(--radius-circle);
+  background: var(--color-vending-slot-selected);
+  box-shadow: var(--shadow-vending-slot-marker);
+}
+.vending-slot:focus-visible { z-index: var(--layer-vending-stock-detail); outline-offset: -3px; }
+.vending-slot:disabled, .vending-machine button[aria-disabled="true"] { cursor: default; }
+.vending-code {
+  min-width: 24px;
+  margin-top: 3px;
+  padding: 1px 3px;
+  border-radius: var(--radius-vending-small-detail);
+  background: var(--color-vending-code-surface);
+  color: var(--color-vending-code-ink);
+  font: var(--font-vending-code);
+}
+.vending-slot[aria-pressed="true"] .vending-code { background: var(--color-vending-active); }
+.vending-drink-name { margin-top: var(--radius-vending-small-detail); font-size: var(--type-vending-drink-name); font-weight: 650; line-height: 1.16; }
+
+.drink-art {
+  position: relative;
+  display: block;
+  width: var(--size-vending-drink);
+  height: calc(var(--size-vending-drink) * 1.55);
+  filter: var(--filter-vending-drink);
+}
+.drink-art::before, .drink-art::after { position: absolute; display: grid; place-items: center; }
+.drink-art::after {
+  content: attr(data-label);
+  inset: 12% 2% 0;
+  padding-top: 22%;
+  border-radius: var(--radius-vending-can);
+  color: var(--color-vending-drink-ink);
+  font: var(--font-vending-drink-label);
+  background: var(--surface-vending-can-finish), var(--drink-color);
+}
+.drink-art::before {
+  content: "";
+  z-index: var(--layer-vending-stock-detail);
+  inset: 10% 3% auto;
+  height: 8%;
+  border-radius: var(--radius-circle);
+  background: var(--surface-vending-can-lid);
+}
+.drink-art[data-shape="bottle"]::after {
+  inset: 7% 6% 0;
+  padding-top: 59%;
+  border-radius: var(--radius-vending-bottle);
+  clip-path: polygon(31% 0, 69% 0, 71% 17%, 92% 29%, 100% 39%, 100% 93%, 91% 100%, 9% 100%, 0 93%, 0 39%, 8% 29%, 29% 17%);
+  background: var(--surface-vending-bottle-finish), var(--drink-color);
+}
+.drink-art[data-shape="bottle"]::before {
+  inset: 0 27% auto;
+  height: 13%;
+  border-radius: var(--radius-vending-bottle-cap);
+  border-top: 1px solid var(--color-vending-bottle-cap-trim);
+  background: var(--surface-vending-bottle-cap);
+}
+.vending-machine:is([data-phase="dispensing"], [data-phase="ready"]) .vending-slot[aria-pressed="true"] .drink-art { visibility: hidden; }
+.vending-flight { position: absolute; z-index: var(--layer-vending-flight); pointer-events: none; }
+
+.vending-controls {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  padding: var(--radius-vending-panel);
+  border: 1px solid var(--color-vending-controls-trim);
+  border-radius: var(--radius-vending-panel);
+  background: var(--surface-vending-controls);
+  box-shadow: var(--shadow-vending-controls);
+}
+.vending-readout {
+  display: grid;
+  align-content: start;
+  gap: var(--radius-vending-face-control);
+  min-height: 80px;
+  padding: var(--radius-vending-face-control);
+  border: 1px solid var(--color-vending-readout-trim);
+  border-radius: var(--radius-vending-inset);
+  background: var(--color-vending-readout-surface);
+  box-shadow: var(--shadow-vending-readout);
+  color: var(--color-vending-readout-text);
+  font: var(--font-vending-readout);
+  overflow-wrap: anywhere;
+}
+.vending-indicator {
+  width: var(--radius-vending-panel);
+  height: var(--radius-vending-panel);
+  border-radius: var(--radius-circle);
+  background: var(--color-vending-indicator);
+  box-shadow: var(--shadow-vending-indicator);
+}
+.vending-machine[data-phase="dispensing"] .vending-indicator { background: var(--color-vending-active); box-shadow: var(--shadow-vending-indicator-active); }
+.vending-serve {
+  min-height: 44px;
+  padding: var(--radius-vending-inset);
+  border: 1px solid var(--color-vending-serve-trim);
+  border-radius: var(--radius-vending-face-control);
+  color: var(--color-vending-serve-ink);
+  background: var(--surface-vending-serve);
+  box-shadow: var(--shadow-vending-serve);
+  font-weight: 800;
+}
+.vending-serve[aria-disabled="true"] { border-color: var(--color-vending-disabled-trim); color: var(--color-vending-disabled-ink); background: var(--color-vending-disabled-surface); box-shadow: var(--shadow-vending-disabled); }
+.vending-machine button:active:not(:disabled, [aria-disabled="true"]) { box-shadow: var(--shadow-vending-pressed); }
+.vending-hardware {
+  display: grid;
+  gap: 7px;
+  color: var(--color-vending-hardware-label);
+  font-size: var(--type-vending-hardware-label);
+  line-height: 1.1;
+  text-align: center;
+}
+.vending-hardware span::before {
+  content: "";
+  display: block;
+  height: var(--radius-vending-face-control);
+  margin: 1px 3px 3px;
+  border: 1px solid var(--color-vending-hardware-trim);
+  border-radius: var(--radius-vending-small-detail);
+  background: var(--color-vending-hardware-surface);
+}
+.vending-hardware span:first-child::before { border-top-color: var(--color-vending-coin-trim); box-shadow: var(--shadow-vending-coin-slot); }
+
+.vending-tray {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-height: 63px;
+  margin-top: 9px;
+  padding: 3px;
+  border: 2px solid var(--color-vending-tray-trim);
+  border-radius: var(--radius-vending-panel);
+  background: var(--surface-vending-tray);
+  box-shadow: var(--shadow-vending-tray);
+  color: var(--color-vending-tray-label);
+}
+.vending-pocket {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
-  margin: 0 auto 6px;
-  font-size: var(--type-capsule-icon);
-  background: var(--color-capsule-cloud);
-  color: var(--color-capsule-ink);
-  border-radius: var(--radius-circle);
+  height: max(52px, calc(var(--size-vending-drink) * 1.55 + 2px));
+  border: 1px solid var(--color-vending-pocket-trim);
+  border-radius: var(--radius-vending-inset);
+  background: var(--surface-vending-pocket);
+  box-shadow: var(--shadow-vending-pocket);
 }
-[data-vend="leaf"] .capsule-icon { background: var(--color-capsule-blossom); }
-[data-vend="star"] .capsule-icon { background: var(--color-capsule-star); }
-.detail .vending-result { min-height: 2.8em; margin-bottom: 6px; }
+.vending-pocket .drink-art { transform: rotate(82deg); }
+.vending-tray-label { padding: 0 9px; font-size: var(--type-vending-tray-label); font-weight: 750; }
+.vending-tray[aria-disabled="false"] { border-color: var(--color-vending-active); color: var(--color-vending-lit-text); box-shadow: var(--shadow-vending-tray-ready); }
+.vending-vent {
+  width: 54%;
+  height: 9px;
+  margin: 8px auto 0;
+  border-block: 1px solid var(--color-vending-vent-trim);
+  background: var(--surface-vending-vent);
+}
 
 @media (max-width: 720px) {
   .masthead-inner, .street { width: calc(100% - 24px); }
@@ -331,6 +541,7 @@ dialog h2 { margin-right: 44px; }
 }
 
 @media (max-width: 370px) {
+  #vending { padding-inline: 10px; }
   .toolbar { flex-wrap: wrap; }
   .lighting button { min-width: 64px; padding: 0 8px; }
 }

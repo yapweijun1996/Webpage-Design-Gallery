@@ -2,9 +2,11 @@
 
 ## Deliverable and scope
 
-An independent, unofficial 3D street outside the existing GJH Virtual Mall concept. The visitor can look around a rainy SG/MY-inspired shophouse street, browse New Moon packshots, try a fictional capsule and follow the mall entrance to v11. The street uses real camera movement and a day/night lighting toggle. On phones the camera opens on the storefront and vending machine. Drag left or press Look right three times to frame the full mall arch. At tablet and desktop widths the opening view includes the covered walkway and mall canopy.
+An independent, unofficial 3D street outside the existing GJH Virtual Mall concept. The visitor can look around a rainy SG/MY-inspired shophouse street, browse New Moon packshots, dispense a fictional drink and follow the mall entrance to v11. The street uses real camera movement and a day/night lighting toggle. On phones the camera opens on the storefront and vending machine. Drag left or press Look right three times to frame the full mall arch. At tablet and desktop widths the opening view includes the covered walkway and mall canopy.
 
 The upstairs window openings pass through the facade and have deep jambs, fanlight bars, shutters, curtains and pendant shades. The shop has a recessed glazed doorway, staggered cases, a tea counter and back shelves under timber ceiling beams. Striped fabric hangs from a roller with visible ribs and braces. Potted plants, a teapot beside the bench, the gold crescent on the vending machine and the visitor's tote give the five-foot way a sense of scale. Drain grates and a curved curb lead past the mall into another row of shophouses. The rainy evening uses warm light pools and a low-resolution planar reflection with irregular pools and gutter runoff. In daylight the fixtures dim and the paving retains a weaker reflection.
+
+The green cabinet has lit shelves with two rows of coded cans and bottles, a demo reader and a recessed pickup tray. The machine and its close-up share the same six fictional drinks and shelf codes. Choose a slot, press Vend, then collect the drink from the tray to start another round. The simulation is free and resets when you leave the close-up.
 
 The mall portal has a cream stone rim, illuminated brass fins and a two-line GJH Virtual Mall marquee. A stepped threshold leads into a recessed glazed vestibule with ceiling lights and a warm lobby behind it. The portal's silhouette accepts canvas clicks and taps. On wider screens the Enter Mall link sits near the foot of the steps, leaving the marquee and doors visible.
 
@@ -20,7 +22,7 @@ python3 scripts/build_gallery.py --output "$preview_dir/Webpage-Design-Gallery"
 python3 -m http.server 8000 --directory "$preview_dir"
 ```
 
-Open `http://localhost:8000/Webpage-Design-Gallery/` for the Gallery or append `demos/corporate/gjh/mini-street/` for the direct route. The generator includes `script.js`, `scene.js`, `world.js`, `surfaces.js`, the shelf label atlas, the three screenshots, the thumbnail and the referenced v11 files. For development, serving the repository root with `python3 -m http.server 8000` also exposes the direct route at `/demos/corporate/gjh/mini-street/`.
+Open `http://localhost:8000/Webpage-Design-Gallery/` for the Gallery or append `demos/corporate/gjh/mini-street/` for the direct route. The generator includes `script.js`, `scene.js`, `world.js`, `surfaces.js`, `vending.js`, the shelf label atlas, the three screenshots, the thumbnail and the referenced v11 files. For development, serving the repository root with `python3 -m http.server 8000` also exposes the direct route at `/demos/corporate/gjh/mini-street/`.
 
 ## Offline and fallback behavior
 
@@ -36,13 +38,17 @@ The Gallery shell can show the collection and Mini Street thumbnail after its ca
 
 ## Known limits
 
-WebGL 2 is required for 3D. The HTML stops and shop images remain available during a WebGL failure. Reload the page to retry 3D after a lost context. With JavaScript disabled, the stop links jump to details on the page and capsule selection is unavailable. Reduced motion renders stationary rain streaks in the night view. The camera covers a bounded street view, and the mobile starting view frames the shop and vending machine. The scene uses stylized architecture and a stationary visitor. The display models indicate the four packs and use approximate tin geometry. The dialog provides the full packshots. The capsule interaction is virtual and transient. The v11 receipts describe the packaging at capture time. Current packaging and physical-device performance remain unverified.
+WebGL 2 is required for 3D. The HTML stops, shop images and working vending close-up remain available during a WebGL failure. Reload the page to retry 3D after a lost context. With JavaScript disabled, the stop links jump to the inline details, where the vending stop explains how to enable the simulation. Reduced motion renders stationary rain streaks and places the dispensed drink directly in the tray. The camera covers a bounded street view, and the mobile starting view frames the shop and vending machine. The scene uses stylized architecture and a stationary visitor. The display models indicate the four packs and use approximate tin geometry. The dialog provides the full packshots. The v11 receipts describe the packaging at capture time. Current packaging and physical-device performance remain unverified.
 
 ## Registration verification
 
-The collection entry answers what visitors can explore before entering the mall. The New Moon street stop opens a panel with four packshots and their labeled weights. The vending stop reveals a fictional keepsake, and Enter Mall opens v11's arrivals page.
+The collection entry answers what visitors can explore before entering the mall. The New Moon street stop opens a panel with four packshots and their labeled weights. The vending stop opens the interactive drink machine, and Enter Mall opens v11's arrivals page.
 
-The saved captures show the mall entrance in build `a71aa8c02f698adf`; the historical browser results below cover earlier builds. The captures use reduced motion for a reproducible first screen. Each was taken from the running WebGL prototype at 390 × 844, 768 × 1024 or 1440 × 900 CSS pixels. The 720 × 450 collection thumbnail is a downsample of the desktop capture.
+The saved captures show the street in build `0efd7bd13d41d0e5`; the historical browser results below cover earlier builds. The captures use reduced motion for a reproducible first screen. Each was taken from the running WebGL prototype at 390 × 844, 768 × 1024 or 1440 × 900 CSS pixels. The 720 × 450 collection thumbnail is a downsample of the desktop capture.
+
+### Vending machine pass
+
+Real HTTP Chromium and WebKit checks of the vending implementation exercised the virtual drinks, tray collection, history and rapid reopening, reduced motion, WebGL fallback, and a stalled-animation fallback before integration onto main `6e8520a1`. Touch controls were checked at 320 × 568; no physical device testing was performed. The gallery export explicitly includes the shared vending module, and the existing v11 crowd regression remains a separately documented baseline limitation.
 
 ### Mall entrance pass
 
@@ -78,6 +84,6 @@ The earlier `06e505d627ee533b` run served generated files by request interceptio
 
 1. Open the route at desktop, tablet and phone widths. Confirm the rainy evening scene, readable street stops and visible camera and lighting controls.
 2. Drag the canvas or use the directional buttons, then reset. Tap or click the storefront and vending machine in the scene. Use Tab and Enter to open each labeled stop, then check focus returns after Back, Close and Escape.
-3. Check the shop's four packshots and displayed weights. In vending, select each capsule and check its fictional result.
+3. Check the shop's four packshots and displayed weights. In vending, select a can and then a bottle. Check the selection, press Vend, watch the drink settle in the tray, and collect it. Start again, close during the drop and reopen with the same link. Repeat with the keyboard and with reduced motion enabled.
 4. Switch Day on and return to Night. Check the sky, window glow, road reflections and rain. Repeat with reduced motion enabled.
 5. On a phone, turn right until the full mall arch is in view. Tap or click the 3D doorway to open v11, then use browser Back to return. Repeat with the Enter Mall link using Tab and Enter and under a nested URL prefix. Disable WebGL and repeat the HTML stop flows, then disable JavaScript and check the inline shop and vending details and the Enter Mall link.

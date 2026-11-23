@@ -6,69 +6,42 @@ const stops = [...document.querySelectorAll("[data-stop]")];
 const dialog = document.querySelector("#stop-dialog");
 const weather = document.querySelector("#weather");
 const sections = [...document.querySelectorAll(".stop-details .detail")];
-const capsules = [...document.querySelectorAll("[data-vend]")];
-const result = document.querySelector(".vending-result");
-const keepsakes = {
-  cloud: "A tiny blue cloud charm.",
-  leaf: "A pink blossom token.",
-  star: "A little gold paper star.",
-};
+const vendingSection = document.querySelector("#vending");
+let vending = { reset() {} };
+// Keep the street links and shop usable if the optional machine fails to load.
+import("./vending.js").then(({ setupVending }) => {
+  vending = setupVending(vendingSection);
+}).catch(() => {
+  vendingSection.querySelector("#vending-note").textContent = "The virtual drink machine could not load. Please try again.";
+});
 
-let previousFocus;
 let street;
 
 if (typeof dialog.showModal === "function") {
   const sectionsByHash = new Map(sections.map((section) => [`#${section.id}`, section]));
   const historyMarker = "__gjhMiniStreetStop";
   let pendingOpener = null;
+  let closingWithBack = false;
+  let deferredStop;
+  let previousFocus;
+  let activeSection;
   function decodedHash() {
     try { return decodeURIComponent(location.hash); }
     catch { return ""; }
   }
   dialog.append(...sections);
 
-  function syncLocation() {
-    const hash = decodedHash();
-    const selected = sectionsByHash.get(hash);
-    if (!selected) {
-      pendingOpener = null;
-      if (dialog.open) dialog.close();
-      return;
-    }
-    previousFocus = pendingOpener || stops.find((stop) => stop.hash === hash);
-    pendingOpener = null;
-    if (dialog.open && !selected.hidden) return;
-    for (const section of sections) section.hidden = section !== selected;
-    dialog.setAttribute("aria-labelledby", selected.getAttribute("aria-labelledby"));
-    result.textContent = "";
-    for (const capsule of capsules) capsule.setAttribute("aria-pressed", "false");
-    if (!dialog.open) dialog.showModal();
-    dialog.scrollTop = 0;
-    street?.setPaused(true);
-    selected.querySelector("h2").focus();
-  }
-
-  for (const stop of stops.filter((link) => sectionsByHash.has(link.hash))) {
-    stop.addEventListener("click", (event) => {
-      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-      event.preventDefault();
-      pendingOpener = stop;
-      if (decodedHash() !== stop.hash) {
-        const previousState = history.state;
-        const state = previousState && typeof previousState === "object" && !Array.isArray(previousState)
-          ? {...previousState} : {};
-        state[historyMarker] = true;
-        history.pushState(state, "", stop.hash);
-      }
-      syncLocation();
-    });
-  }
-  window.addEventListener("hashchange", syncLocation);
-  dialog.addEventListener("close", () => {
-    if (dialog.open) return;
-    if (sectionsByHash.has(decodedHash())) {
-      if (history.state?.[historyMarker]) history.back();
-      else {
+  function closeStop(updateLocation) {
+    if (!activeSection) return;
+    const hash = `#${activeSection.id}`;
+    if (activeSection === vendingSection) vending.reset();
+    activeSection = undefined;
+    if (dialog.open) dialog.close();
+    if (updateLocation && decodedHash() === hash) {
+      if (history.state?.[historyMarker]) {
+        closingWithBack = true;
+        history.back();
+      } else {
         const url = new URL(location.href);
         url.hash = "";
         history.replaceState(history.state, "", url);
@@ -76,13 +49,67 @@ if (typeof dialog.showModal === "function") {
     }
     street?.setPaused(false);
     previousFocus?.focus();
-  });
-  for (const link of dialog.querySelectorAll(".back")) {
-    link.addEventListener("click", (event) => {
+  }
+
+  function syncLocation() {
+    const hash = decodedHash();
+    const selected = sectionsByHash.get(hash);
+    const opener = pendingOpener || stops.find((stop) => stop.hash === hash);
+    pendingOpener = null;
+    if (!selected) {
+      closeStop(false);
+      return;
+    }
+    if (dialog.open && activeSection === selected) return;
+    if (activeSection === vendingSection || selected === vendingSection) vending.reset();
+    activeSection = selected;
+    previousFocus = opener;
+    for (const section of sections) section.hidden = section !== selected;
+    dialog.setAttribute("aria-labelledby", selected.getAttribute("aria-labelledby"));
+    if (!dialog.open) dialog.showModal();
+    dialog.scrollTop = 0;
+    street?.setPaused(true);
+    selected.querySelector("h2").focus();
+  }
+
+  function openStop(stop) {
+    pendingOpener = stop;
+    if (decodedHash() !== stop.hash) {
+      const previousState = history.state;
+      const state = previousState && typeof previousState === "object" && !Array.isArray(previousState)
+        ? {...previousState} : {};
+      state[historyMarker] = true;
+      history.pushState(state, "", stop.hash);
+    }
+    syncLocation();
+  }
+
+  for (const stop of stops.filter((link) => sectionsByHash.has(link.hash))) {
+    stop.addEventListener("click", (event) => {
+      if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      dialog.close();
+      // A close-triggered Back can still be pending when the user opens another stop.
+      if (closingWithBack) deferredStop = stop;
+      else openStop(stop);
     });
   }
+  window.addEventListener("hashchange", () => {
+    closingWithBack = false;
+    const stop = deferredStop;
+    deferredStop = undefined;
+    if (stop) openStop(stop);
+    else syncLocation();
+  });
+  dialog.addEventListener("close", () => {
+    if (!dialog.open) closeStop(true);
+  });
+  function dismiss(event) {
+    event.preventDefault();
+    closeStop(true);
+  }
+  dialog.addEventListener("cancel", dismiss);
+  dialog.querySelector("form").addEventListener("submit", dismiss);
+  for (const link of dialog.querySelectorAll(".back")) link.addEventListener("click", dismiss);
   syncLocation();
   if (document.readyState !== "complete") {
     window.addEventListener("load", () => requestAnimationFrame(() => {
@@ -91,18 +118,8 @@ if (typeof dialog.showModal === "function") {
       }
     }), {once: true});
   }
-}
-
-document.querySelector("#vending-note").hidden = true;
-document.querySelector("#vending-instructions").hidden = false;
-document.querySelector(".capsules").hidden = false;
-result.hidden = false;
-for (const capsule of capsules) {
-  capsule.setAttribute("aria-pressed", "false");
-  capsule.addEventListener("click", () => {
-    for (const button of capsules) button.setAttribute("aria-pressed", String(button === capsule));
-    result.textContent = keepsakes[capsule.dataset.vend];
-  });
+} else {
+  window.addEventListener("hashchange", () => vending.reset());
 }
 
 const showFallback = () => {

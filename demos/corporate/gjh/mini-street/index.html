@@ -43,7 +43,7 @@
             <span class="stop-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18H6zM9 6h6v7H9zM10 17h4"/></svg>
             </span>
-            <span><strong>Vending</strong><small>Try a capsule</small></span>
+            <span><strong>Vending</strong><small>Choose a drink</small></span>
           </a>
           <a class="stop stop-mall" data-stop="mall" href="../v11/" aria-label="Enter Virtual Mall">
             <span class="stop-icon" aria-hidden="true">
@@ -91,14 +91,31 @@
       </section>
       <section class="detail" id="vending" aria-labelledby="vending-title">
         <h2 id="vending-title" tabindex="-1">Vending machine</h2>
-        <p id="vending-note">The capsule preview requires JavaScript.</p>
-        <p id="vending-instructions" hidden>Choose a capsule to reveal a fictional keepsake.</p>
-        <div class="capsules" hidden>
-          <button type="button" data-vend="cloud"><span class="capsule-icon" aria-hidden="true">☁</span>Cloud</button>
-          <button type="button" data-vend="leaf"><span class="capsule-icon" aria-hidden="true">✿</span>Blossom</button>
-          <button type="button" data-vend="star"><span class="capsule-icon" aria-hidden="true">✦</span>Star</button>
+        <p id="vending-note">This virtual drink machine requires JavaScript to operate.</p>
+        <p id="vending-instructions" hidden>Pick a fictional drink, press Vend, then collect it. Free simulation.</p>
+        <div class="vending-machine" data-phase="idle" hidden>
+          <div class="vending-header" aria-hidden="true">
+            <span class="vending-moon"></span><span>Cold drinks</span>
+          </div>
+          <div class="vending-face">
+            <div class="vending-stock" role="group" aria-label="Drink slots"></div>
+            <div class="vending-controls">
+              <div class="vending-readout" role="status" aria-atomic="true">
+                <span class="vending-indicator" aria-hidden="true"></span>
+                <span class="vending-message">Choose a drink</span>
+              </div>
+              <button class="vending-serve" type="button" aria-disabled="true">Vend</button>
+              <div class="vending-hardware" aria-hidden="true">
+                <span>Demo reader</span><span>Receipt</span>
+              </div>
+            </div>
+          </div>
+          <button class="vending-tray" type="button" aria-disabled="true">
+            <span class="vending-pocket" aria-hidden="true"></span>
+            <span class="vending-tray-label">Collect drink</span>
+          </button>
+          <div class="vending-vent" aria-hidden="true"></div>
         </div>
-        <p class="vending-result" role="status" hidden></p>
         <a class="back" href="#street">← Back to street</a>
       </section>
     </div>

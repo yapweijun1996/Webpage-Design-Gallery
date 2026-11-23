@@ -1,5 +1,6 @@
 import * as THREE from "../v11/vendor/three.module.min.js";
 import { paintedTexture, pavingTexture, streetTextures } from "./surfaces.js";
+import { drinks } from "./vending.js";
 
 const NIGHT = {
   sky: "#56677d", haze: "#53617a", top: "#1d3151", ground: "#ad8270", ambient: "#9fb7d8",
@@ -74,7 +75,6 @@ export function buildWorld(scene, invalidate) {
   const lampGlow = glow("#ffad5c");
   const neon = glow("#ffb653");
   const roomGlow = glow("#ffad68");
-  const displayColors = ["#da9cb0", "#f3c26d", "#76bdac", "#98ade3"].map(glow);
 
   const cube = new THREE.BoxGeometry(1, 1, 1);
   const plane = new THREE.PlaneGeometry(1, 1);
@@ -286,7 +286,7 @@ export function buildWorld(scene, invalidate) {
       ctx.font = `${h * 0.24}px Georgia`;
       for (const x of [0.15, 0.85]) ctx.fillText("✦", w * x, h * 0.50);
     } else {
-      ctx.font = `${h * 0.4}px Georgia`;
+      ctx.font = `bold ${h * 0.58}px Georgia`;
       ctx.fillText(title, w * 0.50, h * 0.52, w * 0.86);
     }
     const art = new THREE.CanvasTexture(canvas);
@@ -834,53 +834,158 @@ export function buildWorld(scene, invalidate) {
   }
 
   function vending(x, z) {
-    box(ink, x, 1.19, z, 1.22, 2.29, 0.75);
-    box(deepGreen, x, 1.22, z + 0.18, 1.15, 2.16, 0.44);
-    box(brass, x, 1.94, z + 0.407, 0.95, 0.09, 0.027);
-    box(cream, x - 0.108, 1.40, z + 0.407, 0.75, 1.06, 0.032);
-    box(ink, x - 0.108, 1.42, z + 0.428, 0.66, 0.94, 0.017);
-    sign(x, 2.12, z + 0.432, 0.99, 0.26, "VENDING");
-    box(lightGreen, x, 2.349, z + 0.045, 1.24, 0.065, 0.83);
-    box(brass, x, 2.336, z + 0.46, 1.16, 0.032, 0.035);
-    for (let row = 0; row < 5; row += 1) {
-      const y = 1.08 + row * 0.175;
-      box(neon, x - 0.108, y - 0.068, z + 0.45, 0.65, 0.018, 0.03);
-      for (let column = 0; column < 4; column += 1) {
-        const cx = x - 0.35 + column * 0.16;
-        ellipsoid(displayColors[(row + column) % 4], cx, y, z + 0.45, 0.060, 0.066, 0.038);
-        box(cream, cx, y - 0.01, z + 0.486, 0.06, 0.012, 0.008);
+    const enamel = surface("#244e3c", 0.39);
+    const edge = surface("#486956", 0.35);
+    const steel = surface("#a6b1a8", 0.35);
+    const liner = glow("#76654c");
+    const drinkFinishes = drinks.map(({ color }) => glow(color));
+    const bay = x - 0.13;
+    const panel = x + 0.397;
+
+    // The front returns leave real depth behind the display glass and pickup lip.
+    box(enamel, x, 1.21, z - 0.14, 1.18, 2.21, 0.49);
+    for (const side of [-1, 1]) {
+      box(enamel, x + side * 0.558, 1.21, z + 0.035, 0.084, 2.21, 0.83);
+      box(edge, x + side * 0.585, 1.25, z + 0.44, 0.049, 2.12, 0.045);
+      box(ink, x + side * 0.46, 0.102, z + 0.04, 0.13, 0.078, 0.58);
+    }
+    box(enamel, x, 0.188, z + 0.037, 1.19, 0.145, 0.81);
+    box(edge, x, 2.345, z + 0.037, 1.24, 0.067, 0.85);
+    box(brass, x, 2.33, z + 0.458, 1.15, 0.023, 0.028);
+    box(enamel, x, 2.15, z + 0.255, 1.11, 0.30, 0.38);
+    sign(x, 2.145, z + 0.447, 0.97, 0.195, "COLD DRINKS");
+
+    box(liner, bay, 1.414, z + 0.133, 0.765, 1.12, 0.037);
+    for (const side of [-1, 1]) {
+      box(ink, bay + side * 0.385, 1.414, z + 0.29, 0.040, 1.15, 0.324);
+      box(brass, bay + side * 0.391, 1.414, z + 0.455, 0.023, 1.17, 0.032);
+      box(displayLight, bay + side * 0.356, 1.433, z + 0.325, 0.014, 1.02, 0.016);
+    }
+    for (const y of [0.834, 1.995]) {
+      box(ink, bay, y, z + 0.29, 0.8, 0.044, 0.33);
+      box(brass, bay, y, z + 0.454, 0.803, 0.025, 0.026);
+    }
+    box(displayLight, bay, 1.967, z + 0.356, 0.74, 0.016, 0.036);
+
+    function packageAt(drink, finish, px, y, pz) {
+      if (drink.shape === "can") {
+        tube(finish, px, y + 0.134, pz, 0.071, 0.236, 0.071);
+        for (const rim of [0.017, 0.252]) tube(steel, px, y + rim, pz, 0.071, 0.019, 0.071);
+        tube(ink, px, y + 0.263, pz, 0.023, 0.005, 0.011);
+        tube(lightCream, px, y + 0.108, pz, 0.072, 0.060, 0.072);
+      } else {
+        tube(finish, px, y + 0.111, pz, 0.062, 0.209, 0.062);
+        stamp(shadeGlass, finish, px, y + 0.248, pz, 0.062, 0.072, 0.062);
+        tube(finish, px, y + 0.292, pz, 0.039, 0.026, 0.039);
+        tube(edge, px, y + 0.312, pz, 0.044, 0.033, 0.044);
+        tube(lightCream, px, y + 0.126, pz, 0.063, 0.074, 0.063);
       }
+      box(finish, px, y + 0.113, pz + 0.068, 0.058, 0.021, 0.015);
     }
-    box(brass, x + 0.37, 1.44, z + 0.415, 0.15, 0.52, 0.04);
-    box(displayColors[2], x + 0.37, 1.57, z + 0.446, 0.095, 0.12, 0.017);
+
+    for (const [row, y] of [1.462, 0.937].entries()) {
+      const lanes = drinks.slice(row * 3, row * 3 + 3);
+      box(steel, bay, y, z + 0.288, 0.745, 0.031, 0.27);
+      box(brass, bay, y - 0.022, z + 0.41, 0.748, 0.063, 0.028);
+      for (const [column, drink] of lanes.entries()) {
+        const px = bay + (column - 1) * 0.241;
+        const finish = drinkFinishes[row * 3 + column];
+        packageAt(drink, finish, px + 0.026, y + 0.017, z + 0.208);
+        packageAt(drink, finish, px, y + 0.017, z + 0.344);
+      }
+      const codes = paintedTexture(384, 24, (ctx, w, h) => {
+        ctx.fillStyle = "#2e2d25";
+        ctx.fillRect(0, 0, w, h);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 18px monospace";
+        for (const [column, drink] of lanes.entries()) {
+          ctx.fillStyle = drink.color;
+          ctx.fillRect((column + 0.12) * w / 3, 5, 14, 14);
+          ctx.fillStyle = "#ffedc8";
+          ctx.fillText(drink.code, (column + 0.5) * w / 3, h * 0.53);
+        }
+      });
+      stamp(plane, new THREE.MeshBasicMaterial({ map: codes }), bay, y - 0.021, z + 0.426, 0.74, 0.06, 1);
+    }
+    const sheen = paintedTexture(128, 192, (ctx, w, h) => {
+      const highlight = ctx.createLinearGradient(0, 0, w, h * 0.45);
+      highlight.addColorStop(0, "#fff7d631");
+      highlight.addColorStop(0.25, "#fff7d616");
+      highlight.addColorStop(0.55, "#c6efd50c");
+      highlight.addColorStop(1, "#d9e6db00");
+      ctx.fillStyle = highlight;
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#fff3db2c";
+      ctx.beginPath();
+      ctx.moveTo(w * 0.48, 0);
+      ctx.lineTo(w * 0.65, 0);
+      ctx.lineTo(0, h * 0.73);
+      ctx.lineTo(0, h * 0.53);
+      ctx.fill();
+    });
+    const displayGlass = new THREE.MeshBasicMaterial({ map: sheen, transparent: true, depthWrite: false });
+    stamp(plane, displayGlass, bay, 1.415, z + 0.454, 0.773, 1.139, 1);
+
+    box(enamel, panel, 1.16, z + 0.274, 0.266, 1.64, 0.34);
+    box(steel, panel, 1.49, z + 0.449, 0.214, 0.861, 0.031);
+    box(ink, panel, 1.49, z + 0.468, 0.184, 0.823, 0.025);
+    const screen = paintedTexture(128, 80, (ctx, w, h) => {
+      ctx.fillStyle = "#10291d";
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = "#c9ed9f";
+      ctx.font = "bold 32px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("DEMO", w / 2, 37);
+      for (let i = 0; i < 3; i += 1) ctx.fillRect(32 + i * 24, 54, 14, 6);
+    });
+    stamp(plane, new THREE.MeshBasicMaterial({ map: screen }), panel, 1.742, z + 0.482, 0.149, 0.101, 1);
+    for (const dx of [-0.045, 0, 0.045]) {
+      box(steel, panel + dx, 1.617, z + 0.488, 0.028, 0.031, 0.02);
+    }
+    box(brass, panel, 1.51, z + 0.488, 0.127, 0.065, 0.024);
+    box(steel, panel, 1.367, z + 0.487, 0.13, 0.068, 0.026);
+    box(ink, panel, 1.371, z + 0.501, 0.095, 0.015, 0.010);
+    box(steel, panel, 1.228, z + 0.487, 0.135, 0.038, 0.026);
+    box(ink, panel, 1.23, z + 0.502, 0.102, 0.014, 0.008);
+
+    box(enamel, bay, 0.742, z + 0.266, 0.78, 0.163, 0.36);
+    box(enamel, bay, 0.323, z + 0.274, 0.78, 0.125, 0.37);
+    box(ink, bay, 0.525, z + 0.153, 0.762, 0.283, 0.019);
+    for (const side of [-1, 1]) box(ink, bay + side * 0.364, 0.529, z + 0.299, 0.058, 0.27, 0.297);
+    box(steel, bay, 0.405, z + 0.31, 0.695, 0.035, 0.292);
+    box(ink, bay, 0.609, z + 0.28, 0.695, 0.102, 0.051, -0.23);
+    for (const y of [0.399, 0.663]) box(brass, bay, y, z + 0.456, 0.778, 0.032, 0.047);
     for (let i = 0; i < 4; i += 1) {
-      ellipsoid(ink, x + 0.37, 1.44 - i * 0.055, z + 0.447, 0.018, 0.018, 0.016);
+      box(ink, x, 0.166 + i * 0.025, z + 0.446, 0.668, 0.012, 0.013);
     }
-    box(brass, x, 0.50, z + 0.415, 0.74, 0.26, 0.039);
-    box(ink, x, 0.50, z + 0.443, 0.63, 0.16, 0.026);
-    box(wood, x, 0.23, z + 0.422, 0.75, 0.19, 0.038);
-    for (let i = 0; i < 5; i += 1) box(brass, x, 0.16 + i * 0.031, z + 0.446, 0.66, 0.012, 0.013);
-    box(lightGreen, x - 0.618, 1.30, z, 0.022, 1.80, 0.56);
+
+    box(edge, x - 0.608, 1.23, z + 0.018, 0.017, 1.85, 0.64);
     const badge = paintedTexture(96, 96, (ctx) => {
-      ctx.fillStyle = "#e4bf6f";
+      ctx.fillStyle = "#f6cc80";
       crescent(ctx, 49, 48, 28);
-      ctx.strokeStyle = "#ad8758";
+      ctx.strokeStyle = "#c59b5f";
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(48, 48, 38, 0, 2 * Math.PI);
       ctx.stroke();
     });
-    const badgeMaterial = new THREE.MeshBasicMaterial({
-      map: badge, transparent: true, opacity: 0.89, depthWrite: false,
-    });
-    const plate = mesh(plane, badgeMaterial, x - 0.642, 1.52, z);
-    plate.scale.set(0.47, 0.47, 1);
-    plate.rotation.y = -Math.PI / 2;
-    for (let i = 0; i < 5; i += 1) {
-      box(ink, x - 0.632, 0.52 + i * 0.036, z, 0.013, 0.014, 0.40);
+    const badgeMaterial = new THREE.MeshBasicMaterial({ map: badge, transparent: true, depthWrite: false });
+    stamp(plane, badgeMaterial, x - 0.619, 1.527, z + 0.012, 0.49, 0.49, 1, 0, -Math.PI / 2);
+    for (const y of [0.42, 2.08]) {
+      for (const dz of [-0.272, 0.306]) tube(steel, x - 0.622, y, z + dz, 0.014, 0.017, 0.014, 0, 0, Math.PI / 2);
+    }
+    for (let i = 0; i < 6; i += 1) {
+      box(ink, x - 0.62, 0.53 + i * 0.032, z + 0.025, 0.012, 0.015, 0.39);
     }
     decal(pool, x, 0.056, z + 0.93, 1.55, 1.91, -Math.PI / 2, 2);
     hit("vending", x, 1.17, z + 0.16, 1.24, 2.34, 0.79);
+
+    return (night) => {
+      liner.emissiveIntensity = night ? 0.49 : 0.15;
+      for (const finish of drinkFinishes) finish.emissiveIntensity = night ? 0.49 : 0.17;
+      displayGlass.opacity = night ? 0.63 : 0.9;
+    };
   }
 
   function mallMarquee(x, spring, z, radius) {
@@ -1276,11 +1381,11 @@ export function buildWorld(scene, invalidate) {
   const mallAnchor = mall(mallX, mallZ);
   house(18.56, 6.80, -5.78, plaster[2], 6.78);
   house(25.29, 6.60, -7.20, plaster[3], 7.15);
-  vending(-0.89, -0.05);
+  const setVendingNight = vending(-0.89, -0.05);
   planter(-8.73, 1.26, 1.38);
   planter(-9.21, 1.55, 0.69, false);
   planter(-7.68, 0.87, 0.73, false);
-  planter(-1.87, 1.16, 0.88);
+  planter(-2.52, 1.16, 0.88);
   planter(1.22, 0.66, 1.13, false);
   planter(3.35, 0.21, 1.18);
   planter(5.74, -1.91, 1.17);
@@ -1359,6 +1464,7 @@ export function buildWorld(scene, invalidate) {
     for (const { point, strength } of lamps) point.intensity = strength * palette.warmly;
     for (const glass of windows) glass.emissiveIntensity = palette.glass;
     labels.emissiveIntensity = night ? 0.33 : 0.08;
+    setVendingNight(night);
     litTimber.emissiveIntensity = night ? 0.65 : 0.22;
     displayLight.emissiveIntensity = night ? 2.2 : 0.32;
     pool.opacity = night ? 0.66 : 0.10;
