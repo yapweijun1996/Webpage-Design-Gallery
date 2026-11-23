@@ -311,11 +311,11 @@ function main() {
     allowPositionals: true,
     options: {
       out: { type: 'string' }, title: { type: 'string' }, minify: { type: 'boolean' },
-      'no-pwa': { type: 'boolean' }, brand: { type: 'string' }, langs: { type: 'string' },
+      'no-pwa': { type: 'boolean' }, sds: { type: 'boolean' }, brand: { type: 'string' }, langs: { type: 'string' },
     },
   });
   if (positionals.length > 1) {
-    throw new Error('Usage: node swarm/tools/export-page.js [projectDir] [--out dir] [--title "text"] [--minify] [--no-pwa] [--brand brand] [--langs en,zh-Hans,ms]');
+    throw new Error('Usage: node swarm/tools/export-page.js [projectDir] [--out dir] [--title "text"] [--minify] [--no-pwa] [--sds] [--brand brand] [--langs en,zh-Hans,ms]');
   }
 
   const projectDir = path.resolve(positionals[0] ?? path.join(SWARM_ROOT, 'projects/home'));
@@ -359,7 +359,8 @@ function main() {
   if (headings !== 1) warnings.push(`Expected exactly one <h1>, found ${headings}`);
 
   const baseCss = rewriteCss(pwa ? PWA_BASE_CSS : BASE_CSS, rewriteImage, minify);
-  const styles = [tokens, baseCss, ...sections.map(section => section.css)].map(css => `<style>\n${css}\n</style>`);
+  const sds = values.sds && !pwa ? SDS_STYLES.map(name => fs.readFileSync(path.join(SDS_ROOT, name), 'utf8')) : [];
+  const styles = [tokens, ...sds, baseCss, ...sections.map(section => section.css)].map(css => `<style>\n${css}\n</style>`);
   const body = sections.map(section => section.html).join('\n');
   const destination = path.join(output, 'index.html');
   let page;

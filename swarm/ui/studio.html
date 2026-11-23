@@ -111,8 +111,12 @@
           <button type="button" class="sds-btn studio-button" id="compare-btn" data-icon="compare"><span>Compare</span></button>
         </section>
         <section class="studio-compose" aria-label="Prompt composer">
-          <div class="studio-compose-head"><h2>Prompt</h2><span id="prompt-scope" hidden></span></div>
+          <div class="studio-compose-head">
+            <h2>Prompt</h2><span id="prompt-scope" hidden></span>
+            <button type="button" id="fast-preview" class="studio-button" disabled>Fast preview</button>
+          </div>
           <div id="composer" class="swarm-channel"><p class="studio-placeholder">Connecting to the channel…</p></div>
+          <p id="fast-preview-status" role="status"></p>
         </section>
       </section>
 

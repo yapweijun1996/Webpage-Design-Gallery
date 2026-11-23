@@ -124,12 +124,26 @@ you can recover it from the same panel. Versions preserve the active team,
 channel history, project notes and generated assets. The project keeps up to 20 versions. For a
 project with a locked design anchor, the restored design must match that anchor.
 
+## Fast Path
+
+Enter a request such as “Build a corporate homepage for GJH” in the Studio
+prompt and choose **Fast preview**. Use `/fast <request>` when sending through
+the channel or CLI. Supported requests install a template preview and save a
+**Before Fast Path** checkpoint. Quality work continues in the background.
+Unsupported requests go through the normal channel. Projects with an active
+anchor flow must have a verified locked contract compatible with the recipe.
+
+`POST /api/fast` accepts `{ "projectId": "...", "text": "..." }` with the project
+identity from `/api/state`. `GET /api/metrics` summarizes server build stages.
+The Chrome acceptance check measures the full journey to an interactive preview.
+
 ## Verification
 
 ```sh
 node swarm/test/e2e.js
 python swarm/test/browser_settings_skills.py
 python swarm/test/browser_studio_versions.py
+python swarm/test/browser_fast_path.py
 ```
 
 The browser checks use Python Playwright with Chrome. Set `GALLERY_CHROME`

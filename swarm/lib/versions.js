@@ -58,15 +58,22 @@ function readManifest(storage, id) {
 }
 
 function inspectEntries(directory) {
-  return ENTRIES.filter(name => {
-    const file = path.join(directory, name);
-    const stat = fs.lstatSync(file, { throwIfNoEntry: false });
-    if (!stat) return false;
-    if (name === 'sections' ? !stat.isDirectory() : !stat.isFile()) {
-      throw new Error(`Unexpected file type: ${file}`);
-    }
-    return true;
-  });
+  return ENTRIES.filter(name => existingEntry(path.join(directory, name), name === 'sections'));
+}
+
+function existingEntry(file, directory = false) {
+  const stat = fs.lstatSync(file, { throwIfNoEntry: false });
+  if (!stat) return false;
+  if (directory ? !stat.isDirectory() : !stat.isFile()) throw new Error(`Unexpected file type: ${file}`);
+  return true;
+}
+
+function checkSectionTree(directory) {
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const file = path.join(directory, entry.name);
+    if (entry.isDirectory()) checkSectionTree(file);
+    else if (!entry.isFile()) throw new Error(`Unexpected file type: ${file}`);
+  }
 }
 
 function copyEntries(from, to, entries) {
@@ -147,46 +154,91 @@ function rollback(projectDir, id, { backupLabel, canRestore } = {}) {
     throw new Error(`Incomplete snapshot: ${id}`);
   }
 
+  function verify(candidate) {
+    if (!canRestore) return;
+    const decision = canRestore({ id, source: candidate });
+    if (decision !== true) {
+      throw new VersionRestoreBlockedError(typeof decision === 'string' ? decision : 'This version cannot be restored.');
+    }
+  }
+  return replaceDesign(projectDir, storage, source, entries, { backupLabel, verify, pinned: id });
+}
+
+function install(projectDir, stagedDir, { backupLabel = 'Before Fast Path' } = {}) {
+  if (typeof backupLabel !== 'string') throw new TypeError('Snapshot label must be a string');
+  if (!existingEntry(stagedDir, true) || inspectEntries(stagedDir).length !== ENTRIES.length) {
+    throw new Error('Expected staged sections and contract.json');
+  }
+  const output = path.join(stagedDir, 'dist');
+  if (!existingEntry(output, true) || !existingEntry(path.join(output, 'index.html'))) {
+    throw new Error('Expected staged dist/index.html');
+  }
+  const assets = path.join(output, 'assets');
+  const exportFiles = existingEntry(assets, true) ? fs.readdirSync(assets).sort().map(name => {
+    existingEntry(path.join(assets, name));
+    return path.join('dist', 'assets', name);
+  }) : [];
+  exportFiles.push(path.join('dist', 'index.html'));
+  return replaceDesign(projectDir, versionsDir(projectDir, true), stagedDir, ENTRIES, { backupLabel, exportFiles });
+}
+
+// The caller holds the project lock until the staged design and checkpoint are committed.
+function replaceDesign(projectDir, storage, source, entries, { backupLabel, verify, pinned, exportFiles = [] }) {
   const live = inspectEntries(projectDir);
+  if (backupLabel !== undefined && live.includes('sections')) checkSectionTree(path.join(projectDir, 'sections'));
   const backup = backupLabel === undefined ? undefined : nextVersion(storage);
-  const staging = fs.mkdtempSync(path.join(storage, '.rollback-'));
+  const staging = fs.mkdtempSync(path.join(storage, exportFiles.length ? '.install-' : '.rollback-'));
   const candidate = path.join(staging, 'candidate');
   const before = path.join(staging, 'before');
-  const moves = [];
+  const journal = [];
   let keepStaging = false;
   function move(from, to) {
     fs.renameSync(from, to);
-    moves.push([from, to]);
+    journal.push(() => fs.renameSync(to, from));
   }
   try {
     // Complete all potentially failing copies before moving live entries.
     fs.mkdirSync(candidate);
     fs.mkdirSync(before);
     copyEntries(source, candidate, entries);
-    if (canRestore) {
-      const decision = canRestore({ id, source: candidate });
-      if (decision !== true) {
-        throw new VersionRestoreBlockedError(typeof decision === 'string' ? decision : 'This version cannot be restored.');
-      }
-    }
+    verify?.(candidate);
     if (backup) {
       fs.writeFileSync(path.join(before, MANIFEST), JSON.stringify({
         label: backupLabel, createdAt: backup.createdAt, entries: live,
       }));
+    }
+    const retired = path.join(staging, 'retired');
+    const exportDirs = exportFiles.length ? ['dist'] : [];
+    if (exportFiles.length > 1) exportDirs.push(path.join('dist', 'assets'));
+    const missingDirs = exportDirs.map(dir => path.join(projectDir, dir)).filter(dir => !existingEntry(dir, true));
+    const previousExports = new Set(exportFiles.filter(file => existingEntry(path.join(projectDir, file))));
+    for (const dir of exportDirs) {
+      fs.mkdirSync(path.join(retired, dir), { recursive: true });
+      fs.mkdirSync(path.join(candidate, dir), { recursive: true });
+    }
+    copyEntries(source, candidate, exportFiles);
+    for (const dir of missingDirs) {
+      fs.mkdirSync(dir);
+      journal.push(() => fs.rmdirSync(dir));
     }
     for (const name of ENTRIES) {
       const target = path.join(projectDir, name);
       if (live.includes(name)) move(target, path.join(before, name));
       if (entries.includes(name)) move(path.join(candidate, name), target);
     }
+    for (const name of exportFiles) {
+      const target = path.join(projectDir, name);
+      if (previousExports.has(name)) move(target, path.join(retired, name));
+      move(path.join(candidate, name), target);
+    }
     // Publish the undo snapshot only after the replacement succeeds. Keep the
     // restored version available at the history limit until the next save.
     if (backup) move(before, path.join(storage, backup.id));
   } catch (error) {
     const failures = [];
-    for (const [from, to] of moves.reverse()) {
+    for (const undo of journal.reverse()) {
       try {
-        fs.renameSync(to, from);
+        undo();
       } catch (restoreError) {
         failures.push(restoreError);
       }
@@ -199,8 +251,8 @@ function rollback(projectDir, id, { backupLabel, canRestore } = {}) {
   } finally {
     if (!keepStaging) cleanStage(staging);
   }
-  if (backup) prune(storage, id);
+  if (backup) prune(storage, pinned);
   return backup?.id;
 }
 
-module.exports = { snapshot, list, rollback, isVersionId, VersionNotFoundError, VersionRestoreBlockedError };
+module.exports = { snapshot, list, rollback, install, isVersionId, VersionNotFoundError, VersionRestoreBlockedError };

@@ -92,6 +92,13 @@ function workersForSections(roster) {
   });
 }
 
+function recipeContract() {
+  try {
+    const contract = JSON.parse(fs.readFileSync(path.join(PROJECT, 'contract.json'), 'utf8'));
+    if (typeof contract?.recipe === 'string' && Object.hasOwn(loadAll().recipes, contract.recipe)) return contract;
+  } catch { /* Existing projects can work without a Fast Path contract. */ }
+}
+
 // Copy the staff handbook and the design system (text and icon assets only) into the project so agents can read them in their sandbox.
 function copyTree(from, to, allow) {
   fs.mkdirSync(to, { recursive: true });
@@ -418,7 +425,11 @@ function squadPlan(owner) {
   return { single: waves.length === 1, base, members, waves, prompts, layoutId: (byId.get('layout') || {}).id };
 }
 const availableSpecialists = roster => squadAgents.filter(spec => !roster.some(worker => worker.id === spec.id));
-const everyone = roster => [MANAGER, ...workersForSections(roster), ...availableSpecialists(roster)];
+function everyone(roster) {
+  const workers = workersForSections(roster);
+  const currentSections = recipeContract() && new Set(previewSections().map(({ id }) => id));
+  return [MANAGER, ...workers.filter(({ id }) => !currentSections || currentSections.has(id)), ...availableSpecialists(roster)];
+}
 function createChannel(people) {
   const channel = createChat({ projectDir: PROJECT, agents: people.map(a => ({ id: a.id, name: a.name, section: a.section, color: a.color })), workspaceOutboxes: true, emit });
   const queue = createTurns({
@@ -437,12 +448,12 @@ function setupChat() {
   chat.start();
 }
 let inFlight = 0; // requests being handled or waiting in the queue
-function startTurn(msg, appearance) {
+function startTurn(msg, appearance, { fastPreview = false } = {}) {
   if (!projectBusy()) stopped = false;
   inFlight += 1;
   state.phase = 'running'; emit({ type: 'phase', phase: 'running' });
   emit({ type: 'busy', busy: true });
-  Promise.resolve(turns.onOwnerMessage({ ...msg, previewAppearance: cleanAppearance(appearance) })).catch(e => emit({ type: 'chat', msg: chat.post({ from: 'system', text: 'Turn failed: ' + e.message, kind: 'system' }) })).finally(() => { inFlight -= 1; const b = turns.busy(); emit({ type: 'busy', busy: b }); if (!b && state.phase === 'running') { state.phase = 'ready'; emit({ type: 'phase', phase: 'ready' }); } if (!b) maybeAutopilot(); });
+  Promise.resolve(turns.onOwnerMessage({ ...msg, fastPreview, previewAppearance: cleanAppearance(appearance) })).catch(e => emit({ type: 'chat', msg: chat.post({ from: 'system', text: 'Turn failed: ' + e.message, kind: 'system' }) })).finally(() => { inFlight -= 1; const b = turns.busy(); emit({ type: 'busy', busy: b }); if (!b && state.phase === 'running') { state.phase = 'ready'; emit({ type: 'phase', phase: 'ready' }); } if (!b) maybeAutopilot(); });
 }
 
 function openProject(roster) {
@@ -479,7 +490,8 @@ function prepare({ brief, roster }, replace) {
   stopped = false;
 }
 
-const projectBusy = () => inFlight > 0 || running > 0 || imageWrites > 0 || state.phase === 'running';
+const normalBusy = () => inFlight > 0 || running > 0 || imageWrites > 0 || state.phase === 'running';
+const projectBusy = () => normalBusy() || fastPath.busy();
 async function runAll() {
   state.phase = 'running';
   emit({ type: 'state', state });
@@ -499,6 +511,7 @@ async function runAll() {
 
 function stopAll() {
   stopped = true;
+  fastPath.cancel();
   imageTurns.clear();
   for (const p of children.values()) p.kill('SIGTERM');
 }
@@ -526,7 +539,9 @@ function ensureExport(force) {
   const now = Date.now();
   if (!force && now - lastExport < 5000) return;
   lastExport = now;
-  try { spawnSync(process.execPath, [path.join(ROOT, 'tools', 'export-page.js'), PROJECT, '--no-pwa', '--title', 'Live preview'], { stdio: 'ignore', timeout: 20000 }); } catch (_) { /* the preview is a convenience */ }
+  const args = [path.join(ROOT, 'tools', 'export-page.js'), PROJECT, '--no-pwa', '--title', 'Live preview'];
+  if (recipeContract()) args.push('--sds');
+  try { spawnSync(process.execPath, args, { stdio: 'ignore', timeout: 20000 }); } catch (_) { /* the preview is a convenience */ }
 }
 
 // Autopilot: the team studies only the screen the owner is looking at, researches and improves it, and moves on when the owner scrolls.
@@ -648,6 +663,26 @@ const versionRoutes = createVersionRoutes({
     emit({ type: 'versions' });
   },
 });
+const { createFastPath, FastPathError } = require('./lib/fast-routes');
+const { stageFast } = require('./lib/fast-stage');
+const { install } = require('./lib/versions');
+const { loadAll } = require('./lib/recipes');
+const fastPath = createFastPath({
+  projectDir: PROJECT, projectId: TARGET.projectId, busy: normalBusy, stageFast, install,
+  fallback: submitMessage,
+  published({ text, from, appearance, candidate }) {
+    refreshPreviewSections();
+    setupChat();
+    emit({ type: 'state', state });
+    emit({ type: 'versions' });
+    const sectionIds = candidate.contract.sections.map(({ id }) => id.slice(0, 2));
+    const sections = sectionIds.filter(id => agentsDef.some(agent => agent.id === id));
+    const scope = sections.length ? { sections, elements: [] } : null;
+    const msg = chat.post({ from, text, scope });
+    if (scope) startTurn(msg, appearance, { fastPreview: true });
+    return { id: msg.id, qualityQueued: Boolean(scope) };
+  },
+});
 const preview = require('./lib/preview').createPreview({
   ui: UI, project: PROJECT, designSystem: DS_DIR, library: GJH_ASSETS, mall: GJH_V11_ASSETS
 });
@@ -658,6 +693,30 @@ function serveFile(res, base, rel) {
   fs.readFile(full, (err, buf) => err ? send(res, 404, 'not found', 'text/plain') : send(res, 200, buf, MIME[path.extname(full)] || 'application/octet-stream'));
 }
 function body(req) { return new Promise(r => { let s = ''; req.on('data', d => s += d); req.on('end', () => { try { r(JSON.parse(s || '{}')); } catch (_) { r({}); } }); }); }
+
+function submitMessage(input) {
+  const text = String(input.text || '').trim();
+  const from = input.from === 'owner' ? 'owner' : 'claude';
+  if (!text) throw new FastPathError(400, 'empty');
+  if (!chat) throw new FastPathError(409, 'channel not ready');
+  if (normalBusy() && !inFlight) throw new FastPathError(409, 'Wait for the fixed-phase run to finish.');
+  if (stopped && normalBusy()) throw new FastPathError(409, 'Wait for the stopped turn to finish.');
+  fastPath.cancel('A newer request replaced this Fast Path preview.');
+  const ahead = inFlight;
+  let shown = text, scope = null;
+  if (Array.isArray(input.scope?.sections)) {
+    const ids = [...new Set(input.scope.sections.map(String))].filter(id => agentsDef.some(a => a.id === id));
+    if (ids.length) {
+      scope = { sections: ids, elements: Array.isArray(input.scope.elements) ? input.scope.elements : [] };
+      const label = ids.map(id => `${id} ${sectionName(id)}`.trim()).join(', ');
+      shown = `[Focus: ${label}] ${text}`.slice(0, 800);
+    }
+  }
+  const msg = chat.post({ from, text: shown, scope });
+  if (ahead > 0) chat.post({ from: 'system', kind: 'system', text: `Queued: ${ahead} request${ahead > 1 ? 's' : ''} ahead. The team will start on #${msg.id} when it finishes the current one (about 5 to 10 minutes). \u5df2\u6392\u961f\uff0c\u56e2\u961f\u5904\u7406\u5b8c\u5f53\u524d\u8bf7\u6c42\u540e\u4f1a\u5f00\u59cb\u5904\u7406\u4f60\u7684\u6d88\u606f\u3002` });
+  startTurn(msg, input.scope?.appearance ?? input.appearance);
+  return { id: msg.id };
+}
 
 const server = http.createServer(async (req, res) => {
   // Local-API guard: only a page served by this server may call it (blocks cross-site requests and DNS rebinding).
@@ -679,6 +738,7 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/state') return send(res, 200, state);
   if (isSkillRoute(p)) return skillRoutes(req, res, p, send);
   if (isVersionRoute(p)) return versionRoutes(req, res, p, send);
+  if (p === '/api/fast' || p === '/api/metrics') return fastPath.handle(req, res, p, send);
   if (p === '/api/settings' && req.method === 'GET') return send(res, 200, { settings, allowlist: S.ALLOWLIST, resolved: { manager: S.resolve(settings, 'manager'), worker: S.resolve(settings, 'worker') }, status: readiness });
   if (p === '/api/settings' && req.method === 'PUT') {
     const r = S.save(SETTINGS_PATH, await body(req));
@@ -698,27 +758,12 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/chat' && req.method === 'POST') {
     const b = await body(req);
     const text = String(b.text || '').trim();
-    const from = b.from === 'owner' ? 'owner' : 'claude';
-    if (!text) return send(res, 400, { error: 'empty' });
-    if (!chat) return send(res, 409, { error: 'channel not ready' });
-    if (projectBusy() && !inFlight) return send(res, 409, { error: 'Wait for the fixed-phase run to finish.' });
-    if (stopped && projectBusy()) return send(res, 409, { error: 'Wait for the stopped turn to finish.' });
-    const ahead = inFlight;
-    // Optional owner scope (what the owner is looking at): shown in the message and enforced by the turn orchestrator.
-    let shown = text, scope = null;
-    if (b.scope && Array.isArray(b.scope.sections)) {
-      const ids = [...new Set(b.scope.sections.map(String))].filter(id => agentsDef.some(a => a.id === id));
-      if (ids.length) {
-        scope = { sections: ids, elements: Array.isArray(b.scope.elements) ? b.scope.elements : [] };
-        const label = ids.map(id => `${id} ${sectionName(id)}`.trim()).join(', ');
-        shown = `[Focus: ${label}] ${text}`.slice(0, 800);
-      }
-    }
-    const msg = chat.post({ from, text: shown, scope });
-    // Requests are handled one at a time; say so, otherwise a waiting message looks ignored.
-    if (ahead > 0) chat.post({ from: 'system', kind: 'system', text: `Queued: ${ahead} request${ahead > 1 ? 's' : ''} ahead. The team will start on #${msg.id} when it finishes the current one (about 5 to 10 minutes). \u5df2\u6392\u961f\uff0c\u56e2\u961f\u5904\u7406\u5b8c\u5f53\u524d\u8bf7\u6c42\u540e\u4f1a\u5f00\u59cb\u5904\u7406\u4f60\u7684\u6d88\u606f\u3002` });
-    startTurn(msg, scope ? b.scope.appearance : undefined);
-    return send(res, 200, { id: msg.id });
+    const command = /^\/fast(?:\s+|$)/.exec(text);
+    if (command) return fastPath.respond(res, send, () => fastPath.run({
+      projectId: TARGET.projectId, text: text.slice(command[0].length), from: b.from === 'owner' ? 'owner' : 'claude',
+      appearance: b.scope?.appearance ?? b.appearance, scope: b.scope,
+    }));
+    return fastPath.respond(res, send, () => submitMessage({ ...b, text }));
   }
   if (p === '/api/team' && req.method === 'GET') return send(res, 200, teamView());
   if (p === '/api/team' && req.method === 'PUT') {

@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
-const { snapshot, list, rollback } = require('../lib/versions');
+const { snapshot, list, rollback, install } = require('../lib/versions');
 
 function project(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-versions-'));
@@ -228,4 +228,118 @@ test('snapshot and rollback reject symlinked paths and traversal ids', t => {
   assert.throws(() => rollback(directory, '../outside'), /Invalid snapshot id/);
   assert.equal(read(outside, 'preserve.txt'), 'original');
   assert.deepEqual(fs.readdirSync(outside), ['preserve.txt']);
+});
+
+function stagedExport(t) {
+  const staged = project(t);
+  writeDesign(staged, 2);
+  write(staged, 'dist/index.html', 'new index');
+  write(staged, 'dist/assets/01-replaced.webp', 'new image');
+  write(staged, 'dist/assets/02-added.webp', 'added image');
+  return staged;
+}
+
+function installedProject(t) {
+  const directory = project(t);
+  writeDesign(directory, 1);
+  write(directory, 'sections/02-obsolete.html', 'old design only');
+  write(directory, 'dist/index.html', 'old index');
+  write(directory, 'dist/assets/01-replaced.webp', 'old image');
+  write(directory, 'dist/assets/user-image.webp', 'user image');
+  write(directory, 'dist/user/index.html', 'user file');
+  write(directory, 'notes/01.md', 'keep notes');
+  return directory;
+}
+
+test('install replaces the staged design and emitted export files, saving only the previous design as a checkpoint', t => {
+  const directory = installedProject(t);
+  const earlier = snapshot(directory, 'Earlier checkpoint');
+  const staged = stagedExport(t);
+  write(staged, 'tokens.css', 'export input only');
+  write(staged, 'dist/ignored.txt', 'outside the export contract');
+  const installed = install(directory, staged, { backupLabel: 'Before building' });
+
+  assertDesign(directory, 2);
+  assertDesign(staged, 2);
+  assert.equal(read(staged, 'dist/index.html'), 'new index');
+  assert.equal(read(directory, 'dist/index.html'), 'new index');
+  assert.equal(read(directory, 'dist/assets/01-replaced.webp'), 'new image');
+  assert.equal(read(directory, 'dist/assets/02-added.webp'), 'added image');
+  assert.equal(read(directory, 'dist/assets/user-image.webp'), 'user image');
+  assert.equal(read(directory, 'dist/user/index.html'), 'user file');
+  assert.equal(read(directory, 'notes/01.md'), 'keep notes');
+  for (const absent of ['sections/02-obsolete.html', 'tokens.css', 'dist/ignored.txt']) {
+    assert.equal(fs.existsSync(path.join(directory, absent)), false, absent);
+  }
+  assert.deepEqual(list(directory).map(({ id, label }) => [id, label]), [
+    [installed, 'Before building'], [earlier, 'Earlier checkpoint'],
+  ]);
+  assert.deepEqual(fs.readdirSync(path.join(storage(directory), installed)).sort(), ['contract.json', 'sections', 'snapshot.json']);
+
+  rollback(directory, installed);
+  assertDesign(directory, 1);
+  assert.equal(read(directory, 'sections/02-obsolete.html'), 'old design only');
+  assert.equal(read(directory, 'dist/index.html'), 'new index');
+});
+
+test('each install rename failure recovers the old design and export without changing existing history', async t => {
+  for (const failingMove of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
+    await t.test(`rename ${failingMove}`, child => {
+      const directory = installedProject(child);
+      const earlier = snapshot(directory, 'Unchanged');
+      const staged = stagedExport(child);
+      const rename = fs.renameSync;
+      let calls = 0;
+      child.mock.method(fs, 'renameSync', (from, to) => {
+        if (++calls === failingMove) throw new Error('Injected staged install failure');
+        return rename(from, to);
+      });
+
+      assert.throws(() => install(directory, staged), /Injected staged install failure/);
+      assertDesign(directory, 1);
+      assert.equal(read(directory, 'sections/02-obsolete.html'), 'old design only');
+      assert.equal(read(directory, 'dist/index.html'), 'old index');
+      assert.equal(read(directory, 'dist/assets/01-replaced.webp'), 'old image');
+      assert.equal(read(directory, 'dist/assets/user-image.webp'), 'user image');
+      assert.equal(fs.existsSync(path.join(directory, 'dist/assets/02-added.webp')), false);
+      assert.deepEqual(fs.readdirSync(storage(directory)), [earlier]);
+      assert.equal(read(staged, 'dist/assets/02-added.webp'), 'added image');
+    });
+  }
+});
+
+test('install removes newly created export directories when checkpoint publication fails', t => {
+  const directory = project(t);
+  writeDesign(directory, 1);
+  const staged = stagedExport(t);
+  const rename = fs.renameSync;
+  t.mock.method(fs, 'renameSync', (from, to) => {
+    if (path.basename(from) === 'before') throw new Error('Injected checkpoint publication failure');
+    return rename(from, to);
+  });
+  assert.throws(() => install(directory, staged), /Injected checkpoint publication failure/);
+  assertDesign(directory, 1);
+  assert.equal(fs.existsSync(path.join(directory, 'dist')), false);
+  assert.deepEqual(list(directory), []);
+  assert.deepEqual(fs.readdirSync(storage(directory)), []);
+});
+
+test('install rejects incomplete staging and symlinked export paths before changing the active design', t => {
+  const directory = installedProject(t);
+  const staged = stagedExport(t);
+  const outside = project(t);
+  write(outside, '01-replaced.webp', 'outside image');
+  fs.rmSync(path.join(staged, 'contract.json'));
+  assert.throws(() => install(directory, staged), /Expected staged sections and contract/);
+  writeDesign(staged, 2);
+  fs.rmSync(path.join(staged, 'dist/index.html'));
+  assert.throws(() => install(directory, staged), /Expected staged dist\/index.html/);
+  write(staged, 'dist/index.html', 'candidate index');
+  fs.rmSync(path.join(directory, 'dist/assets'), { recursive: true });
+  fs.symlinkSync(outside, path.join(directory, 'dist/assets'), 'dir');
+  assert.throws(() => install(directory, staged), /Unexpected file type/);
+  assertDesign(directory, 1);
+  assert.equal(read(directory, 'dist/index.html'), 'old index');
+  assert.equal(read(outside, '01-replaced.webp'), 'outside image');
+  assert.deepEqual(list(directory), []);
 });

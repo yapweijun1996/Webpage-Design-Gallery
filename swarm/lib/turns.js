@@ -13,6 +13,7 @@ function scopeLine(scope) {
 
 function buildPrompt(agent, label, owner, assignment, isManager) {
   const { id, name, section, lane } = agent;
+  const currentLane = owner.fastPreview && section ? `Review and improve the existing ${section} section.` : lane;
   const sectionOwnership = `Edit only sections/${id}-${section}.html, sections/${id}-${section}.css, and notes/${id}.md.`;
   const done = 'Finally append one kind:"done" line to your outbox stating what changed in one sentence.';
   const task = {
@@ -38,11 +39,12 @@ function buildPrompt(agent, label, owner, assignment, isManager) {
   ];
   const instructions = [
     `STEP: ${label} | AGENT: ${id}`,
-    `You are ${(name ?? id).slice(0, 100)}${agent.title ? ', job title: ' + String(agent.title).slice(0, 80) : ''}, agent ${id}. Your lane: ${(lane || section || 'Manager and team coordinator').slice(0, 300)}.`,
+    `You are ${(name ?? id).slice(0, 100)}${agent.title ? ', job title: ' + String(agent.title).slice(0, 80) : ''}, agent ${id}. Your lane: ${(currentLane || section || 'Manager and team coordinator').slice(0, 300)}.`,
     'Read CONTRACT.md, brief.md, direction.md, decisions.md (if non-empty), and channel.md.',
     ...posting,
     'Live narration rule: before each major step, write one short sentence of intent (max 20 words) in your live commentary.',
     isManager && 'For channel turns, edit only direction.md, decisions.md, and review.md.',
+    owner.fastPreview && 'A Fast Path preview already renders the request. Review its existing sections and improve only verified quality issues. Follow contract.json and the current section files for this turn.',
     scopeLine(owner.scope),
     task,
     assignment && `Your manager assignment (#${assignment.id}): ${(assignment.task || assignment.text).slice(0, 800)}`,

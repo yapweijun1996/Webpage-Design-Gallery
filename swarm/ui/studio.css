@@ -404,6 +404,9 @@ html, body { margin: 0; }
 #version-list time { color: var(--studio-muted); font-size: var(--sds-text-xs); }
 .studio-compose { padding-block-end: 8px; }
 .studio-compose-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-block-end: 4px; }
+#fast-preview { margin-inline-start: auto; }
+#fast-preview-status { color: var(--studio-muted); font-size: var(--sds-text-xs); margin-block: 6px 0; }
+#fast-preview-status:empty { margin: 0; }
 #prompt-scope { color: var(--studio-accent); overflow-wrap: anywhere; font-size: var(--sds-text-xs); }
 #composer { height: auto; background: transparent; --gutter: 0px; }
 #composer .swarm-channel__composer { padding: 0; border: 0; background: transparent; }

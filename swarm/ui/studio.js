@@ -942,6 +942,31 @@
   let busy = false;
   let connected = false;
   let runningSince = 0;
+  let fastPreviewPending = false;
+
+  $('fast-preview').onclick = async () => {
+    const draft = $('composer').querySelector('textarea');
+    if (!draft?.value.trim()) return draft?.focus();
+    const value = draft.value;
+    const status = $('fast-preview-status');
+    fastPreviewPending = true;
+    setPhase();
+    status.textContent = 'Building preview…';
+    try {
+      const scope = currentScope();
+      const { ok, json } = await api('/api/fast', 'POST', {
+        text: value, projectId: S.projectId, appearance: reviewAppearance(),
+        scope: scope ? { sections: scope.sections, elements: scope.elements } : undefined,
+      });
+      if (!ok) { status.textContent = json.error || 'The preview could not be built.'; return; }
+      status.textContent = json.accepted ? 'Fast preview ready.' : 'Sent to the team.';
+      if (draft.value === value) {
+        draft.value = '';
+        draft.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    } catch { status.textContent = 'The preview request could not be completed.'; }
+    finally { fastPreviewPending = false; setPhase(); }
+  };
 
   function jump(id) {
     if (!S?.agents[id]?.section) return;
@@ -972,6 +997,7 @@
 
   function setPhase(timestamp) {
     const running = S?.phase === 'running' || busy;
+    $('fast-preview').disabled = !connected || running || fastPreviewPending;
     $('phase').dataset.state = running && connected ? 'running' : 'idle';
     $('status-text').textContent = !connected ? 'Reconnecting' : running ? 'Running' : 'Idle';
     if (running) runningSince ||= timestamp || Date.now();
