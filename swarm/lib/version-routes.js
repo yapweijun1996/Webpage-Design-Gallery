@@ -75,4 +75,4 @@ function createVersionRoutes({ projectDir, projectId, busy, canRestore, changed 
   };
 }
 
-module.exports = { createVersionRoutes, matches };
+module.exports = { createVersionRoutes, matches, readOptions };

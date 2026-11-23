@@ -344,7 +344,7 @@ function createAnchorRoutes({ projectDir, projectId, busy, changed, generateAnch
     }
   }
 
-  return { handle, busy: taskBusy, cancel() {
+  return { handle, authorize: requireGrant, busy: taskBusy, cancel() {
     const error = new AnchorRequestError(409, CANCELLED);
     active?.abort(error);
     repairTask?.abort(error);

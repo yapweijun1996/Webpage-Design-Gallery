@@ -356,7 +356,7 @@ function errorChanges(before, after) {
   return { before, after, added };
 }
 
-function compareWidth(before, after, owner) {
+function compareWidth(before, after, owner, { componentRestore = false } = {}) {
   const consoleErrors = errorChanges(before.consoleErrors, after.consoleErrors);
   const ids = [...new Set([...Object.keys(before.sections), ...Object.keys(after.sections)])].sort();
   const perSection = ids.map(id => {
@@ -377,10 +377,14 @@ function compareWidth(before, after, owner) {
     const changed = presenceChanged || moved || resized || diffRatio > 0
       || horizontalOverflow.after !== horizontalOverflow.before || errors.added.length > 0;
     const emptyPlaceholder = previous?.empty && current?.empty;
-    const normalPush = boxDelta?.y > 0 && Number.isFinite(previous.withoutOwnerY) && previous.withoutOwnerY === current.withoutOwnerY;
+    const sameYWithoutOwner = Number.isFinite(previous?.withoutOwnerY) && previous.withoutOwnerY === current?.withoutOwnerY;
+    // Restoration can grow or shrink the owner. Even an empty peer needs proof of owner flow.
+    const allowedTranslation = componentRestore
+      ? sameYWithoutOwner
+      : emptyPlaceholder || (boxDelta?.y > 0 && sameYWithoutOwner);
     const flowTranslation = boxDelta?.x === 0 && moved && !resized && diffRatio === 0
       && horizontalOverflow.after === horizontalOverflow.before && errors.added.length === 0
-      && (emptyPlaceholder || normalPush);
+      && allowedTranslation;
     return { id, owned: id === owner, boxDelta, diffRatio, moved, resized, presenceChanged, horizontalOverflow, consoleErrors: errors, changed, flowTranslation };
   });
   return {
@@ -412,7 +416,7 @@ function summarizeWidths(comparisons) {
   return { ok: unexpected.size === 0, perSection, unexpected: [...unexpected].sort(), perWidth };
 }
 
-async function impact(before, after, { owner, firstBuild = false, widths = DEFAULT_WIDTHS } = {}) {
+async function impact(before, after, { owner, firstBuild = false, componentRestore = false, widths = DEFAULT_WIDTHS } = {}) {
   if (!Array.isArray(widths) || !widths.length || widths.some(width => !Number.isSafeInteger(width) || width < 1)) {
     throw new Error('Widths must be positive integers');
   }
@@ -427,12 +431,12 @@ async function impact(before, after, { owner, firstBuild = false, widths = DEFAU
     chrome = startChrome(binary, path.join(temp, 'profile'), Math.max(...widths));
     await chrome.send('Browser.getVersion');
     const comparisons = [];
-    const flowOwner = firstBuild ? owner : null;
+    const flowOwner = firstBuild || componentRestore ? owner : null;
     for (const width of new Set(widths)) {
       const started = performance.now();
       const left = await render(chrome, original, width, flowOwner);
       const right = await render(chrome, candidate, width, flowOwner);
-      const report = compareWidth(left, right, owner);
+      const report = compareWidth(left, right, owner, { componentRestore });
       comparisons.push({ width, runtimeMs: performance.now() - started, ...report });
     }
     return summarizeWidths(comparisons);

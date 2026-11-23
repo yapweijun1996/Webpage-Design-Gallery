@@ -366,6 +366,7 @@
     if ($('activity-team').parentElement !== roster) roster.append($('activity-team'));
     if (previous !== name) updateSettingsPlacement();
     window.StudioAnchors?.show(name === 'review', reviewAppearance);
+    window.StudioComponentHistory?.show(name === 'review');
     const compareModule = enhancement('StudioCompare');
     if (name === 'review' && !compareIsMounted && compareModule) {
       $('compare').replaceChildren();
@@ -1067,6 +1068,7 @@
       activityModule?.onEvent(event);
       loadVersions();
       window.StudioAnchors?.refresh();
+      window.StudioComponentHistory?.refresh(busy);
       return;
     }
 
@@ -1095,6 +1097,7 @@
         setPhase(event.ts);
         loadVersions();
         window.StudioAnchors?.refresh();
+        window.StudioComponentHistory?.refresh();
         break;
       case 'chat': {
         const message = event.msg;
@@ -1117,12 +1120,14 @@
         setPhase(event.ts);
         loadVersions();
         window.StudioAnchors?.refresh();
+        window.StudioComponentHistory?.refresh(busy);
         break;
       case 'anchor':
         window.StudioAnchors?.refresh();
         break;
       case 'versions':
         loadVersions();
+        window.StudioComponentHistory?.refresh();
         break;
       case 'doc':
         if (typeof event.file === 'string') window.SwarmDocs?.refresh(event.file.split('/').pop());

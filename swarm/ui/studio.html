@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/studio-compare.css">
   <link rel="stylesheet" href="/studio.css">
   <link rel="stylesheet" href="/studio-anchors.css">
+  <link rel="stylesheet" href="/studio-components.css">
   <script defer src="/ds/runtime.js"></script>
   <script defer src="/ds/i18n.js"></script>
   <script defer src="/channel.js"></script>
@@ -24,6 +25,7 @@
   <script defer src="/preview-bridge.js"></script>
   <script defer src="/studio-compare.js"></script>
   <script defer src="/studio-anchors.js"></script>
+  <script defer src="/studio-components.js"></script>
   <script defer src="/studio.js"></script>
 </head>
 <body class="studio" data-workspace="design" data-mobile-pane="preview" data-sidebar="open" data-inspector="open">
@@ -183,6 +185,17 @@
           <p id="anchor-access" hidden></p>
           <p id="anchor-status" role="status"></p>
         </section>
+        <section id="component-history" class="studio-card studio-component-history" aria-labelledby="component-history-title">
+          <h3 id="component-history-title">Component history</h3>
+          <p>Restore a section’s files to their state before a publication.</p>
+          <label for="component-section">Section
+            <select id="component-section" disabled></select>
+          </label>
+          <p id="component-history-busy" role="status" hidden>Restore is available when the project is idle.</p>
+          <p id="component-history-empty" role="status">Loading component history…</p>
+          <ul id="component-history-list" aria-label="Before-publication versions"></ul>
+          <p id="component-history-status" role="status"></p>
+        </section>
         <div id="compare">
           <section class="studio-card"><h3>Reference vs. actual</h3><p class="studio-placeholder">The comparison workspace is loading.</p></section>
         </div>
@@ -302,6 +315,32 @@
       </div>
       <footer class="studio-anchor-dialog-footer">
         <button type="submit" class="studio-button" id="anchor-dialog-submit">Continue</button>
+      </footer>
+    </form>
+  </dialog>
+  <dialog id="component-restore-dialog" class="studio-component-dialog" aria-labelledby="component-restore-title" aria-describedby="component-restore-context">
+    <form id="component-restore-form">
+      <header>
+        <h2 id="component-restore-title" tabindex="-1">Restore component</h2>
+      </header>
+      <div class="studio-component-dialog-body">
+        <p id="component-restore-context">The listed files will be restored to their state before this publication.</p>
+        <dl>
+          <dt>Section</dt>
+          <dd id="component-restore-section"></dd>
+          <dt>Publication time</dt>
+          <dd><time id="component-restore-time"></time></dd>
+          <dt>Version digest</dt>
+          <dd><code id="component-restore-digest"></code></dd>
+        </dl>
+        <h3>Affected files</h3>
+        <ul id="component-restore-paths" class="studio-component-paths"></ul>
+        <p id="component-restore-busy" role="status" hidden>Restore is available when the project is idle.</p>
+        <p id="component-restore-status" role="status" tabindex="-1"></p>
+      </div>
+      <footer>
+        <button type="button" class="studio-button" id="component-restore-cancel">Cancel</button>
+        <button type="submit" class="studio-button" id="component-restore-confirm" disabled>Restore component</button>
       </footer>
     </form>
   </dialog>

@@ -163,6 +163,16 @@ keeps the token out of runner environments and the isolated preview. The control
 assumes a trusted local account, including processes running as that account.
 The generation and advisor actions require explicit confirmation in Studio.
 
+## Component history
+
+Open **Review** and select a component under **Component history**. Each row
+shows the files saved before an audited publication. Review the files and
+confirm **Restore component** to check a staged copy against the current
+design. The restore requires the same confirmed file revision and passes the
+locked-anchor and browser impact checks before committing. Studio records the
+restore as another history entry, with a snapshot you can use to undo it.
+Project-wide saves and restores are available in **Versions**.
+
 ## Verification
 
 ```sh
@@ -172,6 +182,7 @@ python swarm/test/browser_studio_versions.py
 python swarm/test/browser_fast_path.py
 python swarm/test/browser_studio_anchors.py
 python swarm/test/browser_studio_anchor_repair.py
+python swarm/test/browser_studio_component_history.py
 ```
 
 The browser checks use Python Playwright with Chrome. Set `GALLERY_CHROME`

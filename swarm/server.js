@@ -499,7 +499,7 @@ function prepare({ brief, roster }, replace) {
 }
 
 const normalBusy = () => inFlight > 0 || running > 0 || imageWrites > 0 || state.phase === 'running';
-const projectBusy = () => normalBusy() || fastPath.busy() || anchorRoutes.busy();
+const projectBusy = () => normalBusy() || fastPath.busy() || anchorRoutes.busy() || componentRoutes.busy();
 async function runAll() {
   state.phase = 'running';
   emit({ type: 'state', state });
@@ -521,6 +521,7 @@ function stopAll() {
   stopped = true;
   fastPath.cancel();
   anchorRoutes.cancel();
+  componentRoutes.cancel();
   imageTurns.clear();
   for (const p of children.values()) p.kill('SIGTERM');
 }
@@ -677,7 +678,8 @@ const { stageFast } = require('./lib/fast-stage');
 const { install } = require('./lib/versions');
 const { loadAll } = require('./lib/recipes');
 const fastPath = createFastPath({
-  projectDir: PROJECT, projectId: TARGET.projectId, busy: () => normalBusy() || anchorRoutes.busy(), stageFast, install,
+  projectDir: PROJECT, projectId: TARGET.projectId,
+  busy: () => normalBusy() || anchorRoutes.busy() || componentRoutes.busy(), stageFast, install,
   fallback: submitMessage,
   published({ text, from, appearance, candidate }) {
     refreshPreviewSections();
@@ -695,9 +697,18 @@ const fastPath = createFastPath({
 const { createAnchorRoutes, matches: isAnchorRoute } = require('./lib/anchor-routes');
 const { captureAnchorQA } = require('./lib/anchor-preview-qa');
 
+function componentCatalog() {
+  const workers = workersForSections(agentsDef);
+  const manifest = ownership.build({ agents: [MANAGER, ...workers], launchContext: true });
+  const sections = manifest.sections.flatMap(id => {
+    const owner = manifest.owned[`sections/${id}.html`];
+    return owner !== MANAGER.id && state.agents[owner] ? [{ id, label: id.replaceAll('-', ' '), owner }] : [];
+  });
+  return { sections, manifest };
+}
+
 function repairOwners() {
-  const roster = [MANAGER, ...workersForSections(agentsDef)];
-  const manifest = ownership.build({ agents: roster, launchContext: true });
+  const { manifest } = componentCatalog();
   return Object.fromEntries(previewSections().flatMap(({ id, section }) => {
     const base = `${id}-${section}`;
     return state.agents[id] && id !== MANAGER.id && manifest.owned[`sections/${base}.html`] === id ? [[base, id]] : [];
@@ -736,7 +747,7 @@ async function runAnchorRepair({ sectionId, ownerId, evidence, anchor, appearanc
 const anchorRoutes = createAnchorRoutes({
   projectDir: PROJECT,
   projectId: TARGET.projectId,
-  busy: () => normalBusy() || fastPath.busy(),
+  busy: () => normalBusy() || fastPath.busy() || componentRoutes.busy(),
   changed() {
     emit({ type: 'anchor' });
     emit({ type: 'busy', busy: projectBusy() });
@@ -748,6 +759,21 @@ const anchorRoutes = createAnchorRoutes({
   previewUrl: (_width, _height, appearance) => previewUrl(appearance),
   repairOwners,
   runRepair: runAnchorRepair,
+});
+const { createComponentRoutes, matches: isComponentRoute } = require('./lib/component-routes');
+const componentRoutes = createComponentRoutes({
+  projectDir: PROJECT, projectId: TARGET.projectId, catalog: componentCatalog,
+  busy: () => normalBusy() || fastPath.busy() || anchorRoutes.busy(),
+  authorize: anchorRoutes.authorize, publish: publication.publish,
+  changed(result) {
+    if (result) {
+      if (refreshPreviewSections()) setupChat();
+      ensureExport(true);
+      emit({ type: 'state', state });
+      emit({ type: 'versions' });
+    }
+    emit({ type: 'busy', busy: projectBusy() });
+  },
 });
 const preview = require('./lib/preview').createPreview({
   ui: UI, project: PROJECT, designSystem: DS_DIR, library: GJH_ASSETS, mall: GJH_V11_ASSETS
@@ -765,7 +791,7 @@ function submitMessage(input) {
   const from = input.from === 'owner' ? 'owner' : 'claude';
   if (!text) throw new FastPathError(400, 'empty');
   if (!chat) throw new FastPathError(409, 'channel not ready');
-  if (anchorRoutes.busy()) throw new FastPathError(409, 'Wait until the anchor task finishes.');
+  if (anchorRoutes.busy() || componentRoutes.busy()) throw new FastPathError(409, 'Wait until the current review task finishes.');
   if (normalBusy() && !inFlight) throw new FastPathError(409, 'Wait for the fixed-phase run to finish.');
   if (stopped && normalBusy()) throw new FastPathError(409, 'Wait for the stopped turn to finish.');
   fastPath.cancel('A newer request replaced this Fast Path preview.');
@@ -805,6 +831,7 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/state') return send(res, 200, state);
   if (isSkillRoute(p)) return skillRoutes(req, res, p, send);
   if (isVersionRoute(p)) return versionRoutes(req, res, p, send);
+  if (isComponentRoute(p)) return componentRoutes.handle(req, res, url, send);
   if (isAnchorRoute(p)) return anchorRoutes.handle(req, res, p, send);
   if (p === '/api/fast' || p === '/api/metrics') return fastPath.handle(req, res, p, send);
   if (p === '/api/settings' && req.method === 'GET') return send(res, 200, { settings, allowlist: S.ALLOWLIST, resolved: { manager: S.resolve(settings, 'manager'), worker: S.resolve(settings, 'worker') }, status: readiness });

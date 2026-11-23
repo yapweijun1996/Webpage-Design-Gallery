@@ -320,7 +320,7 @@ function prepare(ws, session, manifest, { maxFileBytes = MAX_FILE_BYTES } = {}) 
   try {
     const { changes, after, violations } = workspaceChanges(ws, session, maxFileBytes);
     const unsafePaths = new Set(violations.map(finding => finding.path));
-    const paths = [...changes.added, ...changes.changed, ...changes.removed].sort();
+    const paths = [...new Set([...changes.added, ...changes.changed, ...changes.removed, ...(session.restore?.keys() ?? [])])].sort();
     for (const relative of paths) {
       if (unsafePaths.has(relative)) continue;
       const code = classify(session.launched ?? manifest, session.workerId, relative);
@@ -334,9 +334,13 @@ function prepare(ws, session, manifest, { maxFileBytes = MAX_FILE_BYTES } = {}) 
         }
         if (session.overlap.has(relative)) throw new Violation('overlap', relative, 'Another workspace already merged this path.');
         const next = after.get(relative);
+        const restore = session.restore?.get(relative);
+        if (session.restore && (!restore || (next?.sha256 ?? null) !== restore.sha256)) {
+          throw new Violation('stale', relative, 'The staged file no longer matches the selected version.');
+        }
         if (next?.size > maxFileBytes) throw new Violation('size', relative, `File exceeds the ${maxFileBytes} byte limit.`);
         const live = readFile(project, relative, { hashOnly: true });
-        if (live?.sha256 === next?.sha256) continue;
+        if (live?.sha256 === next?.sha256 && (!restore || (live?.mode ?? null) === restore.mode)) continue;
         if (live?.sha256 !== ws.base[relative]?.sha256) throw new Violation('stale', relative, 'The live file changed since this workspace opened.');
         const content = next ? readFile(ws.dir, relative, { maxBytes: maxFileBytes }) : null;
         if (content?.sha256 !== next?.sha256) throw new Violation('stale', relative, 'The workspace changed while being validated.');
@@ -345,7 +349,7 @@ function prepare(ws, session, manifest, { maxFileBytes = MAX_FILE_BYTES } = {}) 
         }
         const before = live ? readFile(project, relative) : null;
         if (live?.sha256 !== before?.sha256) throw new Violation('stale', relative, 'The live file changed while being validated.');
-        if (content) content.mode = before?.mode ?? 0o644;
+        if (content) content.mode = restore?.mode ?? before?.mode ?? 0o644;
         plan.push({ relative, before, after: content });
       } catch (error) {
         if (!(error instanceof Violation)) throw error;
@@ -516,7 +520,7 @@ function affectedSections(plan, manifest) {
   return [...owners].sort();
 }
 
-async function publish(projectDir, ws, { accept, anchorId, maxFileBytes } = {}) {
+async function publish(projectDir, ws, { accept, anchorId, maxFileBytes, canCommit } = {}) {
   const session = getSession(ws);
   if (!session.launched) throw new TypeError('Publication requires a launch workspace.');
   if (typeof accept !== 'function') throw new TypeError('Publication requires acceptance checks.');
@@ -568,8 +572,16 @@ async function publish(projectDir, ws, { accept, anchorId, maxFileBytes } = {}) 
     }
 
     return withProjectLock(project, () => {
+      if (canCommit?.() === false) return rejected([{ code: 'cancelled', path: '', message: 'The restore was cancelled.' }]);
       if (sessions.get(ws) !== session || projectRoot(projectDir) !== project) {
         throw new Violation('stale', '', 'The launch workspace changed while acceptance was pending.');
+      }
+      if (session.restoreBaseline) {
+        const changed = [...session.restoreBaseline].find(([relative, baseline]) =>
+          signature(readFile(project, relative, { hashOnly: true })) !== baseline);
+        if (changed || componentControl(project).some((value, index) => value !== session.restoreControl[index])) {
+          throw new Violation('stale', changed?.[0] ?? '', 'The confirmed component changed during review.');
+        }
       }
       requireInputs(baseline, project, roots, 'The live preview inputs changed during acceptance.');
       if (before) {
@@ -603,9 +615,8 @@ async function publish(projectDir, ws, { accept, anchorId, maxFileBytes } = {}) 
   }
 }
 
-function rollback(projectDir, snapshotId, { paths } = {}) {
+function snapshotRecords(project, snapshotId, paths, hashOnly = false) {
   if (typeof snapshotId !== 'string' || !UUID.test(snapshotId)) throw new Error('Invalid snapshot ID.');
-  const project = projectRoot(projectDir);
   const source = `${SNAPSHOTS}/${snapshotId}`;
   const meta = readFile(project, `${source}/snapshot.json`, { maxBytes: MAX_FILE_BYTES });
   if (!meta) throw new Error(`Unknown snapshot: ${snapshotId}`);
@@ -621,10 +632,86 @@ function rollback(projectDir, snapshotId, { paths } = {}) {
   if (!Array.isArray(selected) || selected.some(relative => !files.has(relative))) {
     throw new Error('Rollback paths must belong to the component snapshot.');
   }
-  const plan = [];
-  for (const relative of [...new Set(selected)].sort()) {
-    const saved = readFile(project, `${source}/files/${relative}`);
+  return [...new Set(selected)].sort().map(relative => {
+    const saved = readFile(project, `${source}/files/${relative}`, { hashOnly });
     if ((saved?.sha256 ?? null) !== files.get(relative)) throw new Error(`Invalid snapshot file: ${relative}`);
+    return { relative, saved };
+  });
+}
+
+function componentControl(project) {
+  return ['contract.json', 'anchors/flow.json', 'agents.json'].map(relative =>
+    signature(readFile(project, relative, { hashOnly: true })));
+}
+
+function componentStates(project, records, live = new Map()) {
+  return records.map(({ relative, saved }) => {
+    if (!live.has(relative)) live.set(relative, signature(readFile(project, relative, { hashOnly: true })));
+    return [relative, live.get(relative), signature(saved)];
+  });
+}
+
+function componentRevision(sectionId, snapshotId, control, states) {
+  return createHash('sha256').update(JSON.stringify([sectionId, snapshotId, control, states])).digest('hex');
+}
+
+function stageComponentRestore(ws, sectionId, { snapshotId, paths, expectedRevision }) {
+  const session = getSession(ws);
+  if (!session.launched || session.restore || session.publishing || session.published || !Array.isArray(paths) || !paths.length) {
+    throw new Error('A new launch workspace and component paths are required.');
+  }
+  const records = snapshotRecords(session.project, snapshotId, paths);
+  if (records.some(({ relative }) => classify(session.launched, session.workerId, relative) !== 'owned' ||
+      affectedSections([{ relative }], session.launched)[0] !== sectionId)) {
+    throw new Error('The selected paths are not owned by this component.');
+  }
+  const states = componentStates(session.project, records);
+  const control = componentControl(session.project);
+  if (componentRevision(sectionId, snapshotId, control, states) !== expectedRevision) {
+    throw new Violation('stale', '', 'The component changed. Reload its history before restoring.');
+  }
+  session.restore = new Map(records.map(({ relative, saved }) => [relative,
+    { sha256: saved?.sha256 ?? null, mode: saved?.mode ?? null }]));
+  session.restoreBaseline = new Map(states.map(([relative, before]) => [relative, before]));
+  session.restoreControl = control;
+  for (const { relative, saved } of records) {
+    fs.rmSync(entry(ws.dir, relative).file, { force: true });
+    if (saved) stageFile(ws.dir, relative, { ...saved, mode: 0o600 });
+  }
+}
+
+function componentHistory(projectDir, sectionId, workerId, manifest) {
+  const project = projectRoot(projectDir);
+  const log = readFile(project, 'integration/log.jsonl', { maxBytes: 8 * 1024 * 1024 });
+  if (!log) return [];
+  const control = componentControl(project);
+  const versions = [];
+  const visited = new Set();
+  const live = new Map();
+  for (const line of log.data.toString('utf8').trimEnd().split('\n').reverse()) {
+    try {
+      const item = JSON.parse(line);
+      if (!UUID.test(item.snapshotId) || visited.has(item.snapshotId) || !Array.isArray(item.paths) ||
+          typeof item.at !== 'string' || !Number.isFinite(Date.parse(item.at))) continue;
+      const paths = item.paths.filter(relative => isSafePath(relative) && classify(manifest, workerId, relative) === 'owned' &&
+        affectedSections([{ relative }], manifest)[0] === sectionId);
+      if (!paths.length) continue;
+      const records = snapshotRecords(project, item.snapshotId, paths, true);
+      const states = componentStates(project, records, live);
+      visited.add(item.snapshotId);
+      if (states.every(([, current, saved]) => current === saved)) continue;
+      const expectedRevision = componentRevision(sectionId, item.snapshotId, control, states);
+      versions.push({ snapshotId: item.snapshotId, createdAt: item.at, paths: states.map(([relative]) => relative), expectedRevision });
+      if (versions.length === 20) break;
+    } catch { /* A malformed or unavailable history record cannot be restored. */ }
+  }
+  return versions;
+}
+
+function rollback(projectDir, snapshotId, { paths } = {}) {
+  const project = projectRoot(projectDir);
+  const plan = [];
+  for (const { relative, saved } of snapshotRecords(project, snapshotId, paths)) {
     const live = readFile(project, relative);
     if (live?.sha256 !== saved?.sha256 || live?.mode !== saved?.mode) {
       plan.push({ relative, before: live, after: saved });
@@ -651,4 +738,4 @@ function close(ws) {
   }
 }
 
-module.exports = { open, diff, workerOutbox, validate, merge, publish, rollback, close };
+module.exports = { open, diff, workerOutbox, validate, merge, publish, rollback, close, componentHistory, stageComponentRestore };

@@ -54,13 +54,14 @@ function isBlankSection(before, owner) {
 function createPublication(projectDir, checkImpact = impact) {
   let tail = Promise.resolve();
 
-  function audit(result, owner, anchor) {
+  function audit(result, owner, anchor, restore) {
     if (!result.snapshotId) return;
     const dir = path.join(projectDir, 'integration');
     fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
     if (!fs.lstatSync(dir).isDirectory()) throw new Error('Invalid integration directory.');
-    const record = { at: new Date().toISOString(), owner, snapshotId: result.snapshotId,
+    const record = { at: new Date().toISOString(), owner: restore ? 'studio-operator' : owner, snapshotId: result.snapshotId,
       paths: result.merged, anchorId: anchor?.id ?? null, anchorContractSha256: anchor?.contractHash ?? null };
+    if (restore) Object.assign(record, { action: 'component-restore', sectionId: restore.sectionId, sourceSnapshotId: restore.snapshotId });
     const contract = path.join(projectDir, 'contract.json');
     if (fs.lstatSync(contract, { throwIfNoEntry: false })?.isFile()) {
       record.projectContractSha256 = createHash('sha256').update(fs.readFileSync(contract)).digest('hex');
@@ -71,11 +72,12 @@ function createPublication(projectDir, checkImpact = impact) {
     });
   }
 
-  function publish(ws, { anchor, workerId, owner, cancelled, checkOutbox }) {
+  function publish(ws, { anchor, workerId, owner, cancelled, checkOutbox, restore }) {
     const operation = tail.then(async () => {
       if (cancelled()) return reject('cancelled', 'The turn was stopped.');
       const result = await integrator.publish(projectDir, ws, {
         anchorId: anchor?.id,
+        ...(restore && { canCommit: () => !cancelled() }),
         async accept({ before, after, outbox }) {
           try { checkOutbox(outbox); }
           catch (error) { return reject('channel', error.message); }
@@ -88,7 +90,10 @@ function createPublication(projectDir, checkImpact = impact) {
             }
             if (!owner) return reject('impact', 'Visual edits require a section owner.');
             let report;
-            try { report = await checkImpact(before, after, { owner, firstBuild: isBlankSection(before, owner) }); }
+            try {
+              report = await checkImpact(before, after, { owner, firstBuild: isBlankSection(before, owner),
+                ...(restore && { componentRestore: true }) });
+            }
             catch { return reject('impact', 'Chrome could not verify the candidate preview.'); }
             if (!report.ok) return reject('impact', `The candidate changes other sections: ${report.unexpected.join(', ')}.`);
             if (report.perWidth.some(sample => sample.horizontalOverflow.after > sample.horizontalOverflow.before || sample.consoleErrors.added.length)) {
@@ -99,7 +104,7 @@ function createPublication(projectDir, checkImpact = impact) {
         },
       });
       if (result.ok) {
-        try { audit(result, workerId, anchor); }
+        try { audit(result, workerId, anchor, restore); }
         catch { console.warn('Worker changes published, but the integration log could not be written.'); }
       }
       return result;

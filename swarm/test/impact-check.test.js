@@ -7,7 +7,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { test } = require('node:test');
 const { crc32, deflateSync } = require('node:zlib');
-const { compareWidth, summarizeWidths } = require('../tools/impact-check');
+const { impact, compareWidth, summarizeWidths } = require('../tools/impact-check');
 
 const HEADER = '01-header';
 const HERO = '02-hero';
@@ -98,6 +98,45 @@ test('initial insertion only permits unchanged peers in the same flow position w
   }
 });
 
+test('component restore permits proven vertical translations in either direction', () => {
+  const compact = snapshot({ [HEADER]: section(0), [HERO]: { ...section(1), withoutOwnerY: 0 } });
+  const expanded = snapshot({ [HEADER]: section(0, original, { height: 5 }), [HERO]: { ...section(5), withoutOwnerY: 0 } });
+  for (const [before, after, y] of [[compact, expanded, 4], [expanded, compact, -4]]) {
+    const result = compareWidth(before, after, HEADER, { componentRestore: true });
+    const hero = result.perSection[1];
+    assert.deepEqual(result.unexpected, []);
+    assert.deepEqual(hero.boxDelta, { ...ZERO_DELTA, y });
+    assert.equal(hero.changed, true);
+    assert.equal(hero.flowTranslation, true);
+  }
+  assert.deepEqual(compareWidth(expanded, compact, HEADER).unexpected, [HERO]);
+});
+
+test('component restore rejects displaced peers with missing flow evidence or any other change', () => {
+  const before = snapshot({ [HEADER]: section(0), [HERO]: { ...section(5), withoutOwnerY: 0 } });
+  const moved = { ...section(1), withoutOwnerY: 0 };
+  for (const [name, peer, errors] of [
+    ['disappears', null],
+    ['has no measurement without the owner', section(1)],
+    ['moves with the owner hidden', { ...moved, withoutOwnerY: 1 }],
+    ['changes pixels', { ...moved, png: tinted }],
+    ['moves horizontally', { ...moved, box: { ...moved.box, x: 1 } }],
+    ['resizes', { ...moved, box: { ...moved.box, height: 2 } }],
+    ['overflows', { ...moved, horizontalOverflow: 1 }],
+    ['logs a new error', moved, [{ section: HERO, message: 'Unexpected peer error' }]],
+  ]) {
+    const after = snapshot({ ...before.sections, [HERO]: peer }, 0, errors);
+    const result = compareWidth(before, after, HEADER, { componentRestore: true });
+    assert.deepEqual(result.unexpected, [HERO], name);
+    assert.equal(result.perSection[1].flowTranslation, false, name);
+  }
+
+  const empty = y => ({ ...section(y, null, { height: 0 }), empty: true });
+  const previous = snapshot({ ...before.sections, [HERO]: empty(1) });
+  const current = snapshot({ ...previous.sections, [HERO]: empty(5) });
+  assert.deepEqual(compareWidth(previous, current, HEADER, { componentRestore: true }).unexpected, [HERO]);
+});
+
 test('removed and added sections are reported and empty fragments stay unchanged', () => {
   const before = snapshot({ [HEADER]: section(0), [HERO]: section(1), '03-empty': null });
   const after = snapshot({ [HEADER]: section(0), '03-empty': null, [FOOTER]: section(2) });
@@ -152,6 +191,12 @@ test('the CLI rejects malformed widths before exporting or launching Chrome', ()
   assert.match(result.stderr, /Widths must be positive integers/);
 });
 
+test('the CLI does not expose the component restore policy', () => {
+  const result = spawnSync(process.execPath, [TOOL, '--before', 'before', '--after', 'after', '--component-restore'], { encoding: 'utf8' });
+  assert.equal(result.status, 2);
+  assert.match(result.stderr, /Unknown option.*--component-restore/);
+});
+
 // Run explicitly where headless Chrome is permitted: SWARM_IMPACT_CHROME_TEST=1 node --test swarm/test/impact-check.test.js
 const chromeTest = { skip: process.env.SWARM_IMPACT_CHROME_TEST !== '1' && 'Set SWARM_IMPACT_CHROME_TEST=1 to run the Chrome proof' };
 const home = path.resolve(__dirname, '../projects/home');
@@ -193,4 +238,37 @@ test('home with a scoped header color change has no unexpected impact in Chrome'
 
 test('home with a leaking global rule in the header layer flags the hero in Chrome', chromeTest, t => {
   compareHome(t, true);
+});
+
+test('component restore measures owner flow in Chrome', chromeTest, async t => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-impact-restore-'));
+  t.after(() => fs.rmSync(temp, { force: true, recursive: true }));
+  function fixture(name, height, margin = 0) {
+    const project = path.join(temp, name);
+    const sections = path.join(project, 'sections');
+    fs.mkdirSync(sections, { recursive: true });
+    fs.writeFileSync(path.join(sections, `${HEADER}.html`), '<header id="01-header" class="s-01">Header</header>');
+    fs.writeFileSync(path.join(sections, `${HERO}.html`), '<section id="02-hero" class="s-02"><h1>Hero</h1></section>');
+    fs.writeFileSync(path.join(sections, `${HEADER}.css`), `.s-01 { height: ${height}px; }`);
+    fs.writeFileSync(path.join(sections, `${HERO}.css`), `.s-02 { margin-top: ${margin}px; background: #cee; } .s-02 h1 { margin: 0; }`);
+    return project;
+  }
+  const compact = fixture('compact', 24);
+  const expanded = fixture('expanded', 64);
+  const shifted = fixture('shifted', 24, 10);
+  const options = { owner: HEADER, widths: [393] };
+  for (const [before, after, componentRestore, expectedY, ok] of [
+    [compact, expanded, true, 40, true],
+    [expanded, compact, true, -40, true],
+    [expanded, shifted, true, -30, false],
+    [expanded, compact, false, -40, false],
+  ]) {
+    const result = await impact(before, after, { ...options, componentRestore });
+    const hero = result.perSection.find(({ id }) => id === HERO);
+    assert.equal(result.ok, ok);
+    assert.deepEqual(result.unexpected, ok ? [] : [HERO]);
+    assert.deepEqual(hero.boxDelta, { ...ZERO_DELTA, y: expectedY });
+    assert.equal(hero.diffRatio, 0);
+    assert.equal(hero.widths[0].flowTranslation, ok);
+  }
 });
