@@ -1,0 +1,194 @@
+{
+  "390": {
+    "browser": "158.0.8127.37",
+    "width": 390,
+    "height": 844,
+    "tier": "low",
+    "upperCopyRequestedBeforeLift": false,
+    "servedSha256": {
+      "pwa.js": "f5d95e87a50d6ed1d6a1859a9537b6dc6d9e88771acddd8130b33f03e1c3ce89",
+      "assets/world.bundle.js": "739689b0d69b57255c226e45f63d2c8b59b5cde985e625e03e128e01d5c126c1",
+      "assets/brand-wall.js": "fd3cc4eb11aaa4076dd835372f1d29929a5559474bb888d6e16cab203ae888ad",
+      "assets/mall-language.js": "0462be909af287fb0b07baf5da688185c1e567bcf6364b3fbc7c37acc7fa71eb",
+      "assets/brand-plaque-copy.js": "d50ba54aadbf0251e5444eb86924cd8289c3d32ac2c635a2d06917d6b20e04e3",
+      "assets/brand-kit/brand-kit.json": "91a82968169940d0079c62747e06aa7508d6ff11a11bdbe457705bde576d8e44"
+    },
+    "records": {
+      "S13": {
+        "zh-Hans": {
+          "title": "Sony · 小巧的入耳式耳机",
+          "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+          "story": "GJH 的品牌目录列有索尼。索尼将 MDR-E9LP 介绍为有白色款的有线入耳式耳机。",
+          "alt": "Sony 标志",
+          "action": "阅读 Sony 品牌故事"
+        },
+        "ms": {
+          "title": "Sony · Audio dalam bentuk kompak",
+          "kind": "PLAK JENAMA · KONSEP PUSAT BELI-BELAH MAYA BEBAS",
+          "story": "Direktori jenama GJH menyenaraikan Sony. Menurut Sony, MDR-E9LP ialah fon telinga dalam telinga berwayar yang tersedia dalam warna putih.",
+          "alt": "Logo Sony",
+          "action": "Baca kisah jenama Sony"
+        },
+        "en": {
+          "title": "Sony · Audio in a small form",
+          "kind": "BRAND PLAQUE · INDEPENDENT VIRTUAL MALL CONCEPT",
+          "story": "GJH lists Sony in its brand directory. Sony describes its MDR-E9LP as wired in-ear headphones available in white.",
+          "alt": "Sony logo",
+          "action": "Read the Sony brand story"
+        }
+      },
+      "S04": {
+        "zh-Hans": {
+          "title": "Borsch Med · 驱蚊贴展示",
+          "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+          "story": "Borsch Med 驱蚊贴每盒 18 片，所列成分包括香茅油。包装说明写明，可将贴片贴在衣物或附近的物体表面。",
+          "alt": "Borsch Med 标志",
+          "action": "阅读 Borsch Med 品牌故事"
+        },
+        "ms": {
+          "title": "Borsch Med · Pameran pelekat penghalau nyamuk",
+          "kind": "PLAK JENAMA · KONSEP PUSAT BELI-BELAH MAYA BEBAS",
+          "story": "Pelekat penghalau nyamuk Borsch Med didatangkan dalam pek 18 keping. Minyak sitronela ialah antara ramuan yang disenaraikan. Arahan pada pek menyatakan bahawa pelekat boleh ditampal pada pakaian atau permukaan berdekatan.",
+          "alt": "Logo Borsch Med",
+          "action": "Baca kisah jenama Borsch Med"
+        },
+        "en": {
+          "title": "Borsch Med · Repellent patches, neatly shown",
+          "kind": "BRAND PLAQUE · INDEPENDENT VIRTUAL MALL CONCEPT",
+          "story": "Borsch Med’s mosquito repellent patches come in an 18-patch pack and list citronella oil among the ingredients. The pack’s directions describe placing a patch on clothing or a nearby surface, a useful everyday detail.",
+          "alt": "Borsch Med logo",
+          "action": "Read the Borsch Med brand story"
+        }
+      }
+    },
+    "pageErrors": []
+  },
+  "768": {
+    "browser": "158.0.8127.37",
+    "width": 768,
+    "height": 1024,
+    "tier": "balanced",
+    "upperCopyRequestedBeforeLift": false,
+    "servedSha256": {
+      "pwa.js": "f5d95e87a50d6ed1d6a1859a9537b6dc6d9e88771acddd8130b33f03e1c3ce89",
+      "assets/world.bundle.js": "739689b0d69b57255c226e45f63d2c8b59b5cde985e625e03e128e01d5c126c1",
+      "assets/brand-wall.js": "fd3cc4eb11aaa4076dd835372f1d29929a5559474bb888d6e16cab203ae888ad",
+      "assets/mall-language.js": "0462be909af287fb0b07baf5da688185c1e567bcf6364b3fbc7c37acc7fa71eb",
+      "assets/brand-plaque-copy.js": "d50ba54aadbf0251e5444eb86924cd8289c3d32ac2c635a2d06917d6b20e04e3",
+      "assets/brand-kit/brand-kit.json": "91a82968169940d0079c62747e06aa7508d6ff11a11bdbe457705bde576d8e44"
+    },
+    "records": {
+      "S13": {
+        "zh-Hans": {
+          "title": "Sony · 小巧的入耳式耳机",
+          "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+          "story": "GJH 的品牌目录列有索尼。索尼将 MDR-E9LP 介绍为有白色款的有线入耳式耳机。",
+          "alt": "Sony 标志",
+          "action": "阅读 Sony 品牌故事"
+        },
+        "ms": {
+          "title": "Sony · Audio dalam bentuk kompak",
+          "kind": "PLAK JENAMA · KONSEP PUSAT BELI-BELAH MAYA BEBAS",
+          "story": "Direktori jenama GJH menyenaraikan Sony. Menurut Sony, MDR-E9LP ialah fon telinga dalam telinga berwayar yang tersedia dalam warna putih.",
+          "alt": "Logo Sony",
+          "action": "Baca kisah jenama Sony"
+        },
+        "en": {
+          "title": "Sony · Audio in a small form",
+          "kind": "BRAND PLAQUE · INDEPENDENT VIRTUAL MALL CONCEPT",
+          "story": "GJH lists Sony in its brand directory. Sony describes its MDR-E9LP as wired in-ear headphones available in white.",
+          "alt": "Sony logo",
+          "action": "Read the Sony brand story"
+        }
+      },
+      "S04": {
+        "zh-Hans": {
+          "title": "Borsch Med · 驱蚊贴展示",
+          "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+          "story": "Borsch Med 驱蚊贴每盒 18 片，所列成分包括香茅油。包装说明写明，可将贴片贴在衣物或附近的物体表面。",
+          "alt": "Borsch Med 标志",
+          "action": "阅读 Borsch Med 品牌故事"
+        },
+        "ms": {
+          "title": "Borsch Med · Pameran pelekat penghalau nyamuk",
+          "kind": "PLAK JENAMA · KONSEP PUSAT BELI-BELAH MAYA BEBAS",
+          "story": "Pelekat penghalau nyamuk Borsch Med didatangkan dalam pek 18 keping. Minyak sitronela ialah antara ramuan yang disenaraikan. Arahan pada pek menyatakan bahawa pelekat boleh ditampal pada pakaian atau permukaan berdekatan.",
+          "alt": "Logo Borsch Med",
+          "action": "Baca kisah jenama Borsch Med"
+        },
+        "en": {
+          "title": "Borsch Med · Repellent patches, neatly shown",
+          "kind": "BRAND PLAQUE · INDEPENDENT VIRTUAL MALL CONCEPT",
+          "story": "Borsch Med’s mosquito repellent patches come in an 18-patch pack and list citronella oil among the ingredients. The pack’s directions describe placing a patch on clothing or a nearby surface, a useful everyday detail.",
+          "alt": "Borsch Med logo",
+          "action": "Read the Borsch Med brand story"
+        }
+      }
+    },
+    "pageErrors": []
+  },
+  "1440": {
+    "browser": "158.0.8127.37",
+    "width": 1440,
+    "height": 900,
+    "tier": "detailed",
+    "upperCopyRequestedBeforeLift": false,
+    "servedSha256": {
+      "pwa.js": "f5d95e87a50d6ed1d6a1859a9537b6dc6d9e88771acddd8130b33f03e1c3ce89",
+      "assets/world.bundle.js": "739689b0d69b57255c226e45f63d2c8b59b5cde985e625e03e128e01d5c126c1",
+      "assets/brand-wall.js": "fd3cc4eb11aaa4076dd835372f1d29929a5559474bb888d6e16cab203ae888ad",
+      "assets/mall-language.js": "0462be909af287fb0b07baf5da688185c1e567bcf6364b3fbc7c37acc7fa71eb",
+      "assets/brand-plaque-copy.js": "d50ba54aadbf0251e5444eb86924cd8289c3d32ac2c635a2d06917d6b20e04e3",
+      "assets/brand-kit/brand-kit.json": "91a82968169940d0079c62747e06aa7508d6ff11a11bdbe457705bde576d8e44"
+    },
+    "records": {
+      "S13": {
+        "zh-Hans": {
+          "title": "Sony · 小巧的入耳式耳机",
+          "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+          "story": "GJH 的品牌目录列有索尼。索尼将 MDR-E9LP 介绍为有白色款的有线入耳式耳机。",
+          "alt": "Sony 标志",
+          "action": "阅读 Sony 品牌故事"
+        },
+        "ms": {
+          "title": "Sony · Audio dalam bentuk kompak",
+          "kind": "PLAK JENAMA · KONSEP PUSAT BELI-BELAH MAYA BEBAS",
+          "story": "Direktori jenama GJH menyenaraikan Sony. Menurut Sony, MDR-E9LP ialah fon telinga dalam telinga berwayar yang tersedia dalam warna putih.",
+          "alt": "Logo Sony",
+          "action": "Baca kisah jenama Sony"
+        },
+        "en": {
+          "title": "Sony · Audio in a small form",
+          "kind": "BRAND PLAQUE · INDEPENDENT VIRTUAL MALL CONCEPT",
+          "story": "GJH lists Sony in its brand directory. Sony describes its MDR-E9LP as wired in-ear headphones available in white.",
+          "alt": "Sony logo",
+          "action": "Read the Sony brand story"
+        }
+      },
+      "S04": {
+        "zh-Hans": {
+          "title": "Borsch Med · 驱蚊贴展示",
+          "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+          "story": "Borsch Med 驱蚊贴每盒 18 片，所列成分包括香茅油。包装说明写明，可将贴片贴在衣物或附近的物体表面。",
+          "alt": "Borsch Med 标志",
+          "action": "阅读 Borsch Med 品牌故事"
+        },
+        "ms": {
+          "title": "Borsch Med · Pameran pelekat penghalau nyamuk",
+          "kind": "PLAK JENAMA · KONSEP PUSAT BELI-BELAH MAYA BEBAS",
+          "story": "Pelekat penghalau nyamuk Borsch Med didatangkan dalam pek 18 keping. Minyak sitronela ialah antara ramuan yang disenaraikan. Arahan pada pek menyatakan bahawa pelekat boleh ditampal pada pakaian atau permukaan berdekatan.",
+          "alt": "Logo Borsch Med",
+          "action": "Baca kisah jenama Borsch Med"
+        },
+        "en": {
+          "title": "Borsch Med · Repellent patches, neatly shown",
+          "kind": "BRAND PLAQUE · INDEPENDENT VIRTUAL MALL CONCEPT",
+          "story": "Borsch Med’s mosquito repellent patches come in an 18-patch pack and list citronella oil among the ingredients. The pack’s directions describe placing a patch on clothing or a nearby surface, a useful everyday detail.",
+          "alt": "Borsch Med logo",
+          "action": "Read the Borsch Med brand story"
+        }
+      }
+    },
+    "pageErrors": []
+  }
+}

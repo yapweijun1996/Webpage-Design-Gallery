@@ -22,3 +22,11 @@ The deck has a glazed atrium edge, restrained seating and planters, and one wall
 4. Expanded-layout copy correction, focused browser regression coverage, README update, generated-output regeneration, and verification.
 
 Stage commits are required. The browser acceptance must establish that the deck is reachable, all 17 plaques are represented, and both measured views stay at or below 190 draw calls.
+
+## Story languages
+
+All 17 plaques use the visitor's chosen language for the nearby prompt, Story title and body, action label, and logo alternative text. English comes from the [installed kit](../demos/corporate/gjh/v11/assets/brand-kit/brand-kit.json). The language selector also offers Simplified Chinese and Malay. The physical signs retain their original artwork. The wall loads its additional text on arrival at the upper deck.
+
+The browser language matrix recorded 102 selector changes across two same-origin tabs and every supplied slot. Separate Chrome/Metal routes used the Map and lift at 390 × 844 (Low), 768 × 1024 (Balanced) and 1440 × 900 (Detailed). At Sony and Borsch Med each route opened the Story, observed a language change from the other tab, restored the original English copy, then checked the nearby prompt again. Each route matched six served files to the release and recorded zero page errors. The three routes requested the upper-floor translations after the lift. An additional service-worker check on the author checkout preserved Malay on returning from the offline reconnect page. Physical devices and native-speaker editorial review remain open.
+
+[Three-viewport captures](evidence/gjh-v11-upper-plaque-languages/stories.webp) · [Lift-route measurements](evidence/gjh-v11-upper-plaque-languages/lift-routes.json) · [Rendered text for all 17 plaques](evidence/gjh-v11-upper-plaque-languages/rendered-stories.json)

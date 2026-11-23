@@ -1,6 +1,8 @@
-import './assets/mall-language.js';
+import {initMallLanguage} from './assets/mall-language.js';
 import './assets/color-scheme.js';
 import {icon} from './assets/icons.js';
+
+initMallLanguage();
 
 /* V11 owns only its scoped offline fallback. Live mall resources stay network-only. */
 (() => {

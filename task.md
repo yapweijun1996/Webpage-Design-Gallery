@@ -157,6 +157,7 @@ Design and implementation are tracked in [the upper-deck brand-wall brief](docs/
 - [x] Stage 1 — Add the design brief and this checklist.
 - [x] Stage 2 — Build the upper deck, railing, benches and planters.
 - [x] Stage 3 — Build the 17-plaque atlas and accessible nearby/tap story interaction.
+- [x] English, Simplified Chinese and Malay stories are available on all 17 plaques. The [language evidence](docs/gjh-v11-upper-deck-brand-wall.md#story-languages) covers both tabs and three viewport sizes.
 - [x] Stage 4 — Expanded-layout copy, README and generated outputs shipped. Desktop Chrome/Metal measured 73 draw calls at the default entrance, 56 on the upper deck with all 17 plaques, and 86 after the bench interactions. All passed the 190-call limit. [Repeatable browser command and receipt](docs/evidence/gjh-v11-upper-layout/desktop-stage4.md)
 
 

@@ -66,6 +66,7 @@ function fixture(storage = new Map()) {
       createElement: () => new Element()
     }),
     fetch: async () => Response.json({build: 'new', version: '2.0.0'}),
+    initMallLanguage() {},
     icon: () => new Element()
   });
   return {

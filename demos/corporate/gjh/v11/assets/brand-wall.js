@@ -1,6 +1,8 @@
 import {extrudeArtworkGutter, setupArtworkTexture} from './artwork-textures.js';
 import {decalClearance, decalMaterial} from './surface-decals.js';
 import {brandRail} from './upper-layout.js';
+import {brandPlaqueMessages} from './brand-plaque-copy.js';
+import {registerMallMessages} from './mall-language.js';
 
 const SLOT_COUNT = 17;
 const COLUMNS = 4;
@@ -38,6 +40,7 @@ export async function addBrandWallAtlas(T, scene, deckY, prepareModel, artworkTi
       typeof entry.brand !== 'string' || typeof entry.tagline !== 'string' || typeof entry.story !== 'string')) {
     throw new Error('Brand-kit plaque records are incomplete');
   }
+  registerMallMessages(brandPlaqueMessages(entries));
   const logos = await Promise.all(entries.map((entry,index) =>
     image(new URL(`./brands/${entry.slot}-${LOGO_FILES[index]}.webp`, import.meta.url).href)));
   const cellWidth = 256, cellHeight = 224;

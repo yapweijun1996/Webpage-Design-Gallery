@@ -1,7 +1,12 @@
 import {MALL_THEME_COPY} from './mall-theme-copy.js';
 
 // Keep the gallery's saved language when entering the standalone mall.
-const messages = new Map([
+const messages = new Map();
+export function registerMallMessages(rows) {
+  for (const [source, zh, ms] of rows) messages.set(source, {'zh-Hans':zh, ms});
+}
+
+registerMallMessages([
   ['Mute sound','静音','Senyapkan bunyi'],
   ['Sound','声音','Bunyi'],
   ['Menu','菜单','Menu'],
@@ -69,7 +74,6 @@ const messages = new Map([
   ["The Goh Joo Hin catalogue lists Zeria Chondro Max 300 Tablets and Lively & Healthy 180 Tablets separately. The Chondro Max product gallery identifies the outer box and bottle.","Goh Joo Hin 目录分别列有 Zeria Chondro Max 300 片装和 Lively & Healthy 180 片装。Chondro Max 官方图集展示外盒和瓶身。","Katalog Goh Joo Hin menyenaraikan Zeria Chondro Max 300 tablet dan Lively & Healthy 180 tablet secara berasingan. Galeri Chondro Max menunjukkan kotak luar dan botol."],
   ["View the official Chondro Max gallery","查看官方 Chondro Max 图集","Lihat galeri rasmi Chondro Max"],
   ["Official Zeria brand mark","Zeria 官方品牌标志","Logo rasmi Zeria"],
-  ["GJH lists Sony in its brand directory. Sony describes its MDR-E9LP as wired in-ear headphones available in white.","GJH 的品牌目录列有索尼。索尼将 MDR-E9LP 介绍为有白色款的有线入耳式耳机。","Direktori jenama GJH menyenaraikan Sony. Menurut Sony, MDR-E9LP ialah fon telinga dalam telinga berwayar yang tersedia dalam warna putih."],
   ["Sony · Headphones and portable audio","Sony · 耳机与便携音频","Sony · Fon kepala dan audio mudah alih"],
   ["Headphones and portable audio","耳机与便携音频","Fon kepala dan audio mudah alih"],
   ["Sony Singapore documents the WH-1000XM6 wireless headphones and the NW-A306 Walkman. The Walkman measures approximately 56.5 × 98.4 × 11.8 mm. The listening stand illustrates the audio category.","索尼新加坡公布了 WH-1000XM6 无线耳机和 NW-A306 Walkman 的产品资料。后者约为 56.5 × 98.4 × 11.8 毫米。试听台展示个人音频主题。","Sony Singapura mendokumenkan fon kepala tanpa wayar WH-1000XM6 dan Walkman NW-A306. Walkman berukuran kira-kira 56.5 × 98.4 × 11.8 mm. Ruang dengar ini menggambarkan kategori audio."],
@@ -193,6 +197,7 @@ const messages = new Map([
   ['More actions','更多操作','Tindakan lain'],
   ['Bag','购物袋','Beg'],
   ['Story','故事','Kisah'],
+  ['Brand plaque · independent virtual mall concept','品牌铭牌 · 独立虚拟商场概念展示','Plak jenama · konsep pusat beli-belah maya bebas'],
   ['Stand','起身','Berdiri'],
   ['Ride','乘坐','Naik'],
   ['Skip ride','跳过乘梯动画','Langkau perjalanan'],
@@ -538,7 +543,7 @@ const messages = new Map([
   ["Move closer to the front of this shelf to pick up or return a product.", "靠近货架正面以拾取或归还商品。", "Dekati bahagian hadapan rak untuk mengambil atau memulangkan produk."],
   ["This is a different product. Return your held item to its original New Moon shelf.", "这是另一款商品。请将手持商品放回 New Moon 原货架。", "Ini produk lain. Pulangkan item yang dipegang ke rak asal New Moon."],
   ["On touch screens, drag the right joystick to move and drag the scene to look around. Turn on Full-screen joystick to move from anywhere and look with a second finger. Walking is the default. Tap Run to toggle running. Buttons and panels keep their own actions. All benches support Sit / Stand. Shop benches face the entrance; approach the open seat side. Use Shopping Cart in the right rail to start or stow the demo push cart. Leave about 3 metres of clear floor around you to start pushing. Inventory Bag contains collected demo items, not purchases. Neither Bag nor Shopping Cart creates an order. While seated, walking is locked; use Stand or Escape to leave. A sit/stand transition plays with walking locked. The seat camera moves back to frame the visitor. Standing restores your previous view. Escape reverses entry; reduced-motion uses an immediate pose.",'拖动右侧摇杆移动，拖动场景转动视角。开启「全屏摇杆」后，可从场景任意位置移动，用第二根手指调整视角。默认步行，轻触「跑步」可切换跑步。长椅可坐下或起身。购物车需要约三米净空，演示购物袋和购物车均不会创建订单。坐下时无法行走；选择起身或按 Esc 离开。','Seret kayu ria kanan untuk bergerak dan seret adegan untuk melihat sekeliling. Aktifkan kayu ria skrin penuh untuk bergerak dari mana-mana tempat dan melihat dengan jari kedua. Berjalan ialah tetapan lalai. Ketik Lari untuk menghidupkan atau mematikan larian. Dekati bangku untuk duduk atau berdiri. Troli memerlukan ruang lapang kira-kira tiga meter. Beg dan troli demo tidak membuat pesanan. Semasa duduk, pilih Berdiri atau tekan Esc untuk bergerak semula.'],
-].map(([source, zh, ms]) => [source, {'zh-Hans':zh, ms}]));
+]);
 
 const patterns = [
   [/^Holding (.+)\. Add it to your bag, or return it to its original New Moon shelf\.$/, '手持 $1。可加入购物袋，或放回 New Moon 原货架。', 'Anda memegang $1. Masukkan ke dalam beg atau pulangkannya ke rak asal New Moon.'],
@@ -650,30 +655,32 @@ function visit(node) {
   for (const attribute of attributes) if (node.hasAttribute(attribute)) render(node, attribute);
   for (const child of node.childNodes) visit(child);
 }
-const observer = new MutationObserver(records => {
-  for (const record of records) {
-    if (record.type === 'attributes') render(record.target, record.attributeName);
-    else if (record.type === 'characterData') render(record.target);
-    else for (const child of record.addedNodes) visit(child);
+export function initMallLanguage() {
+  const observer = new MutationObserver(records => {
+    for (const record of records) {
+      if (record.type === 'attributes') render(record.target, record.attributeName);
+      else if (record.type === 'characterData') render(record.target);
+      else for (const child of record.addedNodes) visit(child);
+    }
+  });
+  const selectors = document.querySelectorAll('[data-mall-language]');
+  const headerCode = document.getElementById('site-language-code');
+  function setLanguage(code) {
+    observer.disconnect();
+    language = ['zh-Hans','ms'].includes(code) ? code : 'en';
+    document.documentElement.lang = language;
+    headerCode.textContent = language === 'zh-Hans' ? '中' : language.toUpperCase();
+    for (const select of selectors) select.value = language;
+    visit(document.documentElement);
+    if (language !== 'en') observer.observe(document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:attributes});
+    window.dispatchEvent(new Event('mall:languagechange'));
   }
-});
-const selectors = document.querySelectorAll('[data-mall-language]');
-const headerCode = document.getElementById('site-language-code');
-function setLanguage(code) {
-  observer.disconnect();
-  language = ['zh-Hans','ms'].includes(code) ? code : 'en';
-  document.documentElement.lang = language;
-  headerCode.textContent = language === 'zh-Hans' ? '中' : language.toUpperCase();
-  for (const select of selectors) select.value = language;
-  visit(document.documentElement);
-  if (language !== 'en') observer.observe(document.body, {subtree:true, childList:true, characterData:true, attributes:true, attributeFilter:attributes});
-  window.dispatchEvent(new Event('mall:languagechange'));
+  let preferred = 'en';
+  try { preferred = localStorage.getItem('wdg.language'); } catch { /* Session only. */ }
+  setLanguage(preferred);
+  for (const select of selectors) select.addEventListener('change', () => {
+    setLanguage(select.value);
+    try { localStorage.setItem('wdg.language',language); } catch { /* Session only. */ }
+  });
+  window.addEventListener('storage', event => { if (event.key === 'wdg.language') setLanguage(event.newValue); });
 }
-let preferred = 'en';
-try { preferred = localStorage.getItem('wdg.language'); } catch { /* Session only. */ }
-setLanguage(preferred);
-for (const select of selectors) select.addEventListener('change', () => {
-  setLanguage(select.value);
-  try { localStorage.setItem('wdg.language',language); } catch { /* Session only. */ }
-});
-window.addEventListener('storage', event => { if (event.key === 'wdg.language') setLanguage(event.newValue); });

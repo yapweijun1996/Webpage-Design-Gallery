@@ -1,0 +1,648 @@
+[
+  {
+    "slot": "S01",
+    "copy": {
+      "en": {
+        "title": "New Moon · Seafood, simply presented",
+        "body": "New Moon lists its Premium Wild Caught New Zealand Abalone at 425 g, with abalone, water, salt and sugar among its ingredients. The New Zealand origin gives this seafood favourite a clear sense of place.",
+        "nearTitle": "New Moon · Seafood, simply presented",
+        "nearBody": "New Moon lists its Premium Wild Caught New Zealand Abalone at 425 g, with abalone, water, salt and sugar among its ingredients. The New Zealand origin gives this seafood favourite a clear sense of place.",
+        "alt": "New Moon logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the New Moon brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "New Moon · 海鲜罐头",
+        "body": "New Moon 的产品目录列有 425 克新西兰野生捕捞特级鲍鱼罐头，配料包括鲍鱼、水、盐和糖。这款海味来自新西兰。",
+        "nearTitle": "New Moon · 海鲜罐头",
+        "nearBody": "New Moon 的产品目录列有 425 克新西兰野生捕捞特级鲍鱼罐头，配料包括鲍鱼、水、盐和糖。这款海味来自新西兰。",
+        "alt": "New Moon 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 New Moon 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "New Moon · Sajian makanan laut",
+        "body": "New Moon menyenaraikan Premium Wild Caught New Zealand Abalone dalam tin 425 g. Antara ramuannya ialah abalon, air, garam dan gula. Makanan laut ini berasal dari New Zealand.",
+        "nearTitle": "New Moon · Sajian makanan laut",
+        "nearBody": "New Moon menyenaraikan Premium Wild Caught New Zealand Abalone dalam tin 425 g. Antara ramuannya ialah abalon, air, garam dan gula. Makanan laut ini berasal dari New Zealand.",
+        "alt": "Logo New Moon",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama New Moon",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S02",
+    "copy": {
+      "en": {
+        "title": "MILI · A bottle for the pantry",
+        "body": "MILI’s Vegetarian Oyster Sauce comes in a 510 g bottle, with mushroom extract among its ingredients. Its pantry-friendly flavour has a place beside everyday meals, ready to add a savoury touch to home cooking.",
+        "nearTitle": "MILI · A bottle for the pantry",
+        "nearBody": "MILI’s Vegetarian Oyster Sauce comes in a 510 g bottle, with mushroom extract among its ingredients. Its pantry-friendly flavour has a place beside everyday meals, ready to add a savoury touch to home cooking.",
+        "alt": "MILI logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the MILI brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "MILI · 厨房里的一瓶蚝油",
+        "body": "MILI 的素食蚝油为 510 克瓶装，配料包括蘑菇提取物。这款调味酱适合放在厨房，为家常菜增添鲜味。",
+        "nearTitle": "MILI · 厨房里的一瓶蚝油",
+        "nearBody": "MILI 的素食蚝油为 510 克瓶装，配料包括蘑菇提取物。这款调味酱适合放在厨房，为家常菜增添鲜味。",
+        "alt": "MILI 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 MILI 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "MILI · Sebotol sos untuk dapur",
+        "body": "Sos Tiram Vegetarian MILI didatangkan dalam botol 510 g dan mengandungi ekstrak cendawan. Sos ini sesuai disimpan di dapur untuk menambah rasa umami pada masakan harian.",
+        "nearTitle": "MILI · Sebotol sos untuk dapur",
+        "nearBody": "Sos Tiram Vegetarian MILI didatangkan dalam botol 510 g dan mengandungi ekstrak cendawan. Sos ini sesuai disimpan di dapur untuk menambah rasa umami pada masakan harian.",
+        "alt": "Logo MILI",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama MILI",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S03",
+    "copy": {
+      "en": {
+        "title": "GOGO · Drinks and frozen treats",
+        "body": "GOGO’s category covers drinks and ice cream, including canned drinks and potong ice cream. Cool drinks and a familiar frozen treat bring a cheerful, everyday note to the pantry and freezer.",
+        "nearTitle": "GOGO · Drinks and frozen treats",
+        "nearBody": "GOGO’s category covers drinks and ice cream, including canned drinks and potong ice cream. Cool drinks and a familiar frozen treat bring a cheerful, everyday note to the pantry and freezer.",
+        "alt": "GOGO logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the GOGO brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "GOGO · 饮料与冰品",
+        "body": "GOGO 的饮料和冰淇淋系列包括罐装饮料和 potong 冰淇淋。清凉的饮料和熟悉的冰品，为日常生活增添乐趣。",
+        "nearTitle": "GOGO · 饮料与冰品",
+        "nearBody": "GOGO 的饮料和冰淇淋系列包括罐装饮料和 potong 冰淇淋。清凉的饮料和熟悉的冰品，为日常生活增添乐趣。",
+        "alt": "GOGO 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 GOGO 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "GOGO · Minuman dan sajian sejuk beku",
+        "body": "Rangkaian minuman dan ais krim GOGO merangkumi minuman dalam tin dan ais krim potong. Minuman sejuk dan ais krim yang biasa dinikmati menceriakan hidangan harian.",
+        "nearTitle": "GOGO · Minuman dan sajian sejuk beku",
+        "nearBody": "Rangkaian minuman dan ais krim GOGO merangkumi minuman dalam tin dan ais krim potong. Minuman sejuk dan ais krim yang biasa dinikmati menceriakan hidangan harian.",
+        "alt": "Logo GOGO",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama GOGO",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S04",
+    "copy": {
+      "en": {
+        "title": "Borsch Med · Repellent patches, neatly shown",
+        "body": "Borsch Med’s mosquito repellent patches come in an 18-patch pack and list citronella oil among the ingredients. The pack’s directions describe placing a patch on clothing or a nearby surface, a useful everyday detail.",
+        "nearTitle": "Borsch Med · Repellent patches, neatly shown",
+        "nearBody": "Borsch Med’s mosquito repellent patches come in an 18-patch pack and list citronella oil among the ingredients. The pack’s directions describe placing a patch on clothing or a nearby surface, a useful everyday detail.",
+        "alt": "Borsch Med logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Borsch Med brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Borsch Med · 驱蚊贴展示",
+        "body": "Borsch Med 驱蚊贴每盒 18 片，所列成分包括香茅油。包装说明写明，可将贴片贴在衣物或附近的物体表面。",
+        "nearTitle": "Borsch Med · 驱蚊贴展示",
+        "nearBody": "Borsch Med 驱蚊贴每盒 18 片，所列成分包括香茅油。包装说明写明，可将贴片贴在衣物或附近的物体表面。",
+        "alt": "Borsch Med 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Borsch Med 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Borsch Med · Pameran pelekat penghalau nyamuk",
+        "body": "Pelekat penghalau nyamuk Borsch Med didatangkan dalam pek 18 keping. Minyak sitronela ialah antara ramuan yang disenaraikan. Arahan pada pek menyatakan bahawa pelekat boleh ditampal pada pakaian atau permukaan berdekatan.",
+        "nearTitle": "Borsch Med · Pameran pelekat penghalau nyamuk",
+        "nearBody": "Pelekat penghalau nyamuk Borsch Med didatangkan dalam pek 18 keping. Minyak sitronela ialah antara ramuan yang disenaraikan. Arahan pada pek menyatakan bahawa pelekat boleh ditampal pada pakaian atau permukaan berdekatan.",
+        "alt": "Logo Borsch Med",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Borsch Med",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S05",
+    "copy": {
+      "en": {
+        "title": "Pien Tze Huang · A traditional medicine category",
+        "body": "Pien Tze Huang is a medicine named on the official company site, which describes one troche per box. The name and single-item format give this traditional medicine category a concise, familiar character.",
+        "nearTitle": "Pien Tze Huang · A traditional medicine category",
+        "nearBody": "Pien Tze Huang is a medicine named on the official company site, which describes one troche per box. The name and single-item format give this traditional medicine category a concise, familiar character.",
+        "alt": "Pien Tze Huang logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Pien Tze Huang brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Pien Tze Huang · 传统药品陈列",
+        "body": "片仔癀公司的官网列有片仔癀这一药品，并说明每盒一锭。展柜以药品名称和单锭包装呈现这一传统药品类别。",
+        "nearTitle": "Pien Tze Huang · 传统药品陈列",
+        "nearBody": "片仔癀公司的官网列有片仔癀这一药品，并说明每盒一锭。展柜以药品名称和单锭包装呈现这一传统药品类别。",
+        "alt": "Pien Tze Huang 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Pien Tze Huang 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Pien Tze Huang · Pameran ubat tradisional",
+        "body": "Laman rasmi syarikat menyenaraikan ubat Pien Tze Huang dan menerangkan bahawa setiap kotak mengandungi satu ketul ubat. Nama dan format seunit sekotak memperkenalkan kategori ubat tradisional ini.",
+        "nearTitle": "Pien Tze Huang · Pameran ubat tradisional",
+        "nearBody": "Laman rasmi syarikat menyenaraikan ubat Pien Tze Huang dan menerangkan bahawa setiap kotak mengandungi satu ketul ubat. Nama dan format seunit sekotak memperkenalkan kategori ubat tradisional ini.",
+        "alt": "Logo Pien Tze Huang",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Pien Tze Huang",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S06",
+    "copy": {
+      "en": {
+        "title": "Flying Wheel · Noodles, simply air-dried",
+        "body": "Flying Wheel’s Singapore ban mee noodles are air-dried and listed at 70 g, with wheat flour, water and sea salt among the ingredients. A simple noodle staple brings a little warmth to the everyday pantry.",
+        "nearTitle": "Flying Wheel · Noodles, simply air-dried",
+        "nearBody": "Flying Wheel’s Singapore ban mee noodles are air-dried and listed at 70 g, with wheat flour, water and sea salt among the ingredients. A simple noodle staple brings a little warmth to the everyday pantry.",
+        "alt": "Flying Wheel logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Flying Wheel brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Flying Wheel · 风干板面",
+        "body": "Flying Wheel 的新加坡板面采用风干工艺，目录所列规格为 70 克，配料包括小麦粉、水和海盐。这款面条可作为家中常备的主食。",
+        "nearTitle": "Flying Wheel · 风干板面",
+        "nearBody": "Flying Wheel 的新加坡板面采用风干工艺，目录所列规格为 70 克，配料包括小麦粉、水和海盐。这款面条可作为家中常备的主食。",
+        "alt": "Flying Wheel 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Flying Wheel 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Flying Wheel · Mi yang dikeringkan dengan udara",
+        "body": "Ban mee Singapura Flying Wheel dikeringkan dengan udara dan disenaraikan pada berat 70 g. Antara ramuannya ialah tepung gandum, air dan garam laut. Mi ini sesuai sebagai makanan ruji di dapur.",
+        "nearTitle": "Flying Wheel · Mi yang dikeringkan dengan udara",
+        "nearBody": "Ban mee Singapura Flying Wheel dikeringkan dengan udara dan disenaraikan pada berat 70 g. Antara ramuannya ialah tepung gandum, air dan garam laut. Mi ini sesuai sebagai makanan ruji di dapur.",
+        "alt": "Logo Flying Wheel",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Flying Wheel",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S07",
+    "copy": {
+      "en": {
+        "title": "Gu Long · Pork and mushrooms, together",
+        "body": "Gu Long’s Pork Leg Mushroom listing is 397 g and names pork leg, mushrooms and Chinese chestnut among the ingredients. Its wider range includes stewed pork, luncheon meat, seafood, fruit and vegetables, a generous mix of pantry choices.",
+        "nearTitle": "Gu Long · Pork and mushrooms, together",
+        "nearBody": "Gu Long’s Pork Leg Mushroom listing is 397 g and names pork leg, mushrooms and Chinese chestnut among the ingredients. Its wider range includes stewed pork, luncheon meat, seafood, fruit and vegetables, a generous mix of pantry choices.",
+        "alt": "Gu Long logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Gu Long brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Gu Long · 猪脚与蘑菇",
+        "body": "Gu Long 的蘑菇猪脚罐头标示为 397 克，所列配料包括猪脚、蘑菇和板栗。品牌还有炖猪肉、午餐肉、海鲜、水果和蔬菜等罐头。",
+        "nearTitle": "Gu Long · 猪脚与蘑菇",
+        "nearBody": "Gu Long 的蘑菇猪脚罐头标示为 397 克，所列配料包括猪脚、蘑菇和板栗。品牌还有炖猪肉、午餐肉、海鲜、水果和蔬菜等罐头。",
+        "alt": "Gu Long 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Gu Long 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Gu Long · Kaki babi dan cendawan",
+        "body": "Katalog Gu Long menyenaraikan Pork Leg Mushroom pada berat 397 g, dengan kaki babi, cendawan dan buah berangan Cina antara ramuannya. Rangkaian ini turut merangkumi daging babi rebus, daging luncheon, makanan laut, buah-buahan dan sayur-sayuran.",
+        "nearTitle": "Gu Long · Kaki babi dan cendawan",
+        "nearBody": "Katalog Gu Long menyenaraikan Pork Leg Mushroom pada berat 397 g, dengan kaki babi, cendawan dan buah berangan Cina antara ramuannya. Rangkaian ini turut merangkumi daging babi rebus, daging luncheon, makanan laut, buah-buahan dan sayur-sayuran.",
+        "alt": "Logo Gu Long",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Gu Long",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S08",
+    "copy": {
+      "en": {
+        "title": "Skippy · Smooth peanut butter, simply",
+        "body": "SKIPPY Creamy Peanut Butter is listed at 500 g, with roasted peanuts, sugar, peanut oil, vegetable oil and salt among its ingredients. A familiar jar and a steady pantry staple for everyday meals.",
+        "nearTitle": "Skippy · Smooth peanut butter, simply",
+        "nearBody": "SKIPPY Creamy Peanut Butter is listed at 500 g, with roasted peanuts, sugar, peanut oil, vegetable oil and salt among its ingredients. A familiar jar and a steady pantry staple for everyday meals.",
+        "alt": "Skippy logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Skippy brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Skippy · 细滑花生酱",
+        "body": "SKIPPY 细滑花生酱的目录规格为 500 克，所列配料包括烤花生、糖、花生油、植物油和盐。这种熟悉的瓶装花生酱适合作为日常餐食的搭配。",
+        "nearTitle": "Skippy · 细滑花生酱",
+        "nearBody": "SKIPPY 细滑花生酱的目录规格为 500 克，所列配料包括烤花生、糖、花生油、植物油和盐。这种熟悉的瓶装花生酱适合作为日常餐食的搭配。",
+        "alt": "Skippy 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Skippy 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Skippy · Mentega kacang bertekstur halus",
+        "body": "SKIPPY Creamy Peanut Butter disenaraikan pada berat 500 g. Antara ramuannya ialah kacang tanah panggang, gula, minyak kacang tanah, minyak sayuran dan garam. Mentega kacang dalam balang ini sesuai untuk hidangan harian.",
+        "nearTitle": "Skippy · Mentega kacang bertekstur halus",
+        "nearBody": "SKIPPY Creamy Peanut Butter disenaraikan pada berat 500 g. Antara ramuannya ialah kacang tanah panggang, gula, minyak kacang tanah, minyak sayuran dan garam. Mentega kacang dalam balang ini sesuai untuk hidangan harian.",
+        "alt": "Logo Skippy",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Skippy",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S09",
+    "copy": {
+      "en": {
+        "title": "SPAM · A tin for the pantry",
+        "body": "SPAM Classic Luncheon Meat is listed at 340 g, with pork and ham among its ingredients. Classic is one variety in the SPAM range, offering a familiar canned pantry staple for simple meals and shared tables.",
+        "nearTitle": "SPAM · A tin for the pantry",
+        "nearBody": "SPAM Classic Luncheon Meat is listed at 340 g, with pork and ham among its ingredients. Classic is one variety in the SPAM range, offering a familiar canned pantry staple for simple meals and shared tables.",
+        "alt": "SPAM logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the SPAM brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "SPAM · 厨房里的午餐肉罐头",
+        "body": "SPAM Classic 午餐肉的目录规格为 340 克，配料包括猪肉和火腿。Classic 是 SPAM 系列中的一个品种，可搭配简单的家常餐食。",
+        "nearTitle": "SPAM · 厨房里的午餐肉罐头",
+        "nearBody": "SPAM Classic 午餐肉的目录规格为 340 克，配料包括猪肉和火腿。Classic 是 SPAM 系列中的一个品种，可搭配简单的家常餐食。",
+        "alt": "SPAM 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 SPAM 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "SPAM · Setin daging luncheon",
+        "body": "SPAM Classic Luncheon Meat disenaraikan pada berat 340 g, dengan daging babi dan ham antara ramuannya. Classic ialah salah satu variasi dalam rangkaian SPAM untuk hidangan harian yang ringkas.",
+        "nearTitle": "SPAM · Setin daging luncheon",
+        "nearBody": "SPAM Classic Luncheon Meat disenaraikan pada berat 340 g, dengan daging babi dan ham antara ramuannya. Classic ialah salah satu variasi dalam rangkaian SPAM untuk hidangan harian yang ringkas.",
+        "alt": "Logo SPAM",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama SPAM",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S10",
+    "copy": {
+      "en": {
+        "title": "California Mexico · Abalone, simply presented",
+        "body": "GJH’s abalone category lists Red California Mexico Abalone at 454 g; California Mexico Products is named among its distributed brands. A simple seafood note brings a little warmth to the pantry.",
+        "nearTitle": "California Mexico · Abalone, simply presented",
+        "nearBody": "GJH’s abalone category lists Red California Mexico Abalone at 454 g; California Mexico Products is named among its distributed brands. A simple seafood note brings a little warmth to the pantry.",
+        "alt": "California Mexico logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the California Mexico brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "California Mexico · 鲍鱼罐头陈列",
+        "body": "GJH 的鲍鱼目录列有 454 克的 Red California Mexico Abalone。California Mexico Products 也列在 GJH 经销的品牌之中。这款海味为日常餐桌添一道选择。",
+        "nearTitle": "California Mexico · 鲍鱼罐头陈列",
+        "nearBody": "GJH 的鲍鱼目录列有 454 克的 Red California Mexico Abalone。California Mexico Products 也列在 GJH 经销的品牌之中。这款海味为日常餐桌添一道选择。",
+        "alt": "California Mexico 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 California Mexico 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "California Mexico · Pameran abalon",
+        "body": "Kategori abalon GJH menyenaraikan Red California Mexico Abalone pada berat 454 g. California Mexico Products tersenarai antara jenama yang diedarkan oleh GJH. Makanan laut ini menambah pilihan untuk hidangan harian.",
+        "nearTitle": "California Mexico · Pameran abalon",
+        "nearBody": "Kategori abalon GJH menyenaraikan Red California Mexico Abalone pada berat 454 g. California Mexico Products tersenarai antara jenama yang diedarkan oleh GJH. Makanan laut ini menambah pilihan untuk hidangan harian.",
+        "alt": "Logo California Mexico",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama California Mexico",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S11",
+    "copy": {
+      "en": {
+        "title": "Hormel · Canned food, simply shown",
+        "body": "A canned-food shelf belongs in an everyday kitchen, ready for a variety of simple meals. This familiar pantry category brings a sense of order and choice without pointing to one particular food.",
+        "nearTitle": "Hormel · Canned food, simply shown",
+        "nearBody": "A canned-food shelf belongs in an everyday kitchen, ready for a variety of simple meals. This familiar pantry category brings a sense of order and choice without pointing to one particular food.",
+        "alt": "Hormel logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Hormel brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Hormel · 罐头食品陈列",
+        "body": "厨房的罐头架上可以备着多种食材，方便准备简单的日常餐食。这里展示的是罐头食品这一类别，未指定某一种食品。",
+        "nearTitle": "Hormel · 罐头食品陈列",
+        "nearBody": "厨房的罐头架上可以备着多种食材，方便准备简单的日常餐食。这里展示的是罐头食品这一类别，未指定某一种食品。",
+        "alt": "Hormel 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Hormel 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Hormel · Pameran makanan dalam tin",
+        "body": "Rak makanan dalam tin menyediakan pilihan untuk pelbagai hidangan ringkas di dapur. Pameran ini memperkenalkan kategori makanan dalam tin secara umum, tanpa merujuk kepada satu makanan tertentu.",
+        "nearTitle": "Hormel · Pameran makanan dalam tin",
+        "nearBody": "Rak makanan dalam tin menyediakan pilihan untuk pelbagai hidangan ringkas di dapur. Pameran ini memperkenalkan kategori makanan dalam tin secara umum, tanpa merujuk kepada satu makanan tertentu.",
+        "alt": "Logo Hormel",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Hormel",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S12",
+    "copy": {
+      "en": {
+        "title": "Zeria · A considered tablet display",
+        "body": "Zeria Chondro Support is listed as a 150-tablet product in GJH’s Joint Health category; Zeria’s official catalogue also lists Chondro Support. The name and tablet format suit a neat, considered place in the cabinet.",
+        "nearTitle": "Zeria · A considered tablet display",
+        "nearBody": "Zeria Chondro Support is listed as a 150-tablet product in GJH’s Joint Health category; Zeria’s official catalogue also lists Chondro Support. The name and tablet format suit a neat, considered place in the cabinet.",
+        "alt": "Zeria logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Zeria brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Zeria · 片剂陈列",
+        "body": "GJH 的关节健康目录列有 150 片装 Zeria Chondro Support，Zeria 的官方目录也列有 Chondro Support。展柜以产品名称和片剂形式呈现这项资料。",
+        "nearTitle": "Zeria · 片剂陈列",
+        "nearBody": "GJH 的关节健康目录列有 150 片装 Zeria Chondro Support，Zeria 的官方目录也列有 Chondro Support。展柜以产品名称和片剂形式呈现这项资料。",
+        "alt": "Zeria 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Zeria 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Zeria · Pameran tablet",
+        "body": "GJH menyenaraikan Zeria Chondro Support dalam pek 150 tablet di bawah kategori kesihatan sendi. Katalog rasmi Zeria turut menyenaraikan Chondro Support. Paparan ini memperkenalkan nama produk dan bentuk tabletnya.",
+        "nearTitle": "Zeria · Pameran tablet",
+        "nearBody": "GJH menyenaraikan Zeria Chondro Support dalam pek 150 tablet di bawah kategori kesihatan sendi. Katalog rasmi Zeria turut menyenaraikan Chondro Support. Paparan ini memperkenalkan nama produk dan bentuk tabletnya.",
+        "alt": "Logo Zeria",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Zeria",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S13",
+    "copy": {
+      "en": {
+        "title": "Sony · Audio in a small form",
+        "body": "GJH lists Sony in its brand directory. Sony describes its MDR-E9LP as wired in-ear headphones available in white.",
+        "nearTitle": "Sony · Audio in a small form",
+        "nearBody": "GJH lists Sony in its brand directory. Sony describes its MDR-E9LP as wired in-ear headphones available in white.",
+        "alt": "Sony logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Sony brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Sony · 小巧的入耳式耳机",
+        "body": "GJH 的品牌目录列有索尼。索尼将 MDR-E9LP 介绍为有白色款的有线入耳式耳机。",
+        "nearTitle": "Sony · 小巧的入耳式耳机",
+        "nearBody": "GJH 的品牌目录列有索尼。索尼将 MDR-E9LP 介绍为有白色款的有线入耳式耳机。",
+        "alt": "Sony 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Sony 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Sony · Audio dalam bentuk kompak",
+        "body": "Direktori jenama GJH menyenaraikan Sony. Menurut Sony, MDR-E9LP ialah fon telinga dalam telinga berwayar yang tersedia dalam warna putih.",
+        "nearTitle": "Sony · Audio dalam bentuk kompak",
+        "nearBody": "Direktori jenama GJH menyenaraikan Sony. Menurut Sony, MDR-E9LP ialah fon telinga dalam telinga berwayar yang tersedia dalam warna putih.",
+        "alt": "Logo Sony",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Sony",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S14",
+    "copy": {
+      "en": {
+        "title": "LG · A screen for shared viewing",
+        "body": "LG’s UR75 is a 43-inch 4K Smart UHD television, and LG appears in GJH’s brand directory. The 43-inch screen brings generous scale to home viewing, with its resolution and category easy to recognize.",
+        "nearTitle": "LG · A screen for shared viewing",
+        "nearBody": "LG’s UR75 is a 43-inch 4K Smart UHD television, and LG appears in GJH’s brand directory. The 43-inch screen brings generous scale to home viewing, with its resolution and category easy to recognize.",
+        "alt": "LG logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the LG brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "LG · 适合一同观看的屏幕",
+        "body": "LG UR75 是一款 43 英寸的 4K Smart UHD 电视。GJH 的品牌目录列有 LG。43 英寸的屏幕适合家中一同观看。",
+        "nearTitle": "LG · 适合一同观看的屏幕",
+        "nearBody": "LG UR75 是一款 43 英寸的 4K Smart UHD 电视。GJH 的品牌目录列有 LG。43 英寸的屏幕适合家中一同观看。",
+        "alt": "LG 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 LG 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "LG · Skrin untuk tontonan bersama",
+        "body": "LG UR75 ialah televisyen Smart UHD 4K berukuran 43 inci. LG tersenarai dalam direktori jenama GJH. Skrin 43 inci menawarkan ruang tontonan yang luas di rumah.",
+        "nearTitle": "LG · Skrin untuk tontonan bersama",
+        "nearBody": "LG UR75 ialah televisyen Smart UHD 4K berukuran 43 inci. LG tersenarai dalam direktori jenama GJH. Skrin 43 inci menawarkan ruang tontonan yang luas di rumah.",
+        "alt": "Logo LG",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama LG",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S15",
+    "copy": {
+      "en": {
+        "title": "Casio · Keys and sound, side by side",
+        "body": "Casio’s GP-510BP belongs to the CELVIANO Grand Hybrid line and is a digital piano; Casio appears in GJH’s directory. The broad keyboard and piano form bring a quiet music-room feeling.",
+        "nearTitle": "Casio · Keys and sound, side by side",
+        "nearBody": "Casio’s GP-510BP belongs to the CELVIANO Grand Hybrid line and is a digital piano; Casio appears in GJH’s directory. The broad keyboard and piano form bring a quiet music-room feeling.",
+        "alt": "Casio logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Casio brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Casio · 琴键与琴声",
+        "body": "Casio GP-510BP 是 CELVIANO Grand Hybrid 系列的数码钢琴。GJH 的品牌目录列有 Casio。宽阔的键盘和琴身营造出安静琴房的氛围。",
+        "nearTitle": "Casio · 琴键与琴声",
+        "nearBody": "Casio GP-510BP 是 CELVIANO Grand Hybrid 系列的数码钢琴。GJH 的品牌目录列有 Casio。宽阔的键盘和琴身营造出安静琴房的氛围。",
+        "alt": "Casio 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Casio 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Casio · Kekunci dan bunyi",
+        "body": "GP-510BP ialah piano digital dalam rangkaian CELVIANO Grand Hybrid Casio. Casio tersenarai dalam direktori GJH. Papan kekunci yang lebar dan bentuk piano mewujudkan suasana bilik muzik yang tenang.",
+        "nearTitle": "Casio · Kekunci dan bunyi",
+        "nearBody": "GP-510BP ialah piano digital dalam rangkaian CELVIANO Grand Hybrid Casio. Casio tersenarai dalam direktori GJH. Papan kekunci yang lebar dan bentuk piano mewujudkan suasana bilik muzik yang tenang.",
+        "alt": "Logo Casio",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Casio",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S16",
+    "copy": {
+      "en": {
+        "title": "GP · A small locator in white",
+        "body": "The white GP eTag is listed with a lanyard hole and built-in buzzer; GP describes eTag as a smart tracker. Its small round form and opening give it an easy, familiar shape.",
+        "nearTitle": "GP · A small locator in white",
+        "nearBody": "The white GP eTag is listed with a lanyard hole and built-in buzzer; GP describes eTag as a smart tracker. Its small round form and opening give it an easy, familiar shape.",
+        "alt": "GP logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the GP brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "GP · 白色小巧追踪器",
+        "body": "白色 GP eTag 的产品资料列有挂绳孔和内置蜂鸣器。GP 将 eTag 介绍为智能追踪器。圆形机身小巧，预留了挂绳孔。",
+        "nearTitle": "GP · 白色小巧追踪器",
+        "nearBody": "白色 GP eTag 的产品资料列有挂绳孔和内置蜂鸣器。GP 将 eTag 介绍为智能追踪器。圆形机身小巧，预留了挂绳孔。",
+        "alt": "GP 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 GP 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "GP · Penjejak kecil berwarna putih",
+        "body": "GP eTag berwarna putih disenaraikan dengan lubang tali dan pembaz terbina dalam. GP memperkenalkan eTag sebagai penjejak pintar. Badannya kecil dan bulat dengan bukaan untuk tali.",
+        "nearTitle": "GP · Penjejak kecil berwarna putih",
+        "nearBody": "GP eTag berwarna putih disenaraikan dengan lubang tali dan pembaz terbina dalam. GP memperkenalkan eTag sebagai penjejak pintar. Badannya kecil dan bulat dengan bukaan untuk tali.",
+        "alt": "Logo GP",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama GP",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  },
+  {
+    "slot": "S17",
+    "copy": {
+      "en": {
+        "title": "Gigaset · A handset with a home base",
+        "body": "Gigaset’s A270 is a cordless phone with a white colour option; versions are described with or without an answering machine. A handset and base remain a familiar part of the home telephone landscape.",
+        "nearTitle": "Gigaset · A handset with a home base",
+        "nearBody": "Gigaset’s A270 is a cordless phone with a white colour option; versions are described with or without an answering machine. A handset and base remain a familiar part of the home telephone landscape.",
+        "alt": "Gigaset logo",
+        "kind": "Brand plaque · independent virtual mall concept",
+        "action": "Read the Gigaset brand story",
+        "verb": "Story",
+        "legal": "Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd."
+      },
+      "zh-Hans": {
+        "title": "Gigaset · 无绳电话与底座",
+        "body": "Gigaset A270 是一款有白色可选的无绳电话。其产品资料分别介绍了带答录机和不带答录机的版本。听筒和底座是家用电话常见的组合。",
+        "nearTitle": "Gigaset · 无绳电话与底座",
+        "nearBody": "Gigaset A270 是一款有白色可选的无绳电话。其产品资料分别介绍了带答录机和不带答录机的版本。听筒和底座是家用电话常见的组合。",
+        "alt": "Gigaset 标志",
+        "kind": "品牌铭牌 · 独立虚拟商场概念展示",
+        "action": "阅读 Gigaset 品牌故事",
+        "verb": "故事",
+        "legal": "独立非官方设计，与 Goh Joo Hin Pte Ltd 无关联，亦未获其认可。"
+      },
+      "ms": {
+        "title": "Gigaset · Gagang telefon dan tapak",
+        "body": "Gigaset A270 ialah telefon tanpa wayar yang turut ditawarkan dalam warna putih. Keterangan produk merangkumi versi dengan atau tanpa mesin penjawab. Gagang telefon dan tapak merupakan bentuk yang biasa ditemui di rumah.",
+        "nearTitle": "Gigaset · Gagang telefon dan tapak",
+        "nearBody": "Gigaset A270 ialah telefon tanpa wayar yang turut ditawarkan dalam warna putih. Keterangan produk merangkumi versi dengan atau tanpa mesin penjawab. Gagang telefon dan tapak merupakan bentuk yang biasa ditemui di rumah.",
+        "alt": "Logo Gigaset",
+        "kind": "Plak jenama · konsep pusat beli-belah maya bebas",
+        "action": "Baca kisah jenama Gigaset",
+        "verb": "Kisah",
+        "legal": "Konsep bebas dan tidak rasmi. Tidak bersekutu dengan atau disokong oleh Goh Joo Hin Pte Ltd."
+      }
+    }
+  }
+]
