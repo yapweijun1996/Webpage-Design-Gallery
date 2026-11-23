@@ -149,6 +149,12 @@ The optional anchor flow gates Fast Path and worker publication once activated.
 
 Run **Visual QA** to capture the Studio preview at all three widths and compare
 it with the corresponding reference images. The report marks missing references.
+When at least two exact-size comparisons isolate a structural difference to the
+same owned section, Studio can assign a repair to that section's worker. The
+worker uses the normal private workspace and publication checks. Studio checks
+the same appearance again after a preview change is published. The loop stops
+when the report passes, the repair scope is unclear, a repair makes no visible
+progress, or the revision limit is reached. Use **Stop** to cancel a running repair.
 Final approval requires a passing report for the current design revision. If the
 preview changes, run QA again before confirming it.
 
@@ -165,8 +171,11 @@ python swarm/test/browser_settings_skills.py
 python swarm/test/browser_studio_versions.py
 python swarm/test/browser_fast_path.py
 python swarm/test/browser_studio_anchors.py
+python swarm/test/browser_studio_anchor_repair.py
 ```
 
 The browser checks use Python Playwright with Chrome. Set `GALLERY_CHROME`
 if Chrome is installed at a different path.
 Use `browser_studio_anchors.py --qa` to exercise the three Studio captures and final approval.
+Run `SWARM_ANCHOR_REPAIR_CHROME_TEST=1 node --test swarm/test/anchor-repair-e2e.test.js`
+to verify repair dispatch, publication and follow-up QA with a fixture worker.

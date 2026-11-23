@@ -5,6 +5,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { Readable } = require('node:stream');
+const { setTimeout: delay } = require('node:timers/promises');
 const { test } = require('node:test');
 const { crc32, deflateSync } = require('node:zlib');
 const { createAnchorRoutes } = require('../lib/anchor-routes');
@@ -234,4 +235,144 @@ test('design drift during capture and cancellation prevent published QA and conc
   assert.equal((await pending).status, 409);
   assert.equal((await f.call('state')).data.flow.state, 'locked');
   assert.equal(f.routes.busy(), false);
+});
+
+function scopedFailure(score = 70) {
+  const breakpoints = [['desktop', 1440, 900], ['mobile', 393, 844]].map(([name, width, height]) => ({
+    name, width, height, status: 'fail', score, threshold: 80,
+    geometry: [{ sectionId: '01-hero', x: 0, y: 0, width, height: height / 2 }],
+    report: { pass: false, score, threshold: 80, palette: { distance: 0.1 },
+      aspect: { distance: 0, anchor: { width, height }, screenshot: { width, height } },
+      grid: { rows: 2, columns: 2, cells: [
+        { row: 1, column: 1, deviation: 0.9, edgeDensityDelta: 0.2 },
+        { row: 1, column: 2, deviation: 0.9, edgeDensityDelta: 0.2 },
+        { row: 2, column: 1, deviation: 0, edgeDensityDelta: 0 },
+        { row: 2, column: 2, deviation: 0, edgeDensityDelta: 0 },
+      ] } },
+  }));
+  return { ok: false, completeCoverage: false, breakpoints };
+}
+
+async function afterRepairs(f) {
+  for (let index = 0; index < 100; index += 1) {
+    const { data } = await f.call('state');
+    if (!data.busy) return data;
+    await delay(10);
+  }
+  assert.fail('The repair did not finish.');
+}
+
+test('assigns one owner, uses the same appearance for follow-up QA and awaits final approval', async t => {
+  let f, captures = 0;
+  let complete, started;
+  const dispatched = new Promise(resolve => { started = resolve; });
+  const appearance = { theme: 'dark', brand: 'none', lang: 'en' };
+  f = await fixture(t, {
+    cleanAppearance: ({ theme }) => ({ ...appearance, theme }),
+    previewUrl(_width, _height, current) {
+      assert.deepEqual(current, appearance);
+      return 'http://127.0.0.1:8800/studio.html?preview=1&theme=dark';
+    },
+    captureAnchorQA: async ({ previewUrl }) => {
+      assert.match(previewUrl(393, 844), /theme=dark/);
+      return ++captures === 1 ? scopedFailure() : qaReport();
+    },
+    repairOwners: () => ({ '01-hero': '01' }),
+    async runRepair(input) {
+      started(input);
+      await new Promise(resolve => { complete = resolve; });
+      assert.equal(input.isValid(), true);
+      fs.appendFileSync(f.section, '\n<h2>Verified repair</h2>');
+      return 'published';
+    },
+  });
+  const anchor = await f.frozen();
+  const requested = await f.post('qa', { ...anchor, appearance: { theme: 'dark', ignored: 'value' } });
+  assert.equal(requested.data.qa.repair.status, 'queued');
+  assert.equal(requested.data.busy, true);
+  const repair = await dispatched;
+  assert.equal(repair.sectionId, '01-hero');
+  assert.equal(repair.ownerId, '01');
+  assert.equal(repair.anchor.id, anchor.anchorId);
+  assert.deepEqual(repair.appearance, appearance);
+  assert.deepEqual(repair.evidence.map(view => view.name), ['desktop', 'mobile']);
+  assert.equal((await f.call('state')).data.qa.repair.status, 'running');
+  assert.equal((await f.post('qa', anchor)).status, 409);
+  assert.equal((await f.post('finish', anchor)).status, 409);
+  complete();
+  const state = await afterRepairs(f);
+  assert.equal(captures, 2);
+  assert.equal(state.qa.repair.status, 'published');
+  assert.equal(state.qa.ok, true);
+  assert.equal(state.qa.stale, false);
+  assert.equal(state.flow.state, 'final_review');
+  assert.equal((await f.post('finish', anchor)).data.flow.state, 'done');
+});
+
+test('stops at the QA revision limit even when each repair improves the score', async t => {
+  let f, runs = 0, captures = 0;
+  f = await fixture(t, {
+    captureAnchorQA: async () => scopedFailure(66 + captures++),
+    repairOwners: () => ({ '01-hero': '01' }),
+    async runRepair() {
+      fs.appendFileSync(f.section, '\nRepair ' + ++runs);
+      return 'published';
+    },
+  });
+  assert.equal((await f.post('qa', await f.frozen())).status, 200);
+  const state = await afterRepairs(f);
+  assert.equal(captures, 4);
+  assert.equal(runs, 3);
+  assert.equal(state.flow.state, 'qa');
+  assert.equal(state.flow.qaRevisions, 3);
+  assert.equal(state.qa.ok, false);
+  assert.equal(state.qa.repair.status, 'skipped');
+  assert.match(state.qa.repair.message, /revision limit/);
+});
+
+test('cancels an active repair and does not relaunch the same failed design revision', async t => {
+  let started, runs = 0, captures = 0;
+  const running = new Promise(resolve => { started = resolve; });
+  const f = await fixture(t, {
+    captureAnchorQA: async () => { captures += 1; return scopedFailure(); },
+    repairOwners: () => ({ '01-hero': '01' }),
+    async runRepair({ signal, isValid }) {
+      runs += 1;
+      await new Promise(resolve => {
+        signal.addEventListener('abort', resolve, { once: true });
+        started();
+      });
+      assert.equal(isValid(), false);
+      return 'failed';
+    },
+  });
+  const anchor = await f.frozen();
+  await f.post('qa', anchor);
+  await running;
+  f.routes.cancel();
+  assert.equal((await afterRepairs(f)).qa.repair.status, 'cancelled');
+  const again = (await f.post('qa', anchor)).data;
+  assert.equal(again.qa.repair.status, 'skipped');
+  assert.equal(again.flow.qaRevisions, 1);
+  assert.equal(runs, 1);
+  assert.equal(captures, 2);
+});
+
+test('does not chain repairs when the follow-up score fails to improve', async t => {
+  let f, runs = 0;
+  f = await fixture(t, {
+    captureAnchorQA: async () => scopedFailure(),
+    repairOwners: () => ({ '01-hero': '01' }),
+    async runRepair() {
+      runs += 1;
+      fs.appendFileSync(f.section, '\nRepair with no score change');
+      return 'published';
+    },
+  });
+  await f.post('qa', await f.frozen());
+  const state = await afterRepairs(f);
+  assert.equal(runs, 1);
+  assert.equal(state.qa.ok, false);
+  assert.equal(state.qa.repair.status, 'skipped');
+  assert.match(state.qa.repair.message, /did not improve/);
 });

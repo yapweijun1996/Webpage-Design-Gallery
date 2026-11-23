@@ -230,7 +230,7 @@ const MANAGER_CHANNEL_PHASES = new Set(['Triage', 'Decide', 'Review', 'Summary']
 const IMPLEMENTATION_PHASES = new Set(['Work', 'Improve', 'Build', 'Improve together', 'Apply feedback']);
 
 // A successful process exit is necessary before a workspace can enter publication checks.
-function runOnce(a, label, promptText, appearance, launchChannel) {
+function runOnce(a, label, promptText, appearance, launchChannel, execution) {
   return new Promise(resolve => {
     const role = label === 'Research' ? 'research' : (a.id === MANAGER.id ? 'manager' : 'worker');
     const base = S.resolve(settings, role);
@@ -242,8 +242,10 @@ function runOnce(a, label, promptText, appearance, launchChannel) {
     const managerChannel = manager && MANAGER_CHANNEL_PHASES.has(label);
     const imageToken = a.squad?.id === 'image-gen' ? randomUUID() : null;
     const warn = text => launchChannel?.post({ from: 'system', kind: 'system', text });
+    const cancelled = () => stopped || chat !== launchChannel || execution?.isCurrent?.() === false;
     let runner, workspace, anchor, p;
     try {
+      if (cancelled()) return resolve(false);
       try { anchor = approvedAnchor(PROJECT); }
       catch (error) { if (IMPLEMENTATION_PHASES.has(label)) throw error; }
       runner = R.get(resolved.runner);
@@ -300,11 +302,11 @@ function runOnce(a, label, promptText, appearance, launchChannel) {
       const unfinishedImage = imageTurns.get(imageToken)?.pending > 0;
       if (imageToken) imageTurns.delete(imageToken);
       try {
-        if (!ok || fatal || stopped || unfinishedImage || chat !== launchChannel || (managerChannel && !managerPosts)) return resolve(false);
+        if (!ok || fatal || cancelled() || unfinishedImage || (managerChannel && !managerPosts)) return resolve(false);
         const managerOptions = { allowAssignments: label !== 'Summary' };
         const result = await publication.publish(workspace, { anchor, workerId: a.id,
           owner: manager ? null : a.base || `${a.id}-${a.section}`,
-          cancelled: () => stopped || chat !== launchChannel,
+          cancelled,
           checkOutbox(outbox) {
             if (managerChannel) launchChannel.validateManagerPosts(managerPosts, managerOptions);
             else if (!manager) launchChannel.validateWorkerOutbox(a.id, outbox);
@@ -315,9 +317,11 @@ function runOnce(a, label, promptText, appearance, launchChannel) {
           if (reason?.code !== 'cancelled') warn(`${a.name} changes rejected: ${reason?.message || 'Publication checks failed.'}`);
           return resolve(false);
         }
+        const visual = result.merged.some(file => file.startsWith('sections/') || file.startsWith('assets/'));
+        execution?.published(visual);
         if (managerChannel) launchChannel.publishManager(managerPosts, managerOptions);
         else if (!manager) launchChannel.publishWorker(a.id, result.outbox);
-        if (result.merged.some(file => file.startsWith('sections/') || file.startsWith('assets/'))) ensureExport(true);
+        if (visual) ensureExport(true);
         return resolve(true);
       } catch (error) {
         warn(`Could not publish ${a.name}'s turn: ${error.message}`);
@@ -336,27 +340,31 @@ function runOnce(a, label, promptText, appearance, launchChannel) {
   });
 }
 
-async function runProcess(a, label, promptText, isLast, appearance, launchChannel = chat) {
+async function runProcess(a, label, promptText, isLast, appearance, launchChannel = chat, execution) {
   const ag = state.agents[a.id];
   if (!ag) return false;
   if (label === 'Research' && !(settings.research && settings.research.web)) {
     if (chat) chat.post({ from: 'system', kind: 'system', text: 'Research skipped: web research is switched off in Settings.' });
     return true;
   }
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
+  const attempts = execution ? 1 : 2;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
     if (stopped) return false;
     ag.status = 'working ' + label; ag.action = 'starting'; ag.target = a.id;
     emit({ type: 'status', id: a.id, status: ag.status });
     await slot.acquire();
     let ok = false;
-    try { if (!stopped) ok = await runOnce(a, label, promptText, appearance, launchChannel); } finally { slot.release(); }
-    if (stopped) return false;
+    try { if (!stopped) ok = await runOnce(a, label, promptText, appearance, launchChannel, execution); } finally { slot.release(); }
+    if (stopped) {
+      if (execution) { ag.status = 'waiting'; ag.action = ''; emit({ type: 'status', id: a.id, status: ag.status }); }
+      return false;
+    }
     if (ok) {
       ag.status = isLast ? 'done' : 'waiting'; ag.action = '';
       emit({ type: 'status', id: a.id, status: ag.status });
       return true;
     }
-    if (attempt === 1) emit({ type: 'status', id: a.id, status: 'retrying' });
+    if (attempt < attempts) emit({ type: 'status', id: a.id, status: 'retrying' });
   }
   ag.status = 'failed'; ag.action = '';
   emit({ type: 'status', id: a.id, status: 'failed' });
@@ -686,6 +694,45 @@ const fastPath = createFastPath({
 });
 const { createAnchorRoutes, matches: isAnchorRoute } = require('./lib/anchor-routes');
 const { captureAnchorQA } = require('./lib/anchor-preview-qa');
+
+function repairOwners() {
+  const roster = [MANAGER, ...workersForSections(agentsDef)];
+  const manifest = ownership.build({ agents: roster, launchContext: true });
+  return Object.fromEntries(previewSections().flatMap(({ id, section }) => {
+    const base = `${id}-${section}`;
+    return state.agents[id] && id !== MANAGER.id && manifest.owned[`sections/${base}.html`] === id ? [[base, id]] : [];
+  }));
+}
+
+async function runAnchorRepair({ sectionId, ownerId, evidence, anchor, appearance, isValid }) {
+  if (!chat || !isValid() || repairOwners()[sectionId] !== ownerId) return 'failed';
+  const roster = workersForSections(agentsDef);
+  const worker = roster.find(a => a.id === ownerId && `${a.id}-${a.section}` === sectionId);
+  if (!worker) return 'failed';
+  const launchManifest = ownership.build({ agents: [MANAGER, ...roster], launchContext: true });
+  const views = evidence.map(view => {
+    const cells = view.cells.map(cell => `row ${cell.row}, column ${cell.column}`).join(' / ');
+    return `- ${view.name} (${view.width}×${view.height}), ${view.columns}×${view.rows} grid. Strongest structure differences at ${cells}.`;
+  });
+  const prompt = [
+    `STEP: Work | AGENT: ${ownerId}`,
+    `Visual QA requested a repair of ${sectionId} against locked anchor ${anchor.id}.`,
+    'Compare the following areas with the locked reference images. Rows and columns start at 1 from the upper left.',
+    ...views,
+    `Review sections/${sectionId}.html and its stylesheet files. Apply only a verified structural correction inside this section.`,
+    'Preserve other sections, shared styling, accessibility and the locked design contract.',
+    `Summarize the result with one kind:"done" JSON line in chat/${ownerId}.jsonl.`,
+  ].join('\n');
+  const channel = chat;
+  channel.post({ from: 'system', kind: 'system', text: `Visual QA assigned a scoped repair of ${sectionId} to worker ${ownerId}.` });
+  stopped = false;
+  let changed = false;
+  const ok = await runProcess({ ...worker, launchManifest }, 'Work', prompt, false, appearance, channel,
+    { isCurrent: isValid, published: visual => { changed = visual; } });
+  if (changed) return 'published';
+  return ok ? 'no-change' : 'failed';
+}
+
 const anchorRoutes = createAnchorRoutes({
   projectDir: PROJECT,
   projectId: TARGET.projectId,
@@ -697,7 +744,10 @@ const anchorRoutes = createAnchorRoutes({
   generateAnchor: input => require('./lib/anchor-generation').generateAnchor({ ...input, runnerSettings: settings }),
   reviewAnchor: input => require('./lib/anchor-advisor').reviewAnchor({ ...input, runnerSettings: settings }),
   captureAnchorQA,
-  previewUrl: (_width, _height, input) => previewUrl({ theme: 'light', brand: 'none', lang: 'en', ...cleanAppearance(input) }),
+  cleanAppearance: input => ({ theme: 'light', brand: 'none', lang: 'en', ...cleanAppearance(input) }),
+  previewUrl: (_width, _height, appearance) => previewUrl(appearance),
+  repairOwners,
+  runRepair: runAnchorRepair,
 });
 const preview = require('./lib/preview').createPreview({
   ui: UI, project: PROJECT, designSystem: DS_DIR, library: GJH_ASSETS, mall: GJH_V11_ASSETS

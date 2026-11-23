@@ -26,10 +26,19 @@
     approve: 'Image approved.', lock: 'Design contract locked.', revise: 'Revision requested.',
     unlock: 'Anchor unlocked.', qa: 'Visual QA results saved.', finish: 'Final approval saved.',
   };
+  const repairLabels = {
+    queued: 'Scoped repair queued.',
+    running: 'Scoped repair in progress.',
+    published: 'Scoped repair published.',
+    'no-change': 'The worker made no changes.',
+    failed: 'Scoped repair failed.',
+    skipped: 'Scoped repair skipped.',
+    cancelled: 'Scoped repair cancelled.',
+  };
   let active = false;
   let data, token, editing, trigger;
   let request = 0;
-  let pending = false;
+  let pendingAction;
   let updating = false;
   let readAppearance;
   let currentId, selectedId, breakpoint = 'desktop', followActive = true;
@@ -73,6 +82,7 @@
 
   function paintActions() {
     const available = availableActions();
+    const pending = Boolean(pendingAction);
     for (const button of controls) {
       const action = button.dataset.anchorAction;
       button.hidden = !available.includes(action);
@@ -91,12 +101,29 @@
     $('anchor-dialog-close').disabled = pending;
   }
 
+  function paintRepair(repair) {
+    const label = Object.hasOwn(repairLabels, repair?.status) ? repairLabels[repair.status] : '';
+    $('anchor-qa-repair').hidden = !label;
+    if (!label) return;
+    $('anchor-qa-repair-status').textContent = label;
+    const scope = $('anchor-qa-repair-scope');
+    scope.textContent = [
+      repair.sectionId ? 'Section ' + repair.sectionId : '',
+      repair.ownerId ? 'Worker ' + repair.ownerId : '',
+    ].filter(Boolean).join(' · ');
+    scope.hidden = !scope.textContent;
+    const detail = $('anchor-qa-repair-detail');
+    detail.textContent = typeof repair.message === 'string' ? repair.message.trim() : '';
+    detail.hidden = !detail.textContent;
+  }
+
   function paintQA(anchor) {
     const qa = data.qa;
     $('anchor-qa').hidden = qa?.anchorId !== anchor.id;
     if (qa?.anchorId !== anchor.id) return;
     $('anchor-qa-status').textContent = qa.stale ? 'The preview changed after visual QA.' :
       !qa.ok ? 'Visual QA found issues.' : qa.completeCoverage ? 'Visual QA passed.' : 'Visual QA passed the available references.';
+    paintRepair(qa.repair);
     const results = Array.isArray(qa.breakpoints) ? qa.breakpoints : [];
     const summary = results.map(({ name, width, status: result, score, message }) =>
       item([`${name} · ${width} px`, String(result || '').replaceAll('_', ' '), Number.isFinite(score) ? `Score ${Math.round(score)}` : null, message]
@@ -190,7 +217,7 @@
   }
 
   async function refresh() {
-    if (!active || pending) return;
+    if (!active || (pendingAction && pendingAction !== 'qa')) return;
     const id = ++request;
     updating = true;
     paintActions();
@@ -226,7 +253,7 @@
       approve: `Approve the displayed desktop reference for ${anchorId}.`,
       lock: `Review the design contract for ${anchorId} before locking.`,
       advisor: `Start an advisor review for ${anchorId}.`,
-      qa: `Check the current preview against ${anchorId}.`,
+      qa: `Check the current preview against ${anchorId}. For a localized issue, visual QA can ask the assigned worker to fix it and run QA again.`,
       finish: `Finalize the checked design for ${anchorId}.`,
     };
     context.textContent = descriptions[action] || (anchorId ? `Anchor ${anchorId}` : '');
@@ -299,11 +326,11 @@
 
   form.addEventListener('submit', async event => {
     event.preventDefault();
-    if (pending || !editing || $('anchor-dialog-submit').disabled) return;
+    if (pendingAction || !editing || $('anchor-dialog-submit').disabled) return;
     const { action, ...target } = editing;
     const runsInBackground = ['generate', 'advisor', 'qa'].includes(action);
-    pending = true;
-    request += 1;
+    pendingAction = action;
+    const submittedAt = ++request;
     const feedback = runsInBackground ? status : dialogStatus;
     const progress = { generate: 'Generating references…', advisor: 'Advisor review in progress…', qa: 'Visual QA in progress…' };
     feedback.textContent = progress[action] || 'Saving…';
@@ -319,7 +346,7 @@
         method: 'POST', headers: { 'content-type': 'application/json', 'x-swarm-anchor-token': token },
         body: JSON.stringify({ ...target, ...fields }),
       });
-      if (result.projectId === target.projectId && result.flow) setData(result);
+      if (submittedAt === request && result.projectId === target.projectId && result.flow) setData(result);
       saved = true;
       form.reset();
       status.textContent = successes[action];
@@ -327,7 +354,7 @@
       if (error.status === 401 || error.status === 403) token = undefined;
       feedback.textContent = error.message;
     } finally {
-      pending = false;
+      pendingAction = undefined;
       if (saved && !runsInBackground) {
         trigger = undefined;
         dialog.close();
@@ -349,8 +376,8 @@
   image.addEventListener('error', () => { status.textContent = 'The design reference could not be loaded.'; paintActions(); });
   $('anchor-compare').addEventListener('click', () => window.StudioCompare?.showAnchor(image.getAttribute('src'), image.alt));
   $('anchor-dialog-close').addEventListener('click', () => dialog.close());
-  dialog.addEventListener('cancel', event => { if (pending) event.preventDefault(); });
-  dialog.addEventListener('click', event => { if (!pending && event.target === dialog) dialog.close(); });
+  dialog.addEventListener('cancel', event => { if (pendingAction) event.preventDefault(); });
+  dialog.addEventListener('click', event => { if (!pendingAction && event.target === dialog) dialog.close(); });
   dialog.addEventListener('close', () => {
     editing = undefined;
     (trigger?.getClientRects().length ? trigger : $('anchor-title')).focus({ preventScroll: true });

@@ -6,6 +6,7 @@ const { createHash, randomBytes, randomUUID, timingSafeEqual } = require('node:c
 const { AnchorRequestError, createAnchorManager, MAX_IMAGE } = require('./anchor-manager');
 const { ProjectBusyError, withProjectLock } = require('./project-init');
 const { approvedAnchor } = require('./publication');
+const { mapAnchorRepairScope } = require('./anchor-repair-scope');
 
 const BASE = '/api/anchor/';
 const IMAGE = /^image\/(v(?:00[1-9]|0[1-9]\d|[1-9]\d{2,}))\/(desktop|tablet|mobile)$/;
@@ -52,10 +53,13 @@ function revision(projectDir) {
   return digest.digest('hex');
 }
 
-function createAnchorRoutes({ projectDir, projectId, busy, changed, generateAnchor, reviewAnchor, captureAnchorQA, previewUrl }) {
+function createAnchorRoutes({ projectDir, projectId, busy, changed, generateAnchor, reviewAnchor, captureAnchorQA,
+  previewUrl, repairOwners, runRepair, cleanAppearance = () => ({}) }) {
   const qaPath = path.join(projectDir, '.run', 'anchor-qa.json');
   let active;
+  let repairTask;
   let grant = null;
+  const taskBusy = () => Boolean(active || repairTask);
 
   function locked(action) {
     return withProjectLock(projectDir, exists => {
@@ -106,7 +110,14 @@ function createAnchorRoutes({ projectDir, projectId, busy, changed, generateAnch
 
   function status(manager = createAnchorManager(projectDir)) {
     const flow = manager.flow.state();
-    return { projectId, busy: busy() || Boolean(active), flow, anchors: manager.list().reverse(), canEdit: true, qa: readQA(flow) };
+    const qa = readQA(flow);
+    if (qa) {
+      delete qa.repairRevisions;
+      if (!repairTask && ['queued', 'running'].includes(qa.repair?.status)) {
+        qa.repair = { ...qa.repair, status: 'cancelled', message: 'The repair was interrupted.' };
+      }
+    }
+    return { projectId, busy: busy() || taskBusy(), flow, anchors: manager.list().reverse(), canEdit: true, qa };
   }
 
   function notify() {
@@ -146,40 +157,141 @@ function createAnchorRoutes({ projectDir, projectId, busy, changed, generateAnch
     });
   }
 
-  async function qa(input) {
-    const before = locked(manager => {
+  function beforeQA(anchorId) {
+    return locked(manager => {
       const flow = manager.flow.state();
       if (!['locked', 'implementing', 'qa', 'final_review', 'done'].includes(flow.state)) {
         throw new AnchorRequestError(409, 'Lock an anchor before checking the preview.');
       }
-      manager.current(input.anchorId);
+      manager.current(anchorId);
       const anchor = approvedAnchor(projectDir);
       return { anchor, flow, revision: revision(projectDir) };
     });
-    await run(async signal => {
-      const result = await captureAnchorQA({ projectDir, anchor: before.anchor, signal,
-        previewUrl: (width, height) => previewUrl(width, height, input.appearance) });
-      signal.throwIfAborted();
-      const failures = result.breakpoints.filter(item => item.status === 'error');
-      if (failures.length) {
-        const details = failures.map(({ name, message }) => `${name}: ${message || 'Capture failed.'}`);
-        throw new AnchorRequestError(502, details.join(' '));
+  }
+
+  function isCurrent(before, flow, anchor) {
+    return anchor?.id === before.anchor.id && anchor.contractHash === before.anchor.contractHash &&
+      flow.state === before.flow.state && flow.qaRevisions === before.flow.qaRevisions &&
+      revision(projectDir) === before.revision;
+  }
+
+  function improved(breakpoints, prior) {
+    const scores = breakpoints.filter(view => view.status === 'pass' || view.status === 'fail');
+    const deltas = scores.map(view => view.score - prior.find(old => old.name === view.name)?.score);
+    return deltas.length > 0 && deltas.every(delta => delta >= 0) && deltas.some(delta => delta > 0);
+  }
+
+  async function checkQA(before, appearance, signal, previousRepair) {
+    const captureSignal = AbortSignal.any([signal, AbortSignal.timeout(TASK_LIFETIME)]);
+    const result = await captureAnchorQA({ projectDir, anchor: before.anchor, signal: captureSignal,
+      previewUrl: (width, height) => previewUrl(width, height, appearance) });
+    captureSignal.throwIfAborted();
+    const failures = result.breakpoints.filter(item => item.status === 'error');
+    if (failures.length) {
+      const details = failures.map(({ name, message }) => `${name}: ${message || 'Capture failed.'}`);
+      throw new AnchorRequestError(502, details.join(' '));
+    }
+    return locked(manager => {
+      const now = manager.flow.state();
+      const anchor = approvedAnchor(projectDir);
+      if (!isCurrent(before, now, anchor)) {
+        throw new AnchorRequestError(409, 'The design changed during QA. Run QA again.');
       }
-      locked(manager => {
-        const now = manager.flow.state();
-        const anchor = approvedAnchor(projectDir);
-        if (anchor?.id !== before.anchor.id || anchor?.contractHash !== before.anchor.contractHash
-            || now.state !== before.flow.state || revision(projectDir) !== before.revision) {
-          throw new AnchorRequestError(409, 'The design changed during QA. Run QA again.');
+      const { ok, completeCoverage, breakpoints } = result;
+      const history = readQA(now)?.repairRevisions;
+      const repairRevisions = Array.isArray(history) ? history : [];
+      const repeated = !ok && repairRevisions.includes(before.revision);
+      const system = { actor: 'system', anchorId: anchor.id, audit: { anchorId: anchor.id, contractSha256: anchor.contractHash } };
+      if (now.state === 'locked') manager.transition('start_implementation', system);
+      if (manager.flow.state().state === 'implementing' && !repeated) manager.transition('finish', system);
+      if (now.state === 'final_review' || now.state === 'done') manager.transition('check_again', system);
+      const mayRevise = !ok && !repeated && manager.flow.preview('qa_fail', system).ok;
+      if (ok || mayRevise) manager.transition(ok ? 'qa_pass' : 'qa_fail', system);
+
+      let plan, repair;
+      if (ok && previousRepair) {
+        repair = { ...previousRepair.repair, message: 'The scoped repair published and visual QA passed.' };
+      } else if (!ok && runRepair) {
+        let message;
+        if (repeated) message = 'A repair already ran for this design revision.';
+        else if (!mayRevise) message = 'The automatic repair revision limit was reached.';
+        else if (previousRepair && !improved(breakpoints, previousRepair.breakpoints)) {
+          message = 'Visual QA did not improve across the checked viewports. Review the changes before retrying.';
+        } else {
+          plan = mapAnchorRepairScope({ breakpoints, owners: repairOwners() });
+          if (!plan) message = 'The failed views did not isolate one owned section.';
         }
-        const system = { actor: 'system', anchorId: anchor.id, audit: { anchorId: anchor.id, contractSha256: anchor.contractHash } };
-        const { ok, completeCoverage, breakpoints } = result;
-        if (now.state === 'locked') manager.transition('start_implementation', system);
-        if (manager.flow.state().state === 'implementing') manager.transition('finish', system);
-        if (now.state === 'final_review' || now.state === 'done') manager.transition('check_again', system);
-        if (ok || now.qaRevisions < 3) manager.transition(ok ? 'qa_pass' : 'qa_fail', system);
-        writeQA({ anchorId: anchor.id, contractHash: anchor.contractHash, revision: before.revision,
-          checkedAt: new Date().toISOString(), ok, completeCoverage, breakpoints });
+        if (plan) {
+          repair = { status: 'queued', sectionId: plan.sectionId, ownerId: plan.ownerId };
+          repairRevisions.push(before.revision);
+        } else {
+          repair = { status: 'skipped', message };
+        }
+      }
+      const record = { anchorId: anchor.id, contractHash: anchor.contractHash, revision: before.revision,
+        checkedAt: new Date().toISOString(), ok, completeCoverage, breakpoints, repair, repairRevisions };
+      writeQA(record);
+      return { record, plan, before: { ...before, flow: manager.flow.state() } };
+    });
+  }
+
+  function updateRepair(record, status, message) {
+    record.repair = { ...record.repair, status, message };
+    writeQA(record);
+    notify();
+  }
+
+  async function repairLoop(first, appearance, signal) {
+    let job = first;
+    while (job.plan) {
+      const { before, record, plan } = job;
+      const isValid = () => !signal.aborted && isCurrent(before, createAnchorManager(projectDir).flow.state(), approvedAnchor(projectDir));
+      try {
+        if (!locked(() => isValid() && repairOwners()[plan.sectionId] === plan.ownerId)) {
+          if (signal.aborted) updateRepair(record, 'cancelled', CANCELLED);
+          else updateRepair(record, 'skipped', 'The design or assigned owner changed before repair.');
+          return;
+        }
+        updateRepair(record, 'running');
+        const outcome = await runRepair({ ...plan, anchor: before.anchor, appearance, signal, isValid });
+        if (outcome !== 'published') {
+          if (signal.aborted) updateRepair(record, 'cancelled', CANCELLED);
+          else if (outcome === 'no-change') updateRepair(record, 'no-change', 'The worker published no preview changes.');
+          else updateRepair(record, 'failed', 'The worker could not publish the scoped repair.');
+          return;
+        }
+        updateRepair(record, 'published', 'The scoped repair published. Checking the updated preview.');
+        signal.throwIfAborted();
+        job = await checkQA(beforeQA(record.anchorId), appearance, signal, record);
+        notify();
+      } catch (error) {
+        if (!signal.aborted) console.warn('Anchor repair could not finish:', error.message);
+        if (record.repair.status === 'published') {
+          updateRepair(record, 'published', 'The scoped repair published. Run visual QA again to verify the updated preview.');
+        } else {
+          updateRepair(record, signal.aborted ? 'cancelled' : 'failed',
+            signal.aborted ? CANCELLED : 'The scoped repair stopped before publication.');
+        }
+        return;
+      }
+    }
+  }
+
+  async function qa(input) {
+    const before = beforeQA(input.anchorId);
+    const appearance = cleanAppearance(input.appearance);
+    await run(async signal => {
+      const first = await checkQA(before, appearance, signal);
+      if (!first.plan) return;
+      const controller = new AbortController();
+      repairTask = controller;
+      setImmediate(() => {
+        repairLoop(first, appearance, controller.signal).catch(error => {
+          console.warn('Could not update the anchor repair record:', error.message);
+        }).finally(() => {
+          repairTask = undefined;
+          notify();
+        });
       });
     });
   }
@@ -215,10 +327,10 @@ function createAnchorRoutes({ projectDir, projectId, busy, changed, generateAnch
       if (req.method !== 'POST') throw new AnchorRequestError(405, 'Unsupported anchor request.');
       if (!Object.hasOwn(actions, action) && !['generate', 'advisor', 'qa'].includes(action)) throw new AnchorRequestError(404, 'Unknown anchor action.');
       requireGrant(req);
-      if (active || busy()) throw new AnchorRequestError(409, BUSY);
+      if (taskBusy() || busy()) throw new AnchorRequestError(409, BUSY);
       const input = await readObject(req, action === 'import' ? IMAGE_LIMIT : FORM_LIMIT);
       if (input.projectId !== projectId) throw new AnchorRequestError(409, 'The project changed. Refresh Review.');
-      if (active || busy()) throw new AnchorRequestError(409, BUSY);
+      if (taskBusy() || busy()) throw new AnchorRequestError(409, BUSY);
       if (action === 'generate') await generate();
       else if (action === 'advisor') await advisor(input);
       else if (action === 'qa') await qa(input);
@@ -232,7 +344,11 @@ function createAnchorRoutes({ projectDir, projectId, busy, changed, generateAnch
     }
   }
 
-  return { handle, busy: () => Boolean(active), cancel: () => active?.abort(new AnchorRequestError(409, CANCELLED)) };
+  return { handle, busy: taskBusy, cancel() {
+    const error = new AnchorRequestError(409, CANCELLED);
+    active?.abort(error);
+    repairTask?.abort(error);
+  } };
 }
 
 module.exports = { createAnchorRoutes, matches: pathname => pathname.startsWith(BASE) };

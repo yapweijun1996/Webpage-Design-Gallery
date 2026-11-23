@@ -115,7 +115,26 @@ async function prepareFrame(width, height, sections, appearance) {
   }
   window.scrollTo({ left: 0, top: 0, behavior: 'instant' });
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-  return true;
+  const geometry = [];
+  const clip = node => {
+    const rect = node.getBoundingClientRect();
+    const x = Math.max(0, rect.left), y = Math.max(0, rect.top);
+    return { x, y, width: Math.min(width, rect.right) - x, height: Math.min(height, rect.bottom) - y };
+  };
+  for (const { id, sectionId } of sections) {
+    const host = document.getElementById('host-' + id);
+    const body = host.querySelector(':scope > .body');
+    const root = body.firstElementChild;
+    if (body.children.length !== 1 || root?.id !== sectionId ||
+        getComputedStyle(host.querySelector(':scope > .stub')).display !== 'none') {
+      const visible = clip(host);
+      if (visible.width > 0 && visible.height > 0) return { geometry: [] };
+      continue;
+    }
+    const rect = clip(root);
+    if (rect.width > 0 && rect.height > 0) geometry.push({ sectionId, ...rect });
+  }
+  return { geometry };
 }
 
 function browserCapture(project, origin, signal) {
@@ -128,7 +147,8 @@ function browserCapture(project, origin, signal) {
   const sections = dir?.isDirectory() && fs.realpathSync.native(sectionDir) === sectionDir &&
     fs.readdirSync(sectionDir, { withFileTypes: true })
     .filter(entry => entry.isFile() && /^\d{2}-[a-z0-9-]+\.html$/.test(entry.name))
-    .map(({ name }) => ({ id: name.slice(0, 2), content: Boolean(readRegular(path.join(sectionDir, name)).toString('utf8').trim()) }));
+    .map(({ name }) => ({ id: name.slice(0, 2), sectionId: name.slice(0, -5),
+      content: Boolean(readRegular(path.join(sectionDir, name)).toString('utf8').trim()) }));
   if (!sections?.length) return { capture() { throw new ScreenshotError('setup', 'The Studio preview has no sections to capture.'); } };
 
   const scratch = fs.mkdtempSync(path.join(os.tmpdir(), 'swarm-anchor-qa-'));
@@ -192,7 +212,7 @@ function browserCapture(project, origin, signal) {
         const answer = await sendTo(id, 'Runtime.evaluate', {
           expression, uniqueContextId, returnByValue: true, awaitPromise: true,
         }).catch(() => null);
-        if (answer?.result?.value === true) return;
+        if (Array.isArray(answer?.result?.value?.geometry)) return answer.result.value.geometry;
       }
       await delay(50, undefined, { signal });
     }
@@ -221,10 +241,10 @@ function browserCapture(project, origin, signal) {
         const navigation = await send('Page.navigate', { url: target.href });
         if (navigation.errorText) throw new Error('Navigation failed.');
       } catch { throw new ScreenshotError('setup', 'Chrome could not open the Studio preview.'); }
-      await ready(environment, width, height, appearance);
+      const geometry = await ready(environment, width, height, appearance);
       try {
         const { data } = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width, height, scale: 1 } });
-        return Buffer.from(data, 'base64');
+        return { screenshot: Buffer.from(data, 'base64'), geometry };
       } catch { throw new ScreenshotError('capture', 'Chrome could not capture the rendered Studio preview.'); }
     },
     async close() {
@@ -271,11 +291,12 @@ async function captureViewports({ project, expected, references, targets, signal
     const { name, width, height } = viewport;
     const reference = references.get(name);
     const base = { ...viewport, referenceAvailable: Boolean(reference) };
-    let screenshot;
+    let screenshot, geometry;
     try {
-      const bytes = await capture({ url: targets[index].href, width, height, signal });
+      const captured = await capture({ url: targets[index].href, width, height, signal });
       signal?.throwIfAborted();
-      screenshot = screenshotAt(bytes, width, height);
+      screenshot = screenshotAt(Buffer.isBuffer(captured) ? captured : captured?.screenshot, width, height);
+      if (Array.isArray(captured?.geometry) && captured.geometry.length) geometry = captured.geometry;
     } catch (error) {
       signal?.throwIfAborted();
       const message = error instanceof ScreenshotError ? error.message : 'The Studio screenshot could not be captured.';
@@ -290,7 +311,8 @@ async function captureViewports({ project, expected, references, targets, signal
     try {
       const { comparePng, ...report } = compare(reference, screenshot, { includeImage: includeEvidence });
       if (includeEvidence) evidence[name].comparison = comparePng;
-      breakpoints.push({ ...base, status: report.pass ? 'pass' : 'fail', score: report.score, threshold: report.threshold, report });
+      breakpoints.push({ ...base, status: report.pass ? 'pass' : 'fail', score: report.score, threshold: report.threshold, report,
+        ...(geometry ? { geometry } : {}) });
     } catch {
       breakpoints.push({ ...base, status: 'error', message: 'The locked reference and Studio screenshot could not be compared.' });
     }

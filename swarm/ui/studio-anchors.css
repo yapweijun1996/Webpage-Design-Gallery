@@ -38,6 +38,14 @@
   border-inline-start: 2px solid var(--studio-blue);
   background: var(--studio-surface-alt, var(--studio-bg));
 }
+.studio-anchor-qa-repair {
+  display: grid;
+  gap: 2px;
+  padding-block-start: 8px;
+  border-block-start: 1px solid var(--studio-border);
+  overflow-wrap: anywhere;
+}
+#anchor-qa-repair-scope, #anchor-qa-repair-detail { color: var(--studio-muted); }
 #anchor-access { color: var(--studio-muted); }
 #anchor-status:empty, #anchor-dialog-status:empty { display: none; }
 .studio-anchor-actions:not(:has(> button:not([hidden]))) { display: none; }
