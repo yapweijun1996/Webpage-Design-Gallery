@@ -108,7 +108,7 @@ function mockInteriorDownloads(t) {
   t.mock.method(globalThis,'fetch',async (input,options) => {
     const url = new URL(input.url ?? input);
     return url.protocol === 'file:' ? new Response(readFileSync(url),{headers:{'Content-Type':
-      url.pathname.endsWith('.png') ? 'image/png' : 'model/gltf-binary'}}) : realFetch(input,options);
+      url.pathname.endsWith('.png') ? 'image/png' : url.pathname.endsWith('.wasm') ? 'application/wasm' : 'model/gltf-binary'}}) : realFetch(input,options);
   });
   globalThis.self = globalThis;
   // Three's bitmap loader still reads the embedded PNG blobs. Node substitutes
@@ -872,4 +872,58 @@ test('Gigaset fallback ranges draw only near the shop until the gallery sofa is 
   studio.update(nearby);
   assert(model.visible && model.parent.visible);
   assert.equal(fallbackIndices(),0);
+});
+
+test('the visible LG studio sofa uses its existing solid footprint and a clear native front exit', async t => {
+  mockInteriorDownloads(t);
+  globalThis.window = {requestIdleCallback() {}};
+  globalThis.document = {addEventListener() {}};
+  t.after(()=>{ delete globalThis.window; delete globalThis.document; });
+  await R.init();
+  const scene = new T.Scene();
+  const studio = await createExpandedInteriors(T,expandedLayout,scene);
+  const footprint = studio.collisionBoxes.find(box =>
+    Math.abs(box.x-39.9) < 1e-6 && Math.abs(box.z-19.14) < 1e-6 && box.height === .78);
+  assert(footprint);
+  assert.equal(typeof studio.nativeStudioSeats?.get(footprint),'function');
+  assert.equal(studio.nativeStudioSeats.size,1,'Sony replacement proxies must not expose Sit');
+
+  const physics = new R.World({x:0,y:0,z:0});
+  t.after(()=>physics.free());
+  const makeBox = ([x,y,z],[w,h,d],yaw) => physics.createCollider(
+    R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
+      .setRotation({x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}));
+  let collider;
+  for (const box of studio.collisionBoxes) {
+    const solid = makeBox([box.x,box.y,box.z],[box.width,box.height,box.depth],0);
+    if (box === footprint) collider = solid;
+  }
+  const store = interiorStores.S14;
+  for (const box of store.colliders) {
+    const {center,size,yaw} = worldInteriorBox(store,box);
+    makeBox(center,size,yaw);
+  }
+  physics.step();
+  const seat = studio.nativeStudioSeats.get(footprint)(collider.handle);
+  assert.equal(seat.id,'lg-studio-sofa');
+  assert.deepEqual([seat.x,seat.y,seat.z,seat.floor,seat.exitX,seat.exitZ].map(round),[39.9,.52,19.14,.081,38.9,19.14]);
+  assert.equal(seat.collider,collider.handle);
+  assert(isInFrontOfSeat(seat,seat.exit));
+
+  studio.update({x:seat.exitX,y:0,z:seat.exitZ});
+  scene.updateMatrixWorld(true);
+  const batch = scene.getObjectByName('Concourse window studios');
+  const [cushion] = new T.Raycaster(new T.Vector3(seat.x,.56,seat.z),new T.Vector3(0,-1,0)).intersectObject(batch);
+  assert(Math.abs(cushion.point.y-seat.y) < .0001);
+
+  const orientation = {x:0,y:0,z:0,w:1};
+  const capsule = new R.Capsule(.55,.3);
+  const standing = new T.Vector3(seat.exitX,seat.floor+.91,seat.exitZ);
+  const seated = new T.Vector3(seat.x,seat.floor+.89,seat.z);
+  assert.equal(physics.intersectionWithShape(standing,orientation,capsule),null);
+  for (let step=0; step<=20; step++) {
+    const position = new T.Vector3().lerpVectors(standing,seated,step/20);
+    assert.equal(physics.intersectionWithShape(position,orientation,capsule,undefined,undefined,undefined,undefined,
+      shape=>shape.handle!==seat.collider),null,`blocked sit/stand sample ${step}`);
+  }
 });

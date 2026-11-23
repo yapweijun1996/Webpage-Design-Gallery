@@ -6,7 +6,7 @@
 
 ## Player walkthrough
 
-The wall screen is easy to find on desktop and touch emulation. Visitors can sit on the ivory alcove sofa or the velvet ottoman by the window. The larger studio sofa is a separate fixture.
+Visitors can sit on the ivory alcove sofa, the velvet window ottoman, and the larger studio sofa.
 
 [Chrome player baseline](player-baseline.webp)
 
@@ -44,7 +44,9 @@ The screen shows an original dawn-coast still generated for this design study. I
 
 ## Runtime acceptance
 
-Desktop keyboard and 390 px touch-emulated Chrome reached both seats, stood up in the aisle and returned through the automatic door. Both routes also retained the OLED Story, TV-channel and refrigerator actions. The alcove cushion is 0.546 m above world zero. The 0.814 m window ottoman lets the visitor’s lower legs hang past its front edge. [Sofa and ottoman touch views](seats-touch.webp) The 55-inch cabinet uses a dark inactive face and the larger architectural screen shows the existing abstract light artwork.
+Desktop keyboard and 390 px touch-emulated Chrome verified all three seats, safe standing points and return through the automatic door. The OLED Story, TV-channel and refrigerator actions passed in both viewports. The alcove cushion is 0.546 m above world zero. The 0.814 m window ottoman lets the visitor’s lower legs hang past its front edge. The studio cushion is 0.520 m high and its standing point is one metre into the aisle. [Sofa and ottoman touch views](seats-touch.webp) · [Studio sofa on phone and desktop](studio-sofa-runtime.webp)
+
+The 55-inch cabinet uses a dark inactive face and the larger architectural screen shows the existing abstract light artwork.
 
 ## Catalogue exhibit
 

@@ -1191,6 +1191,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       const {x,y,z,width,height,depth} = footprint;
       const shape = collider(x,y,z,width,height,depth);
       if (footprint === interiors.gigasetSeatBox) seats.push(createGigasetLoungeSeat(shape.handle,footprint));
+      const nativeSeat = interiors.nativeStudioSeats.get(footprint);
+      if (nativeSeat) seats.push(nativeSeat(shape.handle));
       shopObstacles.push({min:{x:x-width/2,y:y-height/2,z:z-depth/2},
         max:{x:x+width/2,y:y+height/2,z:z+depth/2}});
       const rect = {minX:x-width/2,maxX:x+width/2,minZ:z-depth/2,maxZ:z+depth/2};

@@ -6830,12 +6830,15 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
     for (const off of [-0.68, 0.68])
       column(x + off * r, (4.11 + y) / 2, z, 0.012, 4.11 - y, brass);
   }
-  function sofa(x, z, c) {
-    block(x, 0.39, z, 1.66, 0.78, 0.8);
-    box(x, 0.35, z, 1.6, 0.34, 0.77, c);
+  function sofa(x, z, c, seat) {
+    const [width2, height, depth2] = [1.66, 0.78, 0.8], cushionY = 0.35, cushionHeight = 0.34;
+    const footprint = block(x, height / 2, z, width2, height, depth2);
+    box(x, cushionY, z, 1.6, cushionHeight, 0.77, c);
     box(x, 0.59, z - 0.32, 1.61, 0.47, 0.19, c);
     for (const k of [-1, 1])
       box(x + k * 0.75, 0.52, z, 0.16, 0.32, 0.71, c);
+    if (seat)
+      t.nativeSeat?.(footprint, { ...seat, centre: [x, cushionY + cushionHeight / 2, z], size: [width2, height, depth2] });
   }
   block(0, 2.12, back, side * 2, 4.18, 0.13);
   block(0, 4.19, mid, side * 2, 0.18, span);
@@ -7103,7 +7106,7 @@ function buildWindowStudio(n, t, width, depth, floorColour) {
     case 14:
       for (const x of [-1.36, 1.36])
         arch(x, 0.21, rear + 0.11, 1.13, 1.98, 0.12, shopLamp);
-      sofa(-0.86, mid, cream);
+      sofa(-0.86, mid, cream, { id: "lg-studio-sofa", name: "LG studio sofa", standDistance: 1 });
       circleIsland(0.71, island, 0.52, 0.37, oak);
       ringLight(0, mid, 1.38, 3.72);
       for (const x of [-side + 0.61, -side + 1.3]) {
@@ -7462,7 +7465,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
 ` + "if(vShopGlow < -2.5) totalEmissiveRadiance += diffuseColor.rgb * .38;");
   };
   const studioParts = [];
-  const shops = [], collisionBoxes = [];
+  const shops = [], collisionBoxes = [], nativeStudioSeats = new Map;
   let gigasetSeatBox;
   const models2 = new Map, loadedScenes = new Map, gltfLoader = new GLTFLoader4;
   const modelStates = new Map(slots.flatMap((slot2) => {
@@ -7585,6 +7588,29 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     }
     const tools = {
       block,
+      nativeSeat(footprint, { id, name, centre, size, standDistance }) {
+        const store2 = interiorStores["S" + slot2.number];
+        const floor = store2.frame.world_origin_m[1] + store2.frame.floor_surface_y_m;
+        const [x, top, z] = worldInteriorPoint(store2, centre);
+        const [exitX, , exitZ] = worldInteriorPoint(store2, [centre[0], 0, centre[2] + standDistance]);
+        const placement = {
+          id,
+          name,
+          x,
+          z,
+          floor,
+          accessible: true,
+          exit: { x: exitX, y: floor, z: exitZ },
+          pose: { facing: 1, angle: group.rotation.y + Math.PI },
+          clearance: {
+            interactionRadius: 0.7,
+            capsuleRadius: 0.3,
+            colliderWidth: footprint.width,
+            colliderDepth: footprint.depth
+          }
+        };
+        nativeStudioSeats.set(footprint, (collider) => createSeatAnchor(placement, collider, { size, top: top - floor, seatCentre: 0, front: -size[2] / 2 }, 1));
+      },
       opaqueWall(x, y, z, w, h, d, color) {
         box(x, y, z, w, h, d, color);
         const a = group.rotation.y, c = Math.cos(a), s = Math.sin(a);
@@ -7848,7 +7874,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       schedulePrefetch();
   });
   schedulePrefetch();
-  return { collisionBoxes, gigasetSeatBox, getPreloadedModels() {
+  return { collisionBoxes, gigasetSeatBox, nativeStudioSeats, getPreloadedModels() {
     return [...loadedScenes].map(([name, scene2]) => ({ name: new URL(name, import.meta.url).href, scene: scene2 }));
   }, get preloadState() {
     return {
@@ -10811,6 +10837,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       const shape = collider(x, y, z, width, height, depth);
       if (footprint === interiors.gigasetSeatBox)
         seats.push(createGigasetLoungeSeat(shape.handle, footprint));
+      const nativeSeat = interiors.nativeStudioSeats.get(footprint);
+      if (nativeSeat)
+        seats.push(nativeSeat(shape.handle));
       shopObstacles.push({
         min: { x: x - width / 2, y: y - height / 2, z: z - depth / 2 },
         max: { x: x + width / 2, y: y + height / 2, z: z + depth / 2 }

@@ -2,7 +2,8 @@ import {createPackedDraw, mergeOpaqueMeshes} from './packed-draw.js';
 import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {buildWindowStudio, shopLamp} from './window-studios.js';
 import {buildLateShopAnchorDetails} from './shop-anchor-details-last.js';
-import {interiorFloorColour,interiorStores} from './interiors/config.js';
+import {interiorFloorColour,interiorStores,worldInteriorPoint} from './interiors/config.js';
+import {createSeatAnchor} from './seat-placements.js';
 import {setupMaterialArtwork} from './artwork-textures.js';
 import {westShopPlacements} from './gallery-west-shops.js';
 import {eastShopPlacements,gigasetLoungeSofa,gigasetSofaFallback} from './gallery-east-shops.js';
@@ -66,7 +67,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       'if(vShopGlow < -2.5) totalEmissiveRadiance += diffuseColor.rgb * .38;');
   };
   const studioParts = [];
-  const shops = [], collisionBoxes = [];
+  const shops = [], collisionBoxes = [], nativeStudioSeats = new Map();
   let gigasetSeatBox;
   const models = new Map(), loadedScenes = new Map(), gltfLoader = new GLTFLoader();
   const modelStates = new Map(slots.flatMap(slot => {
@@ -146,6 +147,17 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     }
     const tools = {
       block,
+      nativeSeat(footprint,{id,name,centre,size,standDistance}) {
+        const store = interiorStores['S'+slot.number];
+        const floor = store.frame.world_origin_m[1]+store.frame.floor_surface_y_m;
+        const [x,top,z] = worldInteriorPoint(store,centre);
+        const [exitX,,exitZ] = worldInteriorPoint(store,[centre[0],0,centre[2]+standDistance]);
+        const placement = {id,name,x,z,floor,accessible:true,exit:{x:exitX,y:floor,z:exitZ},
+          pose:{facing:1,angle:group.rotation.y+Math.PI},clearance:{interactionRadius:.7,capsuleRadius:.3,
+            colliderWidth:footprint.width,colliderDepth:footprint.depth}};
+        nativeStudioSeats.set(footprint,collider=>createSeatAnchor(placement,collider,
+          {size,top:top-floor,seatCentre:0,front:-size[2]/2},1));
+      },
       opaqueWall(x,y,z,w,h,d,color) {
         box(x,y,z,w,h,d,color);
         const a = group.rotation.y, c = Math.cos(a), s = Math.sin(a);
@@ -377,7 +389,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) schedulePrefetch(); });
   schedulePrefetch();
-  return {collisionBoxes,gigasetSeatBox,getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
+  return {collisionBoxes,gigasetSeatBox,nativeStudioSeats,getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
     return {models:Object.fromEntries(modelStates), shops:shops.map(shop => ({...shop.state})),
       settled:shops.filter(shop => shop.state.status==='settled').length, total:shops.length};
   }, update(visitor, view) {

@@ -1,4 +1,4 @@
-"""Walk to the five authored showroom seats and operate their native controls in Chrome."""
+"""Walk to showroom seats and operate their native controls in Chrome."""
 
 import argparse
 import functools
@@ -20,6 +20,7 @@ ROUTES = {
     "S13-backleft": ((35.9, 12), (39.25, 13.85), (42.6, 13.85), (42.6, 11.15), (42.2, 10.85)),
     "S14-leftmid": ((35.9, 20), (39.8, 21.8), (41.5, 21.8), (41.75, 21.4), (41.75, 18.0)),
     "S14-leftfront": ((35.9, 20), (37.2, 19.1)),
+    "lg-studio-sofa": ((35.9, 20), (37.4, 20), (38.55, 19.3)),
     "S15-backleft": ((35, 28), (37.1, 29), (40, 30.6), (41.7, 30.5), (42.9, 27.9),
                      (43.2, 26.4), (43.1, 25.9)),
 }
@@ -35,7 +36,7 @@ def pose(page):
 
 
 def exercise(page, seat_id, touch, out=None):
-    zone = f"planned-space-{seat_id[1:3]}"
+    zone = "planned-space-14" if seat_id == "lg-studio-sofa" else f"planned-space-{seat_id[1:3]}"
     route = ROUTES[seat_id]
     assert_teleport(page, zone)
     arrival = pose(page)

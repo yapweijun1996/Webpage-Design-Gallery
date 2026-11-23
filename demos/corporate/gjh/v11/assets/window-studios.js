@@ -157,10 +157,12 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
     ring(x,y,z,r,.036,shopLamp);
     for(const off of [-.68,.68]) column(x+off*r,(4.11+y)/2,z,.012,4.11-y,brass);
   }
-  function sofa(x,z,c) {
-    block(x,.39,z,1.66,.78,.80);
-    box(x,.35,z,1.6,.34,.77,c);box(x,.59,z-.32,1.61,.47,.19,c);
+  function sofa(x,z,c,seat) {
+    const [width,height,depth] = [1.66,.78,.80], cushionY = .35, cushionHeight = .34;
+    const footprint = block(x,height/2,z,width,height,depth);
+    box(x,cushionY,z,1.6,cushionHeight,.77,c);box(x,.59,z-.32,1.61,.47,.19,c);
     for(const k of [-1,1])box(x+k*.75,.52,z,.16,.32,.71,c);
+    if (seat) t.nativeSeat?.(footprint,{...seat,centre:[x,cushionY+cushionHeight/2,z],size:[width,height,depth]});
   }
   // Floors, side walls and a separate ceiling create real depth when the
   // visitor walks obliquely past the glazing. Aligned reveals frame each view.
@@ -378,7 +380,8 @@ export function buildWindowStudio(n, t, width, depth, floorColour) {
       break;
     case 14: // LG: side-by-side picture walls, ivory sofa, satin appliances and a halo light.
       for(const x of [-1.36,1.36]) arch(x,.21,rear+.11,1.13,1.98,.12,shopLamp);
-      sofa(-.86,mid,cream);circleIsland(.71,island,.52,.37,oak);ringLight(0,mid,1.38,3.72);
+      sofa(-.86,mid,cream,{id:'lg-studio-sofa',name:'LG studio sofa',standDistance:1});
+      circleIsland(.71,island,.52,.37,oak);ringLight(0,mid,1.38,3.72);
       for(const x of [-side+.61,-side+1.30]){
         block(x,1.24,mid+1,.62,2.23,.66);
         box(x,1.24,mid+1,.61,2.23,.64,silver);box(x,1.44,mid+1.34,.49,.035,.04,charcoal);
