@@ -35,7 +35,7 @@ def run():
 
     def ready(page):
         page.goto(mall_entry_url(url))
-        page.wait_for_function('__mall.ready && __sceneReady', timeout=60000)
+        page.wait_for_function('window.__mall?.ready && window.__sceneReady', timeout=60000)
         page.locator('#guide-skip').click(); page.locator('#guide-card').wait_for(state="hidden"); page.locator('#scene').focus()
         page.locator('#view-toggle').click()
 
