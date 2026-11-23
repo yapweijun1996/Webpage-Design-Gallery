@@ -1,0 +1,91 @@
+.studio-anchor-panel { display: grid; min-width: 0; gap: 12px; margin-block-end: 16px; }
+.studio-anchor-head, .studio-anchor-toolbar, .studio-anchor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.studio-anchor-head { justify-content: space-between; }
+#anchor-phase { color: var(--studio-muted); overflow-wrap: anywhere; }
+.studio-anchor-goals, .studio-anchor-advisor ul { padding-inline-start: 20px; }
+.studio-anchor-goals li, .studio-anchor-advisor li { overflow-wrap: anywhere; }
+#anchor-reference { display: grid; min-width: 0; gap: 10px; }
+.studio-anchor-toolbar label { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.studio-anchor-toolbar select, .studio-anchor-dialog :is(textarea, input[type="file"]) {
+  min-height: var(--sds-tap);
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--studio-border);
+  border-radius: var(--sds-radius-md);
+  background: var(--studio-bg);
+  color: var(--studio-text);
+  font: inherit;
+}
+.studio-anchor-toolbar a { color: var(--studio-accent); text-underline-offset: 3px; }
+.studio-anchor-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: min(52dvh, 560px);
+  object-fit: contain;
+  border-radius: var(--sds-radius-md);
+  background: var(--studio-bg);
+}
+.studio-anchor-advisor {
+  display: grid;
+  gap: 4px;
+  padding: 8px 12px;
+  border-inline-start: 2px solid var(--studio-blue);
+  background: var(--studio-surface-alt, var(--studio-bg));
+}
+#anchor-access { color: var(--studio-muted); }
+#anchor-status:empty, #anchor-dialog-status:empty { display: none; }
+.studio-anchor-actions:not(:has(> button:not([hidden]))) { display: none; }
+.studio-anchor-actions button:disabled, .studio-anchor-dialog button:disabled { opacity: .55; cursor: not-allowed; }
+
+.studio-anchor-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(80dvh, 680px);
+  padding: 0;
+  border: 1px solid var(--studio-border);
+  border-radius: var(--sds-radius-md);
+  overflow: hidden;
+  color: var(--studio-text);
+  background: var(--studio-surface);
+  box-shadow: var(--studio-shadow);
+}
+.studio-anchor-dialog::backdrop { background: var(--sds-color-scrim); }
+.studio-anchor-dialog form {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  max-height: inherit;
+}
+.studio-anchor-dialog-head, .studio-anchor-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+}
+.studio-anchor-dialog-head { border-bottom: 1px solid var(--studio-border); }
+.studio-anchor-dialog-head h2 { font-size: var(--sds-text-base); }
+.studio-anchor-dialog-footer { justify-content: flex-end; border-top: 1px solid var(--studio-border); }
+.studio-anchor-dialog-body { display: grid; gap: 12px; min-width: 0; overflow: auto; padding: 14px 16px; }
+.studio-anchor-dialog [data-anchor-fields] { display: grid; gap: 6px; min-width: 0; }
+.studio-anchor-dialog label { font-weight: 650; }
+.studio-anchor-dialog label small { color: var(--studio-muted); font-weight: 400; }
+.studio-anchor-dialog :is(textarea, input[type="file"]) { width: 100%; min-width: 0; }
+.studio-anchor-dialog textarea { resize: vertical; }
+#anchor-contract { font-family: var(--sds-font-mono, monospace); }
+.studio-anchor-dialog :is(p, label) { overflow-wrap: anywhere; }
+
+@media (max-width: 520px) {
+  .studio-anchor-dialog {
+    inset: auto 0 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border-radius: var(--sds-radius-md) var(--sds-radius-md) 0 0;
+  }
+  .studio-anchor-dialog-footer { padding-block-end: calc(10px + var(--sds-safe-bottom)); }
+}

@@ -185,8 +185,8 @@ function get(projectDir, id) {
   return { ...meta, dir, contract };
 }
 
-function list(projectDir) {
-  return ids(path.join(projectDir, 'anchors')).map(id => get(projectDir, id));
+function list(projectDir, { includeContract = true } = {}) {
+  return ids(path.join(projectDir, 'anchors')).map(id => includeContract ? get(projectDir, id) : readAnchor(projectDir, id).meta);
 }
 
 function current(projectDir) {

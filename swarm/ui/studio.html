@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="/studio-activity.css">
   <link rel="stylesheet" href="/studio-compare.css">
   <link rel="stylesheet" href="/studio.css">
+  <link rel="stylesheet" href="/studio-anchors.css">
   <script defer src="/ds/runtime.js"></script>
   <script defer src="/ds/i18n.js"></script>
   <script defer src="/channel.js"></script>
@@ -22,6 +23,7 @@
   <script defer src="/studio-activity.js"></script>
   <script defer src="/preview-bridge.js"></script>
   <script defer src="/studio-compare.js"></script>
+  <script defer src="/studio-anchors.js"></script>
   <script defer src="/studio.js"></script>
 </head>
 <body class="studio" data-workspace="design" data-mobile-pane="preview" data-sidebar="open" data-inspector="open">
@@ -133,6 +135,49 @@
 
       <section id="review" class="studio-mode" role="tabpanel" aria-labelledby="mode-review" hidden>
         <div class="studio-mode-head"><h2>Review</h2></div>
+        <section id="anchor-panel" class="studio-card studio-anchor-panel" aria-labelledby="anchor-title">
+          <header class="studio-anchor-head">
+            <h3 id="anchor-title" tabindex="-1">Design anchors</h3>
+            <span id="anchor-phase">Loading…</span>
+          </header>
+          <ul id="anchor-goals-list" class="studio-anchor-goals" aria-label="Design goals" hidden></ul>
+          <div id="anchor-reference" hidden>
+            <div class="studio-anchor-toolbar">
+              <label for="anchor-selection">Anchor version <select id="anchor-selection"></select></label>
+              <div class="studio-segment studio-anchor-devices" role="group" aria-label="Anchor breakpoints">
+                <button type="button" data-anchor-breakpoint="desktop" aria-pressed="true">Desktop</button>
+                <button type="button" data-anchor-breakpoint="tablet" aria-pressed="false" hidden>Tablet</button>
+                <button type="button" data-anchor-breakpoint="mobile" aria-pressed="false" hidden>Mobile</button>
+              </div>
+              <a id="anchor-full-image" target="_blank" rel="noopener" hidden>Open full image</a>
+              <button type="button" class="studio-button" id="anchor-compare" aria-controls="compare" hidden>Compare with preview</button>
+            </div>
+            <img id="anchor-image" class="studio-anchor-image" alt="" hidden>
+            <div id="anchor-advisor" class="studio-anchor-advisor" hidden>
+              <p id="anchor-advisor-status"></p>
+              <ul id="anchor-advisor-findings" hidden></ul>
+            </div>
+            <p id="anchor-approval" hidden></p>
+            <div id="anchor-qa" class="studio-anchor-advisor" hidden>
+              <p id="anchor-qa-status"></p>
+              <ul id="anchor-qa-results" hidden></ul>
+            </div>
+          </div>
+          <div class="studio-anchor-actions" role="group" aria-label="Design anchor actions">
+            <button type="button" class="studio-button" id="anchor-goals" data-anchor-action="goals" aria-haspopup="dialog" hidden>Set goals</button>
+            <button type="button" class="studio-button" id="anchor-generate" data-anchor-action="generate" aria-haspopup="dialog" hidden>Generate references</button>
+            <button type="button" class="studio-button" id="anchor-import" data-anchor-action="import" aria-haspopup="dialog" hidden>Import anchor</button>
+            <button type="button" class="studio-button" id="anchor-run-advisor" data-anchor-action="advisor" aria-haspopup="dialog" hidden>Review with advisor</button>
+            <button type="button" class="studio-button" id="anchor-approve" data-anchor-action="approve" aria-haspopup="dialog" hidden>Approve image</button>
+            <button type="button" class="studio-button" id="anchor-lock" data-anchor-action="lock" aria-haspopup="dialog" hidden>Lock contract</button>
+            <button type="button" class="studio-button" id="anchor-revise" data-anchor-action="revise" aria-haspopup="dialog" hidden>Request revision</button>
+            <button type="button" class="studio-button" id="anchor-unlock" data-anchor-action="unlock" aria-haspopup="dialog" hidden>Unlock anchor</button>
+            <button type="button" class="studio-button" id="anchor-run-qa" data-anchor-action="qa" aria-haspopup="dialog" hidden>Run visual QA</button>
+            <button type="button" class="studio-button" id="anchor-finish" data-anchor-action="finish" aria-haspopup="dialog" hidden>Final approval</button>
+          </div>
+          <p id="anchor-access" hidden></p>
+          <p id="anchor-status" role="status"></p>
+        </section>
         <div id="compare">
           <section class="studio-card"><h3>Reference vs. actual</h3><p class="studio-placeholder">The comparison workspace is loading.</p></section>
         </div>
@@ -216,6 +261,44 @@
       <p id="version-status" role="status"></p>
       <button class="studio-button" id="version-restore" type="button" disabled>Restore selected version</button>
     </footer>
+  </dialog>
+  <dialog id="anchor-dialog" class="studio-anchor-dialog" aria-labelledby="anchor-dialog-title">
+    <form id="anchor-form" novalidate>
+      <header class="studio-anchor-dialog-head">
+        <h2 id="anchor-dialog-title" tabindex="-1">Design anchor</h2>
+        <button type="button" class="ibtn" id="anchor-dialog-close" data-icon="close" aria-label="Close design anchor action"></button>
+      </header>
+      <div class="studio-anchor-dialog-body">
+        <p id="anchor-dialog-context" hidden></p>
+        <div data-anchor-fields="goals" hidden>
+          <label for="anchor-goal-notes">Design goals</label>
+          <p id="anchor-goal-hint">Enter one goal per line. Add up to 12 goals of 400 characters each.</p>
+          <textarea id="anchor-goal-notes" rows="5" required aria-describedby="anchor-goal-hint"></textarea>
+        </div>
+        <div data-anchor-fields="import" hidden>
+          <p id="anchor-file-hint">PNG files must be up to 4 MiB and 2400 pixels high.</p>
+          <label for="anchor-file-desktop">Desktop PNG <small>1440 px wide, required</small></label>
+          <input type="file" id="anchor-file-desktop" accept="image/png,.png" required aria-describedby="anchor-file-hint">
+          <label for="anchor-file-tablet">Tablet PNG <small>768 px wide</small></label>
+          <input type="file" id="anchor-file-tablet" accept="image/png,.png" aria-describedby="anchor-file-hint">
+          <label for="anchor-file-mobile">Mobile PNG <small>393 px wide</small></label>
+          <input type="file" id="anchor-file-mobile" accept="image/png,.png" aria-describedby="anchor-file-hint">
+        </div>
+        <div data-anchor-fields="lock" hidden>
+          <label for="anchor-contract">Design contract JSON</label>
+          <p id="anchor-contract-hint">Include version, recipe, brand, tokens, sections, owners, and rules. For each supplied breakpoint, specify columns, typeScale, spacingScale, palette, and imagery.</p>
+          <textarea id="anchor-contract" rows="12" spellcheck="false" required aria-describedby="anchor-contract-hint"></textarea>
+        </div>
+        <div data-anchor-fields="reason" hidden>
+          <label for="anchor-reason">Reason</label>
+          <textarea id="anchor-reason" rows="4" maxlength="600" required></textarea>
+        </div>
+        <p id="anchor-dialog-status" role="status"></p>
+      </div>
+      <footer class="studio-anchor-dialog-footer">
+        <button type="submit" class="studio-button" id="anchor-dialog-submit">Continue</button>
+      </footer>
+    </form>
   </dialog>
   <dialog id="setdlg" aria-label="Settings">
     <header><h2>Settings</h2><button class="ibtn" id="setclose" type="button" data-icon="close" aria-label="Close settings"></button></header>

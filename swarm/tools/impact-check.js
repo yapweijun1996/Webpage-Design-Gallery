@@ -74,13 +74,17 @@ async function serveRequest(send, bundle, { requestId, request }) {
 }
 
 function startChrome(binary, profile, width) {
+  const processGroup = process.platform !== 'win32';
   const chrome = spawn(binary, [
     '--headless=new', '--remote-debugging-pipe', `--user-data-dir=${profile}`,
     `--window-size=${Math.max(width, 500)},${HEIGHT}`, '--force-device-scale-factor=1', '--hide-scrollbars',
     '--disable-gpu', '--disable-background-networking', '--use-mock-keychain', '--no-first-run', '--no-default-browser-check', 'about:blank',
-  ], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'] });
+  ], { detached: processGroup, stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'] });
   const stopped = new AbortController();
-  const closed = new Promise(resolve => chrome.once('close', resolve));
+  const exited = new Promise(resolve => {
+    chrome.once('exit', resolve);
+    chrome.once('error', resolve);
+  });
   const events = new EventEmitter();
   const pending = new Map();
   const [, , stderr, input, output] = chrome.stdio;
@@ -95,7 +99,7 @@ function startChrome(binary, profile, width) {
 
   stderr.setEncoding('utf8').on('data', data => { diagnostics = (diagnostics + data).slice(-4096); });
   chrome.on('error', stop);
-  chrome.on('close', (code, signal) => {
+  chrome.on('exit', (code, signal) => {
     const detail = diagnostics.trim();
     stop(new Error(`Chrome exited (${signal ?? code})${detail ? ': ' + detail : ''}`));
   });
@@ -130,6 +134,30 @@ function startChrome(binary, profile, width) {
     });
   }
 
+  let closing;
+  function close() {
+    if (closing) return closing;
+    stop(new Error('Chrome session closed.'));
+    closing = (async () => {
+      function terminate(signal) {
+        if (!chrome.pid) return;
+        try {
+          if (processGroup) process.kill(-chrome.pid, signal);
+          else chrome.kill(signal);
+        } catch (error) { if (error.code !== 'ESRCH') chrome.kill(signal); }
+      }
+      terminate('SIGTERM');
+      const force = setTimeout(() => terminate('SIGKILL'), 1000);
+      try { await exited; }
+      finally {
+        clearTimeout(force);
+        // Chromium descendants may inherit these descriptors after its main process exits.
+        for (const stream of [stderr, input, output]) stream?.destroy();
+      }
+    })();
+    return closing;
+  }
+
   return {
     send, events,
     async wait(event) {
@@ -140,10 +168,7 @@ function startChrome(binary, profile, width) {
         throw stopped.signal.reason ?? new Error('Timed out waiting for Chrome page load');
       }
     },
-    async close() {
-      chrome.kill();
-      await closed;
-    },
+    close,
   };
 }
 

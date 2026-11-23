@@ -29,8 +29,8 @@ const LEGAL = [
   { start_implementation: ['system'], unlock: ['manager'] },
   { finish: ['system'] },
   { qa_pass: ['system'], qa_fail: ['system'] },
-  { finish: ['manager'] },
-  {},
+  { finish: ['manager'], check_again: ['system'] },
+  { check_again: ['system'] },
   { retry: ['manager'] },
 ];
 
@@ -126,7 +126,7 @@ test('implements only from locked through done and closes the gate on failure or
 test('rejects every illegal event and wrong actor without changing either file', t => {
   const events = [
     'set_goals', 'anchor_ready', 'advisor_pass', 'advisor_revise', 'approve', 'request_revision', 'lock',
-    'start_implementation', 'qa_pass', 'qa_fail', 'finish', 'fail', 'retry', 'unlock', 'unknown',
+    'start_implementation', 'qa_pass', 'qa_fail', 'finish', 'check_again', 'fail', 'retry', 'unlock', 'unknown',
   ];
   const actors = [undefined, 'manager', 'advisor', 'system', 'worker', 'owner', 'claude', 'qa', 'constructor'];
   let rejected = 0;
@@ -152,7 +152,7 @@ test('rejects every illegal event and wrong actor without changing either file',
       }
     }
   }
-  assert.equal(rejected, 1448);
+  assert.equal(rejected, 1545);
 });
 
 test('fails from every phase and retries the exact prior snapshot', t => {

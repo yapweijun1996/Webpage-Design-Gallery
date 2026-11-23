@@ -9,6 +9,7 @@
   const availableFormats = 'PNG, JPEG, WebP, or GIF';
   let reference;
   let dispose;
+  let selectAnchor;
 
   function element(tag, className, text) {
     const node = document.createElement(tag);
@@ -145,11 +146,13 @@
     let viewportWidth = 0;
     let frameWidth = 0;
     let swipePointer = null;
+    let anchorReference;
 
     const root = element('section', 'studio-compare');
     root.setAttribute('aria-label', 'Reference comparison');
     const header = element('header', 'studio-compare__header');
     const heading = element('h2', '', 'Reference comparison');
+    heading.tabIndex = -1;
     const actions = element('div', 'studio-compare__actions');
     const pick = button('Replace image', 'secondary');
     const clear = button('Clear', 'ghost');
@@ -236,10 +239,15 @@
     }
 
     function updateFrame() {
-      if (!reference || !root.getClientRects().length) return;
+      const shown = anchorReference || reference;
+      if (!shown || !root.getClientRects().length) return;
       const src = previewSource(getActiveSrc);
-      frameWidth = frameDimension(src, 'w', reference.width);
-      const frameHeight = frameDimension(src, 'h', reference.height);
+      if (anchorReference && src && src.href !== 'about:blank') {
+        src.searchParams.set('w', anchorReference.width);
+        src.searchParams.set('h', anchorReference.height);
+      }
+      frameWidth = frameDimension(src, 'w', shown.width);
+      const frameHeight = frameDimension(src, 'h', shown.height);
       stage.style.setProperty('--studio-compare-ratio', frameWidth + ' / ' + frameHeight);
       stage.style.setProperty('--studio-compare-width', frameWidth + 'px');
       frame.style.width = frameWidth + 'px';
@@ -269,9 +277,12 @@
     }
 
     function renderReference() {
-      const hasReference = !!reference;
+      const shown = anchorReference || reference;
+      const hasReference = !!shown;
       empty.hidden = hasReference;
       actions.hidden = !hasReference;
+      pick.hidden = Boolean(anchorReference);
+      clear.textContent = anchorReference ? 'Return to uploaded reference' : 'Clear';
       workbench.hidden = !hasReference;
       if (!hasReference) {
         referenceImage.removeAttribute('src');
@@ -282,15 +293,15 @@
         persistence.textContent = '';
         return;
       }
-      referenceImage.src = reference.src;
-      filename.textContent = reference.name;
-      dimensions.textContent = reference.width + ' × ' + reference.height;
-      persistence.textContent = reference.saved ? 'Saved in this browser' : 'This page session only';
+      referenceImage.src = shown.src;
+      filename.textContent = shown.name;
+      dimensions.textContent = shown.width + ' × ' + shown.height;
+      persistence.textContent = anchorReference ? 'Project anchor' : shown.saved ? 'Saved in this browser' : 'This page session only';
       updateFrame();
     }
 
     async function choose(file) {
-      if (!file) return;
+      if (!file || anchorReference) return;
       const ticket = ++revision;
       announce('Reading reference image…', 'loading');
       let objectURL;
@@ -338,6 +349,13 @@
     });
     listen(clear, 'click', () => {
       revision += 1;
+      if (anchorReference) {
+        anchorReference = undefined;
+        renderReference();
+        announce('Anchor comparison closed.');
+        (reference ? pick : emptyPick).focus();
+        return;
+      }
       forgetSavedImage();
       setReference(null);
       renderReference();
@@ -414,10 +432,30 @@
         renderReference();
       });
     }
+    selectAnchor = async (source, name) => {
+      const ticket = ++revision;
+      root.scrollIntoView({ block: 'start' });
+      heading.focus({ preventScroll: true });
+      announce('Loading the project anchor…', 'loading');
+      try {
+        const src = new URL(source, location.href);
+        if (src.origin !== location.origin || !/^\/api\/anchor\/image\/v\d{3,}\/(desktop|tablet|mobile)$/.test(src.pathname)) {
+          throw new Error('Invalid anchor reference');
+        }
+        const next = await readImage(src.href, name);
+        if (signal.aborted || ticket !== revision) return;
+        anchorReference = next;
+        renderReference();
+        announce('Comparing the project anchor.');
+      } catch {
+        if (!signal.aborted && ticket === revision) announce('The project anchor could not be opened.', 'error');
+      }
+    };
     dispose = () => {
       controller.abort();
       disconnectPreview?.();
       resize.disconnect();
+      selectAnchor = undefined;
       root.remove();
     };
   }
@@ -427,5 +465,5 @@
     dispose = undefined;
   }
 
-  window.StudioCompare = { mount, destroy };
+  window.StudioCompare = { mount, destroy, showAnchor: (src, name) => selectAnchor?.(src, name) };
 }());

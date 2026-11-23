@@ -491,7 +491,7 @@ function prepare({ brief, roster }, replace) {
 }
 
 const normalBusy = () => inFlight > 0 || running > 0 || imageWrites > 0 || state.phase === 'running';
-const projectBusy = () => normalBusy() || fastPath.busy();
+const projectBusy = () => normalBusy() || fastPath.busy() || anchorRoutes.busy();
 async function runAll() {
   state.phase = 'running';
   emit({ type: 'state', state });
@@ -512,6 +512,7 @@ async function runAll() {
 function stopAll() {
   stopped = true;
   fastPath.cancel();
+  anchorRoutes.cancel();
   imageTurns.clear();
   for (const p of children.values()) p.kill('SIGTERM');
 }
@@ -668,7 +669,7 @@ const { stageFast } = require('./lib/fast-stage');
 const { install } = require('./lib/versions');
 const { loadAll } = require('./lib/recipes');
 const fastPath = createFastPath({
-  projectDir: PROJECT, projectId: TARGET.projectId, busy: normalBusy, stageFast, install,
+  projectDir: PROJECT, projectId: TARGET.projectId, busy: () => normalBusy() || anchorRoutes.busy(), stageFast, install,
   fallback: submitMessage,
   published({ text, from, appearance, candidate }) {
     refreshPreviewSections();
@@ -682,6 +683,21 @@ const fastPath = createFastPath({
     if (scope) startTurn(msg, appearance, { fastPreview: true });
     return { id: msg.id, qualityQueued: Boolean(scope) };
   },
+});
+const { createAnchorRoutes, matches: isAnchorRoute } = require('./lib/anchor-routes');
+const { captureAnchorQA } = require('./lib/anchor-preview-qa');
+const anchorRoutes = createAnchorRoutes({
+  projectDir: PROJECT,
+  projectId: TARGET.projectId,
+  busy: () => normalBusy() || fastPath.busy(),
+  changed() {
+    emit({ type: 'anchor' });
+    emit({ type: 'busy', busy: projectBusy() });
+  },
+  generateAnchor: input => require('./lib/anchor-generation').generateAnchor({ ...input, runnerSettings: settings }),
+  reviewAnchor: input => require('./lib/anchor-advisor').reviewAnchor({ ...input, runnerSettings: settings }),
+  captureAnchorQA,
+  previewUrl: (_width, _height, input) => previewUrl({ theme: 'light', brand: 'none', lang: 'en', ...cleanAppearance(input) }),
 });
 const preview = require('./lib/preview').createPreview({
   ui: UI, project: PROJECT, designSystem: DS_DIR, library: GJH_ASSETS, mall: GJH_V11_ASSETS
@@ -699,6 +715,7 @@ function submitMessage(input) {
   const from = input.from === 'owner' ? 'owner' : 'claude';
   if (!text) throw new FastPathError(400, 'empty');
   if (!chat) throw new FastPathError(409, 'channel not ready');
+  if (anchorRoutes.busy()) throw new FastPathError(409, 'Wait until the anchor task finishes.');
   if (normalBusy() && !inFlight) throw new FastPathError(409, 'Wait for the fixed-phase run to finish.');
   if (stopped && normalBusy()) throw new FastPathError(409, 'Wait for the stopped turn to finish.');
   fastPath.cancel('A newer request replaced this Fast Path preview.');
@@ -738,6 +755,7 @@ const server = http.createServer(async (req, res) => {
   if (p === '/api/state') return send(res, 200, state);
   if (isSkillRoute(p)) return skillRoutes(req, res, p, send);
   if (isVersionRoute(p)) return versionRoutes(req, res, p, send);
+  if (isAnchorRoute(p)) return anchorRoutes.handle(req, res, p, send);
   if (p === '/api/fast' || p === '/api/metrics') return fastPath.handle(req, res, p, send);
   if (p === '/api/settings' && req.method === 'GET') return send(res, 200, { settings, allowlist: S.ALLOWLIST, resolved: { manager: S.resolve(settings, 'manager'), worker: S.resolve(settings, 'worker') }, status: readiness });
   if (p === '/api/settings' && req.method === 'PUT') {

@@ -30,8 +30,8 @@ const ROUTES = new Map(Object.entries({
     qa_pass: ['final_review', 'system'],
     qa_fail: ['implementing', 'system'],
   },
-  final_review: { finish: ['done', 'manager'] },
-  done: {},
+  final_review: { finish: ['done', 'manager'], check_again: ['qa', 'system'] },
+  done: { check_again: ['qa', 'system'] },
   failed: { retry: [null, 'manager'] },
 }));
 
@@ -203,6 +203,10 @@ function createFlow(projectDir) {
     return load().snapshot;
   }
 
+  function preview(event, payload) {
+    return transition(state(), event, payload);
+  }
+
   function dispatch(event, payload) {
     const { snapshot, lastTransition } = load();
     const result = transition(snapshot, event, payload);
@@ -216,6 +220,7 @@ function createFlow(projectDir) {
       event,
       actor: own(payload, 'actor'),
     };
+    if (own(payload, 'audit') && typeof payload.audit === 'object') line.details = payload.audit;
     const commit = { offset, line };
     writeState(file, { ...result.state, lastTransition: commit });
     syncLog(commit);
@@ -226,7 +231,7 @@ function createFlow(projectDir) {
     return IMPLEMENTATION_STATES.has(state().state);
   }
 
-  return { state, dispatch, canImplement };
+  return { state, preview, dispatch, canImplement };
 }
 
 module.exports = { createFlow };

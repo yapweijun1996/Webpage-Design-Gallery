@@ -454,4 +454,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { compare };
+module.exports = { compare, decodePng, encodePng };

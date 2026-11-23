@@ -7,6 +7,10 @@ Owner request 2026-11-21: the Manager approves a high-fidelity design IMAGE befo
 Side transitions: `advisor_review -> generating` (advisor asks for revision, max 3 rounds), `awaiting_approval -> generating` (Manager requests revision, any number), `qa -> implementing` (verified deviations, max 3 rounds), any state -> `failed` (with reason, recoverable by `retry`), `locked` can only be left towards `generating` through an explicit Manager `unlock` (design direction changes need Manager authorisation, recorded).
 Hard rules: implementation (squad, fast path composition, workers) is refused unless state >= `locked`; anchors are immutable once locked (files made read-only 0444, sha256 recorded, any mismatch aborts the run); only an actor `manager` (the owner or `claude`) may approve, revise, unlock; the advisor may only review.
 
+An operator can rerun visual QA from final review or after sign-off. The
+server's `check_again` transition opens QA for the same locked anchor.
+Final approval requires a passing comparison for the current design revision.
+
 ## Anchor store (`<project>/anchors/vNNN/`)
 `anchor.desktop.png`, `anchor.tablet.png`, `anchor.mobile.png` (1440, 768, 393 wide; mobile and tablet optional), `meta.json` {id, createdAt, goals, prompt, model, files:{name:{sha256,bytes,width,height}}, status:'draft|approved|locked|superseded', advisor:{verdict,score,findings[]}, approvedBy, approvedAt}, `contract.json` (versioned Design Contract from FASTPATH_SPEC plus `anchorId` and `anchorSha256` map and `rules` per breakpoint: layout columns, type scale, spacing scale, palette, imagery). Version numbers only grow; superseded anchors are kept.
 

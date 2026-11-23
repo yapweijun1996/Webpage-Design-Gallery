@@ -32,8 +32,7 @@
     if (onError) stream.onerror = onError;
   }
 
-  function syncThemeAttribute() {
-    const theme = SDS.theme.get();
+  function syncThemeAttribute(theme = SDS.theme.get()) {
     const light = theme === 'light' || (theme === 'auto' && !matchMedia('(prefers-color-scheme: dark)').matches);
     document.documentElement.dataset.studioTheme = light ? 'light' : 'dark';
     return light;
@@ -101,6 +100,7 @@
       for (const key of Object.keys(selected)) {
         if (query.has(key)) selected[key] = query.get(key);
       }
+      syncThemeAttribute(selected.theme);
       send('appearance', selected);
     };
     const publishAnchor = () => {
@@ -365,6 +365,7 @@
     const roster = name === 'team' ? $('workspace-roster') : $('inspector-roster');
     if ($('activity-team').parentElement !== roster) roster.append($('activity-team'));
     if (previous !== name) updateSettingsPlacement();
+    window.StudioAnchors?.show(name === 'review', reviewAppearance);
     const compareModule = enhancement('StudioCompare');
     if (name === 'review' && !compareIsMounted && compareModule) {
       $('compare').replaceChildren();
@@ -1065,6 +1066,7 @@
       requestPreviewView();
       activityModule?.onEvent(event);
       loadVersions();
+      window.StudioAnchors?.refresh();
       return;
     }
 
@@ -1092,6 +1094,7 @@
         S.phase = event.phase;
         setPhase(event.ts);
         loadVersions();
+        window.StudioAnchors?.refresh();
         break;
       case 'chat': {
         const message = event.msg;
@@ -1113,6 +1116,10 @@
         window.SwarmChannel?.setBusy(busy);
         setPhase(event.ts);
         loadVersions();
+        window.StudioAnchors?.refresh();
+        break;
+      case 'anchor':
+        window.StudioAnchors?.refresh();
         break;
       case 'versions':
         loadVersions();
@@ -1139,9 +1146,11 @@
         break;
       case 'edit':
         refreshPreview(publishPreview, event);
+        if (event.kind === 'sections') window.StudioAnchors?.previewChanged();
         break;
       case 'asset':
         publishPreview('asset', event.file);
+        window.StudioAnchors?.previewChanged();
         break;
     }
   }

@@ -137,6 +137,26 @@ anchor flow must have a verified locked contract compatible with the recipe.
 identity from `/api/state`. `GET /api/metrics` summarizes server build stages.
 The Chrome acceptance check measures the full journey to an interactive preview.
 
+## Design anchors
+
+In **Review**, set design goals and choose **Generate references** to start the
+configured Codex image specialist. You can also import a desktop PNG with
+optional tablet and mobile PNGs. The required widths are 1440, 768 and 393 px
+respectively. Ask the configured CLI advisor to review the draft. Open the
+current desktop reference, approve it, then review and lock its design contract. Locking
+publishes the same contract bytes to the project and freezes the reference.
+The optional anchor flow gates Fast Path and worker publication once activated.
+
+Run **Visual QA** to capture the Studio preview at all three widths and compare
+it with the corresponding reference images. The report marks missing references.
+Final approval requires a passing report for the current design revision. If the
+preview changes, run QA again before confirming it.
+
+Anchor actions use a short-lived control token from the local Studio. The server
+keeps the token out of runner environments and the isolated preview. The control
+assumes a trusted local account, including processes running as that account.
+The generation and advisor actions require explicit confirmation in Studio.
+
 ## Verification
 
 ```sh
@@ -144,7 +164,9 @@ node swarm/test/e2e.js
 python swarm/test/browser_settings_skills.py
 python swarm/test/browser_studio_versions.py
 python swarm/test/browser_fast_path.py
+python swarm/test/browser_studio_anchors.py
 ```
 
 The browser checks use Python Playwright with Chrome. Set `GALLERY_CHROME`
 if Chrome is installed at a different path.
+Use `browser_studio_anchors.py --qa` to exercise the three Studio captures and final approval.
