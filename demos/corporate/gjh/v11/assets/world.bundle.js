@@ -3488,7 +3488,7 @@ var store = (preset2, options = {}) => ({ preset: preset2, ...options });
 var stores = Object.freeze({
   S01: store("t1-classic", { relief: true, fasciaInkTop: 0.27, palette: { fascia: "#3d483f" }, faceGlaze: { colour: "#7d786d", opacity: 0.14 }, logoModule: "sign_logo3d_new_moon", logoRegion: [6 / 675, 5 / 139, 96 / 675, 129 / 139] }),
   S02: store("t3-cafe", { relief: true, fasciaInkHeight: 0.88 }),
-  S03: store("t8-kids", { letterInk: "dark", faceGlaze: { colour: "#000000", opacity: 0.15 }, palette: { fascia: "#ccbaa5" } }),
+  S03: store("t8-kids", { fasciaInkHeight: 0.92, fasciaInkTop: 0.22, letterInk: "dark", faceGlaze: { colour: "#000000", opacity: 0.15 }, palette: { fascia: "#ccbaa5" } }),
   S04: store("t6-beauty", { carrier: true, caption: true, letterInk: "pale", inkRegion: [0, 0, 1, 0.64] }),
   S05: store("heritage-red", { caption: true, captionLogoWidth: 0.14 }),
   S06: store("t5-book", { carrier: true, letterInk: "all", inkRegion: [0.45, 0, 0.55, 1] }),
@@ -6186,7 +6186,7 @@ async function loadModules(assetBase, files = modelFiles, loader = new GLTFLoade
 var samples = [
   ["S01", 17, 13, 13],
   ["S02", 10, 12, 12],
-  ["S03", 16, 17, 17],
+  ["S03", 16, 16, 16],
   ["S04", 6, 13, 13],
   ["S05", 8, 12, 12],
   ["S06", 12, 11, 12],

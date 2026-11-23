@@ -64,3 +64,17 @@ Five independent reviewers checked this fixture. The phone review identified a l
 ### Lounge and bar routes
 
 At 390 px with touch and 1440 px with the keyboard, the visitor entered from the Map, followed the centre lane to the cross-aisle at local Z +0.4 m and used both lounge benches. Each circuit ended in the atrium with the door fully closed. All ten registered fixtures worked, including the three bar stools. Both the potong Story and the separate rear brand artwork opened. The keyboard route used F to sit and Escape to stand. The benches were vacant during these GOGO visits. [Seated views](side-bench-routes.webp) · [Action results for revision 22d7c788](../../evidence/gjh-v11-s02-s03-interactions.json)
+
+### Showroom review
+
+The original storefront reference centres a curved teal service counter. The later potong brief places a cart on the left and three bar stools on the right. The installed shop follows the later arrangement. Five advisers compared the real Map arrival and doorway with both references, including an independent check of the paths to the seating.
+
+| Area | Result | Evidence |
+| --- | --- | --- |
+| Entrance and sign | Pass at Map arrival | At 1440 px the fixed header previously cut into the official yellow capsule. The new pale edge clears the header by 10 CSS px and the yellow fill clears it by 15 px. At 390 px the badge remains readable. Its 12 m ink height is now 16 CSS px on both atlases, above the 10 px minimum. Looking up from the desktop doorway still crops the overhead badge. The smaller door lintel remains visible. |
+| Composition and lighting | Partial | From the entrance, the left cart, green drinks counter, coral stools and central passage are identifiable. Warm wood surrounds the mint floor and counter accents. The rear drinks photograph attracts more attention than the cart. The reference shows a larger wheeled display with a continuously lit canopy and a deeper lounge. |
+| Circulation and seating | Pass on the exercised routes | The 10.5 m deep room has a 4.7 m clear opening. The centre aisle and its cross-aisle at local Z +0.4 m lead to both lounge benches. At each width the visitor exercised ten registered fixtures, including all three bar stools, and opened both the historical potong Story and the rear artwork. [Seating routes and controls](#lounge-and-bar-routes) |
+| Brand facts | Pass for the sourced exhibit | The original drinks artwork and the two unwrapped potong studies are separately identified in the directory and rear artwork panel in three languages. The historical HPB listing supplies the two flavour names. Current wrappers and retail availability remain unverified. [Product sources](brand-research.md) |
+| Draws and asset requests | Pass in the paired routes | Phone draw counts excluding NPCs stayed at 43, 43 and 48 at arrival, after settling and at the threshold. Desktop counts were 62, 62 and 69. Both runs requested 217 unique paths across 353 HTTP responses. Population changes affected desktop totals between captures. Physical-phone and comparative frame times remain open. |
+
+On the integrated build, the unofficial-concept notice covered zero yellow logo pixels at all three Map arrivals. At the 390 px doorway it crossed 708 yellow background pixels at the top left of the badge. The black letters and registration mark remained readable. The overhead sign extends past the top edge at the tablet and desktop doorways. This near view is recorded separately from the complete Map view. [390, 768 and 1440 px arrival and doorway frames](map-fascia.webp)

@@ -88,13 +88,13 @@ The CPU probe calls the production `playerCameraFraming` for the default Tripo v
 
 S04 and S16 retain their full official marks beside larger Latin captions. S05 allocates more width to its name, S10 fits two lines using measured ink bounds, and S02 uses more of its fascia height. All 17 Low samples reach 11 CSS px or more.
 
-The active measurements below use the 848 × 96 px fascia cells introduced in `d83aa8768`. Replaying `b808ede90` with the same Canvas version reproduces all 17 original readings from the 861 × 106 px cells. Changing only the cell layout accounts for the one-pixel differences in eight shops. GOGO also received its darker finish in `975e3f3fc`. The S01 Map arrival adjustment changes its Low and full reading from 17 to 13 px. Every current Low reading exceeds the 10 px minimum. [Current Low fascia render](evidence/gjh-v11-signage-low-12m-current.png) · [Archived Low fascia render](evidence/gjh-v11-signage-low-12m.png)
+The active measurements below use the 848 × 96 px fascia cells introduced in `d83aa8768`. Replaying `b808ede90` with the same Canvas version reproduces all 17 original readings from the 861 × 106 px cells. Changing only the cell layout accounts for the one-pixel differences in eight shops. GOGO also received its darker finish in `975e3f3fc`. The S01 Map arrival adjustment changes its Low and full reading from 17 to 13 px. The S03 Map arrival adjustment restores the full GOGO mark beneath the desktop header and changes its Low and full reading from 17 to 16 px. Every current Low reading exceeds the 10 px minimum. [Current Low fascia render](evidence/gjh-v11-signage-low-12m-current.png) · [Archived Low fascia render](evidence/gjh-v11-signage-low-12m.png)
 
 | Store | Glyph | Archived baseline CSS px | Current Low CSS px | Current full atlas CSS px |
 | --- | --- | ---: | ---: | ---: |
 | S01 New Moon | e | 17 | 13 | 13 |
 | S02 MILI | m | 10 | 12 | 12 |
-| S03 GOGO | O | 16 | 17 | 17 |
+| S03 GOGO | O | 16 | 16 | 16 |
 | S04 Borsch Med | o | 6 | 13 | 13 |
 | S05 Pien Tze Huang | e | 8 | 12 | 12 |
 | S06 Flying Wheel | W | 12 | 11 | 12 |
