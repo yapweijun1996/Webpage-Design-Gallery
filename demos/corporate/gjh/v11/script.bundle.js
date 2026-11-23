@@ -3897,6 +3897,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
   const studioLighting = expanded ? STUDIO_LIGHTING : CLASSIC_STUDIO_LIGHTING;
   const classicAccents = [12076857, 13934937, 7973266, 7887464, 9518901, 6715527, 10242359, 4684460, 2707324];
   const interiorWarm = new T.Color(expanded ? 16766640 : 16766368);
+  const shopLightReach = 11;
   const bays = slots.map((slot2, index) => {
     const store = interiorStores["S" + slot2.number], mood = store?.ambient;
     const x = (slot2.minX + slot2.maxX) / 2, z = (slot2.minZ + slot2.maxZ) / 2;
@@ -3922,13 +3923,15 @@ function createMallAtmosphere(T, renderer, scene, slots, {
       environmentIntensity: environmentIntensity * (gogo ? 0.92 : lg ? 0.94 : 1),
       keyGain: gogo ? 0.91 : lg ? 0.81 : newMoon ? 0.92 : 1,
       doorFill: gogo ? 0.9 : lg ? 1.38 : 1,
+      keyReach: gogo ? 8.5 : shopLightReach,
+      doorReach: gogo ? 5.8 : shopLightReach,
       temperature: mood ? kelvinColour(T, mood.kelvin) : interiorWarm,
       colors: [new T.Color, new T.Color]
     };
   });
   const lgSlot = expanded && bays.find((bay) => bay.slot.number === "14")?.slot;
   const lights = Array.from({ length: 2 }, (_, index) => {
-    const light = new T.PointLight(16770497, 0, 11, 2);
+    const light = new T.PointLight(16770497, 0, shopLightReach, 2);
     light.name = `Shop focus accent ${index + 1}`;
     scene.add(light);
     return light;
@@ -4043,6 +4046,8 @@ function createMallAtmosphere(T, renderer, scene, slots, {
         if (focus) {
           lights[0].position.set(...focus.keyPosition);
           lights[1].position.set(...focus.accentPosition);
+          lights[0].distance = focus.keyReach;
+          lights[1].distance = focus.doorReach;
           applyFocusColors();
         }
       }
