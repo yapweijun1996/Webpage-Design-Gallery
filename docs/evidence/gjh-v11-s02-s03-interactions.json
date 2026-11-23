@@ -1,0 +1,258 @@
+{
+  "commit": "22d7c788539bb5737b451533a0b30d78adc2dd87",
+  "browser": "Chrome 158.0.8127.37 / Apple M4 Metal",
+  "movement": "Map entry, collision-checked walking and native interaction. Registered-item checks use individual entrance placements.",
+  "profiles": {
+    "390": {
+      "input": "touch",
+      "tier": "Low",
+      "counts": {
+        "benches": {
+          "S02": [
+            2,
+            2
+          ],
+          "S03": [
+            2,
+            2
+          ]
+        },
+        "fixtures": {
+          "S02": [
+            10,
+            10
+          ],
+          "S03": [
+            10,
+            10
+          ]
+        },
+        "dialogs": {
+          "S02": [
+            2,
+            2
+          ],
+          "S03": [
+            2,
+            2
+          ]
+        }
+      },
+      "runtimeSha256": {
+        "index.html": "dfa29b608504821fa4a65eb7f3a6820af12f7baaa4bff541503aebe87c1b68ae",
+        "assets/world.bundle.js": "b12e5b463f3af74dcf4b62caa20de4a0f3d85833a3079434470b74b0cf6adc68",
+        "assets/player.bundle.js": "00a7644a0978006f86f9fedd9508f31a4414254e779d43931fbda17adcc38f95",
+        "script.bundle.js": "f1622b3528e3c3bf409d3ef269d207ac7cf4df4f47c50cba4b5019f3fa9cb3dd",
+        "style.bundle.css": "646b1ebb66abd200cce23cdc47028278b6ddfdb68823e883f1757fab26fe2568",
+        "assets/startup-assets.pack": "4f4057c7d482c269ee217c0ab07ec7b5f208170d8d0eff967f8bc24294322c8a",
+        "assets/interiors/s03-ice-cream-cart-potong-low.glb": "960a5c465acae790f0275372d0b01d778504f6e7b513f17f3980c669a77e7bc1",
+        "assets/interiors/s03-gogo-details.glb": "69335b2c86908ec8848f6c666a3195df3dc6892acdab397106617fb08cb42682",
+        "assets/interiors/s02-hawker-stall-exhaust-hood-low.glb": "f4f2d421ce4a8140611f2a024c5415c07c3b634fdbc02e9a45f3c717a2c5eda7",
+        "assets/interiors/s02-mili-details.glb": "d96264e886a4e253ed00d0cc01ef6550d76d2353fd7863411e46782d0d1bd630"
+      },
+      "passed": {
+        "benches": [
+          "bench-seat-5",
+          "bench-seat-6",
+          "bench-seat-7",
+          "bench-seat-8"
+        ],
+        "fixtures": [
+          "S02-focal",
+          "S02-cookbase",
+          "S02-boiler",
+          "S02-miliwall",
+          "S02-chop",
+          "S02-plate",
+          "S02-rearLights1",
+          "S02-rearLights2",
+          "S02-plant2",
+          "S02-tasting-plate",
+          "S03-focal",
+          "S03-drink",
+          "S03-gbar",
+          "S03-pend3",
+          "S03-cold",
+          "S03-fern3",
+          "S03-tray3",
+          "S03-stools31",
+          "S03-stools32",
+          "S03-stools33"
+        ],
+        "dialogs": [
+          "mili-sauce-story",
+          "gogo-potong-story",
+          "mili",
+          "gogo"
+        ]
+      },
+      "npcContention": [
+        {
+          "slot": "S03",
+          "id": "bench-seat-7",
+          "atMap": [],
+          "immediatelyBefore": [],
+          "whenSeated": [],
+          "afterStand": [],
+          "releasedOnSit": false
+        },
+        {
+          "slot": "S03",
+          "id": "bench-seat-8",
+          "atMap": [],
+          "immediatelyBefore": [],
+          "whenSeated": [],
+          "afterStand": [],
+          "releasedOnSit": false
+        }
+      ],
+      "pageErrors": []
+    },
+    "1440": {
+      "input": "keyboard",
+      "tier": "Detailed",
+      "counts": {
+        "benches": {
+          "S02": [
+            2,
+            2
+          ],
+          "S03": [
+            2,
+            2
+          ]
+        },
+        "fixtures": {
+          "S02": [
+            10,
+            10
+          ],
+          "S03": [
+            10,
+            10
+          ]
+        },
+        "dialogs": {
+          "S02": [
+            2,
+            2
+          ],
+          "S03": [
+            2,
+            2
+          ]
+        }
+      },
+      "runtimeSha256": {
+        "index.html": "dfa29b608504821fa4a65eb7f3a6820af12f7baaa4bff541503aebe87c1b68ae",
+        "assets/world.bundle.js": "b12e5b463f3af74dcf4b62caa20de4a0f3d85833a3079434470b74b0cf6adc68",
+        "assets/player.bundle.js": "00a7644a0978006f86f9fedd9508f31a4414254e779d43931fbda17adcc38f95",
+        "script.bundle.js": "f1622b3528e3c3bf409d3ef269d207ac7cf4df4f47c50cba4b5019f3fa9cb3dd",
+        "style.bundle.css": "646b1ebb66abd200cce23cdc47028278b6ddfdb68823e883f1757fab26fe2568",
+        "assets/startup-assets.pack": "4f4057c7d482c269ee217c0ab07ec7b5f208170d8d0eff967f8bc24294322c8a",
+        "assets/interiors/s03-ice-cream-cart-potong-balanced.glb": "b06076d106cd6adf4468d786f965cd10aa8624578fe8f04160cb48682896a5bb",
+        "assets/interiors/s03-gogo-details.glb": "69335b2c86908ec8848f6c666a3195df3dc6892acdab397106617fb08cb42682",
+        "assets/interiors/s02-hawker-stall-exhaust-hood-balanced.glb": "90c0986c00c88d8165f6603152b932e784af38c4bd6235057fedc74563f8b28a",
+        "assets/interiors/s02-mili-details.glb": "d96264e886a4e253ed00d0cc01ef6550d76d2353fd7863411e46782d0d1bd630"
+      },
+      "passed": {
+        "benches": [
+          "bench-seat-5",
+          "bench-seat-6",
+          "bench-seat-7",
+          "bench-seat-8"
+        ],
+        "fixtures": [
+          "S02-focal",
+          "S02-cookbase",
+          "S02-boiler",
+          "S02-miliwall",
+          "S02-chop",
+          "S02-plate",
+          "S02-rearLights1",
+          "S02-rearLights2",
+          "S02-plant2",
+          "S02-tasting-plate",
+          "S03-focal",
+          "S03-drink",
+          "S03-gbar",
+          "S03-pend3",
+          "S03-cold",
+          "S03-fern3",
+          "S03-tray3",
+          "S03-stools31",
+          "S03-stools32",
+          "S03-stools33"
+        ],
+        "dialogs": [
+          "mili-sauce-story",
+          "gogo-potong-story",
+          "mili",
+          "gogo"
+        ]
+      },
+      "npcContention": [
+        {
+          "slot": "S02",
+          "id": "bench-seat-5",
+          "atMap": [
+            "bench-seat-5",
+            "bench-seat-6"
+          ],
+          "immediatelyBefore": [
+            "bench-seat-5",
+            "bench-seat-6"
+          ],
+          "whenSeated": [
+            "bench-seat-6"
+          ],
+          "afterStand": [
+            "bench-seat-6"
+          ],
+          "releasedOnSit": true
+        },
+        {
+          "slot": "S02",
+          "id": "bench-seat-6",
+          "atMap": [
+            "bench-seat-6"
+          ],
+          "immediatelyBefore": [
+            "bench-seat-6"
+          ],
+          "whenSeated": [],
+          "afterStand": [],
+          "releasedOnSit": true
+        },
+        {
+          "slot": "S03",
+          "id": "bench-seat-7",
+          "atMap": [],
+          "immediatelyBefore": [],
+          "whenSeated": [],
+          "afterStand": [],
+          "releasedOnSit": false
+        },
+        {
+          "slot": "S03",
+          "id": "bench-seat-8",
+          "atMap": [],
+          "immediatelyBefore": [
+            "bench-seat-5",
+            "bench-seat-6"
+          ],
+          "whenSeated": [
+            "bench-seat-5",
+            "bench-seat-6"
+          ],
+          "afterStand": [
+            "bench-seat-5",
+            "bench-seat-6"
+          ],
+          "releasedOnSit": false
+        }
+      ],
+      "pageErrors": []
+    }
+  }
+}

@@ -60,3 +60,7 @@ The raised lid reveals the two steel baskets under the blue handle. The 390 px t
 All three quality tiers share the 128-triangle model in the existing room file. A browser using the previous room file displays the original chest and keeps the same **View** action. The cart bell, drinks counter, stools and other S03 controls passed the ten-action walkthrough. [Model and source](model-inventory.md) · [Walkthrough](../../verify_interactions.py)
 
 Five independent reviewers checked this fixture. The phone review identified a label across the basket rims. Moving its pointer to the physical top of the lid cleared the projected steel by at least 70 CSS pixels at the normal standing point. The visual recheck passed, as did the mobile budget, source attribution, spatial and lighting checks. The whole-shop concept review remains open.
+
+### Lounge and bar routes
+
+At 390 px with touch and 1440 px with the keyboard, the visitor entered from the Map, followed the centre lane to the cross-aisle at local Z +0.4 m and used both lounge benches. Each circuit ended in the atrium with the door fully closed. All ten registered fixtures worked, including the three bar stools. Both the potong Story and the separate rear brand artwork opened. The keyboard route used F to sit and Escape to stand. The benches were vacant during these GOGO visits. [Seated views](side-bench-routes.webp) · [Action results for revision 22d7c788](../../evidence/gjh-v11-s02-s03-interactions.json)

@@ -776,6 +776,11 @@ function buildRestrooms(T, R, physics, scene, { box, cylinder, collider, sign, m
 }
 
 // demos/corporate/gjh/v11/assets/mili-exhibit.js
+var miliCooklineLabels = [
+  "Left · Oyster Sauce 510 g",
+  "Centre · Vegetarian Oyster Sauce 510 g",
+  "Right · Vegetarian Mock Duck 280 g"
+];
 var miliExhibit = {
   "mili-sauce-story": {
     brand: "MILI",
@@ -10185,25 +10190,28 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
   let restrooms = null;
   let signage, interiorKit;
   function sign(text, x, y, z, width, height = 0.4, framed = false, fontSize = 42) {
+    const lines = Array.isArray(text) ? text : [text];
+    const multiLine = lines.length > 1;
+    const lineHeight = multiLine ? 60 : 128;
     const canvas2 = document.createElement("canvas");
-    canvas2.width = 1024;
-    canvas2.height = 128;
+    canvas2.width = multiLine ? 704 : 1024;
+    canvas2.height = lineHeight * lines.length;
     const context = canvas2.getContext("2d");
     if (framed) {
       context.fillStyle = "#17372e";
-      context.fillRect(0, 0, 1024, 128);
+      context.fillRect(0, 0, canvas2.width, canvas2.height);
       context.strokeStyle = "#b59b62";
       context.lineWidth = 3;
-      context.strokeRect(8, 8, 1008, 112);
+      context.strokeRect(8, 8, canvas2.width - 16, canvas2.height - 16);
     }
     context.fillStyle = "#e9d6a9";
     context.font = `500 ${fontSize}px Georgia`;
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(text, 512, 64);
+    lines.forEach((line, i) => context.fillText(line, canvas2.width / 2, (i + 0.5) * lineHeight));
     const texture = setupArtworkTexture(T, new T.CanvasTexture(canvas2), artworkTier());
     const mesh = placeDecal(new T.Mesh(plane, decalMaterial(new T.MeshBasicMaterial({ map: texture, transparent: true }))));
-    mesh.name = text;
+    mesh.name = lines.join(" / ");
     mesh.position.set(x, y, decalHeight(z));
     mesh.scale.set(width, height, 1);
     scene.add(mesh);
@@ -10874,7 +10882,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         const [fixtureX, , fixtureZ] = cookbase.xyz;
         const [standingX, standingZ] = cookbase.standing;
         const counterX = originX + fixtureX, counterZ = originZ + fixtureZ;
-        sign("COMPARE THE TWO MILI SAUCES", counterX, 0.91, counterZ + 1.307, 1.5, 0.14, true, 60);
+        sign(miliCooklineLabels, counterX, 0.91, counterZ + 1.307, 0.55, 0.15, true, 36);
         interactables.push({ id: "mili-sauce-story", x: originX + standingX, z: originZ + standingZ, radius: 1.12 });
         box("jadeAlt", x, 0.57, -5.5, 1.7, 1.12, 2.55);
         box("brass", x, 0.095, -5.5, 1.72, 0.15, 2.57);

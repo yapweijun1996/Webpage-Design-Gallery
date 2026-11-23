@@ -660,6 +660,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   let nearby = null;
   let interactionRegistry = null, selectedInteraction = null, tramHud = null;
   let returnFocus = null, productInspectListener = null;
+  let brandArtworkDescription = null;
   let teleportListener = null;
   let viewListener = null;
   document.addEventListener('keydown',event=>{
@@ -689,7 +690,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       image: card.dataset.brandImage,
       alt: `Official ${card.dataset.brandName} brand cover artwork`,
       kind: 'Brand artwork',
-      description: `Original official ${card.dataset.brandName} brand cover artwork. No verified ${card.dataset.brandName} product packshots are available for this concept; no ${card.dataset.brandName} products are depicted or listed.`,
+      artworkDescription: card.querySelector('[data-brand-description]'),
     });
   }
 
@@ -710,7 +711,10 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       state.message || (state.auto ? formatAutomaticMallTheme(state.auto,state.saved) : `${state.label} is active.`);
     if (themeStatus.textContent!==text) themeStatus.textContent=text;
   }
-  window.addEventListener('mall:languagechange',()=>updateMallTheme());
+  window.addEventListener('mall:languagechange', () => {
+    updateMallTheme();
+    if (dialog.open && brandArtworkDescription) productDescription.textContent = brandArtworkDescription.textContent;
+  });
   function openMallTheme(event) {
     if (themeDialog.open || document.querySelector('dialog[open]:not(#keyboard-help)') || (showing3D && !canUsePanels())) return;
     themeOpener=event.currentTarget;menu.close({focus: false});shelfFocus?.close({focus:false});
@@ -797,6 +801,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     shelfFocus?.close();
     productShop.href = record.source || defaultShop.href;
     productShop.textContent = record.sourceLabel || defaultShop.label;
+    brandArtworkDescription = record.artworkDescription;
     if(record.action==='brand-story'){
       returnFocus=document.activeElement;
       productTitle.textContent=`${record.brand} · ${record.tagline}`;
@@ -809,7 +814,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     productImage.src = record.image;
     productImage.alt = record.alt;
     productKind.textContent = record.kind;
-    productDescription.textContent = record.description;
+    productDescription.textContent = brandArtworkDescription?.textContent ?? record.description;
     bag.select(id);
     returnFocus = document.activeElement;
     dialog.showModal();

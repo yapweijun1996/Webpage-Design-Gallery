@@ -1,3 +1,10 @@
+// Exhibit order as seen from the cookline's standing point, facing the hood.
+export const miliCooklineLabels = [
+  'Left · Oyster Sauce 510 g',
+  'Centre · Vegetarian Oyster Sauce 510 g',
+  'Right · Vegetarian Mock Duck 280 g'
+];
+
 export const miliExhibit = {
   'mili-sauce-story': {
     brand:'MILI', tagline:'Two sauces at the cookline', kind:'Pantry exhibit',

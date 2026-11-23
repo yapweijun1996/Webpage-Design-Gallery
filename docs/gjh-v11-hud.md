@@ -8,6 +8,10 @@ The HUD uses the existing GJH deep green, brass and cream tokens with SVGs from 
 
 Chrome covered 320, 390, 667, 768 and 1440 CSS px, with real pickup and return at the two narrowest widths. At 390 px the observed touch targets measured 44 × 44 px for More, 56 × 56 for Inspect, 95 × 56 for Pickup, 46 × 44 for Drop, 104 × 44 for Bag and 117 × 44 for Return. All six centers were reachable and clear of the caption. [Roaming and held-product views](evidence/gjh-v11-roaming-disclosure.webp)
 
+## Identifying a held product on a narrow phone
+
+In narrow portrait view, the status gives the product its own line above Drop, Add to bag and Return. Chrome compared the same held Australia Abalone 425g in English, Simplified Chinese and Malay with the shelf, expanded Objectives and open aisle. The full name was visible in all nine cases at 320 CSS px and all nine at 390 px. Previously it was fully visible in two and five cases respectively. At 320 px, the instructions after the name may still truncate. All three actions remained at least 44 px high and reachable. [320 px comparison](evidence/gjh-v11-held-product-320.webp) · [390 px comparison](evidence/gjh-v11-held-product-390.webp)
+
 ## Layout and interaction
 
 In the classic mall below 600 CSS px, a projected room plaque clears the Tools button by at least 8 CSS px. The plaque hides while it crosses that boundary and returns as the visitor walks back into the arcade. In a 390 × 844 Chrome viewport, the header ended at y=48 and the separate Tools target extended from y=60 to 104. The New Moon, MILI and GOGO plaques previously reached y=93, 90 and 83 at their respective entrances. [New Moon before](evidence/gjh-classic-room-plaque/newmoon-before.png) · [New Moon after](evidence/gjh-classic-room-plaque/newmoon-after.png)

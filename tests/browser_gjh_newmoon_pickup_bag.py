@@ -79,6 +79,24 @@ def wait_for_product(page, product_id):
     return pose(page)["held"]
 
 
+def wait_for_visible_held_name(page, name):
+    # The full status remains accessible even when the painted name is clipped.
+    page.wait_for_function("""name => {
+      const status = document.getElementById('held-product-status');
+      const text = status?.firstChild;
+      const start = text?.textContent.indexOf(name) ?? -1;
+      if (start < 0) return false;
+      const range = document.createRange();
+      range.setStart(text, start);
+      range.setEnd(text, start + name.length);
+      const box = status.getBoundingClientRect();
+      const lines = Array.from(range.getClientRects());
+      return lines.length > 0 && lines.every(line => line.width > 0 &&
+        line.left >= box.left - 1 && line.right <= box.right + 1 &&
+        line.top >= box.top - 1 && line.bottom <= box.bottom + 1);
+    }""", arg=name)
+
+
 def empty_hands(page):
     page.wait_for_function("() => __mall.state.character.physicalProduct?.phase === 'empty'")
 
@@ -191,6 +209,8 @@ def exercise(page, touch, out, width):
         bag_count(page, sum(expected.values()))
 
         held = pickup(page, product_id, touch)
+        if touch:
+            wait_for_visible_held_name(page, f"{country} Abalone {weight}")
         capture(page, out, f"{width}-{sku}-held")
         if sku == "nz-425g":
             click(page, "#held-product-return", touch)

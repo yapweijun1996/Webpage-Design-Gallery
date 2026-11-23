@@ -3,7 +3,7 @@ import {instancedSurfaceMaterial} from './opaque-batch.js';
 import {registerPhysicsProps} from './physics-props.js';
 import {addTramDebug} from './tram-layout.js';
 import {buildRestrooms} from './restrooms.js';
-import {miliExhibit} from './mili-exhibit.js';
+import {miliCooklineLabels, miliExhibit} from './mili-exhibit.js';
 import {gogoExhibit} from './gogo-exhibit.js';
 import {borschExhibit} from './borsch-exhibit.js';
 import {pzhExhibit} from './pzh-exhibit.js';
@@ -346,16 +346,22 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   let restrooms = null;
   let signage, interiorKit;
   function sign(text, x, y, z, width, height = .4, framed = false, fontSize = 42) {
-    const canvas = document.createElement('canvas'); canvas.width = 1024; canvas.height = 128;
+    const lines = Array.isArray(text) ? text : [text];
+    const multiLine = lines.length > 1;
+    const lineHeight = multiLine ? 60 : 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = multiLine ? 704 : 1024;
+    canvas.height = lineHeight * lines.length;
     const context = canvas.getContext('2d');
     if (framed) {
-      context.fillStyle = '#17372e'; context.fillRect(0, 0, 1024, 128);
-      context.strokeStyle = '#b59b62'; context.lineWidth = 3; context.strokeRect(8, 8, 1008, 112);
+      context.fillStyle = '#17372e'; context.fillRect(0, 0, canvas.width, canvas.height);
+      context.strokeStyle = '#b59b62'; context.lineWidth = 3; context.strokeRect(8, 8, canvas.width-16, canvas.height-16);
     }
-    context.fillStyle = '#e9d6a9'; context.font = `500 ${fontSize}px Georgia`; context.textAlign = 'center'; context.textBaseline = 'middle'; context.fillText(text, 512, 64);
+    context.fillStyle = '#e9d6a9'; context.font = `500 ${fontSize}px Georgia`; context.textAlign = 'center'; context.textBaseline = 'middle';
+    lines.forEach((line, i) => context.fillText(line, canvas.width / 2, (i + .5) * lineHeight));
     const texture = setupArtworkTexture(T,new T.CanvasTexture(canvas),artworkTier());
     const mesh = placeDecal(new T.Mesh(plane, decalMaterial(new T.MeshBasicMaterial({map:texture,transparent:true}))));
-    mesh.name = text;
+    mesh.name = lines.join(' / ');
     mesh.position.set(x, y, decalHeight(z)); mesh.scale.set(width, height, 1); scene.add(mesh);
     mesh.userData.shopDecal = true;
     if (activeShopSlot !== null) queueShopUpload(activeShopSlot, mesh);
@@ -957,7 +963,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         const [fixtureX, , fixtureZ] = cookbase.xyz;
         const [standingX, standingZ] = cookbase.standing;
         const counterX = originX + fixtureX, counterZ = originZ + fixtureZ;
-        sign('COMPARE THE TWO MILI SAUCES', counterX, .91, counterZ+1.307, 1.50, .14, true, 60);
+        sign(miliCooklineLabels, counterX, .91, counterZ+1.307, .55, .15, true, 36);
         interactables.push({id:'mili-sauce-story',x:originX+standingX,z:originZ+standingZ,radius:1.12});
         box('jadeAlt',x,.57,-5.5,1.7,1.12,2.55);
         box('brass',x,.095,-5.5,1.72,.15,2.57);

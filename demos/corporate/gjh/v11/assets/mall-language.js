@@ -261,8 +261,6 @@ const messages = new Map([
   ["Unofficial demo: 3D cans use photo-derived labels, with estimated dimensions, panel order and spacing. Mexico includes a 121-degree unprinted placeholder sector. These are not verified packaging replicas or brand-approved editions. Product images remain associated with official eShop listings.", "非官方演示。罐身标签取自照片，尺寸、版面顺序和间距为估算。墨西哥款有 121 度未印刷的占位区域。这些模型并非经核实或品牌认可的包装复制品。商品图片对应官方网店条目。", "Demo tidak rasmi. Label tin 3D berdasarkan foto, dengan saiz, susunan dan jarak panel dianggarkan. Versi Mexico mempunyai sektor kosong 121 darjah. Model ini bukan replika pembungkusan yang disahkan atau diluluskan oleh jenama. Imej produk merujuk kepada penyenaraian kedai rasmi."],
   ["AI-generated mood imagery. Not official product photography.", "AI 生成的概念插画，并非官方商品照片。", "Ilustrasi suasana janaan AI, bukan foto produk rasmi."],
   ["AI-generated concept imagery for inspiration. These are not photographs of the 3D mall, real stores or products.", "AI 生成的灵感插画，并非 3D 商场、真实店铺或商品照片。", "Ilustrasi konsep janaan AI untuk inspirasi. Ini bukan foto pusat beli-belah 3D, kedai sebenar atau produk."],
-  ["Explore the brand and view its original official cover artwork. No verified MILI product packshots are available for this concept; no MILI products are depicted or listed.", "了解 MILI 并查看官方封面图。此概念未获得经核实的 MILI 商品图片，因此不展示或列出其商品。", "Kenali MILI dan lihat karya muka depan rasmi. Tiada imej bungkusan MILI yang disahkan untuk konsep ini. Produk MILI tidak dipaparkan atau disenaraikan."],
-  ["Explore the brand and view its original official cover artwork. No verified GOGO product packshots are available for this concept; no GOGO products are depicted or listed.", "了解 GOGO 并查看官方封面图。此概念未获得经核实的 GOGO 商品图片，因此不展示或列出其商品。", "Kenali GOGO dan lihat karya muka depan rasmi. Tiada imej bungkusan GOGO yang disahkan untuk konsep ini. Produk GOGO tidak dipaparkan atau disenaraikan."],
   ["This separate viewer is an original generic food-tin demonstration. It is not New Moon packaging, a New Moon SKU, or an official product representation.", "此查看器展示原创食品罐演示模型，不代表 New Moon 包装、商品或官方产品。", "Pemapar berasingan ini menunjukkan tin makanan generik asal. Ia bukan bungkusan New Moon, SKU New Moon atau gambaran produk rasmi."],
   ["Find store information at the service desk or ceiling signs, and discover the New Moon showcase. The complete product list above remains available without 3D.", "在服务台或吊挂标牌上查看商店信息，并探索 New Moon 展柜。上方完整商品列表也可在 3D 模式外使用。", "Cari maklumat kedai di kaunter atau papan tanda gantung dan terokai pameran New Moon. Senarai produk di atas boleh digunakan tanpa 3D."],
   ["Try collecting products. No payment, order or stock reservation. Kept for this browser tab only. In 3D, a generic carried bag shows that you have items; collection is a simplified gesture, not physical grabbing. Optional cart uses a fixed pushing pose and a generic contents marker, not exact products or simulated wheels.", "试着收集商品。不会付款、下单或预留库存。内容仅保存在当前标签页。角色手中的通用购物袋表示已有物品。收集为简化动作；购物车使用固定推车姿势和内容标记。", "Cuba kumpulkan produk. Tiada bayaran, pesanan atau tempahan stok. Pilihan disimpan dalam tab ini. Beg biasa pada pengunjung menandakan terdapat item. Gerakan mengambil dan menolak troli disimulasikan secara ringkas."],
@@ -590,6 +588,18 @@ const patterns = [
   [/^(\d+) New Moon products? shown\. Check the official eShop for current price and availability\.$/, '显示 $1 件 New Moon 商品。价格和库存以官方网店为准。','$1 produk New Moon dipaparkan. Semak harga dan stok di kedai rasmi.'],
 ];
 
+// The directory paragraphs contain the English source for both artwork surfaces.
+const brandDescriptionCopy = {
+  mili: {
+    'zh-Hans': '查看 MILI 官方品牌封面图。虚拟料理台展示 MILI 蚝油（510 克）、素食蚝油（510 克）和素鸭（280 克）的无印刷包装模型。',
+    ms: 'Lihat ilustrasi kulit hadapan rasmi jenama MILI. Kaunter masakan maya mempamerkan model tanpa cetakan label bagi Sos Tiram MILI (510 g), Sos Tiram Vegetarian (510 g) dan Itik Tiruan Vegetarian (280 g).',
+  },
+  gogo: {
+    'zh-Hans': '查看 GOGO 官方饮料封面图。虚拟冰淇淋车展示无包装的 potong 冰淇淋模型，呈现新加坡保健促进局于 2016 年记录的什锦水果和红豆口味。',
+    ms: 'Lihat ilustrasi kulit hadapan rasmi untuk minuman GOGO. Di gerai maya, model ais krim potong tanpa pembalut mewakili perisa Aneka Buah Asli dan Kacang Merah yang direkodkan oleh Lembaga Penggalakan Kesihatan Singapura pada tahun 2016.',
+  },
+};
+
 const attributes = ['aria-label','title','placeholder','alt'];
 const originals = new WeakMap();
 let language = 'en';
@@ -611,7 +621,8 @@ function render(node, attribute) {
   let values = originals.get(node);
   const previous = values?.get(attribute);
   const source = previous?.output === current ? previous.source : current;
-  const output = translate(source);
+  const brand = !attribute && node.parentElement?.dataset.brandDescription;
+  const output = brandDescriptionCopy[brand]?.[language] ?? translate(source);
   if (output === current && !previous) return;
   if (!values) { values = new Map(); originals.set(node, values); }
   values.set(attribute, {source, output});

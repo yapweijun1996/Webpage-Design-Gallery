@@ -1182,8 +1182,23 @@ body.is-3d :is(.site-header,.mall-overlay) .hud-control:focus-visible{
     }
   }
 }
-/* Keep the first-person grip clear. Stack the held action after the visible readouts. */
 @media(max-width:650px) and (orientation:portrait){
+  /* Reserve the full row for the held item name above the touch actions. */
+  body.is-3d .mall-overlay #hud-context[data-context="held"]{
+    flex-direction:column;align-items:flex-start;gap:var(--space-2);
+  }
+  body.is-3d .mall-overlay #hud-context[data-context="held"] .inspect-prompt{
+    justify-content:flex-start;column-gap:var(--space-1);
+  }
+  @media(max-width:375px){
+    body.is-3d .mall-overlay #hud-context[data-context="held"]{
+      gap:var(--space-1);padding:var(--space-2);
+    }
+    body.is-3d .mall-overlay #hud-context[data-context="held"] .held-product-status{
+      -webkit-line-clamp:1;
+    }
+  }
+  /* Keep the first-person grip clear by placing the held HUD after the readouts. */
   body.is-3d #scene[data-camera-view="first-person"] + .mall-overlay:has(#hud-context[data-context="held"]:not([hidden])){
     display:flex;flex-direction:column;
   }

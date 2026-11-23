@@ -99,6 +99,55 @@ from 0.991× to 1.060×. Draw counts matched at all four poses (38, 42, 51,
 missed the 2× near target and was held. Its 2K WebP SHA-256 was
 `3953298d09029bb20b48d7ad80ecc4a06cf4a68554c005bb8a8e5d3b64511937`.
 
+### Painted eye and brow roughness
+
+The player shader estimates hair roughness from dark head texels. Projecting
+the bake's authored-surface labels into the fixed 2.5 m view assigned a
+hair-roughness weight greater than 0.5 to 195 of 7,087 visible facial-skin
+pixels. The eye boxes contained 172 and the brow boxes contained 23. The median projected footprint along the
+weaker axis was 2.93 atlas texels per screen pixel. About 1.2% exceeded the
+existing 4× anisotropy ratio. The projection is a sampling estimate.
+
+The trial used the shipped 2K artwork and rig and changed only the roughness
+of painted ink on owned skin. Load the [grayscale UV mask](c1-skin-roughness-mask.png)
+as its 1024 × 1024 row-major unsigned 8-bit values in a `RedFormat` data
+texture. Use `flipY=false`, `NoColorSpace`, generated mipmaps and the atlas's
+linear/trilinear filters and 4× anisotropy. Within the existing `shadeAvatar`
+fragment shader, bind the data texture as `uniform sampler2D faceOwnership`
+and replace the final roughness mix
+with the following code. Keep the existing `hair` and `skin` terms.
+
+```glsl
+float authoredSkin = texture2D(faceOwnership, vMapUv).r;
+float inkOnSkin = hair * authoredSkin;
+roughnessFactor = mix(mix(roughnessFactor, 0.62, max(skin, inkOnSkin)),
+                      0.43, hair * (1.0 - authoredSkin));
+```
+
+Headed Chrome `158.0.8127.37` replayed the `130f8ea377` Detailed Everyday
+scene at 1920 × 900, DPR 1, using the existing C1 camera, pose and exposure.
+The replay's archived Round 2 and shipped 2K face crops matched the prior
+crops pixel-for-pixel. Both trial distances and the ±40° views retained
+projected framing and reported 41 draws for each stock and trial view.
+
+| Distance | Round 2 variance | Shipped variance | Trial variance | Trial vs. Round 2 |
+| --- | ---: | ---: | ---: | ---: |
+| 2.5 m | 2,655.454754 | 4,010.022772 | 4,011.122174 | 1.510522× |
+| 5.2 m | 6,491.996317 | 6,433.925733 | 6,434.980978 | 0.991218× |
+
+The 2.5 m trial changed 61 of 13,377 native crop pixels. Mean measured skin
+luminance stayed at 0.568694. The fixed close and oblique views showed no
+meaningful visual gain. The trial was held and the 2× target remains open.
+[Matched frontal crops](chrome-skin-roughness-contact.png)
+
+| Evidence | SHA-256 |
+| --- | --- |
+| Archived Round 2 GLB | `c18ad275c1c255e02cd6d0bd5750f796ab9945f982f3ec68487209c6a3b81ff9` |
+| Shared shipped/trial 2K WebP | `4d3e0b01747a69de44d80a4e480b761f19087aa2f82546e3a847b596256e66f4` |
+| Decoded grayscale UV mask | `c643db59ccb0c9c796c22bb98c31bb140cf69fcfa3c459ee4ffb7ae68982a54d` |
+| Shipped native 2.5 m replay PNG | `60722383f3e21ceab3cc19e42a9ce0fcc1cd7a57701df8e31c787baf86540b34` |
+| Trial native 2.5 m PNG | `2279962fbfe8a0c17483a6e1d48d2949bc662bf52f0535f35b30bc4d892f9e50` |
+
 ## Reproduce
 
 Use the guarded Blender invocation in [the signage documentation](../../gjh-v11-signage-assets.md). Supply a Round 2 baseline GLB with the hash recorded in `before.json`.

@@ -42,3 +42,23 @@ Scoring: each item is Pass / Partial / Fail with a named defect. Items marked [P
 - build `--check`, Node tests, unittest, SSOT, full browser suite run by the manager (RC=0), draw calls <= 200.
 - 1440 and 390 screenshots viewed by the manager, side by side with the concept panel.
 - Advisor scores recorded per section A-F; push only when no Fail remains in A1, A3, A4, B1, B2 and C1, or the gap is recorded.
+
+## Current showroom evidence
+
+The later [New Moon showroom brief](goh-joo-hin/01-new-moon/README.md#interior-design) specifies honey oak, cream, blue and a yellow crescent. The original board remains the reference for the route, feature display and entrance sightline.
+
+| Items | Assessment | Observation |
+| --- | --- | --- |
+| A1, A3, A5, A7, A8 | Pass at the sampled viewpoints | The complete official mark is visible at both Map arrivals. Four stocked cabinets face the entrance. The stone tasting island stands to the right, the planter at the left return, and the centre aisle stays clear. The ceiling highlight leaves the stock, crescent and warm timber distinguishable. [Entrance and showroom views](goh-joo-hin/01-new-moon/README.md#storefront-sign-at-the-map-arrival) |
+| A6 | Partial at the straight-on arrival | The planter is present at the left return and visible inside. The front view does not show the tall silhouette seen in the reference. |
+| A2 | Partial | Dark fixed rails remain on the side glazing. The fully open entrance gives an unobstructed central route. [Storefront comparison](goh-joo-hin/01-new-moon/map-arrival-fascia.webp) |
+| A4, D3 | Category and route pass. Product scale remains partial. | First-time image readers could locate the four cabinets. The reader shown the category crown could also read ABALONE from the Map. At that distance the tins remain small and do not reproduce the original large stacked or fanned composition. [Matched phone and desktop views](goh-joo-hin/01-new-moon/README.md#finding-the-abalone-cabinets-from-the-entrance) |
+| B1–B4, D2 | Pass on the two exercised routes | A touch visitor and a keyboard visitor entered through the opening door, inspected and rotated all four products, added them to the bag, used both stools, opened both stories and left through the closing door. The routes exercised 15 shop operations at each width. [Four-product regression](../tests/browser_gjh_newmoon_pickup_bag.py) |
+| C1 | Pass | Arrival and cabinet-aisle draws stayed at 58 and 43 on phone. Desktop scene draws excluding NPCs held at 87 and 64. [Rendering evidence](goh-joo-hin/01-new-moon/README.md#finding-the-abalone-cabinets-from-the-entrance) |
+| C2 | Pass for sampled 390 px controls | The sign clears the movement HUD. More, Inspect, Pickup, Drop, Bag and Return met 44 × 44 CSS px and passed their centre hit tests. [HUD measurements](gjh-v11-hud.md#roaming-disclosure) |
+| C3 | Partial | Before and after the crown change, the test loaded the same 159 phone and 194 desktop request paths. The model grew by 4,992 bytes per tier. Device frame timing requires a separate measurement. |
+| D1 | Pass against the later floor plan | The shop occupies the north lot. The finished room is 10.5 m deep and its clear opening is 4.7 m. [As-built floor plan](goh-joo-hin/01-new-moon/floor-plan.png) |
+| E1–E2 | Pass for the demo | The four stocked origins and official product images have source records. The roaming HUD now shows the unofficial-concept label. Packaging-edition verification remains documented, including the Mexico placeholder sector. [Product sources](goh-joo-hin/01-new-moon/brand-research.md) · [Disclosure](gjh-v11-hud.md#roaming-disclosure) |
+| F1–F2 | Pass in the recorded lighting samples | Low and Detailed preserve the distinction between the cabinet crown, yellow crescent and lit shelf edges in Everyday. The earlier Low and Balanced measurements also cover Christmas. [Store lighting review](goh-joo-hin/01-new-moon/README.md#finding-the-abalone-cabinets-from-the-entrance) |
+
+Five independent advisers reviewed the whole shop across visual design, mobile use, brand, spatial flow and lighting. The visual review rates the shop Partial. The side framing, prominence of the entrance planter and scale of the tins account for that score. The shop has separate five-adviser reviews for the country labels, the fascia and the category crown. These observations cover native desktop Chrome and touch-emulated Chrome. Physical phone acceptance remains open.
