@@ -19,7 +19,7 @@
     "demos/corporate/gjh/v11/assets/district-gateway.js": "1488196ff8419ec0d24f4381a5e314e722bae6da6b7ebfbf5e9d6849de3876e4",
     "demos/corporate/gjh/v11/assets/doorway-occupancy.js": "0145807206349de640608a83dcfff685b21f941dda655201a83b0e0ca219cf84",
     "demos/corporate/gjh/v11/assets/elevator-ride.js": "a3e9228f547fd1c4b4c3605ca32c1cc65454233c22dde919c097a60075975565",
-    "demos/corporate/gjh/v11/assets/expanded-interiors.js": "a8e1c127b8abbb0d0fa9b8821b3612f98d0015a19860905b7f4a9f6afc763314",
+    "demos/corporate/gjh/v11/assets/expanded-interiors.js": "3e09707c2b919933f13de0a33b86dc3a690ec1b32f0a3ee5d2aae54d172846ce",
     "demos/corporate/gjh/v11/assets/expanded-layout.js": "4923c7a6f9c0c74a73c24e25bddefcb5b27188d84351b3061fe01fae4875dc29",
     "demos/corporate/gjh/v11/assets/expanded-storefronts.js": "5172e538ac3b26fbfb153419a8059f7b5362d21e311c87ff3811c7dec92bd8d0",
     "demos/corporate/gjh/v11/assets/feature-kiosk.js": "63111aee89799aec9b897111aed1b4c49e88ee21125a8a910d55de06aa818106",
@@ -27,7 +27,7 @@
     "demos/corporate/gjh/v11/assets/frame-trace.js": "7b34d7d53fcb7a87ed023acda9788a5b91d98219943a3b435cdeced18cd85ae0",
     "demos/corporate/gjh/v11/assets/furnishings.js": "9fe565d9d472a133f07c3cb999c02ef8967f7761747c849d1326b83389232d10",
     "demos/corporate/gjh/v11/assets/gallery-east-shops.js": "c44b9724c11cc0f145f01a3d4d439dbc4e5f7e9c38411f4881a8ca87d38e0f65",
-    "demos/corporate/gjh/v11/assets/gallery-west-shops.js": "bc3b71cd3b49b4c13318a30fe3ac873b3364cb4dd30edc645dd0f36f3ffea2b6",
+    "demos/corporate/gjh/v11/assets/gallery-west-shops.js": "089e7a006da9692de761e301fd18e3f160003435b75f0eb367d2ca437cfd778c",
     "demos/corporate/gjh/v11/assets/gltf-warmup.js": "30a02330ddaa68665c2e6ab42ff93c4cfb028b455be8f3dff4f67a9197e2c835",
     "demos/corporate/gjh/v11/assets/gogo-exhibit.js": "d475adc9709ff58041efced8886e4f54689fa43e8054c1850c523bea2b96de51",
     "demos/corporate/gjh/v11/assets/graphics-quality.js": "9c9ec671ffdf8a42335d06028ef9895e767de04570933f61e2c25ffb84098477",
@@ -123,7 +123,7 @@
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "3c321a7471e4b8838a58361769b3bf697b4b1d076106a9450b06a3321c57c2a3",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "e7abf19c51be4b530c653ab6597fa04c5c00de81c846cf39d242c27156f874ac",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "7a1d92b82b8f20e5cc8eeab45a8604a17d23a995336be9abe87842a8628ac77f",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "a232c2c71d99e5e2dbaa42610c47a51c15ff68e4749005d0273798e5900ea440",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "b1636607a5047d76bd9d02e2b29b09b8c4f0a3106eced67046ffa9fce8639f1f"
   }

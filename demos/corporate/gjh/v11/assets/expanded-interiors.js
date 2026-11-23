@@ -24,7 +24,7 @@ const galleryPlacements = {...westShopPlacements, ...eastShopPlacements};
 // creation, so late-loading furnishings cannot appear around a visitor.
 const floorModelSize = {
   'medicine-health-box-set':[.60,1.70,.35], 'instant-noodle-pack-display':[.80,1.80,.40],
-  'stacked-can-pyramid':[1.20,1.80,1.20], 'peanut-butter-jar-stand':[.80,1.02,.50],
+  'gulong-window-stock':[1.20,.68,1.20], 'peanut-butter-jar-stand':[.80,1.02,.50],
   'shelf-food-aisle':[1.20,1.80,.50], 'food-display-cabinet':[1.25,1.29,.70],
   'headphone-display-stand':[.60,1.40,.40], 'refrigerator':[.63,1.88,.76],
   'grand-piano':[1.50,1.82,2.35], 'shelf-electronics-display':[1.20,1.80,.45],

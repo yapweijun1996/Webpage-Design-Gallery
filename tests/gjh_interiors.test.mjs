@@ -908,9 +908,13 @@ test('studio substitution retains the exact authored collision boxes', async t =
   assert.equal(cabinet.y, .5625);
   assert.equal(cabinet.height, .963);
   assert(Math.abs(cabinet.width - .489) < 1e-8);
+  const windowStock = footprints.find(box => Math.abs(box.x + 17.35) < 1e-8 && Math.abs(box.z - 13.56) < 1e-8);
+  assert(windowStock, 'S07 window stock keeps its floor footprint');
+  assert.equal(windowStock.height, .68 * .88);
+  assert.equal(windowStock.y, .081 + windowStock.height / 2);
   assert.equal(footprints.length,188);
   assert.equal(sha(JSON.stringify(footprints.filter(box => box !== cabinet))),
-    '320ca9b5beda1050df16f1a7b8ff868892b694d85eddd7a3980e5697cd1b5322');
+    '4f122b73198712e684ffc64ba03d50b653f93766cd85119d02f17bfa2600ba23');
 });
 
 

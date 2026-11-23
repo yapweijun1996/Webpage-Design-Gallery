@@ -1,0 +1,506 @@
+{
+  "store": "S07 Gu Long",
+  "scope": "Two-course left-window stock, gallery owner project, 2026-11-24.",
+  "pairedBrowserBuilds": {
+    "before": {
+      "commit": "96d53b00def0a3f76b35942d59342d1b00a1d60d",
+      "build": "2ec7b68e307bbce6",
+      "requestedWindowAsset": "assets/gallery-assets/stacked-can-pyramid.glb",
+      "windowAssetSha256": "cf8cf126e0a0783f4ee9ac585b306caa6714c6dafc6a3dfbbaff117d3d494527",
+      "windowAssetBytes": 418872,
+      "windowAssetTriangles": 17896,
+      "mountedWindowTopM": 1.665
+    },
+    "after": {
+      "commit": "025e2aed48285cbf2ebbf2a6bd4f0c249e5a77e3",
+      "build": "b80cd22c2a35ace8",
+      "requestedWindowAsset": "assets/gallery-assets/gulong-window-stock.glb",
+      "windowAssetSha256": "0af7314ebf17db380e5e2fea4eae9fc0daede459cbe755da74544394b768df75",
+      "windowAssetBytes": 282628,
+      "windowAssetTriangles": 12016,
+      "mountedWindowTopM": 0.6794
+    }
+  },
+  "fixtureSourcePatchSha256": "095b875ca42edb1038edd7ef050bb2596fbf80f238a915bb2b6f896ad7aaa7a4",
+  "integratedSourceComparison": {
+    "commit": "d653cf1b1a6c49a7ac3e66679a6d75f1773eb078",
+    "build": "b18e06b75f45e37c",
+    "pairedCandidateBuild": "b80cd22c2a35ace8",
+    "matchingSourceSha256": {
+      "assets/world.bundle.js": "7a1d92b82b8f20e5cc8eeab45a8604a17d23a995336be9abe87842a8628ac77f",
+      "assets/expanded-interiors.js": "3e09707c2b919933f13de0a33b86dc3a690ec1b32f0a3ee5d2aae54d172846ce",
+      "assets/gallery-west-shops.js": "089e7a006da9692de761e301fd18e3f160003435b75f0eb367d2ca437cfd778c",
+      "assets/gallery-assets/gulong-window-stock.glb": "0af7314ebf17db380e5e2fea4eae9fc0daede459cbe755da74544394b768df75",
+      "assets/interiors/s07-stacked-can-pyramid-low.glb": "165cbd958a7a722b958e52c8ee8048adeb2fee4ecd72b1037e2979840b21339d",
+      "assets/interiors/s07-stacked-can-pyramid-balanced.glb": "1ea97d0e7a47ec64d282999d15d5d2f230a4b8e1537cf2baace56767461b97f5",
+      "assets/interiors/s07-dragon-details.glb": "d18e284965ce043fa438a547e4aef9b842dba1aa7666117a1c25ef99011e2d57",
+      "assets/shop-catalogue-exhibits.js": "4c63f4fd41443007c4730e38352f75685a23619a7f658cd80198734b14cd5631",
+      "assets/brand-kit/brand-kit.json": "91a82968169940d0079c62747e06aa7508d6ff11a11bdbe457705bde576d8e44",
+      "index.html": "94cca84f14b639237aad39679833ecac9c962b1fa8b0f742c2fa1fdff8bf99a0",
+      "style.bundle.css": "157ff3321f26b906c14e82f754708504c8455b136e9dd0b1823a3aebd37a6e30"
+    }
+  },
+  "capture": {
+    "browser": "158.0.8127.37",
+    "renderer": "Chrome on macOS, Apple M4 using Metal",
+    "input": "Ordinary Map arrival, touch joystick at 390/768 or W at 1440. Close-up poses used capsule steering. NPCs were disabled.",
+    "preciseRouteStops": [
+      "map",
+      "threshold",
+      "inside",
+      "near",
+      "shelf",
+      "exit"
+    ],
+    "ownerMask": "Frozen normal and single-owner-hidden renders. Count pixels with maximum absolute RGB-channel difference > 12 inside the clipped projected bounding rectangle.",
+    "boardLayout": "Rows are before and after. Columns show Map arrival, doorway, central display, provision shelf and exit. Full viewport framing is preserved."
+  },
+  "profiles": [
+    {
+      "viewportCssPx": [
+        390,
+        844
+      ],
+      "tier": "Low",
+      "board": "window-stock-390.webp",
+      "boardSha256": "0f9d594eccb4cc3a759e92d3a65a119f9d6aa2f8c088412eec8ab9e0512f24f1",
+      "threshold": {
+        "projectedWindowHeightCssPx": {
+          "before": 91,
+          "after": 49
+        },
+        "visibleWindowPixels": {
+          "before": 2566,
+          "after": 1805
+        },
+        "visibleCentralPixels": {
+          "before": 3006,
+          "after": 3046
+        },
+        "drawCalls": {
+          "before": 37,
+          "after": 37
+        },
+        "sceneTriangles": {
+          "before": 65363,
+          "after": 59449
+        },
+        "windowInFrontOfCentralRays": {
+          "before": 0,
+          "after": 0
+        }
+      },
+      "pairedCameraPositionDifferenceMetres": {
+        "map": 0.0003,
+        "threshold": 0.043,
+        "inside": 0.0082,
+        "near": 0.0007,
+        "shelf": 0.0002,
+        "exit": 0.0005
+      },
+      "cases": {
+        "before": {
+          "fullReceiptSha256": "018f42886aeb779f5ce8d04968f30bc343536b842099199fa290ad20ee49796f",
+          "benchmarkedRenderBufferPx": [
+            390,
+            796
+          ],
+          "maxDrawCallsAcrossSixStops": 63,
+          "thresholdAppFrameP50Ms": 33.3,
+          "thresholdAppFrameP95Ms": 34.5,
+          "passedRoute": true
+        },
+        "after": {
+          "fullReceiptSha256": "3cf90ca6bc4edd68a8fcc423fec81f7ac4397c3a5c10c85c7c46f688c1dbe91d",
+          "benchmarkedRenderBufferPx": [
+            390,
+            796
+          ],
+          "maxDrawCallsAcrossSixStops": 61,
+          "thresholdAppFrameP50Ms": 33.3,
+          "thresholdAppFrameP95Ms": 34.8,
+          "passedRoute": true
+        }
+      }
+    },
+    {
+      "viewportCssPx": [
+        768,
+        1024
+      ],
+      "tier": "Balanced",
+      "board": "window-stock-768.webp",
+      "boardSha256": "32171b900b1834d3300603750adf06872e325cbda02e82ccd0663d328a1553de",
+      "threshold": {
+        "projectedWindowHeightCssPx": {
+          "before": 204,
+          "after": 109
+        },
+        "visibleWindowPixels": {
+          "before": 12873,
+          "after": 8939
+        },
+        "visibleCentralPixels": {
+          "before": 15900,
+          "after": 15853
+        },
+        "drawCalls": {
+          "before": 40,
+          "after": 40
+        },
+        "sceneTriangles": {
+          "before": 68789,
+          "after": 62909
+        },
+        "windowInFrontOfCentralRays": {
+          "before": 0,
+          "after": 0
+        }
+      },
+      "pairedCameraPositionDifferenceMetres": {
+        "map": 0.0001,
+        "threshold": 0.0182,
+        "inside": 0.0037,
+        "near": 0.0018,
+        "shelf": 0.0009,
+        "exit": 0.0013
+      },
+      "cases": {
+        "before": {
+          "fullReceiptSha256": "25a210ef7636bdd77bb491508f62917d0df36ce4e75e8ec9fc93522aef9957bb",
+          "benchmarkedRenderBufferPx": [
+            960,
+            1220
+          ],
+          "maxDrawCallsAcrossSixStops": 62,
+          "thresholdAppFrameP50Ms": 16.7,
+          "thresholdAppFrameP95Ms": 18.3,
+          "passedRoute": true
+        },
+        "after": {
+          "fullReceiptSha256": "c8c02b4576265898e7c67e80f6a9efa6a5ecc4722ee2db28a951ddf4cfcf985a",
+          "benchmarkedRenderBufferPx": [
+            960,
+            1220
+          ],
+          "maxDrawCallsAcrossSixStops": 62,
+          "thresholdAppFrameP50Ms": 16.7,
+          "thresholdAppFrameP95Ms": 18.6,
+          "passedRoute": true
+        }
+      }
+    },
+    {
+      "viewportCssPx": [
+        1440,
+        900
+      ],
+      "tier": "Detailed",
+      "board": "window-stock-1440.webp",
+      "boardSha256": "a2416ec9eecaa2875e5d5f81c836b48b2715d39159b544de9850f77d0cf8ae49",
+      "threshold": {
+        "projectedWindowHeightCssPx": {
+          "before": 178,
+          "after": 95
+        },
+        "visibleWindowPixels": {
+          "before": 9836,
+          "after": 6771
+        },
+        "visibleCentralPixels": {
+          "before": 12100,
+          "after": 12060
+        },
+        "drawCalls": {
+          "before": 55,
+          "after": 55
+        },
+        "sceneTriangles": {
+          "before": 113541,
+          "after": 107625
+        },
+        "windowInFrontOfCentralRays": {
+          "before": 0,
+          "after": 0
+        }
+      },
+      "pairedCameraPositionDifferenceMetres": {
+        "map": 0.0003,
+        "threshold": 0.0291,
+        "inside": 0.0037,
+        "near": 0.0043,
+        "shelf": 0.0071,
+        "exit": 0.0009
+      },
+      "cases": {
+        "before": {
+          "fullReceiptSha256": "1206bb1bb07896d2d3ba2904d557f92a1ff99d8f3b1305d6b42ff58080a71e65",
+          "benchmarkedRenderBufferPx": [
+            1440,
+            852
+          ],
+          "maxDrawCallsAcrossSixStops": 81,
+          "thresholdAppFrameP50Ms": 16.7,
+          "thresholdAppFrameP95Ms": 18.4,
+          "passedRoute": true
+        },
+        "after": {
+          "fullReceiptSha256": "0b6ac14474f9f7e08ad413f28bbbd6b3cf7bb784ee647f225c5335a109d9f223",
+          "benchmarkedRenderBufferPx": [
+            1440,
+            852
+          ],
+          "maxDrawCallsAcrossSixStops": 81,
+          "thresholdAppFrameP50Ms": 16.7,
+          "thresholdAppFrameP95Ms": 18,
+          "passedRoute": true
+        }
+      }
+    }
+  ],
+  "componentRayStudy": {
+    "method": "Cast actual triangle rays to the central display from these finite room-local origins; count a block only when the window mesh is nearer. Detailed uses the Balanced central asset.",
+    "columns": [
+      "centralAssetProfile",
+      "localXMetres",
+      "localEyeYMetres",
+      "localZMetres",
+      "raysHittingCentral",
+      "blockedBefore",
+      "blockedAfter"
+    ],
+    "rows": [
+      [
+        "Low",
+        0,
+        1.64,
+        4.2,
+        4630,
+        0,
+        0
+      ],
+      [
+        "Low",
+        -0.85,
+        1.64,
+        4.2,
+        4279,
+        0,
+        0
+      ],
+      [
+        "Low",
+        -1.15,
+        1.64,
+        4.2,
+        4167,
+        0,
+        0
+      ],
+      [
+        "Low",
+        -1.56,
+        1.64,
+        4.2,
+        4117,
+        361,
+        0
+      ],
+      [
+        "Low",
+        -1.85,
+        1.64,
+        4.2,
+        4157,
+        1501,
+        0
+      ],
+      [
+        "Low",
+        0,
+        3.55,
+        8.7,
+        4516,
+        0,
+        0
+      ],
+      [
+        "Low",
+        -1.15,
+        3.55,
+        8.7,
+        4272,
+        0,
+        0
+      ],
+      [
+        "Balanced/Detailed",
+        0,
+        1.64,
+        4.2,
+        4670,
+        0,
+        0
+      ],
+      [
+        "Balanced/Detailed",
+        -0.85,
+        1.64,
+        4.2,
+        4373,
+        0,
+        0
+      ],
+      [
+        "Balanced/Detailed",
+        -1.15,
+        1.64,
+        4.2,
+        4268,
+        0,
+        0
+      ],
+      [
+        "Balanced/Detailed",
+        -1.56,
+        1.64,
+        4.2,
+        4175,
+        375,
+        0
+      ],
+      [
+        "Balanced/Detailed",
+        -1.85,
+        1.64,
+        4.2,
+        4213,
+        1508,
+        0
+      ],
+      [
+        "Balanced/Detailed",
+        0,
+        3.55,
+        8.7,
+        4548,
+        0,
+        0
+      ],
+      [
+        "Balanced/Detailed",
+        -1.15,
+        3.55,
+        8.7,
+        4361,
+        0,
+        0
+      ]
+    ]
+  },
+  "physicalRoute": {
+    "unchangedCollisionProxies": 187,
+    "totalProxies": 188,
+    "windowProxyFootprintMetres": [
+      1.1273,
+      1.1273
+    ],
+    "checkedAllSixRuns": [
+      "mapToOpenDoor",
+      "centralTinSample",
+      "twoVariantCatalogueStory",
+      "shelfBanquetServing",
+      "returnToAtriumAndClosedDoor"
+    ],
+    "upper397gPlaqueCheckedAtWidthsCssPx": [
+      390
+    ]
+  },
+  "independentReviewScope": {
+    "lightingAndMaterials": "pass",
+    "visualComposition": "pass",
+    "brandAndProvenance": "pass",
+    "mobilePerformance": "pass",
+    "spatialRoute": "pass"
+  },
+  "rawPairedComparisonSha256": "2261bc569efa108208388c9d26586aa1f9b329d3c894e5f8f67c9149fb059f22",
+  "rawVerificationSummarySha256": "3459fc49a6b7f2fab2cbd7ea180436968f9885fdc622405563e7e06b4cd5b1ab",
+  "releaseReplay": {
+    "scope": "After the Singapore street and theme integration. Candidate touch routes at 390 and 768; paired keyboard routes at 1440. The five-stop boards above use the earlier paired builds.",
+    "runtimePair": {
+      "before": {
+        "commit": "59f668b7355dd14462d94deefedc693ddaf957bd",
+        "build": "73400e23cbd1fea0",
+        "requestedStock": "assets/gallery-assets/stacked-can-pyramid.glb",
+        "stockSha256": "cf8cf126e0a0783f4ee9ac585b306caa6714c6dafc6a3dfbbaff117d3d494527"
+      },
+      "after": {
+        "commit": "d653cf1b1a6c49a7ac3e66679a6d75f1773eb078",
+        "build": "b18e06b75f45e37c",
+        "requestedStock": "assets/gallery-assets/gulong-window-stock.glb",
+        "stockSha256": "0af7314ebf17db380e5e2fea4eae9fc0daede459cbe755da74544394b768df75"
+      }
+    },
+    "pairedInputsSha256": "d23c118b206f7c1b00dcb9b39c316601593b77db9187cb77b865b103e661f688",
+    "physicalRoute": "All four runs used Map arrival and crossed the open door with an active capsule. The tin sample, catalogue Story and shelf serving completed. All four exited to the atrium and the door fully closed. The 390 candidate also checked the separate upstairs 397 g plaque.",
+    "profiles": [
+      {
+        "case": "after",
+        "viewportWidthCssPx": 390,
+        "tier": "low",
+        "doorInput": "touch joystick",
+        "thresholdDraws": 37,
+        "thresholdSceneTriangles": 59483,
+        "maxDrawsAtSixStops": 61,
+        "receiptSha256": "671769496fe0874997478d9249f2f5f60447b84856d4da1ff2e635afe36cbd47"
+      },
+      {
+        "case": "after",
+        "viewportWidthCssPx": 768,
+        "tier": "balanced",
+        "doorInput": "touch joystick",
+        "thresholdDraws": 40,
+        "thresholdSceneTriangles": 62909,
+        "maxDrawsAtSixStops": 62,
+        "receiptSha256": "e136a2aa6e821745385d7fdaeda6fb9970bbefcb981b0f21bbca796b01b761e4"
+      },
+      {
+        "case": "before",
+        "viewportWidthCssPx": 1440,
+        "tier": "detailed",
+        "doorInput": "W key",
+        "thresholdDraws": 55,
+        "thresholdSceneTriangles": 113505,
+        "maxDrawsAtSixStops": 81,
+        "receiptSha256": "df68aabbd23b8a9e6c3007959163ef7eef8037c3db22af70970ecc0b5586dd1a"
+      },
+      {
+        "case": "after",
+        "viewportWidthCssPx": 1440,
+        "tier": "detailed",
+        "doorInput": "W key",
+        "thresholdDraws": 55,
+        "thresholdSceneTriangles": 107625,
+        "maxDrawsAtSixStops": 81,
+        "receiptSha256": "c5ceb32bee53b57f9c8a434aec341325bc816a6e09cc71aea6873e6136befa1d"
+      }
+    ],
+    "matchedDesktopThreshold": {
+      "orientation": "The initial desktop camera faced the arcade. Both scored captures face into the room after keyboard entry, with the door fully open.",
+      "cameraSeparationMetres": 0.002176,
+      "before": {
+        "yawRadians": 1.5708419,
+        "centralFixtureRayHits": 28,
+        "thresholdPngSha256": "1b84ced795119ed2a5fac5c6edb93d6164941c4f2c0674b257b0c66a608b8d20"
+      },
+      "after": {
+        "yawRadians": 1.5708075,
+        "centralFixtureRayHits": 28,
+        "thresholdPngSha256": "4ec5c260ef60d6784c518137af4143c8df872fbd4b3f7f132c166b4bfc551add"
+      },
+      "panel": "window-stock-release-threshold-1440.webp",
+      "panelSha256": "e1e25411ddd281279c295d9d52a4bad8f8125f1269108117654a868a04bf2a56"
+    },
+    "limits": "Desktop Chrome with touch emulation or keyboard, NPCs disabled. Draw maxima cover six poses. Physical-handset pacing, input latency and crowded aisles remain unmeasured."
+  }
+}

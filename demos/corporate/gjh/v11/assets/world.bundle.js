@@ -5415,7 +5415,7 @@ var westShopPlacements = {
   4: [galleryFixture("S04", "leftrear", "mosquito-patch-pack", 0.7, true)],
   5: [fixture("medicine-health-box-set", -2.21, 0.081, 4.84, 0.12)],
   6: [fixture("instant-noodle-pack-display", -2.43, 0.081, 4.57, 0.035)],
-  7: [fixture("stacked-can-pyramid", -1.56, 0.081, 2.65, -0.07, 0.88)],
+  7: [fixture("gulong-window-stock", -1.56, 0.081, 2.65, -0.07, 0.88)],
   8: [galleryFixture("S08", "leftfront", "peanut-butter-jar-stand")],
   9: [fixture("shelf-food-aisle", -2.49, 0.081, 4.57, 0.015)],
   10: [galleryFixture("S10", "leftrear", "abalone-gift-box-display", 0.6, true)],
@@ -7705,7 +7705,7 @@ var galleryPlacements = { ...westShopPlacements, ...eastShopPlacements };
 var floorModelSize = {
   "medicine-health-box-set": [0.6, 1.7, 0.35],
   "instant-noodle-pack-display": [0.8, 1.8, 0.4],
-  "stacked-can-pyramid": [1.2, 1.8, 1.2],
+  "gulong-window-stock": [1.2, 0.68, 1.2],
   "peanut-butter-jar-stand": [0.8, 1.02, 0.5],
   "shelf-food-aisle": [1.2, 1.8, 0.5],
   "food-display-cabinet": [1.25, 1.29, 0.7],
