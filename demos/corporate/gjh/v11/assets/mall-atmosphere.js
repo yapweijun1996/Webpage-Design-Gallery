@@ -164,6 +164,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       keyReach:gogo ? 8.5 : shopLightReach, doorReach:gogo ? 5.8 : shopLightReach,
       temperature:mood ? kelvinColour(T,mood.kelvin) : interiorWarm, colors:[new T.Color(),new T.Color()]};
   });
+  const gogoSlot = expanded && bays.find(bay => bay.slot.number === '03')?.slot;
   const lgSlot = expanded && bays.find(bay => bay.slot.number === '14')?.slot;
   const lights = Array.from({length:2}, (_, index) => {
     const light = new T.PointLight(0xffe5c1, 0, shopLightReach, 2);
@@ -248,7 +249,17 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       const keyScale = T.MathUtils.lerp(1,tier === 'balanced' ? .55 : .90,courtyard);
       if (daylight) daylight.intensity = baseDaylight*keyScale;
       if (Number.isFinite(baseExposure)) {
-        renderer.toneMappingExposure = baseExposure*T.MathUtils.lerp(1,.82,tier === 'balanced' ? courtyard : 0);
+        let shopExposure = 1;
+        if (gogoSlot && (tier === 'balanced' || tier === 'low') && Math.abs(y) < 4) {
+          // Keep the exposure adjustment within the entry apron and storefront width.
+          const halfWidth = (gogoSlot.maxX-gogoSlot.minX)/2;
+          const lateral = Math.abs(x-(gogoSlot.minX+halfWidth));
+          const depth = Math.max(gogoSlot.minZ-z,z-gogoSlot.maxZ,0);
+          const frontage = 1-T.MathUtils.smoothstep(lateral,halfWidth*.55,halfWidth);
+          const approach = 1-T.MathUtils.smoothstep(depth,2.5,4.5);
+          shopExposure = T.MathUtils.lerp(1,tier === 'low' ? .68 : .86,frontage*approach);
+        }
+        renderer.toneMappingExposure = baseExposure*T.MathUtils.lerp(1,.82,tier === 'balanced' ? courtyard : 0)*shopExposure;
       }
     }
     let shadowFill = tier === 'low' && publicZone === 'atrium' ? .16 : 0;

@@ -183,7 +183,7 @@ test('courtyard daylight tapers before a storefront and restores the selected th
   scene.add(key);
   const atmosphere=createMallAtmosphere(T,renderer,scene,slots,{atrium});
   const center={...atrium,y:.9};
-  const gogo={...expandedStoreArrival('gogo'),y:.9};
+  const storefront={...expandedStoreArrival('mili'),y:.9};
 
   atmosphere.update(center,0,'balanced');
   const shaded={intensity:key.intensity,exposure:renderer.toneMappingExposure};
@@ -191,7 +191,7 @@ test('courtyard daylight tapers before a storefront and restores the selected th
   atmosphere.update({...center,z:center.z-6},200,'balanced');
   assert.ok(key.intensity > shaded.intensity && key.intensity < 1.6);
   assert.ok(renderer.toneMappingExposure > shaded.exposure && renderer.toneMappingExposure < .72);
-  atmosphere.update(gogo,400,'balanced');
+  atmosphere.update(storefront,400,'balanced');
   assert.equal(key.intensity,1.6);
   assert.equal(renderer.toneMappingExposure,.72);
 
@@ -200,10 +200,38 @@ test('courtyard daylight tapers before a storefront and restores the selected th
   atmosphere.update(center,800,'low');
   assert.ok(key.intensity > shaded.intensity && key.intensity < 1.8);
   assert.equal(renderer.toneMappingExposure,.7);
-  for (const [position,tier] of [[gogo,'low'],[center,'detailed'],[{...center,y:7.2},'balanced']]) {
+  for (const [position,tier] of [[storefront,'low'],[center,'detailed'],[{...center,y:7.2},'balanced']]) {
     atmosphere.update(position,800,tier);
     assert.equal(key.intensity,1.8);
     assert.equal(renderer.toneMappingExposure,.7);
+  }
+});
+
+test('GOGO exposure is confined to the ground-floor frontage and approach', () => {
+  const scene=new T.Scene(), key=new T.DirectionalLight(0xffffff,1.6);
+  const renderer={toneMappingExposure:.72};
+  const {atrium,slots}=expandedLayout;
+  scene.add(key);
+  const atmosphere=createMallAtmosphere(T,renderer,scene,slots,{atrium});
+  const gogo={...expandedStoreArrival('gogo'),y:.9};
+
+  atmosphere.update(gogo,0,'balanced');
+  const balanced=renderer.toneMappingExposure;
+  atmosphere.update(gogo,100,'low');
+  const low=renderer.toneMappingExposure;
+  assert.ok(low < balanced && balanced < .72);
+  assert.equal(key.intensity,1.6);
+
+  atmosphere.update({...gogo,z:3.5},200,'low');
+  assert.ok(renderer.toneMappingExposure > low && renderer.toneMappingExposure < .72);
+  atmosphere.update({...gogo,x:6},300,'low');
+  assert.ok(renderer.toneMappingExposure > low && renderer.toneMappingExposure < .72);
+
+  for (const [position,tier] of [
+    [{...gogo,x:5},'low'], [{...gogo,z:4.6},'low'], [{...gogo,y:7.2},'low'], [gogo,'detailed']
+  ]) {
+    atmosphere.update(position,400,tier);
+    assert.equal(renderer.toneMappingExposure,.72);
   }
 });
 
