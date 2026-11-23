@@ -1,0 +1,41 @@
+{
+  "runtime": "Playwright 1.65.2 WebKit 27.2 on Darwin",
+  "viewport": {
+    "width": 390,
+    "height": 844
+  },
+  "baselineRelease": {
+    "version": "1.4.0",
+    "build": "3c1a49ca9e807431"
+  },
+  "syntheticRelease": {
+    "version": "1.4.1",
+    "build": "cccccccccccccccc"
+  },
+  "updateReloads": 1,
+  "cachedStylesheet": {
+    "type": "text/css",
+    "sha256": "41964418f95c03e75fa1d0a2e862d652331d2c309420f69999270749a5c83538"
+  },
+  "retainedItems": 1,
+  "cachedFallbackStyled": true,
+  "recoveryMessage": "Page did not load fully: Reload",
+  "restoredStyleAndBag": true,
+  "pageErrors": [
+    {
+      "phase": "missing stylesheet",
+      "message": "Response served by service worker is an error"
+    },
+    {
+      "phase": "missing stylesheet",
+      "message": "Cannot load ."
+    }
+  ],
+  "failedRequests": [
+    {
+      "phase": "missing stylesheet",
+      "path": "/Webpage-Design-Gallery/demos/corporate/gjh/v11/style.bundle.css"
+    }
+  ],
+  "sourceHead": "cff8bb10fbad019520f1d8d36b9bf2b752a32f2c"
+}
