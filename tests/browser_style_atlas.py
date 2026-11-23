@@ -38,9 +38,10 @@ def check(browser, base):
     }
     total = sum(map(len, references.values()))
     alternates = sum(entry["kind"] == "alternate" for entries in references.values() for entry in entries)
-    # Full-page studies and their head metadata links were introduced after the original audit.
-    # v24 and v25 also have primary references without before/after audits.
-    full_page_studies = {"gjh-v20", "gjh-v21", "gjh-v22", "gjh-v24", "gjh-v25", "gjh-v29"}
+    # Later studies can use full-page references with head metadata links.
+    full_page_studies = {"gjh-v20", "gjh-v21", "gjh-v22", "gjh-v24", "gjh-v25", "gjh-v29", "gjh-mini-street"}
+    # These editions joined the atlas without a before/after audit sheet.
+    unaudited_studies = full_page_studies | {"gjh-v26", "gjh-v27", "gjh-v28"}
     with browser.new_context(viewport={"width": 1440, "height": 900}) as context:
         page = context.new_page()
         errors = []
@@ -63,19 +64,21 @@ def check(browser, base):
         primary = page.locator("article[data-kind=primary]").evaluate_all("""articles => articles.map(article => [
           article.id, article.querySelector('.actions a').href, article.querySelector('details a')?.href
         ])""")
+        primary_versions = {f"{company}-{entry['version']}": (company, entry["version"])
+                            for company, entries in references.items() for entry in entries if entry["kind"] == "primary"}
         for anchor, demo, audit in primary:
-            company, version = anchor.rsplit("-", 1)
+            company, version = primary_versions[anchor]
             evidence = Path("docs", "landing-atlas", company, "audit", version + ".webp")
             if (ROOT / evidence).is_file():
                 expected = "https://github.com/yapweijun1996/Webpage-Design-Gallery/blob/main/" + evidence.as_posix()
                 assert audit == expected, (anchor, audit)
             else:
-                assert anchor in full_page_studies and audit is None, (evidence, audit)
+                assert anchor in unaudited_studies and audit is None, (evidence, audit)
             response = context.request.get(demo)
             assert response.ok, (demo, response.status)
             related = RelatedLinks()
             related.feed(response.text())
-            tags = ("link",) if anchor in full_page_studies else ("link", "a")
+            tags = ("link",) if anchor in unaudited_studies else ("link", "a")
             for tag in tags:
                 assert urljoin(demo, related.urls[tag]) == atlas + "#" + anchor, (tag, demo, related.urls)
         select = page.get_by_label("Show", exact=True)

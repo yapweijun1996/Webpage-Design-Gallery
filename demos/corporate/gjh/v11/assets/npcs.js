@@ -18,6 +18,9 @@ const BOY_LOD_FAR = 12, BOY_LOD_NEAR = 10;
 const CLIP_NAMES = ['idle','walk','sit'];
 const DESKTOP_LIMITS = {low:2,balanced:4,detailed:6};
 const MOBILE_LIMITS = {low:1,balanced:2,detailed:3};
+// Interior uploads use distance minus 200. Let the closest shops prepare
+// first without making nearby visitors wait for every interior to finish.
+const crowdUploadPriority = () => -185;
 const distance = (a,b) => Math.hypot(a.x-b.x,a.z-b.z);
 const ignoreRaycast = () => {};
 
@@ -437,7 +440,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     visitors.push(npc);
     if (prepareModel) {
       npc.upload=new AbortController();
-      void prepareModel(npc.avatar,{signal:npc.upload.signal}).then(()=>{
+      void prepareModel(npc.avatar,{priority:crowdUploadPriority,signal:npc.upload.signal}).then(()=>{
         npc.gpuReady=true;
       },()=>{
         if (visitors.includes(npc)) remove(npc);
@@ -473,7 +476,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     const upload=new AbortController();
     choice.upload=upload;
     preparingBoy=choice;
-    void prepareModel(meshes,{signal:upload.signal,alternates:boy.lowGeometry?[[rig.mesh,meshes[1]]]:[]}).then(()=>{
+    void prepareModel(meshes,{priority:crowdUploadPriority,signal:upload.signal,alternates:boy.lowGeometry?[[rig.mesh,meshes[1]]]:[]}).then(()=>{
       if (visitors.includes(choice)) mount();
       else disposeRig(rig);
     },()=>disposeRig(rig)).finally(()=>{preparingBoy=null;});
@@ -508,7 +511,7 @@ export function createNpcSystem(T, {scene,source,seats=[],physics,R,playerCollid
     const upload=new AbortController();
     choice.upload=upload;
     preparingModular=choice;
-    void prepareModel(rig.avatar,{signal:upload.signal}).then(mount,()=>{
+    void prepareModel(rig.avatar,{priority:crowdUploadPriority,signal:upload.signal}).then(mount,()=>{
       disposeRig(rig);
       if (!upload.signal.aborted) reportModularFallback();
     }).finally(()=>{preparingModular=null;});

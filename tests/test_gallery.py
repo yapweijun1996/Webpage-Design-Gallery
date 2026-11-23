@@ -21,7 +21,8 @@ class GalleryTests(unittest.TestCase):
     def test_real_companies_contain_their_own_versions(self):
         catalog = gallery.load_catalog()
         versions = [d["version"] for d in catalog["designs"] if d["companyId"] == "gjh"]
-        self.assertEqual(versions, ["v1", *(f"v{number}" for number in range(5, 30))])
+        self.assertEqual(versions, ["v1", *(f"v{number}" for number in range(5, 12)),
+                                    "mini-street", *(f"v{number}" for number in range(12, 30))])
         self.assertEqual({c["id"] for c in catalog["companies"]}, {"gjh", "yeos", "thow-kwang", "pomelo-stem"})
         for company in catalog["companies"]:
             designs = [d for d in catalog["designs"] if d["companyId"] == company["id"]]
@@ -268,6 +269,24 @@ class GalleryTests(unittest.TestCase):
                 self.assertEqual((output / name).read_bytes(), (ROOT / name).read_bytes())
             self.assertFalse((output / "design-system/tokens.json").exists())
             self.assertFalse((output / "demos/corporate/gjh/research").exists())
+            mini_street = next(design for design in catalog["designs"] if design["id"] == "gjh-mini-street")
+            self.assertEqual(mini_street["status"], "concept")
+            street = Path("demos/corporate/gjh/mini-street")
+            street_files = {Path(name) for name in (
+                "index.html", "style.css", "script.js", "scene.js", "world.js", "assets/theme.css",
+                "assets/thumbnail.webp", "assets/mini-street-anchor.webp",
+                "screenshots/1440.png", "screenshots/768.png", "screenshots/390.png",
+            )}
+            self.assertEqual({file.relative_to(output / street) for file in (output / street).rglob("*")
+                              if file.is_file()}, street_files)
+            v11 = street.parent / "v11"
+            street_dependencies = {Path(name) for name in (
+                "vendor/three.module.min.js", "vendor/three.LICENSE",
+                "assets/new-moon-nz-425g-front.webp", "assets/new-moon-au-425g-front.webp",
+                "assets/new-moon-sa-425g-front.webp", "assets/new-moon-mx-454g-front.webp",
+            )}
+            for name in {street / file for file in street_files} | {v11 / file for file in street_dependencies}:
+                self.assertEqual((output / name).read_bytes(), gallery.source_bytes(ROOT / name), name)
             worker = (output / "sw.js").read_text()
             entries = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", worker, re.S).group(1))
             cached = {entry["path"] for entry in entries}
@@ -277,6 +296,9 @@ class GalleryTests(unittest.TestCase):
             self.assertNotIn("design-system/onboarding/index.html", cached)
             self.assertNotIn("demos/corporate/gjh/shared/navigation.js", cached)
             self.assertNotIn("demos/corporate/gjh/v11/vendor/rapier.mjs", cached)
+            self.assertEqual({name for name in cached if name.startswith(street.as_posix() + "/")},
+                             {mini_street["thumbnail"]})
+            self.assertTrue(cached.isdisjoint((v11 / file).as_posix() for file in street_dependencies))
             self.assertTrue(all(design["thumbnail"] in cached for design in catalog["designs"]))
             for company in catalog["companies"]:
                 artwork = company["demoDirectory"] + "/" + company["landing"]["image"]

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en" data-gjh-design="mini-street">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a25">
+  <meta name="description" content="A rainy shophouse street outside the GJH Virtual Mall, an independent design concept.">
+  <title>GJH Mini Street · Independent Design Concept</title>
+  <link rel="icon" href="data:,">
+  <link rel="related" href="../../../../style-atlas/index.html#gjh-mini-street">
+  <link rel="stylesheet" href="assets/theme.css">
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="script.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="identity"><span class="monogram" aria-hidden="true">GJH</span><span>Virtual Mall</span></div>
+      <span class="concept">Unofficial concept</span>
+    </div>
+  </header>
+
+  <main id="street">
+    <section class="street" aria-labelledby="street-title">
+      <div class="stage" id="stage">
+        <canvas id="view" aria-hidden="true"></canvas>
+        <div class="stage-shade" aria-hidden="true"></div>
+        <div class="intro">
+          <h1 id="street-title">Mini Street</h1>
+          <p id="weather">Rainy evening</p>
+        </div>
+
+        <p class="scene-status" id="scene-status" role="status">Explore the street using the stops below.</p>
+
+        <nav class="stops" aria-label="Street stops">
+          <a class="stop" data-stop="shop" href="#shop" aria-label="New Moon Shop">
+            <span class="stop-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 10v10h12V10M4 9l2-5h12l2 5M4 9c0 3 4 3 4 0 0 3 4 3 4 0 0 3 4 3 4 0 0 3 4 3 4 0M10 20v-5h4v5"/></svg>
+            </span>
+            <span><strong>New Moon</strong><small>Shop</small></span>
+          </a>
+          <a class="stop" data-stop="vending" href="#vending" aria-label="Vending machine">
+            <span class="stop-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18H6zM9 6h6v7H9zM10 17h4"/></svg>
+            </span>
+            <span><strong>Vending</strong><small>Try a capsule</small></span>
+          </a>
+          <a class="stop stop-mall" data-stop="mall" href="../v11/" aria-label="Enter Virtual Mall">
+            <span class="stop-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 20v-8a8 8 0 0 1 16 0v8M8 20v-8a4 4 0 0 1 8 0v8M3 20h18M12 8v12"/></svg>
+            </span>
+            <span><strong>Enter Mall</strong><small>Virtual Mall</small></span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="toolbar" id="toolbar" hidden>
+        <div class="look">
+          <span id="orbit-help">Drag to look around</span>
+          <div class="camera-buttons" role="group" aria-label="Street camera">
+            <button type="button" data-camera="left" aria-label="Look left"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button>
+            <button type="button" data-camera="reset" aria-label="Reset view"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 10a7 7 0 1 1 1 7M5 5v5h5"/></svg></button>
+            <button type="button" data-camera="right" aria-label="Look right"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button>
+          </div>
+        </div>
+
+        <div class="lighting" role="group" aria-label="Street lighting">
+          <button type="button" data-light="day" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/><circle cx="12" cy="12" r="4"/></svg>
+            Day
+          </button>
+          <button type="button" data-light="night" aria-pressed="true">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.5 15.4A9 9 0 0 1 8.6 3.5 9 9 0 1 0 20.5 15.4Z"/></svg>
+            Night
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="stop-details">
+      <section class="detail" id="shop" aria-labelledby="shop-title">
+        <h2 id="shop-title" tabindex="-1">New Moon Shop</h2>
+        <p>See four New Moon abalone packs from the Virtual Mall display.</p>
+        <ul class="pack-list">
+          <li><img loading="lazy" width="768" height="768" src="../v11/assets/new-moon-nz-425g-front.webp" alt="New Moon New Zealand abalone front packshot"><strong>New Zealand</strong><span>425 g</span></li>
+          <li><img loading="lazy" width="768" height="768" src="../v11/assets/new-moon-au-425g-front.webp" alt="New Moon Australia abalone front packshot"><strong>Australia</strong><span>425 g</span></li>
+          <li><img loading="lazy" width="768" height="768" src="../v11/assets/new-moon-sa-425g-front.webp" alt="New Moon South Africa abalone front packshot"><strong>South Africa</strong><span>425 g</span></li>
+          <li><img loading="lazy" width="768" height="768" src="../v11/assets/new-moon-mx-454g-front.webp" alt="New Moon Mexico abalone front packshot"><strong>Mexico</strong><span>454 g</span></li>
+        </ul>
+        <a class="back" href="#street">← Back to street</a>
+      </section>
+      <section class="detail" id="vending" aria-labelledby="vending-title">
+        <h2 id="vending-title" tabindex="-1">Vending machine</h2>
+        <p id="vending-note">The capsule preview requires JavaScript.</p>
+        <p id="vending-instructions" hidden>Choose a capsule to reveal a fictional keepsake.</p>
+        <div class="capsules" hidden>
+          <button type="button" data-vend="cloud"><span class="capsule-icon" aria-hidden="true">☁</span>Cloud</button>
+          <button type="button" data-vend="leaf"><span class="capsule-icon" aria-hidden="true">✿</span>Blossom</button>
+          <button type="button" data-vend="star"><span class="capsule-icon" aria-hidden="true">✦</span>Star</button>
+        </div>
+        <p class="vending-result" role="status" hidden></p>
+        <a class="back" href="#street">← Back to street</a>
+      </section>
+    </div>
+  </main>
+
+  <dialog id="stop-dialog">
+    <form method="dialog">
+      <button class="close" type="submit" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </form>
+  </dialog>
+</body>
+</html>

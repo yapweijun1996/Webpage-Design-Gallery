@@ -1,0 +1,20 @@
+{
+  "company": "Goh Joo Hin Pte Ltd",
+  "industry": "FMCG, Electronics, Health & Nutrition",
+  "title": "GJH Mini Street",
+  "version": "mini-street",
+  "designStyle": "An immersive rainy shophouse street with warm storefronts, a bounded 3D camera and a day/night lighting toggle.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/gjh/mini-street/",
+  "officialWebsite": "https://www.gjh.com.sg/",
+  "disclaimer": "Independent, unofficial design concept. Not affiliated with or endorsed by Goh Joo Hin Pte Ltd.",
+  "id": "gjh-mini-street",
+  "companyId": "gjh",
+  "displayTitle": "GJH Mini Street",
+  "summary": "Explore a rainy shophouse street, view four New Moon packshots, try a fictional capsule or enter the Virtual Mall.",
+  "styles": [
+    "immersive",
+    "heritage"
+  ],
+  "order": 85
+}
