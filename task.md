@@ -11,7 +11,7 @@ Owner constraints (binding, 2026-11-21):
 - Plan before assigning: `docs/swarm-design-system-plan.md`, interface specs `swarm/CHANNEL_SPEC.md`, `swarm/design-system/SDS_SPEC.md`, `swarm/RUNNER_SETTINGS_SPEC.md`.
 
 Status legend: [x] done and verified, [~] in progress, [ ] not started.
-- [x] Channel system (store, turns, CLI, UI, tests, e2e with fake agent): 34 tests pass, pushed as 7809f0df, bug fix for assign lines without text (local, not yet committed).
+- [x] Channel system (store, turns, CLI, UI, tests, e2e with fake agent): 34 tests passed at `7809f0df`. Task-only assignments shipped at `37870a2c4`. The [channel tests](swarm/test/chat.test.js) verify that the Manager can publish an assignment using its task as the visible text.
 - [x] First real run: GJH home page by Manager + 10 agents, checked at 393px and 1440px; green-gold rerun applied (owner request).
 - [x] Viewer topbar: single 44px line, icon buttons with cursor-following tooltips, right panel on/off, responsive 320-1440 (verified in browser).
 - [x] The chat log and composer redesign shipped in `37870a2c4`. Chrome verified the four filters, long-message expansion, keyboard mention selection, multiline submission, busy-state controls and search across 1,500 updates at 329, 360 and 393 px with reduced motion. The panel fit all three widths without horizontal overflow. The [channel demo](swarm/ui/channel-demo.html) reproduces these checks; the Studio Chrome fixture also exercises the composer request through the normal UI.
