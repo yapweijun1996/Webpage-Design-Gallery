@@ -37,6 +37,7 @@ const lazyExports = {
   'assets/push-cart.js': ['createLazyCart'],
   'assets/seated-pose.js': ['createSeatedPose'],
   'assets/shelf-focus.js': ['createShelfFocus'],
+  'assets/street-chunk.js': ['loadSingaporeStreet'],
   'assets/target-guidance.js': ['createTargetGuidance'],
   'assets/visitor-gltf.js': ['loadVisitorGLTF', 'disposeVisitorScene'],
   'assets/visitor-v2-controls.js': ['installVisitorV2Controls'],

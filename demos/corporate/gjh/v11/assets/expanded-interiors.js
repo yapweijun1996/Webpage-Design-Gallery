@@ -38,6 +38,30 @@ function displayPlacements(number, heroX, heroZ) {
   return [[heroX, height, heroZ, scale]];
 }
 
+// Cloned furnishings reuse a GLB's materials/textures; merged draws also own new
+// geometries. Dispose each once across all of this generation's instances.
+function studioResources() {
+  const geometries = new Set(), materials = new Set(), textures = new Set();
+  return {
+    track(root) {
+      root.traverse(mesh => {
+        if (!mesh.isMesh) return;
+        geometries.add(mesh.geometry);
+        for (const material of [].concat(mesh.material)) {
+          materials.add(material);
+          for (const value of Object.values(material)) if (value?.isTexture) textures.add(value);
+        }
+      });
+    },
+    release() {
+      for (const geometry of geometries) geometry.dispose();
+      for (const material of materials) material.dispose();
+      for (const texture of textures) { texture.dispose(); texture.image?.close?.(); }
+      geometries.clear(); materials.clear(); textures.clear();
+    }
+  };
+}
+
 // Furniture is vertex-coloured and merged; model displays load in the background.
 // Coordinates inside each bay have the glazed front on local +Z.
 export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => 'low', detailsEnabled = () => true, waitForSlice, showStorefrontBench = () => {}) {
@@ -75,23 +99,26 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     const number=Number(slot.number);
     return [...(displayFiles[number] || []).map(file => `./${file}.glb`), ...galleryPlacements[number].map(({file}) => `./${file}`)];
   }).map(name => [name, 'pending']));
+  let districtLife = new AbortController();
+  let resources = studioResources(), resident = true;
   function loadModel(name) {
     if (!models.has(name)) {
       modelStates.set(name,'loading');
       const url = new URL(name, import.meta.url), controller = new AbortController();
+      const generation = districtLife.signal;
+      const abort = () => controller.abort();
+      generation.addEventListener('abort',abort,{once:true});
       let timer, abandoned = false;
       const load = async () => {
         const response = await fetch(url, {signal:controller.signal});
         if (!response.ok) throw new Error(`Model request failed: ${response.status}`);
         const gltf = await parseWarmGLTF(gltfLoader, await response.arrayBuffer(), new URL('.',url).href, waitForSlice, controller.signal);
-        if (abandoned) {
-          gltf.scene.traverse(node => {
-            if (!node.isMesh) return;
-            node.geometry?.dispose();
-            for (const material of (Array.isArray(node.material) ? node.material : [node.material])) material?.dispose();
-          });
-          throw new Error('Model load timed out');
+        if (abandoned || generation.aborted) {
+          const abandonedModel = studioResources();
+          abandonedModel.track(gltf.scene); abandonedModel.release();
+          throw new Error('Studio model load interrupted');
         }
+        resources.track(gltf.scene);
         // Keep the existing fallback assembly if the downloaded model cannot support both seat anchors.
         if (name === `./${gigasetLoungeSofa.file}` && !hasGigasetSeatCushions(T,gltf.scene))
           throw new Error('Gigaset furnishing is missing a usable seat cushion');
@@ -105,7 +132,13 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       const deadline = new Promise((_,reject) => {
         timer=setTimeout(() => { abandoned=true; controller.abort(); reject(new Error('Model load timed out')); },45000);
       });
-      models.set(name, Promise.race([load(),deadline]).then(scene => { modelStates.set(name,'loaded'); loadedScenes.set(name,scene); return scene; }, error => { modelStates.set(name,'fallback'); throw error; }).finally(() => clearTimeout(timer)));
+      models.set(name, Promise.race([load(),deadline]).then(scene => {
+        generation.throwIfAborted();
+        modelStates.set(name,'loaded'); loadedScenes.set(name,scene); return scene;
+      }, error => {
+        if (!generation.aborted) modelStates.set(name,'fallback');
+        throw error;
+      }).finally(() => { clearTimeout(timer); generation.removeEventListener('abort',abort); }));
     }
     return models.get(name);
   }
@@ -292,17 +325,18 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     hero.userData.fallbackBounds = localBounds(parts);
     hero.userData.fallbackVisible = true;
     group.add(hero);
-    let loadHero, display, loaded = false;
+    let loadHero, display, preparation, loaded = false;
     addStudioParts(fixtureParts, () => group.visible);
     addStudioParts(parts, () => group.visible && (!loaded || !display?.visible));
     if (files) {
       display = new T.Group();
       display.visible = false;
-      let preparation;
       loadHero = () => {
         if (preparation) return preparation;
+        const generation = districtLife.signal;
         const placements = displayPlacements(number, heroOffset, heroZ);
         preparation = Promise.all(files.map(name => loadModel(`./${name}.glb`))).then(async scenes => {
+          generation.throwIfAborted();
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
             const [x, y, z, scale] = placements[i];
@@ -310,10 +344,12 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             instance.scale.setScalar(scale);
             instance.name = `S${slot.number} ${files[i]}`;
             mergeOpaqueMeshes(T, instance);
+            resources.track(instance);
             display.add(instance);
           });
           // The LOD controller can select this display before it finishes loading.
-          await prepareModel(display, {priority: () => display.visible ? -100 : 0});
+          await prepareModel(display, {signal:generation, priority: () => display.visible ? -100 : 0});
+          generation.throwIfAborted();
           hero.add(display);
           loaded = true;
           hero.userData.modelReady = true;
@@ -352,19 +388,24 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
     const shopState = {number:String(slot.number), status:'pending', galleryLoaded:0, galleryFailed:0};
     const gallery = [];
     async function loadShop() {
+      const generation = districtLife.signal;
       await Promise.all([
         loadHero?.(),
         ...placements.map(async placement => {
           const {file,position,yaw=0,scale=1} = placement;
           try {
-            const model = (await loadModel(`./${file}`)).clone(true);
+            const source = await loadModel(`./${file}`);
+            generation.throwIfAborted();
+            const model = source.clone(true);
             const bench=placement===casioStorefrontPiano ? measureStorefrontPiano(T,model) : null;
             model.position.set(...position);
             model.rotation.y = yaw;
             model.scale.setScalar(scale);
             model.name = `S${slot.number} gallery: ${file}`;
             mergeOpaqueMeshes(T, model);
-            await prepareModel(model);
+            resources.track(model);
+            await prepareModel(model,{signal:generation});
+            generation.throwIfAborted();
             group.add(model);
             model.updateWorldMatrix(true,true);
             gallery.push({model, bounds:new T.Box3().setFromObject(model)});
@@ -372,6 +413,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
             if (placement === gigasetLoungeSofa) sofaMounted = true;
             shopState.galleryLoaded++;
           } catch (error) {
+            if (generation.aborted) return;
             if (placement === casioStorefrontPiano) showStorefrontBench(null);
             shopState.galleryFailed++;
             console.warn(`Unavailable shop furnishing: ${file}`, error);
@@ -380,19 +422,31 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       ]);
     }
     shops.push({group, hero, loadHero, number, gallery, x:group.position.x, z:group.position.z, display, isLoaded:() => loaded,
-      loadDisplay: loadShop, state:shopState});
+      loadDisplay: loadShop, state:shopState, resetModels() {
+        this.loadDisplay = loadShop;
+        for (const {model} of gallery) model.removeFromParent();
+        gallery.length = 0;
+        if (display) { display.removeFromParent(); display.clear(); display.visible = false; }
+        preparation = undefined;
+        loaded = sofaMounted = false;
+        hero.userData.modelReady = !files;
+        hero.userData.fallbackVisible = true;
+        Object.assign(shopState,{status:'pending',galleryLoaded:0,galleryFailed:0});
+      }});
   });
   const studioBatch = createPackedDraw(T, studioParts, material);
   studioBatch.mesh.name = 'Concourse window studios';
   scene.add(studioBatch.mesh);
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
-    if (!detailsEnabled()) return;
+    if (!resident || !detailsEnabled()) return;
     if (loading || scheduled) return;
     const candidates = shops.filter(shop => shop.loadDisplay);
     if (!candidates.length) return;
     scheduled = true;
+    const generation = districtLife.signal;
     const run = () => {
+      if (generation.aborted) return;
       scheduled = false;
       if (document.hidden) return;
       const next = shops.filter(shop => shop.loadDisplay)
@@ -400,14 +454,33 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       if (!next) return;
       loading = true;
       const load = next.loadDisplay; next.loadDisplay = null; next.state.status='loading';
-      load().catch(error => console.warn('Shop preload failed',error)).finally(() => { next.state.status='settled'; loading = false; schedulePrefetch(); });
+      load().catch(error => console.warn('Shop preload failed',error)).finally(() => { if (!generation.aborted) { next.state.status='settled'; loading = false; schedulePrefetch(); } });
     };
     if ('requestIdleCallback' in window) window.requestIdleCallback(run, {timeout: 1500});
     else window.setTimeout(run, 100);
   }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) schedulePrefetch(); });
+  const onVisibility = () => { if (!document.hidden) schedulePrefetch(); };
+  document.addEventListener('visibilitychange', onVisibility);
   schedulePrefetch();
-  return {collisionBoxes,gigasetSeatBox,grandCabinetBox,storefrontPianoBox,nativeStudioSeats,getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
+  function setResident(value) {
+    if (value === resident) return;
+    resident = value;
+    if (value) {
+      districtLife = new AbortController();
+      schedulePrefetch();
+    } else {
+      districtLife.abort();
+      loading = scheduled = false;
+      showStorefrontBench(null);
+      for (const shop of shops) shop.resetModels();
+      resources.release();
+      loadedScenes.clear(); models.clear();
+      for (const key of modelStates.keys()) modelStates.set(key,'pending');
+    }
+  }
+  return {collisionBoxes,gigasetSeatBox,grandCabinetBox,storefrontPianoBox,nativeStudioSeats,
+    setResident, dispose() { setResident(false); document.removeEventListener('visibilitychange',onVisibility); },
+    get residentModels() { return loadedScenes.size; }, getPreloadedModels() { return [...loadedScenes].map(([name,scene]) => ({name:new URL(name,import.meta.url).href,scene})); }, get preloadState() {
     return {models:Object.fromEntries(modelStates), shops:shops.map(shop => ({...shop.state})),
       settled:shops.filter(shop => shop.state.status==='settled').length, total:shops.length};
   }, update(visitor, view) {
@@ -429,7 +502,7 @@ export async function createExpandedInteriors(T, expandedLayout, scene, stoneMap
       const active = shop === nearest;
       shop.display.visible = active;
       // A nearby window need not wait for another shop's background furnishings.
-      if (active && detailsEnabled() && !shop.isLoaded()) shop.loadHero();
+      if (active && resident && detailsEnabled() && !shop.isLoaded()) shop.loadHero();
       shop.hero.userData.fallbackVisible = !active || !shop.isLoaded();
     }
     studioBatch.update(part => {

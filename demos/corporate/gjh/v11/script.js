@@ -329,7 +329,8 @@ function heroVisibility(number) {
   return Object.freeze({number:id, hero:project(hero), avatar:project(player.visual),
     loaded:hero.userData.modelReady === true});
 }
-const snapshot = () => Object.freeze({...(player?.state || {}), modelPreload:world?.modelPreload || null, mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
+let district;
+const snapshot = () => Object.freeze({district:district ? {...district.state,mall:world.mallDetailResidency} : null,...(player?.state || {}), modelPreload:world?.modelPreload || null, mode: modes.current(), zone: currentZone, nearby, furnishings: world?.furnishings || null, shell: world?.shell || null,
   illegalCount: modes.illegalCount(), modeHistory: modes.history(), modeLayers: modes.layers(), paused: modes.paused(),
   elevator:elevator?.state||null, elevatorModel:elevator?.kit?{tier:elevator.kit.tier,status:elevator.kit.status}:null, restrooms:world?.restrooms?.state??null, amenities: world?.amenities || null,
   npcs: npcs?.state || null,
@@ -468,7 +469,8 @@ function updateHUD() {
     if(p.escalatorTravel)ui.announce('Ascending to the upper deck. The lift serves both floors.');
     wasOnEscalator=p.escalatorTravel;
   }
-  const zone = elevator && !p.escalatorTravel && p.y > elevator.upper / 2 ? 'upper' : (expanded ? restroomAt(p.x,p.z) ?? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
+  const zone = district && p.z > 48.2 ? 'singapore-street'
+    : elevator && !p.escalatorTravel && p.y > elevator.upper / 2 ? 'upper' : (expanded ? restroomAt(p.x,p.z) ?? expandedStoreAt(p.x,p.z) : storeAt(p.x,p.z))?.id || 'atrium';
   if (zone !== currentZone || travelling !== wasRiding) quality.resetSampling();
   if (zone !== currentZone) mallAudio.setZone(zone);
   currentZone = zone;
@@ -502,6 +504,7 @@ function tick(refreshHud = true) {
   if (modes.paused() || expanded && windowBlurred) return;
   const p = player.state;
   const doorsStart = performance.now();
+  district?.update(p);
   world.restrooms?.update(STEP,p);
   for (const door of world.doors) {
     if (door.advance) { door.advance(p, STEP, reducedMotion.matches); continue; }
@@ -1162,7 +1165,19 @@ async function initialize() {
         if (seat.modelVisible && player?.state.seatId===seat.id && !player.stand(true)) player.teleport(currentZone);
         remove();
       };
+    }, text => {
+      let chip = document.getElementById('street-gateway-status');
+      if (!chip) {
+        chip = document.createElement('p');
+        chip.className = 'hud-context-chip';
+        chip.id = 'street-gateway-status';
+        chip.setAttribute('role','status');
+        document.getElementById('hud-context-stack').append(chip);
+      }
+      chip.textContent = text;
+      chip.hidden = !text;
     });
+  district = world.district;
   if (expanded) renderer.toneMappingExposure = world.defaultExposure;
   ui.setBrandStories(world.shopExhibits);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);
@@ -1401,5 +1416,5 @@ window.addEventListener('pagehide', event => {
   clearTimeout(themeMidnightTimer);
   releaseStartupAssetPack();
   cancelEntryPresentation();
-  pageEnded = true; elevator?.kit?.dispose(); mallAudio.dispose(); tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
+  pageEnded = true; district?.dispose(); world?.disposeStudios(); elevator?.kit?.dispose(); mallAudio.dispose(); tierQueue?.cancel(); warmRunner?.stop('pagehide'); mallTheme?.destroy(); npcs?.dispose(); player?.dispose?.(); world?.interiors?.dispose(); modelWarmup?.dispose();
 });

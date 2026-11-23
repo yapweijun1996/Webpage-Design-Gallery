@@ -78,12 +78,17 @@
     {
       "path": "assets/gallery-assets/*.glb",
       "loader": "assets/expanded-interiors.js",
-      "trigger": "if (!detailsEnabled()) return;"
+      "trigger": "if (!resident || !detailsEnabled()) return;"
     },
     {
       "path": "data/gjh-interior-additions.json#placed",
       "loader": "assets/interior-additions.js",
       "trigger": "if (loading || !detailsEnabled()) return;"
+    },
+    {
+      "path": "assets/districts/singapore/*.glb",
+      "loader": "assets/district-gateway.js",
+      "trigger": "if (status === 'mall' && near) void approach();"
     }
   ],
   "walkImagePreloads": [

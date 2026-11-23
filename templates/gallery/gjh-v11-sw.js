@@ -44,6 +44,21 @@ self.addEventListener('fetch', event => {
   if (request.mode !== 'navigate' && referrer?.origin === BASE.origin &&
       referrer.pathname.startsWith(BASE.pathname) && referrer.searchParams.has('recover-page')) {
     event.respondWith(fetch(request, {cache: 'reload'}));
+  } else if (entry?.path.startsWith('assets/districts/') && !recovery && request.headers?.has('Range') && !request.headers.has('If-Range')) {
+    // The cache stores verified complete files. Derive a requested byte range
+    // from that full response without ever caching a partial model.
+    event.respondWith((async () => {
+      const match = /^bytes=(\d*)-(\d*)$/.exec(request.headers.get('Range'));
+      if (!match || (!match[1] && !match[2])) return fetch(request);
+      const response = await precachedResource(entry,CACHE,BUILD), data = await response.arrayBuffer();
+      const size = data.byteLength;
+      const first = match[1] ? Number(match[1]) : Math.max(0,size-Number(match[2]));
+      const last = match[1] && match[2] ? Math.min(size-1,Number(match[2])) : size-1;
+      if (first > last || first >= size) return new Response(null,{status:416,headers:{'Content-Range':'bytes */'+size}});
+      return new Response(data.slice(first,last+1),{status:206,headers:{
+        'Accept-Ranges':'bytes','Content-Range':`bytes ${first}-${last}/${size}`,
+        'Content-Length':String(last-first+1),'Content-Type':response.headers.get('Content-Type') || 'application/octet-stream'}});
+    })().catch(() => Response.error()));
   } else if (entry && !recovery) {
     event.respondWith(precachedResource(entry, CACHE, BUILD).catch(async () =>
       request.mode === 'navigate' ? await cachedResource(offline, CACHE) || offlinePage() : Response.error()));

@@ -212,6 +212,9 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
   }
   let focus = null, strength = 0, previousTime, baseAmbient = hemisphere?.intensity;
   let baseDaylight = daylight?.intensity, baseExposure = renderer?.toneMappingExposure;
+  const indoorSky = expanded && scene.background?.isColor ? scene.background.clone() : null;
+  const outdoorSky = new T.Color(0xbfd9e4);
+  let previousOutdoor = 0;
   let christmas = false, newMoonExposure = 1;
   const applyFocusColors = () => lights.forEach((light,index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
@@ -244,6 +247,11 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
     const {x,y,z} = position;
     const inside = Math.abs(y) < 4 ? bays.find(bay => insideBay(x,z,bay.slot)) : null;
     const publicZone = publicEnvironmentZone(position,atrium);
+    const outdoor = expanded ? T.MathUtils.smoothstep(z,48.25,55) : 0;
+    if (indoorSky && outdoor !== previousOutdoor && scene.background?.isColor) {
+      scene.background.copy(indoorSky).lerp(outdoorSky,outdoor);
+      previousOutdoor = outdoor;
+    }
     let shadowFill = tier === 'low' && publicZone === 'atrium' ? .16 : 0;
     if (expanded) {
       setPortraitFill(inside,publicZone);
@@ -279,7 +287,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
           const approach = 1-T.MathUtils.smoothstep(depth,2.5,4.5);
           shopExposure *= T.MathUtils.lerp(1,.86,frontage*approach);
         }
-        renderer.toneMappingExposure = baseExposure*T.MathUtils.lerp(1,.82,tier === 'balanced' ? courtyard : 0)*shopExposure;
+        renderer.toneMappingExposure = baseExposure*T.MathUtils.lerp(1,.82,tier === 'balanced' ? courtyard : 0)*shopExposure*(1+.30*outdoor);
       }
     }
     if (lgSlot && Math.abs(y) < 4) {
@@ -295,7 +303,7 @@ export function createMallAtmosphere(T, renderer, scene, slots, {
       const outside = studioLighting[publicZone].intensity;
       selectEnvironment('shop',outside + weight*(inside.environmentIntensity-outside));
     } else selectEnvironment(inside ? 'shop' : publicZone);
-    if (hemisphere) hemisphere.intensity = baseAmbient + shadowFill;
+    if (hemisphere) hemisphere.intensity = baseAmbient + shadowFill + 1.35*outdoor;
     const ground = setLightFloor(position);
     let nearest = inside?.mood ? inside : null, best = 24 ** 2;
     if (ground && !nearest) for (const bay of bays) {

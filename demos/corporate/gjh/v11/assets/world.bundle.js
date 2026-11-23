@@ -7722,6 +7722,37 @@ function displayPlacements(number, heroX, heroZ) {
   const scale = number === 17 ? 1.5 : number === 13 || number === 15 || number === 16 ? 1.3 : 0.7;
   return [[heroX, height, heroZ, scale]];
 }
+function studioResources() {
+  const geometries = new Set, materials2 = new Set, textures = new Set;
+  return {
+    track(root) {
+      root.traverse((mesh) => {
+        if (!mesh.isMesh)
+          return;
+        geometries.add(mesh.geometry);
+        for (const material of [].concat(mesh.material)) {
+          materials2.add(material);
+          for (const value of Object.values(material))
+            if (value?.isTexture)
+              textures.add(value);
+        }
+      });
+    },
+    release() {
+      for (const geometry of geometries)
+        geometry.dispose();
+      for (const material of materials2)
+        material.dispose();
+      for (const texture of textures) {
+        texture.dispose();
+        texture.image?.close?.();
+      }
+      geometries.clear();
+      materials2.clear();
+      textures.clear();
+    }
+  };
+}
 async function createExpandedInteriors(T, expandedLayout2, scene, stoneMap, prepareModel = () => {}, shopVisibility, artworkTier = () => "low", detailsEnabled = () => true, waitForSlice, showStorefrontBench = () => {}) {
   const slots = expandedLayout2.slots.filter((slot2) => Number(slot2.number) >= 4 && Number(slot2.number) <= 17);
   const material = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.65 });
@@ -7758,26 +7789,28 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     const number = Number(slot2.number);
     return [...(displayFiles[number] || []).map((file) => `./${file}.glb`), ...galleryPlacements[number].map(({ file }) => `./${file}`)];
   }).map((name) => [name, "pending"]));
+  let districtLife = new AbortController;
+  let resources = studioResources(), resident = true;
   function loadModel(name) {
     if (!models2.has(name)) {
       modelStates.set(name, "loading");
       const url = new URL(name, import.meta.url), controller = new AbortController;
+      const generation = districtLife.signal;
+      const abort = () => controller.abort();
+      generation.addEventListener("abort", abort, { once: true });
       let timer, abandoned = false;
       const load2 = async () => {
         const response = await fetch(url, { signal: controller.signal });
         if (!response.ok)
           throw new Error(`Model request failed: ${response.status}`);
         const gltf = await parseWarmGLTF(gltfLoader, await response.arrayBuffer(), new URL(".", url).href, waitForSlice, controller.signal);
-        if (abandoned) {
-          gltf.scene.traverse((node) => {
-            if (!node.isMesh)
-              return;
-            node.geometry?.dispose();
-            for (const material2 of Array.isArray(node.material) ? node.material : [node.material])
-              material2?.dispose();
-          });
-          throw new Error("Model load timed out");
+        if (abandoned || generation.aborted) {
+          const abandonedModel = studioResources();
+          abandonedModel.track(gltf.scene);
+          abandonedModel.release();
+          throw new Error("Studio model load interrupted");
         }
+        resources.track(gltf.scene);
         if (name === `./${gigasetLoungeSofa.file}` && !hasGigasetSeatCushions(T, gltf.scene))
           throw new Error("Gigaset furnishing is missing a usable seat cushion");
         const materials2 = new Set;
@@ -7798,13 +7831,18 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
         }, 45000);
       });
       models2.set(name, Promise.race([load2(), deadline2]).then((scene2) => {
+        generation.throwIfAborted();
         modelStates.set(name, "loaded");
         loadedScenes.set(name, scene2);
         return scene2;
       }, (error) => {
-        modelStates.set(name, "fallback");
+        if (!generation.aborted)
+          modelStates.set(name, "fallback");
         throw error;
-      }).finally(() => clearTimeout(timer)));
+      }).finally(() => {
+        clearTimeout(timer);
+        generation.removeEventListener("abort", abort);
+      }));
     }
     return models2.get(name);
   }
@@ -8039,18 +8077,19 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     hero.userData.fallbackBounds = localBounds(parts);
     hero.userData.fallbackVisible = true;
     group.add(hero);
-    let loadHero, display, loaded = false;
+    let loadHero, display, preparation, loaded = false;
     addStudioParts(fixtureParts, () => group.visible);
     addStudioParts(parts, () => group.visible && (!loaded || !display?.visible));
     if (files) {
       display = new T.Group;
       display.visible = false;
-      let preparation;
       loadHero = () => {
         if (preparation)
           return preparation;
+        const generation = districtLife.signal;
         const placements2 = displayPlacements(number, heroOffset, heroZ);
         preparation = Promise.all(files.map((name) => loadModel(`./${name}.glb`))).then(async (scenes) => {
+          generation.throwIfAborted();
           scenes.forEach((model, i) => {
             const instance = model.clone(true);
             const [x, y, z, scale] = placements2[i];
@@ -8058,9 +8097,11 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
             instance.scale.setScalar(scale);
             instance.name = `S${slot2.number} ${files[i]}`;
             mergeOpaqueMeshes(T, instance);
+            resources.track(instance);
             display.add(instance);
           });
-          await prepareModel(display, { priority: () => display.visible ? -100 : 0 });
+          await prepareModel(display, { signal: generation, priority: () => display.visible ? -100 : 0 });
+          generation.throwIfAborted();
           hero.add(display);
           loaded = true;
           hero.userData.modelReady = true;
@@ -8097,19 +8138,24 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     const shopState = { number: String(slot2.number), status: "pending", galleryLoaded: 0, galleryFailed: 0 };
     const gallery = [];
     async function loadShop() {
+      const generation = districtLife.signal;
       await Promise.all([
         loadHero?.(),
         ...placements.map(async (placement) => {
           const { file, position, yaw = 0, scale = 1 } = placement;
           try {
-            const model = (await loadModel(`./${file}`)).clone(true);
+            const source = await loadModel(`./${file}`);
+            generation.throwIfAborted();
+            const model = source.clone(true);
             const bench = placement === casioStorefrontPiano ? measureStorefrontPiano(T, model) : null;
             model.position.set(...position);
             model.rotation.y = yaw;
             model.scale.setScalar(scale);
             model.name = `S${slot2.number} gallery: ${file}`;
             mergeOpaqueMeshes(T, model);
-            await prepareModel(model);
+            resources.track(model);
+            await prepareModel(model, { signal: generation });
+            generation.throwIfAborted();
             group.add(model);
             model.updateWorldMatrix(true, true);
             gallery.push({ model, bounds: new T.Box3().setFromObject(model) });
@@ -8119,6 +8165,8 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
               sofaMounted = true;
             shopState.galleryLoaded++;
           } catch (error) {
+            if (generation.aborted)
+              return;
             if (placement === casioStorefrontPiano)
               showStorefrontBench(null);
             shopState.galleryFailed++;
@@ -8138,7 +8186,23 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       display,
       isLoaded: () => loaded,
       loadDisplay: loadShop,
-      state: shopState
+      state: shopState,
+      resetModels() {
+        this.loadDisplay = loadShop;
+        for (const { model } of gallery)
+          model.removeFromParent();
+        gallery.length = 0;
+        if (display) {
+          display.removeFromParent();
+          display.clear();
+          display.visible = false;
+        }
+        preparation = undefined;
+        loaded = sofaMounted = false;
+        hero.userData.modelReady = !files;
+        hero.userData.fallbackVisible = true;
+        Object.assign(shopState, { status: "pending", galleryLoaded: 0, galleryFailed: 0 });
+      }
     });
   });
   const studioBatch = createPackedDraw(T, studioParts, material);
@@ -8146,7 +8210,7 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
   scene.add(studioBatch.mesh);
   let loading = false, scheduled = false, lastVisitor = null;
   function schedulePrefetch() {
-    if (!detailsEnabled())
+    if (!resident || !detailsEnabled())
       return;
     if (loading || scheduled)
       return;
@@ -8154,7 +8218,10 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     if (!candidates.length)
       return;
     scheduled = true;
+    const generation = districtLife.signal;
     const run = () => {
+      if (generation.aborted)
+        return;
       scheduled = false;
       if (document.hidden)
         return;
@@ -8166,9 +8233,11 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
       next.loadDisplay = null;
       next.state.status = "loading";
       load2().catch((error) => console.warn("Shop preload failed", error)).finally(() => {
-        next.state.status = "settled";
-        loading = false;
-        schedulePrefetch();
+        if (!generation.aborted) {
+          next.state.status = "settled";
+          loading = false;
+          schedulePrefetch();
+        }
       });
     };
     if ("requestIdleCallback" in window)
@@ -8176,52 +8245,90 @@ totalEmissiveRadiance += max(0.,vShopGlow) * vec3(.88,.52,.23);
     else
       window.setTimeout(run, 100);
   }
-  document.addEventListener("visibilitychange", () => {
+  const onVisibility = () => {
     if (!document.hidden)
       schedulePrefetch();
-  });
+  };
+  document.addEventListener("visibilitychange", onVisibility);
   schedulePrefetch();
-  return { collisionBoxes, gigasetSeatBox, grandCabinetBox, storefrontPianoBox, nativeStudioSeats, getPreloadedModels() {
-    return [...loadedScenes].map(([name, scene2]) => ({ name: new URL(name, import.meta.url).href, scene: scene2 }));
-  }, get preloadState() {
-    return {
-      models: Object.fromEntries(modelStates),
-      shops: shops.map((shop) => ({ ...shop.state })),
-      settled: shops.filter((shop) => shop.state.status === "settled").length,
-      total: shops.length
-    };
-  }, update(visitor, view) {
-    lastVisitor = { x: visitor.x, z: visitor.z };
-    let nearest = null, nearestDistance = 11 * 11;
-    for (const shop of shops) {
-      const dx = visitor.x - shop.x, dz = visitor.z - shop.z, distance = dx * dx + dz * dz;
-      shop.group.visible = Math.abs(visitor.y) < 5 && distance < 17 * 17;
-      if (shop.group.visible && distance < nearestDistance) {
-        nearest = shop;
-        nearestDistance = distance;
-      }
+  function setResident(value) {
+    if (value === resident)
+      return;
+    resident = value;
+    if (value) {
+      districtLife = new AbortController;
+      schedulePrefetch();
+    } else {
+      districtLife.abort();
+      loading = scheduled = false;
+      showStorefrontBench(null);
+      for (const shop of shops)
+        shop.resetModels();
+      resources.release();
+      loadedScenes.clear();
+      models2.clear();
+      for (const key of modelStates.keys())
+        modelStates.set(key, "pending");
     }
-    for (const shop of shops) {
-      for (const { model, bounds } of shop.gallery) {
-        model.visible = !view || bounds.isEmpty() || !shopVisibility?.occluded(shop.number, bounds);
+  }
+  return {
+    collisionBoxes,
+    gigasetSeatBox,
+    grandCabinetBox,
+    storefrontPianoBox,
+    nativeStudioSeats,
+    setResident,
+    dispose() {
+      setResident(false);
+      document.removeEventListener("visibilitychange", onVisibility);
+    },
+    get residentModels() {
+      return loadedScenes.size;
+    },
+    getPreloadedModels() {
+      return [...loadedScenes].map(([name, scene2]) => ({ name: new URL(name, import.meta.url).href, scene: scene2 }));
+    },
+    get preloadState() {
+      return {
+        models: Object.fromEntries(modelStates),
+        shops: shops.map((shop) => ({ ...shop.state })),
+        settled: shops.filter((shop) => shop.state.status === "settled").length,
+        total: shops.length
+      };
+    },
+    update(visitor, view) {
+      lastVisitor = { x: visitor.x, z: visitor.z };
+      let nearest = null, nearestDistance = 11 * 11;
+      for (const shop of shops) {
+        const dx = visitor.x - shop.x, dz = visitor.z - shop.z, distance = dx * dx + dz * dz;
+        shop.group.visible = Math.abs(visitor.y) < 5 && distance < 17 * 17;
+        if (shop.group.visible && distance < nearestDistance) {
+          nearest = shop;
+          nearestDistance = distance;
+        }
       }
-      if (!shop.display)
-        continue;
-      const active = shop === nearest;
-      shop.display.visible = active;
-      if (active && detailsEnabled() && !shop.isLoaded())
-        shop.loadHero();
-      shop.hero.userData.fallbackVisible = !active || !shop.isLoaded();
+      for (const shop of shops) {
+        for (const { model, bounds } of shop.gallery) {
+          model.visible = !view || bounds.isEmpty() || !shopVisibility?.occluded(shop.number, bounds);
+        }
+        if (!shop.display)
+          continue;
+        const active = shop === nearest;
+        shop.display.visible = active;
+        if (active && resident && detailsEnabled() && !shop.isLoaded())
+          shop.loadHero();
+        shop.hero.userData.fallbackVisible = !active || !shop.isLoaded();
+      }
+      studioBatch.update((part) => {
+        if (part.visible && !part.visible())
+          return -1;
+        if (!view)
+          return 0;
+        return view.frustum.intersectsBox(part.bounds) && !shopVisibility?.occluded(part.number, part.bounds) ? 0 : -1;
+      });
+      schedulePrefetch();
     }
-    studioBatch.update((part) => {
-      if (part.visible && !part.visible())
-        return -1;
-      if (!view)
-        return 0;
-      return view.frustum.intersectsBox(part.bounds) && !shopVisibility?.occluded(part.number, part.bounds) ? 0 : -1;
-    });
-    schedulePrefetch();
-  } };
+  };
 }
 
 // demos/corporate/gjh/v11/assets/interiors/surfaces.js
@@ -8956,7 +9063,7 @@ function createInteriorKit(T, scene, {
   showGrandBench,
   artworkTier = () => "low",
   waitForSlice,
-  loadModel = createInteriorModelLoader(T, assetBase2, undefined, artworkTier, waitForSlice),
+  loadModel,
   reducedMotion = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)"),
   now = () => performance.now()
 }) {
@@ -8964,6 +9071,10 @@ function createInteriorKit(T, scene, {
   const report = emptyInteriorReport("low"), renderedShops = new Set;
   const visibilityParts = new WeakMap;
   let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
+  const makeLoader = () => createInteriorModelLoader(T, assetBase2, undefined, artworkTier, waitForSlice);
+  const injectedLoader = Boolean(loadModel);
+  loadModel ??= makeLoader();
+  let resident = true, requestedTier;
   let lastUpdate;
   if (packshot && !packshot.userData.artworkMipmaps)
     setupArtworkTexture(T, packshot, artworkTier());
@@ -9064,6 +9175,10 @@ function createInteriorKit(T, scene, {
       showGrandBench?.(roots.find((root) => root.userData.grandPiano));
   }
   function activateTier(tier) {
+    if (!resident) {
+      requestedTier = tier;
+      return true;
+    }
     if (request?.tier !== tier || report.preinstalled.shops !== shops.length)
       return false;
     for (const shop of shops)
@@ -9204,9 +9319,28 @@ function createInteriorKit(T, scene, {
       }
     }
   }
+  function evictModels() {
+    for (const shop of shops) {
+      for (const model of shop.models.values())
+        disposeInteriorModel(model);
+      shop.models.clear();
+      shop.layers.forEach((layer) => layer.traverse((mesh) => {
+        mesh.geometry?.dispose();
+        if (packshot && mesh.material?.map === packshot)
+          mesh.material.dispose();
+      }));
+      shop.layers.length = 0;
+      shop.motion = null;
+      shop.group.clear();
+    }
+    report.modelsLoaded = report.bytes = 0;
+  }
   return {
     prepare(tier, createInstaller, { deferActivation = false } = {}) {
+      requestedTier = tier;
       installer ??= createInstaller();
+      if (!resident)
+        return Promise.resolve({ ...report.preinstalled });
       const job = request?.tier === tier ? request : start(tier, deferActivation);
       return deferActivation ? job.done : awaitLatest(job);
     },
@@ -9231,7 +9365,8 @@ function createInteriorKit(T, scene, {
     groups: shops.map((shop) => shop.group),
     setTier(tier) {
       const target = interiorTiers.includes(tier) ? tier : "low";
-      if (installer && !disposed && request?.tier !== target)
+      requestedTier = target;
+      if (resident && installer && !disposed && request?.tier !== target)
         start(target);
     },
     update(position, view) {
@@ -9283,7 +9418,33 @@ function createInteriorKit(T, scene, {
       return installer.runFrame(remaining);
     },
     get activeTier() {
-      return activeTier;
+      return resident ? activeTier : requestedTier;
+    },
+    get residency() {
+      return {
+        resident,
+        models: shops.reduce((n, shop) => n + shop.models.size, 0),
+        colliders: shops.reduce((n, shop) => n + (shop.removeColliders?.length ?? 0), 0)
+      };
+    },
+    setResident(value) {
+      if (disposed || resident === value)
+        return;
+      resident = value;
+      if (value) {
+        if (!injectedLoader)
+          loadModel = makeLoader();
+        if (installer)
+          start(requestedTier || artworkTier());
+      } else {
+        requestedTier = request?.tier || activeTier || artworkTier();
+        this.invalidate();
+        evictModels();
+        if (!injectedLoader) {
+          loadModel.dispose();
+          loadModel = null;
+        }
+      }
     },
     beginFrame() {
       report.drawCalls = report.triangles = 0;
@@ -9316,22 +9477,163 @@ function createInteriorKit(T, scene, {
       request?.controller.abort();
       request?.resolve({ ...report.preinstalled });
       installer?.dispose();
-      for (const shop of shops) {
-        if (shop.store.anchor.asset_id === "grand-piano")
-          showGrandBench?.(null);
-        removeColliders(shop);
-        for (const model of shop.models.values())
-          disposeInteriorModel(model);
-        shop.layers.forEach((layer) => layer.traverse((mesh) => {
-          mesh.geometry?.dispose();
-          if (packshot && mesh.material?.map === packshot)
-            mesh.material.dispose();
-        }));
+      this.invalidate();
+      evictModels();
+      for (const shop of shops)
         shop.group.removeFromParent();
-      }
       materials2.opaque.dispose();
       materials2.glow.dispose();
-      loadModel.dispose?.();
+      loadModel?.dispose?.();
+    }
+  };
+}
+
+// demos/corporate/gjh/v11/assets/district-gateway.js
+var southDoor = Object.freeze({ x: expandedLayout.entrance.x, z: expandedLayout.bounds.maxZ, halfWidth: 2.16 });
+var loadSingaporeStreet = (T, signal) => import("./street-chunk.js").then((module) => module.loadSingaporeStreet(T, signal));
+function createDistrictGateway({ T, R, physics, scene, cameraObstacles, setMallDetail, notice, tier = () => "balanced", load: load2 = loadSingaporeStreet }) {
+  const { x: centre, z: threshold, halfWidth } = southDoor;
+  const barrier = physics.createCollider(R.ColliderDesc.cuboid(halfWidth, 2.7, 0.11).setTranslation(centre, 2.68, threshold));
+  const geometry = new T.BoxGeometry;
+  const glass = new T.InstancedMesh(geometry, new T.MeshStandardMaterial({ color: 11654859, transparent: true, opacity: 0.34, roughness: 0.25 }), 2);
+  const rails = new T.InstancedMesh(geometry, new T.MeshStandardMaterial({ color: 12886894, roughness: 0.48, metalness: 0.32 }), 12);
+  glass.name = "South street sliding glass doors";
+  rails.name = "South street entrance rails";
+  const matrix = new T.Matrix4, position = new T.Vector3, scale = new T.Vector3, rotation = new T.Quaternion;
+  function piece(mesh, index, x, y, z, w, h, d) {
+    mesh.setMatrixAt(index, matrix.compose(position.set(x, y, z), rotation, scale.set(w, h, d)));
+  }
+  let opening = 0;
+  function positionDoors() {
+    let i = 0, j = 0;
+    for (const side of [-1, 1]) {
+      const x = centre + side * (halfWidth / 2 + (halfWidth + 0.04) * opening);
+      piece(glass, i++, x, 2.66, threshold - 0.13, halfWidth, 5.32, 0.07);
+      for (const left of [-1, 1])
+        piece(rails, j++, x + left * 1.05, 2.66, threshold - 0.14, 0.055, 5.32, 0.085);
+      for (const y of [0.11, 1.07, 5.27])
+        piece(rails, j++, x, y, threshold - 0.16, 2.12, 0.075, 0.095);
+      piece(rails, j++, x - side * 0.8, 1.27, threshold - 0.22, 0.045, 0.48, 0.09);
+    }
+    for (const mesh of [glass, rails]) {
+      mesh.instanceMatrix.needsUpdate = true;
+      mesh.computeBoundingSphere();
+    }
+  }
+  positionDoors();
+  scene.add(glass, rails);
+  let chunk, controller, status = "mall", interiorResident = true, cycles = 0, ended = false;
+  let lastNotice = "";
+  function message(value) {
+    if (lastNotice === value)
+      return;
+    lastNotice = value;
+    notice(value);
+  }
+  function closeDoors() {
+    barrier.setEnabled(true);
+    if (opening) {
+      opening = 0;
+      positionDoors();
+    }
+  }
+  function mallDetail(value) {
+    if (value === interiorResident)
+      return;
+    interiorResident = value;
+    setMallDetail(value);
+  }
+  function retireStreet() {
+    closeDoors();
+    controller?.abort();
+    controller = undefined;
+    chunk?.dispose(physics);
+    chunk = undefined;
+    status = "mall";
+    message("");
+  }
+  async function approach() {
+    const attempt = new AbortController;
+    controller = attempt;
+    status = "loading";
+    message("Opening the Singapore street…");
+    const timeout2 = setTimeout(() => attempt.abort(), 20000);
+    try {
+      const prepared = await load2(T, attempt.signal);
+      if (ended || attempt.signal.aborted || controller !== attempt) {
+        prepared.dispose(physics);
+        throw new DOMException("Street request cancelled", "AbortError");
+      }
+      prepared.mount(scene, R, physics, cameraObstacles);
+      chunk = prepared;
+      status = "opening";
+    } catch {
+      if (controller === attempt && !ended) {
+        status = "unavailable";
+        message("Street unavailable. Step back, then approach to retry.");
+      }
+    } finally {
+      clearTimeout(timeout2);
+      if (controller === attempt)
+        controller = undefined;
+    }
+  }
+  return {
+    update({ x, y, z, yaw }) {
+      if (ended)
+        return;
+      chunk?.update?.(x, z, tier());
+      const outside = z - threshold, lateral = Math.abs(x - centre);
+      if (outside < 4)
+        mallDetail(true);
+      if (outside < -6 || outside < 0 && (y > 3 || lateral > 8)) {
+        if (status !== "mall")
+          retireStreet();
+        return;
+      }
+      const lookingOut = Number.isFinite(yaw) && Math.cos(yaw) < -0.55;
+      const near = lateral < 3.2 && outside < 1 && (outside > -1.95 || lookingOut && outside > -4.5);
+      if (status === "unavailable" && !near)
+        retireStreet();
+      if (status === "mall" && near)
+        approach();
+      if (status === "opening") {
+        const instant = globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+        opening = instant ? 1 : Math.min(1, opening + 0.075);
+        positionDoors();
+        if (opening === 1) {
+          barrier.setEnabled(false);
+          status = "ready";
+          message("Street open. Walk through the south entrance.");
+        }
+      }
+      if (chunk && outside > 1) {
+        status = "street";
+        message("");
+      } else if (chunk && status === "street" && outside < -0.5) {
+        status = "ready";
+        message("");
+      }
+      if (chunk && outside > 10 && interiorResident) {
+        mallDetail(false);
+        cycles++;
+      }
+    },
+    get state() {
+      return { status, interiorResident, cycles, models: chunk ? [...chunk.models] : [], street: chunk?.counts ?? { models: 0, geometries: 0, materials: 0, colliders: 0, cameraBounds: 0, lodGroups: 0, visibleLod: 0 } };
+    },
+    dispose() {
+      if (ended)
+        return;
+      ended = true;
+      retireStreet();
+      physics.removeCollider(barrier, false);
+      geometry.dispose();
+      for (const mesh of [glass, rails]) {
+        mesh.removeFromParent();
+        mesh.dispose();
+        mesh.material.dispose();
+      }
     }
   };
 }
@@ -9955,7 +10257,7 @@ function applyMallThemeToWorld(theme, { expanded, materials: materials2, ambient
   fog?.color.set(l.fog);
   return true;
 }
-async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => "low", phone = false, detailsEnabled = () => true, waitForSlice, registerShopSeat) {
+async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => "low", phone = false, detailsEnabled = () => true, waitForSlice, registerShopSeat, streetNotice = () => {}) {
   let shellState = null;
   const expandedLift = expanded && new URLSearchParams(location.search).get("visitor") !== "v1";
   const textures = new Map, loader = new T.TextureLoader().setCrossOrigin(undefined);
@@ -11131,9 +11433,20 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     box("ivory", 10, 3.3, -12, 70, 6.6, 0.3, true);
     for (const x of [-10.5, 30.5])
       box("ivory", x, 3.3, 48, 29, 6.6, 0.3, true);
-    box("glass", 10, 2.8, 48, 12, 5.6, 0.3, true);
-    for (const x of [4, 10, 16])
-      box("brass", x, 2.8, 47.8, 0.08, 5.6, 0.08);
+    const { x: entryX, z: entryZ, halfWidth: doorHalf } = southDoor;
+    const sidelights = 6 - doorHalf;
+    for (const side of [-1, 1]) {
+      box("glass", entryX + side * (doorHalf + sidelights / 2), 2.8, entryZ, sidelights, 5.6, 0.3, true);
+      for (const offset of [doorHalf, 6])
+        box("brass", entryX + side * offset, 2.8, entryZ - 0.2, 0.08, 5.6, 0.08);
+      for (const distance of [1.95, 1.04]) {
+        solid("box", "brass", entryX + side * 0.26, 0.002, entryZ - distance, 0.66, 0.012, 0.105, side * Math.PI / 5);
+      }
+    }
+    box("green", entryX, 5.7, entryZ, doorHalf * 2 + 0.14, 0.68, 0.22);
+    const streetSign = sign("SINGAPORE STREET", entryX, 5.7, entryZ - 0.13, 3.8, 0.44, false, 71);
+    streetSign.rotation.y = Math.PI;
+    sign("GJH VIRTUAL MALL", entryX, 5.7, entryZ + 0.13, 3.8, 0.44, false, 71);
     ceilingBox("shellCeiling", 10, 8.5, 18, 70, 0.25, 60, liftLayout.roofOpening);
     for (const x of [-12, 32])
       for (const z of [10, 22, 34])
@@ -11712,14 +12025,66 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     interiors: interiorKit,
     initialTier: artworkTier()
   });
-  return { signage, defaultExposure: EVERYDAY.lighting.exposure, interiors: interiorKit, restrooms, shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits } : {}, getPreloadedModels() {
-    return interiorModels?.getPreloadedModels() || [];
-  }, get modelPreload() {
-    const preload = interiorModels?.preloadState;
-    return preload ? { ...preload, sceneModels: Object.fromEntries(["Gallery lift directory standee", "Gallery atrium chandelier"].map((name) => [name, scene.getObjectByName(name)?.userData.sourceStatus || "pending"])) } : null;
-  }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities: amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, prepareUpperFurniture, get upperWarmStatus() {
-    return upperWarmStatus;
-  }, furnishings: Object.freeze({ ...furnishingState, ...additions?.state }), productAssets: Object.freeze(worldProductAssets) };
+  const district = expanded ? createDistrictGateway({
+    T,
+    R,
+    physics,
+    scene,
+    cameraObstacles,
+    notice: streetNotice,
+    tier: artworkTier,
+    setMallDetail(value) {
+      interiorModels.setResident(value);
+      interiorKit.setResident(value);
+    }
+  }) : null;
+  return {
+    signage,
+    district,
+    get mallDetailResidency() {
+      return { studioModels: interiorModels?.residentModels ?? 0, rooms: interiorKit?.residency };
+    },
+    disposeStudios() {
+      interiorModels?.dispose();
+    },
+    defaultExposure: EVERYDAY.lighting.exposure,
+    interiors: interiorKit,
+    restrooms,
+    shopExhibits: expanded ? { ...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits } : {},
+    getPreloadedModels() {
+      return interiorModels?.getPreloadedModels() || [];
+    },
+    get modelPreload() {
+      const preload = interiorModels?.preloadState;
+      return preload ? { ...preload, sceneModels: Object.fromEntries(["Gallery lift directory standee", "Gallery atrium chandelier"].map((name) => [name, scene.getObjectByName(name)?.userData.sourceStatus || "pending"])) } : null;
+    },
+    scene,
+    bakedLighting,
+    doors,
+    seats,
+    shell: shellState,
+    cameraObstacles,
+    amenities: amenities.state,
+    interactables,
+    shelves,
+    createCollectProp,
+    reserveProduct,
+    contact,
+    plane,
+    roomSigns,
+    updateSigns,
+    updateShopLods,
+    drawWithPlayerContact,
+    applyMallTheme,
+    ensureBrandWall,
+    prepareUpperLevel,
+    prepareUpperFurniture,
+    get upperWarmStatus() {
+      return upperWarmStatus;
+    },
+    furnishings: Object.freeze({ ...furnishingState, ...additions?.state }),
+    productAssets: Object.freeze(worldProductAssets)
+  };
 }
 export {
   createWorld,

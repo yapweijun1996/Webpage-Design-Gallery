@@ -19,7 +19,7 @@ const variants = {
   sw: ['', 'wdg:', ':shell:']
 };
 
-function fixture(template) {
+function fixture(template, optional = {}) {
   const [directory, prefix, suffix] = variants[template];
   const base = new URL(directory, 'https://example.test/gallery/');
   const cachePrefix = prefix + base.pathname + suffix;
@@ -53,7 +53,8 @@ function fixture(template) {
     .replace('__BUILD__', JSON.stringify(build))
     .replace('__VERSION__', JSON.stringify(version))
     .replace('__PRECACHE__', JSON.stringify(manifest))
-    .replace('__LAZY_ASSETS__', '[]')
+    .replace('__LAZY_ASSETS__', JSON.stringify(Object.entries(optional).map(([path,[body]]) => ({
+      path,sha256:createHash('sha256').update(body).digest('hex')}))))
     .replace('__RELEASE__', JSON.stringify({build, version}))
     .replace('__ASSETS__', JSON.stringify(Object.fromEntries(manifest.map(e => [e.path, e.sha256]))))
     .replace('__IDENTITY__', '"../../../../version.json"')
@@ -73,7 +74,7 @@ function fixture(template) {
       const path = url.pathname.split('/').at(-1);
       if (path === 'version.json') return Response.json({build, version});
       if (path === errorFor) return new Response('wrong release', {headers: {'Content-Type': assets[path][1]}});
-      const [body, type] = assets[path];
+      const [body, type] = optional[url.pathname.slice(base.pathname.length)] || assets[path];
       return new Response(body, {headers: {'Content-Type': type}});
     }
   });
@@ -83,8 +84,8 @@ function fixture(template) {
     listeners[event]({...fields, waitUntil: capture, respondWith: capture});
     return pending;
   }
-  function request(path, mode = 'same-origin', referrer) {
-    return dispatch('fetch', {request: {method: 'GET', mode, url: key(path), referrer}});
+  function request(path, mode = 'same-origin', referrer, headers = {}) {
+    return dispatch('fetch', {request: {method: 'GET', mode, url: key(path), referrer, headers:new Headers(headers)}});
   }
   return {
     dispatch, request, fetched, files, oldName, cacheName, key,
@@ -197,4 +198,24 @@ test('v11 recovery clears only the active cache after a fresh navigation succeed
   const css = await f.request('style.bundle.css', 'same-origin', f.key('index.html?recover-page=1'));
   assert.equal(await css.text(), 'wrong release'); // Recovery loads the server's current release.
   assert.equal(f.cache, undefined);
+});
+
+test('a warm Singapore GLB supports verified offline ranges while offline mall navigation keeps its reconnect page',async () => {
+  const path = 'assets/districts/singapore/angsana-tree.glb';
+  const bytes = readFileSync(new URL('../demos/corporate/gjh/v11/'+path,import.meta.url));
+  const f = fixture('gjh-v11-sw',{[path]:[bytes,'model/gltf-binary']});
+  await f.dispatch('install');
+  assert.equal(f.cache.has(f.key(path)),false);
+  await f.request(path);
+  f.down(true);
+  const range = async value => f.request(path,'same-origin',undefined,{Range:value});
+  const part = await range('bytes=12-31');
+  assert.equal(part.status,206);
+  assert.equal(part.headers.get('content-range'),`bytes 12-31/${bytes.length}`);
+  assert.deepEqual(Buffer.from(await part.arrayBuffer()),bytes.subarray(12,32));
+  assert.equal((await range('bytes='+bytes.length+'-')).status,416);
+  const full = await f.request(path,'same-origin',undefined,{Range:'bytes=0-3','If-Range':'unmatched'});
+  assert.equal(full.status,200);
+  assert.deepEqual(Buffer.from(await full.arrayBuffer()),bytes);
+  assert.match(await (await f.request('','navigate')).text(),/Reconnect screen/);
 });

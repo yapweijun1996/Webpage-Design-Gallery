@@ -1,0 +1,61 @@
+{
+  "project": "Blender-3D-Gallery",
+  "revision": "3b87c372070051a876190518294cb3a0090b1cd3",
+  "assets": [
+    {
+      "file": "hdb-block.glb",
+      "bytes": 1137308,
+      "sha256": "e24f78bab50bf89697e68608d3369192b70625d765a78abd7716eceb5f964a98",
+      "source": "models/hdb-block/exports/optimized.glb",
+      "blend": "models/hdb-block/sources/hdb-block.blend",
+      "blendSha256": "9b15bbba32addc3a98279fdbf60dcd202e72c2d4ea02f19ff8bad2a8f77f33ab",
+      "license": "models/hdb-block/LICENSE.md",
+      "licenseSha256": "6fdfc31a6ac6dface3d1f2d6f10565aebe95bd29901fdced84669a3a07d8ab92",
+      "terms": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.\nOriginal procedural geometry/materials, no external assets."
+    },
+    {
+      "file": "hdb-void-deck.glb",
+      "bytes": 192360,
+      "sha256": "d01416ca2d9ca2d644da14546f1b45ea659b08cd13e4eb7739bd7c04459fb391",
+      "source": "models/hdb-void-deck/exports/optimized.glb",
+      "blend": "models/hdb-void-deck/sources/hdb-void-deck.blend",
+      "blendSha256": "25fa8cc32ce010b5c5e503e66938010e10929e9c7497a0f5a0a4128895fa80a8",
+      "license": "models/hdb-void-deck/LICENSE.md",
+      "licenseSha256": "6fdfc31a6ac6dface3d1f2d6f10565aebe95bd29901fdced84669a3a07d8ab92",
+      "terms": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.\nOriginal procedural geometry/materials, no external assets."
+    },
+    {
+      "file": "road-segment.glb",
+      "bytes": 189576,
+      "sha256": "6e5ee9563b02614614efc9e3b111d173e852fdf6fa548feae31cecc77188aa8e",
+      "source": "models/road-segment/exports/optimized.glb",
+      "blend": "models/road-segment/sources/road-segment.blend",
+      "blendSha256": "e6911497a0e499d7039b8cb021b56b4913a529710c41721b248fae9e91f4f1ce",
+      "license": "models/road-segment/LICENSE.md",
+      "licenseSha256": "6fdfc31a6ac6dface3d1f2d6f10565aebe95bd29901fdced84669a3a07d8ab92",
+      "terms": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.\nOriginal procedural geometry/materials, no external assets."
+    },
+    {
+      "file": "shophouse.glb",
+      "bytes": 227604,
+      "sha256": "0d18690174361a34eba0d65c71111744e94c580b8a431cde5fc464cb2621229d",
+      "source": "models/shophouse/exports/shophouse.glb",
+      "blend": "models/shophouse/sources/shophouse.blend",
+      "blendSha256": "d6154304c91620296e1a24fd048e17fc5b42d8778c767835dd6afabcffcd5284",
+      "license": "models/shophouse/LICENSE.md",
+      "licenseSha256": "4e25894d2d54495ca5e71578235da761123f557c62d0d00ed8cfb052363f78c5",
+      "terms": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified. Not a medical, accessibility, engineering or safety certification."
+    },
+    {
+      "file": "angsana-tree.glb",
+      "bytes": 78600,
+      "sha256": "5583dea94e846b3b4deac15da7bf7035692ce2a42a418453158fea973c72d852",
+      "source": "models/angsana-tree/exports/optimized.glb",
+      "blend": "models/angsana-tree/sources/angsana-tree.blend",
+      "blendSha256": "41fd85c6093341c66194a5f27fcb94c687651a15c368bd473f04033ea5c3c006",
+      "license": "models/angsana-tree/LICENSE.md",
+      "licenseSha256": "5c390d72b7a8c4c9d9f9bb4dfdd5584215eeb8a12ad7eb3d16880df823eb72f7",
+      "terms": "Original asset; reuse in the owner's projects is authorized. Public redistribution terms have not been specified.\nOriginal procedural geometry and materials; no external assets."
+    }
+  ]
+}

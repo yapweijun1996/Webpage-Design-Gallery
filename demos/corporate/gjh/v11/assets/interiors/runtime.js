@@ -10,7 +10,7 @@ import {emptyInteriorReport} from './warmup.js';
 
 export function createInteriorKit(T, scene, {
   assetBase, packshot, prepareModel, registerCollider, showGrandBench, artworkTier = () => 'low',
-  waitForSlice, loadModel = createInteriorModelLoader(T,assetBase,undefined,artworkTier,waitForSlice),
+  waitForSlice, loadModel,
   reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)'),
   now = () => performance.now()
 }) {
@@ -19,6 +19,10 @@ export function createInteriorKit(T, scene, {
   const visibilityParts = new WeakMap();
   let installer, request, initialTier, activeTier, decoding = false, drawing = false, disposed = false;
 
+  const makeLoader = () => createInteriorModelLoader(T,assetBase,undefined,artworkTier,waitForSlice);
+  const injectedLoader = Boolean(loadModel);
+  loadModel ??= makeLoader();
+  let resident = true, requestedTier;
   let lastUpdate;
   if (packshot && !packshot.userData.artworkMipmaps) setupArtworkTexture(T,packshot,artworkTier());
 
@@ -111,6 +115,7 @@ export function createInteriorKit(T, scene, {
   }
 
   function activateTier(tier) {
+    if (!resident) { requestedTier = tier; return true; }
     if (request?.tier !== tier || report.preinstalled.shops !== shops.length) return false;
     for (const shop of shops) show(shop,shop.ready.get(tier));
     activeTier = report.tier = tier;
@@ -242,9 +247,26 @@ export function createInteriorKit(T, scene, {
     }
   }
 
+  function evictModels() {
+    for (const shop of shops) {
+      for (const model of shop.models.values()) disposeInteriorModel(model);
+      shop.models.clear();
+      shop.layers.forEach(layer => layer.traverse(mesh => {
+        mesh.geometry?.dispose();
+        if (packshot && mesh.material?.map === packshot) mesh.material.dispose();
+      }));
+      shop.layers.length = 0;
+      shop.motion = null;
+      shop.group.clear();
+    }
+    report.modelsLoaded = report.bytes = 0;
+  }
+
   return {
     prepare(tier, createInstaller, {deferActivation = false} = {}) {
+      requestedTier = tier;
       installer ??= createInstaller();
+      if (!resident) return Promise.resolve({...report.preinstalled});
       const job = request?.tier === tier ? request : start(tier,deferActivation);
       return deferActivation ? job.done : awaitLatest(job);
     },
@@ -266,7 +288,8 @@ export function createInteriorKit(T, scene, {
     groups: shops.map(shop => shop.group),
     setTier(tier) {
       const target = interiorTiers.includes(tier) ? tier : 'low';
-      if (installer && !disposed && request?.tier !== target) start(target);
+      requestedTier = target;
+      if (resident && installer && !disposed && request?.tier !== target) start(target);
     },
     update(position, view) {
       const time = now(), delta = Math.min(.1,Math.max(0,(time-(lastUpdate ?? time))*.001));
@@ -309,7 +332,24 @@ export function createInteriorKit(T, scene, {
       }
       return installer.runFrame(remaining);
     },
-    get activeTier() { return activeTier; },
+    get activeTier() { return resident ? activeTier : requestedTier; },
+    get residency() {
+      return {resident,models:shops.reduce((n,shop) => n+shop.models.size,0),
+        colliders:shops.reduce((n,shop) => n+(shop.removeColliders?.length ?? 0),0)};
+    },
+    setResident(value) {
+      if (disposed || resident === value) return;
+      resident = value;
+      if (value) {
+        if (!injectedLoader) loadModel = makeLoader();
+        if (installer) start(requestedTier || artworkTier());
+      } else {
+        requestedTier = request?.tier || activeTier || artworkTier();
+        this.invalidate();
+        evictModels();
+        if (!injectedLoader) { loadModel.dispose(); loadModel = null; }
+      }
+    },
     beginFrame() {
       report.drawCalls = report.triangles = 0;
       renderedShops.clear();
@@ -339,19 +379,12 @@ export function createInteriorKit(T, scene, {
       request?.controller.abort();
       request?.resolve({...report.preinstalled});
       installer?.dispose();
-      for (const shop of shops) {
-        if (shop.store.anchor.asset_id === 'grand-piano') showGrandBench?.(null);
-        removeColliders(shop);
-        for (const model of shop.models.values()) disposeInteriorModel(model);
-        shop.layers.forEach(layer => layer.traverse(mesh => {
-          mesh.geometry?.dispose();
-          if (packshot && mesh.material?.map === packshot) mesh.material.dispose();
-        }));
-        shop.group.removeFromParent();
-      }
+      this.invalidate();
+      evictModels();
+      for (const shop of shops) shop.group.removeFromParent();
       materials.opaque.dispose();
       materials.glow.dispose();
-      loadModel.dispose?.();
+      loadModel?.dispose?.();
     }
   };
 }

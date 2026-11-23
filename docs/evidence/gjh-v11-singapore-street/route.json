@@ -1,0 +1,3044 @@
+{
+  "build": "bb20d2461e9ffe77",
+  "modelRevision": "3b87c372070051a876190518294cb3a0090b1cd3",
+  "widths": {
+    "390": {
+      "browser": "158.0.8127.37",
+      "width": 390,
+      "height": 844,
+      "input": "CDP real touch joystick and look",
+      "peak": {
+        "frames": 3945,
+        "maximum": 86,
+        "over": []
+      },
+      "hashes": {
+        "/demos/corporate/gjh/v11/style.bundle.css": "157ff3321f26b906c14e82f754708504c8455b136e9dd0b1823a3aebd37a6e30",
+        "/demos/corporate/gjh/v11/pwa.js": "f5d95e87a50d6ed1d6a1859a9537b6dc6d9e88771acddd8130b33f03e1c3ce89",
+        "/demos/corporate/gjh/v11/script.bundle.js": "1fc618962726a1efe9cef4080e5a799710d0b194e2bf34e79c28f6465a0d656d",
+        "/demos/corporate/gjh/v11/assets/world.bundle.js": "e7abf19c51be4b530c653ab6597fa04c5c00de81c846cf39d242c27156f874ac",
+        "/demos/corporate/gjh/v11/assets/player.bundle.js": "a232c2c71d99e5e2dbaa42610c47a51c15ff68e4749005d0273798e5900ea440",
+        "/demos/corporate/gjh/v11/assets/street-chunk.js": "b30477f2a9017698022d8b1170822b6cf36cdc8fa867643352e2d1b9ce8ba500",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/sources.json": "671f7e17af5835cd46e47ea7939fb2c45f75f59b384e12251fbfee0254f05085",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/hdb-block.glb": "e24f78bab50bf89697e68608d3369192b70625d765a78abd7716eceb5f964a98",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/hdb-void-deck.glb": "d01416ca2d9ca2d644da14546f1b45ea659b08cd13e4eb7739bd7c04459fb391",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/road-segment.glb": "6e5ee9563b02614614efc9e3b111d173e852fdf6fa548feae31cecc77188aa8e",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/shophouse.glb": "0d18690174361a34eba0d65c71111744e94c580b8a431cde5fc464cb2621229d",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/angsana-tree.glb": "5583dea94e846b3b4deac15da7bf7035692ce2a42a418453158fea973c72d852"
+      },
+      "deckSightlines": {
+        "hits": {
+          "feet": [],
+          "torso": [],
+          "head": [],
+          "top": []
+        },
+        "eye": [
+          -4.202245841371312,
+          1.739139856186833,
+          52.31003954804513
+        ],
+        "foot": [
+          -9.177267074584961,
+          -1.245737075805664e-05,
+          52.31003952026367
+        ],
+        "yaw": 7.853981628417969,
+        "pitch": 0.1
+      },
+      "stops": {
+        "spawn": {
+          "x": 10.000000953674316,
+          "y": -0.019905924797058105,
+          "z": 45,
+          "yaw": 0,
+          "pitch": 0.1,
+          "zone": "atrium",
+          "calls": 66,
+          "gpu": {
+            "geometries": 277,
+            "textures": 110
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 2.6301075947880364,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 609,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 539,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 461,
+              "inside": true
+            }
+          }
+        },
+        "offline-at-entrance": {
+          "x": 10.000000953674316,
+          "y": -0.019905924797058105,
+          "z": 45,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "atrium",
+          "calls": 19,
+          "gpu": {
+            "geometries": 277,
+            "textures": 110
+          },
+          "street": {
+            "status": "unavailable",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 4.964023027663967,
+          "projection": {
+            "feet": {
+              "x": 196,
+              "y": 543,
+              "inside": true
+            },
+            "torso": {
+              "x": 196,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 196,
+              "y": 442,
+              "inside": true
+            }
+          }
+        },
+        "failed-load": {
+          "x": 9.997894287109375,
+          "y": -0.019904136657714844,
+          "z": 47.56501770019531,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "atrium",
+          "calls": 16,
+          "gpu": {
+            "geometries": 277,
+            "textures": 110
+          },
+          "street": {
+            "status": "unavailable",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 4.975713160060631,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 542,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 442,
+              "inside": true
+            }
+          }
+        },
+        "entrance": {
+          "x": 9.997589111328125,
+          "y": -0.019905924797058105,
+          "z": 45.125144958496094,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "atrium",
+          "calls": 34,
+          "gpu": {
+            "geometries": 305,
+            "textures": 110
+          },
+          "street": {
+            "status": "ready",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 7,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 4.97786020920584,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 542,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 442,
+              "inside": true
+            }
+          }
+        },
+        "threshold": {
+          "x": 9.99803638458252,
+          "y": -0.01990288496017456,
+          "z": 50.85237503051758,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 31,
+          "gpu": {
+            "geometries": 305,
+            "textures": 110
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 9,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 4.97788401324108,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 542,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 442,
+              "inside": true
+            }
+          }
+        },
+        "under-void-deck": {
+          "x": -9.177267074584961,
+          "y": -0.00011241436004638672,
+          "z": 52.31003952026367,
+          "yaw": 7.853981628417969,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 32,
+          "gpu": {
+            "geometries": 307,
+            "textures": 110
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 4,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 4.975021731792523,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 533,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 471,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 413,
+              "inside": true
+            }
+          }
+        },
+        "street": {
+          "x": 10.226316452026367,
+          "y": -0.01991325616836548,
+          "z": 65.59896087646484,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 20,
+          "gpu": {
+            "geometries": 141,
+            "textures": 75
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 8,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 4.977526458984487,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 542,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 442,
+              "inside": true
+            }
+          }
+        },
+        "hdb": {
+          "x": 10.226316452026367,
+          "y": -0.01991325616836548,
+          "z": 65.59896087646484,
+          "yaw": 1.5707962799072266,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 27,
+          "gpu": {
+            "geometries": 141,
+            "textures": 75
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 8,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 4.957552697150864,
+          "projection": {
+            "feet": {
+              "x": 194,
+              "y": 543,
+              "inside": true
+            },
+            "torso": {
+              "x": 194,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 194,
+              "y": 442,
+              "inside": true
+            }
+          }
+        },
+        "shophouses": {
+          "x": 10.226316452026367,
+          "y": -0.01991325616836548,
+          "z": 65.59896087646484,
+          "yaw": -1.5707962799072268,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 25,
+          "gpu": {
+            "geometries": 141,
+            "textures": 75
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 8,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 4.96040194960426,
+          "projection": {
+            "feet": {
+              "x": 194,
+              "y": 543,
+              "inside": true
+            },
+            "torso": {
+              "x": 194,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 194,
+              "y": 442,
+              "inside": true
+            }
+          }
+        },
+        "shophouse-elevation": {
+          "x": 10.226316452026367,
+          "y": -0.01991325616836548,
+          "z": 65.59896087646484,
+          "yaw": -1.5707962799072268,
+          "pitch": -0.4799999389648437,
+          "zone": "singapore-street",
+          "calls": 25,
+          "gpu": {
+            "geometries": 141,
+            "textures": 75
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 8,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 3.041557376255426,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 573,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 464,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 379,
+              "inside": true
+            }
+          }
+        },
+        "hdb-elevation": {
+          "x": 10.226316452026367,
+          "y": -0.01991325616836548,
+          "z": 65.59896087646484,
+          "yaw": 1.5707962799072264,
+          "pitch": -0.4799999389648437,
+          "zone": "singapore-street",
+          "calls": 26,
+          "gpu": {
+            "geometries": 141,
+            "textures": 75
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 8,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 2.0597227180117557,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 640,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 473,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 365,
+              "inside": true
+            }
+          }
+        },
+        "location-zh-Hans": {
+          "x": 10.226316452026367,
+          "y": -0.01991325616836548,
+          "z": 65.59896087646484,
+          "yaw": 1.5707962799072264,
+          "pitch": 0.10000000000000003,
+          "zone": "singapore-street",
+          "calls": 27,
+          "gpu": {
+            "geometries": 141,
+            "textures": 75
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 8,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 4.97767444953811,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 540,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 486,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 433,
+              "inside": true
+            }
+          }
+        },
+        "location-ms": {
+          "x": 10.226316452026367,
+          "y": -0.01991325616836548,
+          "z": 65.59896087646484,
+          "yaw": 1.5707962799072264,
+          "pitch": 0.10000000000000003,
+          "zone": "singapore-street",
+          "calls": 27,
+          "gpu": {
+            "geometries": 141,
+            "textures": 75
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 8,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 4.9776884404917645,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 542,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 441,
+              "inside": true
+            }
+          }
+        },
+        "return-view": {
+          "x": 10.226316452026367,
+          "y": -0.01991325616836548,
+          "z": 65.59896087646484,
+          "yaw": -3.885780586188048e-16,
+          "pitch": 0.10000000000000003,
+          "zone": "singapore-street",
+          "calls": 84,
+          "gpu": {
+            "geometries": 141,
+            "textures": 75
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 8,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 4.963813358875096,
+          "projection": {
+            "feet": {
+              "x": 194,
+              "y": 543,
+              "inside": true
+            },
+            "torso": {
+              "x": 194,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 194,
+              "y": 442,
+              "inside": true
+            }
+          }
+        },
+        "return": {
+          "x": 10.228047370910645,
+          "y": -0.020492494106292725,
+          "z": 40.93533706665039,
+          "yaw": -3.885780586188048e-16,
+          "pitch": 0.10000000000000003,
+          "zone": "atrium",
+          "calls": 65,
+          "gpu": {
+            "geometries": 139,
+            "textures": 85
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 1,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 2,
+              "rooms": {
+                "resident": true,
+                "models": 6,
+                "colliders": 14
+              }
+            }
+          },
+          "horizontalArm": 4.978238055631608,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 542,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 442,
+              "inside": true
+            }
+          }
+        },
+        "restored": {
+          "x": 10.228044509887695,
+          "y": -0.019905269145965576,
+          "z": 40.93533706665039,
+          "yaw": -3.885780586188048e-16,
+          "pitch": 0.10000000000000003,
+          "zone": "atrium",
+          "calls": 65,
+          "gpu": {
+            "geometries": 277,
+            "textures": 110
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 1,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 4.975020826390154,
+          "projection": {
+            "feet": {
+              "x": 195,
+              "y": 542,
+              "inside": true
+            },
+            "torso": {
+              "x": 195,
+              "y": 492,
+              "inside": true
+            },
+            "head": {
+              "x": 195,
+              "y": 442,
+              "inside": true
+            }
+          }
+        }
+      },
+      "restoredBag": {
+        "new-moon-nz-425g-front": 2
+      },
+      "sameSceneAndCamera": true,
+      "additionalReturns": [
+        {
+          "gpu": {
+            "geometries": 277,
+            "textures": 110
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 2,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "frame": 3540
+        },
+        {
+          "gpu": {
+            "geometries": 277,
+            "textures": 110
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 3,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "frame": 4514
+        }
+      ],
+      "localizedHeaders": {
+        "zh-Hans": {
+          "name": "- button \"新加坡街区\"",
+          "title": "新加坡街区，打开商场地图",
+          "metrics": {
+            "text": "新加坡街区",
+            "visible": 62,
+            "full": 62
+          }
+        },
+        "ms": {
+          "name": "- button \"Jalan kejiranan Singapura\"",
+          "title": "Jalan kejiranan Singapura — buka peta pusat beli-belah",
+          "metrics": {
+            "text": "Jalan kejiranan Singapura",
+            "visible": 85,
+            "full": 155
+          }
+        }
+      }
+    },
+    "768": {
+      "browser": "158.0.8127.37",
+      "width": 768,
+      "height": 1024,
+      "input": "CDP real touch joystick and look",
+      "peak": {
+        "frames": 3065,
+        "maximum": 104,
+        "over": []
+      },
+      "hashes": {
+        "/demos/corporate/gjh/v11/style.bundle.css": "157ff3321f26b906c14e82f754708504c8455b136e9dd0b1823a3aebd37a6e30",
+        "/demos/corporate/gjh/v11/pwa.js": "f5d95e87a50d6ed1d6a1859a9537b6dc6d9e88771acddd8130b33f03e1c3ce89",
+        "/demos/corporate/gjh/v11/pwa-sw.js": "b61d422b261755314c7b58cb8f88e0b021c106168a3caaa9ea9a2d7917e71f86",
+        "/demos/corporate/gjh/v11/assets/player.bundle.js": "a232c2c71d99e5e2dbaa42610c47a51c15ff68e4749005d0273798e5900ea440",
+        "/demos/corporate/gjh/v11/script.bundle.js": "1fc618962726a1efe9cef4080e5a799710d0b194e2bf34e79c28f6465a0d656d",
+        "/demos/corporate/gjh/v11/assets/world.bundle.js": "e7abf19c51be4b530c653ab6597fa04c5c00de81c846cf39d242c27156f874ac",
+        "/demos/corporate/gjh/v11/assets/street-chunk.js": "b30477f2a9017698022d8b1170822b6cf36cdc8fa867643352e2d1b9ce8ba500",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/sources.json": "671f7e17af5835cd46e47ea7939fb2c45f75f59b384e12251fbfee0254f05085",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/hdb-block.glb": "e24f78bab50bf89697e68608d3369192b70625d765a78abd7716eceb5f964a98",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/hdb-void-deck.glb": "d01416ca2d9ca2d644da14546f1b45ea659b08cd13e4eb7739bd7c04459fb391",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/road-segment.glb": "6e5ee9563b02614614efc9e3b111d173e852fdf6fa548feae31cecc77188aa8e",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/shophouse.glb": "0d18690174361a34eba0d65c71111744e94c580b8a431cde5fc464cb2621229d",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/angsana-tree.glb": "5583dea94e846b3b4deac15da7bf7035692ce2a42a418453158fea973c72d852"
+      },
+      "deckSightlines": {
+        "hits": {
+          "feet": [],
+          "torso": [],
+          "head": [],
+          "top": []
+        },
+        "eye": [
+          -4.003678359588919,
+          1.7591348667690092,
+          52.357017545829
+        ],
+        "foot": [
+          -9.17770004272461,
+          -0.00011140108108520508,
+          52.357017517089844
+        ],
+        "yaw": 7.85398162841797,
+        "pitch": 0.1
+      },
+      "stops": {
+        "spawn": {
+          "x": 10.000000953674316,
+          "y": -0.019905924797058105,
+          "z": 45,
+          "yaw": 0,
+          "pitch": 0.1,
+          "zone": "atrium",
+          "calls": 87,
+          "gpu": {
+            "geometries": 294,
+            "textures": 120
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 2.6301075947880364,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 913,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 752,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 570,
+              "inside": true
+            }
+          }
+        },
+        "entrance": {
+          "x": 10.000000953674316,
+          "y": -0.019905924797058105,
+          "z": 45,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "atrium",
+          "calls": 36,
+          "gpu": {
+            "geometries": 312,
+            "textures": 120
+          },
+          "street": {
+            "status": "ready",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 9,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 5.17320784523578,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 751,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 638,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 526,
+              "inside": true
+            }
+          }
+        },
+        "threshold": {
+          "x": 9.998250007629395,
+          "y": -0.01990121603012085,
+          "z": 50.730587005615234,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 33,
+          "gpu": {
+            "geometries": 315,
+            "textures": 120
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 13,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 5.17647204141708,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 751,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 638,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 526,
+              "inside": true
+            }
+          }
+        },
+        "under-void-deck": {
+          "x": -9.17770004272461,
+          "y": -0.00011140108108520508,
+          "z": 52.357017517089844,
+          "yaw": 7.85398162841797,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 35,
+          "gpu": {
+            "geometries": 320,
+            "textures": 123
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 11,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 5.174021712168699,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 729,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 591,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 463,
+              "inside": true
+            }
+          }
+        },
+        "street": {
+          "x": 10.247539520263672,
+          "y": -0.022634148597717285,
+          "z": 65.5688247680664,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 25,
+          "gpu": {
+            "geometries": 158,
+            "textures": 86
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.175260224532076,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 751,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 638,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 526,
+              "inside": true
+            }
+          }
+        },
+        "hdb": {
+          "x": 10.247539520263672,
+          "y": -0.02001321315765381,
+          "z": 65.5688247680664,
+          "yaw": 1.5707963562011715,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 29,
+          "gpu": {
+            "geometries": 159,
+            "textures": 86
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.151501021998997,
+          "projection": {
+            "feet": {
+              "x": 383,
+              "y": 752,
+              "inside": true
+            },
+            "torso": {
+              "x": 383,
+              "y": 639,
+              "inside": true
+            },
+            "head": {
+              "x": 383,
+              "y": 526,
+              "inside": true
+            }
+          }
+        },
+        "shophouses": {
+          "x": 10.247539520263672,
+          "y": -0.019959092140197754,
+          "z": 65.5688247680664,
+          "yaw": 4.712388916015625,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 26,
+          "gpu": {
+            "geometries": 159,
+            "textures": 86
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.169836262646861,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 751,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 638,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 526,
+              "inside": true
+            }
+          }
+        },
+        "shophouse-elevation": {
+          "x": 10.247539520263672,
+          "y": -0.02001321315765381,
+          "z": 65.5688247680664,
+          "yaw": 4.712388916015625,
+          "pitch": -0.4799999389648437,
+          "zone": "singapore-street",
+          "calls": 26,
+          "gpu": {
+            "geometries": 159,
+            "textures": 86
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 3.4456162214175325,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 796,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 575,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 395,
+              "inside": true
+            }
+          }
+        },
+        "hdb-elevation": {
+          "x": 10.247539520263672,
+          "y": -0.019959092140197754,
+          "z": 65.5688247680664,
+          "yaw": 1.5707963562011718,
+          "pitch": -0.4799999389648437,
+          "zone": "singapore-street",
+          "calls": 27,
+          "gpu": {
+            "geometries": 159,
+            "textures": 86
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 2.0668672237772525,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 983,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 597,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 348,
+              "inside": true
+            }
+          }
+        },
+        "return-view": {
+          "x": 10.247539520263672,
+          "y": -0.02001321315765381,
+          "z": 65.5688247680664,
+          "yaw": 1.1102230246251565e-16,
+          "pitch": 0.10000000000000009,
+          "zone": "singapore-street",
+          "calls": 102,
+          "gpu": {
+            "geometries": 159,
+            "textures": 86
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.163434200899754,
+          "projection": {
+            "feet": {
+              "x": 383,
+              "y": 750,
+              "inside": true
+            },
+            "torso": {
+              "x": 382,
+              "y": 635,
+              "inside": true
+            },
+            "head": {
+              "x": 382,
+              "y": 520,
+              "inside": true
+            }
+          }
+        },
+        "return": {
+          "x": 10.247291564941406,
+          "y": -0.02128124237060547,
+          "z": 41.04398727416992,
+          "yaw": 1.1102230246251565e-16,
+          "pitch": 0.10000000000000009,
+          "zone": "atrium",
+          "calls": 75,
+          "gpu": {
+            "geometries": 173,
+            "textures": 106
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 1,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 4,
+              "rooms": {
+                "resident": true,
+                "models": 10,
+                "colliders": 25
+              }
+            }
+          },
+          "horizontalArm": 5.176617566050351,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 751,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 638,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 526,
+              "inside": true
+            }
+          }
+        },
+        "restored": {
+          "x": 10.247293472290039,
+          "y": -0.01990532875061035,
+          "z": 41.04398727416992,
+          "yaw": 1.1102230246251565e-16,
+          "pitch": 0.10000000000000009,
+          "zone": "atrium",
+          "calls": 75,
+          "gpu": {
+            "geometries": 298,
+            "textures": 127
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 1,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 5.174021659445749,
+          "projection": {
+            "feet": {
+              "x": 384,
+              "y": 751,
+              "inside": true
+            },
+            "torso": {
+              "x": 384,
+              "y": 638,
+              "inside": true
+            },
+            "head": {
+              "x": 384,
+              "y": 526,
+              "inside": true
+            }
+          }
+        }
+      },
+      "restoredBag": {
+        "new-moon-nz-425g-front": 2
+      },
+      "sameSceneAndCamera": true,
+      "offline": {
+        "validRange": {
+          "status": 206,
+          "bytes": "glTF",
+          "range": "bytes 0-3/78600"
+        },
+        "invalidRange": {
+          "status": 416,
+          "bytes": 0,
+          "range": "bytes */78600"
+        },
+        "title": "Connection needed — GJH Virtual Mall"
+      }
+    },
+    "1440": {
+      "browser": "158.0.8127.37",
+      "width": 1440,
+      "height": 900,
+      "input": "keyboard WASD and mouse look",
+      "peak": {
+        "frames": 7883,
+        "maximum": 112,
+        "over": []
+      },
+      "hashes": {
+        "/demos/corporate/gjh/v11/style.bundle.css": "157ff3321f26b906c14e82f754708504c8455b136e9dd0b1823a3aebd37a6e30",
+        "/demos/corporate/gjh/v11/pwa.js": "f5d95e87a50d6ed1d6a1859a9537b6dc6d9e88771acddd8130b33f03e1c3ce89",
+        "/demos/corporate/gjh/v11/assets/player.bundle.js": "a232c2c71d99e5e2dbaa42610c47a51c15ff68e4749005d0273798e5900ea440",
+        "/demos/corporate/gjh/v11/script.bundle.js": "1fc618962726a1efe9cef4080e5a799710d0b194e2bf34e79c28f6465a0d656d",
+        "/demos/corporate/gjh/v11/assets/world.bundle.js": "e7abf19c51be4b530c653ab6597fa04c5c00de81c846cf39d242c27156f874ac",
+        "/demos/corporate/gjh/v11/assets/street-chunk.js": "b30477f2a9017698022d8b1170822b6cf36cdc8fa867643352e2d1b9ce8ba500",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/sources.json": "671f7e17af5835cd46e47ea7939fb2c45f75f59b384e12251fbfee0254f05085",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/hdb-block.glb": "e24f78bab50bf89697e68608d3369192b70625d765a78abd7716eceb5f964a98",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/hdb-void-deck.glb": "d01416ca2d9ca2d644da14546f1b45ea659b08cd13e4eb7739bd7c04459fb391",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/road-segment.glb": "6e5ee9563b02614614efc9e3b111d173e852fdf6fa548feae31cecc77188aa8e",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/shophouse.glb": "0d18690174361a34eba0d65c71111744e94c580b8a431cde5fc464cb2621229d",
+        "/demos/corporate/gjh/v11/assets/districts/singapore/angsana-tree.glb": "5583dea94e846b3b4deac15da7bf7035692ce2a42a418453158fea973c72d852"
+      },
+      "deckSightlines": {
+        "hits": {
+          "feet": [],
+          "torso": [],
+          "head": [],
+          "top": []
+        },
+        "eye": [
+          -4.0700245539553865,
+          1.7585579096859436,
+          52.367599516054234
+        ],
+        "foot": [
+          -9.244046211242676,
+          -0.0005426406860351562,
+          52.36759948730469
+        ],
+        "yaw": 7.8539816284179675,
+        "pitch": 0.1
+      },
+      "stops": {
+        "spawn": {
+          "x": 10.000000953674316,
+          "y": -0.019905924797058105,
+          "z": 45,
+          "yaw": 0,
+          "pitch": 0.1,
+          "zone": "atrium",
+          "calls": 104,
+          "gpu": {
+            "geometries": 299,
+            "textures": 139
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 2.6301075947880364,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 803,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 663,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 504,
+              "inside": true
+            }
+          }
+        },
+        "entrance": {
+          "x": 10.000000953674316,
+          "y": -0.019905924797058105,
+          "z": 45,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "atrium",
+          "calls": 52,
+          "gpu": {
+            "geometries": 323,
+            "textures": 139
+          },
+          "street": {
+            "status": "ready",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 13,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 5.168866693940836,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 662,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 563,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 465,
+              "inside": true
+            }
+          }
+        },
+        "threshold": {
+          "x": 10.001579284667969,
+          "y": -0.020001769065856934,
+          "z": 50.79092025756836,
+          "yaw": 3.1415927124023435,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 42,
+          "gpu": {
+            "geometries": 323,
+            "textures": 135
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 13,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 5.177002137029543,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 662,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 563,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 465,
+              "inside": true
+            }
+          }
+        },
+        "under-void-deck": {
+          "x": -9.244046211242676,
+          "y": -0.0005426406860351562,
+          "z": 52.36759948730469,
+          "yaw": 7.8539816284179675,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 42,
+          "gpu": {
+            "geometries": 328,
+            "textures": 133
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": true,
+            "cycles": 0,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 13,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 5.174021652279443,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 642,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 522,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 410,
+              "inside": true
+            }
+          }
+        },
+        "street": {
+          "x": 10.111599922180176,
+          "y": -0.022136569023132324,
+          "z": 65.5789794921875,
+          "yaw": 3.141592712402343,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 31,
+          "gpu": {
+            "geometries": 162,
+            "textures": 96
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.17725893020385,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 662,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 563,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 465,
+              "inside": true
+            }
+          }
+        },
+        "hdb": {
+          "x": 10.111599922180176,
+          "y": -0.02001333236694336,
+          "z": 65.5789794921875,
+          "yaw": 1.5707965087890616,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 47,
+          "gpu": {
+            "geometries": 162,
+            "textures": 96
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.095236566474239,
+          "projection": {
+            "feet": {
+              "x": 718,
+              "y": 665,
+              "inside": true
+            },
+            "torso": {
+              "x": 718,
+              "y": 565,
+              "inside": true
+            },
+            "head": {
+              "x": 718,
+              "y": 466,
+              "inside": true
+            }
+          }
+        },
+        "shophouses": {
+          "x": 10.111599922180176,
+          "y": -0.019913315773010254,
+          "z": 65.5789794921875,
+          "yaw": 4.712388916015624,
+          "pitch": 0.1,
+          "zone": "singapore-street",
+          "calls": 41,
+          "gpu": {
+            "geometries": 162,
+            "textures": 96
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.117082720946169,
+          "projection": {
+            "feet": {
+              "x": 722,
+              "y": 664,
+              "inside": true
+            },
+            "torso": {
+              "x": 722,
+              "y": 564,
+              "inside": true
+            },
+            "head": {
+              "x": 722,
+              "y": 466,
+              "inside": true
+            }
+          }
+        },
+        "shophouse-elevation": {
+          "x": 10.111599922180176,
+          "y": -0.019913315773010254,
+          "z": 65.5789794921875,
+          "yaw": 4.712388916015624,
+          "pitch": -0.4800001220703125,
+          "zone": "singapore-street",
+          "calls": 39,
+          "gpu": {
+            "geometries": 162,
+            "textures": 96
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 3.387343084641084,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 705,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 508,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 349,
+              "inside": true
+            }
+          }
+        },
+        "hdb-elevation": {
+          "x": 10.111599922180176,
+          "y": -0.02001333236694336,
+          "z": 65.5789794921875,
+          "yaw": 1.5707965087890614,
+          "pitch": -0.4800001220703125,
+          "zone": "singapore-street",
+          "calls": 41,
+          "gpu": {
+            "geometries": 162,
+            "textures": 96
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 2.068129104893891,
+          "projection": {
+            "feet": {
+              "x": 719,
+              "y": 863,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 527,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 310,
+              "inside": true
+            }
+          }
+        },
+        "return-view": {
+          "x": 10.111599922180176,
+          "y": -0.02001333236694336,
+          "z": 65.5789794921875,
+          "yaw": -1.1657341758564144e-15,
+          "pitch": 0.10000000000000003,
+          "zone": "singapore-street",
+          "calls": 110,
+          "gpu": {
+            "geometries": 162,
+            "textures": 96
+          },
+          "street": {
+            "status": "street",
+            "interiorResident": false,
+            "cycles": 1,
+            "models": [
+              "hdb-block",
+              "hdb-void-deck",
+              "road-segment",
+              "shophouse",
+              "angsana-tree"
+            ],
+            "street": {
+              "models": 5,
+              "lodGroups": 19,
+              "visibleLod": 18,
+              "geometries": 30,
+              "materials": 12,
+              "colliders": 116,
+              "cameraBounds": 80
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": false,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.135898403518116,
+          "projection": {
+            "feet": {
+              "x": 718,
+              "y": 660,
+              "inside": true
+            },
+            "torso": {
+              "x": 718,
+              "y": 556,
+              "inside": true
+            },
+            "head": {
+              "x": 718,
+              "y": 454,
+              "inside": true
+            }
+          }
+        },
+        "return": {
+          "x": 10.11125659942627,
+          "y": -0.02193474769592285,
+          "z": 41.01167678833008,
+          "yaw": -1.1657341758564144e-15,
+          "pitch": 0.10000000000000003,
+          "zone": "atrium",
+          "calls": 90,
+          "gpu": {
+            "geometries": 133,
+            "textures": 100
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 1,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": true,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.17712085624712,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 662,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 563,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 465,
+              "inside": true
+            }
+          }
+        },
+        "restored": {
+          "x": 10.111254692077637,
+          "y": -0.01990532875061035,
+          "z": 41.01167678833008,
+          "yaw": -1.1657341758564144e-15,
+          "pitch": 0.10000000000000003,
+          "zone": "atrium",
+          "calls": 103,
+          "gpu": {
+            "geometries": 299,
+            "textures": 141
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 1,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 20,
+              "rooms": {
+                "resident": true,
+                "models": 34,
+                "colliders": 76
+              }
+            }
+          },
+          "horizontalArm": 5.174021659445749,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 662,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 563,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 465,
+              "inside": true
+            }
+          }
+        },
+        "map-sony-arrival": {
+          "x": 32.599998474121094,
+          "y": -0.019904613494873047,
+          "z": 11.999998092651367,
+          "yaw": -1.5707963267948966,
+          "pitch": 0.10000000000000003,
+          "zone": "atrium",
+          "calls": 26,
+          "gpu": {
+            "geometries": 133,
+            "textures": 97
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 2,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": true,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.174021659445762,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 660,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 578,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 495,
+              "inside": true
+            }
+          }
+        },
+        "map-sony-inside": {
+          "x": 35.93830871582031,
+          "y": 0.08086597919464111,
+          "z": 12.00013256072998,
+          "yaw": -1.5707963267948966,
+          "pitch": 0.10000000000000003,
+          "zone": "planned-space-13",
+          "calls": 21,
+          "gpu": {
+            "geometries": 133,
+            "textures": 98
+          },
+          "street": {
+            "status": "mall",
+            "interiorResident": true,
+            "cycles": 2,
+            "models": [],
+            "street": {
+              "models": 0,
+              "geometries": 0,
+              "materials": 0,
+              "colliders": 0,
+              "cameraBounds": 0,
+              "lodGroups": 0,
+              "visibleLod": 0
+            },
+            "mall": {
+              "studioModels": 0,
+              "rooms": {
+                "resident": true,
+                "models": 0,
+                "colliders": 0
+              }
+            }
+          },
+          "horizontalArm": 5.176703611876811,
+          "projection": {
+            "feet": {
+              "x": 720,
+              "y": 662,
+              "inside": true
+            },
+            "torso": {
+              "x": 720,
+              "y": 563,
+              "inside": true
+            },
+            "head": {
+              "x": 720,
+              "y": 465,
+              "inside": true
+            }
+          }
+        }
+      },
+      "restoredBag": {
+        "new-moon-nz-425g-front": 2
+      },
+      "sameSceneAndCamera": true
+    }
+  },
+  "previousOccludedRays": {
+    "390": {
+      "eye": [
+        -4.223455409923571,
+        3.389194429599453,
+        52.35116558023788
+      ],
+      "body": [
+        -9.20101261138916,
+        9.98377799987793e-05,
+        52.351165771484375
+      ],
+      "rays": {
+        "feet": [],
+        "torso": [
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.0832052553061142,
+            "point": [
+              -5.2000000923871985,
+              2.9204790487180534,
+              52.35116561775845
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          },
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.1536424130759255,
+            "point": [
+              -5.263501475463966,
+              2.890000079870224,
+              52.35116562019828
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          }
+        ],
+        "head": [
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.0344329936016508,
+            "point": [
+              -5.2000000923871985,
+              3.048002252954553,
+              52.35116561775845
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          },
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.4581444847773481,
+            "point": [
+              -5.600000098347663,
+              2.9082473854687976,
+              52.351165633127145
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          }
+        ],
+        "top": [
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.0221623631299799,
+            "point": [
+              -5.2000000923871985,
+              3.0872401619503993,
+              52.35116561775845
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          },
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.4408477122868353,
+            "point": [
+              -5.600000098347663,
+              2.963557435467571,
+              52.351165633127145
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          }
+        ],
+        "pivot": [
+          {
+            "name": "TRANSFER_Main",
+            "source": "TRANSFER_Main",
+            "distance": 0.8021639277765095,
+            "point": [
+              -4.999999999999999,
+              3.1880838464645307,
+              52.35116561007409
+            ],
+            "min": [
+              -13,
+              3.1800000417232512,
+              51.7
+            ],
+            "max": [
+              -4.999999999999999,
+              3.48000005364418,
+              60.7
+            ]
+          },
+          {
+            "name": "TRANSFER_Main",
+            "source": "TRANSFER_Main",
+            "distance": 0.8344075643945416,
+            "point": [
+              -5.0312138463387726,
+              3.1800000417232512,
+              52.35116561127338
+            ],
+            "min": [
+              -13,
+              3.1800000417232512,
+              51.7
+            ],
+            "max": [
+              -4.999999999999999,
+              3.48000005364418,
+              60.7
+            ]
+          },
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.008762314675568,
+            "point": [
+              -5.2000000923871985,
+              3.1362875481952073,
+              52.35116561775845
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          }
+        ]
+      }
+    },
+    "1440": {
+      "eye": [
+        -4.030602936449857,
+        3.4091283413790374,
+        52.387216876223164
+      ],
+      "body": [
+        -9.207319259643555,
+        3.7610530853271484e-05,
+        52.3872184753418
+      ],
+      "rays": {
+        "feet": [],
+        "torso": [],
+        "head": [
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.2350681069949936,
+            "point": [
+              -5.2000000923871985,
+              3.011757581758096,
+              52.38721723745694
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          },
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.613502613631925,
+            "point": [
+              -5.558312507114278,
+              2.890000079870224,
+              52.38721734814179
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          }
+        ],
+        "top": [
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.2212815674773077,
+            "point": [
+              -5.2000000923871985,
+              3.0569366907889695,
+              52.38721723745694
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          },
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.6390289784317635,
+            "point": [
+              -5.600000098347663,
+              2.936467215025338,
+              52.38721736101933
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          }
+        ],
+        "pivot": [
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.2062084000859623,
+            "point": [
+              -5.2000000923871985,
+              3.1134105770775604,
+              52.38721723745694
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          },
+          {
+            "name": "TRANSFER_Beam",
+            "source": "TRANSFER_Beam",
+            "distance": 1.6187999347705222,
+            "point": [
+              -5.600000098347663,
+              3.012258366399921,
+              52.38721736101933
+            ],
+            "min": [
+              -5.600000098347665,
+              2.890000079870224,
+              48.95
+            ],
+            "max": [
+              -5.2000000923871985,
+              3.190000091791153,
+              60.45
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

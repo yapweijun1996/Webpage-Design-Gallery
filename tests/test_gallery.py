@@ -122,7 +122,7 @@ class GalleryTests(unittest.TestCase):
         catalog = gallery.load_catalog()
         self.assertEqual(gallery.build_pages(catalog), gallery.build_pages(copy.deepcopy(catalog)))
 
-    def test_v11_verified_wardrobe_and_piano_are_published_and_cached_on_demand(self):
+    def test_v11_verified_optional_assets_are_published_and_cached_on_demand(self):
         catalog = gallery.load_catalog()
         scope = Path("demos/corporate/gjh/v11")
         folder = Path("assets/chibi-crowd")
@@ -141,6 +141,16 @@ class GalleryTests(unittest.TestCase):
                         for octave in (3, 4, 5) for note in ("C", "Ds", "Fs", "A"))
         self.assertIn(scope / piano / "LICENSE.txt", published)
         self.assertNotIn("assets/audio/piano/", workers["sw.js"])
+        street = Path("assets/districts/singapore")
+        expected.update(street / file for file in ("sources.json", "hdb-block.glb", "hdb-void-deck.glb",
+                                                    "shophouse.glb", "road-segment.glb", "angsana-tree.glb"))
+        expected.add(Path("assets/interiors/showroom-atlas.png"))
+        for area in ("assets/interiors", "assets/gallery-assets"):
+            expected.update(path.relative_to(ROOT / scope) for path in (ROOT / scope / area).glob("*.glb"))
+        expected.update(Path("assets") / (name + ".glb") for name in
+                        ("pharmacy-counter", "speaker-soundbar", "tv-demo-table", "tv-floor-stand",
+                         "electronic-keyboard", "battery-display-rack", "cordless-phone-display"))
+        self.assertNotIn("assets/districts/", workers["sw.js"])
         self.assertEqual({Path(entry["path"]) for entry in cache}, expected)
         self.assertTrue({scope / path for path in expected} <= published)
         self.assertTrue(expected.isdisjoint(Path(entry["path"]) for entry in precache))

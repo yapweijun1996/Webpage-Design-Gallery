@@ -29,7 +29,7 @@ const stubs = {
       if (detailsEnabled()) throw Error('Shop detail requests must wait for entry');
       return {scene: new T.Scene(), interactables: [], doors: [], seats: [],
         cameraObstacles: [], shelves: [], shopExhibits: {}, applyMallTheme: () => true,
-        updateShopLods() {}, updateSigns() {}, prepareUpperLevel() {},
+        updateShopLods() {}, updateSigns() {}, prepareUpperLevel() {}, disposeStudios() {},
         drawWithPlayerContact(shadow, draw) {draw();}};
     }
   `,

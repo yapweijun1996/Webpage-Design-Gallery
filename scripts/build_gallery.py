@@ -314,7 +314,7 @@ def runtime_resources(catalog):
             resources.update(directory / name for name in ("scene.js", "world.js", "surfaces.js", "vending.js"))
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
-        for nested in ("brand-kit", "brands", "gallery-assets", "signage", "interiors", "chibi-crowd", "elevator", "tram", "audio"):
+        for nested in ("brand-kit", "brands", "gallery-assets", "signage", "interiors", "chibi-crowd", "elevator", "tram", "audio", "districts"):
             resources.update(path.relative_to(ROOT) for path in (assets / nested).rglob("*") if path.is_file())
         vendor = ROOT / directory / "vendor"
         if vendor.is_dir():
@@ -442,6 +442,26 @@ def pwa_outputs(pages, catalog, release):
     for path in sorted((mall_root / "assets/audio/piano").glob("*.mp3")):
         mall_lazy.append({"path": path.relative_to(mall_root).as_posix(),
                           "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+    # District bytes and released interior details are cached on demand. Only
+    # original owner-project exports recorded in the district manifest ship.
+    street = mall_root / "assets/districts/singapore"
+    receipt = street / "sources.json"
+    resumed = {receipt, *(mall_root / "assets/interiors").glob("*.glb"),
+               mall_root / "assets/interiors/showroom-atlas.png"}
+    for entry in read_json(receipt)["assets"]:
+        path = local_path(street, entry["file"])
+        data = path.read_bytes()
+        if len(data) != entry["bytes"] or hashlib.sha256(data).hexdigest() != entry["sha256"]:
+            raise ValueError(f"Street asset receipt mismatch: {entry['file']}")
+        resumed.add(path)
+    # Both original studio placement tables refer to these two locations.
+    resumed.update((mall_root / "assets/gallery-assets").glob("*.glb"))
+    for name in ("pharmacy-counter", "speaker-soundbar", "tv-demo-table", "tv-floor-stand",
+                 "electronic-keyboard", "battery-display-rack", "cordless-phone-display"):
+        resumed.add(mall_root / f"assets/{name}.glb")
+    for path in sorted(resumed):
+        mall_lazy.append({"path":path.relative_to(mall_root).as_posix(),
+                          "sha256":hashlib.sha256(source_bytes(path)).hexdigest()})
     mall_worker = (ROOT / "templates/gallery/gjh-v11-sw.js").read_text(encoding="utf-8")
     mall_worker = mall_worker.replace("__BUILD__", json.dumps(release["build"])).replace("__VERSION__", json.dumps(release["version"])).replace("__PRECACHE__", json.dumps(mall_entries, indent=2))
     mall_worker = mall_worker.replace("__LAZY_ASSETS__", json.dumps(mall_lazy, indent=2))

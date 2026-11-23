@@ -2290,7 +2290,7 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
   }
   const floorplan = document.querySelector(".floorplan"), mapCaption = document.querySelector(".map-caption");
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel = expanded ? `Ground floor: ${destinations.length} stores open to explore. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel = expanded ? `Ground floor: ${destinations.length} stores open to explore. The south entrance leads to the Singapore street. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute("aria-label", floorplanLabel);
   const mapCaptionText = [...mapCaption.childNodes].find((n) => n.nodeType === Node.TEXT_NODE && n.textContent.trim());
   const inspectPrompt = document.getElementById("inspect-prompt");
@@ -2632,6 +2632,7 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
     floorplan.querySelector(".map-label:not(.map-entry)").setAttribute("x", "350");
     floorplan.querySelector(".map-entry").setAttribute("x", "350");
     floorplan.querySelector(".map-entry").setAttribute("y", "575");
+    floorplan.querySelector(".map-entry").textContent = "South entrance · Singapore street";
     playerDot.setAttribute("r", "10");
     for (const bay of expandedLayout.slots) {
       const origin = expandedMapPoint(bay.minX, bay.minZ);
@@ -2845,6 +2846,7 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
     records.set(id, { name, action: "amenity" });
   const zones = {
     atrium: "Courtyard",
+    "singapore-street": "Singapore street",
     ...Object.fromEntries(restroomRooms.map(({ id, label }) => [id, label])),
     ...Object.fromEntries(destinations.map((store) => [store.id, store.label])),
     upper: "Upper level"
@@ -3524,12 +3526,12 @@ function createUI(expanded = false, onMenuOpen = () => {}) {
       tutorial.reportPose({ x, z, yaw });
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
-        const upper = zone === "upper";
-        playerDot.style.display = upper ? "none" : "";
-        mapCaption.querySelector(".map-key").hidden = upper;
-        floorplan.setAttribute("aria-label", upper ? "Ground floor map. Choose a store to return to its entrance." : floorplanLabel);
+        const offMap = zone === "upper" || zone === "singapore-street";
+        playerDot.style.display = offMap ? "none" : "";
+        mapCaption.querySelector(".map-key").hidden = offMap;
+        floorplan.setAttribute("aria-label", offMap ? "Ground floor map. Choose a store to return to its entrance." : floorplanLabel);
         if (mapCaptionText)
-          mapCaptionText.textContent = upper ? " Ground floor map " : "You are here";
+          mapCaptionText.textContent = offMap ? " Ground floor map " : "You are here";
         if (showing3D) {
           updateLocation(zones[zone]);
           announce(`Location: ${zones[zone]}.`);
@@ -4061,6 +4063,9 @@ function createMallAtmosphere(T, renderer, scene, slots, {
   }
   let focus = null, strength = 0, previousTime, baseAmbient = hemisphere?.intensity;
   let baseDaylight = daylight?.intensity, baseExposure = renderer?.toneMappingExposure;
+  const indoorSky = expanded && scene.background?.isColor ? scene.background.clone() : null;
+  const outdoorSky = new T.Color(12573156);
+  let previousOutdoor = 0;
   let christmas = false, newMoonExposure = 1;
   const applyFocusColors = () => lights.forEach((light, index) => light.color.copy(focus.colors[index]));
   function applyTheme(theme) {
@@ -4094,6 +4099,11 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     const { x, y, z } = position;
     const inside = Math.abs(y) < 4 ? bays.find((bay) => insideBay(x, z, bay.slot)) : null;
     const publicZone = publicEnvironmentZone(position, atrium);
+    const outdoor = expanded ? T.MathUtils.smoothstep(z, 48.25, 55) : 0;
+    if (indoorSky && outdoor !== previousOutdoor && scene.background?.isColor) {
+      scene.background.copy(indoorSky).lerp(outdoorSky, outdoor);
+      previousOutdoor = outdoor;
+    }
     let shadowFill = tier === "low" && publicZone === "atrium" ? 0.16 : 0;
     if (expanded) {
       setPortraitFill(inside, publicZone);
@@ -4124,7 +4134,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
           const approach = 1 - T.MathUtils.smoothstep(depth, 2.5, 4.5);
           shopExposure *= T.MathUtils.lerp(1, 0.86, frontage * approach);
         }
-        renderer.toneMappingExposure = baseExposure * T.MathUtils.lerp(1, 0.82, tier === "balanced" ? courtyard : 0) * shopExposure;
+        renderer.toneMappingExposure = baseExposure * T.MathUtils.lerp(1, 0.82, tier === "balanced" ? courtyard : 0) * shopExposure * (1 + 0.3 * outdoor);
       }
     }
     if (lgSlot && Math.abs(y) < 4) {
@@ -4141,7 +4151,7 @@ function createMallAtmosphere(T, renderer, scene, slots, {
     } else
       selectEnvironment(inside ? "shop" : publicZone);
     if (hemisphere)
-      hemisphere.intensity = baseAmbient + shadowFill;
+      hemisphere.intensity = baseAmbient + shadowFill + 1.35 * outdoor;
     const ground = setLightFloor(position);
     let nearest = inside?.mood ? inside : null, best = 24 ** 2;
     if (ground && !nearest)
@@ -7163,7 +7173,9 @@ function heroVisibility(number) {
     loaded: hero.userData.modelReady === true
   });
 }
+var district;
 var snapshot = () => Object.freeze({
+  district: district ? { ...district.state, mall: world.mallDetailResidency } : null,
   ...player?.state || {},
   modelPreload: world?.modelPreload || null,
   mode: modes.current(),
@@ -7381,7 +7393,7 @@ function updateHUD() {
       ui.announce("Ascending to the upper deck. The lift serves both floors.");
     wasOnEscalator = p.escalatorTravel;
   }
-  const zone = elevator && !p.escalatorTravel && p.y > elevator.upper / 2 ? "upper" : (expanded ? restroomAt(p.x, p.z) ?? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
+  const zone = district && p.z > 48.2 ? "singapore-street" : elevator && !p.escalatorTravel && p.y > elevator.upper / 2 ? "upper" : (expanded ? restroomAt(p.x, p.z) ?? expandedStoreAt(p.x, p.z) : storeAt(p.x, p.z))?.id || "atrium";
   if (zone !== currentZone || travelling !== wasRiding)
     quality.resetSampling();
   if (zone !== currentZone)
@@ -7421,6 +7433,7 @@ function tick(refreshHud = true) {
     return;
   const p = player.state;
   const doorsStart = performance.now();
+  district?.update(p);
   world.restrooms?.update(FIXED_STEP, p);
   for (const door of world.doors) {
     if (door.advance) {
@@ -8309,7 +8322,19 @@ async function initialize() {
         player.teleport(currentZone);
       remove();
     };
+  }, (text) => {
+    let chip = document.getElementById("street-gateway-status");
+    if (!chip) {
+      chip = document.createElement("p");
+      chip.className = "hud-context-chip";
+      chip.id = "street-gateway-status";
+      chip.setAttribute("role", "status");
+      document.getElementById("hud-context-stack").append(chip);
+    }
+    chip.textContent = text;
+    chip.hidden = !text;
   });
+  district = world.district;
   if (expanded)
     renderer.toneMappingExposure = world.defaultExposure;
   ui.setBrandStories(world.shopExhibits);
@@ -8652,6 +8677,8 @@ window.addEventListener("pagehide", (event) => {
   releaseStartupAssetPack();
   cancelEntryPresentation();
   pageEnded = true;
+  district?.dispose();
+  world?.disposeStudios();
   elevator?.kit?.dispose();
   mallAudio3.dispose();
   tierQueue?.cancel();

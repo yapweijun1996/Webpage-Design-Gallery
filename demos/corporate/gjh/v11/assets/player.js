@@ -580,7 +580,11 @@ export async function createPlayer(T, R, physics, scene, canvas, contactMaterial
     const closeFraming = T.MathUtils.clamp((cameraDistance - 1) / 2, 0, 1);
     const framingWeight = closeFraming * neutralFramingWeight(renderedPitch);
     const inUpperCar=expanded && !elevatorTravel && visual.position.y>liftLayout.upper-.1 && insideLiftShaft(visual.position);
-    const orbitHeight = seatView ? Math.max(.9, framing.height * .7) : actionView || inUpperCar ? 0 : framing.height * framingWeight;
+    // In the void deck the raised chase pivot can put a real transfer beam between the eye and the visitor.
+    const underVoidDeck = expanded && visual.position.z > expandedLayout.bounds.maxZ && cameraObstacles.some(box =>
+      box.voidDeckCeiling && target.y < box.min.y && target.x >= box.min.x && target.x <= box.max.x &&
+      target.z >= box.min.z && target.z <= box.max.z);
+    const orbitHeight = seatView ? Math.max(.9, framing.height * .7) : actionView || inUpperCar || underVoidDeck ? 0 : framing.height * framingWeight;
     // The walking level also bounds the camera where the upper floor has no slab.
     const floor = elevatorTravel?.height ?? (ridingEscalator ? visual.position.y : visual.position.y > liftLayout.upper / 2 ? liftLayout.upper : 0);
     const minimumY = floor + cameraRadius + .04;

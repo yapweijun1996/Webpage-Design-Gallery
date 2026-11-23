@@ -2166,7 +2166,8 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     const closeFraming = T.MathUtils.clamp((cameraDistance - 1) / 2, 0, 1);
     const framingWeight = closeFraming * neutralFramingWeight(renderedPitch);
     const inUpperCar = expanded && !elevatorTravel && visual.position.y > liftLayout.upper - 0.1 && insideLiftShaft(visual.position);
-    const orbitHeight = seatView ? Math.max(0.9, framing.height * 0.7) : actionView || inUpperCar ? 0 : framing.height * framingWeight;
+    const underVoidDeck = expanded && visual.position.z > expandedLayout.bounds.maxZ && cameraObstacles.some((box) => box.voidDeckCeiling && target.y < box.min.y && target.x >= box.min.x && target.x <= box.max.x && target.z >= box.min.z && target.z <= box.max.z);
+    const orbitHeight = seatView ? Math.max(0.9, framing.height * 0.7) : actionView || inUpperCar || underVoidDeck ? 0 : framing.height * framingWeight;
     const floor = elevatorTravel?.height ?? (ridingEscalator ? visual.position.y : visual.position.y > liftLayout.upper / 2 ? liftLayout.upper : 0);
     const minimumY = floor + cameraRadius + 0.04;
     let length = cameraCandidate(orbitHeight, desired, minimumY, seatView);

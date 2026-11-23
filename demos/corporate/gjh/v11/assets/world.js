@@ -31,6 +31,7 @@ import {addExpandedStorefronts} from './expanded-storefronts.js';
 import {createExpandedInteriors} from './expanded-interiors.js';
 import {pzhCartonX, pzhCartonStandingZ} from './window-studios.js';
 import {createInteriorKit} from './interiors/runtime.js';
+import {createDistrictGateway,southDoor} from './district-gateway.js';
 import {interiorFloorColour,interiorStores,worldInteriorBox,worldInteriorPoint} from './interiors/config.js';
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
@@ -130,7 +131,7 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
 }
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
-export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low', phone = false, detailsEnabled = () => true, waitForSlice, registerShopSeat) {
+export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low', phone = false, detailsEnabled = () => true, waitForSlice, registerShopSeat, streetNotice = () => {}) {
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
   // Local textures share the HTML packshots' request mode, avoiding duplicate image loads.
@@ -1122,12 +1123,23 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
       };
       doors.push(door);
     }
-    // The closed glass entrance provides a visible boundary to the ground floor.
+    // The central entrance leaf belongs to the street loader and its collision gate.
     for (const x of [-25,45]) box('ivory',x,3.3,18,.3,6.6,60,true);
     box('ivory',10,3.3,-12,70,6.6,.3,true);
     for (const x of [-10.5,30.5]) box('ivory',x,3.3,48,29,6.6,.3,true);
-    box('glass',10,2.8,48,12,5.6,.3,true);
-    for (const x of [4,10,16]) box('brass',x,2.8,47.8,.08,5.6,.08);
+    const {x:entryX,z:entryZ,halfWidth:doorHalf} = southDoor;
+    const sidelights = 6-doorHalf;
+    for (const side of [-1,1]) {
+      box('glass',entryX+side*(doorHalf+sidelights/2),2.8,entryZ,sidelights,5.6,.3,true);
+      for (const offset of [doorHalf,6]) box('brass',entryX+side*offset,2.8,entryZ-.2,.08,5.6,.08);
+      for (const distance of [1.95,1.04]) {
+        solid('box','brass',entryX+side*.26,.002,entryZ-distance,.66,.012,.105,side*Math.PI/5);
+      }
+    }
+    box('green',entryX,5.70,entryZ,doorHalf*2+.14,.68,.22);
+    const streetSign = sign('SINGAPORE STREET',entryX,5.70,entryZ-.13,3.8,.44,false,71);
+    streetSign.rotation.y = Math.PI;
+    sign('GJH VIRTUAL MALL',entryX,5.70,entryZ+.13,3.8,.44,false,71);
     // Four roof panels leave the 12 x 12 m upper landing open to the sky.
     ceilingBox('shellCeiling',10,8.5,18,70,.25,60,liftLayout.roofOpening);
     // Recessed strips share the retained roof footprint, including its camera opening.
@@ -1671,7 +1683,12 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     scene, interactables, reserveProduct, expanded, phone, prepareModel, interiors: interiorKit,
     initialTier: artworkTier()
   });
-  return {signage, defaultExposure:EVERYDAY.lighting.exposure, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
+  const district = expanded ? createDistrictGateway({T,R,physics,scene,cameraObstacles,notice:streetNotice,tier:artworkTier,
+    setMallDetail(value) { interiorModels.setResident(value); interiorKit.setResident(value); }}) : null;
+  return {signage,district,
+    get mallDetailResidency() { return {studioModels:interiorModels?.residentModels ?? 0,rooms:interiorKit?.residency}; },
+    disposeStudios() { interiorModels?.dispose(); },
+    defaultExposure:EVERYDAY.lighting.exposure, interiors:interiorKit, restrooms, shopExhibits:expanded ? {...newMoonExhibit, ...miliExhibit, ...gogoExhibit, ...borschExhibit, ...pzhExhibit, ...shopCatalogueExhibits} : {}, getPreloadedModels() { return interiorModels?.getPreloadedModels() || []; }, get modelPreload() {
     const preload=interiorModels?.preloadState;
     return preload ? {...preload, sceneModels:Object.fromEntries(['Gallery lift directory standee','Gallery atrium chandelier'].map(name => [name,scene.getObjectByName(name)?.userData.sourceStatus || 'pending']))} : null;
   }, scene, bakedLighting, doors, seats, shell: shellState, cameraObstacles, amenities:amenities.state, interactables, shelves, createCollectProp, reserveProduct, contact, plane, roomSigns, updateSigns, updateShopLods, drawWithPlayerContact, applyMallTheme, ensureBrandWall, prepareUpperLevel, prepareUpperFurniture, get upperWarmStatus(){return upperWarmStatus;}, furnishings: Object.freeze({...furnishingState,...additions?.state}), productAssets: Object.freeze(worldProductAssets)};

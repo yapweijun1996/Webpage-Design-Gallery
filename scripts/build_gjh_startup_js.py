@@ -32,7 +32,7 @@ JOBS = (
         'entry': BASE / 'assets/world.js', 'output': BASE / 'assets/world.bundle.js',
         'external': ('*GLTFLoader.js', '*BufferGeometryUtils.js', '*three.module.min.js',
                      '*natural-materials.js', '*products.js', '*startup-asset-pack.js',
-                     '*brand-wall.js', '*audio.js'),
+                     '*brand-wall.js', '*street-chunk.js', '*audio.js'),
         'rewrite': (),
     },
     {

@@ -231,7 +231,7 @@ export function createUI(expanded = false, onMenuOpen = () => {}) {
   }
   const floorplan=document.querySelector('.floorplan'),mapCaption=document.querySelector('.map-caption');
   const [west, centre, east] = spatial.stores;
-  const floorplanLabel=expanded ? `Ground floor: ${destinations.length} stores open to explore. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
+  const floorplanLabel=expanded ? `Ground floor: ${destinations.length} stores open to explore. The south entrance leads to the Singapore street. The gold dot marks your position.` : `Mall floorplan. ${west.label} on the left, ${centre.label} in the centre and ${east.label} on the right. The gold dot marks your position.`;
   floorplan.setAttribute('aria-label',floorplanLabel);
   const mapCaptionText=[...mapCaption.childNodes].find(n=>n.nodeType===Node.TEXT_NODE&&n.textContent.trim());
   const inspectPrompt = document.getElementById('inspect-prompt');
@@ -506,6 +506,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
     floorplan.querySelector('.map-label:not(.map-entry)').setAttribute('y','320');
     floorplan.querySelector('.map-label:not(.map-entry)').setAttribute('x','350');
     floorplan.querySelector('.map-entry').setAttribute('x','350');floorplan.querySelector('.map-entry').setAttribute('y','575');
+    floorplan.querySelector('.map-entry').textContent = 'South entrance · Singapore street';
     playerDot.setAttribute('r','10');
     for(const bay of expandedLayout.slots){
       const origin=expandedMapPoint(bay.minX,bay.minZ);
@@ -652,7 +653,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   }
   records.set(FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD);
   for(const [id,name] of [['service-desk','Guest services'],['wayfinding-west','Store directions'],['wayfinding-east','Store directions'],['featured-showcase','New Moon featured collection']])records.set(id,{name,action:'amenity'});
-  const zones = { atrium: 'Courtyard',
+  const zones = { atrium: 'Courtyard', 'singapore-street':'Singapore street',
     ...Object.fromEntries(restroomRooms.map(({id,label})=>[id,label])), ...Object.fromEntries(destinations.map(store=>[store.id,store.label])), upper: 'Upper level' };
   let available = false;
   let showing3D = false;
@@ -1168,7 +1169,7 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
       tutorial.reportPose({x,z,yaw});
       if (zone in zones && zone !== currentZone) {
         currentZone = zone;
-        const upper=zone==='upper';playerDot.style.display=upper?'none':'';mapCaption.querySelector('.map-key').hidden=upper;floorplan.setAttribute('aria-label',upper?'Ground floor map. Choose a store to return to its entrance.':floorplanLabel);if(mapCaptionText)mapCaptionText.textContent=upper?' Ground floor map ':'You are here';
+        const offMap=zone==='upper'||zone==='singapore-street';playerDot.style.display=offMap?'none':'';mapCaption.querySelector('.map-key').hidden=offMap;floorplan.setAttribute('aria-label',offMap?'Ground floor map. Choose a store to return to its entrance.':floorplanLabel);if(mapCaptionText)mapCaptionText.textContent=offMap?' Ground floor map ':'You are here';
         if (showing3D) {
           updateLocation(zones[zone]);
           announce(`Location: ${zones[zone]}.`);

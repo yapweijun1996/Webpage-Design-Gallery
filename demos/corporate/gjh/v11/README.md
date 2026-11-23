@@ -6,6 +6,12 @@ Independent, unofficial concept. Not affiliated with or endorsed by Goh Joo Hin 
 
 Design reviews, new models, loader screenshots and acceptance use the default expanded 17-shop mall. The Classic 3-store route remains available as a legacy experience. See the [current company and shop design index](../../../../docs/goh-joo-hin/).
 
+Turn toward the south entrance beside the tram and walk through the glazed doors to reach the Singapore street. The same visitor can follow the pavement past an open HDB void deck, shophouses and Angsana trees, then walk back into the mall. The doors open once the street geometry and collision surfaces are ready. A failed request leaves the entrance closed and displays retry instructions.
+
+[Street route, camera and memory checks](../../../../docs/gjh-v11-singapore-street.md)
+
+The [street source receipts](assets/districts/singapore/sources.json) pin the five original GLBs and the corresponding Blender sources and project-use terms. The street loads on approach. Farther down the pavement the mall releases its detailed room models, room proxies and window-studio models. Its structural shell, transit, coarse furnishings, player and session remain resident. Returning rebuilds room details and retires the street geometry, camera bounds and collision handles. The scoped service worker caches verified model files on demand. Opening the live mall offline still uses the existing reconnect page.
+
 Open **Tools** for Guide, Help, Shopping Cart and Theme. Help includes the language picker and versioned update control. These preferences are also accessible from the directory’s **App & offline help**.
 
 The accessible directory contains a separate **Original demo tin — not New Moon packaging** viewer. It lazy-loads the byte-pinned original generic tin, preserves native metre scale, and supports drag/keyboard orbit, zoom, reset and mutually exclusive illustrative OpenClose/Exploded clips. The native dialog is keyboard-contained, restores focus, pauses the mall, and releases resources on close. Missing or invalid assets show a readable fallback; no branded product image, text, eShop link or world geometry is replaced.

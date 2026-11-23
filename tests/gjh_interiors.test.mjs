@@ -558,6 +558,41 @@ test('installed interior instance bounds contain every instance across all 17 st
   assert.ok(printedTin.visible);
 });
 
+test('leaving the mall evicts real interior models and proxies, then regenerates all 17 rooms exactly once',async t => {
+  mockInteriorDownloads(t);
+  const guards = new Set(), scene = new T.Scene();
+  const kit = createInteriorKit(T,scene,{assetBase:assets,registerCollider(box) {
+    guards.add(box);
+    return () => assert.ok(guards.delete(box));
+  }});
+  t.after(()=>kit.dispose());
+  function installer() { return {build:work=>runBuild(work),prepare:async()=>{},runFrame:()=>0,dispose(){}}; }
+  async function ready() {
+    for (let i=0; i<500 && kit.report().preinstalled.shops!==17; i++) {
+      kit.runFrame(); await new Promise(resolve=>setImmediate(resolve));
+    }
+    assert.equal(kit.report().preinstalled.shops,17);
+  }
+  kit.prepare('low',installer); await ready();
+  const original = kit.residency, initialGuards = guards.size;
+  assert.equal(original.models,34);
+  assert.ok(initialGuards > 0);
+  for (let round=0;round<2;round++) {
+    const mesh = kit.groups[0].getObjectByProperty('isMesh',true);
+    let released = false;
+    mesh.geometry.addEventListener('dispose',()=>{ released=true; });
+    kit.setResident(false);
+    assert.ok(released);
+    assert.equal(guards.size,0);
+    assert.deepEqual(kit.residency,{resident:false,models:0,colliders:0});
+    assert.ok(kit.groups.every(g=>!g.children.length));
+    kit.setResident(true); await ready();
+    assert.equal(guards.size,initialGuards);
+    assert.deepEqual(kit.residency,original);
+    assert.notEqual(kit.groups[0].getObjectByProperty('isMesh',true).geometry,mesh.geometry);
+  }
+});
+
 test('warm registration installs all rooms, reprioritizes remaining work and commits tier changes together', async () => {
   const scene = new T.Scene(), requests = [], pending = [], colliders = [];
   const modelsByFile = new Map();
