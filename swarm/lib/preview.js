@@ -21,6 +21,17 @@ const STAGE_SCRIPTS = ['/preview-bridge.js', '/studio-preview.js', '/ds/runtime.
 const ASSET_PATHS = ['/p/sections/', '/p/dist/', '/p/assets/', '/assets/generated/', '/gjh/', '/gjh-v11/', '/p/v11/', '/v11/'];
 const SECTION_ID = /^[\w-]{1,100}$/;
 const INERT_DOCUMENT = "sandbox; default-src 'none'; style-src 'unsafe-inline'";
+const CAPTURE_HEAD = `<style>html:root{scroll-behavior:auto!important}</style>
+<script>
+(() => {
+  const anchor = location.hash.slice(1);
+  if (!/^[\\w-]{1,100}$/.test(anchor)) return;
+  // Reapply after layout changes because the native jump can leave a stale scroll offset.
+  const align = () => document.getElementById(anchor)?.scrollIntoView({ behavior: 'instant', block: 'start' });
+  addEventListener('load', align, { once: true });
+  addEventListener('resize', align);
+})();
+</script>`;
 const FILE_ERRORS = ['ENOENT', 'ENOTDIR', 'ELOOP', 'ENAMETOOLONG', 'EACCES', 'EPERM', 'ERR_INVALID_ARG_VALUE'];
 
 function within(root, file) {
@@ -88,12 +99,12 @@ function dimension(value, fallback, max) {
 }
 
 function exportWrapper(width, height, anchor, standalone) {
-  const fragment = anchor ? '#' + encodeURIComponent(anchor) : '';
+  const target = EXPORT_FRAME + (anchor ? '?capture=1#' + encodeURIComponent(anchor) : '');
   return `<!doctype html><html lang="en"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Project export preview</title>
 <style>body{margin:0;background:#0b0d11}iframe{display:block;border:0;width:${width};height:${height}}</style>
-<iframe id="preview" title="Project export" sandbox="allow-scripts" referrerpolicy="no-referrer" src="${EXPORT_FRAME}${fragment}"></iframe>
+<iframe id="preview" title="Project export" sandbox="allow-scripts" referrerpolicy="no-referrer" src="${target}"></iframe>
 ${standalone ? `<script>
 const preview = document.getElementById('preview');
 function setSection() {
@@ -152,8 +163,15 @@ function createPreview({ ui, project, designSystem, library, mall }) {
       return true;
     }
     if (!opaque && route === EXPORT_FRAME) {
-      return file(path.join(project, 'dist'), 'index.html', 'text/html; charset=utf-8',
-        { 'Content-Security-Policy': isolatedPolicy(origin, false) }, project);
+      const dist = path.join(project, 'dist');
+      const policy = isolatedPolicy(origin, false);
+      if (url.searchParams.get('capture') !== '1') {
+        return file(dist, 'index.html', 'text/html; charset=utf-8', { 'Content-Security-Policy': policy }, project);
+      }
+      const content = readFile(dist, 'index.html', project);
+      if (content === undefined) send(res, 404, 'not found');
+      else html(res, content.toString('utf8').replace(/<head>/i, '$&' + CAPTURE_HEAD), policy);
+      return true;
     }
 
     const section = SECTION_FILE.exec(route);

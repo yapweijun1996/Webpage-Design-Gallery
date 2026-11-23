@@ -13,7 +13,7 @@ Verified 2026-11-20/21 while building the tool. Keep in sync with the KB skill.
 - Tests: `node --test swarm/test/*.test.js` and `node swarm/test/e2e.js` (uses `test/fake-codex.js`, no cost).
 
 ## Protocol
-See `CHANNEL_SPEC.md`. Agents post by appending JSON lines to `chat/NN.jsonl`; only the server writes `channel.jsonl` and `channel.md`. The first prompt line is `STEP: <Label> | AGENT: <id>`. Codex JSONL events used: `item.completed/agent_message` (thought bubble), `item.started/command_execution` (cursor target), `turn.completed`.
+See `CHANNEL_SPEC.md`. Workers append JSON lines to `chat/NN.jsonl`. The Manager returns a final `swarmChannel` envelope via the launched runner. Only the server writes `channel.jsonl` and `channel.md`. The first prompt line is `STEP: <Label> | AGENT: <id>`.
 
 ## Method that worked for building it with parallel Codex workers
 1. Write the interface spec first, then split into modules with disjoint files; add more workers on new independent modules at any time (linter, exporter, tests were added mid-run).
@@ -53,3 +53,7 @@ See `CHANNEL_SPEC.md`. Agents post by appending JSON lines to `chat/NN.jsonl`; o
 - Libraries are not features: anchors, integrator, fast path and versions exist but are not wired into server.js yet. Do not report them as available.
 - Worker sandboxes block Chrome and localhost; the manager verifies in a real browser. Worker reports are not evidence.
 - Speed: one wave of pi specialists is 60 to 85 s, three waves about 100 to 140 s, Codex specialists set the pace. Fast path compose+export p95 69 ms, browser time unmeasured.
+
+## Anchored export captures (2026-11-23)
+
+Headless Chrome intermittently left an export at an intermediate scroll position with the document complete and the expected hash present. Disabling smooth scrolling alone did not fix it. Align the fragment inside the opaque capture frame on load and when the iframe viewport changes. Keep smooth scrolling in the interactive export. The Chrome fixture checks the fragment, target position, viewport size and scrolling mode, and reports the geometry if it fails.

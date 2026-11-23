@@ -73,8 +73,11 @@ test('preview routes apply an opaque sandbox and limit readable resources', t =>
   }
   const shot = response('/frame?src=' + encodeURIComponent(EXPORT) + '&at=02-end&w=393');
   assert.equal(shot.status, 200);
-  assert.match(shot.body.toString(), /sandbox="allow-scripts" referrerpolicy="no-referrer" src="\/p\/dist\/preview\.html#02-end"/);
+  assert.match(shot.body.toString(), /sandbox="allow-scripts" referrerpolicy="no-referrer" src="\/p\/dist\/preview\.html\?capture=1#02-end"/);
   assert.match(shot.headers['Content-Security-Policy'], /frame-src http:\/\/swarm-preview\.test\/p\/dist\/preview\.html;/);
+  assert.match(response('/p/dist/preview.html?capture=1').body.toString(), /scroll-behavior:auto!important/);
+  assert.doesNotMatch(response('/p/dist/preview.html').body.toString(), /scroll-behavior:auto!important/);
+  assert.equal(isolated('/p/dist/preview.html?capture=1'), isolated('/p/dist/preview.html'));
   assert.equal(response('/frame?src=/p/sections/01-hero.html').status, 400);
   assert.equal(response(EXPORT).body.includes(Buffer.from('sandbox="allow-scripts"')), true);
   assert.equal(response('/p/dist/preview.html', { 'sec-fetch-dest': 'document' }).body.includes(Buffer.from('sandbox="allow-scripts"')), true);
@@ -256,13 +259,14 @@ test('Studio, agent captures, Compare and the export render in opaque frames in 
       if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description || expression);
       return result.result.value;
     };
-    async function until(check, label) {
+    async function until(check, label, diagnostics) {
       for (let i = 0; i < 80; i++) {
         const result = await check();
         if (result) return result;
         await delay(50);
       }
-      assert.fail(label + (errors.length ? '\n' + errors.join('\n') : ''));
+      assert.fail(label + (diagnostics ? '\n' + JSON.stringify(diagnostics()) : '') +
+        (errors.length ? '\n' + errors.join('\n') : ''));
     }
     async function child(fragment) {
       for (const [id, contexts] of sessions) {
@@ -388,14 +392,37 @@ test('Studio, agent captures, Compare and the export render in opaque frames in 
     }
 
     await send('Page.navigate', { url: ORIGIN + '/frame?src=' + encodeURIComponent(EXPORT) + '&at=02-end&w=393&h=844' });
+    let exportLayout;
     const exported = await until(async () => {
-      const context = await child('/p/dist/preview.html');
-      return context && await evalIn("document.readyState === 'complete' && Math.abs(document.getElementById('02-end')?.getBoundingClientRect().top) < 2", context) && context;
-    }, 'Screenshot preview never scrolled to the selected section');
+      const context = await child('/p/dist/preview.html?capture=1');
+      if (!context) return;
+      exportLayout = await evalIn(`({ ready: document.readyState, hash: location.hash, scrollY,
+        top: document.getElementById('02-end')?.getBoundingClientRect().top,
+        behavior: getComputedStyle(document.documentElement).scrollBehavior })`, context);
+      return exportLayout.ready === 'complete' && Math.abs(exportLayout.top) < 2 && context;
+    }, 'Screenshot preview never scrolled to the selected section', () => exportLayout ?? { context: 'missing' });
+    assert.equal(exportLayout.hash, '#02-end');
+    assert.equal(exportLayout.behavior, 'auto');
     assert.deepEqual(await evalIn('[window.origin, innerWidth, innerHeight]', exported), ['null', 393, 844]);
+    // The first section uses viewport-relative height. Resizing moves the anchor independently of scroll anchoring.
+    await evalIn("document.documentElement.style.overflowAnchor = 'none'; true", exported);
+    for (const height of [540, 844]) {
+      await evalIn(`document.getElementById('preview').style.height = '${height}px'; true`);
+      await until(() => evalIn(`innerHeight === ${height} &&
+        Math.abs(document.getElementById('02-end').getBoundingClientRect().top) < 2`, exported),
+      `Screenshot preview lost its anchor after resizing to ${height}px`);
+    }
     const png = await send('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: 393, height: 844, scale: 1 } });
     assert.equal(Buffer.from(png.data, 'base64').readUInt32BE(16), 393);
     assert.equal(Buffer.from(png.data, 'base64').readUInt32BE(20), 844);
+
+    await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
+    await send('Page.navigate', { url: ORIGIN + EXPORT });
+    const ordinaryExport = await until(async () => {
+      const context = await child('/p/dist/preview.html');
+      return context && await evalIn("!location.search && document.readyState === 'complete' && !!document.querySelector('#end-heading')", context) && context;
+    }, 'Standalone export never rendered');
+    assert.deepEqual(await evalIn('[window.origin, getComputedStyle(document.documentElement).scrollBehavior]', ordinaryExport), ['null', 'smooth']);
 
     if (evidence) {
       await send('Emulation.setDeviceMetricsOverride', { width: 2250, height: 1250, mobile: false, deviceScaleFactor: 1 });
