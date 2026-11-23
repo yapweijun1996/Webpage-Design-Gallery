@@ -1146,7 +1146,7 @@ async function initialize() {
   // Let the shared transfer finish before asset-specific deadlines begin.
   await packTask;
   world = await createWorld(T, R, physics, expanded, warmModel,
-    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === 'phone', detailsEnabled, waitForParseSlice);
+    () => requestedProfile?.tier ?? quality.resolve(innerWidth).tier, quality.deviceClass === 'phone', detailsEnabled, waitForParseSlice, ui.registerSeat);
   if (expanded) renderer.toneMappingExposure = world.defaultExposure;
   ui.setBrandStories(world.shopExhibits);
   const prepareModel = (model, options) => warmModel(model, world.scene, options);

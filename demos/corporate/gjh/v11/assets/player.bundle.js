@@ -155,6 +155,8 @@ function createSeatContact(T, visual, rig, { prefix = "", tripo = false } = {}) 
       visual.worldToLocal(lower.getWorldPosition(knee));
       visual.worldToLocal(foot.getWorldPosition(point));
       target.set(restFoot.x, seat.footY - originY + restFoot.y + (tripo ? 0.026 : 0), -seat.frontEdge - 0.04);
+      if (seat.pose?.feetHang)
+        target.y = Math.max(target.y, seat.y - originY - knee.distanceTo(point));
       const reach = hip.distanceTo(knee) + knee.distanceTo(point) - 0.003;
       const maxForward = Math.sqrt(Math.max(0, reach ** 2 - (target.y - hip.y) ** 2 - (target.x - hip.x) ** 2));
       target.z = Math.max(target.z, hip.z - maxForward);
@@ -2264,7 +2266,7 @@ async function createPlayer(T, R, physics, scene, canvas, contactMaterial, conta
     seatFrom = { ...p };
     seatPhase = "align";
     seatStartWeight = 0;
-    beginActionView("seat", seat.angle + Math.PI);
+    beginActionView("seat", seat.angle + Math.PI + (seat.pose?.cameraOffset ?? 0));
     vertical = 0;
     if (reduceSeatMotion()) {
       moveSeat(target2);

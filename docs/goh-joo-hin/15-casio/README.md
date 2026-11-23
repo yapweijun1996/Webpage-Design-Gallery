@@ -43,7 +43,7 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 
 ## Runtime acceptance
 
-Desktop and touch-emulated Chrome passed the story, the two model views and the return route. Instrument audio and Sit remain separate work.
+The audience chair beside the piano offers **Sit** from the side aisle. The visitor sits at world Y 0.601 m. **Stand** on touch or **Escape** on the keyboard restores the visitor to the clear floor beside the instrument. At 390 and 1440 px, Chrome completed the seat transition, the piano phrase and the walk back to the arcade. The seated view looks past the raised piano lid so the visitor and chair stay visible. [Seated touch view](seat-touch.webp)
 
 ## Catalogue exhibit
 

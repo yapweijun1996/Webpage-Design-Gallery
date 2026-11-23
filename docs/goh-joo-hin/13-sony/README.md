@@ -43,7 +43,7 @@ The four ImageGen studies cover the entrance, the main fixture, the browse aisle
 
 ## Runtime acceptance
 
-Both input paths entered and browsed. Extra lighting, side display clearing and SKU interactions remain design work.
+The felt listening chair behind the console offers **Sit** from its open side. Use the touch card or press **F** to sit. **Stand** or **Escape** returns the visitor to the same spot. The chair faces the headphone rack across the raised floor. Both widths also completed the headphone sample. On Low, enable Sound to hear the three-note cue. [Seated touch view](seat-touch.webp)
 
 ## Catalogue exhibit
 

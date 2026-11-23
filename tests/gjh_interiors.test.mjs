@@ -8,6 +8,7 @@ import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
 import {expandedLayout,shopEntrance} from '../demos/corporate/gjh/v11/assets/expanded-layout.js';
 import {createExpandedInteriors} from '../demos/corporate/gjh/v11/assets/expanded-interiors.js';
 import {createSeatPlacements,isInFrontOfSeat} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
+import {createProceduralSeat} from '../demos/corporate/gjh/v11/assets/interiors/procedural-seats.js';
 import {createGigasetLoungeSeat,gigasetLoungeSofa,gigasetSofaFallback} from '../demos/corporate/gjh/v11/assets/gallery-east-shops.js';
 import {
   interiorAsset,interiorRoutes,interiorStores,interiorTiers,radians,worldInteriorBox
@@ -735,6 +736,58 @@ test('studio substitution retains the exact authored collision boxes', async t =
   assert.equal(footprints.length,188);
   assert.equal(sha(JSON.stringify(footprints.filter(box => box !== cabinet))),
     '320ca9b5beda1050df16f1a7b8ff868892b694d85eddd7a3980e5697cd1b5322');
+});
+
+
+for (const [name,slot,id,angle,behind] of [
+  ['SKIPPY','S08','S08-leftmid',Math.PI/6,{x:-18.2,z:22.2}],
+  ['Sony','S13','S13-backleft',-7*Math.PI/6,{x:42.3,z:9.04}],
+  ['LG sofa','S14','S14-leftmid',-2*Math.PI/3,{x:40,z:16.6}],
+  ['LG ottoman','S14','S14-leftfront',-7*Math.PI/12,{x:35.8,z:18}],
+  ['Casio','S15','S15-backleft',-3*Math.PI/4,{x:38.95,z:24.95}]
+]) test(`${name} Sit follows the actual cushion and its front approach clears the studio`, async t => {
+  t.mock.method(globalThis,'fetch',async url => new Response(readFileSync(url),
+    {headers:{'Content-Type':'application/wasm'}}));
+  await R.init();
+  globalThis.window = {requestIdleCallback() {}};
+  globalThis.document = {addEventListener() {}};
+  t.after(()=>{ delete globalThis.window; delete globalThis.document; });
+  const store = interiorStores[slot];
+  const {collisionBoxes} = await createExpandedInteriors(T,expandedLayout,new T.Scene());
+  const upright = {x:0,y:0,z:0,w:1};
+  const seatBoxes = store.colliders.map((footprint,handle) => {
+    const {center:[x,y,z],size:[w,h,d],yaw} = worldInteriorBox(store,footprint);
+    return {handle,position:{x,y,z},shape:new R.Cuboid(w/2,h/2,d/2),
+      rotation:{x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}};
+  });
+  const seats = store.colliders.map((footprint,i) => createProceduralSeat(store,footprint,seatBoxes[i].handle)).filter(Boolean);
+  const authored = store.colliders.filter(footprint => footprint.seat).map(footprint => footprint.seat.id);
+  assert.deepEqual(seats.map(seat => seat.id), authored);
+  const seat = seats.find(entry => entry.id === id);
+  assert(seat, id);
+  const decoration = buildInteriorDecoration(T,store,interiorMaterials(T));
+  decoration.position.set(...store.frame.world_origin_m);
+  decoration.rotation.y = radians(store.frame.yaw_world_deg);
+  decoration.updateMatrixWorld(true);
+  const ray = new T.Raycaster(new T.Vector3(seat.x,1,seat.z),new T.Vector3(0,-1,0));
+  assert(Math.abs(ray.intersectObject(decoration,true)[0].point.y-seat.y) < .001);
+  assert(Math.abs(seat.angle-angle) < 1e-6);
+  assert.equal(seat.floor,.081);
+  assert(isInFrontOfSeat(seat,seat.exit));
+  assert(!isInFrontOfSeat(seat,behind));
+
+  const capsule = new R.Capsule(.55,.3);
+  const boxes = [...seatBoxes,...collisionBoxes.map(({x,y,z,width,height,depth}) => ({
+    shape:new R.Cuboid(width/2,height/2,depth/2),position:{x,y,z},rotation:upright
+  }))];
+  const intersects = (point,box) => capsule.intersectsShape(point,upright,box.shape,box.position,box.rotation);
+  const start = {x:seat.exitX,y:seat.floor+.91,z:seat.exitZ};
+  assert(!boxes.some(box => intersects(start,box)));
+  for (let i=0;i<=10;i++) {
+    const f = i/10;
+    const point = {x:start.x+(seat.x-start.x)*f,y:start.y-.02*f,z:start.z+(seat.z-start.z)*f};
+    assert(!boxes.some(box => box.handle !== seat.collider && intersects(point,box)),JSON.stringify(point));
+  }
 });
 
 

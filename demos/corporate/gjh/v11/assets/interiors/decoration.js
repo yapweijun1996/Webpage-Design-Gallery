@@ -2,6 +2,8 @@ import {mergeGeometries} from '../shop-sign-vendor.js';
 import {radians} from './config.js';
 import {floorFinish, kelvinColour} from './surfaces.js';
 
+export const seatCushionRatios = {centreHeight:.34, thickness:.31};
+
 function merged(parts) {
   if (!parts.length) return null;
   const result = mergeGeometries(parts);
@@ -119,7 +121,7 @@ export function* prepareInteriorDecoration(T, store, materials, detail = 0) {
       case 'sofa':
       case 'chair':
       case 'ottoman':
-        slab(h*.34,h*.31,secondary);
+        slab(h*seatCushionRatios.centreHeight,h*seatCushionRatios.thickness,secondary);
         if (kind !== 'ottoman') box(0,h*.66,-d*.34,w,h*.67,d*.32,pale);
         for (const x of [-.39,.39]) for (const z of [-.34,.34])
           box(x*w,h*.12,z*d,.07,h*.24,.07,body);

@@ -639,6 +639,16 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
   }
   cartToggle.addEventListener('click',toggleCart);sceneCart.addEventListener('click',toggleCart);
   const records = new Map([['courtyard-seat',{name:'Courtyard bench',action:'seat'}],['mall-directory', {name: 'Directory kiosk · Decorative screen', action: 'map'}]]);
+  function registerSeat(seat) {
+    let record = records.get(seat.id);
+    if (record?.seat !== seat) {
+      record = {name:seat.name, action:'seat', seat};
+      records.set(seat.id, record);
+    }
+    return () => {
+      if (records.get(seat.id) === record) records.delete(seat.id);
+    };
+  }
   records.set(FEATURE_KIOSK_ID, FEATURE_KIOSK_RECORD);
   for(const [id,name] of [['service-desk','Guest services'],['wayfinding-west','Store directions'],['wayfinding-east','Store directions'],['featured-showcase','New Moon featured collection']])records.set(id,{name,action:'amenity'});
   const zones = { atrium: 'Courtyard',
@@ -1288,7 +1298,8 @@ layoutLink.textContent=expanded?'Classic 3-store view':'Return to the expanded m
         for (const [id, {label}] of Object.entries(floorDestinations)) select.add(new Option(label, id));
       }
     },
-    setSeats(seats){for(const seat of seats)records.set(seat.id,{name:seat.name,action:'seat'});},
+    registerSeat,
+    setSeats(seats){for(const seat of seats)registerSeat(seat);},
     setBrandStories(stories){for(const [id,record] of Object.entries(stories))records.set(id,record);},
     onSeat(listener){seatListener=listener;},
     onBagChange(listener) { return bag.subscribe(listener); },

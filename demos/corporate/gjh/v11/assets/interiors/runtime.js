@@ -86,7 +86,7 @@ export function createInteriorKit(T, scene, {
     const removals = [];
     try {
       for (const box of shop.store.colliders) {
-        const remove = registerCollider(worldInteriorBox(shop.store,box));
+        const remove = registerCollider(worldInteriorBox(shop.store,box),shop.store,box);
         if (typeof remove === 'function') removals.push(remove);
       }
       shop.removeColliders = removals;

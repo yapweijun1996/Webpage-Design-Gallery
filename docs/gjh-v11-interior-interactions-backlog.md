@@ -16,7 +16,7 @@ The layout sweep checks each action from its standing position across all 17 sho
 
 ## Installed shop interactions
 
-The November 24 inventory compared emitted furniture, named product exhibits and registered interactions in the default expanded mall. It covers 10 native shop seats, 60 scripted targets, 19 catalogue Story stops and four distinct physical product pickups at [release 29ba490e](https://github.com/yapweijun1996/Webpage-Design-Gallery/commit/29ba490e219d68f764843d3f480760bd671e43ab). The [65-action walkthrough](verify_interactions.py) exercised the 60 scripted targets and five stools. Each room link below leads to its installed exhibits and the available browser evidence for native seats, catalogue stops and product handling.
+The expanded mall has 15 native shop seats, 60 scripted targets, 19 catalogue Story stops and four distinct physical product pickups. The [initial inventory](https://github.com/yapweijun1996/Webpage-Design-Gallery/commit/29ba490e219d68f764843d3f480760bd671e43ab) found ten native seats. Five more now use their existing room-kit colliders. The [65-action walkthrough](verify_interactions.py) covers the 60 scripted targets and five stools. The [showroom seat walkthrough](../tests/browser_gjh_showroom_seats.py) exercises all five additional seats with keyboard and touch input. Run `python tests/browser_gjh_showroom_seats.py` for the ten phone and desktop routes. Add `--width 390 768 1440` to include the Balanced tablet walkthrough. To repeat the LG window seat on touch and capture its default view, add `--seat S14-leftfront --width 390 --out /tmp/lg-seat`.
 
 | Room | Native seats | Scripted targets | Stories | Installed exhibits and visitor actions |
 | --- | ---: | ---: | ---: | --- |
@@ -27,18 +27,18 @@ The November 24 inventory compared emitted furniture, named product exhibits and
 | [S05 Pien Tze Huang](goh-joo-hin/05-pien-tze-huang/README.md) | 0 | 2 | 1 | The single-unit and larger cartons share a Story. The specimen drawer and display case open. |
 | [S06 Flying Wheel](goh-joo-hin/06-flying-wheel/README.md) | 0 | 2 | 1 | Ban Mee and Shanghai LaMian share a Story. Visitors can turn the wheel and serve a sample. |
 | [S07 Gu Long](goh-joo-hin/07-gu-long/README.md) | 0 | 2 | 1 | Two pork tins share a Story. The tower and serving station offer sample demonstrations. |
-| [S08 Skippy](goh-joo-hin/08-skippy/README.md) | 0 | 2 | 1 | Creamy and Chunky jars share a Story. Visitors can lift the jar lid and spread peanut butter. The breakfast chair has an authored Sit action awaiting registration. |
+| [S08 Skippy](goh-joo-hin/08-skippy/README.md) | 1 | 2 | 1 | Creamy and Chunky jars share a Story. Visitors can lift the jar lid and spread peanut butter. The breakfast chair offers Sit from the aisle. |
 | [S09 SPAM](goh-joo-hin/09-spam/README.md) | 0 | 2 | 1 | Classic, Lite and Less Sodium tins share a Story. The conveyor and scanner can be activated. |
 | [S10 California Mexico](goh-joo-hin/10-california-mexico/README.md) | 0 | 2 | 1 | Red and Black abalone exhibits share a Story. The shell opens to reveal the pearl. |
 | [S11 Hormel](goh-joo-hin/11-hormel/README.md) | 0 | 2 | 1 | The two chili tins share a Story. Visitors can unpack and weigh the demonstration parcel. |
 | [S12 Zeria](goh-joo-hin/12-zeria/README.md) | 0 | 2 | 1 | Lively & Healthy and Chondro Max share a Story. Visitors can match an herb print and water the orchid. |
-| [S13 Sony](goh-joo-hin/13-sony/README.md) | 0 | 3 | 1 | The WH-1000XM6 and NW-A306 share a Story and the listening displays offer sound demos. The felt chair has an authored Sit action awaiting registration. |
-| [S14 LG](goh-joo-hin/14-lg/README.md) | 0 | 2 | 1 | The OLED55C5PSA has a Story. Visitors can change the display channel and open the refrigerator. The small sofa and ottoman have authored Sit actions awaiting registration. |
-| [S15 Casio](goh-joo-hin/15-casio/README.md) | 0 | 3 | 1 | The CT-S1BK and GP-510BP share a Story. Both instrument demos can play a phrase. The audience chair has an authored Sit action awaiting registration. |
+| [S13 Sony](goh-joo-hin/13-sony/README.md) | 1 | 3 | 1 | The WH-1000XM6 and NW-A306 share a Story and the listening displays offer sound demos. Visitors can sit in the felt listening chair behind the console. |
+| [S14 LG](goh-joo-hin/14-lg/README.md) | 2 | 2 | 1 | The OLED55C5PSA has a Story. Visitors can change the display channel and open the refrigerator. The alcove sofa and window ottoman each have a Sit action. |
+| [S15 Casio](goh-joo-hin/15-casio/README.md) | 1 | 3 | 1 | The CT-S1BK and GP-510BP share a Story. Both instrument demos can play a phrase. Visitors can sit beside the recital piano and stand in its side aisle. |
 | [S16 GP Batteries](goh-joo-hin/16-gp-batteries/README.md) | 0 | 2 | 1 | The AA cells, eTag tracker and CR2032 cell share a Story. Visitors can switch the torch and test the cells. |
 | [S17 Gigaset](goh-joo-hin/17-gigaset/README.md) | 1 | 2 | 1 | The sofa supports Sit and Stand with the model or its fallback. The A170 and COMFORT 550A share a Story. The receiver and dial have separate demo actions. |
 
-The five unregistered authored seat IDs are `S08-leftmid`, `S13-backleft`, `S14-leftmid`, `S14-leftfront` and `S15-backleft`. Other modelled furniture needs an intent and clearance check, including LG's separate studio sofa, Casio's piano and keyboard benches, and the backless bench in the Gigaset composite. The two Sony studio sofa declarations keep collision volumes after their mesh is replaced. Repeated shelf facings, alternate levels of detail and serving props reuse the underlying product or demonstration. [Seat registration](../demos/corporate/gjh/v11/assets/world.js) · [Shop action installer](../demos/corporate/gjh/v11/assets/interiors/shop-interactions.js) · [Seat and pickup controls](gjh-v11-engine-interactions.md)
+Other modelled furniture needs an intent and clearance check, including LG's separate studio sofa, Casio's piano and keyboard benches, and the backless bench in the Gigaset composite. The two Sony studio sofa declarations keep collision volumes after their mesh is replaced. Repeated shelf facings, alternate levels of detail and serving props reuse the underlying product or demonstration. [Seat registration](../demos/corporate/gjh/v11/assets/world.js) · [Shop action installer](../demos/corporate/gjh/v11/assets/interiors/shop-interactions.js) · [Seat and pickup controls](gjh-v11-engine-interactions.md)
 
 ## Original interaction proposals
 

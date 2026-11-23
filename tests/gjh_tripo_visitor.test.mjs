@@ -11,6 +11,8 @@ import {meshTextures} from '../demos/corporate/gjh/v11/assets/model-warmup.js';
 import {usesPortraitAtlas} from '../demos/corporate/gjh/v11/assets/graphics-quality.js';
 import {playerCameraFraming} from '../demos/corporate/gjh/v11/assets/player.js';
 import {createSeatAnchor, createSeatPlacements} from '../demos/corporate/gjh/v11/assets/seat-placements.js';
+import {interiorStores} from '../demos/corporate/gjh/v11/assets/interiors/config.js';
+import {createProceduralSeat} from '../demos/corporate/gjh/v11/assets/interiors/procedural-seats.js';
 
 const names = ['idle', 'walk', 'run', 'wave', 'nod', 'jump', 'dance'];
 const hips = {name: 'mixamorigHips', position: new T.Vector3(.02, .37, .08)};
@@ -297,6 +299,34 @@ test('the runtime seat pose fits the actual visitor to ground and upper benches 
     const restored = foot.getWorldPosition(new T.Vector3());
     assert.ok(Math.abs(restored.y-character.visual.position.y-.122) < .02);
   });
+});
+
+for (const [name, factory, kneeName] of [
+  ['Tripo', createCharacterTripo, 'Leg'],
+  ['Visitor v2', createCharacterV2, 'Knee']
+]) test(`${name} knees and boots clear the front of the high LG ottoman`, async () => {
+  const store = interiorStores.S14;
+  const footprint = store.colliders.find(box => box.seat?.id === 'S14-leftfront');
+  const seat = createProceduralSeat(store, footprint, 1);
+  await withVisitorAssets(async character => {
+    character.visual.position.set(seat.x, seat.floor + .015, seat.z);
+    character.visual.rotation.y = seat.angle;
+    character.setSeated(true);
+    character.update('idle', 1/60, 'idle', 1, seat);
+    const jointPosition = suffix => {
+      const joint = character.visual.getObjectByName(suffix) ??
+        character.visual.getObjectByProperty('isSkinnedMesh', true).skeleton.bones.find(bone => bone.name.endsWith(suffix));
+      return joint.getWorldPosition(new T.Vector3());
+    };
+    const forwardOfLip = point => -(point.x-seat.x)*Math.sin(seat.angle) - (point.z-seat.z)*Math.cos(seat.angle) - seat.frontEdge;
+    for (const side of ['Left', 'Right']) {
+      const knee = jointPosition(side+kneeName);
+      const ankle = jointPosition(side+'Foot');
+      assert(forwardOfLip(knee) > .04, side+' knee intersects the ottoman');
+      assert(forwardOfLip(ankle) > .02, side+' ankle intersects the ottoman');
+      assert(knee.y > seat.y-.05 && ankle.y < knee.y, side+' lower leg should hang from the cushion');
+    }
+  }, factory);
 });
 
 // Use the shipped can and animated skin. The product pivot is at its base.

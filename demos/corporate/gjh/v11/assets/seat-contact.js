@@ -48,6 +48,8 @@ export function createSeatContact(T, visual, rig, {prefix = '', tripo = false} =
       visual.worldToLocal(lower.getWorldPosition(knee));
       visual.worldToLocal(foot.getWorldPosition(point));
       target.set(restFoot.x, seat.footY - originY + restFoot.y + (tripo ? .026 : 0), -seat.frontEdge - .04);
+      // On a high seat the boots can hang one shin below the cushion.
+      if (seat.pose?.feetHang) target.y = Math.max(target.y, seat.y - originY - knee.distanceTo(point));
       // Deep cushions can exhaust a short rig's reach. Keep the ankle on the
       // floor and fit its fore/aft placement to the actual leg lengths.
       const reach = hip.distanceTo(knee) + knee.distanceTo(point) - .003;

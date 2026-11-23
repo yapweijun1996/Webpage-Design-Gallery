@@ -36,6 +36,7 @@ import {interiorFloorColour,interiorStores,worldInteriorBox,worldInteriorPoint} 
 import {liftLayout,cutRectangle,showcaseProducts} from './lift-layout.js';
 import {benchScale, createSeatPlacements, createSeatAnchor, deckBenchFallback, groundBenchFallback} from './seat-placements.js';
 import {gogoStoolSeat} from './interiors/gogo-seats.js';
+import {createProceduralSeat} from './interiors/procedural-seats.js';
 import {createGigasetLoungeSeat} from './gallery-east-shops.js';
 import {addFeatureKiosk} from './feature-kiosk.js';
 import {createMallSurfaceAtmosphere, shopLampTint} from './mall-atmosphere.js';
@@ -129,7 +130,7 @@ export function applyMallThemeToWorld(theme, {expanded, materials, ambient, key,
 }
 
 // Continuous, metre-scale architecture. All repeated architectural solids are instanced.
-export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low', phone = false, detailsEnabled = () => true, waitForSlice) {
+export async function createWorld(T, R, physics, expanded = false, warmModel, artworkTier = () => 'low', phone = false, detailsEnabled = () => true, waitForSlice, registerShopSeat) {
   let shellState = null;
   const expandedLift=expanded&&new URLSearchParams(location.search).get('visitor')!=='v1';
   // Local textures share the HTML packshots' request mode, avoiding duplicate image loads.
@@ -173,6 +174,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     return panels;
   }
   const seats=[], seatPlacements=createSeatPlacements(expanded);
+  const seatInteraction = seat => ({id:seat.id,kind:'sit',x:seat.exitX,y:seat.floor,z:seat.exitZ,
+    floor:seat.floor,radius:seat.clearance.interactionRadius,seat});
   const scene = new T.Scene();
   const prepareModel = warmModel && ((model, options) => warmModel(model, scene, options));
   scene.background = new T.Color(expanded ? 0x819b9b : 0x192e32);
@@ -1199,11 +1202,22 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     shopLodUpdates.push(interiors.update);
     interiorKit = createInteriorKit(T, scene, {
       assetBase:new URL('.',import.meta.url), packshot:textures.get('new-moon-nz-425g-front.jpg'), artworkTier, waitForSlice,
-      prepareModel, registerCollider({center:[x,y,z],size:[w,h,d],yaw}) {
+      prepareModel, registerCollider({center:[x,y,z],size:[w,h,d],yaw},store,footprint) {
         // The camera sweep already uses these oriented Rapier boxes.
         const box = physics.createCollider(R.ColliderDesc.cuboid(w/2,h/2,d/2).setTranslation(x,y,z)
           .setRotation({x:0,y:Math.sin(yaw/2),z:0,w:Math.cos(yaw/2)}));
-        return () => physics.removeCollider(box,false);
+        const seat = createProceduralSeat(store,footprint,box.handle);
+        if (!seat) return () => physics.removeCollider(box,false);
+        const entry = seatInteraction(seat);
+        const removeRecord = registerShopSeat?.(seat);
+        seats.push(seat);
+        interactables.push(entry);
+        return () => {
+          seats.splice(seats.indexOf(seat),1);
+          interactables.splice(interactables.indexOf(entry),1);
+          removeRecord?.();
+          physics.removeCollider(box,false);
+        };
       }
     });
     // Shop focus pools share the public light wash. Contact decals follow
@@ -1553,7 +1567,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     }
   }
   const additions = expanded ? createInteriorAdditions(T,{scene,collider,seats,prepareModel,detailsEnabled,tier:artworkTier}) : null;
-  interactables.push(...seats.map(seat=>({id:seat.id,kind:'sit',x:seat.exitX,y:seat.floor,z:seat.exitZ,floor:seat.floor,radius:seat.clearance.interactionRadius,seat})));
+  interactables.push(...seats.map(seatInteraction));
   const firstFurnishing = shopLodMeshes.length;
   const furnishingState=furnishings.finish(scene,mesh=>shopLodMeshes.push(mesh),prepareModel);
   for (const mesh of shopLodMeshes.slice(firstFurnishing)) queueShopUpload(mesh.userData.shopSlot, mesh);

@@ -6,7 +6,7 @@
 
 ## Player walkthrough
 
-The wall screen is easy to find on desktop and touch emulation. The large sofa and ottomans have no active seat targets.
+The wall screen is easy to find on desktop and touch emulation. Visitors can sit on the ivory alcove sofa or the velvet ottoman by the window. The larger studio sofa is a separate fixture.
 
 [Chrome player baseline](player-baseline.webp)
 
@@ -18,7 +18,7 @@ Use home-theatre warmth and a low matte wall panel. Make a single valid screen f
 | --- | --- |
 | Main display | Two-scale screen wall with a gallery reveal, local XYZ (-0.62, 1.03, -3.99), yaw 0°. Retain the enlarged existing screen as the exhibit frame. A smaller reference product should be a separate visible object. |
 | Visitor route | Threshold local XZ (0, 5). Keep the right-side walkthrough and the central viewing area separate. |
-| Fixtures and use points | Model the sofa and ottomans as distinct seat nodes with entry and stand placement before adding interactions. |
+| Fixtures and use points | Use the rear aisle to reach the alcove sofa and the open space inside the entrance to reach the window ottoman. |
 
 World origin (40, 0, 20), yaw -90°. Dimensions are authored metres. The [floor plan](floor-plan.webp) shows programme footprints and the [inventory](model-inventory.md) resolves fixture coordinates and upstream assets.
 
@@ -44,7 +44,7 @@ The screen shows an original dawn-coast still generated for this design study. I
 
 ## Runtime acceptance
 
-Both viewport flows passed with the two installed displays. The 55-inch cabinet uses a dark inactive face. The larger architectural screen shows the existing abstract light artwork.
+Desktop keyboard and 390 px touch-emulated Chrome reached both seats, stood up in the aisle and returned through the automatic door. Both routes also retained the OLED Story, TV-channel and refrigerator actions. The alcove cushion is 0.546 m above world zero. The 0.814 m window ottoman lets the visitor’s lower legs hang past its front edge. [Sofa and ottoman touch views](seats-touch.webp) The 55-inch cabinet uses a dark inactive face and the larger architectural screen shows the existing abstract light artwork.
 
 ## Catalogue exhibit
 

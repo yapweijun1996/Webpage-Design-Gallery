@@ -27,7 +27,10 @@ def project(shop):
     for item in items:
         if item['collision'] == 'kit':
             x, y, z = item['xyz']
-            colliders.append(dict(center=[x, y+item['size'][1]/2, z], size=item['size'], yaw=item['yawDeg']))
+            collider = dict(center=[x, y+item['size'][1]/2, z], size=item['size'], yaw=item['yawDeg'])
+            if 'sit' in item['action']:
+                collider['seat'] = dict(id=item['id'], socket=item['socket'])
+            colliders.append(collider)
     details = {}
     if shop['slot'] == 'S03':
         details['gogoStools'] = [dict(id=item['id'], standing=item['standing'], **placement(item))
