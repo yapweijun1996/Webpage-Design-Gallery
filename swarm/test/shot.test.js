@@ -40,6 +40,10 @@ if (process.env.SHOT_TEST_MODE === 'truncated') process.exit(1);
 if (process.env.SHOT_TEST_MODE === 'complete') {
   setTimeout(() => fs.appendFileSync(output, png.subarray(-12)), 150);
 }
+if (process.env.SHOT_TEST_MODE === 'retiring') {
+  fs.appendFileSync(output, png.subarray(-12));
+  setTimeout(() => process.exit(0), 90);
+}
 setInterval(() => {}, 1000);
 `, { mode: 0o700 });
   const env = {
@@ -48,7 +52,7 @@ setInterval(() => {}, 1000);
   };
   return {
     png, out, proof, terminated,
-    start: () => run(process.execPath, [SHOT, LOCAL_PREVIEW, '393', '844', out], { env, timeout: 8000 }),
+    start: (options = []) => run(process.execPath, [...options, SHOT, LOCAL_PREVIEW, '393', '844', out], { env, timeout: 8000 }),
     assertCleanup() {
       const { profile, output, pid } = JSON.parse(fs.readFileSync(proof, 'utf8'));
       assert.equal(fs.existsSync(profile), false);
@@ -71,6 +75,20 @@ test('rejects a partial PNG and preserves the previous destination on Chrome fai
   const shot = fixture(t, 'truncated');
   await assert.rejects(shot.start(), error => error.code === 3 && /before writing a complete PNG/.test(error.stderr));
   assert.equal(fs.readFileSync(shot.out, 'utf8'), 'previous capture');
+  shot.assertCleanup();
+});
+
+test('keeps a complete capture when the retiring Chrome group reports EPERM', executableFixture, async t => {
+  const shot = fixture(t, 'retiring');
+  const preload = path.join(path.dirname(shot.out), 'retiring.cjs');
+  fs.writeFileSync(preload, `const original = process.kill;
+    process.kill = function (pid, signal) {
+      if (pid < 0) throw Object.assign(new Error('retiring process group'), { code: 'EPERM' });
+      return original.call(process, pid, signal);
+    };
+  `);
+  await shot.start(['--require', preload]);
+  assert.deepEqual(fs.readFileSync(shot.out), shot.png);
   shot.assertCleanup();
 });
 

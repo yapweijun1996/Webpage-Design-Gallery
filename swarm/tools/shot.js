@@ -53,12 +53,20 @@ async function capture(chrome, args, output, signal) {
       resolve();
     });
   });
-  function terminate(killSignal) {
+  async function terminate(killSignal) {
     if (!child.pid) return;
     try {
       if (processGroup) process.kill(-child.pid, killSignal);
       else child.kill(killSignal);
-    } catch (error) { if (error.code !== 'ESRCH') throw error; }
+    } catch (error) {
+      if (error.code === 'ESRCH') return;
+      // Darwin can report EPERM for a defunct group just before Node delivers its exit event.
+      if (error.code === 'EPERM' && processGroup) {
+        await Promise.race([exited, delay(150, undefined, { ref: false })]);
+        if (exit) return;
+      }
+      throw error;
+    }
   }
   try {
     const deadline = performance.now() + CAPTURE_TIMEOUT;
@@ -72,12 +80,12 @@ async function capture(chrome, args, output, signal) {
     throw new Error('Timed out waiting for a complete PNG');
   } finally {
     if (!exit) {
-      terminate('SIGTERM');
-      const force = setTimeout(() => terminate('SIGKILL'), 1000);
-      try { await exited; }
-      finally { clearTimeout(force); }
+      await terminate('SIGTERM');
+      await Promise.race([exited, delay(1000, undefined, { ref: false })]);
+      if (!exit) await terminate('SIGKILL');
+      await exited;
     }
-    if (processGroup) terminate('SIGKILL');
+    if (processGroup) await terminate('SIGKILL');
   }
 }
 
