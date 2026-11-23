@@ -55,6 +55,7 @@ def click(page, selector, touch):
 
 
 def inspect_product(page, touch):
+    page.locator("#inspect:visible, #hud-more-actions:visible").first.wait_for(state="visible")
     if not page.locator("#inspect").is_visible():
         click(page, "#hud-more-actions", touch)
     click(page, "#inspect", touch)
@@ -149,7 +150,9 @@ def floor_pickup(page, product_id, touch):
     }""", arg=product_id)
     drop = page.evaluate("() => __mall.testProps().can")
     assert abs(drop["floor"] - floor) < .015, drop
-    inspect_product(page, touch)
+    # Dropped bodies expose Pick up directly once the HUD paints the new target.
+    page.locator("#inspect-verb").filter(has_text="Pick up").wait_for(state="visible")
+    click(page, "#inspect", touch)
     wait_for_product(page, product_id)
     assert page.evaluate("() => __mall.testProps()?.can === null")
     return drop
