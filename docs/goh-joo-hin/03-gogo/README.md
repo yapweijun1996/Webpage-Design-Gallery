@@ -31,6 +31,14 @@ Both references come from the [Singapore HPB historical product list](https://ww
 
 The built-in image generator produced the proposed warm metal and seafoam entrance view and two unwrapped form studies. The app keeps its original left cart and three backed stools. The header uses the already-loaded full-resolution GOGO mark. The counter and tea niches retain their positions.
 
+## Arcade frontage
+
+Expanded GOGO uses clear fixed display spans, slim floor channels and small patch fittings on its automatic leaves. The existing fascia, 4.7 m portal and sliding colliders still serve the same path to the left cart, central aisle and right tea counter. Classic keeps its original framed frontage.
+
+The original Open and Closed variants use 12 mm glass and 26 mm floor channels. The mall adapts these parts and the door patch fittings to its existing glass and trim batches. The source permits reuse in the owner's projects. [Pinned Blender source and scale](https://github.com/yapweijun1996/Blender-3D-Gallery/tree/a87117622ed25efc5f804c9ee6ed0171e4946cf7/models/glass-storefront-module)
+
+At 390 px the closed glass looks faint from the arcade. Both touch-width and desktop Chrome routes crossed the doorway and returned. With the doors closed and open, the matched Low view used 46 and 42 draws. Detailed used 67 and 63. Five independent reviewers checked the pilot’s sightlines, lighting, brand treatment, mobile render budget and physical clearances. [Arcade views before and after](arcade-frontage.webp)
+
 ## Cart identity and product references
 
 The cart uses the [existing sourced GOGO mark](../../../demos/corporate/gjh/v11/assets/gogo-logo.jpg) in the header slot. The [existing drinks cover](../../../demos/corporate/gjh/v11/assets/gogo-brand-cover.jpg) stays in the refreshment zone. For the cart, the [HPB historical list](https://www.healthhub.sg/sites/assets/Assets/PDFs/HPB/Food/HCS%20products%20list%20for%20website%20updated%20till%2031%20July%2016.pdf) establishes Assorted Real Fruit and Red Bean formats. The installed samples are unwrapped. Current wrappers and exact product dimensions remain open. The brand’s [GOGO page](https://gjh.com.sg/gogo/) establishes both categories.

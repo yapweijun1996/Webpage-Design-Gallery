@@ -16,7 +16,6 @@ import {decalClearance, decalHeight, decalMaterial, placeDecal} from './surface-
 import {createShopVisibility} from './shop-visibility.js';
 import {buildPublicArchitecture} from './public-architecture.js';
 import {addOriginalShopDetails} from './shop-anchor-details-first.js';
-import {mergeGeometries} from '../vendor/BufferGeometryUtils.js';
 import {addAmenities,SHOWCASE_PRODUCTS} from './amenities.js';
 import {brandRail} from './upper-layout.js';
 import {buildUpperLevel, loadUpperFurniture, deckPlanters} from './upper-level.js';
@@ -224,8 +223,6 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     box: new T.BoxGeometry(1, 1, 1), cylinder: new T.CylinderGeometry(1, 1, 1, 32), sphere: new T.SphereGeometry(1, 12, 8),
     plane: new T.PlaneGeometry(1, 1), torus: new T.TorusGeometry(1, .045, 8, 64), ring: new T.RingGeometry(.985, 1, 64)
   };
-  // Each moving leaf has three fixed brass pieces; bake their local transforms
-  // into one shared geometry while the parent and physics body remain movable.
   const storefrontGlassMaterial = expanded ? materials.glass.clone() : materials.glass;
   if (expanded) storefrontGlassMaterial.forceSinglePass = true;
   const doorGlassMaterial = expanded ? new T.MeshBasicMaterial({
@@ -233,10 +230,16 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   }) : materials.glass;
   materials.skylightGlass = materials.glass.clone();
   materials.skylightGlass.side = T.FrontSide;
-  const doorFrameParts = [-1.12,1.12].map(x => geometry.box.clone().scale(.035,3.5,.065).translate(x,0,0));
-  doorFrameParts.push(geometry.box.clone().scale(2.25,.035,.065).translate(0,-1.73,0));
-  const doorFrameGeometry = mergeGeometries(doorFrameParts);
-  doorFrameParts.forEach(part=>part.dispose());
+  const framedDoorTrim = [
+    {offset:[-1.12,0,0],size:[.035,3.5,.065]},
+    {offset:[1.12,0,0],size:[.035,3.5,.065]},
+    {offset:[0,-1.73,0],size:[2.25,.035,.065]}
+  ];
+  // Adapt the editable frameless module's panes, channels and patch clamps to
+  // the mall's existing opening. The moving leaves keep their own physics.
+  const framelessGlassDepth = .012;
+  const framelessPatchSize = [.082,.072,.028];
+  const framelessPatchOffset = (.455-.2515)/.491*2.25;
   const batches = new Map(), matrix = new T.Matrix4(), quaternion = new T.Quaternion(), euler = new T.Euler();
   // These matte and wood finishes differ only in tint within each group.
   // Shared ground batches retain shop membership per placement.
@@ -651,6 +654,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   }
   for (const store of spatial.stores) {
     const zone = store.id, x = storeCenterX(store);
+    const frameless = expanded && zone === 'gogo';
     const lightNewMoon = expanded && zone === 'newmoon';
     const wall = expanded ? (lightNewMoon ? 'newMoonWall' : 'cream') : (zone === 'mili' ? 'cream' : 'green');
     if (lightNewMoon) materials.newMoonWall = mat(0xe6e4df);
@@ -680,14 +684,18 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         // Glazing is physically solid but visually transparent: shoppers can
         // see the real existing interior without blocking the 4.7 m doorway.
         const windowX = x + side * 3.55;
-        windowGlass.push({position:new T.Vector3(windowX,2.6,0), scale:new T.Vector3(2.4,5.2,.12)});
+        windowGlass.push({position:new T.Vector3(windowX,2.6,0), scale:new T.Vector3(2.4,5.2,frameless ? framelessGlassDepth : .12)});
         collider(windowX,2.6,0,2.4,5.2,.12);
-        box('shellWall', x + side * 3.55, .26, .1, 2.4, .52, .2);
-        for (const edge of [-1, 1]) {
-          box('green', x + side * 3.55 + edge * 1.15, 2.65, .1, .11, 5.05, .18);
-          box('brass', x + side * 3.55, 2.6 + edge * 2.49, .12, 2.3, .06, .16);
+        if (frameless) {
+          box('brass', windowX, .013, 0, 2.4, .026, .036);
+        } else {
+          box('shellWall', windowX, .26, .1, 2.4, .52, .2);
+          for (const edge of [-1, 1]) {
+            box('green', windowX + edge * 1.15, 2.65, .1, .11, 5.05, .18);
+            box('brass', windowX, 2.6 + edge * 2.49, .12, 2.3, .06, .16);
+          }
+          box('brass', windowX, 2.58, .12, 2.3, .035, .12);
         }
-        box('brass', x + side * 3.55, 2.58, .12, 2.3, .035, .12);
       } else {
         // Keep the original facade and collision in the reversible legacy view.
         for (const face of [-1, 1]) {
@@ -698,8 +706,8 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
           }
         }
       }
-      box('brass', x + side * 2.36, 1.9, .22, .065, 3.8, .08);
-      box('glow', x + side * 3.6, 3.67, .28, 2.12, .035, .04);
+      if (!frameless) box('brass', x + side * 2.36, 1.9, .22, .065, 3.8, .08);
+      box('glow', x + side * 3.6, frameless ? 3.94 : 3.67, .28, 2.12, .035, .04);
       lightPool(x + side * 3.6, .053, 1.15, 3.4, 3.7);
     }
     if (expanded) {
@@ -820,7 +828,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         box('timber', rugX + (i - 6.5) * (rugWidth - .6) / 13, .034, rugZ + end * (rugDepth / 2 + .045), .035, .006, .12);
       }
     }
-    box('brass', x, .03, .25, 4.7, .025, .7);
+    if (!frameless) box('brass', x, .03, .25, 4.7, .025, .7);
     const logo = zone === 'newmoon' ? 'new-moon-logo.svg' : `${zone}-logo.jpg`;
     if (!expanded && !furnishings.place('storeSign', x, .28, 1, 1, 4.065, null, activeShopSlot)) {
       box('brass', x, 4.67, .3, 2.52, 1.21, .09); box('cream', x, 4.67, .36, 2.42, 1.11, .05);
@@ -834,7 +842,7 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
     const leaves = [];
     for (const side of [-1, 1]) {
       const group = new T.Group(); group.position.set(x + side * 1.16, 1.8, .05); scene.add(group);
-      const paneScale = new T.Vector3(2.25,3.5,.06);
+      const paneScale = new T.Vector3(2.25,3.5,frameless ? framelessGlassDepth : .06);
       if (expanded) {
         doorGlass.push({position:group.position,scale:paneScale});
       } else {
@@ -842,7 +850,10 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
         glass.scale.copy(paneScale);
         group.add(glass);
       }
-      doorFrames.push(group);
+      const trim = frameless ? [-1,1].map(end => ({
+        offset:[side*framelessPatchOffset,end*(1.75-.046),0],size:framelessPatchSize
+      })) : framedDoorTrim;
+      doorFrames.push({position:group.position,trim});
       const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, .05));
       physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, .03), body); leaves.push({group, body, side});
     }
@@ -1264,33 +1275,41 @@ export async function createWorld(T, R, physics, expanded = false, warmModel, ar
   interactables.push(...amenities.interactables);
   // The physics still owns each moving leaf. Frame and glass buffers read the
   // same transforms before drawing.
-  const frames = new T.InstancedMesh(doorFrameGeometry, materials.brass, doorFrames.length);
+  const trimCount = doorFrames.reduce((count,{trim}) => count+trim.length,0);
+  const frames = new T.InstancedMesh(geometry.box, materials.brass, trimCount);
   frames.name = 'Sliding shop door frames';
   frames.instanceMatrix.setUsage(T.DynamicDrawUsage);
   let frameCount = -1;
-  const previousDoorX = [];
-  doorFrames.forEach((group, index) => {
-    group.updateMatrix();
-    frames.setMatrixAt(index, group.matrix);
-  });
-  frames.computeBoundingSphere();
-  scene.add(frames);
-  doorFrameGeometry.computeBoundingBox();
+  const previousDoorFrames = [], previousDoorX = [];
+  geometry.box.computeBoundingBox();
   const frameBox = new T.Box3();
-  function updateFrames({frustum}) {
+  for (const leaf of doorFrames) {
+    leaf.bounds = new T.Box3();
+    for (const {size,offset} of leaf.trim) {
+      matrix.makeScale(...size).setPosition(...offset);
+      leaf.bounds.union(frameBox.copy(geometry.box.boundingBox).applyMatrix4(matrix));
+    }
+  }
+  function updateFrames({frustum} = {}) {
     let count = 0, changed = false;
-    for (const group of doorFrames) {
-      matrix.makeTranslation(group.position.x, group.position.y, group.position.z);
-      if (!frustum.intersectsBox(frameBox.copy(doorFrameGeometry.boundingBox).applyMatrix4(matrix))) continue;
-      if (previousDoorX[count] !== group.position.x) changed = true;
-      previousDoorX[count] = group.position.x;
-      frames.setMatrixAt(count++, matrix);
+    for (const leaf of doorFrames) {
+      const {position,trim,bounds} = leaf;
+      if (frustum && !frustum.intersectsBox(frameBox.copy(bounds).translate(position))) continue;
+      if (previousDoorFrames[count] !== leaf || previousDoorX[count] !== position.x) changed = true;
+      previousDoorFrames[count] = leaf;
+      previousDoorX[count] = position.x;
+      for (const {offset,size} of trim) {
+        matrix.makeScale(...size).setPosition(position.x+offset[0],position.y+offset[1],position.z+offset[2]);
+        frames.setMatrixAt(count++, matrix);
+      }
     }
     if (!changed && count === frameCount) return;
     frameCount = frames.count = count;
     frames.instanceMatrix.needsUpdate = true;
     frames.computeBoundingSphere();
   }
+  updateFrames();
+  scene.add(frames);
   viewUpdates.push(updateFrames);
   if (expanded) for (const [name,panes,material,receiveShadow] of [
     ['Sliding shop door glass',doorGlass,doorGlassMaterial,false],

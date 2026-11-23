@@ -14,6 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location('gallery', ROOT / 'scripts/build_gallery.py')
 gallery = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gallery)
+ORIGINAL_SHOPS = (('newmoon', -10), ('mili', 0), ('gogo', 10))
+NUMBERED_SHOPS = {f'planned-space-{number:02d}' for number in range(4, 18)}
+RESTROOM_DOORS = {'restroom-men', 'restroom-women', 'restroom-accessible'}
 
 
 def run():
@@ -33,10 +36,17 @@ def run():
                             page.goto(f'http://127.0.0.1:{server.server_port}/gallery/demos/corporate/gjh/v11/?layout={layout}#experience')
                             page.wait_for_function('window.__sceneReady && window.__mall?.ready', timeout=90000)
                             dismiss_tutorial(page)
+                            shop_ids = {zone for zone, _ in ORIGINAL_SHOPS}
+                            public_ids = set()
                             if layout == 'expanded':
-                                assert len(state(page)['doors']) == 17
-                                assert page.locator('#mall-map [data-map-store]').count() == 17
-                            for zone, x in (('newmoon',-10), ('mili',0), ('gogo',10)):
+                                shop_ids |= NUMBERED_SHOPS
+                                public_ids = RESTROOM_DOORS
+                            actual = set(state(page)['doors'])
+                            assert actual == shop_ids | public_ids, actual
+                            map_ids = page.locator('#mall-map [data-map-store]').evaluate_all(
+                                'items => items.map(item => item.dataset.mapStore)')
+                            assert sorted(map_ids) == sorted(shop_ids), map_ids
+                            for zone, x in ORIGINAL_SHOPS:
                                 assert page.evaluate('zone => __mall.teleport(zone)', zone)
                                 opened = drive(page, 1000)
                                 assert opened['doors'][zone] > .99, (layout, zone, opened)
@@ -75,7 +85,8 @@ def run():
                                     assert state(page)['doors'][zone] > .99
                                     walk_to(page, *outside)
                                     assert state(page)['zone'] != zone
-                            print(f'PASS {layout} {width}x{height} {reduced}: proximity, close, walk through and re-open', flush=True)
+                            print(f'PASS {layout} {width}x{height} {reduced}: {len(shop_ids)} shop doors, '
+                                  f'{len(public_ids)} public doors; proximity, close, walk through and re-open', flush=True)
                             context.close()
                 finally:
                     browser.close()

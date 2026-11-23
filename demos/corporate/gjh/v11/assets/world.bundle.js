@@ -2802,9 +2802,6 @@ function addOriginalShopDetails(zone, x, { box, cylinder, solid, collider, seats
   }
 }
 
-// demos/corporate/gjh/v11/assets/world.js
-import { mergeGeometries as mergeGeometries6 } from "../vendor/BufferGeometryUtils.js";
-
 // demos/corporate/gjh/v11/assets/amenities.js
 import { GLTFLoader as GLTFLoader2 } from "../vendor/GLTFLoader.js";
 import { fetchStartupAsset as fetchStartupAsset2 } from "./startup-asset-pack.js";
@@ -6573,9 +6570,10 @@ function addExpandedStorefronts(T, layout, scene, signs, trimMaterial = instance
     };
     if (number <= 3) {
       box("accent", 0, 5.55, 0.32, width, 0.14, 0.24);
-      for (const side of [-1, 1]) {
-        box("accent", side * 2.47, 1.95, 0.21, 0.12, 3.7, 0.08);
-      }
+      if (number !== 3)
+        for (const side of [-1, 1]) {
+          box("accent", side * 2.47, 1.95, 0.21, 0.12, 3.7, 0.08);
+        }
       continue;
     }
     const windowWidth = (width - 2.7) / 2;
@@ -9767,10 +9765,14 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
   }) : materials2.glass;
   materials2.skylightGlass = materials2.glass.clone();
   materials2.skylightGlass.side = T.FrontSide;
-  const doorFrameParts = [-1.12, 1.12].map((x) => geometry.box.clone().scale(0.035, 3.5, 0.065).translate(x, 0, 0));
-  doorFrameParts.push(geometry.box.clone().scale(2.25, 0.035, 0.065).translate(0, -1.73, 0));
-  const doorFrameGeometry = mergeGeometries6(doorFrameParts);
-  doorFrameParts.forEach((part) => part.dispose());
+  const framedDoorTrim = [
+    { offset: [-1.12, 0, 0], size: [0.035, 3.5, 0.065] },
+    { offset: [1.12, 0, 0], size: [0.035, 3.5, 0.065] },
+    { offset: [0, -1.73, 0], size: [2.25, 0.035, 0.065] }
+  ];
+  const framelessGlassDepth = 0.012;
+  const framelessPatchSize = [0.082, 0.072, 0.028];
+  const framelessPatchOffset = 0.9325356415478616;
   const batches = new Map, matrix = new T.Matrix4, quaternion = new T.Quaternion, euler = new T.Euler;
   const finishForRole = new Map;
   const finishMaterials = {}, colourBatches = [], viewUpdates = [];
@@ -10274,6 +10276,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
   }
   for (const store2 of spatial.stores) {
     const zone = store2.id, x = storeCenterX(store2);
+    const frameless = expanded && zone === "gogo";
     const lightNewMoon = expanded && zone === "newmoon";
     const wall = expanded ? lightNewMoon ? "newMoonWall" : "cream" : zone === "mili" ? "cream" : "green";
     if (lightNewMoon)
@@ -10304,14 +10307,18 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       if (expanded) {
         shopVisibility.addWall(Number(store2.number), x + side * 4.8, 2.85, -5.25, 0.22, 5.7, 10.5);
         const windowX = x + side * 3.55;
-        windowGlass.push({ position: new T.Vector3(windowX, 2.6, 0), scale: new T.Vector3(2.4, 5.2, 0.12) });
+        windowGlass.push({ position: new T.Vector3(windowX, 2.6, 0), scale: new T.Vector3(2.4, 5.2, frameless ? framelessGlassDepth : 0.12) });
         collider(windowX, 2.6, 0, 2.4, 5.2, 0.12);
-        box("shellWall", x + side * 3.55, 0.26, 0.1, 2.4, 0.52, 0.2);
-        for (const edge of [-1, 1]) {
-          box("green", x + side * 3.55 + edge * 1.15, 2.65, 0.1, 0.11, 5.05, 0.18);
-          box("brass", x + side * 3.55, 2.6 + edge * 2.49, 0.12, 2.3, 0.06, 0.16);
+        if (frameless) {
+          box("brass", windowX, 0.013, 0, 2.4, 0.026, 0.036);
+        } else {
+          box("shellWall", windowX, 0.26, 0.1, 2.4, 0.52, 0.2);
+          for (const edge of [-1, 1]) {
+            box("green", windowX + edge * 1.15, 2.65, 0.1, 0.11, 5.05, 0.18);
+            box("brass", windowX, 2.6 + edge * 2.49, 0.12, 2.3, 0.06, 0.16);
+          }
+          box("brass", windowX, 2.58, 0.12, 2.3, 0.035, 0.12);
         }
-        box("brass", x + side * 3.55, 2.58, 0.12, 2.3, 0.035, 0.12);
       } else {
         for (const face of [-1, 1]) {
           box("glass", x + side * 3.6, 2.08, face * 0.23, 2.12, 3.5, 0.055);
@@ -10321,8 +10328,9 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           }
         }
       }
-      box("brass", x + side * 2.36, 1.9, 0.22, 0.065, 3.8, 0.08);
-      box("glow", x + side * 3.6, 3.67, 0.28, 2.12, 0.035, 0.04);
+      if (!frameless)
+        box("brass", x + side * 2.36, 1.9, 0.22, 0.065, 3.8, 0.08);
+      box("glow", x + side * 3.6, frameless ? 3.94 : 3.67, 0.28, 2.12, 0.035, 0.04);
       lightPool(x + side * 3.6, 0.053, 1.15, 3.4, 3.7);
     }
     if (expanded) {
@@ -10442,7 +10450,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
           box("timber", rugX + (i - 6.5) * (rugWidth - 0.6) / 13, 0.034, rugZ + end * (rugDepth / 2 + 0.045), 0.035, 0.006, 0.12);
         }
     }
-    box("brass", x, 0.03, 0.25, 4.7, 0.025, 0.7);
+    if (!frameless)
+      box("brass", x, 0.03, 0.25, 4.7, 0.025, 0.7);
     const logo = zone === "newmoon" ? "new-moon-logo.svg" : `${zone}-logo.jpg`;
     if (!expanded && !furnishings.place("storeSign", x, 0.28, 1, 1, 4.065, null, activeShopSlot)) {
       box("brass", x, 4.67, 0.3, 2.52, 1.21, 0.09);
@@ -10460,7 +10469,7 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
       const group = new T.Group;
       group.position.set(x + side * 1.16, 1.8, 0.05);
       scene.add(group);
-      const paneScale = new T.Vector3(2.25, 3.5, 0.06);
+      const paneScale = new T.Vector3(2.25, 3.5, frameless ? framelessGlassDepth : 0.06);
       if (expanded) {
         doorGlass.push({ position: group.position, scale: paneScale });
       } else {
@@ -10468,7 +10477,11 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
         glass.scale.copy(paneScale);
         group.add(glass);
       }
-      doorFrames.push(group);
+      const trim = frameless ? [-1, 1].map((end) => ({
+        offset: [side * framelessPatchOffset, end * 1.704, 0],
+        size: framelessPatchSize
+      })) : framedDoorTrim;
+      doorFrames.push({ position: group.position, trim });
       const body = physics.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(group.position.x, 1.8, 0.05));
       physics.createCollider(R.ColliderDesc.cuboid(1.125, 1.75, 0.03), body);
       leaves.push({ group, body, side });
@@ -10925,29 +10938,35 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
   }
   const amenities = await addAmenities(T, scene, collider, createCollectProp, true, staticProductCount, expanded, artworkTier);
   interactables.push(...amenities.interactables);
-  const frames = new T.InstancedMesh(doorFrameGeometry, materials2.brass, doorFrames.length);
+  const trimCount = doorFrames.reduce((count, { trim }) => count + trim.length, 0);
+  const frames = new T.InstancedMesh(geometry.box, materials2.brass, trimCount);
   frames.name = "Sliding shop door frames";
   frames.instanceMatrix.setUsage(T.DynamicDrawUsage);
   let frameCount = -1;
-  const previousDoorX = [];
-  doorFrames.forEach((group, index) => {
-    group.updateMatrix();
-    frames.setMatrixAt(index, group.matrix);
-  });
-  frames.computeBoundingSphere();
-  scene.add(frames);
-  doorFrameGeometry.computeBoundingBox();
+  const previousDoorFrames = [], previousDoorX = [];
+  geometry.box.computeBoundingBox();
   const frameBox = new T.Box3;
-  function updateFrames({ frustum }) {
+  for (const leaf of doorFrames) {
+    leaf.bounds = new T.Box3;
+    for (const { size, offset } of leaf.trim) {
+      matrix.makeScale(...size).setPosition(...offset);
+      leaf.bounds.union(frameBox.copy(geometry.box.boundingBox).applyMatrix4(matrix));
+    }
+  }
+  function updateFrames({ frustum } = {}) {
     let count = 0, changed = false;
-    for (const group of doorFrames) {
-      matrix.makeTranslation(group.position.x, group.position.y, group.position.z);
-      if (!frustum.intersectsBox(frameBox.copy(doorFrameGeometry.boundingBox).applyMatrix4(matrix)))
+    for (const leaf of doorFrames) {
+      const { position: position2, trim, bounds } = leaf;
+      if (frustum && !frustum.intersectsBox(frameBox.copy(bounds).translate(position2)))
         continue;
-      if (previousDoorX[count] !== group.position.x)
+      if (previousDoorFrames[count] !== leaf || previousDoorX[count] !== position2.x)
         changed = true;
-      previousDoorX[count] = group.position.x;
-      frames.setMatrixAt(count++, matrix);
+      previousDoorFrames[count] = leaf;
+      previousDoorX[count] = position2.x;
+      for (const { offset, size } of trim) {
+        matrix.makeScale(...size).setPosition(position2.x + offset[0], position2.y + offset[1], position2.z + offset[2]);
+        frames.setMatrixAt(count++, matrix);
+      }
     }
     if (!changed && count === frameCount)
       return;
@@ -10955,6 +10974,8 @@ async function createWorld(T, R, physics, expanded = false, warmModel, artworkTi
     frames.instanceMatrix.needsUpdate = true;
     frames.computeBoundingSphere();
   }
+  updateFrames();
+  scene.add(frames);
   viewUpdates.push(updateFrames);
   if (expanded)
     for (const [name, panes, material, receiveShadow] of [

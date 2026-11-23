@@ -34,7 +34,7 @@ export function addExpandedStorefronts(T, layout, scene, signs, trimMaterial = i
     if (number <= 3) {
       // Leave the existing 4.7 m entrance and its moving leaves unobstructed.
       box('accent', 0, 5.55, .32, width, .14, .24);
-      for (const side of [-1, 1]) {
+      if (number !== 3) for (const side of [-1, 1]) {
         box('accent', side * 2.47, 1.95, .21, .12, 3.7, .08);
       }
       continue;

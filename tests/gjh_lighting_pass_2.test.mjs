@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import test from 'node:test';
 import * as T from '../demos/corporate/gjh/v11/vendor/three.module.min.js';
+import R from '../demos/corporate/gjh/v11/vendor/rapier.mjs';
 import {createMallAtmosphere} from '../demos/corporate/gjh/v11/assets/mall-atmosphere.js';
 import {createMallBakedLighting, createSkylightDapple} from '../demos/corporate/gjh/v11/assets/mall-baked-lighting.js';
 import {createPlayerShadow} from '../demos/corporate/gjh/v11/assets/mall-player-shadow.js';
@@ -310,6 +311,80 @@ test('LG exposure tapers before nearby storefronts and leaves Detailed unchanged
   assert.equal(sample(approach,'detailed'),.8);
 });
 
+function checkGogoStorefront(world, physics) {
+  const gogo = world.doors.find(({zone}) => zone === 'gogo');
+  const camera = new T.OrthographicCamera(-22,22,8,-8,.1,60);
+  camera.position.set(gogo.x,2.6,10);
+  camera.lookAt(gogo.x,2.6,0);
+  camera.updateMatrixWorld(true);
+  world.updateShopLods({x:gogo.x,y:0,z:6},false,'low',camera,700,false,false);
+  world.scene.updateMatrixWorld(true);
+  const visible = [];
+  world.scene.traverseVisible(node => {
+    // The sign faces are positioned by their shader rather than by the CPU raycaster.
+    if (node.isMesh && node.name!=='Expanded branded shop signs') visible.push(node);
+  });
+  const sightline = (x,y) => new T.Raycaster(new T.Vector3(x,y,.6),new T.Vector3(0,0,-1),0,.76)
+    .intersectObjects(visible,false);
+  const opaque = hits => hits.filter(({object}) => !object.material.transparent);
+  const windows = world.scene.getObjectByName('Original shop window glass');
+  for (const side of [-1,1]) {
+    const windowX = gogo.x+side*3.55;
+    // Sample inside the facade, clear of the retained structural sidewall.
+    for (const [dx,y] of [[0,.3],[0,2.58],[-1.105,1.6],[1.105,1.6],[0,3.67]]) {
+      const hits = sightline(windowX+dx,y);
+      assert(hits.some(({object}) => object===windows),'GOGO fixed pane still spans the display');
+      assert.deepEqual(opaque(hits).map(({object}) => object.name),[],
+        `GOGO fixed pane must be unobstructed at ${windowX+dx},${y}`);
+    }
+  }
+  for (const zone of ['newmoon','mili']) {
+    const {x} = world.doors.find(door => door.zone===zone);
+    assert(opaque(sightline(x+3.55,2.58)).length,zone+' keeps its existing midrail');
+  }
+
+  const trim = world.scene.getObjectByName('Sliding shop door frames');
+  const matrix = new T.Matrix4();
+  const fittings = Array.from({length:trim.count},(_,i) => {
+    trim.getMatrixAt(i,matrix);
+    return {x:matrix.elements[12], size:new T.Vector3().setFromMatrixScale(matrix).toArray()};
+  });
+  assert.equal(fittings.filter(({x}) => Math.abs(x-gogo.x)<2.35).length,4);
+  assert(fittings.filter(({x}) => Math.abs(x-gogo.x)<2.35).every(({size}) =>
+    size.every((dimension,i) => Math.abs(dimension-[.082,.072,.028][i])<1e-6)));
+  for (const zone of ['newmoon','mili']) {
+    const {x} = world.doors.find(door => door.zone===zone);
+    assert.equal(fittings.filter(fitting => Math.abs(fitting.x-x)<2.35).length,6);
+  }
+
+  const close = (actual,expected) => Math.abs(actual-expected)<1e-5;
+  const bounds = [];
+  physics.forEachCollider(collider => {
+    const {x,y,z}=collider.translation();
+    if (close(Math.abs(x-gogo.x),3.55) && close(y,2.6) && close(z,0)) bounds.push(collider);
+  });
+  assert.equal(bounds.length,2);
+  const [left,right] = bounds.sort((a,b) => a.translation().x-b.translation().x);
+  const edge = (box,sign) => box.translation().x+sign*box.shape.halfExtents.x;
+  assert(close(edge(right,-1)-edge(left,1),4.7));
+  for (const glass of bounds) assert(close(glass.shape.halfExtents.z,.06));
+
+  const traveller = new R.Capsule(.55,.3), upright = {x:0,y:0,z:0,w:1};
+  const passage = {x:gogo.x,y:.89,z:.05};
+  for (const leaf of gogo.leaves) {
+    const body = leaf.body, shape = body.collider(0);
+    const original = body.translation();
+    assert(close(original.x,gogo.x+leaf.side*1.16));
+    assert(close(shape.shape.halfExtents.x,1.125));
+    assert(shape.intersectsShape(traveller,passage,upright),'closed leaf blocks the centre');
+    body.setTranslation({x:original.x+leaf.side*2.28,y:original.y,z:original.z},true);
+    physics.propagateModifiedBodyPositionsToColliders();
+    assert(!shape.intersectsShape(traveller,passage,upright),'open leaf clears the centre');
+    body.setTranslation(original,true);
+    physics.propagateModifiedBodyPositionsToColliders();
+  }
+}
+
 test('bundled world starts and submits expanded Low, Balanced and Detailed frames with browser stubs', async t => {
   const noop=()=>{};
   const gradient={addColorStop:noop};
@@ -337,11 +412,10 @@ test('bundled world starts and submits expanded Low, Balanced and Detailed frame
     Object.defineProperty(globalThis,name,{configurable:true,value});
     t.after(()=>{if(before)Object.defineProperty(globalThis,name,before);else delete globalThis[name];});
   }
-  const descriptor=()=>({setTranslation(){return this;},setRotation(){return this;}});
-  const R={ColliderDesc:{cuboid:descriptor,cylinder:descriptor},RigidBodyDesc:{kinematicPositionBased:descriptor},
-    Cuboid:class {},QueryFilterFlags:{EXCLUDE_FIXED:1,EXCLUDE_SENSORS:2}};
-  let handle=0;
-  const physics={createCollider:()=>({setRotation:noop,setEnabled(value){this.enabled=value;}}),createRigidBody:()=>({handle:handle++}),removeCollider:noop};
+  await R.init(await readFile(new URL('../demos/corporate/gjh/v11/vendor/rapier_bg.wasm',import.meta.url)));
+  const physics = new R.World({x:0,y:-24,z:0});
+  let world;
+  t.after(()=>{ world?.interiors.dispose(); physics.free(); });
   const textureRequests=[];
   class TextureLoader {
     setCrossOrigin() {return this;}
@@ -349,13 +423,13 @@ test('bundled world starts and submits expanded Low, Balanced and Detailed frame
     async loadAsync(url) {textureRequests.push(url);return new T.Texture(canvas());}
   }
   const three={...T,TextureLoader};
-  const world=await createWorld(three,R,physics,true,async()=>{},()=> 'low',false,()=>false);
+  world=await createWorld(three,R,physics,true,async()=>{},()=> 'low',false,()=>false);
   assert.equal(requests.filter(path=>path.endsWith('/startup-assets.pack')).length,1);
   assert.deepEqual(requests.filter(path=>path.endsWith('.glb')),[], 'first frame should use only packed models');
   assert.equal(world.signage.configs.size, 17);
   assert.equal(world.interiors.groups.length, 17);
   assert.deepEqual(Object.values(world.productAssets.cans).map(({status,reason})=>reason ?? status), Array(4).fill('loaded'));
-  t.after(()=>world.interiors.dispose());
+  checkGogoStorefront(world,physics);
   const camera=new T.PerspectiveCamera(65,1,.1,160);
   camera.position.set(10,2,45);camera.updateMatrixWorld(true);
   const pose={x:10,y:0,z:45};
@@ -447,4 +521,13 @@ test('bundled world starts and submits expanded Low, Balanced and Detailed frame
 
   assert.equal(textureRequests.filter(url=>url.includes('mall-light-ao')).length,2);
   assert.equal(textureRequests.filter(url=>url.includes('mall-skylight-dapple-512.png')).length,1);
+
+  const classicPhysics = new R.World({x:0,y:-24,z:0});
+  t.after(()=>classicPhysics.free());
+  const classic = await createWorld(three,R,classicPhysics,false,async()=>{},()=> 'low',false,()=>false);
+  assert.equal(classic.scene.getObjectByName('Original shop window glass'),undefined);
+  const classicTrim = classic.scene.getObjectByName('Sliding shop door frames');
+  assert.equal(classicTrim.count,18,'all six Classic leaves keep three full frame pieces');
+  const classicGogo = classic.doors.find(({zone}) => zone==='gogo');
+  for (const leaf of classicGogo.leaves) assert.deepEqual(leaf.group.children[0].scale.toArray(),[2.25,3.5,.06]);
 });

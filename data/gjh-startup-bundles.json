@@ -20,7 +20,7 @@
     "demos/corporate/gjh/v11/assets/elevator-ride.js": "a3e9228f547fd1c4b4c3605ca32c1cc65454233c22dde919c097a60075975565",
     "demos/corporate/gjh/v11/assets/expanded-interiors.js": "38a2927697e7c2cce94721bdcb28f85ea89235f1246cd380e228d00d5774a2d2",
     "demos/corporate/gjh/v11/assets/expanded-layout.js": "4923c7a6f9c0c74a73c24e25bddefcb5b27188d84351b3061fe01fae4875dc29",
-    "demos/corporate/gjh/v11/assets/expanded-storefronts.js": "729708ad8d411bcfb7212c4715e85d0611eef97e15a15766b8d640bc67e84701",
+    "demos/corporate/gjh/v11/assets/expanded-storefronts.js": "5172e538ac3b26fbfb153419a8059f7b5362d21e311c87ff3811c7dec92bd8d0",
     "demos/corporate/gjh/v11/assets/feature-kiosk.js": "63111aee89799aec9b897111aed1b4c49e88ee21125a8a910d55de06aa818106",
     "demos/corporate/gjh/v11/assets/festival-calendar.js": "a5322b62f3bce3498c9e273a416aab5e407c168f6ddd50a93e122dab85b623d1",
     "demos/corporate/gjh/v11/assets/frame-trace.js": "7b34d7d53fcb7a87ed023acda9788a5b91d98219943a3b435cdeced18cd85ae0",
@@ -116,12 +116,12 @@
     "demos/corporate/gjh/v11/assets/visitor-v2-customization.js": "06f77543852578d8d3e11de82e8d0e6b9e063b32ac37e5655d986d3229da165d",
     "demos/corporate/gjh/v11/assets/visitor-v2-lod.js": "18296b3471b3c3cdb87e4e38c00415b84b24557a25514f77aabc3d6e4436fa27",
     "demos/corporate/gjh/v11/assets/window-studios.js": "89cdfe61ff8fc778ef1802a0db2806fd93d3f5a726a43c9114f73b40f144b4cb",
-    "demos/corporate/gjh/v11/assets/world.js": "d264654a7477069d5e3db5c08722bf163a89e00784641cb99b95cd0b2484aacc",
+    "demos/corporate/gjh/v11/assets/world.js": "2f4832e1b0043b2f4f48b2ab80d4d2155b2d8c657364d422f256fdb294636fa3",
     "demos/corporate/gjh/v11/script.js": "de40314c0f226b0643389c86461ed86563e5a6841b2b239e8a466914c1e1a125"
   },
   "outputs": {
     "demos/corporate/gjh/v11/script.bundle.js": "cb0297e86bb030035dc259a429c695edac810da1569558342612017e14a6313a",
-    "demos/corporate/gjh/v11/assets/world.bundle.js": "8f050c95fcf125a2b7ed1e3c8928fc7e8627a4f09034a47f29122d1a6f363ea8",
+    "demos/corporate/gjh/v11/assets/world.bundle.js": "127c195a4962c53032a864503ae9664b317ec80a97edd30ab5af12bc638e20dc",
     "demos/corporate/gjh/v11/assets/player.bundle.js": "70c4264c35796edc1b438f33d3c924a6903207b4b2f8fedf179313535b2de528",
     "demos/corporate/gjh/v11/assets/character-v2.bundle.js": "ee2c91ed82047367c39d15f1cad1a03a1c398012df6e2f82400bc93d02e4dd0f"
   }
