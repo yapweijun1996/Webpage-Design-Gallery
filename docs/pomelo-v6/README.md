@@ -18,3 +18,14 @@ python tests/browser_pomelo_v6.py
 ```
 
 The browser test needs Playwright Python and a Chromium binary; `GALLERY_CHROME` selects the executable. Actual screen-reader and physical-device testing are not implied by the automated checks.
+
+
+## Version and contact controls
+
+The contact page displays the owner-provided telephone number as a `tel:` link. It does not assume that the number supports WhatsApp.
+
+The canonical V6 release version is `demos/corporate/pomelo-stem/v6/release.json`. Increase its semantic version on each V6 release before generating the pages. Run `python scripts/build_pomelo_v6.py` after changing the version or any V6 CSS/JS: generated HTML embeds the version, versioned asset URLs and SHA-256 subresource integrity for its boot, app, update and stylesheet assets. Then run `python scripts/build_gallery.py`.
+
+The update control checks the release JSON using a cache-busting no-store network request; it does not claim that an offline check succeeded. On explicit acceptance, the page reloads with a cache-busting URL; after reload the active tab confirms the expected version, both initialized scripts and loaded integrity-protected stylesheets before reporting success. A stale document or missing critical resource is reported as unverified. Only the active tab is updated, and its sample demo state is reset; other tabs are not claimed to be updated.
+
+Validate with `python tests/browser_pomelo_v6.py` and `python tests/browser_pomelo_v6_update.py`, plus the repository-required checks.

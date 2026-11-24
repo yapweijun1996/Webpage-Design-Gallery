@@ -46,5 +46,10 @@
   "pomelo-study-v-0c0025b8828b9ef9": "1.35rem",
   "pomelo-study-v-27f50aadb1375e8d": "#a9340b",
   "pomelo-study-v-61f6e1225e0eec2e": "clamp(2.5rem,4.5vw,4.8rem)",
-  "pomelo-study-v-94944af387cfd598": "clamp(2.5rem,5vw,4.5rem)"
+  "pomelo-study-v-94944af387cfd598": "clamp(2.5rem,5vw,4.5rem)",
+  "pomelo-study-v-9bf0c8e6e77f9f3a": "20px",
+  "pomelo-study-v-717594bbc63051b0": "44px",
+  "pomelo-study-v-01d8e7b31bb26482": ".25s",
+  "pomelo-study-v-865e8d154311592f": ".35s",
+  "pomelo-study-v-64c83df872d808a1": "1s"
 }

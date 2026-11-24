@@ -8,6 +8,7 @@ import re
 import tempfile
 import unittest
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("build_gallery", ROOT / "scripts/build_gallery.py")
@@ -298,8 +299,11 @@ class GalleryTests(unittest.TestCase):
                     source = route.read_text(encoding="utf-8")
                     self.assertIn('content="noindex,nofollow"', source)
                     for href in re.findall(r'(?:href|src)="(\.{1,2}/[^"#]+)', source):
-                        target = (route.parent / href).resolve()
+                        target = (route.parent / urlsplit(href).path).resolve()
                         self.assertTrue(target.is_relative_to(output.resolve()) and target.is_file(), (route, href))
+                    self.assertIn(f'content="{gallery.pomelo_v6.VERSION}"', source)
+                    self.assertEqual(source.count('integrity="sha256-'), 5)
+            self.assertEqual(json.loads((v6 / "release.json").read_text())["version"], gallery.pomelo_v6.VERSION)
             self.assertFalse((v6 / "sw.js").exists())
             gallery_models = Path("demos/corporate/gjh/v11/assets/gallery-assets")
             for source in (gallery.ROOT / gallery_models).glob("*.glb"):

@@ -85,3 +85,23 @@
 .v6-demo-section .badge{display:inline-block}
 
 @media(min-width:651px){.hero h1{font-size:var(--pomelo-study-v-61f6e1225e0eec2e)}.hero{padding-block:var(--pomelo-study-v-94944af387cfd598)}}
+
+/* Compact controls and version status use the same theme tokens as the site. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.header-tools svg{width:var(--pomelo-study-v-9bf0c8e6e77f9f3a);height:var(--pomelo-study-v-9bf0c8e6e77f9f3a);flex:none}
+.theme-toggle,.languages summary,.update-control summary,.menu summary{gap:.4rem;justify-content:center}
+.theme-toggle{min-width:var(--pomelo-study-v-717594bbc63051b0)}
+.theme-icons{display:flex}
+.theme-icons .sun{display:none}
+:root[data-theme=dark] .theme-icons .sun{display:block}
+:root[data-theme=dark] .theme-icons .moon{display:none}
+.update-control{position:relative}
+.update-control summary{min-height:var(--pomelo-study-v-717594bbc63051b0);display:flex;align-items:center;padding:.5rem .65rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--ink);font-size:var(--pomelo-study-v-89c2c37519989d8a);cursor:pointer;list-style:none;white-space:nowrap}
+.update-control summary::-webkit-details-marker{display:none}
+.update-menu{position:absolute;right:0;top:100%;width:16rem;max-width:calc(100vw - 2rem);padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);z-index:var(--pomelo-study-v-4b227777d4dd1fc6)}
+.update-menu p{margin:.5rem 0;color:var(--muted);font-size:var(--pomelo-study-v-89c2c37519989d8a)}
+.update-menu button{min-height:var(--pomelo-study-v-717594bbc63051b0);padding:.5rem .8rem;background:var(--brand);color:var(--bg);border:1px solid var(--brand);border-radius:var(--radius);font-weight:700}
+.languages-menu a[aria-current=true]{font-weight:800;color:var(--accent)}
+.languages-menu a[aria-current=true]::after{content:' ✓'}
+@media(max-width:650px){.header-tools{gap:.25rem}.theme-toggle,.languages summary,.menu summary,.update-control summary{padding:.4rem}.brand-copy{display:none}.head-inner{gap:.25rem}.update-control summary{font-size:var(--pomelo-study-v-4cf179823936a6e2)}}
+@media(prefers-reduced-motion:no-preference){.languages[open] summary svg{animation:pomelo-globe var(--pomelo-study-v-865e8d154311592f) ease}.theme-icons svg{transition:transform var(--pomelo-study-v-01d8e7b31bb26482) ease}.theme-toggle:active svg{transform:rotate(35deg)}.update-control.is-checking summary svg{animation:pomelo-spin var(--pomelo-study-v-64c83df872d808a1) linear infinite}@keyframes pomelo-spin{to{transform:rotate(360deg)}}@keyframes pomelo-globe{to{transform:rotate(180deg)}}}

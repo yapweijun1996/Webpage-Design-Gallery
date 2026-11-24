@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-var root=document.documentElement;
+var root=document.documentElement;root.dataset.pomeloApp='ready';
 function ready(){root.classList.remove('booting')}
 if(document.readyState==='complete')ready();else window.addEventListener('load',ready,{once:true});
 var toggle=document.querySelector('[data-theme-toggle]');

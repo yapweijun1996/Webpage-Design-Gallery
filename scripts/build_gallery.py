@@ -311,7 +311,8 @@ def runtime_resources(catalog):
             if directory != Path("demos/corporate/pomelo-stem/v6"):
                 raise ValueError("Unexpected Pomelo V6 route")
             local_files = [directory / lang / (page + ".html") for lang in ("", "zh", "ms") for page in pomelo_v6.PAGES]
-            local_files += [directory / "assets" / name for name in ("site.css", "tokens.css", "app.js", "boot.js")]
+            local_files += [directory / "assets" / name for name in ("site.css", "tokens.css", "app.js", "boot.js", "update.js")]
+            local_files += [directory / "release.json"]
             local_files += [Path(design["thumbnail"])] + [Path(item["path"]) for item in design["screenshots"].values()]
             for path in local_files:
                 pomelo_studies.regular_file(ROOT, path)
