@@ -56,6 +56,15 @@
       setBusy(false);
     }
   }
+  // A single open panel prevents neighboring menus from obscuring each other.
+  document.querySelectorAll('.languages, .update-control, .menu').forEach(function (panel) {
+    panel.addEventListener('toggle', function () {
+      if (!panel.open) return;
+      document.querySelectorAll('.languages[open], .update-control[open], .menu[open]').forEach(function (other) {
+        if (other !== panel) other.open = false;
+      });
+    });
+  });
   control.addEventListener('toggle', function () {
     if (!control.open) return;
     if (control.dataset.verifiedResult) {
