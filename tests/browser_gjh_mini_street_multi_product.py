@@ -37,6 +37,12 @@ PRODUCTS = (
 )
 LEGACY_KEY = "gjh-mini-street:basket:v1"
 BASKET_KEY = "gjh-mini-street:basket:v2"
+ANCHORS = {
+    "au-425g": "entry-display",
+    "nz-425g": "right-shelf-front",
+    "sa-425g": "right-shelf-middle",
+    "mx-454g": "back-shelf-left",
+}
 
 
 def route_camera(route):
@@ -49,6 +55,14 @@ def route_camera(route):
     window.__miniStreetTestSetView = ({eye, target}) => {
       camera.position.set(...eye);
       camera.lookAt(...target);
+    };
+    window.__miniStreetTestContactVisible = (anchorId) => {
+      const contact = scene.getObjectByName(anchorId)?.getObjectByName("Shelf can contact");
+      if (!contact) return null;
+      for (let node = contact; node; node = node.parent) {
+        if (!node.visible) return false;
+      }
+      return true;
     };
     """, 1)
     route.fulfill(content_type="text/javascript", body=body)
@@ -68,10 +82,14 @@ def inspect_product(page, product):
                   {"eye": product.eye, "target": product.target})
     inspect = page.get_by_role("button", name=f"Inspect {product.name}", exact=True)
     expect(inspect).to_be_enabled()
+    assert page.evaluate("id => window.__miniStreetTestContactVisible(id)", ANCHORS[product.sku]) is True
     inspect.click()
     dialog = page.get_by_role("dialog", name=product.title, exact=True)
     expect(dialog).to_have_attribute("data-phase", "inspecting")
     expect(dialog.locator(".shop-product-specs dd")).to_have_text([product.size, product.origin])
+    # A failed held model leaves the original shelf can and its shadow visible.
+    fallback = dialog.get_attribute("data-fallback") is not None
+    assert page.evaluate("id => window.__miniStreetTestContactVisible(id)", ANCHORS[product.sku]) is fallback
     return dialog
 
 
@@ -119,6 +137,7 @@ def check_shop(browser, url):
     dialog = inspect_product(page, mexico)
     dialog.get_by_role("button", name="Put back", exact=True).click()
     expect(dialog).to_be_hidden()
+    assert page.evaluate("id => window.__miniStreetTestContactVisible(id)", ANCHORS[mexico.sku]) is True
     expect(basket_button(page, 2)).to_be_visible()
     assert read_storage(page, BASKET_KEY) is None
     expect(page.get_by_role("button", name=f"Inspect {mexico.name}", exact=True)).to_be_enabled()
@@ -130,6 +149,7 @@ def check_shop(browser, url):
         dialog.get_by_role("button", name="Reset rotation", exact=True).click()
         dialog.get_by_role("button", name="Add to basket", exact=True).click()
         expect(dialog).to_be_hidden()
+        assert page.evaluate("id => window.__miniStreetTestContactVisible(id)", ANCHORS[product.sku]) is True
         quantities[product.sku] = quantities.get(product.sku, 0) + 1
         expect(basket_button(page, sum(quantities.values()))).to_be_visible()
         assert read_storage(page, BASKET_KEY) == {"version": 2, "items": quantities}

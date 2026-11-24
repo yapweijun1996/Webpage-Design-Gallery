@@ -30,18 +30,28 @@ def run():
             page = browser.new_page(viewport={"width": 1280, "height": 800}, reduced_motion="reduce")
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
+
+            def observe_camera(route):
+                source = route.fetch().text()
+                marker = 'camera.rotation.order = "YXZ";'
+                assert source.count(marker) == 1
+                body = source.replace(marker, marker + "\nwindow.__miniStreetSmokeCamera = camera;", 1)
+                route.fulfill(content_type="text/javascript", body=body)
+
+            page.route("**/mini-street/shop-interior.js", observe_camera)
             page.goto(url, wait_until="networkidle")
             page.locator('a[data-stop="shop"]').click()
             page.get_by_role("button", name="Enter 3D shop").click()
             page.wait_for_selector(".shop-interior-controls")
             inspect = page.locator(".shop-interior-inspect")
             assert not inspect.is_enabled(), "The product should be out of reach at the entrance"
-            page.wait_for_timeout(1500)
+            # Wait for actual rendered movement, not a fixed wall-clock duration:
+            # software rendering can run slowly while other browser tests execute.
             page.keyboard.down("w")
-            page.wait_for_timeout(3000)
+            page.wait_for_function("window.__miniStreetSmokeCamera.position.z <= 2.1", timeout=20000)
             page.keyboard.up("w")
             page.keyboard.down("PageDown")
-            page.wait_for_timeout(260)
+            page.wait_for_function("window.__miniStreetSmokeCamera.rotation.x <= -0.48", timeout=10000)
             page.keyboard.up("PageDown")
             bounds = page.locator("#view").bounding_box()
             aim_x = aim_y = 0.5
