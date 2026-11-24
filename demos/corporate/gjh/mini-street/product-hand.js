@@ -6,7 +6,7 @@ const HAND = {
   sha256: "4e9a6219f4147f80fbd29cd4c349e1ae1d59d436d81822a0da8247984cb2d4e9",
 };
 const shelfHandYaw = 0.16;
-const inspectionHandYaw = -0.35;
+const inspectionHandYaw = 0.17;
 const gripDiameter = 0.0775;
 const maxTurnSpeed = 4.2;
 const durations = { reaching: 0.65, lifting: 0.61, returning: 1.28, stowing: 0.40 };
@@ -513,7 +513,10 @@ export function createProductHand({
     carrier.quaternion.copy(viewHeading).multiply(poseOffset.setFromAxisAngle(axes.right, pitch));
     heldProduct.quaternion.setFromAxisAngle(axes.up, active.can.frontYaw + yaw);
     if (hand) {
-      hand.object.rotation.set(0, inspectionHandYaw + Math.sin(yaw * 4) * 0.12, 0);
+      // Rest at the side so the panel remains legible, then roll briefly toward
+      // the viewer while the upper fingers lift and reseat during the turn.
+      const wristRoll = (0.15 + 0.22 * Math.sin(yaw * 4) ** 2) * turnMotion;
+      hand.object.rotation.set(0, inspectionHandYaw - wristRoll, 0);
       poseTurnGrip(turnMotion);
     }
   }
