@@ -643,7 +643,6 @@ export function buildShopInterior(THREE, scene, productCount) {
       boards.push({ group, width, y, stock: footprints });
       const reserved = clearances.filter((anchor) => Math.abs(anchor.y - y) < 0.14);
       const featureSlots = reserved.map(({ x }) => x / width + 0.5);
-      for (const anchor of reserved) footprints.push([anchor.x, anchor.z, 0.19, 0.16]);
       plane(group, shelfTickets(plan[row], featureSlots), width, 0.041, 0, y - 0.019, 0.295);
       shelfTrim(group, paintedGreen, [width, 0.018, 0.022], 0, y - 0.045, 0.263);
       const laneWidth = width / plan[row].length;
@@ -742,11 +741,6 @@ export function buildShopInterior(THREE, scene, productCount) {
     box(island, deepGreen, [width, 0.044, depth], [x, 1.000, z]);
     shelfTrim(island, brass, [width + 0.006, 0.005, depth + 0.006], x, 1.023, z);
     shelfTrim(island, stone, [width - 0.009, 0.003, depth - 0.009], x, 1.028, z);
-  }
-  for (const { id, position } of occupiedAnchors) {
-    if (id !== "entry-display" && id !== "island-side") continue;
-    const local = island.worldToLocal(new THREE.Vector3(...position));
-    plane(island, shadow, 0.19, 0.18, local.x, local.y + 0.001, local.z).rotation.x = -Math.PI / 2;
   }
   block(0.27, 0.28, 1.46, 2.43);
   for (const [i, id] of ["crackers", "lychee", "kaya"].entries()) {
