@@ -51,6 +51,7 @@ def css_paths(root=ROOT):
                  root / design_system.BLUEPRINT_TOKEN_OUTPUT,
                  root / design_system.ORDER_JOURNEY_TOKEN_OUTPUT,
                  root / design_system.SHOWCASE_TOKEN_OUTPUT,
+                 root / design_system.V6_TOKEN_OUTPUT,
                  *(root / path for path in design_system.DEMO_THEME_OUTPUTS.values())}
     return sorted(path for path in paths if "vendor" not in path.parts and path not in generated)
 

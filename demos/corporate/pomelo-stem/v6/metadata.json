@@ -1,0 +1,20 @@
+{
+  "company": "Pomelo STEM",
+  "industry": "STEM & Technology",
+  "title": "Pomelo STEM - Connected Product Showcase",
+  "version": "v6",
+  "designStyle": "A multi-page product showcase with connected business stories and safe interactive demos.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/pomelo-stem/v6/",
+  "officialWebsite": "https://pomelostem.com/",
+  "disclaimer": "Independent concept. The order story is fictional and does not submit an order.",
+  "id": "pomelo-stem-v6",
+  "companyId": "pomelo-stem",
+  "displayTitle": "Pomelo STEM Connected Product Showcase",
+  "summary": "Explore ten pages and four illustrative interactive demos in English, Simplified Chinese and Malay.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 6
+}

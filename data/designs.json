@@ -1203,6 +1203,45 @@
     "disclaimer": "Independent concept. The order story is fictional and does not submit an order."
   },
   {
+    "id": "pomelo-stem-v6",
+    "companyId": "pomelo-stem",
+    "slug": "v6",
+    "version": "v6",
+    "title": "Pomelo STEM Connected Product Showcase",
+    "description": "Explore ten pages and four illustrative interactive demos in English, Simplified Chinese and Malay.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 6,
+    "demoPath": "demos/corporate/pomelo-stem/v6/index.html",
+    "thumbnail": "demos/corporate/pomelo-stem/v6/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/pomelo-stem/v6/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/pomelo-stem/v6/screenshots/768.png",
+        "width": 768,
+        "height": 900
+      },
+      "mobile": {
+        "path": "demos/corporate/pomelo-stem/v6/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent concept. The order story is fictional and does not submit an order."
+  },
+  {
     "id": "pomelo-stem-v1",
     "companyId": "pomelo-stem",
     "slug": "v1",
