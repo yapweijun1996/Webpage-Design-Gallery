@@ -6,7 +6,7 @@ An independent, unofficial 3D street outside the existing GJH Virtual Mall conce
 
 The upstairs window openings pass through the facade and have deep jambs, fanlight bars, shutters, curtains and pendant shades. The shop has a recessed glazed doorway, staggered cases, a tea counter and back shelves under timber ceiling beams. Striped fabric hangs from a roller with visible ribs and braces. Potted plants, a teapot beside the bench, the gold crescent on the vending machine and the visitor's tote give the five-foot way a sense of scale. Drain grates and a curved curb lead past the mall into another row of shophouses. The rainy evening uses warm light pools and a low-resolution planar reflection with irregular pools and gutter runoff. In daylight the fixtures dim and the paving retains a weaker reflection.
 
-The green cabinet has lit shelves with two rows of coded cans and bottles, a demo reader and a recessed pickup tray. The machine and its close-up share the same six fictional drinks and shelf codes. Choose a slot, press Vend, then collect the drink from the tray to start another round. The simulation is free and resets when you leave the close-up.
+The green cabinet has lit shelves with two rows of coded cans and bottles, a demo reader and a recessed pickup tray. Its close-up is a rotatable 3D model: drag horizontally on touch, drag or use arrow keys on desktop, or reset the view. The machine and its close-up share six fictional drinks and shelf codes. Choose a slot, press Vend, watch the dispensing mechanism and collect the drink to start another round. When the 3D view is outside the visible area, the control panel shows the drop instead. Sound is off until the visitor enables it; the locally synthesized button, motor, impact and pickup sounds can be muted. The simulation is free and resets when you leave the close-up.
 
 The mall portal has a cream stone rim, illuminated brass fins and a two-line GJH Virtual Mall marquee. A stepped threshold leads into a recessed glazed vestibule with ceiling lights and a warm lobby behind it. The portal's silhouette accepts canvas clicks and taps. On wider screens the Enter Mall link sits near the foot of the steps, leaving the marquee and doors visible.
 
@@ -22,7 +22,7 @@ python3 scripts/build_gallery.py --output "$preview_dir/Webpage-Design-Gallery"
 python3 -m http.server 8000 --directory "$preview_dir"
 ```
 
-Open `http://localhost:8000/Webpage-Design-Gallery/` for the Gallery or append `demos/corporate/gjh/mini-street/` for the direct route. The generator includes `script.js`, `scene.js`, `world.js`, `surfaces.js`, `vending.js`, the shelf label atlas, the three screenshots, the thumbnail and the referenced v11 files. For development, serving the repository root with `python3 -m http.server 8000` also exposes the direct route at `/demos/corporate/gjh/mini-street/`.
+Open `http://localhost:8000/Webpage-Design-Gallery/` for the Gallery or append `demos/corporate/gjh/mini-street/` for the direct route. The generator includes `script.js`, `scene.js`, `world.js`, `surfaces.js`, `vending.js`, the vending 3D, audio and sequence modules, the shelf label atlas, the three screenshots, the thumbnail and the referenced v11 files. For development, serving the repository root with `python3 -m http.server 8000` also exposes the direct route at `/demos/corporate/gjh/mini-street/`.
 
 ## Offline and fallback behavior
 

@@ -312,7 +312,7 @@ def runtime_resources(catalog):
         resources.update(directory / name for name in ("style.css", "script.js", "i18n.js") if (ROOT / directory / name).is_file())
         if design["id"] == "gjh-mini-street":
             resources.update(directory / name for name in (
-                "scene.js", "world.js", "surfaces.js", "vending.js", "vending-viewer.js", "vending-model.js",
+                "scene.js", "world.js", "surfaces.js", "vending.js", "vending-viewer.js", "vending-model.js", "vending-audio.js", "vending-sequence.js",
             ))
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
