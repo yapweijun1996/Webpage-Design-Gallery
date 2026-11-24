@@ -12,7 +12,9 @@ const phaseMessages = {
  * Mounts controls over the existing street canvas. The preview element supplies
  * the view bounds. The caller owns scene transitions and basket state.
  */
-export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBack, onAddToBasket }) {
+export function createShopProductUI({
+  mount, onClose, onRotate, onDrag, onReset, onPutBack, onAddToBasket,
+}) {
   const document = mount.ownerDocument;
   const root = document.createElement("section");
   root.className = "shop-product";
@@ -25,6 +27,7 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
       Close
     </button>
     <div class="shop-product-preview">
+      <span class="shop-product-drag-hint" aria-hidden="true" hidden>Drag to rotate</span>
       <img class="shop-product-photo" width="768" height="768" decoding="async" alt="" hidden>
     </div>
     <div class="shop-product-panel">
@@ -53,6 +56,7 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
     </div>`;
   const preview = root.querySelector(".shop-product-preview");
   const photo = root.querySelector(".shop-product-photo");
+  const dragHint = root.querySelector(".shop-product-drag-hint");
   const close = root.querySelector(".shop-product-close");
   const title = root.querySelector("h2");
   const [packSize, origin] = root.querySelectorAll("dd");
@@ -64,6 +68,7 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
   const { signal } = events;
   let previousFocus;
   let currentProduct;
+  let drag;
 
   function bind(button, action) {
     button.addEventListener("click", (event) => {
@@ -77,6 +82,31 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
   bind(right, () => onRotate(1));
   bind(putBack, onPutBack);
   bind(add, () => onAddToBasket(currentProduct.id));
+
+  function endDrag(pointerId = drag?.id) {
+    if (!drag || drag.id !== pointerId) return;
+    drag = undefined;
+    delete preview.dataset.dragging;
+    if (preview.hasPointerCapture(pointerId)) preview.releasePointerCapture(pointerId);
+  }
+
+  preview.addEventListener("pointerdown", (event) => {
+    if (!preview.hasAttribute("data-rotatable") || !event.isPrimary || event.button !== 0 || drag) return;
+    preview.setPointerCapture(event.pointerId);
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
+    preview.dataset.dragging = "";
+  }, { signal });
+  preview.addEventListener("pointermove", (event) => {
+    if (drag?.id !== event.pointerId) return;
+    const dx = event.clientX - drag.x;
+    const dy = event.clientY - drag.y;
+    drag.x = event.clientX;
+    drag.y = event.clientY;
+    if (dx || dy) onDrag(dx, dy);
+  }, { signal });
+  for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
+    preview.addEventListener(type, event => endDrag(event.pointerId), { signal });
+  }
 
   document.addEventListener("keydown", (event) => {
     if (root.hidden || event.defaultPrevented || event.key !== "Escape") return;
@@ -104,6 +134,10 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
     root.dataset.phase = phase;
     root.toggleAttribute("data-fallback", fallback);
     const inspecting = phase === "inspecting";
+    const canDrag = Boolean(onDrag && inspecting && !fallback);
+    preview.toggleAttribute("data-rotatable", canDrag);
+    dragHint.hidden = !canDrag;
+    if (!canDrag) endDrag();
     rotateGroup.hidden = fallback;
     for (const button of [left, reset, right]) button.disabled = !inspecting || fallback;
     putBack.disabled = !inspecting;

@@ -45,7 +45,8 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
       if (hand?.getState().phase === "inspecting") hand.putBack();
       else hand?.cancel();
     },
-    onRotate: direction => hand?.rotate(direction * 0.32),
+    onRotate: direction => hand?.rotate(direction * Math.PI / 8),
+    onDrag: (dx, dy) => hand?.rotate(dx * 0.016, dy * 0.010),
     onReset: () => hand?.resetRotation(),
     onPutBack: () => hand?.putBack(),
     onAddToBasket: () => hand?.addToBasket(),

@@ -69,6 +69,29 @@
   border-radius: var(--shop-product-ui-border-radius-2);
 }
 
+.shop-product-preview[data-rotatable] {
+  position: relative;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+}
+
+.shop-product-preview[data-dragging] {
+  cursor: grabbing;
+}
+
+.shop-product-drag-hint {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 4px 8px;
+  border-radius: var(--radius-control);
+  background: var(--shop-product-ui-background-3);
+  font: var(--shop-product-ui-font-5);
+  pointer-events: none;
+}
+
 .shop-product[data-fallback] .shop-product-preview {
   display: grid;
   place-items: center;

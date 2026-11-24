@@ -28,6 +28,7 @@ const html = `<!doctype html>
     mount: stage,
     onClose: () => { events.push("close"); product.render(); },
     onRotate: (direction) => events.push(direction),
+    onDrag: () => {},
     onReset: () => events.push("reset"),
     onPutBack: () => { events.push("put-back"); product.render({ phase: "returning" }); },
     onAddToBasket: (id) => {
@@ -111,8 +112,9 @@ test("product controls and static fallback share one responsive scene", async ()
 
       await page.evaluate(() => window.fixture.product.render({ phase: "inspecting" }));
       const preview = await checkBounds(page, stage, dialog, settings);
-      assert.equal(await page.evaluate(({ x, y, width, height }) =>
-        document.elementFromPoint(x + width / 2, y + height / 2).id, preview), "view");
+      assert.ok(await page.evaluate(({ x, y, width, height }) =>
+        document.elementFromPoint(x + width / 2, y + height / 2).matches(".shop-product-preview[data-rotatable]"), preview));
+      assert.ok(await dialog.getByText("Drag to rotate", { exact: true }).isVisible());
       assert.equal(await page.locator("canvas").count(), 1);
       if (process.env.PRODUCT_UI_SCREENSHOT_DIR) {
         await page.screenshot({ path: `${process.env.PRODUCT_UI_SCREENSHOT_DIR}/product-${settings.viewport.width}.jpg`, quality: 45 });

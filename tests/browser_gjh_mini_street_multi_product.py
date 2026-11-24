@@ -56,6 +56,7 @@ def route_camera(route):
       camera.position.set(...eye);
       camera.lookAt(...target);
     };
+    window.__miniStreetTestCanRotation = () => scene.getObjectByName("Held can")?.quaternion.toArray();
     window.__miniStreetTestContactVisible = (anchorId) => {
       const contact = scene.getObjectByName(anchorId)?.getObjectByName("Shelf can contact");
       if (!contact) return null;
@@ -179,6 +180,156 @@ def check_shop(browser, url):
     page.close()
 
 
+def expect_can_rotation(page, front, back=False):
+    # Unit quaternions are equivalent up to sign. Their absolute dot product
+    # is 1 for the same orientation and 0 for a 180-degree turn.
+    page.wait_for_function("""({front, back}) => {
+      const rotation = window.__miniStreetTestCanRotation();
+      if (!rotation) return false;
+      const dot = Math.abs(rotation.reduce((sum, component, i) => sum + component * front[i], 0));
+      return back ? dot < 0.06 : dot > 0.999;
+    }""", arg={"front": front, "back": back})
+
+
+def check_desktop_inspection_controls(browser, url):
+    page = browser.new_page(viewport={"width": 1280, "height": 800}, service_workers="block")
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.route("**/mini-street/shop-interior.js", route_camera)
+    model = "**/new-moon-can-au-425g-lod1.glb"
+    with page.expect_response(model) as shelf_response:
+        page.goto(url + "#shop-interior", wait_until="domcontentloaded")
+    assert shelf_response.value.ok
+
+    australia = PRODUCTS[0]
+    page.evaluate("pose => window.__miniStreetTestSetView(pose)",
+                  {"eye": australia.eye, "target": australia.target})
+    inspect = page.get_by_role("button", name=f"Inspect {australia.name}", exact=True)
+    expect(inspect).to_be_enabled()
+    pending = []
+    page.route(model, lambda route: pending.append(route))
+    with page.expect_request(model):
+        inspect.press("Enter")
+    dialog = page.get_by_role("dialog", name=australia.title, exact=True)
+    expect(dialog).to_have_attribute("data-phase", "loading")
+    page.keyboard.press("Escape")
+    expect(dialog).to_be_hidden()
+    expect(page.locator(".shop-interior-controls")).to_be_focused()
+    expect(basket_button(page, 0)).to_be_visible()
+    assert page.evaluate("id => window.__miniStreetTestContactVisible(id)", ANCHORS[australia.sku])
+
+    inspect.press("Enter")
+    expect(dialog).to_have_attribute("data-phase", "loading")
+    request = pending[0]
+    request.fulfill(response=request.fetch())
+    expect(dialog).to_have_attribute("data-phase", "inspecting")
+    front = page.evaluate("window.__miniStreetTestCanRotation()")
+    rotate = dialog.get_by_role("button", name="Rotate right", exact=True)
+    rotate.press("Enter")
+    rotate.evaluate("button => { for (let i = 0; i < 7; i++) button.click(); }")
+    expect_can_rotation(page, front, back=True)
+    dialog.get_by_role("button", name="Reset rotation", exact=True).press("Enter")
+    expect_can_rotation(page, front)
+
+    preview = dialog.locator(".shop-product-preview")
+    bounds = preview.bounding_box()
+    x = bounds["x"] + bounds["width"] * 0.25
+    y = bounds["y"] + bounds["height"] * 0.5
+    page.mouse.move(x, y)
+    page.mouse.down()
+    expect(preview).to_have_attribute("data-dragging", "")
+    page.mouse.move(x + 196, y, steps=8)
+    expect_can_rotation(page, front, back=True)
+    page.keyboard.press("Escape")
+    expect(preview).not_to_have_attribute("data-dragging", "")
+    expect(dialog).to_be_hidden()
+    page.mouse.move(x, y)
+    page.mouse.up()
+    expect(basket_button(page, 0)).to_be_visible()
+
+    inspect.press("Enter")
+    expect(dialog).to_have_attribute("data-phase", "inspecting")
+    expect_can_rotation(page, front)
+    # Deliver two add events and interrupt the stow before its next frame.
+    dialog.get_by_role("button", name="Add to basket", exact=True).evaluate("""button => {
+      button.click();
+      button.click();
+      document.activeElement.dispatchEvent(new KeyboardEvent("keydown",
+        {key: "Escape", code: "Escape", bubbles: true, cancelable: true}));
+    }""")
+    expect(dialog).to_be_hidden()
+    expect(basket_button(page, 1)).to_be_visible()
+    assert page.evaluate("id => window.__miniStreetTestContactVisible(id)", ANCHORS[australia.sku])
+    assert read_storage(page, BASKET_KEY) == {"version": 2, "items": {australia.sku: 1}}
+    assert not errors, errors
+    page.close()
+
+
+def check_touch_inspection_controls(browser, url):
+    page = browser.new_page(
+        viewport={"width": 390, "height": 844}, has_touch=True, is_mobile=True,
+        reduced_motion="reduce", service_workers="block",
+    )
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.route("**/mini-street/shop-interior.js", route_camera)
+    page.goto(url + "#shop-interior", wait_until="domcontentloaded")
+    australia = PRODUCTS[0]
+    expect(basket_button(page, 0)).to_be_visible()
+    page.evaluate("pose => window.__miniStreetTestSetView(pose)",
+                  {"eye": australia.eye, "target": australia.target})
+    inspect = page.get_by_role("button", name=f"Inspect {australia.name}", exact=True)
+    inspect.tap()
+    dialog = page.get_by_role("dialog", name=australia.title, exact=True)
+    expect(dialog).to_have_attribute("data-phase", "inspecting")
+    front = page.evaluate("window.__miniStreetTestCanRotation()")
+    preview = dialog.locator(".shop-product-preview")
+    bounds = preview.bounding_box()
+    x = round(bounds["x"] + bounds["width"] * 0.2)
+    y = round(bounds["y"] + bounds["height"] * 0.55)
+    session = page.context.new_cdp_session(page)
+
+    def touch(kind, *points):
+        session.send("Input.dispatchTouchEvent", {
+            "type": kind,
+            "touchPoints": [{"x": point_x, "y": point_y, "id": 0} for point_x, point_y in points],
+        })
+
+    # Make the document scrollable so a missing touch-action rule is observable.
+    page.add_style_tag(content="body { min-height: 150vh; }")
+    scroll_top = page.evaluate("document.scrollingElement.scrollTop")
+    touch("touchStart", (x, y))
+    touch("touchMove", (x + 48, y - 40))
+    expect(preview).to_have_attribute("data-dragging", "")
+    touch("touchCancel")
+    expect(preview).not_to_have_attribute("data-dragging", "")
+    reset = dialog.get_by_role("button", name="Reset rotation", exact=True)
+    reset.tap()
+    expect_can_rotation(page, front)
+    touch("touchStart", (x, y))
+    for dx, dy in [(48, -40), (96, -48), (147, -50), (196, -50)]:
+        touch("touchMove", (x + dx, y + dy))
+    touch("touchEnd")
+    expect(preview).not_to_have_attribute("data-dragging", "")
+    expect_can_rotation(page, front, back=True)
+    assert page.evaluate("document.scrollingElement.scrollTop") == scroll_top
+
+    reset.tap()
+    expect_can_rotation(page, front)
+    dialog.get_by_role("button", name="Put back", exact=True).tap()
+    expect(dialog).to_be_hidden()
+    expect(basket_button(page, 0)).to_be_visible()
+    inspect.tap()
+    expect(dialog).to_have_attribute("data-phase", "inspecting")
+    dialog.get_by_role("button", name="Add to basket", exact=True).tap()
+    expect(dialog).to_be_hidden()
+    page.reload(wait_until="domcontentloaded")
+    basket_button(page, 1).tap()
+    check_basket_rows(page.get_by_role("dialog", name="Virtual basket"), {australia.sku: 1})
+    assert not errors, errors
+    page.close()
+
+
 def expect_fallback_display(page):
     page.wait_for_url("**/#shop", timeout=15000)
     display = page.locator("#stop-dialog")
@@ -284,6 +435,9 @@ def run():
             expect.set_options(timeout=15000)
             check_shop(browser, url)
             print("Mini Street four-product picking and v1 basket migration: PASS", flush=True)
+            check_desktop_inspection_controls(browser, url)
+            check_touch_inspection_controls(browser, url)
+            print("Mini Street desktop and touch backside rotation and inspection interruptions: PASS", flush=True)
             check_webgl_fallback(browser, url)
             print("Mini Street four-product WebGL fallback: PASS", flush=True)
             check_runtime_context_loss(browser, url)
