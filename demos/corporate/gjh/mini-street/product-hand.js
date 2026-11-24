@@ -5,15 +5,16 @@ const HAND = {
   url: new URL("./assets/posable-right-hand.glb", import.meta.url),
   sha256: "4e9a6219f4147f80fbd29cd4c349e1ae1d59d436d81822a0da8247984cb2d4e9",
 };
-const handYaw = 0.16;
+const shelfHandYaw = 0.16;
+const inspectionHandYaw = 0.37;
 const gripDiameter = 0.0775;
-const durations = { reaching: 0.65, lifting: 0.61, returning: 1.03, stowing: 0.40 };
+const durations = { reaching: 0.65, lifting: 0.61, returning: 1.28, stowing: 0.40 };
 const gripAngles = {
   index: [-0.10, 0.375, 0.861],
   middle: [-0.10, 0.819, 0.459],
   ring: [-0.10, 0.707, 0.159],
-  pinky: [-0.10, 0.627, 0.394],
-  thumb: [-0.48, 0.056, -0.48],
+  pinky: [-0.125, 0.477, 0.369],
+  thumb: [-0.48, 0.031, -0.555],
 };
 
 // The offsets follow the distal joints of the CC0 hand in its bind pose.
@@ -25,17 +26,49 @@ const nailAreas = {
   thumb_03_r: [0.019, 0.005, 0.010, 0.007],
 };
 
+function skinRelief(T, uv) {
+  // Use the whole map for the hand, which occupies one corner of the source UV atlas.
+  for (let i = 0; i < uv.count; i++) {
+    uv.setXY(i, (uv.getX(i) - 0.36) / 0.20, (uv.getY(i) - 0.80) / 0.19);
+  }
+  uv.needsUpdate = true;
+
+  const size = 256;
+  const height = new Uint8Array(size * size);
+  let seed = 6327;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      const pore = seed >>> 24;
+      const fineLines = Math.sin(x * 1.67 + y * 0.89 + 1.8 * Math.sin(y * 0.21));
+      const crossLines = Math.sin(x * 0.92 - y * 1.43 + 1.4 * Math.sin(x * 0.14));
+      height[y * size + x] = 142 + 12 * fineLines + 7 * crossLines - (pore < 24 ? 35 : 0);
+    }
+  }
+  const texture = new T.DataTexture(height, size, size, T.RedFormat);
+  texture.magFilter = T.LinearFilter;
+  texture.minFilter = T.LinearMipmapLinearFilter;
+  texture.generateMipmaps = true;
+  texture.needsUpdate = true;
+  return texture;
+}
+
 function paintSkin(T, mesh) {
-  const { position, normal, skinIndex, skinWeight } = mesh.geometry.attributes;
+  const { position, normal, uv, skinIndex, skinWeight } = mesh.geometry.attributes;
   const colors = new Float32Array(position.count * 3);
+  const nails = new Float32Array(position.count);
   const color = new T.Color();
-  const back = new T.Color(0xb7826d);
-  const palm = new T.Color(0xc38a75);
-  const flush = new T.Color(0xb76e65);
-  const nail = new T.Color(0xd4a09b);
-  const nailEdge = new T.Color(0xd5b4a3);
+  const back = new T.Color(0xa66d56);
+  const palm = new T.Color(0xc78b75);
+  const flush = new T.Color(0xa45452);
+  const crease = new T.Color(0x8f5347);
+  const vein = new T.Color(0x847b73);
+  const nail = new T.Color(0xd6a5a0);
+  const nailEdge = new T.Color(0xe5c8b0);
   const point = new T.Vector3();
   const bind = mesh.skeleton.boneInverses.map(matrix => matrix.clone().multiply(mesh.bindMatrix));
+  const smooth = T.MathUtils.smoothstep;
+  const line = (distance, width) => 1 - smooth(Math.abs(distance), width * 0.25, width);
 
   for (let i = 0; i < position.count; i++) {
     let slot = 0;
@@ -45,59 +78,67 @@ function paintSkin(T, mesh) {
     const index = skinIndex.getComponent(i, slot);
     const bone = mesh.skeleton.bones[index];
     const { x, z } = point.fromBufferAttribute(position, i);
-    const palmar = T.MathUtils.smoothstep(-normal.getY(i), -0.2, 0.8);
-    const mottling = Math.sin(141 * x + 28 * z) * Math.sin(116 * z - 19 * x);
-    const wristShade = 1 - T.MathUtils.smoothstep(-z, 0.029, 0.077);
-    const palmFold = 1 - T.MathUtils.smoothstep(
-      Math.abs(z + 0.081 + 9 * (x - 0.033) ** 2), 0.0007, 0.0032
-    );
-    const palmCenter = T.MathUtils.smoothstep(x, 0.012, 0.021) *
-      (1 - T.MathUtils.smoothstep(x, 0.035, 0.054));
-    color.copy(back).lerp(palm, palmar)
-      .multiplyScalar(1 + 0.065 * mottling - 0.12 * wristShade - 0.11 * palmar * palmFold * palmCenter);
-    point.applyMatrix4(bind[index]);
-    if (bone.name !== "hand_r") {
-      // Warm fingertips and knuckles, with a soft crease across each joint.
-      const joint = 1 - T.MathUtils.smoothstep(Math.abs(point.y - 0.005), 0.001, 0.011);
-      const crease = 1 - T.MathUtils.smoothstep(
-        Math.abs(point.y - 0.004 - 0.0014 * Math.cos(point.z * 370)), 0.0003, 0.0015
-      );
-      color.lerp(flush, 0.27 * joint + 0.26 * palmar).multiplyScalar(1 - 0.10 * palmar * crease);
-    }
+    const palmar = smooth(-normal.getY(i), -0.21, 0.74);
+    const dorsal = smooth(normal.getY(i), -0.10, 0.76);
+    const mottling = Math.sin(115 * x + 32 * z) * Math.sin(103 * z - 29 * x);
+    const wristShade = 1 - smooth(-z, 0.032, 0.078);
+    color.copy(back).lerp(palm, palmar).multiplyScalar(1 + 0.075 * mottling - 0.14 * wristShade);
 
-    const area = nailAreas[bone.name];
-    if (area) {
-      const [centerY, centerZ, length, width] = area;
-      const edge = Math.hypot((point.y - centerY) / length, (point.z - centerZ) / width);
-      const onNail = (1 - T.MathUtils.smoothstep(edge, 0.71, 1.03)) *
-        T.MathUtils.smoothstep(-point.x, 0.0018, 0.0036);
-      const freeEdge = T.MathUtils.smoothstep(point.y, centerY + length * 0.46, centerY + length * 0.80);
-      color.lerp(nail, 0.87 * onNail).lerp(nailEdge, 0.75 * onNail * freeEdge);
+    if (bone.name === "hand_r") {
+      const palmCenter = smooth(x, 0.007, 0.027) * (1 - smooth(x, 0.056, 0.080));
+      const radialFold = line(z + 0.083 + 13 * (x - 0.050) ** 2, 0.0036);
+      const crossFold = line(z + 0.104 - 0.20 * x - 3 * (x - 0.034) ** 2, 0.0025);
+      const wristFold = line(z + 0.038 + 0.17 * x, 0.0038) * (1 - smooth(x, 0.061, 0.083));
+      color.lerp(crease, palmar * palmCenter * (0.30 * radialFold + 0.42 * crossFold));
+      color.lerp(crease, 0.38 * wristFold * (0.43 + 0.57 * palmar));
+      const dorsalVein = line(x - 0.027 - 0.075 * (z + 0.060) - 0.006 * Math.sin(z * 50), 0.006);
+      const veinLength = smooth(-z, 0.037, 0.058) * (1 - smooth(-z, 0.084, 0.115));
+      color.lerp(vein, 0.34 * dorsalVein * dorsal * veinLength);
+    } else {
+      point.applyMatrix4(bind[index]);
+      const pad = smooth(point.x, -0.002, 0.007);
+      const joint = 1 - smooth(Math.abs(point.y - 0.0045), 0.001, 0.012);
+      const fold = point.y - 0.0044 - 0.0014 * Math.cos(point.z * 350);
+      const jointLines = 0.38 * line(fold, 0.0022) + 0.19 * line(fold - 0.0031, 0.0018);
+      color.lerp(flush, 0.31 * joint + 0.16 * pad)
+        .lerp(crease, jointLines * (0.26 + 0.74 * pad));
+
+      const area = nailAreas[bone.name];
+      if (area) {
+        const [centerY, centerZ, length, width] = area;
+        const across = (point.z - centerZ) / width;
+        const along = (point.y - centerY) / length;
+        // The nail plate follows the distal dorsal surface. Leave a narrow cuticle and free edge.
+        const edge = Math.sqrt(along * along + across ** 4);
+        const side = smooth(-point.x, 0.0015, 0.0040);
+        const plate = (1 - smooth(edge, 0.73, 0.99)) * side;
+        const cuticle = line(edge - 0.91, 0.22) * side * (1 - smooth(along, -0.1, 0.28));
+        const freeEdge = smooth(along, 0.42, 0.83);
+        color.lerp(flush, 0.32 * cuticle).lerp(nail, 0.95 * plate).lerp(nailEdge, 0.84 * plate * freeEdge);
+        nails[i] = plate;
+      }
     }
     color.toArray(colors, i * 3);
   }
+
   mesh.geometry.setAttribute("color", new T.BufferAttribute(colors, 3));
+  mesh.geometry.setAttribute("nailPlate", new T.BufferAttribute(nails, 1));
 
-  // A tiny, deterministic pore texture keeps the close-up from looking like plastic.
-  const size = 128;
-  const pores = new Uint8Array(size * size);
-  let seed = 6327;
-  for (let i = 0; i < pores.length; i++) {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    const tone = seed >>> 24;
-    pores[i] = tone < 23 ? 84 + tone : 120 + (tone >>> 3);
-  }
-  const texture = new T.DataTexture(pores, size, size, T.RedFormat);
-  texture.magFilter = T.LinearFilter;
-  texture.minFilter = T.LinearMipmapLinearFilter;
-  texture.generateMipmaps = true;
-  texture.needsUpdate = true;
+  const material = mesh.material;
+  material.color.set(0xffffff);
+  material.vertexColors = true;
+  material.roughness = 0.63;
+  material.bumpMap = skinRelief(T, uv);
+  material.bumpScale = 0.00125;
 
-  mesh.material.color.set(0xffffff);
-  mesh.material.vertexColors = true;
-  mesh.material.roughness = 0.57;
-  mesh.material.bumpMap = texture;
-  mesh.material.bumpScale = 0.00085;
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nattribute float nailPlate;\nvarying float vNailPlate;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvNailPlate = nailPlate;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying float vNailPlate;")
+      .replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.34, vNailPlate);");
+  };
 }
 
 function disposeModel(model) {
@@ -154,6 +195,41 @@ async function loadPinnedModel(loader, definition, lifetime) {
   }
 }
 
+function makeSleeve(T, position, direction) {
+  const sleeve = new T.Group();
+  sleeve.position.copy(position);
+  sleeve.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), direction);
+  const cuffProfile = [
+    [0.0218, -0.018], [0.0231, -0.017], [0.0243, -0.014], [0.0251, -0.008],
+    [0.0256, 0.006], [0.0269, 0.020], [0.0270, 0.024], [0.0262, 0.027],
+  ];
+  const clothProfile = [
+    [0.0251, 0.020], [0.0277, 0.026], [0.0304, 0.037], [0.0301, 0.053],
+    [0.0315, 0.074], [0.0312, 0.096], [0.0349, 0.180], [0.036, 0.270],
+  ];
+  const cuff = new T.LatheGeometry(cuffProfile.map(([radius, y]) => new T.Vector2(radius, y)), 96);
+  const knit = cuff.attributes.position;
+  for (let i = 0; i < knit.count; i++) {
+    const x = knit.getX(i);
+    const z = knit.getZ(i);
+    const y = knit.getY(i);
+    const taper = T.MathUtils.smoothstep(y, -0.017, -0.009) *
+      (1 - T.MathUtils.smoothstep(y, 0.020, 0.027));
+    const rib = 1 + 0.023 * taper * Math.cos(32 * Math.atan2(x, z));
+    knit.setX(i, x * rib);
+    knit.setZ(i, z * rib);
+  }
+  cuff.computeVertexNormals();
+  sleeve.add(
+    new T.Mesh(cuff, new T.MeshStandardMaterial({ color: 0x343e3e, roughness: 0.89 })),
+    new T.Mesh(
+      new T.LatheGeometry(clothProfile.map(([radius, y]) => new T.Vector2(radius, y)), 32),
+      new T.MeshStandardMaterial({ color: 0x414a4a, roughness: 0.95 }),
+    ),
+  );
+  return sleeve;
+}
+
 function makeHand(T, model) {
   const wrist = model.getObjectByName("hand_r");
   const middle = model.getObjectByName("middle_01_r");
@@ -162,7 +238,8 @@ function makeHand(T, model) {
   const joints = Object.entries(gripAngles).flatMap(([finger, angles], fingerIndex) => angles.map((angle, index) => {
     const bone = model.getObjectByName(`${finger}_0${index + 1}_r`);
     const delay = finger === "thumb" ? 0.16 : 0.23 + fingerIndex * 0.042 + index * 0.023;
-    return bone && { bone, bind: bone.quaternion.clone(), angle, delay };
+    const rest = finger === "thumb" ? -0.06 : 0.12 + 0.04 * index;
+    return bone && { bone, bind: bone.quaternion.clone(), angle, delay, rest };
   }));
   if (!wrist?.isBone || !middle?.isBone || joints.some(joint => !joint?.bone.isBone)) {
     throw new Error("Invalid hand rig");
@@ -171,18 +248,7 @@ function makeHand(T, model) {
   model.updateMatrixWorld(true);
   const wristPosition = wrist.getWorldPosition(new T.Vector3());
   const forearm = wristPosition.clone().sub(middle.getWorldPosition(new T.Vector3())).normalize();
-  const cuff = new T.Mesh(
-    new T.CylinderGeometry(0.028, 0.023, 0.043, 24),
-    new T.MeshStandardMaterial({ color: 0x232a29, roughness: 0.95 }),
-  );
-  const sleeve = new T.Mesh(
-    new T.CylinderGeometry(0.035, 0.026, 0.25, 24),
-    new T.MeshStandardMaterial({ color: 0x333c3a, roughness: 0.94 }),
-  );
-  for (const [garment, distance] of [[cuff, 0.006], [sleeve, 0.145]]) {
-    garment.position.copy(wristPosition).addScaledVector(forearm, distance);
-    garment.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), forearm);
-  }
+  const sleeve = makeSleeve(T, wristPosition, forearm);
   model.traverse((object) => {
     if (!object.isSkinnedMesh) return;
     object.frustumCulled = false;
@@ -199,17 +265,17 @@ function makeHand(T, model) {
     0, 0, 1, 0.12626,
     0, 0, 0, 1,
   ));
-  hand.add(model, cuff, sleeve);
+  hand.add(model, sleeve);
   const wristMount = new T.Group();
   wristMount.name = hand.name;
   wristMount.add(hand);
 
   return {
     object: wristMount,
-    pose(proportion) {
-      for (const { bone, bind, angle, delay } of joints) {
+    pose(proportion, relaxed = 0) {
+      for (const { bone, bind, angle, delay, rest } of joints) {
         const curl = T.MathUtils.smoothstep(proportion, delay, 0.93 + delay * 0.15);
-        offset.setFromAxisAngle(flexAxis, curl * angle);
+        offset.setFromAxisAngle(flexAxis, curl * angle + relaxed * rest);
         bone.quaternion.copy(bind).multiply(offset);
       }
     },
@@ -240,6 +306,9 @@ export function createProductHand({
   const aboveStock = new T.Vector3();
   const inspection = new T.Vector3();
   const alongsideStock = new T.Vector3();
+  const inFrontOfStock = new T.Vector3();
+  const stockFront = new T.Vector3();
+  const reachStart = new T.Vector3();
   const drop = new T.Vector3();
   const stock = new T.Vector3();
   const start = new T.Vector3();
@@ -374,7 +443,11 @@ export function createProductHand({
   function atStock() {
     carrier.position.copy(stock);
     carrier.quaternion.copy(viewHeading);
-    alongsideStock.set(0.095, 0.012, 0).applyAxisAngle(axes.up, handYaw).applyQuaternion(viewHeading).add(stock);
+    alongsideStock.set(0.095, 0.012, 0).applyAxisAngle(axes.up, shelfHandYaw).applyQuaternion(viewHeading).add(stock);
+    stockFront.set(0, 0, 1).applyAxisAngle(axes.up, shelfHandYaw).applyQuaternion(viewHeading);
+    inFrontOfStock.copy(alongsideStock).addScaledVector(stockFront, 0.17);
+    const approachDepth = reachStart.copy(inFrontOfStock).sub(approach).dot(stockFront);
+    reachStart.copy(approach).addScaledVector(stockFront, Math.max(0, approachDepth));
     heldProduct.quaternion.copy(viewHeading).invert().multiply(stockPose);
   }
 
@@ -384,13 +457,24 @@ export function createProductHand({
     hand?.pose(progress);
   }
 
+  function poseReach(reach) {
+    // Traverse in front of the stock, then line up at its side before curling.
+    const front = T.MathUtils.smoothstep(reach, 0, 0.65);
+    const side = T.MathUtils.smoothstep(reach, 0.65, 1);
+    carrier.position.lerpVectors(reachStart, inFrontOfStock, front).lerp(alongsideStock, side);
+    carrier.position.y += Math.sin(reach * Math.PI) * 0.055;
+    const relaxed = 1 - front;
+    hand.object.rotation.set(-0.20 * relaxed, shelfHandYaw, 0.15 * relaxed);
+    hand.pose(0, relaxed);
+  }
+
   function inspectPose() {
     carrier.position.copy(inspection);
     carrier.quaternion.copy(viewHeading).multiply(poseOffset.setFromAxisAngle(axes.right, pitch));
     heldProduct.quaternion.setFromAxisAngle(axes.up, active.can.frontYaw + yaw);
     if (hand) {
       // The thumb and fingers roll the tin as the wrist follows slightly.
-      hand.object.rotation.y = handYaw + Math.asin(Math.sin(yaw) * 0.12);
+      hand.object.rotation.set(0, inspectionHandYaw + Math.sin(yaw) * 0.29, 0);
       hand.pose(1);
     }
   }
@@ -426,7 +510,7 @@ export function createProductHand({
     heldProduct.add(model);
     screenPoints();
     if (hand) {
-      hand.object.rotation.y = handYaw;
+      hand.object.rotation.set(0, shelfHandYaw, 0);
       hand.object.scale.setScalar(can.dimensions[0] / gripDiameter);
     }
     if (shelfObject) {
@@ -448,9 +532,8 @@ export function createProductHand({
     } else {
       atStock();
       if (hand) {
-        carrier.position.copy(approach);
         heldProduct.visible = false;
-        hand.pose(0);
+        poseReach(0);
         transition("reaching");
       } else {
         showShelf(false);
@@ -542,11 +625,9 @@ export function createProductHand({
     if (phase === "reaching") {
       atStock();
       if (progress < 0.61) {
-        const reach = T.MathUtils.smootherstep(progress, 0, 0.61);
-        carrier.position.lerpVectors(approach, alongsideStock, reach);
-        carrier.position.y += Math.sin(reach * Math.PI) * 0.065;
-        hand?.pose(0);
+        poseReach(T.MathUtils.smootherstep(progress, 0, 0.61));
       } else {
+        hand.object.rotation.set(0, shelfHandYaw, 0);
         poseGrip((progress - 0.61) / 0.39);
       }
       if (progress === 1) {
@@ -566,32 +647,31 @@ export function createProductHand({
         carrier.position.y += arc * 0.055;
         carrier.quaternion.multiply(poseOffset.setFromAxisAngle(axes.right, 0.18 * arc));
         heldProduct.quaternion.slerp(viewPose.setFromAxisAngle(axes.up, active.can.frontYaw), lift);
+        if (hand) hand.object.rotation.y = T.MathUtils.lerp(shelfHandYaw, inspectionHandYaw, lift);
       }
       if (progress === 1) transition("inspecting");
     } else if (phase === "returning") {
-      if (progress < 0.64) {
-        const approachShelf = T.MathUtils.smootherstep(progress, 0, 0.64);
+      if (progress < 0.55) {
+        const approachShelf = T.MathUtils.smootherstep(progress, 0, 0.55);
         carrier.position.lerpVectors(start, aboveStock, approachShelf);
         carrier.position.y += Math.sin(approachShelf * Math.PI) * 0.045;
         carrier.quaternion.copy(startRotation).slerp(viewHeading, approachShelf);
         viewPose.copy(viewHeading).invert().multiply(stockPose);
         heldProduct.quaternion.copy(startCanRotation).slerp(viewPose, approachShelf);
-        if (hand) hand.object.rotation.y = T.MathUtils.lerp(startHandYaw, handYaw, approachShelf);
-      } else if (progress < 0.80) {
+        if (hand) hand.object.rotation.y = T.MathUtils.lerp(startHandYaw, shelfHandYaw, approachShelf);
+      } else if (progress < 0.70) {
         atStock();
-        carrier.position.lerpVectors(aboveStock, stock, T.MathUtils.smoothstep(progress, 0.64, 0.80));
+        carrier.position.lerpVectors(aboveStock, stock, T.MathUtils.smoothstep(progress, 0.55, 0.70));
       } else if (!hand) {
         finish();
       } else {
         showShelf(true);
         heldProduct.visible = false;
         atStock();
-        if (progress < 0.92) {
-          poseGrip(1 - (progress - 0.80) / 0.12);
+        if (progress < 0.87) {
+          poseGrip(1 - (progress - 0.70) / 0.17);
         } else {
-          const withdraw = T.MathUtils.smoothstep(progress, 0.92, 1);
-          carrier.position.lerpVectors(alongsideStock, approach, withdraw);
-          hand.pose(0);
+          poseReach(1 - T.MathUtils.smootherstep(progress, 0.87, 1));
         }
         if (progress === 1) finish();
       }
