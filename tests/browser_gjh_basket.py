@@ -110,7 +110,7 @@ def check_interaction(browser, url, mobile):
     assert page.evaluate("basket.open()") is False
     page.evaluate("document.querySelector('#product-modal').close()")
     assert page.evaluate("basket.open(document.querySelector('#opener'))") is True
-    expect(panel.get_by_text("425 g", exact=True)).to_be_visible()
+    expect(panel.get_by_role("listitem").get_by_text("425 g", exact=True)).to_be_visible()
     page.wait_for_function("document.querySelector('.mini-basket-photo').naturalWidth > 0")
     assert page.evaluate("""() => {
       const panel = document.querySelector('.mini-basket');

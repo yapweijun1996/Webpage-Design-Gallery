@@ -193,6 +193,30 @@
   }
 }
 
+@media (max-width: 373px) {
+  .shop-product {
+    gap: 5px;
+    padding: 9px;
+  }
+
+  .shop-product-panel {
+    padding: 8px 10px;
+  }
+
+  .shop-product-brand {
+    margin-block-end: 2px;
+  }
+
+  .shop-product-specs {
+    margin-block-start: 6px;
+  }
+
+  .shop-product-rotate,
+  .shop-product-actions {
+    margin-block-start: 5px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .shop-product button {
     transition: none;
