@@ -5,12 +5,7 @@ import { createProductHand } from "./product-hand.js";
 import { createShopProductUI } from "./shop-product-ui.js";
 import { createShopBasket } from "./basket.js";
 
-const PRODUCT = Object.freeze({
-  id: "au-425g",
-  name: "New Moon Australia Abalone",
-  origin: "Australia",
-  weight: "425 g",
-});
+import { NEW_MOON_PRODUCTS } from "./shop-product-catalog.js";
 
 // The shop and product inspection use the street renderer, never another WebGL context.
 export function createShopExperience({street, stage, toolbar, onExit}) {
@@ -64,13 +59,14 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     root.classList.toggle("is-inspecting", inspecting);
     previewUI.render({
       phase: state.phase,
+      product: state.product,
       fallback: state.phase === "inspecting" && state.modelReady === false,
       added: wasAdded,
       opener: selectionOpener,
     });
   }
 
-  function createProduct() {
+  function createProduct(product) {
     const group = new THREE.Group();
     const fallback = new THREE.Mesh(
       new THREE.CylinderGeometry(0.03875, 0.03875, 0.124, 24),
@@ -78,8 +74,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     );
     fallback.position.y = 0.062;
     group.add(fallback);
-    const url = new URL("../v11/assets/new-moon-can-au-425g-lod1.glb", import.meta.url).href;
-    new GLTFLoader().load(url, ({scene}) => {
+    new GLTFLoader().load(product.modelUrl, ({scene}) => {
       if (disposed) return;
       const box = new THREE.Box3().setFromObject(scene);
       const size = box.getSize(new THREE.Vector3());
@@ -112,7 +107,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     renderer: street.renderer,
     canvas: street.canvas,
     controlsRoot: controls,
-    products: [PRODUCT],
+    products: NEW_MOON_PRODUCTS,
     createProduct,
     onProductSelect: selectProduct,
     onExitRequest: onExit,
@@ -181,6 +176,11 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
       street.restoreCameraState(exteriorView);
       street.setInteractive(true);
       street.setPaused(false);
+    },
+    moveBasketTo(host) {
+      const dock = basketHost.querySelector(".mini-basket-dock");
+      if (dock) host.append(dock);
+      return basket;
     },
     destroy() {
       this.exit();

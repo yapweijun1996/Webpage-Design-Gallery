@@ -44,6 +44,7 @@ def run():
             page.wait_for_timeout(260)
             page.keyboard.up("PageDown")
             bounds = page.locator("#view").bounding_box()
+            aim_x = aim_y = 0.5
             for y in (0.25, 0.35, 0.45, 0.55, 0.65):
                 if inspect.is_enabled():
                     break
@@ -52,6 +53,7 @@ def run():
                                     bounds["y"] + bounds["height"] * y)
                     page.wait_for_timeout(75)
                     if inspect.is_enabled():
+                        aim_x, aim_y = x, y
                         break
             assert inspect.is_enabled(), "The product should be reachable from the aisle"
             inspect.click()
@@ -61,8 +63,8 @@ def run():
             page.locator(".shop-product").wait_for(state="hidden")
             page.wait_for_timeout(500)
             assert page.locator(".mini-basket-badge").inner_text() == "0"
-            page.mouse.move(bounds["x"] + bounds["width"] * x,
-                            bounds["y"] + bounds["height"] * y)
+            page.mouse.move(bounds["x"] + bounds["width"] * aim_x,
+                            bounds["y"] + bounds["height"] * aim_y)
             page.wait_for_timeout(250)
             assert inspect.is_enabled()
             inspect.click()
@@ -75,7 +77,7 @@ def run():
             assert page.locator(".mini-basket-badge").inner_text() == "1"
             page.get_by_role("button", name="Basket").click()
             assert page.get_by_role("dialog", name="Virtual basket").is_visible()
-            assert page.locator(".mini-basket-quantity span").inner_text() == "1"
+            assert page.locator(".mini-basket-item:not([hidden]) .mini-basket-quantity span").inner_text() == "1"
             page.get_by_role("button", name="Continue shopping").click()
             page.get_by_role("button", name="Exit shop").click()
             page.wait_for_selector("#stop-dialog[open]")
@@ -94,11 +96,11 @@ def run():
             fallback.wait_for_selector('#stop-dialog[open]')
             assert fallback.url.endswith("#shop")
             fallback.get_by_role("button", name="Add Australian abalone to basket").click()
-            assert "Added" in fallback.get_by_role("status").last.inner_text()
+            assert "added" in fallback.get_by_role("status").last.inner_text().lower()
             fallback.get_by_role("button", name="Close").click()
             fallback.get_by_role("button", name="Basket").click()
             assert fallback.get_by_role("dialog", name="Virtual basket").is_visible()
-            assert fallback.locator(".mini-basket-quantity span").inner_text() == "1"
+            assert fallback.locator(".mini-basket-item:not([hidden]) .mini-basket-quantity span").inner_text() == "1"
             browser.close()
             print("Mini Street integrated shop, basket persistence and WebGL fallback: PASS")
     finally:

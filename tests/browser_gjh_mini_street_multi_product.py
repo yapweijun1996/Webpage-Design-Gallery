@@ -159,6 +159,73 @@ def check_shop(browser, url):
     page.close()
 
 
+def expect_fallback_display(page):
+    page.wait_for_url("**/#shop", timeout=15000)
+    display = page.locator("#stop-dialog")
+    expect(display).to_be_visible()
+    expect(display.get_by_role("button", name="Enter 3D shop", exact=True)).to_be_hidden()
+    for product in PRODUCTS:
+        expect(display.get_by_role("button", name=f"Add {product.title} to basket", exact=True)).to_be_visible()
+    return display
+
+
+def lose_webgl_context(page):
+    page.locator("#view").evaluate("""canvas => {
+      const extension = canvas.getContext("webgl2")?.getExtension("WEBGL_lose_context");
+      if (!extension) throw new Error("Missing WEBGL_lose_context extension");
+      extension.loseContext();
+    }""")
+
+
+def check_runtime_context_loss(browser, url):
+    page = browser.new_page(viewport={"width": 320, "height": 700}, service_workers="block",
+                            reduced_motion="reduce")
+    page.goto(url, wait_until="domcontentloaded")
+    page.locator('a[data-stop="shop"]').click()
+    page.get_by_role("button", name="Enter 3D shop", exact=True).click()
+    expect(basket_button(page, 0)).to_be_visible()
+    page.evaluate("history.pushState(history.state, '', '#shop-interior')")
+
+    lose_webgl_context(page)
+    expect_fallback_display(page)
+    page.evaluate("""() => new Promise(resolve => {
+      window.addEventListener("hashchange", resolve, {once: true});
+      history.back();
+    })""")
+    display = expect_fallback_display(page)
+    display.get_by_role("button", name="Add Mexican abalone to basket", exact=True).click()
+    display.get_by_role("button", name="Close", exact=True).click()
+    masthead = page.locator(".masthead-inner")
+    assert masthead.evaluate("(node) => node.scrollWidth <= node.clientWidth")
+    assert page.locator(".masthead-inner > .mini-basket-dock").count() == 1
+    basket_button(page, 1).click()
+    check_basket_rows(page.get_by_role("dialog", name="Virtual basket"), {"mx-454g": 1})
+    expect(page.locator("#mini-basket")).to_have_count(1)
+    page.get_by_role("button", name="Continue shopping", exact=True).click()
+    page.locator('a[data-stop="shop"]').click()
+    expect_fallback_display(page)
+    page.close()
+
+
+def check_pending_shop_context_loss(browser, url):
+    page = browser.new_page(viewport={"width": 390, "height": 700}, service_workers="block")
+    pending = []
+    shop_module = "**/mini-street/shop-experience.js"
+    page.route(shop_module, lambda route: pending.append(route))
+    with page.expect_request(shop_module):
+        page.goto(url + "#shop-interior", wait_until="domcontentloaded")
+
+    lose_webgl_context(page)
+    expect_fallback_display(page)
+    response = pending[0].fetch()
+    pending[0].fulfill(response=response, body=response.text() + "\nwindow.__shopModuleEvaluated = true;")
+    page.wait_for_function("window.__shopModuleEvaluated")
+    page.evaluate("() => new Promise(requestAnimationFrame)")
+    expect(page.locator("#mini-basket")).to_have_count(1)
+    expect(page.locator(".shop-experience")).to_have_count(0)
+    page.close()
+
+
 def check_webgl_fallback(browser, url):
     page = browser.new_page(viewport={"width": 390, "height": 700}, service_workers="block")
     page.add_init_script("""(() => {
@@ -170,10 +237,12 @@ def check_webgl_fallback(browser, url):
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.goto(url + "#shop-interior", wait_until="domcontentloaded")
-    page.wait_for_url("**/#shop")
+    expect_fallback_display(page)
+    page.evaluate("location.hash = 'shop-interior'")
+    display = expect_fallback_display(page)
     for product in PRODUCTS:
-        page.get_by_role("button", name=f"Add {product.title} to basket", exact=True).click()
-    page.get_by_role("dialog").get_by_role("button", name="Close", exact=True).click()
+        display.get_by_role("button", name=f"Add {product.title} to basket", exact=True).click()
+    display.get_by_role("button", name="Close", exact=True).click()
     basket_button(page, 4).click()
     basket = page.get_by_role("dialog", name="Virtual basket", exact=True)
     check_basket_rows(basket, {product.sku: 1 for product in PRODUCTS})
@@ -197,6 +266,9 @@ def run():
             print("Mini Street four-product picking and v1 basket migration: PASS", flush=True)
             check_webgl_fallback(browser, url)
             print("Mini Street four-product WebGL fallback: PASS", flush=True)
+            check_runtime_context_loss(browser, url)
+            check_pending_shop_context_loss(browser, url)
+            print("Mini Street context loss, history and pending import: PASS", flush=True)
             browser.close()
     finally:
         server.shutdown()

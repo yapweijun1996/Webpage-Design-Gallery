@@ -305,7 +305,7 @@ class GalleryTests(unittest.TestCase):
                 "index.html", "style.css", "script.js", "scene.js", "world.js", "surfaces.js", "vending.js",
                 "vending-viewer.js", "vending-model.js", "vending-audio.js", "vending-sequence.js",
                 "shop-experience.js", "shop-experience.css", "shop-interior.js", "shop-interior-world.js", "shop-interior.css",
-                "product-hand.js", "shop-product-ui.js", "shop-product-ui.css", "basket.js", "basket.css",
+                "product-hand.js", "shop-product-catalog.js", "shop-product-ui.js", "shop-product-ui.css", "basket.js", "basket.css",
                 "assets/posable-right-hand.glb", "assets/posable-right-hand.LICENSE.md",
                 "assets/theme.css", "assets/thumbnail.webp", "assets/mini-street-anchor.webp",
                 "assets/new-moon-label-atlas.webp",
@@ -316,6 +316,9 @@ class GalleryTests(unittest.TestCase):
             v11 = street.parent / "v11"
             street_dependencies = {Path(name) for name in (
                 "vendor/three.module.min.js", "vendor/three.LICENSE",
+                "vendor/GLTFLoader.js", "vendor/BufferGeometryUtils.js",
+                "assets/new-moon-can-au-425g-lod1.glb", "assets/new-moon-can-nz-425g-lod1.glb",
+                "assets/new-moon-can-sa-425g-lod1.glb", "assets/new-moon-can-mx-454g-lod1.glb",
                 "assets/new-moon-nz-425g-front.webp", "assets/new-moon-au-425g-front.webp",
                 "assets/new-moon-sa-425g-front.webp", "assets/new-moon-mx-454g-front.webp",
             )}

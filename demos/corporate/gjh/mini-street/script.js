@@ -32,45 +32,45 @@ import("./vending.js").then(({ setupVending }) => {
 let street;
 let shopExperience;
 let shopLoading;
+let shopUnavailable = false;
+const historyMarker = "__gjhMiniStreetStop";
 let syncRoute = () => {};
 let routeRequest = 0;
 
+function redirectToShopDisplay() {
+  const url = new URL(location.href);
+  url.hash = "shop";
+  const state = history.state;
+  const directState = state?.[historyMarker] ? {...state, [historyMarker]: false} : state;
+  history.replaceState(directState, "", url);
+  syncRoute();
+}
+
 async function enterShop() {
-  if (!street || decodedHash() !== "#shop-interior") return;
+  if (!street || shopUnavailable || decodedHash() !== "#shop-interior") return;
   try {
     if (!shopExperience) {
-      shopLoading ||= import("./shop-experience.js").then(({createShopExperience}) =>
-        createShopExperience({street, stage, toolbar, onExit: () => {
+      shopLoading ||= import("./shop-experience.js").then(({createShopExperience}) => {
+        if (shopUnavailable) return;
+        shopExperience = createShopExperience({street, stage, toolbar, onExit: () => {
           if (decodedHash() !== "#shop-interior") return;
-          if (history.state?.__gjhMiniStreetStop) history.back();
-          else {
-            const url = new URL(location.href);
-            url.hash = "shop";
-            history.replaceState(history.state, "", url);
-            syncRoute();
-          }
-        }}));
-      shopExperience = await shopLoading;
+          if (history.state?.[historyMarker]) history.back();
+          else redirectToShopDisplay();
+        }});
+      });
+      await shopLoading;
     }
-    if (decodedHash() === "#shop-interior") shopExperience.enter();
+    if (!shopUnavailable && decodedHash() === "#shop-interior") shopExperience.enter();
   } catch (error) {
-    if (decodedHash() !== "#shop-interior") return;
+    if (shopUnavailable || decodedHash() !== "#shop-interior") return;
     console.error("Could not enter the 3D shop", error);
-    shopLoading = undefined;
-    const enterButton = document.querySelector("#shop .enter-shop");
-    if (enterButton) enterButton.hidden = true;
-    enableFallbackShopping();
+    showShopFallback();
     status.textContent = "The 3D shop could not load. The product display remains available.";
-    const url = new URL(location.href);
-    url.hash = "shop";
-    history.replaceState(history.state, "", url);
-    syncRoute();
   }
 }
 
 if (typeof dialog.showModal === "function") {
   const sectionsByHash = new Map(sections.map((section) => [`#${section.id}`, section]));
-  const historyMarker = "__gjhMiniStreetStop";
   let pendingOpener = null;
   let closingWithBack = false;
   let deferredStop;
@@ -83,7 +83,7 @@ if (typeof dialog.showModal === "function") {
   enter.className = "enter-shop";
   enter.textContent = "Enter 3D shop";
   enter.addEventListener("click", () => {
-    if (!street) return;
+    if (!street || shopUnavailable) return;
     routeRequest++;
     history.pushState({...history.state, [historyMarker]: true}, "", "#shop-interior");
     syncLocation();
@@ -113,8 +113,11 @@ if (typeof dialog.showModal === "function") {
   function syncLocation() {
     const hash = decodedHash();
     if (hash === "#shop-interior") {
-      closeStop(false);
-      enterShop();
+      if (shopUnavailable) redirectToShopDisplay();
+      else {
+        closeStop(false);
+        enterShop();
+      }
       return;
     }
     shopExperience?.exit();
@@ -203,22 +206,28 @@ if (typeof dialog.showModal === "function") {
 let fallbackShopping;
 function enableFallbackShopping() {
   if (fallbackShopping) return fallbackShopping;
-  fallbackShopping = import("./basket.js").then(({createShopBasket}) => {
+  fallbackShopping = Promise.all([
+    import("./basket.js"), import("./shop-product-catalog.js"),
+  ]).then(([{createShopBasket}, {NEW_MOON_PRODUCTS}]) => {
     const host = document.querySelector(".masthead-inner");
-    const basket = createShopBasket({host});
+    const basket = shopExperience?.moveBasketTo(host) ?? createShopBasket({host});
     const shop = document.querySelector("#shop");
-    const add = document.createElement("button");
-    add.type = "button";
-    add.className = "enter-shop";
-    add.textContent = "Add Australian abalone to basket";
+    const choices = document.createElement("div");
     const message = document.createElement("p");
     message.setAttribute("role", "status");
-    add.addEventListener("click", () => {
-      if (basket.add("au-425g", {})) {
-        message.textContent = "Added. Close this display to view your basket.";
-      }
-    });
-    shop.querySelector(".pack-list").after(add, message);
+    for (const product of NEW_MOON_PRODUCTS) {
+      const add = document.createElement("button");
+      add.type = "button";
+      add.className = "enter-shop";
+      add.textContent = `Add ${product.title} to basket`;
+      add.addEventListener("click", () => {
+        if (basket.add(product.id, {})) {
+          message.textContent = `${product.title} added. Close this display to view your basket.`;
+        }
+      });
+      choices.append(add);
+    }
+    shop.querySelector(".pack-list").after(choices, message);
     return basket;
   }).catch(error => {
     console.error("Could not load the virtual basket", error);
@@ -226,17 +235,17 @@ function enableFallbackShopping() {
   return fallbackShopping;
 }
 
-const showFallback = () => {
+function showShopFallback() {
+  shopUnavailable = true;
   shopExperience?.exit();
   const enterButton = document.querySelector("#shop .enter-shop");
   if (enterButton) enterButton.hidden = true;
-  if (decodedHash() === "#shop-interior") {
-    const url = new URL(location.href);
-    url.hash = "shop";
-    history.replaceState(history.state, "", url);
-    syncRoute();
-  }
+  if (decodedHash() === "#shop-interior") redirectToShopDisplay();
   enableFallbackShopping();
+}
+
+const showFallback = () => {
+  showShopFallback();
   delete stage.dataset.webgl;
   toolbar.hidden = true;
   status.textContent = "The 3D street is unavailable. The shop, vending demo and mall link are available below.";

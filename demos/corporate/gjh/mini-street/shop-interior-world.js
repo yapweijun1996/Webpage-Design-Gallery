@@ -99,15 +99,15 @@ function shopSign() {
 }
 
 const provisionStock = {
-  rice: { name: ["JASMINE", "RICE"], note: "THAI FRAGRANT RICE", script: "香米", color: "#5f7450", accent: "#ddd194", shape: "pouch", size: [0.20, 0.275, 0.112], price: "6.80" },
-  kopi: { name: ["KOPI O"], note: "ROASTED COFFEE", script: "咖啡乌", color: "#8c533c", accent: "#eab670", shape: "pouch", size: [0.145, 0.213, 0.096], price: "4.30" },
-  mee: { name: ["EGG", "NOODLES"], note: "DRIED WHEAT NOODLES", script: "鸡蛋面", color: "#cf9a46", accent: "#883427", shape: "pouch", size: [0.175, 0.221, 0.090], price: "2.80" },
-  teh: { name: ["JASMINE", "TEA"], note: "LOOSE LEAF", script: "茉莉花茶", color: "#406455", accent: "#d5bc7d", shape: "box", size: [0.135, 0.190, 0.102], price: "4.80" },
-  crackers: { name: ["CREAM", "CRACKERS"], note: "TRADITIONAL BISCUITS", script: "梳打饼", color: "#9f5839", accent: "#e8c180", shape: "box", size: [0.164, 0.195, 0.137], price: "4.60" },
-  kaya: { name: ["PANDAN", "KAYA"], note: "COCONUT JAM", script: "斑斓咖椰", color: "#73774b", accent: "#cbd39a", shape: "can", size: [0.104, 0.122, 0.104], price: "3.90" },
-  sardines: { name: ["SARDINES"], note: "IN TOMATO SAUCE", script: "茄汁沙丁鱼", color: "#a34b3e", accent: "#f1b379", shape: "can", size: [0.108, 0.148, 0.108], price: "3.20" },
-  lychee: { name: ["LYCHEES"], note: "IN LIGHT SYRUP", script: "糖水荔枝", color: "#377a6d", accent: "#efb69d", shape: "can", size: [0.117, 0.151, 0.117], price: "3.50" },
-  soy: { name: ["LIGHT SOY", "SAUCE"], note: "NATURALLY BREWED", script: "生抽", color: "#4d352a", accent: "#bc6755", shape: "bottle", size: [0.094, 0.295, 0.094], price: "3.80" },
+  rice: { name: ["JASMINE", "RICE"], note: "THAI FRAGRANT RICE", script: "香米", color: "#5f7450", accent: "#ddd194", shape: "pouch", size: [0.20, 0.275, 0.112] },
+  kopi: { name: ["KOPI O"], note: "ROASTED COFFEE", script: "咖啡乌", color: "#8c533c", accent: "#eab670", shape: "pouch", size: [0.145, 0.213, 0.096] },
+  mee: { name: ["EGG", "NOODLES"], note: "DRIED WHEAT NOODLES", script: "鸡蛋面", color: "#cf9a46", accent: "#883427", shape: "pouch", size: [0.175, 0.221, 0.090] },
+  teh: { name: ["JASMINE", "TEA"], note: "LOOSE LEAF", script: "茉莉花茶", color: "#406455", accent: "#d5bc7d", shape: "box", size: [0.135, 0.190, 0.102] },
+  crackers: { name: ["CREAM", "CRACKERS"], note: "TRADITIONAL BISCUITS", script: "梳打饼", color: "#9f5839", accent: "#e8c180", shape: "box", size: [0.164, 0.195, 0.137] },
+  kaya: { name: ["PANDAN", "KAYA"], note: "COCONUT JAM", script: "斑斓咖椰", color: "#73774b", accent: "#cbd39a", shape: "can", size: [0.104, 0.122, 0.104] },
+  sardines: { name: ["SARDINES"], note: "IN TOMATO SAUCE", script: "茄汁沙丁鱼", color: "#a34b3e", accent: "#f1b379", shape: "can", size: [0.108, 0.148, 0.108] },
+  lychee: { name: ["LYCHEES"], note: "IN LIGHT SYRUP", script: "糖水荔枝", color: "#377a6d", accent: "#efb69d", shape: "can", size: [0.117, 0.151, 0.117] },
+  soy: { name: ["LIGHT SOY", "SAUCE"], note: "NATURALLY BREWED", script: "生抽", color: "#4d352a", accent: "#bc6755", shape: "bottle", size: [0.094, 0.295, 0.094] },
 };
 
 function provisionLabel({ name, note, script, color, accent, shape }) {
@@ -400,7 +400,7 @@ export function buildShopInterior(THREE, scene, productCount) {
           ctx.fillRect(x, 3, 20, 10);
           ctx.fillStyle = "#3b382b";
           ctx.font = "bold 7px sans-serif";
-          ctx.fillText("$" + provisionStock[id].price, x + 2, 10, 11);
+          ctx.fillText(id.toUpperCase(), x + 2, 10, 11);
           ctx.fillRect(x + 16, 5, 1, 6);
           ctx.fillRect(x + 18, 5, 1, 6);
         }
