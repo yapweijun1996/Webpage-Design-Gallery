@@ -20,6 +20,18 @@ function drinkArt({ label, color, shape }) {
   return art;
 }
 
+function dropKeyframes(x, y) {
+  return [
+    { offset: 0, transform: "translate(0, 0) rotate(0)" },
+    { offset: 0.12, transform: "translate(0, 0) rotate(0)", easing: "ease-in-out" },
+    { offset: RELEASE, transform: "translate(4px, 3px) rotate(12deg)", easing: "cubic-bezier(.45, .03, .84, .51)" },
+    { offset: CHUTE_CONTACT, transform: `translate(${x * 0.63}px, ${y * 0.53}px) rotate(51deg)`, easing: "ease-in" },
+    { offset: TRAY_IMPACT, transform: `translate(${x - 6}px, ${y + 1}px) rotate(96deg)`, easing: "ease-out" },
+    { offset: TRAY_RATTLE, transform: `translate(${x - 2}px, ${y - 5}px) rotate(77deg)`, easing: "ease-in" },
+    { offset: 1, transform: `translate(${x}px, ${y}px) rotate(82deg)` },
+  ];
+}
+
 export function setupVending(section) {
   const layout = section.querySelector(".vending-layout");
   const preview = layout.querySelector(".vending-viewer");
@@ -39,9 +51,12 @@ export function setupVending(section) {
   let selection = -1;
   let flight;
   let animation;
+  let flightEvents;
+  let flightObserver;
   let settleTimer;
   let startedAt;
   let viewer;
+  let pendingViewer;
   let viewerRequest = 0;
   let opened = false;
   let showDropInViewer = false;
@@ -96,8 +111,13 @@ export function setupVending(section) {
   function clearFlight() {
     clearTimeout(settleTimer);
     settleTimer = undefined;
-    animation?.cancel();
+    flightEvents?.abort();
+    flightEvents = undefined;
+    flightObserver?.disconnect();
+    flightObserver = undefined;
+    const drop = animation;
     animation = undefined;
+    drop?.cancel();
     flight?.remove();
     flight = undefined;
     startedAt = undefined;
@@ -120,6 +140,62 @@ export function setupVending(section) {
     if (document.activeElement === serve) tray.focus();
   }
 
+  function measureDrop(source) {
+    const cabinet = machine.getBoundingClientRect();
+    const origin = source.getBoundingClientRect();
+    const destination = pocket.getBoundingClientRect();
+    return {
+      left: origin.left - cabinet.left - machine.clientLeft,
+      top: origin.top - cabinet.top - machine.clientTop,
+      x: destination.left + (destination.width - origin.width) / 2 - origin.left,
+      y: destination.top + (destination.height - origin.height) / 2 - origin.top,
+    };
+  }
+
+  function startFlight(source, drink) {
+    let path = measureDrop(source);
+    flight = drinkArt(drink);
+    flight.classList.add("vending-flight");
+    function positionFlight({ left, top }) {
+      flight.style.left = `${left}px`;
+      flight.style.top = `${top}px`;
+    }
+    positionFlight(path);
+    machine.append(flight);
+    const drop = flight.animate(dropKeyframes(path.x, path.y), { duration: VEND_DURATION, fill: "forwards" });
+    animation = drop;
+
+    function settleDrop() {
+      if (animation === drop) deliver(drink);
+    }
+
+    function retargetFlight() {
+      if (animation !== drop) return;
+      const next = measureDrop(source);
+      if (Object.keys(next).every(key => Math.abs(next[key] - path[key]) < 0.1)) return;
+      try {
+        positionFlight(next);
+        // Replacing keyframes preserves the current time and the matching sound cues.
+        drop.effect.setKeyframes(dropKeyframes(next.x, next.y));
+        path = next;
+      } catch {
+        sound.stop();
+        settleDrop();
+      }
+    }
+
+    flightEvents = new AbortController();
+    window.addEventListener("resize", retargetFlight, { signal: flightEvents.signal });
+    if (typeof ResizeObserver === "function") {
+      flightObserver = new ResizeObserver(retargetFlight);
+      for (const element of [machine, source, pocket]) flightObserver.observe(element);
+    }
+    // Some browsers may leave a newly created animation pending indefinitely.
+    // Finish the transaction even if the compositor never starts it.
+    settleTimer = setTimeout(settleDrop, VEND_DURATION + 640);
+    drop.finished.then(settleDrop, settleDrop);
+  }
+
   serve.addEventListener("click", (event) => {
     if (machine.dataset.phase !== "selected") return;
     const drink = drinks[selection];
@@ -139,39 +215,14 @@ export function setupVending(section) {
       return;
     }
 
-    const cabinet = machine.getBoundingClientRect();
-    const origin = source.getBoundingClientRect();
-    const destination = pocket.getBoundingClientRect();
-    const x = destination.left + (destination.width - origin.width) / 2 - origin.left;
-    const y = destination.top + (destination.height - origin.height) / 2 - origin.top;
-    flight = drinkArt(drink);
-    flight.classList.add("vending-flight");
-    flight.style.left = `${origin.left - cabinet.left - machine.clientLeft}px`;
-    flight.style.top = `${origin.top - cabinet.top - machine.clientTop}px`;
-    machine.append(flight);
-    const drop = flight.animate([
-      { offset: 0, transform: "translate(0, 0) rotate(0)" },
-      { offset: 0.12, transform: "translate(0, 0) rotate(0)", easing: "ease-in-out" },
-      { offset: RELEASE, transform: "translate(4px, 3px) rotate(12deg)", easing: "cubic-bezier(.45, .03, .84, .51)" },
-      { offset: CHUTE_CONTACT, transform: `translate(${x * 0.63}px, ${y * 0.53}px) rotate(51deg)`, easing: "ease-in" },
-      { offset: TRAY_IMPACT, transform: `translate(${x - 6}px, ${y + 1}px) rotate(96deg)`, easing: "ease-out" },
-      { offset: TRAY_RATTLE, transform: `translate(${x - 2}px, ${y - 5}px) rotate(77deg)`, easing: "ease-in" },
-      { offset: 1, transform: `translate(${x}px, ${y}px) rotate(82deg)` },
-    ], { duration: VEND_DURATION, fill: "forwards" });
-    animation = drop;
-    function settleDrop() {
-      if (animation === drop) deliver(drink);
-    }
-    // Some browsers may leave a newly created animation pending indefinitely.
-    // Finish the transaction even if the compositor never starts it.
-    settleTimer = setTimeout(settleDrop, VEND_DURATION + 640);
-    drop.finished.then(settleDrop, settleDrop);
+    startFlight(source, drink);
   });
 
   tray.addEventListener("click", (event) => {
     if (machine.dataset.phase !== "ready") return;
     const index = selection;
     reset("Collected. Choose again.");
+    if (pendingViewer) mountViewer(pendingViewer);
     if (event.isTrusted) sound.play("collect", { bottle: drinks[index].shape === "bottle" });
     if (document.activeElement === tray) slots[index].focus();
   });
@@ -202,11 +253,9 @@ export function setupVending(section) {
     if (restoreFocus && hadFocus) section.querySelector("h2").focus();
   }
 
-  async function loadViewer() {
-    const request = ++viewerRequest;
+  function mountViewer(createVendingViewer) {
+    pendingViewer = undefined;
     try {
-      const { createVendingViewer } = await import("./vending-viewer.js");
-      if (request !== viewerRequest) return;
       viewer = createVendingViewer(preview, {
         drinks, motion, onFailure: () => releaseViewer(true),
       });
@@ -214,6 +263,22 @@ export function setupVending(section) {
       layout.dataset.viewer = "ready";
       dialog?.setAttribute("data-vending-viewer", "");
       syncViewer();
+    } catch {
+      releaseViewer(true);
+    }
+  }
+
+  async function loadViewer() {
+    const request = ++viewerRequest;
+    try {
+      const { createVendingViewer } = await import("./vending-viewer.js");
+      if (request !== viewerRequest) return;
+      // Keep the controls and the pickup tray in place until the drink is collected.
+      if (machine.dataset.phase === "dispensing" || machine.dataset.phase === "ready") {
+        pendingViewer = createVendingViewer;
+      } else {
+        mountViewer(createVendingViewer);
+      }
     } catch {
       if (request === viewerRequest) releaseViewer(true);
     }
@@ -225,18 +290,19 @@ export function setupVending(section) {
     loadViewer();
   }
 
-  function close() {
-    opened = false;
+  function clearSession() {
     viewerRequest += 1;
+    pendingViewer = undefined;
     releaseViewer();
     reset();
   }
 
-  window.addEventListener("pagehide", () => {
-    viewerRequest += 1;
-    releaseViewer();
-    reset();
-  });
+  function close() {
+    opened = false;
+    clearSession();
+  }
+
+  window.addEventListener("pagehide", clearSession);
   window.addEventListener("pageshow", (event) => {
     if (event.persisted && opened) loadViewer();
   });
