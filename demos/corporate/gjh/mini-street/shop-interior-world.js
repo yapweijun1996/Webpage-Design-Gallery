@@ -57,12 +57,13 @@ function tileTexture(THREE, random) {
   return texture;
 }
 
-function timberTexture(random) {
+function timberTexture(random, tones = ["#a6734b", "#825233", "#714428"],
+  grainColors = ["#dfa67562", "#4327184d"]) {
   return paintedTexture(512, 256, (ctx, width, height) => {
     const tone = ctx.createLinearGradient(0, 0, width, height);
-    tone.addColorStop(0, "#a6734b");
-    tone.addColorStop(0.57, "#825233");
-    tone.addColorStop(1, "#714428");
+    tone.addColorStop(0, tones[0]);
+    tone.addColorStop(0.57, tones[1]);
+    tone.addColorStop(1, tones[2]);
     ctx.fillStyle = tone;
     ctx.fillRect(0, 0, width, height);
     for (let i = 0; i < 440; i += 1) {
@@ -70,7 +71,7 @@ function timberTexture(random) {
       const x = random() * width - width * 0.32;
       const length = width * (0.44 + random() * 0.52);
       const curve = (random() - 0.5) * 11;
-      ctx.strokeStyle = i % 2 ? "#4327184d" : "#dfa67562";
+      ctx.strokeStyle = grainColors[i % 2];
       ctx.lineWidth = 0.28 + random() * 1.15;
       ctx.beginPath();
       ctx.moveTo(x, y);
@@ -730,27 +731,96 @@ export function buildShopInterior(THREE, scene, productCount) {
   block(-2.57, 2.11, 1.39, 1.63);
 
   const island = area("Island display", 0.27, 0.28);
+  const islandDeck = 0.9945;
+  const deckTimber = new THREE.MeshStandardMaterial({
+    map: timberTexture(textureRandom, ["#a18261", "#80664e", "#745941"], ["#c7a37a36", "#4a342535"]),
+    roughness: 0.68,
+  });
+  const brushedRail = new THREE.MeshStandardMaterial({
+    map: paintedTexture(256, 16, (ctx, width, height) => {
+      const grain = ctx.createLinearGradient(0, 0, width, 0);
+      grain.addColorStop(0, "#969083");
+      grain.addColorStop(0.34, "#c3b9a3");
+      grain.addColorStop(0.73, "#a29b8f");
+      grain.addColorStop(1, "#bcb29f");
+      ctx.fillStyle = grain;
+      ctx.fillRect(0, 0, width, height);
+      for (let row = 1; row < height; row += 2) {
+        ctx.fillStyle = row % 3 ? "#f1e7cd3d" : "#433d332c";
+        ctx.fillRect(0, row, width, 1);
+      }
+    }),
+    roughness: 0.4,
+    metalness: 0.31,
+  });
+  const contactPlane = new THREE.PlaneGeometry().rotateX(-Math.PI / 2);
+  function displayContact(x, y, z, width, depth) {
+    const position = island.localToWorld(new THREE.Vector3(x, y + 0.001, z));
+    batch(contactPlane, shadow, position.toArray(), [width, 1, depth]);
+  }
+  function displayStockContacts(y, footprints) {
+    for (const [x, z, width, depth] of footprints) {
+      displayContact(x, y, z, width * 1.48, depth * 1.54);
+    }
+  }
+
   box(island, timber, [1.40, 0.85, 2.37], [0, 0.493, 0], true);
-  box(island, paintedGreen, [1.415, 0.12, 2.38], [0, 0.09, 0]);
-  box(island, stone, [1.45, 0.077, 2.42], [0, 0.956, 0], true);
-  box(island, brass, [1.455, 0.015, 2.425], [0, 0.977, 0]);
-  box(island, deepGreen, [1.20, 0.54, 0.018], [0, 0.53, 1.19]);
-  plane(island, shelfSign("NEW MOON ABALONE", "新月鲍鱼"), 0.99, 0.25, 0, 0.58, 1.20);
+  box(island, dark, [1.36, 0.11, 2.30], [0, 0.077, 0]);
+  box(island, deckTimber, [1.45, 0.077, 2.42], [0, islandDeck - 0.0385, 0], true);
+  shelfTrim(island, brass, [1.44, 0.006, 0.008], 0, 0.978, 1.212);
+  shelfTrim(island, deepGreen, [1.25, 0.64, 0.022], 0, 0.53, 1.185);
+  for (const x of [-0.616, 0.616]) {
+    shelfTrim(island, timber, [0.064, 0.66, 0.045], x, 0.53, 1.189);
+  }
+  for (const y of [0.214, 0.839]) {
+    shelfTrim(island, timber, [1.21, 0.045, 0.039], 0, y, 1.19);
+  }
+  plane(island, shelfSign("NEW MOON ABALONE", "新月鲍鱼"), 0.88, 0.22, 0, 0.58, 1.199);
+
+  // The short rear tier gives the display a readable shelf silhouette and
+  // leaves the original can and the hand's approach in front of the joinery.
+  const upperDeck = 1.362;
+  box(island, paintedGreen, [1.23, 0.29, 0.026], [0, 1.155, 0.49], true);
+  box(island, deckTimber, [1.29, 0.042, 0.35], [0, upperDeck - 0.021, 0.575], true);
+  shelfTrim(island, brushedRail, [1.29, 0.019, 0.013], 0, 1.334, 0.752);
+  for (const x of [-0.59, 0.59]) {
+    shelfTrim(island, timber, [0.045, 0.326, 0.055], x, 1.158, 0.51);
+    shelfTrim(island, paintedGreen, [0.038, 0.089, 0.14], x, 1.284, 0.604);
+    shelfTrim(island, brushed, [0.011, 0.011, 0.004], x, 1.27, 0.676);
+  }
+  displayContact(0, islandDeck, 0.49, 1.38, 0.10);
+  const upperStock = [];
+  for (const [id, x, z, turn] of [
+    ["teh", -0.43, 0.58, 0.07], ["teh", -0.28, 0.56, -0.04],
+    ["kaya", 0.34, 0.59, -0.07], ["kaya", 0.46, 0.58, 0.04],
+  ]) {
+    packageAt(island, id, x, upperDeck, z, turn, upperStock);
+  }
+  displayStockContacts(upperDeck, upperStock);
+
   const stands = [[-0.03, 0.98, 0.43, 0.44], [-0.60, -0.19, 0.21, 0.35]];
   for (const [x, z, width, depth] of stands) {
-    box(island, deepGreen, [width, 0.044, depth], [x, 1.000, z]);
-    shelfTrim(island, brass, [width + 0.006, 0.005, depth + 0.006], x, 1.023, z);
-    shelfTrim(island, stone, [width - 0.009, 0.003, depth - 0.009], x, 1.028, z);
+    shelfTrim(island, deepGreen, [width, 0.044, depth], x, 1.000, z);
+    shelfTrim(island, brushedRail, [width + 0.006, 0.005, depth + 0.006], x, 1.023, z);
+    shelfTrim(island, timber, [width - 0.009, 0.003, depth - 0.009], x, 1.028, z);
+    displayContact(x, islandDeck, z, width * 1.12, depth * 1.14);
   }
+  const heroTicket = shelfSign("AUSTRALIAN ABALONE", "澳洲鲍鱼 · 425 g");
+  plane(island, heroTicket, 0.215, 0.056, -0.03, 1.031, 1.116).rotation.x = -Math.PI / 2;
+
   block(0.27, 0.28, 1.46, 2.43);
   for (const [i, id] of ["crackers", "lychee", "kaya"].entries()) {
     const trayZ = -0.80 + i * 0.49;
     const trayX = i === 2 ? 0.20 : 0.03;
-    box(island, timber, [0.79, 0.053, 0.37], [trayX, 1.01, trayZ]);
+    const trayTop = 1.037;
+    shelfTrim(island, timber, [0.79, 0.053, 0.37], trayX, trayTop - 0.0265, trayZ);
+    displayContact(trayX, islandDeck, trayZ, 0.92, 0.46);
+    const footprints = [];
     for (let n = 0; n < 4; n += 1) {
-      packageAt(island, id, trayX - 0.28 + n * 0.182, 1.037, trayZ, (random() - 0.5) * 0.16);
-      packageAt(island, id, trayX - 0.28 + n * 0.182, 1.037, trayZ - 0.14, (random() - 0.5) * 0.16);
+      packageAt(island, id, trayX - 0.28 + n * 0.182, trayTop, trayZ, (random() - 0.5) * 0.16, footprints);
+      packageAt(island, id, trayX - 0.28 + n * 0.182, trayTop, trayZ - 0.14, (random() - 0.5) * 0.16, footprints);
     }
+    displayStockContacts(trayTop, footprints);
   }
 
   const cartons = area("Stock cartons", -3.05, -1.73);
@@ -809,11 +879,11 @@ export function buildShopInterior(THREE, scene, productCount) {
   entranceLight.position.set(1.7, 1.8, 5.0);
   room.add(ambient, shopFill, entranceLight);
   const interiorLights = [
-    { origin: [0.22, 2.64, 0.63], aim: [0.20, 1.04, 0.92], intensity: 19, color: 0xffdfb3 },
-    { origin: [1.62, 3.105, -2.12], aim: [0.36, 1.42, -3.44], intensity: 17, color: 0xffe9cc },
+    { origin: [0.22, 2.64, 0.63], aim: [0.22, 1.10, 1.16], intensity: 20, color: 0xffdfb0, angle: 0.63 },
+    { origin: [1.62, 3.105, -2.12], aim: [0.36, 1.42, -3.44], intensity: 17, color: 0xffe9cc, angle: 0.97 },
   ];
-  for (const { origin, aim, intensity, color } of interiorLights) {
-    const light = new THREE.SpotLight(color, intensity, 6.5, 0.97, 0.76, 2);
+  for (const { origin, aim, intensity, color, angle } of interiorLights) {
+    const light = new THREE.SpotLight(color, intensity, 6.5, angle, 0.76, 2);
     light.position.set(...origin);
     light.target.position.set(...aim);
     room.add(light, light.target);
