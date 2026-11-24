@@ -70,7 +70,7 @@ def exercise_late_viewer(browser, url, collect):
     context = browser.new_context(viewport={"width": 1000, "height": 800}, service_workers="block")
     context.route("**/scene.js", lambda route: route.abort())
     held = []
-    context.route("**/vending-viewer.js", held.append)
+    context.route("**/vending-viewer.js", lambda route: held.append(route))
     page = context.new_page()
     page.goto(url, wait_until="domcontentloaded")
     flight = begin_drop(page)
@@ -101,6 +101,31 @@ def exercise_late_viewer(browser, url, collect):
     context.close()
 
 
+def exercise_failed_flight(browser, url):
+    context = browser.new_context(viewport={"width": 320, "height": 568}, service_workers="block")
+    context.route("**/scene.js", lambda route: route.abort())
+    context.route("**/vending-viewer.js", lambda route: route.abort())
+    context.add_init_script("""(() => {
+      const animate = Element.prototype.animate;
+      Element.prototype.animate = function(...args) {
+        if (this.classList.contains("vending-flight")) throw new Error("Unable to create animation");
+        return animate.apply(this, args);
+      };
+    })();""")
+    page = context.new_page()
+    errors = []
+    page.on("pageerror", lambda error: errors.append(str(error)))
+    page.goto(url, wait_until="domcontentloaded")
+    page.locator("[data-slot=A2]").click()
+    page.get_by_role("button", name="Vend", exact=True).press("Enter")
+    expect_ready(page)
+    expect(page.locator(".vending-flight")).to_have_count(0)
+    page.get_by_role("button", name="Collect drink", exact=True).press("Enter")
+    expect(page.locator(".vending-message")).to_have_text("Collected. Choose again.")
+    assert not errors, errors
+    context.close()
+
+
 def main():
     with ThreadingHTTPServer(("127.0.0.1", 0), partial(Quiet, directory=str(ROOT))) as server:
         Thread(target=server.serve_forever, daemon=True).start()
@@ -116,7 +141,8 @@ def main():
                     exercise_resize(browser, url, can_retarget)
                 for collect in (True, False):
                     exercise_late_viewer(browser, url, collect)
-                print("PASS: resize trajectory, resize fallback and deferred viewer on collect or close")
+                exercise_failed_flight(browser, url)
+                print("PASS: resize trajectory, fallbacks and deferred viewer on collect or close")
             finally:
                 browser.close()
 

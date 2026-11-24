@@ -162,7 +162,14 @@ export function setupVending(section) {
     }
     positionFlight(path);
     machine.append(flight);
-    const drop = flight.animate(dropKeyframes(path.x, path.y), { duration: VEND_DURATION, fill: "forwards" });
+    let drop;
+    try {
+      drop = flight.animate(dropKeyframes(path.x, path.y), { duration: VEND_DURATION, fill: "forwards" });
+    } catch {
+      sound.stop();
+      deliver(drink);
+      return;
+    }
     animation = drop;
 
     function settleDrop() {
