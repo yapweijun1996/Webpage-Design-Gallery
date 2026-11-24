@@ -4,6 +4,7 @@ import { createShopInterior } from "./shop-interior.js";
 import { createProductHand } from "./product-hand.js";
 import { createShopProductUI } from "./shop-product-ui.js";
 import { createShopBasket } from "./basket.js";
+import { paintedTexture } from "./surfaces.js";
 
 import { NEW_MOON_PRODUCTS } from "./shop-product-catalog.js";
 
@@ -66,8 +67,29 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     });
   }
 
+  const contactGeometry = new THREE.PlaneGeometry(0.15, 0.15).rotateX(-Math.PI / 2);
+  const contactMaterial = new THREE.MeshBasicMaterial({
+    map: paintedTexture(32, 32, (ctx, size) => {
+      const radius = size / 2;
+      const shade = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
+      shade.addColorStop(0, "#21180e8a");
+      shade.addColorStop(0.48, "#21180e47");
+      shade.addColorStop(1, "#21180e00");
+      ctx.fillStyle = shade;
+      ctx.fillRect(0, 0, size, size);
+    }),
+    transparent: true,
+    depthWrite: false,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+  });
+
   function createProduct(product) {
     const group = new THREE.Group();
+    const contact = new THREE.Mesh(contactGeometry, contactMaterial);
+    contact.name = "Shelf can contact";
+    contact.position.y = 0.003;
+    group.add(contact);
     const fallback = new THREE.Mesh(
       new THREE.CylinderGeometry(0.03875, 0.03875, 0.124, 24),
       new THREE.MeshStandardMaterial({color: 0xdbc8a4, metalness: 0.25, roughness: 0.6})
