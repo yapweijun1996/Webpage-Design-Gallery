@@ -142,7 +142,7 @@ function wetRoad(scene) {
   };
 }
 
-export function createStreet({ canvas, stops, activate, fail }) {
+export function createStreet({ canvas, stops, activate, fail, startPaused = false }) {
   const attributes = { antialias: true, alpha: false, powerPreference: "low-power" };
   const context = canvas.getContext("webgl2", attributes);
   if (!context) throw new Error("WebGL 2 is unavailable.");
@@ -164,7 +164,7 @@ export function createStreet({ canvas, stops, activate, fail }) {
   let azimuth = 0;
   let elevation = 0;
   let night = true;
-  let paused = false;
+  let paused = startPaused;
   let lost = false;
   let dirty = true;
   let frame = 0;

@@ -7,6 +7,8 @@ export const drinks = [
   { code: "B3", name: "Lemon Tea", label: "LEMON", color: "#d9d875", shape: "bottle" },
 ];
 
+const DROP_DURATION = 880;
+
 function drinkArt({ label, color, shape }) {
   const art = document.createElement("span");
   art.className = "drink-art";
@@ -18,6 +20,9 @@ function drinkArt({ label, color, shape }) {
 }
 
 export function setupVending(section) {
+  const layout = section.querySelector(".vending-layout");
+  const preview = layout.querySelector(".vending-viewer");
+  const dialog = section.closest("dialog");
   const machine = section.querySelector(".vending-machine");
   const stock = machine.querySelector(".vending-stock");
   const message = machine.querySelector(".vending-message");
@@ -29,6 +34,14 @@ export function setupVending(section) {
   let flight;
   let animation;
   let settleTimer;
+  let startedAt;
+  let viewer;
+  let viewerRequest = 0;
+  let opened = false;
+
+  function syncViewer() {
+    viewer?.setState({ phase: machine.dataset.phase, selection, startedAt });
+  }
 
   function setPhase(phase, text) {
     machine.dataset.phase = phase;
@@ -39,6 +52,7 @@ export function setupVending(section) {
       slot.setAttribute("aria-pressed", String(index === selection));
       slot.disabled = phase === "dispensing" || phase === "ready";
     }
+    syncViewer();
   }
 
   const slots = drinks.map((drink, index) => {
@@ -68,6 +82,7 @@ export function setupVending(section) {
     animation = undefined;
     flight?.remove();
     flight = undefined;
+    startedAt = undefined;
   }
 
   function reset(text = "Choose a drink") {
@@ -88,8 +103,17 @@ export function setupVending(section) {
     if (machine.dataset.phase !== "selected") return;
     const drink = drinks[selection];
     const source = slots[selection].querySelector(".drink-art");
+    startedAt = performance.now();
     setPhase("dispensing", `Dispensing ${drink.name}…`);
-    if (motion.matches || typeof source.animate !== "function") {
+    if (motion.matches) {
+      deliver(drink);
+      return;
+    }
+    if (viewer) {
+      settleTimer = setTimeout(() => deliver(drink), DROP_DURATION);
+      return;
+    }
+    if (typeof source.animate !== "function") {
       deliver(drink);
       return;
     }
@@ -110,7 +134,7 @@ export function setupVending(section) {
       { offset: 0.76, transform: `translate(${x}px, ${y + 4}px) rotate(91deg)`, easing: "ease-out" },
       { offset: 0.89, transform: `translate(${x - 3}px, ${y - 6}px) rotate(72deg)`, easing: "ease-in" },
       { offset: 1, transform: `translate(${x}px, ${y}px) rotate(82deg)` },
-    ], { duration: 880, fill: "forwards" });
+    ], { duration: DROP_DURATION, fill: "forwards" });
     animation = drop;
     function settleDrop() {
       if (animation === drop) deliver(drink);
@@ -131,11 +155,59 @@ export function setupVending(section) {
   motion.addEventListener?.("change", () => {
     if (motion.matches && machine.dataset.phase === "dispensing") deliver(drinks[selection]);
   });
-  window.addEventListener("pagehide", () => reset());
+
+  function releaseViewer(restoreFocus = false) {
+    const hadFocus = preview.contains(document.activeElement);
+    viewer?.dispose();
+    viewer = undefined;
+    preview.hidden = true;
+    delete layout.dataset.viewer;
+    dialog?.removeAttribute("data-vending-viewer");
+    if (restoreFocus && hadFocus) section.querySelector("h2").focus();
+  }
+
+  async function loadViewer() {
+    const request = ++viewerRequest;
+    try {
+      const { createVendingViewer } = await import("./vending-viewer.js");
+      if (request !== viewerRequest) return;
+      viewer = createVendingViewer(preview, {
+        drinks, motion, dropDuration: DROP_DURATION, onFailure: () => releaseViewer(true),
+      });
+      preview.hidden = false;
+      layout.dataset.viewer = "ready";
+      dialog?.setAttribute("data-vending-viewer", "");
+      syncViewer();
+    } catch {
+      if (request === viewerRequest) releaseViewer(true);
+    }
+  }
+
+  function open() {
+    if (opened) return;
+    opened = true;
+    loadViewer();
+  }
+
+  function close() {
+    opened = false;
+    viewerRequest += 1;
+    releaseViewer();
+    reset();
+  }
+
+  window.addEventListener("pagehide", () => {
+    viewerRequest += 1;
+    releaseViewer();
+    reset();
+  });
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted && opened) loadViewer();
+  });
 
   reset();
   machine.hidden = false;
   section.querySelector("#vending-note").hidden = true;
   section.querySelector("#vending-instructions").hidden = false;
-  return { reset };
+  return { open, close };
 }

@@ -7,10 +7,24 @@ const dialog = document.querySelector("#stop-dialog");
 const weather = document.querySelector("#weather");
 const sections = [...document.querySelectorAll(".stop-details .detail")];
 const vendingSection = document.querySelector("#vending");
-let vending = { reset() {} };
+let vending;
+let vendingOpen = false;
+
+function setVendingOpen(open) {
+  vendingOpen = open;
+  if (open) vending?.open();
+  else vending?.close();
+}
+
+function decodedHash() {
+  try { return decodeURIComponent(location.hash); }
+  catch { return ""; }
+}
+
 // Keep the street links and shop usable if the optional machine fails to load.
 import("./vending.js").then(({ setupVending }) => {
   vending = setupVending(vendingSection);
+  if (vendingOpen) vending.open();
 }).catch(() => {
   vendingSection.querySelector("#vending-note").textContent = "The virtual drink machine could not load. Please try again.";
 });
@@ -25,16 +39,12 @@ if (typeof dialog.showModal === "function") {
   let deferredStop;
   let previousFocus;
   let activeSection;
-  function decodedHash() {
-    try { return decodeURIComponent(location.hash); }
-    catch { return ""; }
-  }
   dialog.append(...sections);
 
   function closeStop(updateLocation) {
     if (!activeSection) return;
     const hash = `#${activeSection.id}`;
-    if (activeSection === vendingSection) vending.reset();
+    if (activeSection === vendingSection) setVendingOpen(false);
     activeSection = undefined;
     if (dialog.open) dialog.close();
     if (updateLocation && decodedHash() === hash) {
@@ -61,7 +71,7 @@ if (typeof dialog.showModal === "function") {
       return;
     }
     if (dialog.open && activeSection === selected) return;
-    if (activeSection === vendingSection || selected === vendingSection) vending.reset();
+    if (activeSection === vendingSection) setVendingOpen(false);
     activeSection = selected;
     previousFocus = opener;
     for (const section of sections) section.hidden = section !== selected;
@@ -69,6 +79,7 @@ if (typeof dialog.showModal === "function") {
     if (!dialog.open) dialog.showModal();
     dialog.scrollTop = 0;
     street?.setPaused(true);
+    if (selected === vendingSection) setVendingOpen(true);
     selected.querySelector("h2").focus();
   }
 
@@ -119,7 +130,12 @@ if (typeof dialog.showModal === "function") {
     }), {once: true});
   }
 } else {
-  window.addEventListener("hashchange", () => vending.reset());
+  const syncInlineVending = () => {
+    setVendingOpen(decodedHash() === "#vending");
+    street?.setPaused(vendingOpen);
+  };
+  window.addEventListener("hashchange", syncInlineVending);
+  syncInlineVending();
 }
 
 const showFallback = () => {
@@ -136,11 +152,11 @@ async function start() {
       stops,
       activate: (name) => stops.find((stop) => stop.dataset.stop === name)?.click(),
       fail: showFallback,
+      startPaused: dialog.open || vendingOpen,
     });
     stage.dataset.webgl = "";
     toolbar.hidden = false;
     status.textContent = "3D street ready. Drag the street or use the camera controls.";
-    street.setPaused(dialog.open);
 
     for (const button of toolbar.querySelectorAll("[data-light]")) {
       button.addEventListener("click", () => {

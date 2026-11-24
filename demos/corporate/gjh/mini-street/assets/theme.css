@@ -75,6 +75,8 @@ html[data-gjh-design="mini-street"] {
   --radius-vending-bottle-cap: 20% 20% 10% 10%;
   --color-vending-cabinet-trim: #ba935c;
   --color-vending-cabinet-base: #091b16;
+  --color-vending-enamel: #244e3c;
+  --surface-vending-viewer: radial-gradient(ellipse at 49% 38%, #527163, #2a463c 57%, #162d28 89%);
   --surface-vending-cabinet: linear-gradient(100deg, #1d4538, #2d5542 33%, #193c31 89%, #102d24);
   --shadow-vending-cabinet: inset 0 2px #ffebb34d, inset 4px 0 #ffffff12, 0 9px 14px #07151080;
   --color-vending-header-trim: #dcaf6e;

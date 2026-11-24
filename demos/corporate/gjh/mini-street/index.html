@@ -93,28 +93,41 @@
         <h2 id="vending-title" tabindex="-1">Vending machine</h2>
         <p id="vending-note">This virtual drink machine requires JavaScript to operate.</p>
         <p id="vending-instructions" hidden>Pick a fictional drink, press Vend, then collect it. Free simulation.</p>
-        <div class="vending-machine" data-phase="idle" hidden>
-          <div class="vending-header" aria-hidden="true">
-            <span class="vending-moon"></span><span>Cold drinks</span>
-          </div>
-          <div class="vending-face">
-            <div class="vending-stock" role="group" aria-label="Drink slots"></div>
-            <div class="vending-controls">
-              <div class="vending-readout" role="status" aria-atomic="true">
-                <span class="vending-indicator" aria-hidden="true"></span>
-                <span class="vending-message">Choose a drink</span>
-              </div>
-              <button class="vending-serve" type="button" aria-disabled="true">Vend</button>
-              <div class="vending-hardware" aria-hidden="true">
-                <span>Demo reader</span><span>Receipt</span>
+        <div class="vending-layout">
+          <div class="vending-viewer" role="group" aria-label="3D vending machine" hidden>
+            <div class="vending-orbit" tabindex="0" role="group" aria-label="Machine view" aria-describedby="vending-orbit-help"></div>
+            <div class="vending-viewer-bar">
+              <p id="vending-orbit-help">Drag sideways or use arrow keys to rotate.</p>
+              <div class="camera-buttons" role="group" aria-label="Machine view controls">
+                <button type="button" data-orbit="left" aria-label="Rotate machine left"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button>
+                <button type="button" data-orbit="reset" aria-label="Reset machine view"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 10a7 7 0 1 1 1 7M5 5v5h5"/></svg></button>
+                <button type="button" data-orbit="right" aria-label="Rotate machine right"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg></button>
               </div>
             </div>
           </div>
-          <button class="vending-tray" type="button" aria-disabled="true">
-            <span class="vending-pocket" aria-hidden="true"></span>
-            <span class="vending-tray-label">Collect drink</span>
-          </button>
-          <div class="vending-vent" aria-hidden="true"></div>
+          <div class="vending-machine" data-phase="idle" hidden>
+            <div class="vending-header" aria-hidden="true">
+              <span class="vending-moon"></span><span>Cold drinks</span>
+            </div>
+            <div class="vending-face">
+              <div class="vending-stock" role="group" aria-label="Drink slots"></div>
+              <div class="vending-controls">
+                <div class="vending-readout" role="status" aria-atomic="true">
+                  <span class="vending-indicator" aria-hidden="true"></span>
+                  <span class="vending-message">Choose a drink</span>
+                </div>
+                <button class="vending-serve" type="button" aria-disabled="true">Vend</button>
+                <div class="vending-hardware" aria-hidden="true">
+                  <span>Demo reader</span><span>Receipt</span>
+                </div>
+              </div>
+            </div>
+            <button class="vending-tray" type="button" aria-disabled="true">
+              <span class="vending-pocket" aria-hidden="true"></span>
+              <span class="vending-tray-label">Collect drink</span>
+            </button>
+            <div class="vending-vent" aria-hidden="true"></div>
+          </div>
         </div>
         <a class="back" href="#street">← Back to street</a>
       </section>

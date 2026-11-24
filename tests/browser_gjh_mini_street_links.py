@@ -96,6 +96,8 @@ def main():
                 raise ValueError(f"Unsupported browser: {browser_name}")
             try:
                 context = browser.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
+                # Exercise the original HTML animation and history with the optional viewer unavailable.
+                context.route("**/vending-viewer.js", lambda route: route.abort())
                 page = context.new_page()
                 errors = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
@@ -243,6 +245,7 @@ def main():
                 context.close()
                 # A stalled browser animation still completes; closing cancels the fallback.
                 context = browser.new_context(reduced_motion="no-preference", service_workers="block")
+                context.route("**/vending-viewer.js", lambda route: route.abort())
                 context.add_init_script("""Element.prototype.animate = function() {
                   return {finished: new Promise(() => {}), cancel() {}};
                 };""")
