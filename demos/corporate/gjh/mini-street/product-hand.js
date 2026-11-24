@@ -14,11 +14,11 @@ const HAND = {
 const handYaw = 0.43;
 const durations = { reaching: 0.54, lifting: 0.58, returning: 0.94, stowing: 0.40 };
 const gripAngles = {
-  index: [0.12, 0.52, 0.28],
-  middle: [0.17, 0.58, 0.36],
-  ring: [0.23, 0.68, 0.42],
-  pinky: [0.28, 0.72, 0.46],
-  thumb: [-0.27, 0.40, 0.43],
+  index: [-0.10, 0.375, 0.861],
+  middle: [-0.10, 0.819, 0.459],
+  ring: [-0.10, 0.707, 0.159],
+  pinky: [-0.10, 0.627, 0.394],
+  thumb: [-0.48, 0.056, -0.48],
 };
 
 function disposeModel(model) {
@@ -112,11 +112,11 @@ function makeHand(T, model) {
   const hand = new T.Group();
   hand.name = "Anatomical first-person right hand";
   // The GLB is authored with fingers facing -Z and a reflected source basis.
-  // Place the palm at the can's right edge, with the thumb above the fingers.
+  // Fit the palm and the curled fingers to the can's 77.5 mm diameter.
   hand.applyMatrix4(new T.Matrix4().set(
-    0, 1, 0, -0.010,
-    1, 0, 0, -0.058,
-    0, 0, 1, 0.133,
+    0, 1, 0, -0.00244,
+    1, 0, 0, -0.05947,
+    0, 0, 1, 0.12626,
     0, 0, 0, 1,
   ));
   hand.add(model, cuff, sleeve);
@@ -157,6 +157,7 @@ export function createProductHand({
   const stockPose = new T.Quaternion();
   const approach = new T.Vector3();
   const inspection = new T.Vector3();
+  const alongsideStock = new T.Vector3();
   const drop = new T.Vector3();
   const end = new T.Vector3();
   const stock = new T.Vector3();
@@ -279,7 +280,14 @@ export function createProductHand({
   function atStock() {
     carrier.position.copy(stock);
     carrier.quaternion.copy(viewHeading);
+    alongsideStock.set(0.095, 0.012, 0).applyAxisAngle(axes.up, handYaw).applyQuaternion(viewHeading).add(stock);
     heldProduct.quaternion.copy(viewHeading).invert().multiply(stockPose);
+  }
+
+  // Slide in from the side before curling the fingers around the tin.
+  function poseGrip(progress) {
+    carrier.position.lerpVectors(alongsideStock, stock, T.MathUtils.smoothstep(progress, 0, 1));
+    hand?.pose(T.MathUtils.smoothstep(progress, 0.1875, 1));
   }
 
   function inspectPose() {
@@ -296,7 +304,7 @@ export function createProductHand({
   async function select(product, anchor) {
     if (disposed || active || !product?.id) return false;
     const shelfObject = anchor ? getProductObject?.(anchor.id) : null;
-    const selection = { product, shelfObject, shelfWasVisible: shelfObject?.visible, modelReady: false };
+    const selection = { product, anchor, shelfObject, shelfWasVisible: shelfObject?.visible, modelReady: false };
     active = selection;
     targetYaw = yaw = targetPitch = pitch = 0;
     // Product fallback still opens immediately for products without a pinned model.
@@ -338,9 +346,15 @@ export function createProductHand({
     } else {
       atStock();
       carrier.position.copy(approach);
-      heldProduct.visible = false;
-      hand?.pose(0);
-      transition("reaching");
+      if (hand) {
+        heldProduct.visible = false;
+        hand.pose(0);
+        transition("reaching");
+      } else {
+        showShelf(false);
+        heldProduct.visible = true;
+        transition("lifting");
+      }
     }
     return true;
   }
@@ -364,7 +378,7 @@ export function createProductHand({
 
   function putBack() {
     if (phase !== "inspecting") return false;
-    if (!active.modelReady || motion.matches) finish();
+    if (!active.modelReady || !active.anchor || motion.matches) finish();
     else {
       start.copy(carrier.position);
       startRotation.copy(carrier.quaternion);
@@ -418,9 +432,13 @@ export function createProductHand({
     const eased = T.MathUtils.smoothstep(progress, 0, 1);
     if (phase === "reaching") {
       atStock();
-      carrier.position.lerpVectors(approach, stock, eased);
-      carrier.position.y += Math.sin(progress * Math.PI) * 0.07;
-      hand?.pose(T.MathUtils.smoothstep(progress, 0.69, 1));
+      if (progress < 0.68) {
+        const reach = T.MathUtils.smoothstep(progress, 0, 0.68);
+        carrier.position.lerpVectors(approach, alongsideStock, reach);
+        carrier.position.y += Math.sin(reach * Math.PI) * 0.07;
+      } else {
+        poseGrip((progress - 0.68) / 0.32);
+      }
       if (progress === 1) {
         showShelf(false);
         heldProduct.visible = true;
@@ -442,13 +460,18 @@ export function createProductHand({
         heldProduct.quaternion.slerp(viewPose.copy(viewHeading).invert().multiply(stockPose), place);
         if (hand) hand.object.rotation.y = T.MathUtils.lerp(startHandYaw, handYaw, place);
       } else {
-        const withdraw = T.MathUtils.smoothstep(progress, 0.75, 1);
         showShelf(true);
         heldProduct.visible = false;
         carrier.quaternion.copy(viewHeading);
-        carrier.position.lerpVectors(stock, approach, withdraw);
-        carrier.position.y += Math.sin(withdraw * Math.PI) * 0.06;
-        hand?.pose(1 - withdraw);
+        if (hand) hand.object.rotation.y = handYaw;
+        if (progress < 0.86) {
+          poseGrip((0.86 - progress) / 0.11);
+        } else {
+          const withdraw = T.MathUtils.smoothstep(progress, 0.86, 1);
+          carrier.position.lerpVectors(alongsideStock, approach, withdraw);
+          hand?.pose(0);
+          carrier.position.y += Math.sin(withdraw * Math.PI) * 0.06;
+        }
       }
       if (progress === 1) finish();
     } else if (phase === "stowing") {
