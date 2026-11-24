@@ -66,6 +66,7 @@ h1, h2, p { margin: 0; }
 }
 .stage[data-webgl] #view { visibility: visible; }
 #view[data-dragging] { cursor: grabbing; }
+#view:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -4px; }
 .stage-shade {
   pointer-events: none;
   background: var(--scene-shade);
@@ -603,8 +604,15 @@ dialog[aria-labelledby="vending-title"] { width: min(100% - 26px, 510px); }
   .stop small { display: none; }
   .stop-icon { width: 25px; height: 25px; }
   .stop-icon svg { width: 16px; height: 16px; }
-  #orbit-help { display: none; }
-  .toolbar { min-height: 56px; }
+  #orbit-help {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .toolbar { min-height: 56px; flex-wrap: wrap; }
 }
 
 @media (max-width: 500px) {
@@ -613,10 +621,17 @@ dialog[aria-labelledby="vending-title"] { width: min(100% - 26px, 510px); }
   .pack-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+@media (max-width: 450px) {
+  .lighting button { min-width: 44px; padding: 0 8px; }
+  .lighting button span { display: none; }
+}
+
 @media (max-width: 370px) {
   #vending { padding-inline: 10px; }
-  .toolbar { flex-wrap: wrap; }
-  .lighting button { min-width: 64px; padding: 0 8px; }
+}
+
+@media (max-width: 373px) {
+  .stage { height: clamp(380px, calc(100svh - 185px), 880px); }
 }
 
 @media (prefers-reduced-motion: no-preference) {

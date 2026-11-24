@@ -6,6 +6,15 @@ const LANDMARKS = {
   vending: [-0.89, 2.40, 0.50],
 };
 const PHONE_MALL_TURN = 0.9;
+const DEFAULT_VIEW = { azimuth: 0, elevation: 0, zoom: 1, stop: null };
+const MIN_ZOOM = 0.65;
+const MAX_ZOOM = 2.4;
+const ZOOM_STEP = 1.24;
+const FOCUS_DURATION = 440;
+const KEYS = {
+  ArrowLeft: "left", ArrowRight: "right", ArrowUp: "up", ArrowDown: "down",
+  "+": "zoom-in", "=": "zoom-in", "-": "zoom-out", Home: "reset",
+};
 
 function rain(scene) {
   const material = new THREE.ShaderMaterial({
@@ -158,6 +167,14 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
   const camera = new THREE.PerspectiveCamera(38, 1, 0.15, 150);
   const street = buildWorld(world, invalidate);
   const landmarks = { ...LANDMARKS, mall: street.mallAnchor };
+  const stopViews = {
+    shop: { target: [-5.25, 1.82, 0.02], width: 4.7, distance: 6.7, closest: 3.25, angle: -0.12, eye: 2.35 },
+    vending: { target: [-0.89, 1.29, 0.47], width: 2.25, distance: 4.15, closest: 2.30, angle: 0.08, eye: 1.66 },
+    mall: {
+      target: [street.mallAnchor[0], 3.27, street.mallAnchor[2] - 1.25],
+      width: 9.4, distance: 11.1, closest: 4.5, angle: -0.1, eye: 3.42,
+    },
+  };
   const rainLines = rain(world);
   const reflection = wetRoad(world);
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -165,8 +182,12 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
   const pick = new THREE.Raycaster();
   const cursor = new THREE.Vector2();
   const projected = new THREE.Vector3();
-  let azimuth = 0;
-  let elevation = 0;
+  const cameraTarget = new THREE.Vector3();
+  const pointers = new Map();
+  let view = { ...DEFAULT_VIEW };
+  let transition;
+  let interactive = true;
+  let pinchSpan = 0;
   let night = true;
   let paused = startPaused;
   let lost = false;
@@ -174,11 +195,11 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
   let frame = 0;
   let lastPaint = 0;
   let rainTime = 0;
-  let pointer;
   let width = 1;
   let height = 1;
 
   function resize() {
+    if (!interactive || lost) return;
     width = Math.max(1, canvas.clientWidth);
     height = Math.max(1, canvas.clientHeight);
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.45));
@@ -186,7 +207,7 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
     reflection.resize(width, height);
     camera.aspect = width / height;
     camera.fov = portrait.matches ? THREE.MathUtils.clamp(53 - camera.aspect * 9, 43, 50) : 43;
-    if (portrait.matches) azimuth = Math.min(azimuth, PHONE_MALL_TURN);
+    if (portrait.matches) view.azimuth = Math.min(view.azimuth, PHONE_MALL_TURN);
     camera.updateProjectionMatrix();
     invalidate();
   }
@@ -217,21 +238,51 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
     }
   }
 
-  function updateView() {
+  function updateView(now) {
     const narrow = portrait.matches;
-    const { clamp, degToRad, lerp } = THREE.MathUtils;
-    const wideFocus = clamp(3.05 - camera.aspect * 1.65, -0.38, 1.95);
-    const mallTurn = narrow ? clamp(azimuth / PHONE_MALL_TURN, 0, 1) : 0;
-    const focus = narrow
-      ? lerp(-4.15, street.mallAnchor[0], mallTurn) + Math.min(0, azimuth) * 10.1
-      : wideFocus + azimuth * 7.1;
-    // Fit the full arch and its approach when the phone camera reaches the mall.
+    const { clamp, degToRad, lerp, smoothstep } = THREE.MathUtils;
+    const { azimuth, elevation, zoom, stop } = view;
     const horizontalSpan = 2 * Math.tan(degToRad(camera.fov / 2)) * camera.aspect;
-    const mallDistance = Math.max(16.6, 10.9 / horizontalSpan);
-    const distance = narrow ? lerp(16.6, mallDistance, mallTurn) : clamp(24.8 / camera.aspect, 16.9, 37);
-    const angle = (narrow ? -0.50 : -0.63) + azimuth * 0.28;
-    camera.position.set(focus + Math.sin(angle) * distance, 4.73 + elevation, 0.12 + Math.cos(angle) * distance);
-    camera.lookAt(focus, narrow ? lerp(2.78, 3.40, mallTurn) : 3.00, -0.40);
+    let distance;
+    let closest;
+    let angle;
+    let eye;
+    if (stop) {
+      const focus = stopViews[stop];
+      distance = Math.max(focus.distance, focus.width / horizontalSpan);
+      closest = focus.closest;
+      angle = focus.angle + azimuth * .52;
+      eye = focus.eye + elevation;
+      cameraTarget.set(...focus.target);
+    } else {
+      const wideFocus = clamp(3.05 - camera.aspect * 1.65, -0.38, 1.95);
+      const mallTurn = narrow ? clamp(azimuth / PHONE_MALL_TURN, 0, 1) : 0;
+      const center = narrow
+        ? lerp(-4.15, street.mallAnchor[0], mallTurn) + Math.min(0, azimuth) * 10.1
+        : wideFocus + azimuth * 7.1;
+      // Fit the full arch and approach at the end of the phone's rightward pan.
+      const mallDistance = Math.max(16.6, 10.9 / horizontalSpan);
+      distance = narrow ? lerp(16.6, mallDistance, mallTurn) : clamp(24.8 / camera.aspect, 16.9, 37);
+      closest = narrow ? 6.3 : 5.6;
+      angle = (narrow ? -0.50 : -0.63) + azimuth * 0.28;
+      eye = 4.73 + elevation;
+      cameraTarget.set(center, narrow ? lerp(2.78, 3.40, mallTurn) : 3.00, -0.40);
+    }
+    distance = zoom < 1 ? distance / zoom : lerp(distance, closest, (zoom - 1) / (MAX_ZOOM - 1));
+    camera.position.set(
+      cameraTarget.x + Math.sin(angle) * distance,
+      Math.max(1.1, eye),
+      cameraTarget.z + (stop ? 0 : 0.52) + Math.cos(angle) * distance,
+    );
+
+    if (transition) {
+      const progress = motion.matches ? 1 : clamp((now - transition.start) / FOCUS_DURATION, 0, 1);
+      const blend = smoothstep(progress, 0, 1);
+      camera.position.lerpVectors(transition.fromPosition, camera.position, blend);
+      cameraTarget.lerpVectors(transition.fromTarget, cameraTarget, blend);
+      if (progress === 1) finishTransition(true);
+    }
+    camera.lookAt(cameraTarget);
     camera.updateMatrixWorld();
     placeStops();
     reflection.update(renderer, camera, night);
@@ -240,18 +291,19 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
   function draw(now) {
     frame = 0;
     if (lost || document.hidden || paused) return;
-    const moving = night && !motion.matches;
+    const rainMoving = night && !motion.matches;
     const elapsed = now - lastPaint;
-    if (dirty || (moving && elapsed >= 32)) {
-      if (moving) rainTime += Math.min(elapsed, 60) / 1000;
+    const cameraMoving = transition && (elapsed >= 32 || motion.matches);
+    if (dirty || cameraMoving || (rainMoving && elapsed >= 32)) {
+      if (rainMoving) rainTime += Math.min(elapsed, 60) / 1000;
       rainLines.visible = night;
       rainLines.material.uniforms.time.value = motion.matches ? 0 : rainTime;
-      if (dirty) updateView();
+      if (dirty || cameraMoving) updateView(now);
       renderer.render(world, camera);
       lastPaint = now;
       dirty = false;
     }
-    if (moving) frame = requestAnimationFrame(draw);
+    if (rainMoving || transition) frame = requestAnimationFrame(draw);
   }
 
   function invalidate() {
@@ -259,35 +311,108 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
     if (!frame && !paused && !lost && !document.hidden) frame = requestAnimationFrame(draw);
   }
 
-  function turn(horizontal, vertical = 0) {
-    azimuth = THREE.MathUtils.clamp(azimuth + horizontal, -0.83, portrait.matches ? PHONE_MALL_TURN : 1.15);
-    elevation = THREE.MathUtils.clamp(elevation + vertical, -2.0, 2.85);
+  function finishTransition(completed) {
+    const pending = transition;
+    transition = undefined;
+    pending?.resolve(completed);
+  }
+
+  function setView(next, animate) {
+    finishTransition(false);
+    view = { ...next, azimuth: Math.min(next.azimuth, portrait.matches ? PHONE_MALL_TURN : 1.15) };
     invalidate();
+    if (!animate || paused || lost || document.hidden || motion.matches) return Promise.resolve(!lost);
+    return new Promise((resolve) => {
+      transition = {
+        start: performance.now(),
+        fromPosition: camera.position.clone(),
+        fromTarget: cameraTarget.clone(),
+        resolve,
+      };
+    });
+  }
+
+  function focusStop(name) {
+    if (!interactive || paused || lost || !Object.hasOwn(stopViews, name)) return Promise.resolve(false);
+    return setView({ ...DEFAULT_VIEW, stop: name }, true);
+  }
+
+  function turn(horizontal, vertical = 0) {
+    view.azimuth = THREE.MathUtils.clamp(view.azimuth + horizontal, -0.83, portrait.matches ? PHONE_MALL_TURN : 1.15);
+    view.elevation = THREE.MathUtils.clamp(view.elevation + vertical, -2.0, 2.85);
+    invalidate();
+  }
+
+  function zoomBy(factor) {
+    const zoom = THREE.MathUtils.clamp(view.zoom * factor, MIN_ZOOM, MAX_ZOOM);
+    if (zoom === view.zoom) return;
+    view.zoom = zoom;
+    invalidate();
+  }
+
+  function look(direction) {
+    if (!interactive || paused || lost) return;
+    switch (direction) {
+      case "reset": setView(DEFAULT_VIEW, true); break;
+      case "left": turn(-0.30); break;
+      case "right": turn(0.30); break;
+      case "up": turn(0, 0.40); break;
+      case "down": turn(0, -0.40); break;
+      case "zoom-in": zoomBy(ZOOM_STEP); break;
+      case "zoom-out": zoomBy(1 / ZOOM_STEP); break;
+    }
   }
 
   function select(event) {
     const rect = canvas.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX >= rect.right || event.clientY < rect.top || event.clientY >= rect.bottom) return;
     cursor.set((event.clientX - rect.left) / rect.width * 2 - 1, 1 - (event.clientY - rect.top) / rect.height * 2);
     pick.setFromCamera(cursor, camera);
     const [hit] = pick.intersectObjects(street.hitTargets);
-    if (hit) activate(hit.object.name);
+    if (!hit) return;
+    const name = hit.object.name;
+    if (name === "shop" || (!transition && view.stop === name)) activate(name);
+    else focusStop(name);
+  }
+
+  function clearPointers() {
+    const ids = [...pointers.keys()];
+    pointers.clear();
+    pinchSpan = 0;
+    delete canvas.dataset.dragging;
+    for (const id of ids) {
+      if (canvas.hasPointerCapture(id)) canvas.releasePointerCapture(id);
+    }
+  }
+
+  function pinchDistance() {
+    const [first, second] = pointers.values();
+    return Math.max(1, Math.hypot(first.x - second.x, first.y - second.y));
   }
 
   function end(event) {
-    if (!pointer || event.pointerId !== pointer.id) return;
-    const wasTap = !pointer.dragging && event.type === "pointerup";
-    pointer = undefined;
-    delete canvas.dataset.dragging;
-    if (wasTap) select(event);
+    const pointer = pointers.get(event.pointerId);
+    if (!pointer) return;
+    pointers.delete(event.pointerId);
+    pinchSpan = 0;
+    if (!pointers.size) delete canvas.dataset.dragging;
+    if (!pointer.dragging && event.type === "pointerup") select(event);
   }
 
   canvas.addEventListener("pointerdown", (event) => {
-    if (!event.isPrimary || event.button !== 0) return;
-    pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, dragging: false };
+    if (!interactive || paused || lost || event.button !== 0 || pointers.size >= 2) return;
+    if (pointers.size && (event.pointerType !== "touch" || pointers.values().next().value.type !== "touch")) return;
+    const pointer = { x: event.clientX, y: event.clientY, dragging: false, type: event.pointerType };
+    pointers.set(event.pointerId, pointer);
     canvas.setPointerCapture(event.pointerId);
+    if (pointers.size === 2) {
+      for (const active of pointers.values()) active.dragging = true;
+      pinchSpan = pinchDistance();
+    }
   });
   canvas.addEventListener("pointermove", (event) => {
-    if (!pointer || event.pointerId !== pointer.id) return;
+    const pointer = pointers.get(event.pointerId);
+    if (!pointer) return;
     const dx = event.clientX - pointer.x;
     const dy = event.clientY - pointer.y;
     if (!pointer.dragging && Math.hypot(dx, dy) < 5) return;
@@ -295,10 +420,38 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
     pointer.x = event.clientX;
     pointer.y = event.clientY;
     canvas.dataset.dragging = "";
-    turn(-dx * 0.0043, dy * 0.015);
+    if (pinchSpan) {
+      const span = pinchDistance();
+      zoomBy(span / pinchSpan);
+      pinchSpan = span;
+    } else {
+      turn(-dx * 0.0043, dy * 0.015);
+    }
   });
   for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
     canvas.addEventListener(type, end);
+  }
+
+  canvas.addEventListener("wheel", (event) => {
+    if (!interactive || paused || lost || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+    event.preventDefault();
+    const signaledDelta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? height : 1;
+    const delta = THREE.MathUtils.clamp(signaledDelta * unit, -220, 220);
+    zoomBy(Math.exp(-delta * 0.002));
+  }, { passive: false });
+  canvas.addEventListener("keydown", (event) => {
+    if (!interactive || paused || lost || event.altKey || event.ctrlKey || event.metaKey || !Object.hasOwn(KEYS, event.key)) return;
+    event.preventDefault();
+    look(KEYS[event.key]);
+  });
+
+  function visibilityChanged() {
+    if (document.hidden) {
+      clearPointers();
+      finishTransition(true);
+    }
+    invalidate();
   }
 
   const observer = new ResizeObserver(() => resize());
@@ -307,12 +460,14 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
     event.preventDefault();
     lost = true;
     cancelAnimationFrame(frame);
+    clearPointers();
+    finishTransition(false);
     observer.disconnect();
-    document.removeEventListener("visibilitychange", invalidate);
+    document.removeEventListener("visibilitychange", visibilityChanged);
     motion.removeEventListener("change", invalidate);
     fail();
   });
-  document.addEventListener("visibilitychange", invalidate);
+  document.addEventListener("visibilitychange", visibilityChanged);
   motion.addEventListener("change", invalidate);
 
   street.setNight(true);
@@ -322,9 +477,27 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
   if (lost) throw new Error("The WebGL context was lost during startup.");
 
   return {
+    canvas,
+    renderer,
+    focusStop,
+    focusShop: () => focusStop("shop"),
+    getCameraState: () => ({ ...view }),
+    restoreCameraState: (state, { animate = false } = {}) => setView(state, animate),
+    setInteractive(value) {
+      if (interactive === value) return;
+      interactive = value;
+      if (interactive) {
+        resize();
+      } else {
+        clearPointers();
+        finishTransition(false);
+      }
+    },
     setPaused(value) {
       paused = value;
       if (paused) {
+        clearPointers();
+        finishTransition(false);
         cancelAnimationFrame(frame);
         frame = 0;
       } else {
@@ -336,14 +509,6 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
       street.setNight(night);
       invalidate();
     },
-    look(direction) {
-      if (direction === "reset") {
-        azimuth = 0;
-        elevation = 0;
-        invalidate();
-      } else {
-        turn(direction === "left" ? -0.30 : 0.30);
-      }
-    },
+    look,
   };
 }
