@@ -44,7 +44,7 @@ WebGL 2 is required for 3D. The HTML stops, shop images and working vending clos
 
 The collection entry answers what visitors can explore before entering the mall. The New Moon street stop opens a panel with four packshots and their labeled weights. The vending stop opens the interactive drink machine, and Enter Mall opens v11's arrivals page.
 
-The saved captures show the street in build `0efd7bd13d41d0e5`; the historical browser results below cover earlier builds. The captures use reduced motion for a reproducible first screen. Each was taken from the running WebGL prototype at 390 × 844, 768 × 1024 or 1440 × 900 CSS pixels. The 720 × 450 collection thumbnail is a downsample of the desktop capture.
+The saved Gallery captures show the enhanced street recorded on 24 November 2026; the historical browser results below cover earlier builds. The captures use reduced motion for a reproducible first screen. Each was taken from the running WebGL prototype at 390 × 844, 768 × 1024 or 1440 × 900 CSS pixels. The 720 × 450 collection thumbnail is a downsample of the desktop capture.
 
 ### Vending machine pass
 
