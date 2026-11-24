@@ -319,8 +319,8 @@ export function buildWorld(scene, invalidate) {
     scene.add(halo);
   }
 
-  function light(x, y, z, strength, radius) {
-    const point = new THREE.PointLight("#ffac60", strength, radius, 1.6);
+  function light(x, y, z, strength, radius, color = "#ffac60") {
+    const point = new THREE.PointLight(color, strength, radius, 1.6);
     point.position.set(x, y, z);
     point.layers.enable(REFLECTED);
     scene.add(point);
@@ -426,6 +426,23 @@ export function buildWorld(scene, invalidate) {
     rod(ink, [x, 0.13, z + 0.15], [x, 0.13, z + 0.23], 0.051);
   }
 
+  function drainChannel(x, start) {
+    const end = 1.77;
+    const length = end - start;
+    const center = (start + end) / 2;
+    box(ink, x, 0.044, center, 0.229, 0.010, length);
+    for (const side of [-1, 1]) {
+      box(stone, x + side * 0.12, 0.057, center, 0.052, 0.030, length);
+    }
+    for (let i = 0; i < 13; i += 1) {
+      box(i % 3 ? ink : brass, x, 0.057, start + (i + 0.5) * length / 13, 0.192, 0.020, 0.037);
+    }
+    box(ink, x, 0.051, end + 0.16, 0.27, 0.022, 0.28);
+    for (const offset of [-0.062, 0, 0.062]) {
+      box(brass, x + offset, 0.065, end + 0.16, 0.024, 0.009, 0.23);
+    }
+  }
+
   function upperWall(x, z, width, bottom, top, windowY, offsets, material) {
     // The front leaf of the wall has openings through its full thickness.
     const shape = new THREE.Shape();
@@ -498,6 +515,21 @@ export function buildWorld(scene, invalidate) {
     box(stone, x, y - 1.285, z + 0.16, 1.51, 0.084, 0.32);
     box(cream, x, y - 1.217, z + 0.18, 1.70, 0.093, 0.41);
     if (index % 2 === 0) hangingGreenery(x, y - 1.02, z + 0.35, 1.12);
+  }
+
+  function windowGuard(x, y, z) {
+    box(brass, x, y + 0.13, z, 1.44, 0.047, 0.050);
+    box(ink, x, y - 0.13, z, 1.44, 0.049, 0.051);
+    for (const offset of [-0.68, -0.46, -0.23, 0, 0.23, 0.46, 0.68]) {
+      box(ink, x + offset, y, z, 0.038, 0.253, 0.044);
+    }
+    for (const offset of [-0.35, -0.12, 0.12, 0.35]) {
+      stamp(cupHandle, brass, x + offset, y + 0.002, z, 0.085, 0.091, 0.071);
+    }
+    for (const side of [-1, 1]) {
+      const end = x + side * 0.68;
+      rod(ink, [end, y - 0.13, z], [end, y - 0.22, z - 0.24], 0.023);
+    }
   }
 
   function pier(x, z, height) {
@@ -735,8 +767,11 @@ export function buildWorld(scene, invalidate) {
     for (const side of [-1, 1]) pier(x + side * (width / 2 - 0.13), z + 0.11, 5.73);
     bays.forEach((offset, index) => upperWindow(x + offset, windowY, z + 0.09, index + (shop ? 0 : 1)));
     roof(x, width, z - 2.15, peak);
-    downpipe(x + width / 2 + 0.02, z + 0.42, peak - 1.25);
+    const drainX = x + width / 2 + 0.02;
+    downpipe(drainX, z + 0.42, peak - 1.25);
     if (shop) {
+      drainChannel(drainX, z + 0.69);
+      for (const offset of bays) windowGuard(x + offset, windowY - 1.015, z + 0.635);
       shopfront(x, z, width - 0.79);
       sign(x, 3.25, z + 0.28, width - 0.66, 0.78, "New Moon", "moon");
       for (const side of [-1, 1]) {
@@ -792,6 +827,7 @@ export function buildWorld(scene, invalidate) {
         0.80, 0.38, 1, 0, side === 1 ? turn : turn + Math.PI);
     }
     box(roseGlow, x, y - 0.218, z, 0.80, 0.034, 0.096, 0, turn);
+    light(x + 0.58, y + 0.17, z + 0.84, 8.2, 4.5, "#ff80a6");
     // Use static spill around the sign and its wet-road reflection.
     decal(rosePool, x + 0.36, 0.057, 1.05, 2.77, 1.90, -Math.PI / 2, 2);
     decal(rosePool, x + 0.49, 0.018, 3.72, 2.90, 4.41, -Math.PI / 2, 2);
@@ -1470,7 +1506,6 @@ export function buildWorld(scene, invalidate) {
   streetLamp(-12.71, 1.81, 1.00);
   streetLamp(3.05, 8.68, 1.08);
   decal(pool, 3.70, 0.054, 8.77, 2.66, 2.88, -Math.PI / 2, 2);
-  light(4.47, 3.00, 1.93, 5.7, 4.7);
   palm(7.12, -5.11, 6.20);
   palm(16.22, -5.95, 6.82);
   palm(21.54, -3.48, 6.18);
