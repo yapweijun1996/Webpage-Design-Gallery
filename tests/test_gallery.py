@@ -291,6 +291,9 @@ class GalleryTests(unittest.TestCase):
             street_files = {Path(name) for name in (
                 "index.html", "style.css", "script.js", "scene.js", "world.js", "surfaces.js", "vending.js",
                 "vending-viewer.js", "vending-model.js", "vending-audio.js", "vending-sequence.js",
+                "shop-experience.js", "shop-experience.css", "shop-interior.js", "shop-interior-world.js", "shop-interior.css",
+                "product-hand.js", "shop-product-ui.js", "shop-product-ui.css", "basket.js", "basket.css",
+                "assets/posable-right-hand.glb", "assets/posable-right-hand.LICENSE.md",
                 "assets/theme.css", "assets/thumbnail.webp", "assets/mini-street-anchor.webp",
                 "assets/new-moon-label-atlas.webp",
                 "screenshots/1440.png", "screenshots/768.png", "screenshots/390.png",

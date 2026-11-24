@@ -5,7 +5,7 @@ const EYE_HEIGHT = 1.64;
 const PLAYER_RADIUS = 0.24;
 const WALK_SPEED = 1.75;
 const LOOK_SPEED = 1.4;
-const PICK_DISTANCE = 2.6;
+const PICK_DISTANCE = 1.2;
 const movementKeys = new Set([
   "KeyW", "KeyA", "KeyS", "KeyD", "KeyQ", "KeyE", "ArrowUp", "ArrowDown",
   "ArrowLeft", "ArrowRight", "PageUp", "PageDown",
@@ -99,7 +99,7 @@ function createControls(root, onExit, onInspect, onLock, signal) {
   lock.setAttribute("aria-pressed", "false");
   if (onLock) lock.addEventListener("click", onLock, { signal });
 
-  const inspect = add("button", "shop-interior-inspect", "Aim at a product");
+  const inspect = add("button", "shop-interior-inspect", "Walk closer and aim");
   inspect.type = "button";
   inspect.disabled = true;
   inspect.addEventListener("click", onInspect, { signal });
@@ -205,7 +205,7 @@ export function createShopInterior({
     }
     if (controls) {
       controls.inspect.disabled = !next;
-      controls.inspect.textContent = next ? `Inspect ${next.product.name}` : "Aim at a product";
+      controls.inspect.textContent = next ? `Inspect ${next.product.name}` : "Walk closer and aim";
       controls.reticle.classList.toggle("shop-interior-reticle--target", Boolean(next));
     }
     onProductFocus?.(next?.product ?? null, next?.anchor ?? null);

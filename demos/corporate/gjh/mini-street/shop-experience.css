@@ -1,0 +1,46 @@
+.shop-experience {
+  position: absolute;
+  inset: 0;
+  z-index: var(--shop-experience-z-index-1);
+  pointer-events: none;
+}
+.shop-experience[hidden] { display: none; }
+.shop-experience-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.shop-experience-basket {
+  position: absolute;
+  top: 64px;
+  right: 16px;
+  z-index: var(--shop-experience-z-index-2);
+  pointer-events: auto;
+}
+.stage[data-interior] :is(.intro, .stops, .stage-shade, .scene-status) {
+  visibility: hidden;
+  pointer-events: none;
+}
+.stage[data-interior] #view { cursor: default; }
+
+.enter-shop {
+  min-height: 44px;
+  padding: 10px 18px;
+  margin: 0 0 16px;
+  color: var(--color-stop-ink);
+  background: var(--color-toolbar-selected);
+  border: 1px solid var(--color-dialog-border);
+  border-radius: var(--radius-control);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.enter-shop:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .stage[data-interior] #view { animation: shop-arrive 320ms ease-out both; }
+}
+@keyframes shop-arrive {
+  from { opacity: .2; }
+  to { opacity: 1; }
+}

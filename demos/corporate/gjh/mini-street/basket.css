@@ -7,20 +7,20 @@
 .mini-basket button,
 .mini-basket-launcher {
   min-height: 44px;
-  border: 1px solid var(--color-dialog-border, #967451);
-  border-radius: var(--radius-control, 10px);
-  color: var(--cream, #fbecd7);
-  background: var(--color-close, #ffffff14);
+  border: 1px solid var(--color-dialog-border);
+  border-radius: var(--radius-control);
+  color: var(--cream);
+  background: var(--color-close);
 }
 
 .mini-basket button:hover,
 .mini-basket-launcher:hover {
-  background: var(--color-close-hover, #ffffff24);
+  background: var(--color-close-hover);
 }
 
 .mini-basket button:focus-visible,
 .mini-basket-launcher:focus-visible {
-  outline: 2px solid var(--color-focus, #ffd899);
+  outline: 2px solid var(--color-focus);
   outline-offset: 3px;
 }
 
@@ -29,8 +29,8 @@
   align-items: center;
   gap: 7px;
   padding: 0 9px;
-  border-radius: var(--radius-stop, 28px);
-  font-size: var(--type-stop, .84rem);
+  border-radius: var(--radius-stop);
+  font-size: var(--type-stop);
   font-weight: 650;
   white-space: nowrap;
 }
@@ -41,27 +41,27 @@
   height: 23px;
   padding-inline: 4px;
   place-items: center;
-  border-radius: var(--radius-stop, 28px);
-  background: var(--color-toolbar-selected, #f1dab6);
-  color: var(--color-stop-ink, #173429);
-  font-size: .73rem;
+  border-radius: var(--radius-stop);
+  background: var(--color-toolbar-selected);
+  color: var(--color-stop-ink);
+  font-size: var(--basket-font-size-1);
   font-variant-numeric: tabular-nums;
 }
 
 .mini-basket-notice {
   position: absolute;
-  z-index: 6;
+  z-index: var(--basket-z-index-1);
   inset-block-start: calc(100% + 8px);
   inset-inline-end: 0;
   width: min(17.5rem, 85vw);
   margin: 0;
   padding: 10px 12px;
-  border: 1px solid var(--color-dialog-border, #967451);
-  border-radius: var(--radius-control, 10px);
-  background: var(--color-dialog-surface, #142f28);
-  color: var(--cream, #fbecd7);
-  box-shadow: var(--shadow-stop, 0 5px 16px #09131354);
-  font-size: .83rem;
+  border: 1px solid var(--color-dialog-border);
+  border-radius: var(--radius-control);
+  background: var(--color-dialog-surface);
+  color: var(--cream);
+  box-shadow: var(--shadow-stop);
+  font-size: var(--basket-font-size-2);
   pointer-events: none;
 }
 
@@ -86,15 +86,15 @@
   padding: clamp(16px, 5vw, 26px);
   overflow: auto;
   overscroll-behavior: contain;
-  border: 1px solid var(--color-dialog-border, #967451);
-  border-radius: var(--radius-stage, 18px);
-  background: var(--color-dialog-surface, #142f28);
-  color: var(--cream, #fbecd7);
-  box-shadow: var(--shadow-dialog, 0 20px 90px #0009);
+  border: 1px solid var(--color-dialog-border);
+  border-radius: var(--radius-stage);
+  background: var(--color-dialog-surface);
+  color: var(--cream);
+  box-shadow: var(--shadow-dialog);
 }
 
 .mini-basket::backdrop {
-  background: var(--color-dialog-overlay, #081513b8);
+  background: var(--color-dialog-overlay);
 }
 
 .mini-basket-heading {
@@ -106,7 +106,7 @@
 
 .mini-basket-heading h2 {
   margin: 0;
-  font: var(--font-dialog-title, 500 2rem/1.05 Georgia, serif);
+  font: var(--font-dialog-title);
 }
 
 .mini-basket-close {
@@ -127,8 +127,8 @@
 .mini-basket #mini-basket-description,
 .mini-basket-saving {
   margin: 10px 0 0;
-  color: var(--color-dialog-copy, #e4d6be);
-  font-size: var(--type-dialog-copy, .93rem);
+  color: var(--color-dialog-copy);
+  font-size: var(--type-dialog-copy);
 }
 
 .mini-basket-empty {
@@ -147,8 +147,8 @@
   align-items: center;
   gap: 8px 12px;
   padding: 12px;
-  border-radius: var(--radius-pack, 9px);
-  background: var(--color-pack-surface, #1d3b32);
+  border-radius: var(--radius-pack);
+  background: var(--color-pack-surface);
 }
 
 .mini-basket-photo {
@@ -156,8 +156,8 @@
   width: 64px;
   height: 64px;
   object-fit: contain;
-  border-radius: var(--radius-image, 5px);
-  background: var(--color-pack-photo, #f6f1e8);
+  border-radius: var(--radius-image);
+  background: var(--color-pack-photo);
 }
 
 .mini-basket-product strong,
@@ -166,8 +166,8 @@
 }
 
 .mini-basket-product span {
-  color: var(--color-pack-meta, #e1c8a2);
-  font-size: var(--type-pack, .81rem);
+  color: var(--color-pack-meta);
+  font-size: var(--type-pack);
 }
 
 .mini-basket-edit {
@@ -193,7 +193,7 @@
 
 .mini-basket-quantity button {
   width: 44px;
-  font-size: 1.2rem;
+  font-size: var(--basket-font-size-3);
 }
 
 .mini-basket button:disabled {
@@ -204,20 +204,20 @@
 .mini-basket-remove,
 .mini-basket-continue {
   padding: 6px 12px;
-  font-size: .9rem;
+  font-size: var(--basket-font-size-4);
 }
 
 .mini-basket .mini-basket-continue {
   display: block;
   margin-top: 16px;
-  border-color: var(--cream, #fbecd7);
-  background: var(--cream, #fbecd7);
-  color: var(--color-stop-ink, #173429);
+  border-color: var(--cream);
+  background: var(--cream);
+  color: var(--color-stop-ink);
   font-weight: 650;
 }
 
 .mini-basket .mini-basket-continue:hover {
-  background: var(--color-stop-hover, #fff7ea);
+  background: var(--color-stop-hover);
 }
 
 @media (max-width: 420px) {

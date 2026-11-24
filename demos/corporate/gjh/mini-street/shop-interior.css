@@ -9,13 +9,13 @@ canvas[data-shop-interior]:active {
 
 .shop-interior-controls {
   position: absolute;
-  z-index: 3;
+  z-index: var(--shop-interior-z-index-1);
   inset: 0;
   isolation: isolate;
   pointer-events: none;
-  color: #fff2d9;
-  font: 600 0.875rem/1.35 system-ui, sans-serif;
-  --shop-inset: clamp(8px, 2vw, 20px);
+  color: var(--shop-interior-color-1);
+  font: var(--shop-interior-font-1);
+  --shop-inset: var(--shop-interior-shop-inset-1);
 }
 
 .shop-interior-controls[data-paused] {
@@ -27,39 +27,39 @@ canvas[data-shop-interior]:active {
   min-width: 44px;
   min-height: 44px;
   padding: 8px 14px;
-  border: 1px solid #cbb78990;
-  border-radius: 7px;
+  border: var(--shop-interior-border-1);
+  border-radius: var(--shop-interior-border-radius-1);
   color: inherit;
-  background: #1a3028f2;
+  background: var(--shop-interior-background-1);
   cursor: pointer;
   pointer-events: auto;
-  box-shadow: 0 3px 12px #15151135;
+  box-shadow: var(--shop-interior-box-shadow-1);
 }
 
 .shop-interior-controls button:hover {
-  background: #28493a;
+  background: var(--shop-interior-background-2);
 }
 
 .shop-interior-controls button:focus-visible {
-  outline: 2px solid #ffe1a6;
+  outline: var(--shop-interior-outline-1);
   outline-offset: 3px;
 }
 
 .shop-interior-controls .shop-interior-inspect:enabled {
-  border-color: #e3be79;
-  color: #28251d;
-  background: #f1d49d;
+  border-color: var(--shop-interior-border-color-1);
+  color: var(--shop-interior-color-2);
+  background: var(--shop-interior-background-3);
 }
 
 .shop-interior-controls .shop-interior-inspect:enabled:hover {
-  background: #f9e1b2;
+  background: var(--shop-interior-background-4);
 }
 
 .shop-interior-controls .shop-interior-inspect:disabled {
   pointer-events: none;
-  border-color: #cbb78966;
-  color: #eadfc8;
-  background: #24352ff2;
+  border-color: var(--shop-interior-border-color-2);
+  color: var(--shop-interior-color-3);
+  background: var(--shop-interior-background-5);
 }
 
 .shop-interior-title {
@@ -67,16 +67,16 @@ canvas[data-shop-interior]:active {
   inset: var(--shop-inset) auto auto var(--shop-inset);
   max-width: calc(100% - var(--shop-inset) * 2 - 108px);
   padding: 8px 11px;
-  border: 1px solid #cbb78955;
-  border-radius: 7px;
-  background: #1a3028f2;
+  border: var(--shop-interior-border-2);
+  border-radius: var(--shop-interior-border-radius-1);
+  background: var(--shop-interior-background-1);
 }
 
 .shop-interior-title small {
   display: block;
   margin-top: 3px;
-  color: #f1dcb7;
-  font-size: 0.72rem;
+  color: var(--shop-interior-color-4);
+  font-size: var(--shop-interior-font-size-1);
   font-weight: 500;
 }
 
@@ -112,16 +112,16 @@ canvas[data-shop-interior]:active {
   width: 10px;
   height: 10px;
   transform: translate(-50%, -50%);
-  border: 1px solid #fff3d7;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px #26241989;
+  border: var(--shop-interior-border-3);
+  border-radius: var(--shop-interior-border-radius-2);
+  box-shadow: var(--shop-interior-box-shadow-2);
 }
 
 .shop-interior-reticle--target {
   width: 13px;
   height: 13px;
-  border: 2px solid #ffe0a5;
-  box-shadow: 0 0 0 1px #392d14ba, 0 0 9px #f4c27799;
+  border: var(--shop-interior-border-4);
+  box-shadow: var(--shop-interior-box-shadow-3);
 }
 
 .shop-interior-stick {
@@ -132,9 +132,9 @@ canvas[data-shop-interior]:active {
   width: clamp(78px, 22vw, 100px);
   aspect-ratio: 1;
   place-items: center;
-  border: 1px solid #eed5a597;
-  border-radius: 50%;
-  background: #1b302abc;
+  border: var(--shop-interior-border-5);
+  border-radius: var(--shop-interior-border-radius-2);
+  background: var(--shop-interior-background-6);
   touch-action: none;
   user-select: none;
   pointer-events: auto;
@@ -143,10 +143,10 @@ canvas[data-shop-interior]:active {
 .shop-interior-stick span {
   width: 41%;
   aspect-ratio: 1;
-  border: 1px solid #f2ddb2;
-  border-radius: 50%;
-  background: #c2ab7d;
-  box-shadow: inset 0 1px 2px #fff3cc9c, 0 2px 7px #171b1580;
+  border: var(--shop-interior-border-6);
+  border-radius: var(--shop-interior-border-radius-2);
+  background: var(--shop-interior-background-7);
+  box-shadow: var(--shop-interior-box-shadow-4);
   pointer-events: none;
 }
 

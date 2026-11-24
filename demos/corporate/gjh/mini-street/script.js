@@ -30,6 +30,43 @@ import("./vending.js").then(({ setupVending }) => {
 });
 
 let street;
+let shopExperience;
+let shopLoading;
+let syncRoute = () => {};
+let routeRequest = 0;
+
+async function enterShop() {
+  if (!street || decodedHash() !== "#shop-interior") return;
+  try {
+    if (!shopExperience) {
+      shopLoading ||= import("./shop-experience.js").then(({createShopExperience}) =>
+        createShopExperience({street, stage, toolbar, onExit: () => {
+          if (decodedHash() !== "#shop-interior") return;
+          if (history.state?.__gjhMiniStreetStop) history.back();
+          else {
+            const url = new URL(location.href);
+            url.hash = "shop";
+            history.replaceState(history.state, "", url);
+            syncRoute();
+          }
+        }}));
+      shopExperience = await shopLoading;
+    }
+    if (decodedHash() === "#shop-interior") shopExperience.enter();
+  } catch (error) {
+    if (decodedHash() !== "#shop-interior") return;
+    console.error("Could not enter the 3D shop", error);
+    shopLoading = undefined;
+    const enterButton = document.querySelector("#shop .enter-shop");
+    if (enterButton) enterButton.hidden = true;
+    enableFallbackShopping();
+    status.textContent = "The 3D shop could not load. The product display remains available.";
+    const url = new URL(location.href);
+    url.hash = "shop";
+    history.replaceState(history.state, "", url);
+    syncRoute();
+  }
+}
 
 if (typeof dialog.showModal === "function") {
   const sectionsByHash = new Map(sections.map((section) => [`#${section.id}`, section]));
@@ -40,6 +77,18 @@ if (typeof dialog.showModal === "function") {
   let previousFocus;
   let activeSection;
   dialog.append(...sections);
+  const enter = document.createElement("button");
+  enter.type = "button";
+  enter.hidden = !street;
+  enter.className = "enter-shop";
+  enter.textContent = "Enter 3D shop";
+  enter.addEventListener("click", () => {
+    if (!street) return;
+    routeRequest++;
+    history.pushState({...history.state, [historyMarker]: true}, "", "#shop-interior");
+    syncLocation();
+  });
+  sectionsByHash.get("#shop").querySelector("p").after(enter);
 
   function closeStop(updateLocation) {
     if (!activeSection) return;
@@ -63,6 +112,12 @@ if (typeof dialog.showModal === "function") {
 
   function syncLocation() {
     const hash = decodedHash();
+    if (hash === "#shop-interior") {
+      closeStop(false);
+      enterShop();
+      return;
+    }
+    shopExperience?.exit();
     const selected = sectionsByHash.get(hash);
     const opener = pendingOpener || stops.find((stop) => stop.hash === hash);
     pendingOpener = null;
@@ -83,7 +138,12 @@ if (typeof dialog.showModal === "function") {
     selected.querySelector("h2").focus();
   }
 
-  function openStop(stop) {
+  async function openStop(stop) {
+    const request = ++routeRequest;
+    if (stop.dataset.stop === "shop" && street && !dialog.open) {
+      await street.focusShop();
+      if (request !== routeRequest) return;
+    }
     pendingOpener = stop;
     if (decodedHash() !== stop.hash) {
       const previousState = history.state;
@@ -105,6 +165,7 @@ if (typeof dialog.showModal === "function") {
     });
   }
   window.addEventListener("hashchange", () => {
+    routeRequest++;
     closingWithBack = false;
     const stop = deferredStop;
     deferredStop = undefined;
@@ -121,6 +182,7 @@ if (typeof dialog.showModal === "function") {
   dialog.addEventListener("cancel", dismiss);
   dialog.querySelector("form").addEventListener("submit", dismiss);
   for (const link of dialog.querySelectorAll(".back")) link.addEventListener("click", dismiss);
+  syncRoute = syncLocation;
   syncLocation();
   if (document.readyState !== "complete") {
     window.addEventListener("load", () => requestAnimationFrame(() => {
@@ -138,7 +200,43 @@ if (typeof dialog.showModal === "function") {
   syncInlineVending();
 }
 
+let fallbackShopping;
+function enableFallbackShopping() {
+  if (fallbackShopping) return fallbackShopping;
+  fallbackShopping = import("./basket.js").then(({createShopBasket}) => {
+    const host = document.querySelector(".masthead-inner");
+    const basket = createShopBasket({host});
+    const shop = document.querySelector("#shop");
+    const add = document.createElement("button");
+    add.type = "button";
+    add.className = "enter-shop";
+    add.textContent = "Add Australian abalone to basket";
+    const message = document.createElement("p");
+    message.setAttribute("role", "status");
+    add.addEventListener("click", () => {
+      if (basket.add("au-425g", {})) {
+        message.textContent = "Added. Close this display to view your basket.";
+      }
+    });
+    shop.querySelector(".pack-list").after(add, message);
+    return basket;
+  }).catch(error => {
+    console.error("Could not load the virtual basket", error);
+  });
+  return fallbackShopping;
+}
+
 const showFallback = () => {
+  shopExperience?.exit();
+  const enterButton = document.querySelector("#shop .enter-shop");
+  if (enterButton) enterButton.hidden = true;
+  if (decodedHash() === "#shop-interior") {
+    const url = new URL(location.href);
+    url.hash = "shop";
+    history.replaceState(history.state, "", url);
+    syncRoute();
+  }
+  enableFallbackShopping();
   delete stage.dataset.webgl;
   toolbar.hidden = true;
   status.textContent = "The 3D street is unavailable. The shop, vending demo and mall link are available below.";
@@ -156,6 +254,9 @@ async function start() {
     });
     stage.dataset.webgl = "";
     toolbar.hidden = false;
+    const enterShopButton = document.querySelector(".enter-shop");
+    if (enterShopButton) enterShopButton.hidden = false;
+    syncRoute();
     status.textContent = "3D street ready. Drag the street or use the camera controls.";
 
     for (const button of toolbar.querySelectorAll("[data-light]")) {
