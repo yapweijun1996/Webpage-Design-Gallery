@@ -59,17 +59,84 @@ function tileTexture(THREE, random) {
 
 function timberTexture(random) {
   return paintedTexture(512, 256, (ctx, width, height) => {
-    ctx.fillStyle = "#a27553";
+    const tone = ctx.createLinearGradient(0, 0, width, height);
+    tone.addColorStop(0, "#a6734b");
+    tone.addColorStop(0.57, "#825233");
+    tone.addColorStop(1, "#714428");
+    ctx.fillStyle = tone;
     ctx.fillRect(0, 0, width, height);
     for (let i = 0; i < 440; i += 1) {
       const y = random() * height;
-      ctx.strokeStyle = i % 2 ? "#3a281d43" : "#e6bc9366";
-      ctx.lineWidth = 0.3 + random() * 1.5;
+      const x = random() * width - width * 0.32;
+      const length = width * (0.44 + random() * 0.52);
+      const curve = (random() - 0.5) * 11;
+      ctx.strokeStyle = i % 2 ? "#4327184d" : "#dfa67562";
+      ctx.lineWidth = 0.28 + random() * 1.15;
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.bezierCurveTo(width * 0.35, y - 4, width * 0.65, y + 3, width, y - 1);
+      ctx.moveTo(x, y);
+      ctx.bezierCurveTo(x + length * 0.35, y - curve, x + length * 0.7, y + curve, x + length, y - 1);
       ctx.stroke();
     }
+  });
+}
+
+function finishTexture(base, light, dark, random) {
+  return paintedTexture(256, 256, (ctx, size) => {
+    ctx.fillStyle = base;
+    ctx.fillRect(0, 0, size, size);
+    for (let i = 0; i < 4200; i += 1) {
+      ctx.fillStyle = i % 3 ? light : dark;
+      ctx.fillRect(random() * size, random() * size, 0.4 + random() ** 2 * 2.9, 0.4 + random() ** 2 * 2);
+    }
+  });
+}
+
+function shelfBackTexture() {
+  return paintedTexture(256, 256, (ctx, width, height) => {
+    ctx.fillStyle = "#4b5d51";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "#24342980";
+    for (let y = 2; y < height; y += 7) {
+      for (let x = 3; x < width; x += 6) ctx.fillRect(x, y, 1.4, 1.9);
+    }
+    for (const top of [4, 60, 117, 174, 232]) {
+      const falloff = ctx.createLinearGradient(0, top, 0, top + 30);
+      falloff.addColorStop(0, "#1e2a20b8");
+      falloff.addColorStop(0.47, "#29372b5c");
+      falloff.addColorStop(1, "#29362d00");
+      ctx.fillStyle = falloff;
+      ctx.fillRect(0, top, width, 30);
+    }
+  });
+}
+
+function lidTexture() {
+  return paintedTexture(64, 64, (ctx, size) => {
+    const metal = ctx.createLinearGradient(0, 0, size, size);
+    metal.addColorStop(0, "#a29d92");
+    metal.addColorStop(0.28, "#d9d2be");
+    metal.addColorStop(0.64, "#989489");
+    metal.addColorStop(1, "#ddd7c8");
+    ctx.fillStyle = metal;
+    ctx.fillRect(0, 0, size, size);
+    for (const [radius, color] of [[29.5, "#ede4d0"], [26.4, "#8c867c"], [24.4, "#cbc3b4"], [19, "#9b9587"]]) {
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      ctx.arc(32, 32, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.fillStyle = "#827a6b";
+    ctx.beginPath();
+    ctx.ellipse(32, 38, 6.7, 10, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ded3be";
+    ctx.beginPath();
+    ctx.ellipse(32, 36, 5.8, 8.9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#938b7c";
+    ctx.beginPath();
+    ctx.ellipse(32, 39, 3, 3.6, 0, 0, Math.PI * 2);
+    ctx.fill();
   });
 }
 
@@ -107,7 +174,7 @@ const provisionStock = {
   kaya: { name: ["PANDAN", "KAYA"], note: "COCONUT JAM", script: "斑斓咖椰", color: "#73774b", accent: "#cbd39a", shape: "can", size: [0.104, 0.122, 0.104] },
   sardines: { name: ["SARDINES"], note: "IN TOMATO SAUCE", script: "茄汁沙丁鱼", color: "#a34b3e", accent: "#f1b379", shape: "can", size: [0.108, 0.148, 0.108] },
   lychee: { name: ["LYCHEES"], note: "IN LIGHT SYRUP", script: "糖水荔枝", color: "#377a6d", accent: "#efb69d", shape: "can", size: [0.117, 0.151, 0.117] },
-  soy: { name: ["LIGHT SOY", "SAUCE"], note: "NATURALLY BREWED", script: "生抽", color: "#4d352a", accent: "#bc6755", shape: "bottle", size: [0.094, 0.295, 0.094] },
+  soy: { name: ["LIGHT SOY", "SAUCE"], note: "SOY SAUCE", script: "生抽", color: "#4d352a", accent: "#bc6755", shape: "bottle", size: [0.094, 0.295, 0.094] },
 };
 
 function provisionLabel({ name, note, script, color, accent, shape }) {
@@ -147,15 +214,45 @@ function provisionLabel({ name, note, script, color, accent, shape }) {
     ctx.fillStyle = wrapped ? color : "#35342a";
     ctx.font = "bold 11px system-ui, sans-serif";
     ctx.fillText(script, 64, labelTop + 26, sides[1] - sides[0] - 10);
-    ctx.font = 'bold ' + (wrapped ? 13 : 23) + 'px Georgia, serif';
-    name.forEach((line, index) => ctx.fillText(line, 64, labelTop + 41 + index * (wrapped ? 13 : 20), sides[1] - sides[0] - 12));
+    ctx.font = wrapped ? "bold 13px Georgia, serif" : "bold 23px Georgia, serif";
+    const baseline = labelTop + (shape === "bottle" ? 38 : 41);
+    name.forEach((line, index) => {
+      ctx.fillText(line, 64, baseline + index * (wrapped ? 13 : 18), sides[1] - sides[0] - 12);
+    });
+    if (shape === "pouch") {
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.57;
+      for (const side of [-1, 1]) {
+        for (let grain = 0; grain < 4; grain += 1) {
+          ctx.beginPath();
+          ctx.ellipse(64 + side * (12 + grain * 3.7), labelBottom - 23 + grain % 2 * 2.7,
+            2.7, 0.8, side * (grain - 1) * 0.26, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
     ctx.font = "bold 6px system-ui, sans-serif";
     ctx.fillText(note, 64, labelBottom - 12, sides[1] - sides[0] - 8);
 
     if (shape === "can") {
-      ctx.fillStyle = "#b0aaa0";
-      ctx.fillRect(0, 0, width, 4);
-      ctx.fillRect(0, height - 4, width, 4);
+      for (const y of [0, height - 4]) {
+        ctx.fillStyle = "#9d988c";
+        ctx.fillRect(0, y, width, 4);
+        ctx.fillStyle = "#dfd7c5";
+        ctx.fillRect(0, y + 1, width, 1);
+      }
+    }
+    if (shape === "bottle") {
+      const reflection = ctx.createLinearGradient(0, 0, width, 0);
+      reflection.addColorStop(0, "#21110b77");
+      reflection.addColorStop(0.22, "#e6ba8659");
+      reflection.addColorStop(0.38, "#210f0800");
+      reflection.addColorStop(0.77, "#1e100a00");
+      reflection.addColorStop(0.85, "#e4b69256");
+      reflection.addColorStop(1, "#1e100a48");
+      ctx.fillStyle = reflection;
+      ctx.fillRect(0, 0, width, labelTop);
     }
     if (shape === "pouch") {
       ctx.fillStyle = "#ffffff40";
@@ -195,20 +292,82 @@ function bottleGeometry(THREE) {
   return geometry;
 }
 
+function paintContact(ctx, x, y, radiusX, radiusY) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(radiusX, radiusY);
+  const color = ctx.createRadialGradient(0, 0, 0.03, 0, 0, 1);
+  color.addColorStop(0, "#211810d0");
+  color.addColorStop(0.48, "#271c1378");
+  color.addColorStop(1, "#2a1c1100");
+  ctx.fillStyle = color;
+  ctx.fillRect(-1, -1, 2, 2);
+  ctx.restore();
+}
+
+const SHELF_DEPTH = 0.56;
+const SHELF_CENTER = 0.013;
+
+function addShelfDecks(THREE, room, boards) {
+  // Static contact shading for all board tops uses one texture and one draw call.
+  const width = 1024;
+  const height = 256;
+  const stride = Math.floor(height / boards.length);
+  const texture = paintedTexture(width, height, (ctx) => {
+    for (const [index, board] of boards.entries()) {
+      const top = index * stride;
+      const tone = ctx.createLinearGradient(0, top, 0, top + stride);
+      tone.addColorStop(0, "#c4b79c");
+      tone.addColorStop(0.60, "#a89173");
+      tone.addColorStop(1, "#655745");
+      ctx.fillStyle = tone;
+      ctx.fillRect(0, top, width, stride);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, top, width, stride);
+      ctx.clip();
+      for (const [x, z, packWidth, packDepth] of board.stock) {
+        paintContact(ctx, (0.5 + x / board.width) * width,
+          top + (0.5 - (z - SHELF_CENTER) / SHELF_DEPTH) * stride,
+          packWidth * 0.74 / board.width * width, packDepth * 0.80 / SHELF_DEPTH * stride);
+      }
+      ctx.restore();
+    }
+  });
+  const positions = [];
+  const uvs = [];
+  const indices = [];
+  for (const [index, board] of boards.entries()) {
+    const half = board.width / 2;
+    const front = SHELF_CENTER + SHELF_DEPTH / 2;
+    const back = SHELF_CENTER - SHELF_DEPTH / 2;
+    const y = board.y + 0.0015;
+    for (const [x, z] of [[-half, front], [half, front], [-half, back], [half, back]]) {
+      positions.push(...board.group.localToWorld(new THREE.Vector3(x, y, z)).toArray());
+    }
+    const frontUV = 1 - (index * stride + 1) / height;
+    const backUV = 1 - ((index + 1) * stride - 1) / height;
+    uvs.push(0, frontUV, 1, frontUV, 0, backUV, 1, backUV);
+    const base = index * 4;
+    indices.push(base, base + 1, base + 2, base + 2, base + 1, base + 3);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  room.add(new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ map: texture, roughness: 0.77 })));
+}
+
 function shadowMap() {
   return paintedTexture(64, 64, (ctx, size) => {
-    const radius = size / 2;
-    const color = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
-    color.addColorStop(0, "#231b12a0");
-    color.addColorStop(0.57, "#261d1554");
-    color.addColorStop(1, "#261d1500");
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, size, size);
+    paintContact(ctx, size / 2, size / 2, size / 2, size / 2);
   });
 }
 
 export function buildShopInterior(THREE, scene, productCount) {
   const random = seededRandom();
+  const textureRandom = seededRandom();
   const room = new THREE.Group();
   scene.add(room);
   const unitBox = new THREE.BoxGeometry();
@@ -217,23 +376,29 @@ export function buildShopInterior(THREE, scene, productCount) {
   const unitCap = new THREE.CylinderGeometry(0.5, 0.5, 1, 10);
   const shapes = { box: unitBox, can: unitCan, pouch: pouchGeometry(THREE), bottle: bottleGeometry(THREE) };
   const surfaces = new Map();
+  const boards = [];
   const colliders = [];
   const occluders = [];
   const occupiedAnchors = SHOP_ANCHORS.slice(0, productCount);
   const finish = (color, roughness = 0.86, metalness = 0) =>
     new THREE.MeshStandardMaterial({ color, roughness, metalness });
-  const wall = finish(0xf1e5cf);
-  const ceiling = finish(0xdfdacf);
+  const wall = new THREE.MeshStandardMaterial({
+    map: finishTexture("#dfd0b4", "#fff0d444", "#7966512b", textureRandom), roughness: 0.91,
+  });
+  const ceiling = finish(0xd5cbb7);
   const paintedGreen = finish(0x37594a);
   const deepGreen = finish(0x234439);
   const dark = finish(0x30342d);
-  const shelf = finish(0xbebbae, 0.74);
+  const shelf = finish(0x958a75, 0.74);
+  const shelfBack = new THREE.MeshStandardMaterial({ map: shelfBackTexture(), roughness: 0.84 });
   const brushed = finish(0xa9a99c, 0.34, 0.38);
   const brass = finish(0xb49a61, 0.42, 0.38);
-  const stone = finish(0x57584f, 0.63);
+  const stone = new THREE.MeshStandardMaterial({
+    map: finishTexture("#494941", "#c4b39420", "#292a2148", textureRandom), roughness: 0.54,
+  });
   const paper = finish(0xd1b98e);
   const rubber = finish(0x303731);
-  const timber = new THREE.MeshStandardMaterial({ map: timberTexture(random), roughness: 0.63 });
+  const timber = new THREE.MeshStandardMaterial({ map: timberTexture(textureRandom), roughness: 0.59 });
   const shadow = new THREE.MeshBasicMaterial({
     map: shadowMap(), transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1,
   });
@@ -273,7 +438,7 @@ export function buildShopInterior(THREE, scene, productCount) {
   }
 
   const floor = new THREE.MeshStandardMaterial({
-    map: tileTexture(THREE, random), roughness: 0.61,
+    map: tileTexture(THREE, textureRandom), roughness: 0.67,
   });
   plane(room, floor, HALF_WIDTH * 2, HALF_DEPTH * 2, 0, 0, 0).rotation.x = -Math.PI / 2;
   box(room, ceiling, [7.18, 0.08, 8.56], [0, CEILING, 0], true);
@@ -300,11 +465,29 @@ export function buildShopInterior(THREE, scene, productCount) {
     light.addColorStop(1, "#191d25");
     ctx.fillStyle = light;
     ctx.fillRect(0, 0, w, h);
+    for (const [x, y, color] of [[59, 72, "#97b8c588"], [164, 97, "#edb77a76"], [407, 89, "#a8c7d580"]]) {
+      const exteriorGlow = ctx.createRadialGradient(x, y, 2, x, y, 36);
+      exteriorGlow.addColorStop(0, color);
+      exteriorGlow.addColorStop(1, "#f9d49400");
+      ctx.fillStyle = exteriorGlow;
+      ctx.fillRect(x - 36, y - 36, 72, 72);
+    }
     for (let i = 0; i < 160; i += 1) {
       const x = random() * w;
       const y = random() * h;
       ctx.fillStyle = i % 3 ? "#7997a952" : "#b4a27a48";
       ctx.fillRect(x, y, 1, 5 + random() * 13);
+    }
+    const reflectedLight = ctx.createLinearGradient(0, 0, 0, h);
+    reflectedLight.addColorStop(0, "#f8d4a566");
+    reflectedLight.addColorStop(0.41, "#d2be9d05");
+    reflectedLight.addColorStop(0.83, "#d2be9d00");
+    reflectedLight.addColorStop(1, "#14111e66");
+    ctx.fillStyle = reflectedLight;
+    ctx.fillRect(0, 0, w, h);
+    for (const x of [55, 219, 355, 475]) {
+      ctx.fillStyle = "#ddd9c62e";
+      ctx.fillRect(x, 8, 1.5, h - 74);
     }
   }) });
   plane(room, evening, 3.64, 2.8, 0, 1.40, 4.24, Math.PI);
@@ -318,14 +501,18 @@ export function buildShopInterior(THREE, scene, productCount) {
     box(room, brass, [0.035, 0.29, 0.09], [x, 1.11, 4.047]);
   }
   box(room, brass, [3.57, 0.017, 0.095], [0, 0.012, 4.025]);
+  for (const x of [-0.43, 0.43]) {
+    batch(unitBox, brushed, [x, 0.27, 4.091], [0.83, 0.29, 0.018]);
+  }
   box(room, rubber, [1.54, 0.02, 0.63], [0, 0.015, 3.72]);
   for (let stripe = 0; stripe < 8; stripe += 1) {
     batch(unitBox, dark, [0, 0.028, 3.47 + stripe * 0.07], [1.49, 0.005, 0.019]);
   }
 
   box(room, timber, [3.12, 0.78, 0.087], [0, 2.79, -4.125]);
+  const signMap = shopSign();
   const sign = new THREE.MeshStandardMaterial({
-    map: shopSign(), emissive: 0xc4ae81, emissiveIntensity: 0.15, roughness: 0.64,
+    map: signMap, emissiveMap: signMap, emissive: 0xffe4ba, emissiveIntensity: 0.18, roughness: 0.67,
   });
   plane(room, sign, 3.00, 0.70, 0, 2.79, -4.077);
   function shelfSign(title, subtitle) {
@@ -350,33 +537,46 @@ export function buildShopInterior(THREE, scene, productCount) {
     });
   }
   plane(room, shelfSign("TINS & SAUCES", "罐头 · 调味料"), 1.82, 0.39, 3.477, 2.67, -0.70, -Math.PI / 2);
-  plane(room, shelfSign("PROVISIONS", "粮油 · 日用杂货"), 1.36, 0.34, -3.477, 2.31, 0.58, Math.PI / 2);
+  plane(room, shelfSign("PROVISIONS", "粮油 · 日用杂货"), 1.36, 0.34, -3.477, 2.31, -0.55, Math.PI / 2);
 
   const stock = Object.fromEntries(Object.entries(provisionStock).map(([id, item]) => [
     id,
     new THREE.MeshStandardMaterial({ map: provisionLabel(item), roughness: item.shape === "pouch" ? 0.76 : 0.48 }),
   ]));
   const screwCap = finish(0x9d4333, 0.52);
-  const jarCap = finish(0x76814a, 0.44, 0.17);
+  const lidMap = lidTexture();
+  const tinLid = new THREE.MeshStandardMaterial({ map: lidMap, roughness: 0.43, metalness: 0.31 });
+  const jarCap = new THREE.MeshStandardMaterial({ map: lidMap, color: 0xaeb57c, roughness: 0.46, metalness: 0.22 });
 
   function batch(geometry, material, position, scale, rotation = 0) {
-    let list = surfaces.get(material);
-    if (!list) {
-      list = { geometry, items: [] };
-      surfaces.set(material, list);
+    let geometries = surfaces.get(material);
+    if (!geometries) {
+      geometries = new Map();
+      surfaces.set(material, geometries);
     }
-    list.items.push({ position, scale, rotation });
+    let items = geometries.get(geometry);
+    if (!items) {
+      items = [];
+      geometries.set(geometry, items);
+    }
+    items.push({ position, scale, rotation });
   }
 
-  function packageAt(group, id, x, y, z, turn = 0) {
+  function shelfTrim(group, material, size, x, y, z) {
+    const position = group.localToWorld(new THREE.Vector3(x, y, z));
+    batch(unitBox, material, position.toArray(), size, group.rotation.y);
+  }
+
+  function packageAt(group, id, x, y, z, turn = 0, footprints) {
     const { shape, size } = provisionStock[id];
     const [width, height, depth] = size;
     const center = group.localToWorld(new THREE.Vector3(x, y + height / 2, z));
+    footprints?.push([x, z, width, depth]);
     const round = shape === "can" || shape === "bottle";
     batch(shapes[shape], stock[id], center.toArray(), size, group.rotation.y + turn + (round ? Math.PI : 0));
     if (shape === "can") {
-      batch(unitTop, id === "kaya" ? jarCap : brushed, [center.x, y + height + 0.001, center.z],
-        [width + 0.005, 1, depth + 0.005]);
+      batch(unitTop, id === "kaya" ? jarCap : tinLid, [center.x, y + height + 0.001, center.z],
+        [width + 0.005, 1, depth + 0.005], group.rotation.y + turn);
     }
     if (shape === "bottle") {
       batch(unitCap, screwCap, [center.x, y + height - 0.014, center.z], [0.054, 0.033, 0.054]);
@@ -422,20 +622,30 @@ export function buildShopInterior(THREE, scene, productCount) {
 
   function wallShelf(name, x, z, width, yaw, plan) {
     const group = area(name, x, z, yaw);
-    box(group, deepGreen, [width, 2.24, 0.07], [0, 1.20, -0.235], true);
+    box(group, shelfBack, [width, 2.24, 0.07], [0, 1.20, -0.235], true);
     box(group, dark, [width, 0.13, 0.53], [0, 0.069, 0], true);
     for (let bay = 0; bay <= 3; bay += 1) {
+      const railX = width * (bay / 3 - 0.5);
       for (const railDepth of [-0.22, 0.25]) {
-        box(group, paintedGreen, [0.046, 2.22, 0.052], [width * (bay / 3 - 0.5), 1.18, railDepth], true);
+        const size = [0.046, 2.22, 0.052];
+        // Keep each rail's intersection geometry while drawing the rails in one batch.
+        const rail = box(group, paintedGreen, size, [railX, 1.18, railDepth], true);
+        rail.visible = false;
+        shelfTrim(group, paintedGreen, size, railX, 1.18, railDepth);
       }
+      shelfTrim(group, brushed, [0.014, 2.06, 0.005], railX, 1.12, 0.278);
     }
     const clearances = occupiedAnchors.map(({ position }) => group.worldToLocal(new THREE.Vector3(...position)))
       .filter(({ x, z }) => Math.abs(x) < width / 2 && Math.abs(z - 0.17) < 0.12);
     for (const [row, y] of [0.31, 0.81, 1.31, 1.81, 2.29].entries()) {
-      box(group, shelf, [width, 0.036, 0.56], [0, y - 0.018, 0.013], true);
+      box(group, shelf, [width, 0.036, SHELF_DEPTH], [0, y - 0.018, SHELF_CENTER], true);
+      const footprints = [];
+      boards.push({ group, width, y, stock: footprints });
       const reserved = clearances.filter((anchor) => Math.abs(anchor.y - y) < 0.14);
       const featureSlots = reserved.map(({ x }) => x / width + 0.5);
+      for (const anchor of reserved) footprints.push([anchor.x, anchor.z, 0.19, 0.16]);
       plane(group, shelfTickets(plan[row], featureSlots), width, 0.041, 0, y - 0.019, 0.295);
+      shelfTrim(group, paintedGreen, [width, 0.018, 0.022], 0, y - 0.045, 0.263);
       const laneWidth = width / plan[row].length;
       for (const [lane, id] of plan[row].entries()) {
         const [packWidth] = provisionStock[id].size;
@@ -445,9 +655,9 @@ export function buildShopInterior(THREE, scene, productCount) {
           const localX = -width / 2 + laneWidth * (lane + 0.5) + pitch * (pack - (count - 1) / 2);
           if (reserved.some((anchor) => Math.abs(anchor.x - localX) < 0.16 + packWidth / 2)) continue;
           if (row === 4 && (lane % 2 || pack % 3 === 1 || (yaw === 0 && Math.abs(localX) < 1.62))) continue;
-          packageAt(group, id, localX, y, 0.160 - random() * 0.022, (random() - 0.5) * 0.14);
+          packageAt(group, id, localX, y, 0.160 - random() * 0.022, (random() - 0.5) * 0.14, footprints);
           if (row < 4 && (lane + pack) % 3 !== 1) {
-            packageAt(group, id, localX, y, -0.025 - random() * 0.032, (random() - 0.5) * 0.21);
+            packageAt(group, id, localX, y, -0.025 - random() * 0.032, (random() - 0.5) * 0.21, footprints);
           }
         }
       }
@@ -469,6 +679,22 @@ export function buildShopInterior(THREE, scene, productCount) {
     ["crackers", "rice", "crackers", "rice", "crackers", "rice"],
   ]);
   block(3.23, -0.33, 0.64, 5.12);
+  addShelfDecks(THREE, room, boards);
+
+  // These shallow ledges keep the existing walkable camera bounds clear.
+  const ledges = area("Left provision ledges", -3.43, -0.55, Math.PI / 2);
+  for (const [row, y] of [1.36, 1.84].entries()) {
+    shelfTrim(ledges, timber, [1.50, 0.05, 0.20], 0, y - 0.025, 0.021);
+    shelfTrim(ledges, brass, [1.50, 0.008, 0.007], 0, y - 0.012, 0.122);
+    for (const x of [-0.55, 0.55]) {
+      shelfTrim(ledges, paintedGreen, [0.052, 0.10, 0.115], x, y - 0.075, -0.017);
+    }
+    const goods = row === 0 ? ["crackers", "crackers", "kopi", "kopi", "teh", "teh"] :
+      ["teh", "teh", "teh", "kopi", "kopi", "kopi"];
+    for (const [slot, id] of goods.entries()) {
+      packageAt(ledges, id, (slot - 2.5) * 0.22, y, 0.021, (random() - 0.5) * 0.09);
+    }
+  }
 
   const counter = area("Checkout counter", -2.57, 2.11);
   box(counter, timber, [1.31, 0.93, 1.54], [0, 0.51, 0], true);
@@ -511,8 +737,17 @@ export function buildShopInterior(THREE, scene, productCount) {
   box(island, brass, [1.455, 0.015, 2.425], [0, 0.977, 0]);
   box(island, deepGreen, [1.20, 0.54, 0.018], [0, 0.53, 1.19]);
   plane(island, shelfSign("NEW MOON ABALONE", "新月鲍鱼"), 0.99, 0.25, 0, 0.58, 1.20);
-  box(island, brushed, [0.43, 0.052, 0.44], [-0.03, 1.004, 0.98]);
-  box(island, brushed, [0.21, 0.052, 0.35], [-0.60, 1.004, -0.19]);
+  const stands = [[-0.03, 0.98, 0.43, 0.44], [-0.60, -0.19, 0.21, 0.35]];
+  for (const [x, z, width, depth] of stands) {
+    box(island, deepGreen, [width, 0.044, depth], [x, 1.000, z]);
+    shelfTrim(island, brass, [width + 0.006, 0.005, depth + 0.006], x, 1.023, z);
+    shelfTrim(island, stone, [width - 0.009, 0.003, depth - 0.009], x, 1.028, z);
+  }
+  for (const { id, position } of occupiedAnchors) {
+    if (id !== "entry-display" && id !== "island-side") continue;
+    const local = island.worldToLocal(new THREE.Vector3(...position));
+    plane(island, shadow, 0.19, 0.18, local.x, local.y + 0.001, local.z).rotation.x = -Math.PI / 2;
+  }
   block(0.27, 0.28, 1.46, 2.43);
   for (const [i, id] of ["crackers", "lychee", "kaya"].entries()) {
     const trayZ = -0.80 + i * 0.49;
@@ -553,37 +788,56 @@ export function buildShopInterior(THREE, scene, productCount) {
   box(room, conduit, [0.028, 0.024, 7.35], [2.81, 3.20, 0]);
   box(room, conduit, [5.64, 0.024, 0.028], [0, 3.20, -3.68]);
   const diffuser = new THREE.MeshStandardMaterial({
-    color: 0xffe8bd, emissive: 0xffd49f, emissiveIntensity: 1.1, roughness: 0.58,
+    color: 0xf5e6cb, emissive: 0xffd7a1, emissiveIntensity: 1.18, roughness: 0.54,
   });
   for (const x of [-1.62, 1.62]) {
     for (const z of [-2.12, 0.45, 2.65]) {
-      batch(unitBox, dark, [x, 3.167, z], [0.15, 0.063, 1.10]);
-      batch(unitBox, diffuser, [x, 3.124, z], [0.094, 0.026, 1.05]);
+      batch(unitBox, dark, [x, 3.185, z], [0.19, 0.053, 1.16]);
+      batch(unitBox, diffuser, [x, 3.148, z], [0.126, 0.029, 1.05]);
+      for (const end of [-0.54, 0.54]) {
+        batch(unitBox, brushed, [x, 3.148, z + end], [0.148, 0.041, 0.044]);
+      }
     }
   }
-  const ambient = new THREE.HemisphereLight(0xffefd8, 0xa89981, 1.58);
-  const frontLight = new THREE.DirectionalLight(0xffe7c7, 0.98);
-  frontLight.position.set(-1.2, 4.2, 2.7);
-  const entranceLight = new THREE.DirectionalLight(0xc1d8ec, 0.55);
+  const shade = new THREE.CylinderGeometry(0.085, 0.24, 0.17, 16, 1, true);
+  const pendant = new THREE.CircleGeometry(0.228, 16).rotateX(Math.PI / 2);
+  const enamel = new THREE.MeshStandardMaterial({ color: 0x355346, roughness: 0.45, side: THREE.DoubleSide });
+  for (const z of [0.63, -0.94]) {
+    batch(unitBox, dark, [0.22, 3.18, z], [0.19, 0.057, 0.19]);
+    batch(unitBox, dark, [0.22, 2.99, z], [0.023, 0.32, 0.023]);
+    batch(shade, enamel, [0.22, 2.76, z], [1, 1, 1]);
+    batch(pendant, diffuser, [0.22, 2.678, z], [1, 1, 1]);
+  }
+  const ambient = new THREE.HemisphereLight(0xf8efe2, 0xa79b87, 1.04);
+  const shopFill = new THREE.DirectionalLight(0xffebd2, 0.84);
+  shopFill.position.set(-1.8, 4.3, 2.5);
+  const entranceLight = new THREE.DirectionalLight(0xc3daf0, 0.47);
   entranceLight.position.set(1.7, 1.8, 5.0);
-  room.add(ambient, frontLight, entranceLight);
-  for (const [x, z, intensity] of [[0.20, 1.27, 17], [0.70, -2.1, 14]]) {
-    const light = new THREE.PointLight(0xffe7c6, intensity, 6, 2);
-    light.position.set(x, 2.93, z);
-    room.add(light);
+  room.add(ambient, shopFill, entranceLight);
+  const interiorLights = [
+    { origin: [0.22, 2.64, 0.63], aim: [0.20, 1.04, 0.92], intensity: 19, color: 0xffdfb3 },
+    { origin: [1.62, 3.105, -2.12], aim: [0.36, 1.42, -3.44], intensity: 17, color: 0xffe9cc },
+  ];
+  for (const { origin, aim, intensity, color } of interiorLights) {
+    const light = new THREE.SpotLight(color, intensity, 6.5, 0.97, 0.76, 2);
+    light.position.set(...origin);
+    light.target.position.set(...aim);
+    room.add(light, light.target);
   }
 
   const transform = new THREE.Object3D();
-  for (const [material, { geometry, items }] of surfaces) {
-    const mesh = new THREE.InstancedMesh(geometry, material, items.length);
-    items.forEach(({ position, scale, rotation }, index) => {
-      transform.position.set(...position);
-      transform.scale.set(...scale);
-      transform.rotation.y = rotation;
-      transform.updateMatrix();
-      mesh.setMatrixAt(index, transform.matrix);
-    });
-    room.add(mesh);
+  for (const [material, geometries] of surfaces) {
+    for (const [geometry, items] of geometries) {
+      const mesh = new THREE.InstancedMesh(geometry, material, items.length);
+      items.forEach(({ position, scale, rotation }, index) => {
+        transform.position.set(...position);
+        transform.scale.set(...scale);
+        transform.rotation.y = rotation;
+        transform.updateMatrix();
+        mesh.setMatrixAt(index, transform.matrix);
+      });
+      room.add(mesh);
+    }
   }
 
   return { room, colliders, occluders, halfWidth: HALF_WIDTH, halfDepth: HALF_DEPTH };
