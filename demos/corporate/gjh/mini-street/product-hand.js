@@ -13,7 +13,7 @@ const gripAngles = {
   index: [-0.10, 0.375, 0.861],
   middle: [-0.10, 0.819, 0.459],
   ring: [-0.10, 0.707, 0.159],
-  pinky: [-0.125, 0.477, 0.369],
+  pinky: [-0.233, 0.392, 0.318],
   thumb: [-0.48, 0.031, -0.555],
 };
 
@@ -235,11 +235,14 @@ function makeHand(T, model) {
   const middle = model.getObjectByName("middle_01_r");
   const offset = new T.Quaternion();
   const flexAxis = new T.Vector3(0, 0, -1);
+  const spreadAxis = new T.Vector3(1, 0, 0);
   const joints = Object.entries(gripAngles).flatMap(([finger, angles], fingerIndex) => angles.map((angle, index) => {
     const bone = model.getObjectByName(`${finger}_0${index + 1}_r`);
     const delay = finger === "thumb" ? 0.16 : 0.23 + fingerIndex * 0.042 + index * 0.023;
     const rest = finger === "thumb" ? -0.06 : 0.12 + 0.04 * index;
-    return bone && { bone, bind: bone.quaternion.clone(), angle, delay, rest };
+    // Tuck the little finger towards the ring finger to leave the shelf below the grip clear.
+    const spread = finger === "pinky" && index === 0 ? -0.175 : 0;
+    return bone && { bone, bind: bone.quaternion.clone(), angle, delay, rest, spread };
   }));
   if (!wrist?.isBone || !middle?.isBone || joints.some(joint => !joint?.bone.isBone)) {
     throw new Error("Invalid hand rig");
@@ -248,6 +251,9 @@ function makeHand(T, model) {
   model.updateMatrixWorld(true);
   const wristPosition = wrist.getWorldPosition(new T.Vector3());
   const forearm = wristPosition.clone().sub(middle.getWorldPosition(new T.Vector3())).normalize();
+  // The source X axis maps to up. Continue the sleeve slightly above the wrist tangent.
+  forearm.x += 0.065;
+  forearm.normalize();
   const sleeve = makeSleeve(T, wristPosition, forearm);
   model.traverse((object) => {
     if (!object.isSkinnedMesh) return;
@@ -261,7 +267,7 @@ function makeHand(T, model) {
   // Fit the palm and the curled fingers to the can's 77.5 mm diameter.
   hand.applyMatrix4(new T.Matrix4().set(
     0, 1, 0, -0.00244,
-    1, 0, 0, -0.05947,
+    1, 0, 0, -0.04947,
     0, 0, 1, 0.12626,
     0, 0, 0, 1,
   ));
@@ -273,10 +279,11 @@ function makeHand(T, model) {
   return {
     object: wristMount,
     pose(proportion, relaxed = 0) {
-      for (const { bone, bind, angle, delay, rest } of joints) {
+      for (const { bone, bind, angle, delay, rest, spread } of joints) {
         const curl = T.MathUtils.smoothstep(proportion, delay, 0.93 + delay * 0.15);
         offset.setFromAxisAngle(flexAxis, curl * angle + relaxed * rest);
         bone.quaternion.copy(bind).multiply(offset);
+        if (spread) bone.quaternion.multiply(offset.setFromAxisAngle(spreadAxis, curl * spread));
       }
     },
   };
