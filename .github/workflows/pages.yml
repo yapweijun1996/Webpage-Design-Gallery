@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -40,6 +41,27 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site
+      - name: Wait for Pages artifact registration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          stable=0
+          for attempt in {1..30}; do
+            count="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" --jq '[.artifacts[] | select(.name == "github-pages" and .expired == false)] | length' 2>/dev/null || true)"
+            if [[ "$count" == "1" ]]; then
+              stable=$((stable + 1))
+              if (( stable >= 3 )); then exit 0; fi
+            else
+              stable=0
+              if [[ "$count" =~ ^[0-9]+$ ]] && (( count > 1 )); then
+                echo "::error::Multiple Pages artifacts were registered for this run."
+                exit 1
+              fi
+            fi
+            sleep 2
+          done
+          echo "::error::Pages artifact registration did not become available."
+          exit 1
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
