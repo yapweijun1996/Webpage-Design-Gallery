@@ -788,7 +788,20 @@ export function buildShopInterior(THREE, scene, productCount) {
     shelfTrim(island, paintedGreen, [0.038, 0.089, 0.14], x, 1.284, 0.604);
     shelfTrim(island, brushed, [0.011, 0.011, 0.004], x, 1.27, 0.676);
   }
+  shelfTrim(island, deckTimber, [1.20, 0.028, 0.026], 0, 1.016, 0.515);
+  for (const x of [-0.45, -0.27, -0.09, 0.09, 0.27, 0.45]) {
+    shelfTrim(island, deepGreen, [0.003, 0.249, 0.004], x, 1.154, 0.504);
+  }
   displayContact(0, islandDeck, 0.49, 1.38, 0.10);
+  const lowerStock = [];
+  for (const [id, x, z, turn] of [
+    ["kaya", -0.48, 0.595, 0.03], ["kaya", -0.35, 0.595, -0.06], ["kaya", -0.413, 0.72, 0.06],
+    ["lychee", 0.30, 0.61, -0.04], ["lychee", 0.45, 0.61, 0.06], ["lychee", 0.375, 0.74, -0.05],
+  ]) {
+    packageAt(island, id, x, islandDeck, z, turn, lowerStock);
+  }
+  displayStockContacts(islandDeck, lowerStock);
+
   const upperStock = [];
   for (const [id, x, z, turn] of [
     ["teh", -0.43, 0.58, 0.07], ["teh", -0.28, 0.56, -0.04],
