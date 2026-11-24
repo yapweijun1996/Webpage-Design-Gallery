@@ -6,8 +6,9 @@ const HAND = {
   sha256: "4e9a6219f4147f80fbd29cd4c349e1ae1d59d436d81822a0da8247984cb2d4e9",
 };
 const shelfHandYaw = 0.16;
-const inspectionHandYaw = 0.37;
+const inspectionHandYaw = -0.35;
 const gripDiameter = 0.0775;
+const maxTurnSpeed = 4.2;
 const durations = { reaching: 0.65, lifting: 0.61, returning: 1.28, stowing: 0.40 };
 const gripAngles = {
   index: [-0.10, 0.375, 0.861],
@@ -15,6 +16,15 @@ const gripAngles = {
   ring: [-0.10, 0.707, 0.159],
   pinky: [-0.233, 0.392, 0.318],
   thumb: [-0.48, 0.031, -0.555],
+};
+
+// The shelf grip clears nearby stock. At eye level the thumb seats a little
+// closer to the rim, and individual fingers can lift to turn the can.
+const inspectionFlex = { thumb: [0.025, 0, -0.050] };
+const releaseFlex = {
+  index: [0, -0.055, -0.10],
+  middle: [0, -0.060, -0.09],
+  thumb: [-0.07, 0, 0.10],
 };
 
 // The offsets follow the distal joints of the CC0 hand in its bind pose.
@@ -242,7 +252,9 @@ function makeHand(T, model) {
     const rest = finger === "thumb" ? -0.06 : 0.12 + 0.04 * index;
     // Tuck the little finger towards the ring finger to leave the shelf below the grip clear.
     const spread = finger === "pinky" && index === 0 ? -0.175 : 0;
-    return bone && { bone, bind: bone.quaternion.clone(), angle, delay, rest, spread };
+    const inspectionBias = inspectionFlex[finger]?.[index] ?? 0;
+    const release = releaseFlex[finger]?.[index] ?? 0;
+    return bone && { bone, bind: bone.quaternion.clone(), finger, angle, delay, rest, spread, inspectionBias, release };
   }));
   if (!wrist?.isBone || !middle?.isBone || joints.some(joint => !joint?.bone.isBone)) {
     throw new Error("Invalid hand rig");
@@ -255,6 +267,10 @@ function makeHand(T, model) {
   forearm.x += 0.065;
   forearm.normalize();
   const sleeve = makeSleeve(T, wristPosition, forearm);
+  const shelfSleeve = sleeve.quaternion.clone();
+  const inspectionSleeve = new T.Quaternion().setFromUnitVectors(
+    new T.Vector3(0, 1, 0), forearm.clone().add(new T.Vector3(-0.18, 0.40, 0)).normalize(),
+  );
   model.traverse((object) => {
     if (!object.isSkinnedMesh) return;
     object.frustumCulled = false;
@@ -278,10 +294,14 @@ function makeHand(T, model) {
 
   return {
     object: wristMount,
-    pose(proportion, relaxed = 0) {
-      for (const { bone, bind, angle, delay, rest, spread } of joints) {
+    pose(proportion, { relaxed = 0, inspection = 0, thumb = 0, fingers = 0 } = {}) {
+      // Bend the forearm back towards the viewer's right while preserving the grip.
+      sleeve.quaternion.copy(shelfSleeve).slerp(inspectionSleeve, inspection);
+      for (const { bone, bind, finger, angle, delay, rest, spread, inspectionBias, release } of joints) {
         const curl = T.MathUtils.smoothstep(proportion, delay, 0.93 + delay * 0.15);
-        offset.setFromAxisAngle(flexAxis, curl * angle + relaxed * rest);
+        const lift = finger === "thumb" ? thumb : fingers;
+        const flex = angle + inspection * inspectionBias + lift * release;
+        offset.setFromAxisAngle(flexAxis, curl * flex + relaxed * rest);
         bone.quaternion.copy(bind).multiply(offset);
         if (spread) bone.quaternion.multiply(offset.setFromAxisAngle(spreadAxis, curl * spread));
       }
@@ -333,6 +353,7 @@ export function createProductHand({
   let targetPitch = 0;
   let yaw = 0;
   let pitch = 0;
+  let turnMotion = 0;
   let hand = null;
   let handRequest = null;
   let requestingAdd = false;
@@ -472,7 +493,19 @@ export function createProductHand({
     carrier.position.y += Math.sin(reach * Math.PI) * 0.055;
     const relaxed = 1 - front;
     hand.object.rotation.set(-0.20 * relaxed, shelfHandYaw, 0.15 * relaxed);
-    hand.pose(0, relaxed);
+    hand.pose(0, { relaxed });
+  }
+
+  function poseTurnGrip(amount, inspection = 1) {
+    // The wrist rocks over a short arc while the can makes a complete turn.
+    // The thumb and upper fingers regrip in separate parts of each quarter turn.
+    const stroke = yaw * 4;
+    const wrist = Math.sin(stroke);
+    hand.pose(1, {
+      inspection,
+      fingers: amount * T.MathUtils.smoothstep(Math.abs(wrist), 0.72, 0.98),
+      thumb: amount * T.MathUtils.smoothstep(-Math.cos(stroke), 0.72, 0.98),
+    });
   }
 
   function inspectPose() {
@@ -480,9 +513,8 @@ export function createProductHand({
     carrier.quaternion.copy(viewHeading).multiply(poseOffset.setFromAxisAngle(axes.right, pitch));
     heldProduct.quaternion.setFromAxisAngle(axes.up, active.can.frontYaw + yaw);
     if (hand) {
-      // The thumb and fingers roll the tin as the wrist follows slightly.
-      hand.object.rotation.set(0, inspectionHandYaw + Math.sin(yaw) * 0.29, 0);
-      hand.pose(1);
+      hand.object.rotation.set(0, inspectionHandYaw + Math.sin(yaw * 4) * 0.12, 0);
+      poseTurnGrip(turnMotion);
     }
   }
 
@@ -500,6 +532,7 @@ export function createProductHand({
     const selection = { product, can, anchor, shelfObject, shelfWasVisible: shelfObject?.visible, modelReady: false };
     active = selection;
     targetYaw = yaw = targetPitch = pitch = 0;
+    turnMotion = 0;
     if (!can) {
       transition("inspecting");
       return true;
@@ -610,14 +643,22 @@ export function createProductHand({
     if (!active?.modelReady) return false;
     screenPoints();
     if (phase === "inspecting") {
-      yaw = motion.matches || Math.abs(targetYaw - yaw) < 0.001 ? targetYaw : T.MathUtils.damp(yaw, targetYaw, 14, delta);
+      const remaining = targetYaw - yaw;
+      const speedLimit = maxTurnSpeed * delta;
+      const step = motion.matches || Math.abs(remaining) < 0.001 ? remaining
+        : T.MathUtils.clamp(remaining * (1 - Math.exp(-14 * delta)), -speedLimit, speedLimit);
+      yaw = step === remaining ? targetYaw : yaw + step;
+      const turnSpeed = delta > 0 ? Math.abs(step / delta) : 0;
+      const moving = T.MathUtils.smoothstep(turnSpeed, 0.10, 2.8);
+      turnMotion = motion.matches ? 0 : T.MathUtils.damp(turnMotion, moving, 16, delta);
+      if (turnMotion < 0.001) turnMotion = 0;
       pitch = motion.matches || Math.abs(targetPitch - pitch) < 0.001 ? targetPitch : T.MathUtils.damp(pitch, targetPitch, 14, delta);
       if (yaw === targetYaw) {
         yaw = T.MathUtils.euclideanModulo(yaw + Math.PI, 2 * Math.PI) - Math.PI;
         targetYaw = yaw;
       }
       inspectPose();
-      return yaw !== targetYaw || pitch !== targetPitch;
+      return yaw !== targetYaw || pitch !== targetPitch || turnMotion > 0;
     }
 
     if (motion.matches) {
@@ -654,7 +695,10 @@ export function createProductHand({
         carrier.position.y += arc * 0.055;
         carrier.quaternion.multiply(poseOffset.setFromAxisAngle(axes.right, 0.18 * arc));
         heldProduct.quaternion.slerp(viewPose.setFromAxisAngle(axes.up, active.can.frontYaw), lift);
-        if (hand) hand.object.rotation.y = T.MathUtils.lerp(shelfHandYaw, inspectionHandYaw, lift);
+        if (hand) {
+          hand.object.rotation.y = T.MathUtils.lerp(shelfHandYaw, inspectionHandYaw, lift);
+          hand.pose(1, { inspection: lift });
+        }
       }
       if (progress === 1) transition("inspecting");
     } else if (phase === "returning") {
@@ -665,7 +709,10 @@ export function createProductHand({
         carrier.quaternion.copy(startRotation).slerp(viewHeading, approachShelf);
         viewPose.copy(viewHeading).invert().multiply(stockPose);
         heldProduct.quaternion.copy(startCanRotation).slerp(viewPose, approachShelf);
-        if (hand) hand.object.rotation.y = T.MathUtils.lerp(startHandYaw, shelfHandYaw, approachShelf);
+        if (hand) {
+          hand.object.rotation.y = T.MathUtils.lerp(startHandYaw, shelfHandYaw, approachShelf);
+          poseTurnGrip(turnMotion * (1 - approachShelf), 1 - approachShelf);
+        }
       } else if (progress < 0.70) {
         atStock();
         carrier.position.lerpVectors(aboveStock, stock, T.MathUtils.smoothstep(progress, 0.55, 0.70));
@@ -675,16 +722,18 @@ export function createProductHand({
         showShelf(true);
         heldProduct.visible = false;
         atStock();
-        if (progress < 0.87) {
-          poseGrip(1 - (progress - 0.70) / 0.17);
+        if (progress < 0.88) {
+          // Keep the fingers wrapped briefly once the shelf takes the weight.
+          poseGrip(1 - T.MathUtils.clamp((progress - 0.75) / 0.13, 0, 1));
         } else {
-          poseReach(1 - T.MathUtils.smootherstep(progress, 0.87, 1));
+          poseReach(1 - T.MathUtils.smootherstep(progress, 0.88, 1));
         }
         if (progress === 1) finish();
       }
     } else if (phase === "stowing") {
       carrier.position.lerpVectors(start, drop, eased);
       carrier.quaternion.copy(startRotation).multiply(poseOffset.setFromAxisAngle(axes.right, -0.32 * eased));
+      if (hand) poseTurnGrip(turnMotion * (1 - eased));
       if (progress === 1) finish();
     }
     return phase !== "idle";
