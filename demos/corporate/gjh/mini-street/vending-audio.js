@@ -2,7 +2,10 @@ import { CHUTE_CONTACT, MOTOR_START, RELEASE, TRAY_IMPACT, TRAY_RATTLE, VEND_DUR
 
 // Use filtered noise for friction and contact and short resonances for the cabinet.
 // The sounds are generated locally and share one audio context for the dialog.
-export function createVendingAudio(AudioContext = globalThis.AudioContext ?? globalThis.webkitAudioContext) {
+export function createVendingAudio(
+  AudioContext = globalThis.AudioContext ?? globalThis.webkitAudioContext,
+  now = () => performance.now(),
+) {
   let context;
   let noiseBuffer;
   let currentCue;
@@ -18,15 +21,20 @@ export function createVendingAudio(AudioContext = globalThis.AudioContext ?? glo
     for (const source of sources) source.stop();
   }
 
-  function startCue(draw) {
-    const output = context.createGain();
-    output.gain.value = 0.38;
-    output.connect(context.destination);
-    const cue = { output, sources: new Set() };
-    currentCue = cue;
-    const start = context.currentTime + 0.008;
+  function startCue(draw, elapsed) {
+    // Audio time pauses during a suspension, but the visible vend keeps moving.
+    const availableAt = context.currentTime;
+    const start = availableAt + 0.008 - elapsed;
+    let cue;
 
     function layer(source, at, length, level, attack, input = source) {
+      if (!cue) {
+        const output = context.createGain();
+        output.gain.value = 0.38;
+        output.connect(context.destination);
+        cue = currentCue = { output, sources: new Set() };
+      }
+      const { output } = cue;
       const envelope = context.createGain();
       input.connect(envelope);
       envelope.connect(output);
@@ -52,6 +60,7 @@ export function createVendingAudio(AudioContext = globalThis.AudioContext ?? glo
 
     function tone(offset, length, level, type, frequency, endFrequency = frequency, attack = 0.003) {
       const at = start + offset;
+      if (at < availableAt) return;
       const oscillator = context.createOscillator();
       oscillator.type = type;
       oscillator.frequency.setValueAtTime(frequency, at);
@@ -60,12 +69,13 @@ export function createVendingAudio(AudioContext = globalThis.AudioContext ?? glo
     }
 
     function noise(offset, length, level, frequency, endFrequency = frequency, attack = 0.003) {
+      const at = start + offset;
+      if (at < availableAt) return;
       if (!noiseBuffer) {
         noiseBuffer = context.createBuffer(1, Math.ceil(context.sampleRate * 0.55), context.sampleRate);
         const samples = noiseBuffer.getChannelData(0);
         for (let i = 0; i < samples.length; i += 1) samples[i] = Math.random() * 2 - 1;
       }
-      const at = start + offset;
       const source = context.createBufferSource();
       const filter = context.createBiquadFilter();
       source.buffer = noiseBuffer;
@@ -84,6 +94,7 @@ export function createVendingAudio(AudioContext = globalThis.AudioContext ?? glo
     if (!enabled) return;
     stop();
     const token = request;
+    const requestedAt = now();
     const draw = () => {
       if (token !== request || !enabled || context.state !== "running") return;
       try {
@@ -120,7 +131,7 @@ export function createVendingAudio(AudioContext = globalThis.AudioContext ?? glo
           noise(impact, 0.063, 0.33, bottle ? 840 : 1850, 710);
           tone(rattle, 0.10, 0.13, "triangle", bottle ? 210 : 520, bottle ? 105 : 270);
           noise(rattle + 0.028, 0.087, 0.12, 1150, 690);
-        });
+        }, (now() - requestedAt) / 1000);
       } catch {
         stop();
       }

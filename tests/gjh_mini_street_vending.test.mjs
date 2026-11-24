@@ -66,6 +66,9 @@ function audioFixture() {
   const outputs = [];
   let created = 0;
   let resumed = 0;
+  let clock = 0;
+  let context;
+  let pendingResume;
   const parameter = () => ({
     setValueAtTime(value) { this.initial = value; },
     linearRampToValueAtTime: noop, exponentialRampToValueAtTime: noop,
@@ -78,6 +81,7 @@ function audioFixture() {
   class Context {
     constructor() {
       created += 1;
+      context = this;
       this.currentTime = 3;
       this.sampleRate = 8000;
       this.state = "suspended";
@@ -86,6 +90,7 @@ function audioFixture() {
 
     async resume() {
       resumed += 1;
+      if (pendingResume) await pendingResume;
       this.state = "running";
     }
 
@@ -112,9 +117,20 @@ function audioFixture() {
   }
 
   return {
-    audio: createVendingAudio(Context), sources, outputs,
+    audio: createVendingAudio(Context, () => clock), sources, outputs,
     get created() { return created; },
     get resumed() { return resumed; },
+    suspend() {
+      context.state = "suspended";
+      let unblock;
+      pendingResume = new Promise(resolve => { unblock = resolve; });
+      return async (delay) => {
+        clock += delay;
+        unblock();
+        pendingResume = undefined;
+        await new Promise(setImmediate);
+      };
+    },
   };
 }
 
@@ -163,4 +179,47 @@ test("mute and dismissal cut off scheduled layers and a denied resume remains si
   });
   assert.equal(await denied.setEnabled(true), false);
   assert.doesNotThrow(() => denied.play("vend"));
+});
+
+test("delayed audio resumes at the current vend stage and discards expired cues", async () => {
+  const { audio, outputs, sources, suspend } = audioFixture();
+  await audio.setEnabled(true);
+  let resume = suspend();
+  audio.play("vend");
+  await resume(VEND_DURATION + 100);
+  assert.equal(sources.length, 0);
+  assert.equal(outputs.length, 0);
+
+  resume = suspend();
+  audio.play("select");
+  await resume(160);
+  assert.equal(sources.length, 0);
+
+  resume = suspend();
+  audio.play("vend");
+  const delay = 1000;
+  await resume(delay);
+  const first = Math.min(...sources.map(source => source.started));
+  const expectedFirst = 3 + 0.008 + (TRAY_IMPACT * VEND_DURATION - delay) / 1000;
+  assert.ok(Math.abs(first - expectedFirst) < 0.00001);
+  assert.ok(sources.length > 1 && sources.length < 8);
+});
+
+test("close, hide and mute invalidate a pending resume", async t => {
+  const cancellations = {
+    "stopping on dialog close or document hide": audio => audio.stop(),
+    "muting the audio": audio => audio.setEnabled(false),
+  };
+  for (const [name, cancel] of Object.entries(cancellations)) {
+    await t.test(name, async () => {
+      const { audio, outputs, sources, suspend } = audioFixture();
+      await audio.setEnabled(true);
+      const resume = suspend();
+      audio.play("vend");
+      await cancel(audio);
+      await resume(160);
+      assert.equal(sources.length, 0);
+      assert.equal(outputs.length, 0);
+    });
+  }
 });
