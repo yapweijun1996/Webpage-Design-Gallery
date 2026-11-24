@@ -33,7 +33,7 @@ def outputs(root, catalog, release, resources, source_bytes, precache_runtime):
     for design in catalog["designs"]:
         if design["id"] == "gjh-v11":
             continue  # The virtual mall has its own small offline directory and worker.
-        if design["id"] in ("gjh-mini-street", "pomelo-stem-v2", "pomelo-stem-v3", "pomelo-stem-v4"):
+        if design["id"] in ("gjh-mini-street", "pomelo-stem-v2", "pomelo-stem-v3", "pomelo-stem-v4", "pomelo-stem-v5"):
             continue  # Preserve the standalone editions' no-worker behavior.
         directory = Path(design["demoPath"]).parent
         company = companies[design["companyId"]]

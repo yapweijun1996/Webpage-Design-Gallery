@@ -31,6 +31,7 @@ class GalleryTests(unittest.TestCase):
                     ("pomelo-stem-v3", "demos/corporate/pomelo-stem/v3/index.html"),
                     ("pomelo-stem-v4", "demos/corporate/pomelo-stem/v4/index.html"),
                     ("pomelo-stem-v2", "demos/corporate/pomelo-stem/v2/index.html"),
+                    ("pomelo-stem-v5", "demos/corporate/pomelo-stem/v5/index.html"),
                     ("pomelo-stem-v1", "demos/corporate/pomelo-stem/v1/index.html")
                 ])
             else:
@@ -279,6 +280,16 @@ class GalleryTests(unittest.TestCase):
                         target = (route.parent / href).resolve()
                         self.assertTrue(target.is_relative_to(output.resolve()) and target.is_file(), (route, href))
             self.assertFalse((refined / "sw.js").exists())
+            showcase = output / "demos/corporate/pomelo-stem/v5"
+            for locale in ("", "zh", "ms"):
+                for page in ("index", "showcase", "story", "services", "contact"):
+                    route = showcase / locale / (page + ".html")
+                    source = route.read_text(encoding="utf-8")
+                    self.assertIn('content="noindex,nofollow"', source)
+                    for href in re.findall(r'(?:href|src)="(\.{1,2}/[^"#]+)', source):
+                        target = (route.parent / href).resolve()
+                        self.assertTrue(target.is_relative_to(output.resolve()) and target.is_file(), (route, href))
+            self.assertFalse((showcase / "sw.js").exists())
             gallery_models = Path("demos/corporate/gjh/v11/assets/gallery-assets")
             for source in (gallery.ROOT / gallery_models).glob("*.glb"):
                 self.assertEqual((output / gallery_models / source.name).read_bytes(), source.read_bytes())

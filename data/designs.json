@@ -1164,6 +1164,45 @@
     "disclaimer": "Independent design concept. No messages, orders or payments are sent."
   },
   {
+    "id": "pomelo-stem-v5",
+    "companyId": "pomelo-stem",
+    "slug": "v5",
+    "version": "v5",
+    "title": "Pomelo STEM Product Showcase",
+    "description": "Explore five connected pages in English, Simplified Chinese and Malay, with light and dark themes.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 5,
+    "demoPath": "demos/corporate/pomelo-stem/v5/index.html",
+    "thumbnail": "demos/corporate/pomelo-stem/v5/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/pomelo-stem/v5/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/pomelo-stem/v5/screenshots/768.png",
+        "width": 768,
+        "height": 900
+      },
+      "mobile": {
+        "path": "demos/corporate/pomelo-stem/v5/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent concept. The order story is fictional and does not submit an order."
+  },
+  {
     "id": "pomelo-stem-v1",
     "companyId": "pomelo-stem",
     "slug": "v1",

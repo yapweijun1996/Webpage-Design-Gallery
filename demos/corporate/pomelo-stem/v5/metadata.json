@@ -1,0 +1,20 @@
+{
+  "company": "Pomelo STEM",
+  "industry": "STEM & Technology",
+  "title": "Pomelo STEM - Product Showcase",
+  "version": "v5",
+  "designStyle": "An interactive product-led showcase with connected commerce and a human-centred business story.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/pomelo-stem/v5/",
+  "officialWebsite": "https://pomelostem.com/",
+  "disclaimer": "Independent concept. The order story is fictional and does not submit an order.",
+  "id": "pomelo-stem-v5",
+  "companyId": "pomelo-stem",
+  "displayTitle": "Pomelo STEM Product Showcase",
+  "summary": "Explore five connected pages in English, Simplified Chinese and Malay, with light and dark themes.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 5
+}
