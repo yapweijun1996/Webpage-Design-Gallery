@@ -29,6 +29,7 @@ class GalleryTests(unittest.TestCase):
             if company["id"] == "pomelo-stem":
                 self.assertEqual([(d["id"], d["demoPath"]) for d in designs], [
                     ("pomelo-stem-v3", "demos/corporate/pomelo-stem/v3/index.html"),
+                    ("pomelo-stem-v4", "demos/corporate/pomelo-stem/v4/index.html"),
                     ("pomelo-stem-v2", "demos/corporate/pomelo-stem/v2/index.html"),
                     ("pomelo-stem-v1", "demos/corporate/pomelo-stem/v1/index.html")
                 ])
@@ -266,6 +267,18 @@ class GalleryTests(unittest.TestCase):
                 self.assertIn(status, story)
             self.assertEqual(set(re.findall(r'"path": "(demos/corporate/pomelo-stem/v3/[^"]+)"', gallery_sw)),
                              {(journey.DIRECTORY / journey.THUMBNAIL).as_posix()})
+            # V4 reuses V3's published brand and story assets, while keeping its own routes.
+            refined = output / "demos/corporate/pomelo-stem/v4"
+            for locale in ("", "zh", "ms"):
+                for page in ("index", "story", "services", "contact"):
+                    route = refined / locale / (page + ".html")
+                    source = route.read_text(encoding="utf-8")
+                    self.assertIn('content="noindex,nofollow"', source)
+                    self.assertNotIn("serviceWorker", source)
+                    for href in re.findall(r'(?:href|src)="(\.{1,2}/[^"#]+)', source):
+                        target = (route.parent / href).resolve()
+                        self.assertTrue(target.is_relative_to(output.resolve()) and target.is_file(), (route, href))
+            self.assertFalse((refined / "sw.js").exists())
             gallery_models = Path("demos/corporate/gjh/v11/assets/gallery-assets")
             for source in (gallery.ROOT / gallery_models).glob("*.glb"):
                 self.assertEqual((output / gallery_models / source.name).read_bytes(), source.read_bytes())

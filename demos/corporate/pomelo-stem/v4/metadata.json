@@ -1,0 +1,20 @@
+{
+  "company": "Pomelo STEM",
+  "industry": "STEM & Technology",
+  "title": "Pomelo STEM - A Connected Order Journey",
+  "version": "v4",
+  "designStyle": "A warm editorial journey connecting a customer enquiry to a clear team handoff.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/pomelo-stem/v4/",
+  "officialWebsite": "https://pomelostem.com/",
+  "disclaimer": "Independent concept. The order story is fictional and does not submit an order.",
+  "id": "pomelo-stem-v4",
+  "companyId": "pomelo-stem",
+  "displayTitle": "Pomelo STEM Connected Order Journey",
+  "summary": "A refined four-stage order story with services and localized pages in English, Simplified Chinese and Malay.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 4
+}

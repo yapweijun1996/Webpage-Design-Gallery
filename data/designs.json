@@ -1086,6 +1086,45 @@
     "disclaimer": "Independent concept. The order story is fictional and does not submit an order."
   },
   {
+    "id": "pomelo-stem-v4",
+    "companyId": "pomelo-stem",
+    "slug": "v4",
+    "version": "v4",
+    "title": "Pomelo STEM Connected Order Journey",
+    "description": "A refined four-stage order story with services and localized pages in English, Simplified Chinese and Malay.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 4,
+    "demoPath": "demos/corporate/pomelo-stem/v4/index.html",
+    "thumbnail": "demos/corporate/pomelo-stem/v4/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/pomelo-stem/v4/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/pomelo-stem/v4/screenshots/768.png",
+        "width": 768,
+        "height": 900
+      },
+      "mobile": {
+        "path": "demos/corporate/pomelo-stem/v4/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent concept. The order story is fictional and does not submit an order."
+  },
+  {
     "id": "pomelo-stem-v2",
     "companyId": "pomelo-stem",
     "slug": "v2",

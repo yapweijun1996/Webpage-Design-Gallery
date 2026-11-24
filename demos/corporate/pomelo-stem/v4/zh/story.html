@@ -1,0 +1,31 @@
+<!doctype html><html lang="zh-Hans"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><title>故事 | Pomelo STEM</title><link rel="stylesheet" href="../../v3/assets/journey-tokens.css"><link rel="stylesheet" href="../../v3/assets/style.css"><link rel="stylesheet" href="../assets/refinement.css"></head><body><a class="skip" href="#main">跳到正文</a><header class="sitehead"><div class="wrap"><a class="brand" href="./index.html"><img width="38" height="38" alt="" src="../../v3/assets/logo.png">Pomelo STEM</a><nav class="nav" aria-label="主导航"><a href="./index.html" data-nav="zh/index">首页</a><a href="./story.html" data-nav="zh/story" aria-current="page" class="current">故事</a><a href="./services.html" data-nav="zh/services">服务</a><a href="./contact.html" data-nav="zh/contact">联系</a></nav><nav class="languages" aria-label="语言"><a lang="en" href="../story.html" data-swap="en">English</a><a lang="zh-Hans" href="./story.html" data-swap="zh" aria-current="true">简体中文</a><a lang="ms" href="../ms/story.html" data-swap="ms">Bahasa Melayu</a></nav></div></header><main id="main" tabindex="-1"><section class="cover-slim"><div class="wrap"><p class="tag">示例订单 · PS-0124</p><h1>一张订单的旅程</h1><p>小店里，手机亮了一下。两个连接器不难数，但有一个问题没回答，订单就还不能往下走。</p></div></section><section class="story page-story wrap"><nav class="chapter-nav" aria-label="故事章节"><a href="#zh-chapter-1">01 · 先收到消息，还不是订单</a><a href="#zh-chapter-2">02 · 确认一个细节，订单才能往下走</a><a href="#zh-chapter-3">03 · 打包团队不用再翻聊天</a></nav><div class="story-stack"><article class="chapter" id="zh-chapter-1" data-chapter><img class="" width="1536" height="1024" src="../../v3/assets/story-message.webp" alt="店主在窗边拿着手机，查看一条商品询问。"><div class="copy"><p class="chapnum">01</p><h2 tabindex="-1">先收到消息，还不是订单</h2><p>「我想买两个 SPL2 连接器。」店主记下型号和数量，没有急着答应，而是多问了一句：「您要自取，还是配送？」</p><p class="lesson"><strong>等待客户确认</strong><br>SPL2 × 2 · 取货方式未确认</p></div></article><article class="chapter" id="zh-chapter-2" data-chapter><img class="" width="1536" height="1024" src="../../v3/assets/story-review.webp" alt="店主对照工作台上的两个连接器，核对纸质订单单。"><div class="copy"><p class="chapnum">02</p><h2 tabindex="-1">确认一个细节，订单才能往下走</h2><p>「我来店里拿。」店主把答复补到订单单上，对照商品和数量，再亲自批准。这时，它才是一笔核对完的订单。</p><p class="lesson"><strong>店主已批准</strong><br>SPL2 × 2 · 已确认客户自取</p></div></article><article class="chapter" id="zh-chapter-3" data-chapter><img class="" width="1536" height="1024" src="../../v3/assets/story-pack.webp" alt="店主把装着两个连接器的小袋放进铺有牛皮纸的纸箱。"><div class="copy"><p class="chapnum">03</p><h2 tabindex="-1">打包团队不用再翻聊天</h2><p>两个连接器装进箱子。打包团队照着核对过的单据做，不用再翻原来的聊天。包裹留在店里，等客户来取。</p><p class="lesson"><strong>已打包，待自取</strong><br>SPL2 × 2 · 客户自取 · 未出货</p></div></article></div></section><section class="journey-end"><div class="wrap"><h2>多确认一步，交接就清楚了。</h2><p>看看商品目录、聊天、草稿和团队交接，各自在流程里帮了什么忙。</p><div class="actions"><a class="btn" href="./services.html">查看服务</a></div></div></section></main><footer class="sitefoot"><div class="wrap"><nav class="nav" aria-label="主导航"><a href="./index.html" data-nav="zh/index">首页</a><a href="./story.html" data-nav="zh/story" aria-current="page" class="current">故事</a><a href="./services.html" data-nav="zh/services">服务</a><a href="./contact.html" data-nav="zh/contact">联系</a></nav><p>订单和图像均为示意。本页不会创建真实订单、发送消息或收集个人资料。</p></div></footer><script>
+'use strict';
+function focusChapter(hash) {
+ const article=document.getElementById(hash);
+ const heading=article?.matches('[data-chapter]') ? article.querySelector('h2[tabindex="-1"]') : null;
+ if(!heading)return;
+ article.scrollIntoView({block:'start'});
+ heading.focus({preventScroll:true});
+}
+// A fresh fragment navigation can replace parser-time focus during the load.
+// Restore it only if the chapter is still current and the user has not moved focus.
+const initialChapter=location.hash;
+if(/^#(en|zh|ms)-chapter-[123]$/.test(initialChapter)){
+ window.addEventListener('load',()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   if(location.hash===initialChapter&&document.activeElement===document.body)focusChapter(initialChapter.slice(1));
+ })),{once:true});
+}
+// A second activation of the current link does not fire hashchange.
+document.addEventListener('click',event=>{
+ if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+ const link=event.target.closest('.chapter-nav a');
+ const hash=location.hash;
+ if(link&&hash&&link.getAttribute('href')===hash){
+   event.preventDefault();focusChapter(hash.slice(1));
+ }
+});
+
+function followChapter(){focusChapter(location.hash.slice(1))}
+window.addEventListener('hashchange',followChapter);
+followChapter();
+</script></body></html>

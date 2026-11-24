@@ -301,6 +301,16 @@ def runtime_resources(catalog):
                 pomelo_studies.regular_file,
             ))
             continue
+        if design["id"] == "pomelo-stem-v4":
+            if directory != Path("demos/corporate/pomelo-stem/v4"):
+                raise ValueError("Unexpected Pomelo v4 route")
+            local_files = [directory / lang / (page + ".html") for lang in ("", "zh", "ms") for page in ("index", "story", "services", "contact")]
+            local_files += [directory / "assets/refinement.css", Path(design["thumbnail"])]
+            local_files += [Path(item["path"]) for item in design["screenshots"].values()]
+            for path in local_files:
+                pomelo_studies.regular_file(ROOT, path)
+            resources.update(local_files)
+            continue
         resources.add(directory / "index.html")
         # Multi-page editions ship every top-level page beside index.html.
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory).glob("*.html"))
