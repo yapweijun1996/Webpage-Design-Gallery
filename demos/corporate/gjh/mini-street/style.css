@@ -292,7 +292,7 @@ dialog[aria-labelledby="vending-title"] { width: min(100% - 26px, 510px); }
 .vending-orbit {
   position: relative;
   height: clamp(220px, 38svh, 340px);
-  border-radius: var(--radius-inline-detail) var(--radius-inline-detail) 0 0;
+  border-radius: var(--radius-inline-detail);
   background: var(--surface-vending-viewer);
   cursor: grab;
   touch-action: pan-y pinch-zoom;
