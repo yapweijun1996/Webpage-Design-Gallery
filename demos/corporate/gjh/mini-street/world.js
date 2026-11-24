@@ -75,13 +75,14 @@ export function buildWorld(scene, invalidate) {
   const lampGlow = glow("#ffad5c");
   const neon = glow("#ffb653");
   const roomGlow = glow("#ffad68");
+  const roseGlow = glow("#eb96b7");
 
   const cube = new THREE.BoxGeometry(1, 1, 1);
   const plane = new THREE.PlaneGeometry(1, 1);
   const cylinder = new THREE.CylinderGeometry(1, 1, 1, 10);
   const shadeGlass = new THREE.CylinderGeometry(0.65, 1, 1, 10);
   const cupHandle = new THREE.TorusGeometry(1, 0.16, 4, 10);
-  const barrelTile = new THREE.CylinderGeometry(1, 1, 1, 7, 1, false, Math.PI / 2, Math.PI);
+  const barrelTile = new THREE.CylinderGeometry(1, 1, 1, 6, 1, false, Math.PI / 2, Math.PI);
   const ball = new THREE.SphereGeometry(1, 11, 7);
   const petal = new THREE.SphereGeometry(1, 7, 4);
   const leaf = new THREE.BufferGeometry();
@@ -125,6 +126,9 @@ export function buildWorld(scene, invalidate) {
   });
   const pool = new THREE.MeshBasicMaterial({
     map: textures.lightPool, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  const rosePool = new THREE.MeshBasicMaterial({
+    map: textures.rosePool, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.61,
   });
   const shade = new THREE.MeshBasicMaterial({ map: textures.occlusion, transparent: true, depthWrite: false });
   const glass = new THREE.MeshBasicMaterial({
@@ -407,6 +411,19 @@ export function buildWorld(scene, invalidate) {
     for (let i = 0; i < count; i += 2) {
       box(wood, x - width / 2 + i * step, peak - rise - 0.25, z + depth - 0.09, 0.13, 0.19, 0.34);
     }
+  }
+
+  function downpipe(x, z, top) {
+    const radius = 0.046;
+    const shoulder = top - 0.29;
+    rod(ink, [x, top, z + 0.08], [x, shoulder, z], radius);
+    rod(ink, [x, shoulder, z], [x, 0.27, z], radius);
+    for (const y of [0.63, 2.16, 3.86, top - 0.32]) {
+      tube(ink, x, y, z, 0.060, 0.062, 0.060);
+      box(mortar, x, y, z - 0.074, 0.112, 0.081, 0.13);
+    }
+    rod(ink, [x, 0.27, z], [x, 0.13, z + 0.15], radius);
+    rod(ink, [x, 0.13, z + 0.15], [x, 0.13, z + 0.23], 0.051);
   }
 
   function upperWall(x, z, width, bottom, top, windowY, offsets, material) {
@@ -718,6 +735,7 @@ export function buildWorld(scene, invalidate) {
     for (const side of [-1, 1]) pier(x + side * (width / 2 - 0.13), z + 0.11, 5.73);
     bays.forEach((offset, index) => upperWindow(x + offset, windowY, z + 0.09, index + (shop ? 0 : 1)));
     roof(x, width, z - 2.15, peak);
+    downpipe(x + width / 2 + 0.02, z + 0.42, peak - 1.25);
     if (shop) {
       shopfront(x, z, width - 0.79);
       sign(x, 3.25, z + 0.28, width - 0.66, 0.78, "New Moon", "moon");
@@ -743,15 +761,57 @@ export function buildWorld(scene, invalidate) {
     }
   }
 
+  function arcadeSign(x, y, z) {
+    const art = paintedTexture(256, 128, (ctx, w, h) => {
+      ctx.fillStyle = "#402a35";
+      ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = "#e9a6ae";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(10, 10, w - 20, h - 20);
+      ctx.fillStyle = "#ffeecc";
+      ctx.textAlign = "center";
+      ctx.font = "bold 32px Georgia";
+      ctx.fillText("FIVE-FOOT", w / 2, 56);
+      ctx.font = "25px Georgia";
+      ctx.fillText("WAY", w / 2, 91);
+    });
+    const enamel = new THREE.MeshStandardMaterial({
+      name: "Five-foot way sign",
+      map: art, emissiveMap: art, emissive: "#ffd6e3", roughness: 0.58,
+    });
+    signMaterials.push(enamel);
+    const turn = -Math.PI / 3;
+    const sine = Math.sin(turn);
+    const cosine = Math.cos(turn);
+    box(ink, x, y, z, 0.84, 0.42, 0.092, 0, turn);
+    rod(ink, [x + 0.16, y + 0.34, z - 1.31], [x, y + 0.34, z + 0.27], 0.026);
+    rod(ink, [x + 0.23, y + 0.59, z - 1.31], [x + 0.035, y + 0.34, z - 0.37], 0.018);
+    for (const side of [-1, 1]) {
+      box(brass, x + side * cosine * 0.28, y + 0.26, z - side * sine * 0.28, 0.043, 0.15, 0.043);
+      stamp(plane, enamel, x + side * sine * 0.048, y, z + side * cosine * 0.048,
+        0.80, 0.38, 1, 0, side === 1 ? turn : turn + Math.PI);
+    }
+    box(roseGlow, x, y - 0.218, z, 0.80, 0.034, 0.096, 0, turn);
+    // Use static spill around the sign and its wet-road reflection.
+    decal(rosePool, x + 0.36, 0.057, 1.05, 2.77, 1.90, -Math.PI / 2, 2);
+    decal(rosePool, x + 0.49, 0.018, 3.72, 2.90, 4.41, -Math.PI / 2, 2);
+  }
+
   function arcade(x, z) {
     upperWall(x, z + 0.075, 5.46, 3.77, 5.72, 4.99, [-1.20, 1.18], plaster[1]);
     box(wood, x, 1.99, z - 2.10, 5.46, 3.98, 0.36);
     box(wood, x, 3.99, z - 0.85, 5.34, 0.13, 2.10);
+    box(stone, x, 0.028, z - 0.80, 5.29, 0.069, 2.92);
     for (let i = 0; i < 7; i += 1) {
       box(cane, x, 3.91, z - 0.12 - i * 0.27, 5.28, 0.09, 0.052);
     }
     for (const offset of [-1.26, 1.26]) {
       const px = x + offset;
+      for (let tile = -3; tile <= 3; tile += 1) {
+        for (const dz of [-0.32, -0.568]) {
+          stamp(plane, encaustic, px + tile * 0.248, 0.065, z + dz, 0.247, 0.247, 1, -Math.PI / 2);
+        }
+      }
       arch(px, 2.89, z - 0.14, 0.96, 0.30, 2.81, cream, 0.46);
       arch(px, 2.89, z + 0.322, 0.98, 0.054, 2.81, stone, 0.052);
       arch(px, 2.89, z + 0.331, 1.13, 0.074, 2.81, lightCream, 0.048);
@@ -788,6 +848,8 @@ export function buildWorld(scene, invalidate) {
     upperWindow(x - 1.20, 4.99, z + 0.08, 2);
     upperWindow(x + 1.18, 4.99, z + 0.08, 3);
     roof(x, 5.42, z - 2.13, 6.83);
+    downpipe(x + 2.71, z + 0.42, 5.58);
+    arcadeSign(x - 2.61, 2.83, z + 1.65);
   }
 
   function cornerShop(x, z) {
@@ -1092,6 +1154,13 @@ export function buildWorld(scene, invalidate) {
     }
     for (const side of [-1, 1]) {
       const px = x + side * (outer - 0.43);
+      const flank = x + side * (radius + 0.25);
+      box(stone, flank, 0.34, z - 1.96, 0.19, 0.34, 3.03);
+      box(wood, flank, 0.58, z - 1.96, 0.14, 0.14, 3.04);
+      box(lightGreen, flank, 2.51, z - 1.96, 0.12, 0.12, 3.02);
+      for (const dz of [-3.35, -2.00, -0.57]) {
+        box(lightGreen, flank, 1.51, z + dz, 0.15, 1.96, 0.12);
+      }
       box(stone, px, 0.32, z + 0.25, 0.89, 0.55, 0.66);
       box(lightCream, px, 0.59, z + 0.26, 0.87, 0.102, 0.68);
       box(cream, px, spring - 0.10, z + 0.26, 0.86, 0.17, 0.59);
@@ -1468,6 +1537,8 @@ export function buildWorld(scene, invalidate) {
     litTimber.emissiveIntensity = night ? 0.65 : 0.22;
     displayLight.emissiveIntensity = night ? 2.2 : 0.32;
     pool.opacity = night ? 0.66 : 0.10;
+    rosePool.visible = night;
+    roseGlow.emissiveIntensity = night ? 2.1 : 0.09;
     lampGlow.emissiveIntensity = night ? 3.3 : 0.27;
     roomGlow.emissiveIntensity = night ? 1.85 : 0.11;
     neon.emissiveIntensity = night ? 2.85 : 0.41;

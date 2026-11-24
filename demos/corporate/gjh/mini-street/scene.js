@@ -16,10 +16,14 @@ function rain(scene) {
       varying float opacity;
       void main() {
         vec3 p = position;
-        float y = mod(p.y - time * (4.6 + fract(p.z * 2.6)), 13.0);
-        p.x += -(13.0 - y) * 0.12 - tail * 0.026;
-        p.y = y + tail * (0.18 + 0.22 * fract(p.x * 3.1));
-        opacity = mix(0.29, 0.02, tail) * smoothstep(0.0, 1.2, y) * (1.0 - smoothstep(8.0, 13.0, y));
+        float variation = fract(p.x * 1.6 + p.z * 2.6);
+        float y = mod(p.y - time * (4.6 + variation * 1.8), 13.0);
+        float streakLength = mix(0.22, 0.63, variation);
+        p.y = y + tail * streakLength;
+        p.x += (13.0 - p.y) * 0.39;
+        float depth = smoothstep(-6.0, 15.0, p.z);
+        opacity = mix(mix(0.21, 0.43, depth), 0.02, tail)
+          * smoothstep(0.0, 1.2, y) * (1.0 - smoothstep(9.0, 13.0, y));
         gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
       }`,
     fragmentShader: `

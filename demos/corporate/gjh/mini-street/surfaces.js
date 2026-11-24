@@ -18,6 +18,16 @@ function grain(ctx, width, height, random, count, opacity) {
   }
 }
 
+function lightSpill(colors) {
+  return paintedTexture(128, 128, (ctx, w, h) => {
+    const light = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+    const stops = [0, 0.33, 0.7, 1];
+    stops.forEach((stop, i) => light.addColorStop(stop, colors[i]));
+    ctx.fillStyle = light;
+    ctx.fillRect(0, 0, w, h);
+  });
+}
+
 export function streetTextures(random) {
   const plaster = paintedTexture(256, 256, (ctx, w, h) => {
     ctx.fillStyle = "#d7cec5";
@@ -120,15 +130,8 @@ export function streetTextures(random) {
     grain(ctx, w, h, random, 600, 0.14);
   });
 
-  const lightPool = paintedTexture(128, 128, (ctx, w, h) => {
-    const light = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
-    light.addColorStop(0, "#ffb96dc6");
-    light.addColorStop(0.33, "#ffa8576b");
-    light.addColorStop(0.7, "#f9893b22");
-    light.addColorStop(1, "#ed7c3100");
-    ctx.fillStyle = light;
-    ctx.fillRect(0, 0, w, h);
-  });
+  const lightPool = lightSpill(["#ffb96dc6", "#ffa8576b", "#f9893b22", "#ed7c3100"]);
+  const rosePool = lightSpill(["#f8afd381", "#ee8cbd62", "#d975b229", "#d05c9d00"]);
 
   const occlusion = paintedTexture(64, 64, (ctx, w, h) => {
     const shadow = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
@@ -138,7 +141,7 @@ export function streetTextures(random) {
     ctx.fillStyle = shadow;
     ctx.fillRect(0, 0, w, h);
   });
-  return { plaster, wood, roof, cloth, encaustic, lightPool, occlusion };
+  return { plaster, wood, roof, cloth, encaustic, lightPool, rosePool, occlusion };
 }
 
 export function pavingTexture(road, random) {
