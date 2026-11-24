@@ -3,6 +3,7 @@
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+import re
 import threading
 
 from playwright.sync_api import expect, sync_playwright
@@ -10,7 +11,8 @@ from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = "/demos/corporate/gjh/mini-street/"
-STORAGE_KEY = "gjh-mini-street:basket:v1"
+STORAGE_KEY = "gjh-mini-street:basket:v2"
+LEGACY_STORAGE_KEY = "gjh-mini-street:basket:v1"
 FIXTURE = """<!doctype html>
 <html lang="en" data-gjh-design="mini-street">
 <head>
@@ -114,7 +116,9 @@ def check_interaction(browser, url, mobile):
       const panel = document.querySelector('.mini-basket');
       return document.documentElement.scrollWidth <= innerWidth
         && panel.scrollWidth === panel.clientWidth
-        && Array.from(panel.querySelectorAll('button')).every(button => button.offsetHeight >= 44);
+        && Array.from(panel.querySelectorAll('button'))
+          .filter(button => !button.closest('[hidden]'))
+          .every(button => button.offsetHeight >= 44);
     }""")
 
     second = context.new_page()
@@ -155,16 +159,77 @@ def check_interaction(browser, url, mobile):
     context.close()
 
 
+def check_legacy_migration(browser, url):
+    context = browser.new_context(viewport={"width": 320, "height": 568})
+    first = context.new_page()
+    first.goto(url)
+    first.evaluate("""key => localStorage.setItem(key, JSON.stringify({
+      version: 1, items: {"au-425g": 2}
+    }))""", LEGACY_STORAGE_KEY)
+    first.reload()
+    expect(launcher(first, 2)).to_be_visible()
+    second = context.new_page()
+    second.goto(url)
+    expect(launcher(second, 2)).to_be_visible()
+    assert first.evaluate("""() => {
+      const picked = {};
+      return [basket.add("nz-425g", picked), basket.add("sa-425g", picked)];
+    }""") == [True, False]
+    expect(launcher(second, 3)).to_be_visible()
+    assert second.evaluate("""() => [
+      basket.add("sa-425g", {}), basket.add("mx-454g", {})
+    ]""") == [True, True]
+    expect(launcher(first, 5)).to_be_visible()
+    first.evaluate("""key => localStorage.setItem(key, JSON.stringify({
+      version: 1, items: {"au-425g": 8}
+    }))""", LEGACY_STORAGE_KEY)
+    first.reload()
+    expect(launcher(first, 5)).to_be_visible()
+
+    launcher(first, 5).click()
+    panel = first.get_by_role("dialog", name="Virtual basket")
+    row_paths = {
+        "Australia": "au-425g",
+        "New Zealand": "nz-425g",
+        "South Africa": "sa-425g",
+        "Mexico": "mx-454g",
+    }
+    for origin, sku in row_paths.items():
+        row = panel.get_by_role("listitem").filter(has_text=f"New Moon {origin} Abalone")
+        expect(row.get_by_text("454 g" if origin == "Mexico" else "425 g")).to_be_visible()
+        expect(row.locator("img")).to_have_attribute("src", re.compile(rf"/new-moon-{sku}-front\.webp$"))
+        row.locator("img").evaluate("(photo) => photo.decode()")
+    expect(panel.get_by_role("listitem")).to_have_count(4)
+    assert first.evaluate("""() => {
+      const panel = document.querySelector('.mini-basket');
+      return panel.scrollWidth === panel.clientWidth && document.documentElement.scrollWidth <= innerWidth;
+    }""")
+    panel.get_by_role("button", name="Increase quantity for New Moon Mexico Abalone").click()
+    expect(launcher(second, 6)).to_be_visible()
+    assert second.evaluate("key => JSON.parse(localStorage.getItem(key))", STORAGE_KEY) == {
+        "version": 2,
+        "items": {"au-425g": 2, "nz-425g": 1, "sa-425g": 1, "mx-454g": 2},
+    }
+    for origin in row_paths:
+        panel.get_by_role("button", name=f"Remove New Moon {origin} Abalone").click()
+    expect(panel.get_by_text("Your basket is empty.")).to_be_visible()
+    second.reload()
+    expect(launcher(second, 0)).to_be_visible()
+    context.close()
+
+
 def check_storage_fallback(browser, url, storage_script):
     context = browser.new_context()
     context.add_init_script(storage_script)
     page = context.new_page()
     page.goto(url)
     expect(launcher(page, 0)).to_be_visible()
-    assert page.evaluate("basket.add('au-425g', {})") is True
-    expect(launcher(page, 1)).to_be_visible()
+    assert page.evaluate("""() => [
+      basket.add("au-425g", {}), basket.add("mx-454g", {})
+    ]""") == [True, True]
+    expect(launcher(page, 2)).to_be_visible()
     expect(page.locator(".mini-basket-notice")).to_contain_text("Browser saving is unavailable")
-    launcher(page, 1).click()
+    launcher(page, 2).click()
     panel = page.get_by_role("dialog", name="Virtual basket")
     expect(panel.get_by_text("Browser saving is unavailable", exact=False)).to_be_visible()
     page.reload()
@@ -182,6 +247,7 @@ def main():
             for engine, mobile in ((playwright.chromium, False), (playwright.webkit, True)):
                 with engine.launch() as browser:
                     check_interaction(browser, url, mobile)
+                    check_legacy_migration(browser, url)
                     check_storage_fallback(browser, url, """Object.defineProperty(window, 'localStorage', {
                       get() { throw new DOMException('Blocked', 'SecurityError'); }
                     });""")

@@ -1,21 +1,37 @@
-const storageKey = "gjh-mini-street:basket:v1";
-const product = {
-  sku: "au-425g",
-  name: "New Moon Australia Abalone",
-  size: "425 g",
-  photo: new URL("../v11/assets/new-moon-au-425g-front.webp", import.meta.url).href,
-};
+import { getNewMoonProduct, NEW_MOON_DEFAULT_PRODUCT, NEW_MOON_PRODUCTS } from "./shop-product-catalog.js";
+
+const storageKey = "gjh-mini-street:basket:v2";
+const legacyStorageKey = "gjh-mini-street:basket:v1";
+const maxQuantity = Number.MAX_SAFE_INTEGER;
 const repeatWindow = 250;
 const visitOnly = "Browser saving is unavailable. Your selections are kept until you leave this page.";
 
-function readQuantity(raw) {
+function readQuantities(raw, version) {
+  let saved;
   try {
-    const saved = JSON.parse(raw);
-    const quantity = saved?.items?.[product.sku];
-    return saved?.version === 1 && Number.isSafeInteger(quantity) && quantity > 0 ? quantity : 0;
+    saved = JSON.parse(raw);
   } catch {
-    return 0;
+    return {};
   }
+  if (saved?.version !== version) return {};
+  const products = version === 1 ? [NEW_MOON_DEFAULT_PRODUCT] : NEW_MOON_PRODUCTS;
+  const quantities = {};
+  let remaining = maxQuantity;
+  for (const {id} of products) {
+    const quantity = saved.items?.[id];
+    if (!Number.isSafeInteger(quantity) || quantity <= 0 || !remaining) continue;
+    quantities[id] = Math.min(quantity, remaining);
+    remaining -= quantities[id];
+  }
+  return quantities;
+}
+
+function countItems(quantities) {
+  return Object.values(quantities).reduce((total, quantity) => total + quantity, 0);
+}
+
+function itemsChanged(previous, next) {
+  return NEW_MOON_PRODUCTS.some(({id}) => previous[id] !== next[id]);
 }
 
 /** Mount one shopping basket. Pass a unique object to add() for each picked-up item. */
@@ -25,8 +41,8 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
   const abort = new view.AbortController();
   const events = new view.EventTarget();
   const pickedItems = new WeakSet();
-  let lastAdd = -Infinity;
-  let quantity = 0;
+  const lastAdds = new Map();
+  let quantities = {};
   let storage;
   let opener;
   let noticeTimer;
@@ -57,20 +73,21 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
     '</header>',
     '<p id="mini-basket-description">Keep track of the products you pick in Mini Street.</p>',
     '<p class="mini-basket-empty">Your basket is empty.</p>',
-    '<ul class="mini-basket-items" hidden>',
-    '  <li class="mini-basket-item">',
+    '<ul class="mini-basket-items" hidden></ul>',
+    '<template>',
+    '  <li class="mini-basket-item" hidden>',
     '    <img class="mini-basket-photo" width="64" height="64" alt="">',
     '    <div class="mini-basket-product"><strong></strong><span></span></div>',
     '    <div class="mini-basket-edit">',
-    '      <div class="mini-basket-quantity" role="group" aria-label="Quantity">',
-    '        <button type="button" data-change="-1" aria-label="Decrease quantity">−</button>',
+    '      <div class="mini-basket-quantity" role="group">',
+    '        <button type="button" data-change="-1">−</button>',
     '        <span></span>',
-    '        <button type="button" data-change="1" aria-label="Increase quantity">+</button>',
+    '        <button type="button" data-change="1">+</button>',
     '      </div>',
     '      <button type="button" class="mini-basket-remove">Remove</button>',
     '    </div>',
     '  </li>',
-    '</ul>',
+    '</template>',
     '<p class="mini-basket-saving" hidden></p>',
     '<p class="mini-basket-status" role="status" aria-atomic="true"></p>',
     '<button type="button" class="mini-basket-continue">Continue shopping</button>',
@@ -79,30 +96,47 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
   const heading = dialog.querySelector("h2");
   const items = dialog.querySelector(".mini-basket-items");
   const empty = dialog.querySelector(".mini-basket-empty");
-  const quantityLabel = dialog.querySelector(".mini-basket-quantity span");
-  const increment = dialog.querySelector('[data-change="1"]');
-  const decrement = dialog.querySelector('[data-change="-1"]');
-  const remove = dialog.querySelector(".mini-basket-remove");
   const continueButton = dialog.querySelector(".mini-basket-continue");
   const saveWarning = dialog.querySelector(".mini-basket-saving");
   const dialogStatus = dialog.querySelector(".mini-basket-status");
-  const photo = dialog.querySelector(".mini-basket-photo");
-  dialog.querySelector(".mini-basket-product strong").textContent = product.name;
-  dialog.querySelector(".mini-basket-product span").textContent = product.size;
-  remove.setAttribute("aria-label", "Remove " + product.name);
+  const rowTemplate = dialog.querySelector("template");
+  const rows = NEW_MOON_PRODUCTS.map(product => {
+    const row = rowTemplate.content.firstElementChild.cloneNode(true);
+    const photo = row.querySelector(".mini-basket-photo");
+    const group = row.querySelector(".mini-basket-quantity");
+    const quantityLabel = group.querySelector("span");
+    const increment = group.querySelector('[data-change="1"]');
+    const decrement = group.querySelector('[data-change="-1"]');
+    const remove = row.querySelector(".mini-basket-remove");
+    row.querySelector(".mini-basket-product strong").textContent = product.name;
+    row.querySelector(".mini-basket-product span").textContent = product.size;
+    group.setAttribute("aria-label", "Quantity for " + product.name);
+    increment.setAttribute("aria-label", "Increase quantity for " + product.name);
+    decrement.setAttribute("aria-label", "Decrease quantity for " + product.name);
+    remove.setAttribute("aria-label", "Remove " + product.name);
+    items.append(row);
+    return {product, row, photo, quantityLabel, increment, decrement, remove};
+  });
+  rowTemplate.remove();
   saveWarning.textContent = visitOnly;
   host.append(dock);
   doc.body.append(dialog);
 
   function render() {
-    const focusRemoved = !quantity && items.contains(doc.activeElement);
-    if (quantity && !photo.hasAttribute("src")) photo.src = product.photo;
-    items.hidden = !quantity;
-    empty.hidden = Boolean(quantity);
-    quantityLabel.textContent = String(quantity);
-    increment.disabled = quantity >= Number.MAX_SAFE_INTEGER;
-    badge.textContent = quantity > 99 ? "99+" : String(quantity);
-    launcher.setAttribute("aria-label", "Basket, " + quantity + (quantity === 1 ? " item" : " items"));
+    const total = countItems(quantities);
+    let focusRemoved = false;
+    for (const {product, row, photo, quantityLabel, increment} of rows) {
+      const quantity = quantities[product.id] ?? 0;
+      if (!quantity && row.contains(doc.activeElement)) focusRemoved = true;
+      row.hidden = !quantity;
+      if (quantity && !photo.hasAttribute("src")) photo.src = product.photo;
+      quantityLabel.textContent = String(quantity);
+      increment.disabled = total >= maxQuantity;
+    }
+    items.hidden = !total;
+    empty.hidden = Boolean(total);
+    badge.textContent = total > 99 ? "99+" : String(total);
+    launcher.setAttribute("aria-label", "Basket, " + total + (total === 1 ? " item" : " items"));
     saveWarning.hidden = Boolean(storage);
     if (focusRemoved) continueButton.focus();
   }
@@ -117,22 +151,24 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
     noticeTimer = view.setTimeout(() => { notice.textContent = ""; }, 5000);
   }
 
-  function currentQuantity() {
-    if (!storage) return quantity;
+  function currentQuantities() {
+    if (!storage) return quantities;
     try {
-      return readQuantity(storage.getItem(storageKey));
+      const saved = storage.getItem(storageKey);
+      // The first edit writes v2. An older open tab can only write the legacy key.
+      return saved === null ? readQuantities(storage.getItem(legacyStorageKey), 1) : readQuantities(saved, 2);
     } catch {
       storage = undefined;
-      return quantity;
+      return quantities;
     }
   }
 
   function reconcile() {
-    const previous = quantity;
-    quantity = currentQuantity();
+    const previous = quantities;
+    quantities = currentQuantities();
     render();
-    if (quantity !== previous) {
-      if (dialog.open) announce("Basket updated. Quantity " + quantity + ".");
+    if (itemsChanged(previous, quantities)) {
+      if (dialog.open) announce("Basket updated. Total quantity " + countItems(quantities) + ".");
       events.dispatchEvent(new view.Event("change"));
     }
   }
@@ -144,49 +180,55 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
   }
   reconcile();
 
-  function changeQuantity(update, describe) {
-    const previous = quantity;
-    const current = currentQuantity();
-    const next = update(current);
-    const changed = next !== current && Number.isSafeInteger(next) && next >= 0;
-    quantity = changed ? next : current;
-    if (changed && storage) {
-      try {
-        storage.setItem(storageKey, JSON.stringify({
-          version: 1,
-          items: quantity ? {[product.sku]: quantity} : {},
-        }));
-      } catch {
-        storage = undefined;
+  function changeQuantity(id, update, describe) {
+    const previous = quantities;
+    const current = currentQuantities();
+    const quantity = current[id] ?? 0;
+    const next = update(quantity);
+    const limit = maxQuantity - (countItems(current) - quantity);
+    const changed = next !== quantity && Number.isSafeInteger(next) && next >= 0 && next <= limit;
+    quantities = current;
+    if (changed) {
+      quantities = {...current};
+      if (next) quantities[id] = next;
+      else delete quantities[id];
+      if (storage) {
+        try {
+          storage.setItem(storageKey, JSON.stringify({version: 2, items: quantities}));
+        } catch {
+          storage = undefined;
+        }
       }
     }
 
     render();
     if (changed) {
-      const message = describe(quantity);
+      const message = describe(next, countItems(quantities));
       announce(storage ? message : message + " " + visitOnly);
-    } else if (next > Number.MAX_SAFE_INTEGER) {
+    } else if (next > limit) {
       announce("The basket has reached its quantity limit.");
     }
-    if (quantity !== previous) events.dispatchEvent(new view.Event("change"));
+    if (itemsChanged(previous, quantities)) events.dispatchEvent(new view.Event("change"));
     return changed;
   }
 
   function add(sku, pickedItem) {
-    if (abort.signal.aborted || sku !== product.sku) return false;
+    const product = getNewMoonProduct(sku);
+    if (abort.signal.aborted || !product) return false;
     if (pickedItem != null && (typeof pickedItem !== "object" || pickedItems.has(pickedItem))) return false;
     const now = view.performance.now();
-    if (pickedItem == null && now - lastAdd < repeatWindow) return false;
+    const previousAdd = lastAdds.get(sku);
+    if (pickedItem == null && now - (previousAdd ?? -Infinity) < repeatWindow) return false;
 
-    const previousAdd = lastAdd;
-    if (pickedItem == null) lastAdd = now;
+    if (pickedItem == null) lastAdds.set(sku, now);
     else pickedItems.add(pickedItem);
-    const changed = changeQuantity((value) => value + 1, (value) => (
-      "Added " + product.name + ". " + value + (value === 1 ? " item" : " items") + " in basket."
+    const changed = changeQuantity(sku, (value) => value + 1, (_, total) => (
+      "Added " + product.name + ". " + total + (total === 1 ? " item" : " items") + " in basket."
     ));
     if (!changed) {
-      if (pickedItem == null) lastAdd = previousAdd;
-      else pickedItems.delete(pickedItem);
+      if (pickedItem != null) pickedItems.delete(pickedItem);
+      else if (previousAdd === undefined) lastAdds.delete(sku);
+      else lastAdds.set(sku, previousAdd);
     }
     return changed;
   }
@@ -238,20 +280,25 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
   });
   listen(dialog.querySelector(".mini-basket-close"), "click", close);
   listen(continueButton, "click", close);
-  listen(increment, "click", () => changeQuantity((value) => value + 1, (value) => "Quantity " + value + "."));
-  listen(decrement, "click", () => changeQuantity((value) => Math.max(0, value - 1), (value) => (
-    value ? "Quantity " + value + "." : "Removed " + product.name + "."
-  )));
-  listen(remove, "click", () => changeQuantity(() => 0, () => "Removed " + product.name + "."));
+  for (const {product, increment, decrement, remove} of rows) {
+    const showQuantity = (value) => product.name + " quantity " + value + ".";
+    const showRemoval = () => "Removed " + product.name + ".";
+    listen(increment, "click", () => changeQuantity(product.id, (value) => value + 1, showQuantity));
+    listen(decrement, "click", () => changeQuantity(product.id, (value) => Math.max(0, value - 1), (value) => (
+      value ? showQuantity(value) : showRemoval()
+    )));
+    listen(remove, "click", () => changeQuantity(product.id, () => 0, showRemoval));
+  }
   listen(view, "storage", (event) => {
-    if (storage && event.storageArea === storage && (event.key === storageKey || event.key === null)) reconcile();
+    if (storage && event.storageArea === storage &&
+        (event.key === storageKey || event.key === legacyStorageKey || event.key === null)) reconcile();
   });
   listen(view, "pageshow", reconcile);
 
   function subscribe(listener) {
     if (abort.signal.aborted) return () => {};
-    listener(quantity);
-    const update = () => listener(quantity);
+    listener(countItems(quantities));
+    const update = () => listener(countItems(quantities));
     listen(events, "change", update);
     return () => events.removeEventListener("change", update);
   }
@@ -264,5 +311,5 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
     dock.remove();
   }
 
-  return {add, open, close, count: () => quantity, subscribe, cleanup};
+  return {add, open, close, count: () => countItems(quantities), subscribe, cleanup};
 }

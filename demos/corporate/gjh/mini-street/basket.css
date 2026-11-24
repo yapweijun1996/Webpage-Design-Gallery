@@ -136,9 +136,16 @@
 }
 
 .mini-basket-items {
+  display: grid;
+  gap: 8px;
   margin: 16px 0 0;
   padding: 0;
   list-style: none;
+}
+
+.mini-basket-items[hidden],
+.mini-basket-item[hidden] {
+  display: none;
 }
 
 .mini-basket-item {

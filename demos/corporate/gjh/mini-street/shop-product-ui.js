@@ -1,5 +1,4 @@
-const CAN_ID = "au-425g";
-const PACKSHOT = new URL("../v11/assets/new-moon-au-425g-front.webp", import.meta.url);
+import { getNewMoonProduct, NEW_MOON_DEFAULT_PRODUCT } from "./shop-product-catalog.js";
 
 const phaseMessages = {
   loading: "Loading product view…",
@@ -26,15 +25,14 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
       Close
     </button>
     <div class="shop-product-preview">
-      <img class="shop-product-photo" width="768" height="768" decoding="async" hidden
-        alt="Front of the New Moon Australian abalone can">
+      <img class="shop-product-photo" width="768" height="768" decoding="async" alt="" hidden>
     </div>
     <div class="shop-product-panel">
       <p class="shop-product-brand">New Moon</p>
-      <h2 id="shop-product-title">Australian abalone</h2>
+      <h2 id="shop-product-title"></h2>
       <dl class="shop-product-specs">
-        <div><dt>Pack size</dt><dd>425 g</dd></div>
-        <div><dt>Origin</dt><dd>Australia</dd></div>
+        <div><dt>Pack size</dt><dd></dd></div>
+        <div><dt>Origin</dt><dd></dd></div>
       </dl>
       <p class="shop-product-status" role="status" aria-atomic="true"></p>
       <div class="shop-product-rotate" role="group" aria-label="Product view controls">
@@ -56,6 +54,8 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
   const preview = root.querySelector(".shop-product-preview");
   const photo = root.querySelector(".shop-product-photo");
   const close = root.querySelector(".shop-product-close");
+  const title = root.querySelector("h2");
+  const [packSize, origin] = root.querySelectorAll("dd");
   const status = root.querySelector(".shop-product-status");
   const rotateGroup = root.querySelector(".shop-product-rotate");
   const [left, reset, right] = rotateGroup.querySelectorAll("button");
@@ -63,6 +63,7 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
   const events = new AbortController();
   const { signal } = events;
   let previousFocus;
+  let currentProduct;
 
   function bind(button, action) {
     button.addEventListener("click", (event) => {
@@ -75,7 +76,7 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
   bind(reset, onReset);
   bind(right, () => onRotate(1));
   bind(putBack, onPutBack);
-  bind(add, () => onAddToBasket(CAN_ID));
+  bind(add, () => onAddToBasket(currentProduct.id));
 
   document.addEventListener("keydown", (event) => {
     if (root.hidden || event.defaultPrevented || event.key !== "Escape") return;
@@ -87,11 +88,19 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
   }, { signal });
   mount.append(root);
 
-  function render({ phase = "idle", fallback = false, added = false, opener } = {}) {
+  function render({ phase = "idle", product, fallback = false, added = false, opener } = {}) {
     const visible = phase !== "idle";
     if (visible && root.hidden) previousFocus = opener ?? document.activeElement;
     const wasVisible = !root.hidden;
     const activeControl = root.contains(document.activeElement) ? document.activeElement : null;
+    const selected = getNewMoonProduct(product?.id) ?? (wasVisible ? currentProduct : undefined) ?? NEW_MOON_DEFAULT_PRODUCT;
+    if (currentProduct !== selected) {
+      currentProduct = selected;
+      title.textContent = selected.title;
+      packSize.textContent = selected.size;
+      origin.textContent = selected.origin;
+      photo.alt = `Front of the New Moon ${selected.title} can`;
+    }
     root.dataset.phase = phase;
     root.toggleAttribute("data-fallback", fallback);
     const inspecting = phase === "inspecting";
@@ -101,7 +110,7 @@ export function createShopProductUI({ mount, onClose, onRotate, onReset, onPutBa
     add.disabled = !inspecting || added;
     add.textContent = added ? "Added to basket" : "Add to basket";
     photo.hidden = !visible || !fallback;
-    if (!photo.hidden && !photo.hasAttribute("src")) photo.src = PACKSHOT.href;
+    if (!photo.hidden && photo.src !== selected.photo) photo.src = selected.photo;
     const message = added ? "Added to the virtual basket." :
       phaseMessages[phase] ?? (fallback && inspecting ? "Showing product photo." : "");
     if (status.textContent !== message) status.textContent = message;

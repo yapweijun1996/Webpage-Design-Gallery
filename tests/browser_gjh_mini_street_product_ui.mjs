@@ -20,6 +20,7 @@ const html = `<!doctype html>
 </main>
 <script type="module">
   import { createShopProductUI } from "./shop-product-ui.js";
+  import { getNewMoonProduct } from "./shop-product-catalog.js";
   const stage = document.getElementById("stage");
   const opener = document.getElementById("opener");
   const events = [];
@@ -39,14 +40,17 @@ const html = `<!doctype html>
     },
   });
   opener.addEventListener("click", () => product.render({ phase: "loading", opener }));
-  window.fixture = { product, events };
+  window.fixture = { product, events, getNewMoonProduct };
 </script>`;
 const files = new Map([
   [route + "assets/theme.css", "text/css"],
   [route + "style.css", "text/css"],
   [route + "shop-product-ui.css", "text/css"],
   [route + "shop-product-ui.js", "text/javascript"],
-  ["/demos/corporate/gjh/v11/assets/new-moon-au-425g-front.webp", "image/webp"],
+  [route + "shop-product-catalog.js", "text/javascript"],
+  ...["au-425g", "nz-425g", "sa-425g", "mx-454g"].map(id => [
+    `/demos/corporate/gjh/v11/assets/new-moon-${id}-front.webp`, "image/webp",
+  ]),
 ]);
 
 async function checkBounds(page, stage, dialog, settings) {
@@ -149,6 +153,27 @@ test("product controls and static fallback share one responsive scene", async ()
       assert.equal(await page.evaluate(() => document.activeElement.id), "opener");
       assert.deepEqual(await page.evaluate(() => window.fixture.events),
         [-1, 1, "reset", "put-back", "close", "au-425g", "close"]);
+      for (const [id, title, origin, size] of [
+        ["nz-425g", "New Zealand abalone", "New Zealand", "425 g"],
+        ["sa-425g", "South African abalone", "South Africa", "425 g"],
+        ["mx-454g", "Mexican abalone", "Mexico", "454 g"],
+      ]) {
+        await page.evaluate((id) => {
+          const {product, getNewMoonProduct} = window.fixture;
+          product.render({phase: "inspecting", product: getNewMoonProduct(id), fallback: true});
+        }, id);
+        const variant = page.getByRole("dialog", {name: title});
+        await variant.waitFor();
+        assert.deepEqual(await variant.locator("dd").allTextContents(), [size, origin]);
+        const variantPhoto = variant.getByRole("img", {name: `Front of the New Moon ${title} can`});
+        assert.ok((await variantPhoto.getAttribute("src")).endsWith(`new-moon-${id}-front.webp`));
+        await variantPhoto.evaluate(photo => photo.decode());
+        await checkBounds(page, stage, variant, settings);
+        await variant.getByRole("button", {name: "Add to basket", exact: true}).click();
+        assert.equal(await page.evaluate(() => window.fixture.events.at(-1)), id);
+        assert.ok(await variant.getByRole("button", {name: "Added to basket"}).isDisabled());
+        await variant.getByRole("button", {name: "Close"}).click();
+      }
       await page.evaluate(() => window.fixture.product.destroy());
       assert.equal(await page.locator(".shop-product").count(), 0);
       assert.deepEqual(errors, []);
