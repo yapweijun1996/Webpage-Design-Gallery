@@ -277,7 +277,25 @@ dialog h2 { margin-right: 44px; }
 .back { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-back-link); }
 dialog[aria-labelledby="vending-title"] { width: min(100% - 26px, 510px); }
 #vending { padding-inline: clamp(12px, 4vw, 26px); }
-#vending-instructions { margin-block: 8px 14px; }
+.vending-guide { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-block: 8px 14px; }
+#vending-instructions { margin: 0; }
+.vending-sound {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-toolbar-button);
+  background: var(--color-toolbar);
+  font-size: var(--type-toolbar);
+  touch-action: manipulation;
+}
+.vending-sound:hover { background: var(--color-toolbar-hover); }
+.vending-sound[aria-pressed="true"] { background: var(--color-toolbar-selected); color: var(--color-stop-ink); }
+.vending-sound[aria-pressed="false"] .vending-sound-on,
+.vending-sound[aria-pressed="true"] .vending-sound-off { display: none; }
 .vending-layout[data-viewer] {
   display: grid;
   align-items: start;
@@ -550,7 +568,7 @@ dialog[aria-labelledby="vending-title"] { width: min(100% - 26px, 510px); }
   background: var(--surface-vending-vent);
 }
 
-.vending-layout[data-viewer] :is(.vending-header, .vending-hardware, .vending-pocket, .vending-vent, .vending-flight) { display: none; }
+.vending-layout[data-viewer] :is(.vending-header, .vending-hardware, .vending-pocket, .vending-vent) { display: none; }
 .vending-layout[data-viewer] .vending-face { grid-template-columns: minmax(0, 1fr); }
 .vending-layout[data-viewer] .vending-controls { grid-template-columns: minmax(0, 1fr) minmax(60px, 29%); }
 .vending-layout[data-viewer] .vending-readout {
@@ -561,6 +579,12 @@ dialog[aria-labelledby="vending-title"] { width: min(100% - 26px, 510px); }
   padding-inline: 8px;
 }
 .vending-layout[data-viewer] .vending-tray { grid-template-columns: 1fr; min-height: 46px; }
+.vending-layout[data-viewer] .vending-machine[data-local-vend] .vending-tray { grid-template-columns: minmax(0, 1fr) auto; }
+.vending-layout[data-viewer] .vending-machine[data-local-vend] .vending-pocket { display: grid; }
+@media (max-width: 739px) {
+  .vending-layout[data-viewer] .vending-tray { grid-template-columns: minmax(0, 1fr) auto; }
+  .vending-layout[data-viewer] .vending-pocket { display: grid; }
+}
 
 @media (max-width: 720px) {
   .masthead-inner, .street { width: calc(100% - 24px); }

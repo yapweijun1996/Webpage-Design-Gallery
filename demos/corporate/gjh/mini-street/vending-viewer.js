@@ -1,5 +1,6 @@
 import * as THREE from "../v11/vendor/three.module.min.js";
 import { buildVendingModel } from "./vending-model.js";
+import { VEND_DURATION } from "./vending-sequence.js";
 
 const HOME_YAW = 0.31;
 const HOME_PITCH = 0.13;
@@ -7,7 +8,7 @@ const TURN_STEP = Math.PI / 7;
 const TILT_STEP = Math.PI / 18;
 const DRAG_THRESHOLD = 6;
 
-export function createVendingViewer(preview, { drinks, motion, dropDuration, onFailure }) {
+export function createVendingViewer(preview, { drinks, motion, onFailure }) {
   const viewport = preview.querySelector(".vending-orbit");
   const canvas = document.createElement("canvas");
   canvas.setAttribute("aria-hidden", "true");
@@ -18,6 +19,8 @@ export function createVendingViewer(preview, { drinks, motion, dropDuration, onF
   let renderer;
   let model;
   let observer;
+  let intersection;
+  let inView = true;
   let frame = 0;
   let width = 0;
   let height = 0;
@@ -27,6 +30,7 @@ export function createVendingViewer(preview, { drinks, motion, dropDuration, onF
   let yaw = HOME_YAW;
   let pitch = HOME_PITCH;
   let state;
+  let returnView;
 
   function dispose() {
     if (disposed) return;
@@ -34,6 +38,7 @@ export function createVendingViewer(preview, { drinks, motion, dropDuration, onF
     cancelAnimationFrame(frame);
     events.abort();
     observer?.disconnect();
+    intersection?.disconnect();
     if (pointer && viewport.hasPointerCapture(pointer.id)) viewport.releasePointerCapture(pointer.id);
     delete viewport.dataset.dragging;
     canvas.remove();
@@ -55,12 +60,12 @@ export function createVendingViewer(preview, { drinks, motion, dropDuration, onF
   }
 
   function invalidate() {
-    if (!frame && !disposed && !document.hidden) frame = requestAnimationFrame(draw);
+    if (!frame && !disposed && inView && !document.hidden) frame = requestAnimationFrame(draw);
   }
 
   function draw(now) {
     frame = 0;
-    if (disposed || document.hidden) return;
+    if (disposed || !inView || document.hidden) return;
     const nextWidth = viewport.clientWidth;
     const nextHeight = viewport.clientHeight;
     if (!nextWidth || !nextHeight) return;
@@ -76,13 +81,19 @@ export function createVendingViewer(preview, { drinks, motion, dropDuration, onF
         camera.updateProjectionMatrix();
       }
 
+      if (returnView && !motion.matches) {
+        const step = THREE.MathUtils.smoothstep(now - state.startedAt, 0, 410);
+        yaw = THREE.MathUtils.lerp(returnView.yaw, HOME_YAW, step);
+        pitch = THREE.MathUtils.lerp(returnView.pitch, HOME_PITCH, step);
+        if (step === 1) returnView = undefined;
+      }
       const distance = Math.max(4.65, 3.35 / camera.aspect);
       const horizontal = Math.cos(pitch) * distance;
       camera.position.set(Math.sin(yaw) * horizontal, 1.17 + Math.sin(pitch) * distance, Math.cos(yaw) * horizontal);
       camera.lookAt(0, 1.17, 0);
 
       const progress = state?.phase === "dispensing" && !motion.matches
-        ? THREE.MathUtils.clamp((now - state.startedAt) / dropDuration, 0, 1)
+        ? THREE.MathUtils.clamp((now - state.startedAt) / VEND_DURATION, 0, 1)
         : 1;
       model.poseDrop(progress);
       renderer.render(scene, camera);
@@ -97,12 +108,14 @@ export function createVendingViewer(preview, { drinks, motion, dropDuration, onF
   }
 
   function turn(horizontal, vertical = 0) {
+    returnView = undefined;
     yaw = (yaw + horizontal) % (2 * Math.PI);
     pitch = THREE.MathUtils.clamp(pitch + vertical, -0.12, 0.66);
     invalidate();
   }
 
   function resetView() {
+    returnView = undefined;
     yaw = HOME_YAW;
     pitch = HOME_PITCH;
     invalidate();
@@ -134,6 +147,7 @@ export function createVendingViewer(preview, { drinks, motion, dropDuration, onF
 
     viewport.addEventListener("pointerdown", (event) => {
       if (!event.isPrimary || event.button !== 0 || pointer) return;
+      returnView = undefined;
       viewport.setPointerCapture(event.pointerId);
       pointer = { id: event.pointerId, type: event.pointerType, x: event.clientX, y: event.clientY, dragging: false };
     }, { signal });
@@ -162,11 +176,23 @@ export function createVendingViewer(preview, { drinks, motion, dropDuration, onF
     }
     observer = new ResizeObserver(invalidate);
     observer.observe(viewport);
+    if (typeof IntersectionObserver === "function") {
+      intersection = new IntersectionObserver(([entry]) => {
+        inView = entry.isIntersecting;
+        if (inView) invalidate();
+      });
+      intersection.observe(viewport);
+    }
     document.addEventListener("visibilitychange", invalidate, { signal });
 
     return {
       dispose,
       setState(next) {
+        returnView = undefined;
+        if (next.phase === "dispensing" && next.showDropInViewer && !motion.matches && !pointer && Math.cos(yaw) < 0.6) {
+          const offset = yaw - HOME_YAW;
+          returnView = { yaw: HOME_YAW + Math.atan2(Math.sin(offset), Math.cos(offset)), pitch };
+        }
         state = next;
         model.setState(state);
         invalidate();

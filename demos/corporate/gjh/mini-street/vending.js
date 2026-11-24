@@ -1,3 +1,6 @@
+import { createVendingAudio } from "./vending-audio.js";
+import { CHUTE_CONTACT, RELEASE, TRAY_IMPACT, TRAY_RATTLE, VEND_DURATION } from "./vending-sequence.js";
+
 export const drinks = [
   { code: "A1", name: "Lime Soda", label: "LIME", color: "#9fce63", shape: "can" },
   { code: "A2", name: "Peach Tea", label: "PEACH", color: "#f2a65f", shape: "bottle" },
@@ -6,8 +9,6 @@ export const drinks = [
   { code: "B2", name: "Still Water", label: "WATER", color: "#7dd1ea", shape: "bottle" },
   { code: "B3", name: "Lemon Tea", label: "LEMON", color: "#d9d875", shape: "bottle" },
 ];
-
-const DROP_DURATION = 880;
 
 function drinkArt({ label, color, shape }) {
   const art = document.createElement("span");
@@ -22,6 +23,9 @@ function drinkArt({ label, color, shape }) {
 export function setupVending(section) {
   const layout = section.querySelector(".vending-layout");
   const preview = layout.querySelector(".vending-viewer");
+  const viewport = preview.querySelector(".vending-orbit");
+  const guide = section.querySelector(".vending-guide");
+  const soundButton = guide.querySelector(".vending-sound");
   const dialog = section.closest("dialog");
   const machine = section.querySelector(".vending-machine");
   const stock = machine.querySelector(".vending-stock");
@@ -30,6 +34,8 @@ export function setupVending(section) {
   const tray = machine.querySelector(".vending-tray");
   const pocket = tray.querySelector(".vending-pocket");
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
+  const sound = createVendingAudio();
+  let soundRequest = 0;
   let selection = -1;
   let flight;
   let animation;
@@ -38,9 +44,20 @@ export function setupVending(section) {
   let viewer;
   let viewerRequest = 0;
   let opened = false;
+  let showDropInViewer = false;
+
+  function canSeeViewer() {
+    if (!viewer) return false;
+    const view = viewport.getBoundingClientRect();
+    const bounds = dialog?.open ? dialog.getBoundingClientRect() : view;
+    const screen = window.visualViewport;
+    const top = Math.max(view.top, bounds.top, screen?.offsetTop ?? 0);
+    const bottom = Math.min(view.bottom, bounds.bottom, screen ? screen.offsetTop + screen.height : window.innerHeight);
+    return view.height > 0 && bottom - top >= view.height * 0.72;
+  }
 
   function syncViewer() {
-    viewer?.setState({ phase: machine.dataset.phase, selection, startedAt });
+    viewer?.setState({ phase: machine.dataset.phase, selection, startedAt, showDropInViewer });
   }
 
   function setPhase(phase, text) {
@@ -67,9 +84,10 @@ export function setupVending(section) {
     name.className = "vending-drink-name";
     name.textContent = drink.name;
     slot.append(drinkArt(drink), code, name);
-    slot.addEventListener("click", () => {
+    slot.addEventListener("click", (event) => {
       selection = index;
       setPhase("selected", `${drink.code} · ${drink.name}`);
+      if (event.isTrusted) sound.play("select");
     });
     return slot;
   });
@@ -87,8 +105,11 @@ export function setupVending(section) {
 
   function reset(text = "Choose a drink") {
     clearFlight();
+    sound.stop();
     pocket.replaceChildren();
+    delete machine.dataset.localVend;
     selection = -1;
+    showDropInViewer = false;
     setPhase("idle", text);
   }
 
@@ -99,22 +120,22 @@ export function setupVending(section) {
     if (document.activeElement === serve) tray.focus();
   }
 
-  serve.addEventListener("click", () => {
+  serve.addEventListener("click", (event) => {
     if (machine.dataset.phase !== "selected") return;
     const drink = drinks[selection];
     const source = slots[selection].querySelector(".drink-art");
+    showDropInViewer = canSeeViewer();
+    const animate = !motion.matches && (showDropInViewer || typeof source.animate === "function");
+    if (!showDropInViewer || motion.matches) machine.dataset.localVend = "";
     startedAt = performance.now();
     setPhase("dispensing", `Dispensing ${drink.name}…`);
-    if (motion.matches) {
+    if (event.isTrusted) sound.play("vend", { bottle: drink.shape === "bottle", reducedMotion: !animate });
+    if (!animate) {
       deliver(drink);
       return;
     }
-    if (viewer) {
-      settleTimer = setTimeout(() => deliver(drink), DROP_DURATION);
-      return;
-    }
-    if (typeof source.animate !== "function") {
-      deliver(drink);
+    if (showDropInViewer) {
+      settleTimer = setTimeout(() => deliver(drink), VEND_DURATION);
       return;
     }
 
@@ -130,30 +151,45 @@ export function setupVending(section) {
     machine.append(flight);
     const drop = flight.animate([
       { offset: 0, transform: "translate(0, 0) rotate(0)" },
-      { offset: 0.22, transform: "translate(2px, -3px) rotate(12deg)", easing: "cubic-bezier(.55, .05, .87, .58)" },
-      { offset: 0.76, transform: `translate(${x}px, ${y + 4}px) rotate(91deg)`, easing: "ease-out" },
-      { offset: 0.89, transform: `translate(${x - 3}px, ${y - 6}px) rotate(72deg)`, easing: "ease-in" },
+      { offset: 0.12, transform: "translate(0, 0) rotate(0)", easing: "ease-in-out" },
+      { offset: RELEASE, transform: "translate(4px, 3px) rotate(12deg)", easing: "cubic-bezier(.45, .03, .84, .51)" },
+      { offset: CHUTE_CONTACT, transform: `translate(${x * 0.63}px, ${y * 0.53}px) rotate(51deg)`, easing: "ease-in" },
+      { offset: TRAY_IMPACT, transform: `translate(${x - 6}px, ${y + 1}px) rotate(96deg)`, easing: "ease-out" },
+      { offset: TRAY_RATTLE, transform: `translate(${x - 2}px, ${y - 5}px) rotate(77deg)`, easing: "ease-in" },
       { offset: 1, transform: `translate(${x}px, ${y}px) rotate(82deg)` },
-    ], { duration: DROP_DURATION, fill: "forwards" });
+    ], { duration: VEND_DURATION, fill: "forwards" });
     animation = drop;
     function settleDrop() {
       if (animation === drop) deliver(drink);
     }
     // Some browsers may leave a newly created animation pending indefinitely.
     // Finish the transaction even if the compositor never starts it.
-    settleTimer = setTimeout(settleDrop, 1600);
+    settleTimer = setTimeout(settleDrop, VEND_DURATION + 640);
     drop.finished.then(settleDrop, settleDrop);
   });
 
-  tray.addEventListener("click", () => {
+  tray.addEventListener("click", (event) => {
     if (machine.dataset.phase !== "ready") return;
     const index = selection;
     reset("Collected. Choose again.");
+    if (event.isTrusted) sound.play("collect", { bottle: drinks[index].shape === "bottle" });
     if (document.activeElement === tray) slots[index].focus();
   });
 
   motion.addEventListener?.("change", () => {
-    if (motion.matches && machine.dataset.phase === "dispensing") deliver(drinks[selection]);
+    if (!motion.matches || machine.dataset.phase !== "dispensing") return;
+    machine.dataset.localVend = "";
+    sound.stop();
+    deliver(drinks[selection]);
+  });
+
+  soundButton.addEventListener("click", async (event) => {
+    if (!event.isTrusted) return;
+    const request = ++soundRequest;
+    const enabled = soundButton.getAttribute("aria-pressed") !== "true";
+    soundButton.setAttribute("aria-pressed", String(enabled));
+    const active = await sound.setEnabled(enabled);
+    if (request === soundRequest) soundButton.setAttribute("aria-pressed", String(active));
   });
 
   function releaseViewer(restoreFocus = false) {
@@ -172,7 +208,7 @@ export function setupVending(section) {
       const { createVendingViewer } = await import("./vending-viewer.js");
       if (request !== viewerRequest) return;
       viewer = createVendingViewer(preview, {
-        drinks, motion, dropDuration: DROP_DURATION, onFailure: () => releaseViewer(true),
+        drinks, motion, onFailure: () => releaseViewer(true),
       });
       preview.hidden = false;
       layout.dataset.viewer = "ready";
@@ -204,10 +240,14 @@ export function setupVending(section) {
   window.addEventListener("pageshow", (event) => {
     if (event.persisted && opened) loadViewer();
   });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) sound.stop();
+  });
 
   reset();
   machine.hidden = false;
   section.querySelector("#vending-note").hidden = true;
-  section.querySelector("#vending-instructions").hidden = false;
+  guide.hidden = false;
+  soundButton.hidden = !sound.available;
   return { open, close };
 }

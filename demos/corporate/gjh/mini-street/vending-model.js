@@ -1,11 +1,11 @@
 import * as THREE from "../v11/vendor/three.module.min.js";
 import { paintedTexture } from "./surfaces.js";
+import { CHUTE_CONTACT, MOTOR_START, RELEASE, TRAY_IMPACT, TRAY_RATTLE } from "./vending-sequence.js";
 
 const BAY = -0.133;
 const PANEL = 0.407;
 const STOCK_DEPTH = 0.271;
 const TRAY_DEPTH = 0.367;
-const TRAY_CENTER = 0.465;
 const { clamp, lerp, smoothstep } = THREE.MathUtils;
 
 function moon(ctx, x, y, radius) {
@@ -256,6 +256,12 @@ export function buildVendingModel(scene, drinks, theme) {
     return group;
   }
 
+  const augerPath = new THREE.Curve();
+  augerPath.getPoint = (position, point = new THREE.Vector3()) => {
+    const angle = position * Math.PI * 4.6;
+    return point.set(Math.sin(angle) * 0.068, Math.cos(angle) * 0.068, position * 0.228);
+  };
+  const augerGeometry = new THREE.TubeGeometry(augerPath, 42, 0.005, 5, false);
   const slots = drinks.map((drink, index) => {
     const x = BAY + (index % 3 - 1) * 0.247;
     const shelf = shelves[Math.floor(index / 3)];
@@ -267,8 +273,11 @@ export function buildVendingModel(scene, drinks, theme) {
     rear.rotation.y = 0.42;
     cabinet.add(rear, front);
     const moving = front.clone();
+    moving.name = `${drink.code} dispensing pack`;
     moving.visible = false;
     cabinet.add(moving);
+    const auger = mesh(augerGeometry, steel, x, shelf + 0.082, 0.122);
+    auger.name = `${drink.code} auger`;
     const marker = box(black, x, shelf - 0.026, 0.362, 0.215, 0.039, 0.015);
     const code = paintedTexture(128, 28, (ctx, w, h) => {
       ctx.fillStyle = drink.color;
@@ -278,7 +287,7 @@ export function buildVendingModel(scene, drinks, theme) {
     decal(print(code, true), x, shelf - 0.026, 0.371, 0.21, 0.034);
     const led = box(slotLamp, x, shelf - 0.054, 0.362, 0.156, 0.009, 0.010);
     led.visible = false;
-    return { front, moving, marker, led };
+    return { front, moving, auger, marker, led, bottle: drink.shape === "bottle" };
   });
 
   bevel(enamel, PANEL, 1.215, 0.292, 0.282, 1.771, 0.390, 0.017);
@@ -297,9 +306,14 @@ export function buildVendingModel(scene, drinks, theme) {
     for (const y of [1.649, 1.601, 1.553]) box(steel, PANEL + dx, y, 0.540, 0.033, 0.034, 0.020);
   }
   decal(print(keys, true), PANEL, 1.601, 0.551, 0.138, 0.144);
-  bevel(brass, PANEL, 1.47, 0.543, 0.141, 0.059, 0.022, 0.007);
+  const vendButton = new THREE.Group();
+  vendButton.name = "Vend button";
+  cabinet.add(vendButton);
   const vendLabel = paintedTexture(160, 52, (ctx, w, h) => lettering(ctx, "VEND", w / 2, h / 2, "bold 31px monospace", darkGreen));
-  decal(print(vendLabel, true), PANEL, 1.47, 0.555, 0.132, 0.05);
+  vendButton.add(
+    bevel(brass, PANEL, 1.47, 0.543, 0.141, 0.059, 0.022, 0.007),
+    decal(print(vendLabel, true), PANEL, 1.47, 0.555, 0.132, 0.05),
+  );
   const reader = paintedTexture(128, 80, (ctx, w, h) => {
     ctx.strokeStyle = "#c1ceb9";
     ctx.lineWidth = 3;
@@ -333,6 +347,7 @@ export function buildVendingModel(scene, drinks, theme) {
   box(trayTrim, BAY, 0.399, 0.496, 0.758, 0.029, 0.044);
   box(brass, BAY, 0.649, 0.492, 0.758, 0.032, 0.042);
   const flap = new THREE.Group();
+  flap.name = "Pickup flap";
   flap.position.set(BAY, 0.631, 0.388);
   cabinet.add(flap);
   box(rubber, 0, -0.045, 0, 0.679, 0.09, 0.020, flap);
@@ -463,6 +478,7 @@ export function buildVendingModel(scene, drinks, theme) {
       slot.moving.visible = selected && vending;
       slot.led.visible = selected;
       slot.marker.material = selected ? frame : black;
+      slot.auger.rotation.z = 0;
     }
     slotLamp.color.set(vending ? active : "#91c879");
     trayTrim.emissiveIntensity = phase === "ready" ? 0.64 : 0;
@@ -479,22 +495,42 @@ export function buildVendingModel(scene, drinks, theme) {
   }
 
   function poseDrop(progress) {
+    vendButton.position.z = 0;
     if (!current || !current.moving.visible) {
       flap.rotation.x = 0;
       return;
     }
-    const { front, moving } = current;
-    const slide = smoothstep(progress, 0, 0.24);
-    const fall = Math.pow(smoothstep(progress, 0.18, 0.88), 1.35);
-    const settle = smoothstep(progress, 0.67, 1);
-    const bounce = Math.sin(settle * Math.PI) * 0.045;
+    const { front, moving, auger, bottle } = current;
+    const push = smoothstep(progress, MOTOR_START, RELEASE);
+    const fall = clamp((progress - RELEASE) / (TRAY_IMPACT - RELEASE), 0, 1);
+    const intoChute = smoothstep(progress, CHUTE_CONTACT, TRAY_IMPACT);
+    const roll = smoothstep(progress, TRAY_IMPACT, 1);
+    const firstBounce = clamp((progress - TRAY_IMPACT) / (TRAY_RATTLE - TRAY_IMPACT), 0, 1);
+    const secondBounce = clamp((progress - TRAY_RATTLE) / (1 - TRAY_RATTLE), 0, 1);
+    const bounce = 0.037 * Math.sin(Math.PI * firstBounce) + 0.013 * Math.sin(Math.PI * secondBounce);
+    const chuteX = lerp(front.position.x, BAY, 0.76);
+    const tilt = 1.87 * smoothstep(progress, RELEASE - 0.04, TRAY_IMPACT) - 0.32 * roll + bounce * 4;
+    const radius = bottle ? 0.058 : 0.064;
+    const halfLength = bottle ? 0.156 : 0.13;
+    const restingHeight = 0.412 + radius;
+    const contactHeight = (halfLength * Math.abs(Math.cos(tilt)) - radius * (1 - Math.sin(tilt))) * intoChute;
+
+    // The pack tips into the gap between the stock and the glass, then rolls across the tray.
+    auger.rotation.z = push * Math.PI * 2;
     moving.position.set(
-      lerp(front.position.x, BAY, settle),
-      lerp(front.position.y, TRAY_CENTER, fall) + bounce,
-      lerp(lerp(STOCK_DEPTH, 0.415, slide), TRAY_DEPTH, settle),
+      lerp(lerp(front.position.x, chuteX, intoChute), BAY, roll),
+      lerp(front.position.y, restingHeight, fall ** 2) + contactHeight + bounce,
+      lerp(lerp(STOCK_DEPTH, 0.424, push), TRAY_DEPTH, smoothstep(progress, CHUTE_CONTACT, 1)),
     );
-    moving.rotation.set(0, 0, lerp(0, 1.49, smoothstep(progress, 0.57, 0.96)));
-    flap.rotation.x = -0.87 * smoothstep(progress, 0.61, 0.95);
+    moving.rotation.set(
+      0,
+      0.12 * intoChute - 0.08 * roll,
+      tilt,
+    );
+    vendButton.position.z = -0.019 * (smoothstep(progress, 0, 0.034) - smoothstep(progress, 0.062, 0.12));
+    flap.rotation.x = -1.16 * smoothstep(progress, CHUTE_CONTACT, TRAY_IMPACT) + 0.85 * roll;
+    trayTrim.emissiveIntensity = 0.64 * roll;
+    trayLight.intensity = 0.35 + 1.95 * intoChute;
   }
 
   return { setState, poseDrop };

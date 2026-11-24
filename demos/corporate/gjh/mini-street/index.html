@@ -92,7 +92,17 @@
       <section class="detail" id="vending" aria-labelledby="vending-title">
         <h2 id="vending-title" tabindex="-1">Vending machine</h2>
         <p id="vending-note">This virtual drink machine requires JavaScript to operate.</p>
-        <p id="vending-instructions" hidden>Pick a fictional drink, press Vend, then collect it. Free simulation.</p>
+        <div class="vending-guide" hidden>
+          <p id="vending-instructions">Pick a drink, press Vend, then collect it. Free simulation.</p>
+          <button class="vending-sound" type="button" aria-pressed="false" hidden>
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 9v6h4l5 4V5L7 9H3Z"/>
+              <path class="vending-sound-off" d="m16 9 5 6m0-6-5 6"/>
+              <path class="vending-sound-on" d="M16 9a5 5 0 0 1 0 6m3-9a9 9 0 0 1 0 12"/>
+            </svg>
+            Sound
+          </button>
+        </div>
         <div class="vending-layout">
           <div class="vending-viewer" role="group" aria-label="3D vending machine" hidden>
             <div class="vending-orbit" tabindex="0" role="group" aria-label="Machine view" aria-describedby="vending-orbit-help"></div>
