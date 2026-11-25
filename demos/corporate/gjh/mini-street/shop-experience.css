@@ -11,12 +11,25 @@
   pointer-events: none;
 }
 .shop-experience-basket {
-  position: absolute;
-  top: 64px;
-  right: 16px;
+  grid-area: basket;
+  align-self: start;
+  justify-self: end;
+  min-width: 0;
+  max-width: 100%;
   z-index: var(--shop-experience-z-index-2);
   pointer-events: auto;
 }
+.shop-interior-controls[data-paused] .shop-experience-basket {
+  /* The dialog restores focus to this launcher before the scene resumes. */
+  visibility: visible;
+}
+.shop-experience-basket :is(.mini-basket-dock, .mini-basket-launcher) {
+  max-width: 100%;
+}
+.shop-experience-basket .mini-basket-launcher {
+  white-space: normal;
+}
+.stage[data-interior] { min-height: 20rem; }
 .stage[data-interior] :is(.intro, .stops, .stage-shade, .scene-status) {
   visibility: hidden;
   pointer-events: none;

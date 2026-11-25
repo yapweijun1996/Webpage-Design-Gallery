@@ -63,7 +63,7 @@ function disposeShopObjects(root) {
   for (const geometry of geometries) geometry.dispose();
 }
 
-function createControls(root, onExit, onInspect, onLock, signal) {
+function createControls(root, basketHost, onExit, onInspect, onLock, signal) {
   const document = root.ownerDocument;
   const group = document.createElement("div");
   group.className = "shop-interior-controls";
@@ -71,15 +71,15 @@ function createControls(root, onExit, onInspect, onLock, signal) {
   group.setAttribute("role", "region");
   group.setAttribute("aria-label", "New Moon Shop controls");
 
-  function add(tag, className, label) {
+  function add(parent, tag, className, label) {
     const element = document.createElement(tag);
     element.className = className;
     if (label) element.textContent = label;
-    group.append(element);
+    parent.append(element);
     return element;
   }
 
-  const title = add("div", "shop-interior-title", "New Moon Shop");
+  const title = add(group, "div", "shop-interior-title", "New Moon Shop");
   const hint = document.createElement("small");
   hint.className = "shop-interior-keyboard-hint";
   hint.textContent = "WASD to walk · Drag or use ← and → to turn";
@@ -89,28 +89,30 @@ function createControls(root, onExit, onInspect, onLock, signal) {
   touchHint.textContent = "Use the stick to walk and drag to look";
   title.append(touchHint);
 
-  const exit = add("button", "shop-interior-exit", "‹ Exit shop");
+  const exit = add(group, "button", "shop-interior-exit", "‹ Exit shop");
   exit.type = "button";
   exit.addEventListener("click", onExit, { signal });
 
-  const lock = add("button", "shop-interior-lock", "Capture mouse");
+  const actions = add(group, "div", "shop-interior-actions");
+  const lock = add(actions, "button", "shop-interior-lock", "Capture mouse");
   lock.type = "button";
   lock.hidden = !onLock;
   lock.setAttribute("aria-pressed", "false");
   if (onLock) lock.addEventListener("click", onLock, { signal });
 
-  const inspect = add("button", "shop-interior-inspect", "Walk closer and aim");
+  const inspect = add(actions, "button", "shop-interior-inspect", "Walk closer and aim");
   inspect.type = "button";
   inspect.disabled = true;
   inspect.addEventListener("click", onInspect, { signal });
 
-  const reticle = add("span", "shop-interior-reticle");
-  reticle.setAttribute("aria-hidden", "true");
-
-  const stick = add("div", "shop-interior-stick");
+  const stick = add(actions, "div", "shop-interior-stick");
   stick.setAttribute("aria-hidden", "true");
   const thumb = document.createElement("span");
   stick.append(thumb);
+
+  const reticle = add(group, "span", "shop-interior-reticle");
+  reticle.setAttribute("aria-hidden", "true");
+  if (basketHost) group.append(basketHost);
   root.append(group);
 
   return { group, lock, inspect, reticle, stick, thumb };
@@ -122,7 +124,7 @@ function createControls(root, onExit, onInspect, onLock, signal) {
  * with its base at y=0 and face toward +Z. Omit the result to use the default can.
  */
 export function createShopInterior({
-  THREE, renderer, canvas = renderer.domElement, controlsRoot = canvas.parentElement,
+  THREE, renderer, canvas = renderer.domElement, controlsRoot = canvas.parentElement, basketHost,
   products = [], createProduct, onProductSelect, onProductFocus, onExitRequest,
 }) {
   const document = canvas.ownerDocument;
@@ -441,7 +443,7 @@ export function createShopInterior({
           controls?.lock.setAttribute("aria-pressed", "false");
         }
       } : undefined;
-      controls = createControls(controlsRoot,
+      controls = createControls(controlsRoot, basketHost,
         () => onExitRequest?.(), () => select(focus ?? pick()), requestLock, events.signal);
     }
     bindInputs(events.signal);

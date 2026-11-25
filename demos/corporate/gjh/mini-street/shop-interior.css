@@ -11,19 +11,32 @@ canvas[data-shop-interior]:active {
   position: absolute;
   z-index: var(--shop-interior-z-index-1);
   inset: 0;
+  display: grid;
+  grid-template-areas:
+    "title exit"
+    "title basket"
+    ". ."
+    "actions actions";
+  grid-template-columns: minmax(0, 1fr) fit-content(50%);
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: var(--shop-inset);
   isolation: isolate;
   pointer-events: none;
   color: var(--shop-interior-color-1);
   font: var(--shop-interior-font-1);
+  overflow-wrap: anywhere;
   --shop-inset: var(--shop-interior-shop-inset-1);
+  padding: max(var(--shop-inset), env(safe-area-inset-top, 0px))
+    max(var(--shop-inset), env(safe-area-inset-right, 0px))
+    max(var(--shop-inset), env(safe-area-inset-bottom, 0px))
+    max(var(--shop-inset), env(safe-area-inset-left, 0px));
 }
 
 .shop-interior-controls[data-paused] {
   visibility: hidden;
 }
 
-.shop-interior-controls button {
-  position: absolute;
+.shop-interior-controls :is(.shop-interior-exit, .shop-interior-actions > button) {
   min-width: 44px;
   min-height: 44px;
   padding: 8px 14px;
@@ -36,11 +49,11 @@ canvas[data-shop-interior]:active {
   box-shadow: var(--shop-interior-box-shadow-1);
 }
 
-.shop-interior-controls button:hover {
+.shop-interior-controls :is(.shop-interior-exit, .shop-interior-actions > button):hover {
   background: var(--shop-interior-background-2);
 }
 
-.shop-interior-controls button:focus-visible {
+.shop-interior-controls :is(.shop-interior-exit, .shop-interior-actions > button):focus-visible {
   outline: var(--shop-interior-outline-1);
   outline-offset: 3px;
 }
@@ -62,10 +75,20 @@ canvas[data-shop-interior]:active {
   background: var(--shop-interior-background-5);
 }
 
+.shop-interior-actions {
+  grid-area: actions;
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: end;
+  column-gap: var(--shop-inset);
+}
+
 .shop-interior-title {
-  position: absolute;
-  inset: var(--shop-inset) auto auto var(--shop-inset);
-  max-width: calc(100% - var(--shop-inset) * 2 - 108px);
+  grid-area: title;
+  align-self: start;
+  justify-self: start;
+  min-width: 0;
+  max-width: 100%;
   padding: 8px 11px;
   border: var(--shop-interior-border-2);
   border-radius: var(--shop-interior-border-radius-1);
@@ -85,20 +108,23 @@ canvas[data-shop-interior]:active {
 }
 
 .shop-interior-exit {
-  top: var(--shop-inset);
-  right: var(--shop-inset);
+  grid-area: exit;
+  align-self: start;
+  justify-self: end;
+  max-width: 100%;
 }
 
 .shop-interior-inspect {
-  right: var(--shop-inset);
-  bottom: var(--shop-inset);
-  max-width: min(56%, 19rem);
+  grid-area: 1 / 2;
+  justify-self: end;
+  max-width: min(100%, 19rem);
   text-wrap: balance;
 }
 
-.shop-interior-lock {
-  left: var(--shop-inset);
-  bottom: var(--shop-inset);
+.shop-interior-lock,
+.shop-interior-stick {
+  grid-area: 1 / 1;
+  justify-self: start;
 }
 
 .shop-interior-lock[hidden] {
@@ -125,9 +151,6 @@ canvas[data-shop-interior]:active {
 }
 
 .shop-interior-stick {
-  position: absolute;
-  left: var(--shop-inset);
-  bottom: var(--shop-inset);
   display: none;
   width: clamp(78px, 22vw, 100px);
   aspect-ratio: 1;

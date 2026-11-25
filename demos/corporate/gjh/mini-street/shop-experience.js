@@ -130,6 +130,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     renderer: street.renderer,
     canvas: street.canvas,
     controlsRoot: controls,
+    basketHost,
     products: NEW_MOON_PRODUCTS,
     createProduct,
     onProductSelect: selectProduct,
@@ -167,7 +168,8 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     const rect = stage.getBoundingClientRect();
     indoor.resize(rect.width, rect.height);
   }
-  window.addEventListener("resize", resize);
+  const resizeObserver = new ResizeObserver(resize);
+  resizeObserver.observe(stage);
 
   return {
     enter() {
@@ -192,6 +194,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
       frame = 0;
       basket.close();
       hand.cancel();
+      root.append(basketHost);
       indoor.exit();
       root.hidden = true;
       delete stage.dataset.interior;
@@ -208,7 +211,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     destroy() {
       this.exit();
       disposed = true;
-      window.removeEventListener("resize", resize);
+      resizeObserver.disconnect();
       hand.dispose();
       indoor.dispose();
       basket.cleanup();
