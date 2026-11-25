@@ -49,7 +49,10 @@ def observe_camera(route):
     marker = 'camera.rotation.order = "YXZ";'
     source = response.text()
     assert source.count(marker) == 1
-    probe = "\nwindow.__shopHudTestPose = () => [camera.position.x, camera.position.z, camera.rotation.y];"
+    probe = """
+window.__shopHudTestPose = () => [camera.position.x, camera.position.z, camera.rotation.y];
+window.__shopHudTestAspect = () => camera.aspect;
+"""
     route.fulfill(response=response, body=source.replace(marker, marker + probe, 1))
 
 
@@ -108,6 +111,27 @@ def check_touch_input(page, stage):
     assert abs(page.evaluate("window.__shopHudTestPose()[2]") - stopped[2]) > 0.1, "Canvas drag must change camera yaw"
 
 
+def check_resize_fallback(context, url):
+    page = context.new_page()
+    try:
+        page.goto(url, wait_until="domcontentloaded")
+        entry = page.locator(".scene-shop-entry")
+        expect(entry).to_be_visible(timeout=15000)
+        # The street is already initialized. Exercise the shop observer fallback only.
+        page.evaluate("window.ResizeObserver = undefined")
+        entry.tap()
+        expect(page.locator(".shop-interior-controls")).to_be_focused(timeout=15000)
+        previous = page.evaluate("window.__shopHudTestAspect()")
+        page.set_viewport_size({"width": 390, "height": 844})
+        page.wait_for_function("""previous => {
+          const stage = document.querySelector("#stage").getBoundingClientRect();
+          const next = window.__shopHudTestAspect();
+          return next !== previous && Math.abs(next - stage.width / stage.height) < 0.001;
+        }""", arg=previous)
+    finally:
+        page.close()
+
+
 def exercise(browser, url, evidence):
     context = browser.new_context(is_mobile=True, has_touch=True, reduced_motion="reduce",
                                   viewport={"width": VIEWPORTS[0][0], "height": VIEWPORTS[0][1]})
@@ -115,7 +139,7 @@ def exercise(browser, url, evidence):
         page = context.new_page()
         errors = []
         page.on("pageerror", lambda error: errors.append(str(error)))
-        page.route("**/mini-street/shop-interior.js", observe_camera)
+        context.route("**/mini-street/shop-interior.js", observe_camera)
         page.goto(url, wait_until="domcontentloaded")
         entry = page.locator(".scene-shop-entry")
         entry.tap(timeout=15000)
@@ -168,6 +192,7 @@ def exercise(browser, url, evidence):
         expect(hud).to_be_hidden()
         expect(entry).to_be_focused()
         assert not errors, errors
+        check_resize_fallback(context, url)
     finally:
         context.close()
 

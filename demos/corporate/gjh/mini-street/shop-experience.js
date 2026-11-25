@@ -168,8 +168,9 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     const rect = stage.getBoundingClientRect();
     indoor.resize(rect.width, rect.height);
   }
-  const resizeObserver = new ResizeObserver(resize);
-  resizeObserver.observe(stage);
+  const resizeObserver = typeof ResizeObserver === "function" ? new ResizeObserver(resize) : null;
+  if (resizeObserver) resizeObserver.observe(stage);
+  else window.addEventListener("resize", resize);
 
   return {
     enter() {
@@ -211,7 +212,8 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     destroy() {
       this.exit();
       disposed = true;
-      resizeObserver.disconnect();
+      if (resizeObserver) resizeObserver.disconnect();
+      else window.removeEventListener("resize", resize);
       hand.dispose();
       indoor.dispose();
       basket.cleanup();
