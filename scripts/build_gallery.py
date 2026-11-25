@@ -459,7 +459,7 @@ def build_mini_street(catalog, version):
         raise ValueError(f"Missing Mini Street runtime resources: {sorted(runtime - resources)}")
     hashes = {name: hashlib.sha256(source_bytes(ROOT / name)).digest() for name in sorted(runtime)}
     # Revision the publication format separately from the runtime source digests.
-    fingerprint = hashlib.sha256(b"mini-street-pages-v1\0")
+    fingerprint = hashlib.sha256(b"mini-street-pages-v1\0" + version.encode("ascii") + b"\0")
     for name, digest in hashes.items():
         fingerprint.update(name.as_posix().encode("utf-8") + b"\0" + digest)
     build = fingerprint.hexdigest()[:16]

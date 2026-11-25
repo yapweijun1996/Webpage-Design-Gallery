@@ -78,6 +78,11 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
   if (!button || !version || !status) return;
   const document = button.ownerDocument;
   const view = document.defaultView;
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => initMiniUpdate({ button, version, status, translate }),
+      { once: true });
+    return;
+  }
   const label = button.querySelector("[data-update-label]");
   const path = button.querySelector("path[data-update-icon]");
   const styles = [...document.querySelectorAll("link[data-mini-street-style]")];
@@ -184,7 +189,7 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
         offline();
       } else if (applying && sameRelease(applying, latest)) {
         view.location.replace(page);
-      } else if (current.build === latest.build) {
+      } else if (sameRelease(current, latest)) {
         show("current", "update.current", "Mini Street is up to date.");
       } else {
         available = latest;
