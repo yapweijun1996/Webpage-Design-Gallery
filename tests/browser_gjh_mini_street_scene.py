@@ -87,6 +87,7 @@ def exercise_desktop(browser, url):
     page.wait_for_function("window.miniStreetNight === false")
     assert page.evaluate("localStorage.getItem('gjh-mini-street-site-theme')") == "light"
     page.reload(wait_until="domcontentloaded")
+    expect(stage).to_have_attribute("data-webgl", "", timeout=15000)
     expect(day).to_have_attribute("aria-pressed", "true")
     page.wait_for_function("window.miniStreetNight === false")
     night.press("Enter")
