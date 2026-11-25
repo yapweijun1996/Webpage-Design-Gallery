@@ -15,6 +15,8 @@ from urllib.parse import parse_qs, urlsplit
 
 from playwright.sync_api import expect, sync_playwright
 
+from browser_gjh_mini_street_multi_product import PRODUCTS, inspect_product, route_camera
+
 ROUTE = "/demos/corporate/gjh/mini-street/"
 SEL = "#mini-update"
 STATUS = "#mini-update-status"
@@ -86,6 +88,68 @@ def layout(page):
 def record(page, directory, name):
     if directory:
         page.screenshot(path=str(directory / f"{name}.png"), animations="disabled")
+
+
+def permit_shop_camera_fixture(route):
+    response = route.fetch()
+    page = response.text()
+    match = re.search(r'<script type="importmap">(.*?)</script>', page, re.S)
+    assert match
+    import_map = json.loads(match.group(1))
+    # Only the fixture's camera-position module may have modified bytes.
+    del import_map["integrity"][import_map["imports"]["./shop-interior.js"]]
+    page = page[:match.start(1)] + json.dumps(import_map) + page[match.end(1):]
+    route.fulfill(response=response, body=page)
+
+
+def check_shop_priority(browser, base, server):
+    page = browser.new_page(viewport={"width": 320, "height": 568},
+                            reduced_motion="reduce", service_workers="block")
+    url = base + "?source=shop-update-priority"
+    page.route(url, permit_shop_camera_fixture)
+    page.route("**/mini-street/shop-interior.js?build=*", route_camera)
+    page.goto(url, wait_until="domcontentloaded")
+    page.locator(".scene-shop-entry").click(timeout=15000)
+    expect(page.locator("#stage")).to_have_attribute("data-interior", "")
+
+    button = page.locator(SEL)
+    status = page.locator(STATUS)
+    live = page.locator("#mini-update-announcement")
+    server.release_build = None
+    button.press("Enter")
+    expect_status(status, "could not be verified")
+    expect(live).to_contain_text("could not be verified")
+
+    australia = PRODUCTS[0]
+    product = inspect_product(page, australia)
+    expect(status).to_be_hidden()
+    expect(live).to_be_empty()
+    expect(page.get_by_role("button", name="Check again", exact=True)).to_have_count(0)
+    product.get_by_role("button", name="Add to basket", exact=True).click()
+    expect(product).to_be_hidden()
+    review = page.get_by_role("button", name="View basket", exact=True)
+    expect(review).to_be_focused()
+    expect(status).to_be_hidden()
+
+    # This native click previously hit the overlapping update CTA.
+    review.click()
+    basket = page.get_by_role("dialog", name="Virtual basket", exact=True)
+    expect(basket.get_by_text(australia.name, exact=True)).to_be_visible()
+    expect(status).to_be_hidden()
+    basket.get_by_role("button", name="Continue shopping", exact=True).click()
+    expect_status(status, "could not be verified")
+    expect(live).to_be_empty()  # The unchanged status has already been announced.
+
+    product = inspect_product(page, australia)
+    product.get_by_role("button", name="Add to basket", exact=True).click()
+    expect(review).to_be_focused()
+    server.release_build = server.document_build
+    button.click()
+    expect(review).to_be_hidden()
+    expect_status(status, "up to date")
+    expect(live).to_contain_text("up to date")
+    expect(page.get_by_role("button", name="Basket, 2 items", exact=True)).to_be_visible()
+    page.close()
 
 
 def run(site, evidence=None):
@@ -251,6 +315,10 @@ def run(site, evidence=None):
             narrow_shop = private_page.locator(".scene-shop-entry").bounding_box()
             assert private_status.bounding_box()["y"] > narrow_shop["y"] + narrow_shop["height"]
         record(private_page, evidence, "mini-street-update-error-320")
+        private.close()
+        second.close()
+        page.close()
+        check_shop_priority(browser, base, server)
         browser.close()
 
 

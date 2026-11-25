@@ -2,6 +2,8 @@ const updateParameter = "mini-street-update";
 const timeout = 8000;
 const confirmationDuration = 6000;
 const releaseURL = new URL("../release.json", import.meta.url);
+const activeOverlays = 'dialog[open], [role="dialog"][aria-modal="true"]:not([hidden]), .mini-basket-feedback[data-visible]';
+const overlayElements = 'dialog, [role="dialog"][aria-modal="true"], .mini-basket-feedback';
 class OfflineError extends Error {}
 const icons = {
   idle: "M20 7v5h-5M4 17v-5h5M6 8a7 7 0 0 1 12-2l2 3M4 15l2 3a7 7 0 0 0 12-2",
@@ -99,6 +101,7 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
   let state = "idle";
   let message;
   let hideTimer;
+  let announced = "";
 
   function setText(element, text) {
     if (element.textContent !== text) element.textContent = text;
@@ -109,6 +112,30 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     const mastheadBottom = masthead.getBoundingClientRect().bottom;
     const introBottom = intro?.getBoundingClientRect().bottom ?? 0;
     status.style.setProperty("--mini-update-protected-top", Math.max(0, mastheadBottom, introBottom) + "px");
+  }
+
+  function syncToast() {
+    const detail = messageText.textContent;
+    const visible = Boolean(detail) && !document.querySelector(activeOverlays);
+    status.toggleAttribute("hidden", !visible);
+    if (!visible) {
+      view.clearTimeout(hideTimer);
+      hideTimer = undefined;
+      setText(announcement, "");
+      if (!detail) announced = "";
+      return;
+    }
+    positionToast();
+    if (announced !== detail) {
+      setText(announcement, detail);
+      announced = detail;
+    }
+    if (state === "current" && hideTimer === undefined) {
+      hideTimer = view.setTimeout(() => {
+        message = undefined;
+        refresh();
+      }, confirmationDuration);
+    }
   }
 
   function refresh() {
@@ -136,22 +163,15 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     setText(action, available ? translate("update.apply", "Apply update") : translate("update.retry", "Check again"));
     setText(dismiss, translate("update.dismiss", "Dismiss"));
     actions.hidden = busy || state === "current" || !detail;
-    status.hidden = !detail;
-    positionToast();
-    setText(announcement, detail);
+    syncToast();
   }
 
   function show(next, key, english, values) {
     view.clearTimeout(hideTimer);
+    hideTimer = undefined;
     state = next;
     message = key ? [key, english, values] : undefined;
     refresh();
-    if (state === "current") {
-      hideTimer = view.setTimeout(() => {
-        message = undefined;
-        refresh();
-      }, confirmationDuration);
-    }
   }
 
   function cancelCheck() {
@@ -206,6 +226,13 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     return refresh;
   }
 
+  const interactionObserver = new view.MutationObserver((records) => {
+    if (records.some(({target}) => target.matches(overlayElements))) syncToast();
+  });
+  interactionObserver.observe(document.body, {
+    subtree: true, attributeFilter: ["open", "hidden", "data-visible"],
+  });
+
   button.disabled = false;
   if (!verifyNavigation()) refresh();
   view.addEventListener("offline", offline);
@@ -251,7 +278,12 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     }
   }
 
-  button.addEventListener("click", () => check());
+  button.addEventListener("click", () => {
+    if (activeRequest || state === "applying") return;
+    if (document.activeElement?.closest(".mini-basket-feedback")) button.focus({preventScroll: true});
+    document.dispatchEvent(new view.Event("mini:updatecheck"));
+    check();
+  });
   action.addEventListener("click", () => {
     button.focus({preventScroll: true});
     check(available);

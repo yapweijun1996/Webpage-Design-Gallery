@@ -194,7 +194,6 @@ html[data-site-theme="light"] { color-scheme: light; }
   overflow: auto;
 }
 
-body:has(dialog[open]) .mini-update-toast { visibility: hidden; }
 .mini-update-copy { max-inline-size: 34ch; }
 .mini-update-copy [data-update-message] { font-weight: 650; }
 .mini-installed-build {

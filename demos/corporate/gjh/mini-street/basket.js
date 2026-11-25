@@ -302,6 +302,7 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
   }
 
   const listen = (target, type, handler) => target.addEventListener(type, handler, {signal: abort.signal});
+  listen(doc, "mini:updatecheck", dismissNotice);
   listen(launcher, "click", () => open(launcher));
   listen(review, "click", () => open(launcher));
   listen(dock.querySelector(".mini-basket-dismiss"), "click", () => {
