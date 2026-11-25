@@ -64,7 +64,11 @@ html[data-gjh-design="mini-street"] {
   --radius-inline-detail: 14px;
   --radius-pack: 9px;
   --radius-image: 5px;
+  --vending-heading-height: 60px;
+  --vending-dialog-gutter: clamp(10px, 4vw, 26px);
+  --vending-dialog-gutter-mobile: clamp(8px, 3vw, 16px);
   --size-vending-drink: clamp(25px, 7.5vw, 36px);
+  --size-vending-drink-mobile: 21px;
   --radius-vending-cabinet: 14px 14px 10px 10px;
   --radius-vending-face-control: 5px;
   --radius-vending-panel: 6px;

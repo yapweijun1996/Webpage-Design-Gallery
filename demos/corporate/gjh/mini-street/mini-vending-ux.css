@@ -1,6 +1,5 @@
 dialog[aria-labelledby="vending-title"] {
-  --vending-heading-height: 60px;
-  --vending-gutter: clamp(10px, 4vw, 26px);
+  --vending-gutter: var(--vending-dialog-gutter);
   scroll-padding-block-start: var(--vending-heading-height);
 }
 
@@ -44,7 +43,7 @@ dialog #vending-title {
 
 @media (max-width: 739px) {
   dialog[aria-labelledby="vending-title"] {
-    --vending-gutter: clamp(8px, 3vw, 16px);
+    --vending-gutter: var(--vending-dialog-gutter-mobile);
     width: min(100% - 16px, 510px);
     max-width: calc(100% - 16px);
   }
@@ -72,7 +71,7 @@ dialog #vending-title {
   }
 
   .vending-machine {
-    --size-vending-drink: 21px;
+    --size-vending-drink: var(--size-vending-drink-mobile);
   }
 
   .vending-stock {
