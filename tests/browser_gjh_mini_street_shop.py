@@ -88,7 +88,9 @@ def run():
             page.get_by_role("button", name="Basket").click()
             assert page.get_by_role("dialog", name="Virtual basket").is_visible()
             assert page.locator(".mini-basket-item:not([hidden]) .mini-basket-quantity span").inner_text() == "1"
-            page.get_by_role("button", name="Continue shopping").click()
+            page.keyboard.press("Escape")
+            page.get_by_role("dialog", name="Virtual basket").wait_for(state="hidden")
+            assert page.url.endswith("#shop-interior"), "Escape should close only the basket"
             page.get_by_role("button", name="Exit shop").click()
             page.wait_for_selector("#stop-dialog[open]")
             assert page.url.endswith("#shop")

@@ -292,8 +292,9 @@ export function createShopInterior({
   function bindInputs(signal) {
     const on = (target, type, listener) => target.addEventListener(type, listener, { signal });
     on(window, "keydown", (event) => {
-      if (paused || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
-      if (event.target?.closest?.("input, select, textarea, [contenteditable]")) return;
+      if (paused || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+      if (document.querySelector("dialog[open]") ||
+        event.target?.closest?.("input, select, textarea, [contenteditable]")) return;
       const code = event.code;
       if (movementKeys.has(code)) {
         event.preventDefault();
