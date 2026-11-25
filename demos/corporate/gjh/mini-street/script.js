@@ -9,10 +9,6 @@ const sections = [...document.querySelectorAll(".stop-details .detail")];
 const vendingSection = document.querySelector("#vending");
 const lightingStorageKey = "gjh-mini-street-lighting";
 const lightingButtons = [...toolbar.querySelectorAll("[data-light]")];
-const stylesheet = document.createElement("link");
-stylesheet.rel = "stylesheet";
-stylesheet.href = new URL("./mini-scene-ux.css", import.meta.url).href;
-document.head.append(stylesheet);
 
 const cameraGroup = toolbar.querySelector(".camera-buttons");
 const cameraLabel = document.createElement("span");
@@ -184,6 +180,7 @@ if (typeof dialog.showModal === "function") {
   function syncLocation() {
     const hash = decodedHash();
     if (hash === "#shop-interior") {
+      directOpener = history.state?.[historyMarker] === "direct" ? directShopLink : undefined;
       if (shopUnavailable) redirectToShopDisplay();
       else {
         closeStop(false);
@@ -221,13 +218,12 @@ if (typeof dialog.showModal === "function") {
       await street.focusShop();
       if (request !== routeRequest) return;
     }
-    if (stop === directShopLink) directOpener = stop;
-    else pendingOpener = stop;
+    if (stop !== directShopLink) pendingOpener = stop;
     if (decodedHash() !== stop.hash) {
       const previousState = history.state;
       const state = previousState && typeof previousState === "object" && !Array.isArray(previousState)
         ? {...previousState} : {};
-      state[historyMarker] = true;
+      state[historyMarker] = stop === directShopLink ? "direct" : true;
       history.pushState(state, "", stop.hash);
     }
     syncLocation();

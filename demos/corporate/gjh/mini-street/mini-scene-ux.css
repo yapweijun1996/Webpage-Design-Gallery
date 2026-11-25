@@ -151,10 +151,6 @@
     width: 14px;
     height: 14px;
   }
-
-  #toolbar .look {
-    flex-wrap: wrap;
-  }
 }
 
 @media (max-width: 373px) {
