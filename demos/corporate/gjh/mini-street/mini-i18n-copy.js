@@ -18,6 +18,7 @@ export const miniMessages = [
   ["Light", "浅色", "Cerah"],
   ["Dark", "深色", "Gelap"],
   ["Dark mode", "深色模式", "Mod gelap"],
+  ["Website dark mode", "网站深色模式", "Mod gelap laman web"],
   ["Light mode", "浅色模式", "Mod cerah"],
   ["Switch to light theme", "切换到浅色主题", "Tukar kepada tema cerah"],
   ["Switch to dark theme", "切换到深色主题", "Tukar kepada tema gelap"],
