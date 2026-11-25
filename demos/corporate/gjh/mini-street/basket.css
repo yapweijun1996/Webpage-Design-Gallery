@@ -6,16 +6,32 @@
 
 .mini-basket button,
 .mini-basket-launcher {
+  min-width: 44px;
   min-height: 44px;
+  padding: 6px 12px;
   border: 1px solid var(--color-dialog-border);
   border-radius: var(--radius-control);
-  color: var(--cream);
+  color: var(--site-ink);
   background: var(--color-close);
+  font-size: var(--type-dialog-copy);
+  font-weight: 600;
+  line-height: 1.25;
+  touch-action: manipulation;
 }
 
-.mini-basket button:hover,
+.mini-basket button:not(:disabled):hover,
 .mini-basket-launcher:hover {
   background: var(--color-close-hover);
+}
+
+.mini-basket button:not(:disabled):active,
+.mini-basket-launcher:active {
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+
+.mini-basket button:disabled {
+  opacity: .6;
+  cursor: default;
 }
 
 .mini-basket button:focus-visible,
@@ -27,11 +43,10 @@
 .mini-basket-launcher {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 0 9px;
-  border-radius: var(--radius-stop);
-  font-size: var(--type-stop);
-  font-weight: 650;
+  gap: 8px;
+  padding-inline: 9px;
+  border-radius: var(--radius-masthead-control);
+  font-size: var(--type-toolbar);
   white-space: nowrap;
 }
 
@@ -59,7 +74,7 @@
   border: 1px solid var(--color-dialog-border);
   border-radius: var(--radius-control);
   background: var(--color-dialog-surface);
-  color: var(--cream);
+  color: var(--site-ink);
   box-shadow: var(--shadow-stop);
   font-size: var(--basket-font-size-2);
   pointer-events: none;
@@ -89,7 +104,7 @@
   border: 1px solid var(--color-dialog-border);
   border-radius: var(--radius-stage);
   background: var(--color-dialog-surface);
-  color: var(--cream);
+  color: var(--site-ink);
   box-shadow: var(--shadow-dialog);
 }
 
@@ -107,13 +122,16 @@
 .mini-basket-heading h2 {
   margin: 0;
   font: var(--font-dialog-title);
+  overflow-wrap: anywhere;
 }
 
-.mini-basket-close {
+.mini-basket .mini-basket-close {
   display: grid;
   flex-shrink: 0;
   width: 44px;
+  padding: 0;
   place-items: center;
+  border-radius: var(--radius-circle);
 }
 
 .mini-basket-close svg {
@@ -170,6 +188,7 @@
 .mini-basket-product strong,
 .mini-basket-product span {
   display: block;
+  overflow-wrap: anywhere;
 }
 
 .mini-basket-product span {
@@ -189,6 +208,7 @@
 .mini-basket-quantity {
   display: flex;
   align-items: center;
+  max-width: 100%;
   gap: 8px;
 }
 
@@ -196,47 +216,28 @@
   min-width: 2ch;
   text-align: center;
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 .mini-basket-quantity button {
+  flex-shrink: 0;
   width: 44px;
+  padding: 0;
   font-size: var(--basket-font-size-3);
-}
-
-.mini-basket button:disabled {
-  opacity: .6;
-  cursor: default;
-}
-
-.mini-basket-remove,
-.mini-basket-continue {
-  padding: 6px 12px;
-  font-size: var(--basket-font-size-4);
 }
 
 .mini-basket .mini-basket-continue {
   display: block;
   margin-top: 16px;
-  border-color: var(--cream);
-  background: var(--cream);
+  background: var(--color-toolbar-selected);
   color: var(--color-stop-ink);
-  font-weight: 650;
 }
 
-.mini-basket .mini-basket-continue:hover {
+.mini-basket .mini-basket-continue:not(:disabled):hover {
   background: var(--color-stop-hover);
 }
 
 @media (max-width: 420px) {
-  .masthead-inner:has(> .mini-basket-dock) {
-    gap: 5px 8px;
-    flex-wrap: wrap;
-  }
-
-  .masthead-inner > .mini-basket-dock {
-    margin-inline-start: auto;
-  }
-
   .mini-basket .mini-basket-continue {
     width: 100%;
   }
