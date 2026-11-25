@@ -1,0 +1,20 @@
+{
+  "company": "Pomelo STEM",
+  "industry": "STEM & Technology",
+  "title": "Pomelo STEM - Connected Commerce",
+  "version": "v7",
+  "designStyle": "An editorial multi-page product and services showcase for growing merchants.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/pomelo-stem/v7/",
+  "officialWebsite": "https://pomelostem.com/",
+  "disclaimer": "Independent concept. Product visuals are illustrative; the contact form is not connected.",
+  "id": "pomelo-stem-v7",
+  "companyId": "pomelo-stem",
+  "displayTitle": "Pomelo STEM Connected Commerce",
+  "summary": "Explore Pomelo Commerce and services across six pages in English, Chinese and Malay.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 7
+}

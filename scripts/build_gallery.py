@@ -67,6 +67,9 @@ SHOWCASE_SPEC.loader.exec_module(pomelo_showcase)
 V6_SPEC = importlib.util.spec_from_file_location("build_pomelo_v6", ROOT / "scripts/build_pomelo_v6.py")
 pomelo_v6 = importlib.util.module_from_spec(V6_SPEC)
 V6_SPEC.loader.exec_module(pomelo_v6)
+V7_SPEC = importlib.util.spec_from_file_location("build_pomelo_v7", ROOT / "scripts/build_pomelo_v7.py")
+pomelo_v7 = importlib.util.module_from_spec(V7_SPEC)
+V7_SPEC.loader.exec_module(pomelo_v7)
 
 
 def read_json(path):
@@ -312,6 +315,17 @@ def runtime_resources(catalog):
                 pomelo_studies.regular_file,
             ))
             continue
+        if design["id"] == "pomelo-stem-v7":
+            if directory != Path("demos/corporate/pomelo-stem/v7"):
+                raise ValueError("Unexpected Pomelo V7 route")
+            local_files = [directory / lang / (page + ".html") for lang in ("", "zh", "ms") for page in pomelo_v7.PAGES]
+            local_files += [directory / "assets" / name for name in ("site.css", "tokens.css", "app.js", "boot.js", "update.js", "merchant.webp", "pomelo-compact.svg")]
+            local_files += [directory / "release.json", Path(design["thumbnail"])]
+            local_files += [Path(item["path"]) for item in design["screenshots"].values()]
+            for path in local_files:
+                pomelo_studies.regular_file(ROOT, path)
+            resources.update(local_files)
+            continue
         if design["id"] == "pomelo-stem-v6":
             if directory != Path("demos/corporate/pomelo-stem/v6"):
                 raise ValueError("Unexpected Pomelo V6 route")
@@ -383,7 +397,7 @@ def release_info(catalog):
     # The mall entry's template and manifest own its bytes.
     inputs = [path for path in runtime_resources(catalog) if path != GJH_ENTRY]
     inputs += list((ROOT / "templates/gallery").glob("*"))
-    inputs.extend(map(Path, ("scripts/build_gallery.py", "scripts/build_demo_pwas.py", "scripts/pomelo_studies.py", "scripts/pomelo_blueprint.py", "scripts/pomelo_order_journey.py", "scripts/build_pomelo_showcase.py", "scripts/build_pomelo_v6.py", "data/app.json", GJH_FIRST_VIEW)))
+    inputs.extend(map(Path, ("scripts/build_gallery.py", "scripts/build_demo_pwas.py", "scripts/pomelo_studies.py", "scripts/pomelo_blueprint.py", "scripts/pomelo_order_journey.py", "scripts/build_pomelo_showcase.py", "scripts/build_pomelo_v6.py", "scripts/build_pomelo_v7.py", "data/app.json", GJH_FIRST_VIEW)))
     for name in sorted(set(path.relative_to(ROOT) if path.is_absolute() else path for path in inputs)):
         digest.update(name.as_posix().encode("utf-8") + b"\0" + source_bytes(ROOT / name))
     return {"version": version, "build": digest.hexdigest()[:16]}
@@ -596,6 +610,12 @@ def build(output=ROOT, check=False):
             target = directory / (page + ".html")
             if not target.is_file() or target.read_text(encoding="utf-8") != pomelo_v6.render(language, page):
                 raise ValueError(f"Regenerate Pomelo V6 page: {target}")
+    for language in pomelo_v7.COPY:
+        directory = ROOT / "demos/corporate/pomelo-stem/v7" / ("" if language == "en" else language)
+        for page in pomelo_v7.PAGES:
+            target = directory / (page + ".html")
+            if not target.is_file() or target.read_text(encoding="utf-8") != pomelo_v7.render(language, page):
+                raise ValueError(f"Regenerate Pomelo V7 page: {target}")
     packs = validate_locales()
     build_english_pack(packs["en"], check)
     build_mall_theme_copy(packs, check)
