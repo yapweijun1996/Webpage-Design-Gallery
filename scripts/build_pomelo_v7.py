@@ -89,7 +89,7 @@ def render(lang,page):
  global ASSET
  c=COPY[lang]; base=rel(lang); ASSET=base+'assets/'
  nav=''.join(f'<a href="{link(p)}"'+(' aria-current="page"' if page==p else '')+f'>{esc(n)}</a>' for p,n in zip(PAGES,c['nav']))
- langs=''.join(f'<a href="{esc(("../" if lang!="en" else "./")+("" if code=="en" else code+"/")+page+".html")}"'+(' aria-current="true"' if code==lang else '')+f'>{esc(name)}</a>' for code,name in [('en','English'),('zh','简体中文'),('ms','Bahasa Melayu')])
+ langs=''.join(f'<a data-locale="{code}" href="{esc(("../" if lang!="en" else "./")+("" if code=="en" else code+"/")+page+".html")}"'+(' aria-current="true"' if code==lang else '')+f'>{esc(name)}</a>' for code,name in [('en','English'),('zh','简体中文'),('ms','Bahasa Melayu')])
  foot=''.join(f'<a href="{link(p)}">{esc(n)}</a>' for p,n in zip(PAGES,c['nav']))
  control=(f'<details class="panel"><summary aria-label="{esc(c["lang"])}" title="{esc(c["lang"])}">{icon("language")}<span class="language-code">{esc(lang.upper())}</span></summary><div class="panel-menu">{langs}</div></details>'
  f'<button class="control" type="button" data-theme-toggle data-dark="{esc(c["dark"])}" data-light="{esc(c["light"])}" aria-label="{esc(c["dark"])}" title="{esc(c["dark"])}">{icon("sun")}</button>'

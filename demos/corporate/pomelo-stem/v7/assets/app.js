@@ -16,6 +16,7 @@
     syncTheme();
   });
   syncTheme();
+  document.querySelectorAll('[data-locale]').forEach(function (link) { link.addEventListener('click', function () { try { localStorage.setItem('pomelo-v7-language', link.dataset.locale); } catch (_) {} }); });
   document.querySelectorAll('details.panel').forEach(function (panel) {
     panel.addEventListener('toggle', function () {
       if (panel.open) document.querySelectorAll('details.panel[open]').forEach(function (other) { if (other !== panel) other.open = false; });

@@ -48,6 +48,11 @@ def main():
                 page.locator('.controls details.panel').first.locator('summary').click()
                 page.locator('.panel-menu a[href="./zh/index.html"]').click()
                 assert page.url.endswith('/zh/index.html')
+                page.goto(base + 'index.html')
+                page.wait_for_url('**/zh/index.html')
+                page.locator('.controls details.panel').first.locator('summary').click()
+                page.locator('.panel-menu a[data-locale="en"]').click()
+                page.wait_for_url('**/v7/index.html')
                 if width in (1440, 768, 390):
                     page.goto(base + 'index.html', wait_until='load')
                     page.screenshot(path=str(DEMO / 'screenshots' / f'{width}.png'))
