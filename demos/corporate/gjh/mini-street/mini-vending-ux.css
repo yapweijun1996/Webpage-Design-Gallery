@@ -1,0 +1,148 @@
+dialog[aria-labelledby="vending-title"] {
+  --vending-heading-height: 60px;
+  --vending-gutter: clamp(10px, 4vw, 26px);
+  scroll-padding-block-start: var(--vending-heading-height);
+}
+
+dialog[aria-labelledby="vending-title"] > form {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--layer-vending-flight);
+  block-size: 0;
+}
+
+dialog[aria-labelledby="vending-title"] .close {
+  inset-block-start: 8px;
+  inset-inline-end: var(--vending-gutter);
+}
+
+dialog[aria-labelledby="vending-title"] #vending {
+  padding-block-start: 0;
+  padding-inline: var(--vending-gutter);
+}
+
+dialog #vending-title {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: var(--layer-vending-stock-detail);
+  display: flex;
+  align-items: center;
+  min-block-size: var(--vending-heading-height);
+  margin-inline: calc(-1 * var(--vending-gutter));
+  padding-block: 7px;
+  padding-inline: var(--vending-gutter) calc(var(--vending-gutter) + 54px);
+  border-block-end: 1px solid var(--line);
+  background: var(--color-dialog-surface);
+}
+
+.vending-tray[aria-disabled="false"] {
+  border-color: var(--color-vending-serve-trim);
+  color: var(--color-vending-serve-ink);
+  background: var(--surface-vending-serve);
+  box-shadow: var(--shadow-vending-serve);
+}
+
+@media (max-width: 739px) {
+  dialog[aria-labelledby="vending-title"] {
+    --vending-gutter: clamp(8px, 3vw, 16px);
+    width: min(100% - 16px, 510px);
+    max-width: calc(100% - 16px);
+  }
+
+  #vending-instructions {
+    font-size: var(--type-toolbar);
+  }
+
+  .vending-guide {
+    margin-block: 6px;
+  }
+
+  .vending-orbit {
+    height: clamp(100px, 22svh, 180px);
+  }
+
+  .vending-viewer-bar {
+    padding-block: 0;
+  }
+
+  .vending-viewer-bar .camera-buttons {
+    gap: 0;
+    padding: 0;
+    border-color: transparent;
+  }
+
+  .vending-machine {
+    --size-vending-drink: 21px;
+  }
+
+  .vending-stock {
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .vending-face {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vending-slot {
+    grid-template: "art code" auto "art name" 1fr / auto minmax(0, 1fr);
+    column-gap: 4px;
+    align-content: center;
+    justify-items: start;
+    min-width: 0;
+    min-height: 44px;
+    padding: 4px;
+    text-align: start;
+  }
+
+  .vending-slot .drink-art {
+    grid-area: art;
+    align-self: center;
+  }
+
+  .vending-code {
+    grid-area: code;
+  }
+
+  .vending-drink-name {
+    grid-area: name;
+    overflow-wrap: anywhere;
+  }
+
+  .vending-layout .vending-controls,
+  .vending-layout[data-viewer] .vending-controls {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 4px;
+  }
+
+  .vending-serve {
+    min-width: 44px;
+    padding-inline: 8px;
+  }
+
+  .vending-readout {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    align-content: center;
+    min-height: 44px;
+  }
+
+  .vending-hardware {
+    display: none;
+  }
+
+  .vending-tray {
+    min-height: 44px;
+    margin-top: 6px;
+  }
+
+  .vending-pocket {
+    height: calc(var(--size-vending-drink) * 1.55 + 2px);
+  }
+}
+
+@media (max-width: 370px) {
+  .vending-orbit {
+    height: clamp(100px, 20svh, 180px);
+  }
+}

@@ -39,6 +39,7 @@ export function setupVending(section) {
   const guide = section.querySelector(".vending-guide");
   const soundButton = guide.querySelector(".vending-sound");
   const dialog = section.closest("dialog");
+  const heading = section.querySelector("h2");
   const machine = section.querySelector(".vending-machine");
   const stock = machine.querySelector(".vending-stock");
   const message = machine.querySelector(".vending-message");
@@ -65,8 +66,9 @@ export function setupVending(section) {
     if (!viewer) return false;
     const view = viewport.getBoundingClientRect();
     const bounds = dialog?.open ? dialog.getBoundingClientRect() : view;
+    const headingBottom = dialog?.open ? heading.getBoundingClientRect().bottom : 0;
     const screen = window.visualViewport;
-    const top = Math.max(view.top, bounds.top, screen?.offsetTop ?? 0);
+    const top = Math.max(view.top, bounds.top, headingBottom, screen?.offsetTop ?? 0);
     const bottom = Math.min(view.bottom, bounds.bottom, screen ? screen.offsetTop + screen.height : window.innerHeight);
     return view.height > 0 && bottom - top >= view.height * 0.72;
   }
@@ -257,7 +259,7 @@ export function setupVending(section) {
     preview.hidden = true;
     delete layout.dataset.viewer;
     dialog?.removeAttribute("data-vending-viewer");
-    if (restoreFocus && hadFocus) section.querySelector("h2").focus();
+    if (restoreFocus && hadFocus) heading.focus();
   }
 
   function mountViewer(createVendingViewer) {
