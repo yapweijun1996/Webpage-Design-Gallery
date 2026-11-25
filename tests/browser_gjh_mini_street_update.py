@@ -76,7 +76,7 @@ def expect_status(status, text):
 
 def layout(page):
     return page.evaluate("""() => Object.fromEntries(
-        ['.masthead', '#mini-update', '#stage', '.stops'].map(selector => {
+        ['.masthead', '#mini-update', '#stage', '.scene-shop-entry', '.stops'].map(selector => {
             const {x, y, width, height} = document.querySelector(selector).getBoundingClientRect();
             return [selector, [x, y, width, height]];
         })
@@ -121,6 +121,8 @@ def run(site, evidence=None):
         expect_version(page, version, initial)
         expect(page.locator("#stage")).to_have_attribute("data-webgl", "", timeout=15000)
         nav_count = page.evaluate("performance.getEntriesByType('navigation').length")
+        page.evaluate("scrollTo(0, 0)")
+        expect(page.locator(".scene-shop-entry")).to_be_visible()
         baseline = layout(page)
         live = page.locator("#mini-update-announcement")
         expect(live).to_have_attribute("role", "status")
@@ -178,7 +180,9 @@ def run(site, evidence=None):
         assert layout(page) == baseline
         toast = status.bounding_box()
         assert toast["x"] >= 12 and toast["x"] + toast["width"] <= 378
-        assert toast["y"] > baseline[".masthead"][3] and toast["y"] + toast["height"] < baseline[".stops"][1]
+        _, shop_y, _, shop_height = baseline[".scene-shop-entry"]
+        assert toast["y"] > shop_y + shop_height
+        assert toast["y"] + toast["height"] < baseline[".stops"][1]
         page.locator("#mini-language").click()
         expect(page.get_by_role("dialog")).to_be_visible()
         expect(status).to_be_hidden()
@@ -243,6 +247,9 @@ def run(site, evidence=None):
         expect(private_button).to_have_attribute("data-state", "error")
         expect_status(private_status, "could not be verified")
         assert private_page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+        if private_page.locator(".scene-shop-entry").is_visible():
+            narrow_shop = private_page.locator(".scene-shop-entry").bounding_box()
+            assert private_status.bounding_box()["y"] > narrow_shop["y"] + narrow_shop["height"]
         record(private_page, evidence, "mini-street-update-error-320")
         browser.close()
 

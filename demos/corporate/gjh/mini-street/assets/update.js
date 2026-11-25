@@ -89,6 +89,8 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
   const actions = status.querySelector(".mini-update-actions");
   const action = status.querySelector("[data-update-action]");
   const dismiss = status.querySelector("[data-update-dismiss]");
+  const masthead = button.closest(".masthead");
+  const intro = document.querySelector("#stage .intro");
   const styles = [...document.querySelectorAll("link[data-mini-street-style]")];
   const haveStyles = styles.length > 0 && styles.every((link) => link.sheet);
   const current = haveStyles ? pageRelease(document) : null;
@@ -100,6 +102,13 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
 
   function setText(element, text) {
     if (element.textContent !== text) element.textContent = text;
+  }
+
+  function positionToast() {
+    if (status.hidden) return;
+    const mastheadBottom = masthead.getBoundingClientRect().bottom;
+    const introBottom = intro?.getBoundingClientRect().bottom ?? 0;
+    status.style.setProperty("--mini-update-protected-top", Math.max(0, mastheadBottom, introBottom) + "px");
   }
 
   function refresh() {
@@ -128,6 +137,7 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     setText(dismiss, translate("update.dismiss", "Dismiss"));
     actions.hidden = busy || state === "current" || !detail;
     status.hidden = !detail;
+    positionToast();
     setText(announcement, detail);
   }
 
@@ -181,13 +191,13 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     return true;
   }
 
-  const masthead = button.closest(".masthead");
-  const updateOffset = () => {
-    document.documentElement.style.setProperty("--mini-update-masthead-height", masthead.offsetHeight + "px");
-  };
-  updateOffset();
-  if ("ResizeObserver" in view) new view.ResizeObserver(updateOffset).observe(masthead);
-  else view.addEventListener("resize", updateOffset);
+  if ("ResizeObserver" in view) {
+    const observer = new view.ResizeObserver(positionToast);
+    observer.observe(masthead);
+    if (intro) observer.observe(intro);
+  }
+  view.addEventListener("resize", positionToast);
+  view.addEventListener("scroll", positionToast, {passive: true});
 
   view.addEventListener("mini:languagechange", refresh);
   if (!current) {
