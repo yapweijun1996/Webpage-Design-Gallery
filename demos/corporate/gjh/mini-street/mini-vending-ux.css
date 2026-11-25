@@ -1,9 +1,8 @@
 dialog[aria-labelledby="vending-title"] {
   --vending-gutter: var(--vending-dialog-gutter);
-  --vending-safe-inline: max(13px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
-  --vending-safe-block: max(13px, env(safe-area-inset-top, 0px), env(safe-area-inset-bottom, 0px));
+  --vending-safe-inline: var(--vending-dialog-safe-inline);
   max-inline-size: calc(100% - 2 * var(--vending-safe-inline));
-  max-block-size: calc(100svh - 2 * var(--vending-safe-block));
+  max-block-size: calc(100svh - 2 * var(--vending-dialog-safe-block));
   overscroll-behavior: contain;
   scroll-padding-block-start: var(--vending-heading-height);
 }
@@ -75,11 +74,6 @@ dialog #vending-title {
   text-underline-offset: 3px;
 }
 
-.vending-stock {
-  background: var(--surface-vending-stock);
-  box-shadow: var(--shadow-vending-stock), inset 0 0 0 1px var(--color-vending-cabinet-base);
-}
-
 .vending-slot {
   border-color: var(--color-vending-slot-divider);
   background: var(--surface-vending-slot-shelf);
@@ -95,7 +89,7 @@ dialog #vending-title {
   content: "";
   position: absolute;
   inset: 58% -3px 1px;
-  border-radius: 45%;
+  border-radius: var(--radius-vending-slot-coil);
   background: var(--surface-vending-slot-coil);
 }
 
@@ -106,7 +100,7 @@ dialog #vending-title {
   block-size: 8px;
   border: solid var(--color-vending-slot-selected);
   border-width: 0 2px 2px 0;
-  border-radius: 0;
+  border-radius: unset;
   background: transparent;
   box-shadow: none;
   transform: rotate(45deg);
@@ -172,7 +166,7 @@ dialog #vending-title {
 @media (max-width: 739px), (max-width: 950px) and (max-height: 500px) {
   dialog[aria-labelledby="vending-title"] {
     --vending-gutter: var(--vending-dialog-gutter-mobile);
-    --vending-safe-inline: max(8px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+    --vending-safe-inline: var(--vending-dialog-safe-inline-mobile);
     width: min(100% - 16px, 510px);
   }
 

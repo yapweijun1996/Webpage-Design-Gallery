@@ -67,6 +67,9 @@ html[data-gjh-design="mini-street"] {
   --vending-heading-height: 60px;
   --vending-dialog-gutter: clamp(10px, 4vw, 26px);
   --vending-dialog-gutter-mobile: clamp(8px, 3vw, 16px);
+  --vending-dialog-safe-inline: max(13px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  --vending-dialog-safe-inline-mobile: max(8px, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  --vending-dialog-safe-block: max(13px, env(safe-area-inset-top, 0px), env(safe-area-inset-bottom, 0px));
   --size-vending-drink: clamp(25px, 7.5vw, 36px);
   --size-vending-drink-mobile: 21px;
   --radius-vending-cabinet: 14px 14px 10px 10px;
@@ -77,6 +80,7 @@ html[data-gjh-design="mini-street"] {
   --radius-vending-can: 15% 15% 18% 18% / 9%;
   --radius-vending-bottle: 0;
   --radius-vending-bottle-cap: 20% 20% 10% 10%;
+  --radius-vending-slot-coil: 45%;
   --color-vending-cabinet-trim: #ba935c;
   --color-vending-cabinet-base: #091b16;
   --color-vending-enamel: #244e3c;
@@ -92,7 +96,7 @@ html[data-gjh-design="mini-street"] {
   --shadow-vending-moon: inset 5px -2px #ffda8d;
   --color-vending-stock-trim: #c7a571;
   --surface-vending-stock: linear-gradient(122deg, transparent 14%, #fff7d31f 14.5% 18%, transparent 19% 27%, #fff7d312 28% 33%, transparent 34%), linear-gradient(180deg, #ffe3a5, #685644 12%, #242b24 73%, #473827), #362f24;
-  --shadow-vending-stock: inset 0 3px 5px #171409b0, inset 0 -2px 7px #1b110a, 0 2px 3px #061912;
+  --shadow-vending-stock: inset 0 3px 5px #171409b0, inset 0 -2px 7px #1b110a, 0 2px 3px #061912, inset 0 0 0 1px var(--color-vending-cabinet-base);
   --color-vending-slot-trim: #a08b6d;
   --color-vending-slot-text: #fff3d9;
   --surface-vending-slot: linear-gradient(transparent 58%, #181c17 59%);
