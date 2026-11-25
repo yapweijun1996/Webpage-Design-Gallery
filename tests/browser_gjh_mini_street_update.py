@@ -57,12 +57,26 @@ def apply_update(page, button, build):
         button.click()
 
 
+def expect_version(page, version, build):
+    badge = page.locator("#mini-version")
+    expect(badge).to_be_visible()
+    expect(badge).to_have_text(f"v{version}")
+    expect(badge).to_have_attribute("title", f"v{version} · {build}")
+
+
+def expect_status(status, text):
+    expect(status).to_be_visible()
+    expect(status).to_be_in_viewport()
+    expect(status.locator("[data-update-message]")).to_contain_text(text)
+    assert status.bounding_box()["height"] >= 16
+
 def run(site):
     app = site / ROUTE.strip("/")
     handler = partial(ReleaseHandler, directory=site)
     with ThreadingHTTPServer(("127.0.0.1", 0), handler) as server, sync_playwright() as tools:
         server.index = (app / "index.html").read_text(encoding="utf-8")
         server.initial = json.loads((app / "release.json").read_text(encoding="utf-8"))
+        version = server.initial["version"]
         initial = server.initial["build"]
         latest = "a" * 16 if initial != "a" * 16 else "b" * 16
         server.release_build = initial
@@ -82,34 +96,37 @@ def run(site):
         button = page.locator(SEL)
         status = page.locator(STATUS)
         expect(button).to_be_enabled()
-        expect(page.locator("#mini-version")).to_contain_text(initial[:8])
+        expect_version(page, version, initial)
         expect(page.locator("#stage")).to_have_attribute("data-webgl", "", timeout=15000)
         nav_count = page.evaluate("performance.getEntriesByType('navigation').length")
         button.press("Enter")
-        expect(status).to_contain_text("up to date")
+        expect_status(status, "up to date")
+        expect(status.locator("[data-installed-build]")).to_have_text(f"Installed build · v{version} · {initial}")
         assert page.evaluate("performance.getEntriesByType('navigation').length") == nav_count
 
         second = context.new_page()
         second.goto(base + "?source=second-tab", wait_until="domcontentloaded")
-        expect(second.locator("#mini-version")).to_contain_text(initial[:8])
+        expect_version(second, version, initial)
 
         server.release_build = latest
         button.click()
         expect(button).to_have_attribute("data-state", "error")
-        expect(status).to_contain_text("could not be verified")
-        expect(page.locator("#mini-version")).to_contain_text(initial[:8])
+        expect_status(status, "could not be verified")
+        expect_version(page, version, initial)
 
         context.set_offline(True)
         expect(button).to_have_attribute("data-state", "offline")
         button.click()
-        expect(status).to_contain_text("offline")
+        expect_status(status, "offline")
         context.set_offline(False)
 
         server.document_build = latest
         button.click()
         expect(button).to_have_attribute("data-state", "available")
         expect(button).to_have_accessible_name("Apply update")
-        expect(page.locator("#mini-version")).to_contain_text(initial[:8])
+        expect(button.locator("[data-update-label]")).to_be_visible()
+        expect_status(status, f"Update available · v{version} · {latest}")
+        expect_version(page, version, initial)
         assert page.url == site_url, page.url
         assert button.locator("svg").evaluate("(svg) => getComputedStyle(svg).animationName") == "none"
         # A restored document must ask the user to check again before applying.
@@ -124,8 +141,8 @@ def run(site):
         server.stale_navigation = latest + "."
         apply_update(page, button, latest)
         expect(button).to_have_attribute("data-state", "error")
-        expect(status).to_contain_text("new build did not load")
-        expect(page.locator("#mini-version")).to_contain_text(initial[:8])
+        expect_status(status, "new build did not load")
+        expect_version(page, version, initial)
         expect(page).to_have_url(site_url)
 
         server.stale_navigation = "disabled"
@@ -133,11 +150,11 @@ def run(site):
         expect(button).to_have_attribute("data-state", "available")
         apply_update(page, button, latest)
         expect(button).to_have_attribute("data-state", "current")
-        expect(status).to_contain_text("Updated to")
-        expect(page.locator("#mini-version")).to_contain_text(latest[:8])
+        expect_status(status, f"Updated to v{version} · {latest}.")
+        expect_version(page, version, latest)
         expect(page).to_have_url(site_url)
         assert page.evaluate("JSON.parse(localStorage.getItem('gjh-mini-street:basket:v2')).items['nz-425g']") == 2
-        expect(second.locator("#mini-version")).to_contain_text(initial[:8])
+        expect_version(second, version, initial)
         assert errors == [], errors
 
         private = browser.new_context(service_workers="allow")

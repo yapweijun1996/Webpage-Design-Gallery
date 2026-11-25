@@ -135,6 +135,7 @@ export const miniMessages = [
   ["Apply update", "应用更新", "Gunakan kemas kini"],
   ["Applying update…", "正在应用更新…", "Menggunakan kemas kini…"],
   ["Build unavailable", "版本信息不可用", "Versi binaan tidak tersedia"],
+  ["Installed build · {build}", "已安装版本 · {build}", "Binaan dipasang · {build}"],
   ["You are offline. Reconnect to check for updates.", "你目前处于离线状态。重新联网后可检查更新。", "Anda di luar talian. Sambung semula untuk menyemak kemas kini."],
   ["Updated to {build}.", "已更新至 {build}。", "Dikemas kini kepada {build}."],
   ["The new build did not load. Check again to retry.", "新版本未能加载。请重新检查更新。", "Versi baharu gagal dimuatkan. Semak sekali lagi untuk mencuba semula."],

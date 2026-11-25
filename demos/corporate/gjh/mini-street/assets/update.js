@@ -38,7 +38,7 @@ function sameRelease(first, second) {
 }
 
 function renderBuild(release) {
-  return `v${release.version} · ${release.build.slice(0, 8)}`;
+  return `v${release.version} · ${release.build}`;
 }
 
 async function verifyLatest(view, page, cacheKey, abort) {
@@ -85,6 +85,8 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
   }
   const label = button.querySelector("[data-update-label]");
   const path = button.querySelector("path[data-update-icon]");
+  const messageText = status.querySelector("[data-update-message]");
+  const installedBuild = status.querySelector("[data-installed-build]");
   const styles = [...document.querySelectorAll("link[data-mini-street-style]")];
   const haveStyles = styles.length > 0 && styles.every((link) => link.sheet);
   const current = haveStyles ? pageRelease(document) : null;
@@ -95,16 +97,20 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
 
   function refresh() {
     const action = translate(...labels[state]);
-    const busy = Boolean(activeRequest);
+    const busy = Boolean(activeRequest) || state === "applying";
     button.dataset.state = state;
     button.setAttribute("aria-label", action);
     button.setAttribute("aria-busy", String(busy));
     button.setAttribute("aria-disabled", String(button.disabled || busy));
     if (label) label.textContent = action;
     path?.setAttribute("d", icons[state] ?? icons.checking);
-    version.textContent = current ? renderBuild(current) : translate("update.unavailableBuild", "Build unavailable");
-    version.title = current ? `v${current.version} · ${current.build}` : version.textContent;
-    status.textContent = message ? translate(...message) : "";
+    version.textContent = current ? `v${current.version}` : translate("update.unavailableBuild", "Build unavailable");
+    version.title = current ? renderBuild(current) : version.textContent;
+    const detail = message ? translate(...message) : "";
+    const installed = current && message && message[0] !== "update.applied"
+      ? translate("update.installedBuild", "Installed build · {build}", {build: renderBuild(current)}) : "";
+    if (messageText.textContent !== detail) messageText.textContent = detail;
+    if (installedBuild.textContent !== installed) installedBuild.textContent = installed;
   }
 
   function show(next, key, english, values) {
@@ -163,7 +169,7 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
   });
 
   button.addEventListener("click", async () => {
-    if (activeRequest) return;
+    if (activeRequest || state === "applying") return;
     if (!view.navigator.onLine) {
       offline();
       return;
