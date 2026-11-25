@@ -42,3 +42,21 @@
 @media(max-width:700px){.story-layout,.future-layout{grid-template-columns:1fr;gap:2rem}.control,.controls summary{min-width:44px}}
 @media(max-width:350px){.brand img{width:26px;height:26px}.brand{gap:.3rem}.controls{gap:0}.control,.controls summary{min-width:44px}}
 @media(max-width:400px){.brand img{width:26px;height:26px}.brand{gap:.3rem}.brand span{font-size:var(--pomelo-study-v-2e72ebc42d3d19be)}.controls{gap:0}}
+
+/* V7.4: merchant story and fictional order detail. */
+.story-image{margin:2rem 0 0;position:relative;overflow:hidden;border-radius:var(--pomelo-study-v-a7b00d3ea5b66f04);background:var(--sand)}
+.story-image img{width:100%;height:clamp(220px,24vw,340px);object-fit:cover;object-position:center}
+.story-image figcaption{padding:.8rem 1rem;background:var(--surface);color:var(--ink);font-weight:700;font-size:var(--pomelo-study-v-a4deb85ac7431f1d)}
+.story-image figcaption span{color:var(--muted);font-weight:400}
+.demo-product-price{display:block;color:var(--green);font-size:var(--pomelo-study-v-a4deb85ac7431f1d);margin-top:.3rem}
+.sample-order{margin-top:1rem;padding:1rem;background:var(--surface);border:1px solid var(--line);border-radius:var(--pomelo-study-v-b8be0c77cfdcd326);color:var(--ink)}
+.sample-order-head{display:flex;justify-content:space-between;align-items:start;gap:.5rem}
+.sample-order-head strong{display:block;margin-top:.3rem}
+.sample-order-item{display:flex;justify-content:space-between;gap:.5rem;margin:.9rem 0;font-weight:700;font-size:var(--pomelo-study-v-2e72ebc42d3d19be);color:var(--ink)}
+.sample-order dl{margin:0;border-top:1px solid var(--line);padding-top:.55rem;font-size:var(--pomelo-study-v-818b9f71cc18b13d)}
+.sample-order dl div{display:flex;justify-content:space-between;gap:.5rem;padding:.2rem 0}
+.sample-order dd{margin:0}.sample-order-total{font-weight:800;color:var(--ink)}
+.sample-order-next{margin-top:.6rem;font-size:var(--pomelo-study-v-4cf179823936a6e2)}
+.page-hero-v2 .page-visual,.hero-art{isolation:isolate}
+.page-hero-v2 .hero-copy,.story-copy{min-width:0}
+@media(max-width:700px){.story-image{margin-top:1.4rem}.story-image img{height:220px}.sample-order-head{flex-wrap:wrap}.sample-order-item{flex-wrap:wrap}}

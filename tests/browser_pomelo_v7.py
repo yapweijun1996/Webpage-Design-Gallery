@@ -35,7 +35,7 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name, page.evaluate('document.documentElement.scrollWidth'))
                         assert page.locator('main').inner_text().strip(), (width, locale, name)
-                        assert page.locator('[data-update] .version').inner_text() == '7.3.0'
+                        assert page.locator('[data-update] .version').inner_text() == '7.4.0'
                         if width <= 700:
                             for control in page.locator('.controls .control, .controls summary').all():
                                 if control.is_visible():
@@ -82,8 +82,11 @@ def main():
             assert tablist.is_visible() and tablist.get_attribute('aria-orientation') == 'horizontal'
             assert page.locator('[data-tour-panel="0"]').is_visible()
             assert page.locator('[data-tour-panel="1"]').is_hidden()
+            assert page.locator('.demo-product-price').all_inner_texts() == ['RM 39.90', 'RM 32.00', 'RM 48.00']
             page.locator('[data-tour-tab="1"]').click()
             assert page.locator('[data-tour-panel="1"]').is_visible()
+            order = page.locator('.sample-order')
+            assert all(value in order.inner_text() for value in ('#PS-0124', 'Ceramic mug × 2', 'RM 79.80', 'RM 8.00', 'RM 87.80', 'New order', 'Next: preparing'))
             assert page.locator('[data-tour-tab="1"]').get_attribute('aria-selected') == 'true'
             page.locator('[data-scene-switch]').nth(1).locator('[data-scene-button]').nth(2).click()
             assert 'Preparing' in page.locator('[data-scene-switch]').nth(1).locator('[data-scene-detail]').nth(2).inner_text()
@@ -112,10 +115,10 @@ def main():
             assert page.locator('form input[name="name"]').input_value() == 'Sample name'
             assert not posted, posted
             page.goto(base + 'contact.html')
-            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.3.1"}'))
+            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.4.1"}'))
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.3.1' in page.locator('[data-status]').inner_text()
+            assert '7.4.1' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
             page.wait_for_load_state('load')
             page.wait_for_function("document.querySelector('[data-status]').textContent.includes('could not be verified')")

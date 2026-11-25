@@ -41,6 +41,21 @@ EXTRA = {
  'zh': {'sample_form':'互动示例：资料不会被发送或保存。','sample_result':'这只是预览，没有发送任何咨询。','sample_submit':'体验示例表单','sample_nojs':'请启用 JavaScript 体验示例表单。','sample_contact_title':'体验联系表单','sample_next':'如果你联系我们','sample_label':'示意预览','journey_kicker':'你的商家旅程','product_kicker':'连接各项工作的空间','services_kicker':'探索我们的服务','about_kicker':'以实用为本','contact_kicker':'让我们开始对话','feature_cta':'了解运作方式','demo_field':'申请产品演示'},
  'ms': {'sample_form':'Contoh interaktif — maklumat tidak dihantar atau disimpan.','sample_result':'Ini hanya pratonton. Tiada pertanyaan dihantar.','sample_submit':'Cuba borang contoh','sample_nojs':'Aktifkan JavaScript untuk mencuba borang contoh ini.','sample_contact_title':'Cuba borang hubungan','sample_next':'Jika anda menghubungi kami','sample_label':'Pratonton contoh','journey_kicker':'PERJALANAN ANDA','product_kicker':'SATU RUANG KERJA TERHUBUNG','services_kicker':'TEROKAI PERKHIDMATAN','about_kicker':'PRAKTIKAL MENGIKUT REKAAN','contact_kicker':'MARI MULAKAN PERBUALAN','feature_cta':'Lihat cara ia berfungsi','demo_field':'Permohonan demo'}
 }
+# V7.4: consistent, fictional merchant details across all three languages.
+DETAILS = {
+ 'en': {'sample_prices':['RM 39.90','RM 32.00','RM 48.00'],
+        'order_title':'A closer look at an order', 'order_status':'New order',
+        'order_items':'Ceramic mug × 2', 'order_subtotal':'Items', 'order_delivery':'Delivery',
+        'order_total':'Total', 'order_follow':'Next: preparing', 'story_caption':'Made for the people behind every business'},
+ 'zh': {'sample_prices':['RM 39.90','RM 32.00','RM 48.00'],
+        'order_title':'看看一笔订单', 'order_status':'新订单',
+        'order_items':'陶瓷杯 × 2', 'order_subtotal':'商品小计', 'order_delivery':'运费',
+        'order_total':'总计', 'order_follow':'下一步：准备中', 'story_caption':'为每一门生意背后的人而设计'},
+ 'ms': {'sample_prices':['RM 39.90','RM 32.00','RM 48.00'],
+        'order_title':'Lihat butiran pesanan', 'order_status':'Pesanan baharu',
+        'order_items':'Cawan seramik × 2', 'order_subtotal':'Jumlah produk', 'order_delivery':'Penghantaran',
+        'order_total':'Jumlah', 'order_follow':'Seterusnya: disediakan', 'story_caption':'Untuk insan di sebalik setiap perniagaan'},
+}
 for _lang in COPY:
  COPY[_lang].update(EXTRA[_lang])
 # Localized storefront and seller illustrations. These are static examples.
@@ -120,6 +135,7 @@ STORY = {
 for _lang in COPY:
  COPY[_lang].update(SHOWCASE[_lang])
  COPY[_lang].update(STORY[_lang])
+ COPY[_lang].update(DETAILS[_lang])
 ICON = {
 'language':'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c-5 5-5 13 0 18M12 3c5 5 5 13 0 18"/>',
 'sun':'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M19 5l-1.5 1.5m-11 11L5 19"/>',
@@ -192,7 +208,7 @@ def concept_home(c):
 
 def merchant_story(c):
  entries=''.join(f'<div class="story-step"><span>{i:02}</span><div><b>{esc(title)}</b><p>{esc(desc)}</p></div></div>' for i,(title,desc) in enumerate(zip(c['story_steps'],c['story_descriptions']),1))
- return f'<section class="section merchant-story"><div class="wrap story-layout"><div class="story-copy"><p class="eyebrow">{esc(c["story_tag"])}</p><h2>{esc(c["story_title"])}</h2><p>{esc(c["story_text"])}</p></div><div class="story-steps">{entries}</div></div></section>'
+ return f'<section class="section merchant-story"><div class="wrap story-layout"><div class="story-copy"><p class="eyebrow">{esc(c["story_tag"])}</p><h2>{esc(c["story_title"])}</h2><p>{esc(c["story_text"])}</p><figure class="story-image"><img src="{ASSET}merchant.webp" alt="" loading="lazy"><figcaption>{esc(c["story_caption"])} <span>· {esc(c["sample_label"])}</span></figcaption></figure></div><div class="story-steps">{entries}</div></div></section>'
 
 def home_ai(c):
  return f'<section class="section home-ai"><div class="wrap story-layout"><div class="story-copy"><p class="eyebrow">{esc(c["home_ai_tag"])}</p><h2>{esc(c["home_ai_title"])}</h2><p>{esc(c["home_ai_text"])}</p>{button(c["home_cta"],link("commerce"),"outline")}</div><div class="future-card"><div class="future-card-top"><span>{icon("spark")} AI + MCP</span><span class="pill">{esc(c["studio_label"])}</span></div><div class="future-prompt">{esc(c["ai_prompt"])}</div><div class="future-canvas"><span class="mini-kicker">AI + MCP</span><p>{esc(c["ai_answer"])}</p></div><p>{esc(c["ai_note"])}</p></div></div></section>'
@@ -208,10 +224,10 @@ def future_concept(c):
 
 def product_showcase(c):
  tabs=''.join(f'<button type="button" class="showcase-tab" id="tour-tab-{i}" role="tab" aria-selected="{str(i==0).lower()}" aria-controls="tour-panel-{i}" tabindex="{0 if i==0 else -1}" data-tour-tab="{i}"><span class="showcase-tab-icon">{icon(ic)}</span><span><b>{esc(title)}</b><small>{esc(desc)}</small></span>{icon("arrow")}</button>' for i,(ic,title,desc) in enumerate(zip(('shop','panel','spark'),c['tabs'],c['tab_desc'])))
- products=''.join(f'<div class="demo-product"><div class="demo-product-art art-{i}"><i class="{shape}"></i></div><b>{esc(name)}</b><small>{esc(c["store_sample"])}</small></div>' for i,(name,shape) in enumerate(zip(c['store_items'],('object-cup','object-bowl','object-vase'))))
+ products=''.join(f'<div class="demo-product"><div class="demo-product-art art-{i}"><i class="{shape}"></i></div><b>{esc(name)}</b><small>{esc(c["store_sample"])}</small><strong class="demo-product-price">{esc(c["sample_prices"][i])}</strong></div>' for i,(name,shape) in enumerate(zip(c['store_items'],('object-cup','object-bowl','object-vase'))))
  shop=f'<div class="tour-shop"><div class="tour-shop-nav"><b>{esc(c["store_brand"])}</b><span>{esc(c["sample_label"])}</span></div><div class="tour-shop-hero"><span class="mini-kicker">{esc(c["store_kicker"])}</span><h3>{esc(c["store_title"])}</h3><p>{esc(c["store_desc"])}</p><span class="tour-shop-action">{esc(c["store_action"])}</span></div><div class="tour-products">{products}</div></div>'
  rows=''.join(f'<div class="tour-order"><span class="tour-order-icon">{icon(ic)}</span><div><b>{esc(name)}</b><small>#PS-0{124+i}</small></div><span class="tour-order-status">{esc(status)}</span></div>' for i,(name,status,ic) in enumerate(zip(c['studio_rows'],c['studio_states'],('shop','panel','shop'))))
- studio=f'<div class="tour-studio"><div class="tour-studio-bar"><b>Seller Studio</b><span class="pill">{esc(c["studio_label"])}</span></div><div class="tour-studio-body"><p class="mini-kicker">{esc(c["studio_kicker"])}</p><h3>{esc(c["studio_title"])}</h3><p>{esc(c["studio_desc"])}</p><div class="tour-order-list"><div class="tour-order-heading"><b>{esc(c["studio_row_title"])}</b><span>{esc(c["sample_label"])}</span></div>{rows}</div></div></div>'
+ studio=f'<div class="tour-studio"><div class="tour-studio-bar"><b>Seller Studio</b><span class="pill">{esc(c["studio_label"])}</span></div><div class="tour-studio-body"><p class="mini-kicker">{esc(c["studio_kicker"])}</p><h3>{esc(c["studio_title"])}</h3><p>{esc(c["studio_desc"])}</p><div class="tour-order-list"><div class="tour-order-heading"><b>{esc(c["studio_row_title"])}</b><span>{esc(c["sample_label"])}</span></div>{rows}</div><div class="sample-order" aria-label="{esc(c["order_title"])}"><div class="sample-order-head"><div><span class="mini-kicker">{esc(c["order_title"])}</span><strong>#PS-0124</strong></div><span class="pill">{esc(c["order_status"])}</span></div><p class="sample-order-item">{esc(c["order_items"])} <span>RM 79.80</span></p><dl><div><dt>{esc(c["order_subtotal"])}</dt><dd>RM 79.80</dd></div><div><dt>{esc(c["order_delivery"])}</dt><dd>RM 8.00</dd></div><div class="sample-order-total"><dt>{esc(c["order_total"])}</dt><dd>RM 87.80</dd></div></dl><p class="sample-order-next">{esc(c["order_follow"])} · {esc(c["studio_label"])}</p></div></div></div>'
  ai=f'<div class="tour-ai"><div class="tour-ai-head"><span class="tour-ai-icon">{icon("spark")}</span><div><b>AI + MCP</b><small>{esc(c["ai_kicker"])}</small></div><span class="pill">{esc(c["studio_label"])}</span></div><div class="tour-ai-body"><div class="tour-message tour-message-user">{esc(c["ai_prompt"])}</div><div class="tour-message tour-message-answer"><b>{esc(c["tabs"][2])}</b><p>{esc(c["ai_answer"])}</p></div><span class="tour-review">{icon("panel")}{esc(c["ai_human"])}</span><p class="tour-ai-note">{esc(c["ai_note"])}</p></div></div>'
  panels=''.join(f'<section class="showcase-panel" id="tour-panel-{i}" role="tabpanel" aria-labelledby="tour-tab-{i}" tabindex="0" data-tour-panel="{i}"><div class="showcase-panel-copy"><p class="mini-kicker">{esc(c["tabs"][i])}</p><h3>{esc(title)}</h3><p>{esc(desc)}</p></div><div class="showcase-visual">{visual}{scenario_switch(c,i)}</div></section>' for i,(title,desc,visual) in enumerate(((c['store_title'],c['feature_text'][0],shop),(c['studio_title'],c['studio_desc'],studio),(c['ai_title'],c['ai_desc'],ai))))
  return f'<section class="section showcase-section" id="product-preview"><div class="wrap"><div class="showcase-intro"><div><p class="eyebrow">{esc(c["tour_tag"])}</p><h2>{esc(c["tour_title"])}</h2></div><p>{esc(c["tour_desc"])}</p></div><div class="showcase-shell" data-product-tour><div class="showcase-tabs" role="tablist" aria-label="{esc(c["tour_tag"])}" aria-orientation="vertical" data-tour-tabs hidden>{tabs}</div><div class="showcase-panels">{panels}</div></div><p class="showcase-disclaimer">{esc(c["tour_note"])}</p></div></section>'
