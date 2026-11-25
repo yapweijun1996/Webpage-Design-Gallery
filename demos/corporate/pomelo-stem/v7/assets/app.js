@@ -52,6 +52,24 @@
     syncOrientation(); window.addEventListener('resize', syncOrientation);
     show(0, false); tour.classList.add('tour-enabled'); tablist.hidden = false;
   });
+  document.querySelectorAll('[data-scene-switch]').forEach(function (group) {
+    var controls = group.querySelector('[data-scene-buttons]');
+    var buttons = Array.from(group.querySelectorAll('[data-scene-button]'));
+    var details = Array.from(group.querySelectorAll('[data-scene-detail]'));
+    function select(index) {
+      buttons.forEach(function (button, i) { button.setAttribute('aria-pressed', String(i === index)); });
+      details.forEach(function (detail, i) { detail.hidden = i !== index; });
+      var visual = group.closest('.showcase-visual');
+      var prompt = visual.querySelector('.tour-message-user');
+      var answer = visual.querySelector('.tour-message-answer p');
+      if (prompt && answer) {
+        prompt.textContent = details[index].querySelector('strong').textContent;
+        answer.textContent = details[index].querySelector('p').textContent;
+      }
+    }
+    buttons.forEach(function (button, index) { button.addEventListener('click', function () { select(index); }); });
+    select(0); controls.hidden = false;
+  });
   document.querySelectorAll('details.panel').forEach(function (panel) {
     panel.addEventListener('toggle', function () {
       if (panel.open) document.querySelectorAll('details.panel[open]').forEach(function (other) { if (other !== panel) other.open = false; });

@@ -69,8 +69,57 @@ SHOWCASE = {
   'studio_kicker':'PERNIAGAAN SEKILAS PANDANG','studio_title':'Lebih jelas untuk kerja harian.','studio_desc':'Lihat produk dan pesanan dalam ruang kerja yang sesuai dengan rutin anda.','studio_rows':['Cawan seramik','Mangkuk harian','Bakul anyaman'],'studio_states':['Untuk semakan','Sedang disiapkan','Draf'],'studio_row_title':'Aktiviti terkini','studio_label':'Contoh sahaja',
   'ai_kicker':'PEMBANTU UNTUK KERJA HARIAN','ai_title':'Berikan ruang untuk idea seterusnya.','ai_desc':'Terokai cara alat AI yang disokong dapat membantu maklumat produk, pesanan dan kandungan, dengan kawalan di tangan anda.','ai_prompt':'Bantu saya menulis penerangan ringkas untuk cawan seramik.','ai_answer':'Cawan seramik ringkas untuk detik kecil dalam hari anda.','ai_note':'Contoh yang telah ditulis. Tiada permintaan AI dihantar.','ai_human':'Semak sebelum guna',
  }}
+
+STORY = {
+ 'en': {
+  'story_tag':'MADE FOR THE WAY YOU WORK', 'story_title':'There is a story behind every business.',
+  'story_text':'From sharing a favourite product to preparing an order, every day brings a lot to look after. We believe your tools should make those moments feel a little simpler.',
+  'home_ai_tag':'A HELPFUL SECOND PAIR OF HANDS', 'home_ai_title':'More space for the work that matters.', 'home_ai_text':'Explore how supported AI tools could help with product information and content, while you review and decide what to use.',
+  'story_steps':['Show what you love','Keep track of the details','Make room for what is next'],
+  'story_descriptions':['Give your products a home that feels like your brand.','Bring products and orders into a clearer daily routine.','Explore practical support for content and new ideas.'],
+  'scene_label':'Explore the example', 'future_tag':'A LOOK AHEAD', 'future_badge':'Future concept',
+  'future_title':'Imagine a shop shaped around your ideas.',
+  'future_text':'A future direction: describe your brand and use AI to help explore a storefront design. This is a concept, not an available feature.',
+  'future_prompt':'A calm, welcoming shop for handmade homewares', 'future_note':'Illustration only · No AI request is sent',
+  'scenes':[
+   [('Ceramic mug','Ceramic mug','A favourite for slow, everyday moments.'),('Everyday bowl','Everyday bowl','A simple piece for the daily table.'),('Woven basket','Woven basket','A place for the things you want close by.')],
+   [('Product','Ceramic mug','Sample product listing · Ready for review'),('New order','Order #PS-0124','Ceramic mug · New order received'),('Preparing','Order #PS-0124','Ceramic mug · Preparing for the customer')],
+   [('Product description','Write about a ceramic mug','A simple ceramic mug for the little moments in your day.'),('Social caption','Share a ceramic mug','A quiet moment, a warm drink, and a favourite cup.')]],
+ },
+ 'zh': {
+  'story_tag':'为你的日常而设计', 'story_title':'每一门生意，都有自己的故事。',
+  'story_text':'从介绍喜欢的商品到准备一笔订单，每天都有许多事要照顾。我们相信，好的工具可以让这些时刻变得更从容。',
+  'home_ai_tag':'日常工作的好帮手', 'home_ai_title':'把更多时间留给重要的事。', 'home_ai_text':'探索受支持的 AI 工具如何协助整理商品资料和制作内容；你可以先审核，再决定如何使用。',
+  'story_steps':['展示你用心挑选的商品','把日常细节整理清楚','为下一个想法留点空间'],
+  'story_descriptions':['为商品打造一个体现品牌风格的家。','让商品和订单更容易融入日常管理。','探索内容制作与新想法的实用协助。'],
+  'scene_label':'探索示例', 'future_tag':'展望未来', 'future_badge':'未来概念',
+  'future_title':'想象一个由你的创意塑造的网店。',
+  'future_text':'未来方向：描述你的品牌，借助 AI 探索网店设计。这是概念展示，并非目前可用的功能。',
+  'future_prompt':'一家温暖、宁静的手作家居用品店', 'future_note':'仅为示意 · 不会发送 AI 请求',
+  'scenes':[
+   [('陶瓷杯','陶瓷杯','为日常慢下来的片刻而准备。'),('日用碗','日用碗','适合每天餐桌的简约器皿。'),('编织篮','编织篮','收纳你想放在身边的小物。')],
+   [('商品','陶瓷杯','示例商品资料 · 等待审核'),('新订单','订单 #PS-0124','陶瓷杯 · 已收到新订单'),('准备中','订单 #PS-0124','陶瓷杯 · 正为顾客准备')],
+   [('商品描述','介绍陶瓷杯','一只简约陶瓷杯，陪伴你生活中的每个小片刻。'),('社交文案','分享陶瓷杯','安静的时刻，一杯热饮，还有你喜欢的杯子。')]],
+ },
+ 'ms': {
+  'story_tag':'DIBINA UNTUK CARA ANDA BEKERJA', 'story_title':'Setiap perniagaan ada ceritanya.',
+  'story_text':'Daripada memperkenalkan produk hingga menyediakan pesanan, banyak perkara perlu dijaga setiap hari. Kami percaya alat yang baik dapat menjadikan semuanya lebih mudah.',
+  'home_ai_tag':'PEMBANTU UNTUK KERJA HARIAN', 'home_ai_title':'Lebih ruang untuk kerja yang penting.', 'home_ai_text':'Terokai cara alat AI yang disokong boleh membantu maklumat produk dan kandungan, sambil anda menyemak dan membuat keputusan.',
+  'story_steps':['Tampilkan produk pilihan','Urus butiran harian','Beri ruang untuk idea baharu'],
+  'story_descriptions':['Berikan produk tempat yang mencerminkan jenama anda.','Urus produk dan pesanan dengan lebih teratur.','Terokai bantuan praktikal untuk kandungan dan idea.'],
+  'scene_label':'Terokai contoh', 'future_tag':'PANDANGAN KE HADAPAN', 'future_badge':'Konsep masa depan',
+  'future_title':'Bayangkan kedai yang dibentuk oleh idea anda.',
+  'future_text':'Arah masa depan: terangkan jenama anda dan gunakan AI untuk meneroka reka bentuk kedai. Ini konsep, bukan fungsi yang tersedia.',
+  'future_prompt':'Kedai barangan rumah buatan tangan yang tenang dan mesra', 'future_note':'Ilustrasi sahaja · Tiada permintaan AI dihantar',
+  'scenes':[
+   [('Cawan seramik','Cawan seramik','Untuk detik tenang setiap hari.'),('Mangkuk harian','Mangkuk harian','Pilihan ringkas untuk meja harian.'),('Bakul anyaman','Bakul anyaman','Ruang untuk barang kegemaran anda.')],
+   [('Produk','Cawan seramik','Senarai produk contoh · Sedia disemak'),('Pesanan baharu','Pesanan #PS-0124','Cawan seramik · Pesanan baharu diterima'),('Disediakan','Pesanan #PS-0124','Cawan seramik · Sedang disediakan')],
+   [('Penerangan produk','Perkenalkan cawan seramik','Cawan seramik ringkas untuk detik kecil dalam hari anda.'),('Kapsyen sosial','Kongsi cawan seramik','Saat tenang, minuman hangat dan cawan kegemaran.')]],
+ }}
+
 for _lang in COPY:
  COPY[_lang].update(SHOWCASE[_lang])
+ COPY[_lang].update(STORY[_lang])
 ICON = {
 'language':'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c-5 5-5 13 0 18M12 3c5 5 5 13 0 18"/>',
 'sun':'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M19 5l-1.5 1.5m-11 11L5 19"/>',
@@ -140,6 +189,23 @@ def concept_home(c):
  items=''.join(f'<li><span class="home-feature-icon">{icon(ic)}</span><div><strong>{esc(title)}</strong><p>{esc(desc)}</p></div></li>' for ic,title,desc in zip(icons,c['tabs'],c['tab_desc']))
  return f'<section class="section home-concept"><div class="wrap home-concept-grid"><div class="home-concept-copy"><p class="eyebrow">{esc(c["tag"])}</p><h2>{esc(c["title"])}</h2><p>{esc(c["desc"])}</p><ul class="home-feature-list">{items}</ul><div>{button(c["home_cta"],link("commerce"))}</div></div><div class="home-concept-visual"><div class="home-concept-caption"><span class="mini-kicker">POMELO COMMERCE</span><b>{esc(c["home_note"])}</b></div>{dashboard(c)}<div class="home-concept-badge">{icon("spark")} AI + MCP</div></div></div></section>'
 
+
+def merchant_story(c):
+ entries=''.join(f'<div class="story-step"><span>{i:02}</span><div><b>{esc(title)}</b><p>{esc(desc)}</p></div></div>' for i,(title,desc) in enumerate(zip(c['story_steps'],c['story_descriptions']),1))
+ return f'<section class="section merchant-story"><div class="wrap story-layout"><div class="story-copy"><p class="eyebrow">{esc(c["story_tag"])}</p><h2>{esc(c["story_title"])}</h2><p>{esc(c["story_text"])}</p></div><div class="story-steps">{entries}</div></div></section>'
+
+def home_ai(c):
+ return f'<section class="section home-ai"><div class="wrap story-layout"><div class="story-copy"><p class="eyebrow">{esc(c["home_ai_tag"])}</p><h2>{esc(c["home_ai_title"])}</h2><p>{esc(c["home_ai_text"])}</p>{button(c["home_cta"],link("commerce"),"outline")}</div><div class="future-card"><div class="future-card-top"><span>{icon("spark")} AI + MCP</span><span class="pill">{esc(c["studio_label"])}</span></div><div class="future-prompt">{esc(c["ai_prompt"])}</div><div class="future-canvas"><span class="mini-kicker">AI + MCP</span><p>{esc(c["ai_answer"])}</p></div><p>{esc(c["ai_note"])}</p></div></div></section>'
+
+def scenario_switch(c, index):
+ items=c['scenes'][index]
+ buttons=''.join(f'<button type="button" data-scene-button="{i}" aria-pressed="{str(i==0).lower()}">{esc(label)}</button>' for i,(label,title,body) in enumerate(items))
+ panels=''.join(f'<div class="scene-detail" data-scene-detail="{i}"><strong>{esc(title)}</strong><p>{esc(body)}</p></div>' for i,(label,title,body) in enumerate(items))
+ return f'<div class="scene-switch" data-scene-switch><p class="mini-kicker">{esc(c["scene_label"])}</p><div class="scene-buttons" data-scene-buttons hidden>{buttons}</div><div class="scene-details" aria-live="polite">{panels}</div></div>'
+
+def future_concept(c):
+ return f'<section class="section future-section"><div class="wrap future-layout"><div class="future-copy"><p class="eyebrow">{esc(c["future_tag"])}</p><h2>{esc(c["future_title"])}</h2><p>{esc(c["future_text"])}</p></div><div class="future-card"><div class="future-card-top"><span>{icon("spark")} AI + MCP</span><span class="pill">{esc(c["future_badge"])}</span></div><div class="future-prompt">{esc(c["future_prompt"])}</div><div class="future-canvas"><span class="mini-kicker">POMELO HOME</span><strong>{esc(c["store_title"])}</strong><div class="future-swatches" aria-hidden="true"><i></i><i></i><i></i></div></div><p>{esc(c["future_note"])}</p></div></div></section>'
+
 def product_showcase(c):
  tabs=''.join(f'<button type="button" class="showcase-tab" id="tour-tab-{i}" role="tab" aria-selected="{str(i==0).lower()}" aria-controls="tour-panel-{i}" tabindex="{0 if i==0 else -1}" data-tour-tab="{i}"><span class="showcase-tab-icon">{icon(ic)}</span><span><b>{esc(title)}</b><small>{esc(desc)}</small></span>{icon("arrow")}</button>' for i,(ic,title,desc) in enumerate(zip(('shop','panel','spark'),c['tabs'],c['tab_desc'])))
  products=''.join(f'<div class="demo-product"><div class="demo-product-art art-{i}"><i class="{shape}"></i></div><b>{esc(name)}</b><small>{esc(c["store_sample"])}</small></div>' for i,(name,shape) in enumerate(zip(c['store_items'],('object-cup','object-bowl','object-vase'))))
@@ -147,15 +213,15 @@ def product_showcase(c):
  rows=''.join(f'<div class="tour-order"><span class="tour-order-icon">{icon(ic)}</span><div><b>{esc(name)}</b><small>#PS-0{124+i}</small></div><span class="tour-order-status">{esc(status)}</span></div>' for i,(name,status,ic) in enumerate(zip(c['studio_rows'],c['studio_states'],('shop','panel','shop'))))
  studio=f'<div class="tour-studio"><div class="tour-studio-bar"><b>Seller Studio</b><span class="pill">{esc(c["studio_label"])}</span></div><div class="tour-studio-body"><p class="mini-kicker">{esc(c["studio_kicker"])}</p><h3>{esc(c["studio_title"])}</h3><p>{esc(c["studio_desc"])}</p><div class="tour-order-list"><div class="tour-order-heading"><b>{esc(c["studio_row_title"])}</b><span>{esc(c["sample_label"])}</span></div>{rows}</div></div></div>'
  ai=f'<div class="tour-ai"><div class="tour-ai-head"><span class="tour-ai-icon">{icon("spark")}</span><div><b>AI + MCP</b><small>{esc(c["ai_kicker"])}</small></div><span class="pill">{esc(c["studio_label"])}</span></div><div class="tour-ai-body"><div class="tour-message tour-message-user">{esc(c["ai_prompt"])}</div><div class="tour-message tour-message-answer"><b>{esc(c["tabs"][2])}</b><p>{esc(c["ai_answer"])}</p></div><span class="tour-review">{icon("panel")}{esc(c["ai_human"])}</span><p class="tour-ai-note">{esc(c["ai_note"])}</p></div></div>'
- panels=''.join(f'<section class="showcase-panel" id="tour-panel-{i}" role="tabpanel" aria-labelledby="tour-tab-{i}" tabindex="0" data-tour-panel="{i}"><div class="showcase-panel-copy"><p class="mini-kicker">{esc(c["tabs"][i])}</p><h3>{esc(title)}</h3><p>{esc(desc)}</p></div><div class="showcase-visual">{visual}</div></section>' for i,(title,desc,visual) in enumerate(((c['store_title'],c['feature_text'][0],shop),(c['studio_title'],c['studio_desc'],studio),(c['ai_title'],c['ai_desc'],ai))))
+ panels=''.join(f'<section class="showcase-panel" id="tour-panel-{i}" role="tabpanel" aria-labelledby="tour-tab-{i}" tabindex="0" data-tour-panel="{i}"><div class="showcase-panel-copy"><p class="mini-kicker">{esc(c["tabs"][i])}</p><h3>{esc(title)}</h3><p>{esc(desc)}</p></div><div class="showcase-visual">{visual}{scenario_switch(c,i)}</div></section>' for i,(title,desc,visual) in enumerate(((c['store_title'],c['feature_text'][0],shop),(c['studio_title'],c['studio_desc'],studio),(c['ai_title'],c['ai_desc'],ai))))
  return f'<section class="section showcase-section" id="product-preview"><div class="wrap"><div class="showcase-intro"><div><p class="eyebrow">{esc(c["tour_tag"])}</p><h2>{esc(c["tour_title"])}</h2></div><p>{esc(c["tour_desc"])}</p></div><div class="showcase-shell" data-product-tour><div class="showcase-tabs" role="tablist" aria-label="{esc(c["tour_tag"])}" aria-orientation="vertical" data-tour-tabs hidden>{tabs}</div><div class="showcase-panels">{panels}</div></div><p class="showcase-disclaimer">{esc(c["tour_note"])}</p></div></section>'
 def home(c):
  band=''.join(f'<div><strong>{esc(n)}</strong>{esc(d)}</div>' for n,d in zip(c['band'],c['band_desc']))
  audience=''.join(f'<div class="audience"><span>{i:02}</span><b>{esc(n)}</b><p>{esc(d)}</p></div>' for i,(n,d) in enumerate(zip(c['aud_names'],c['aud_text']),1))
  features=''.join('<li>'+esc(x)+'</li>' for x in c['features'])
- return hero(c,c['home_tag'],c['home_title'],c['home_desc'],True)+f'<div class="feature-band"><div class="wrap feature-band-inner"><b>{esc(c["home_band"])}</b><div class="band-items">{band}</div></div></div>{concept_home(c)}<section class="section section-soft"><div class="wrap">{section_head(c["service_tag"],c["service_title"],c["service_desc"])}{cards(c["service_names"],c["service_text"],["shop","code","spark"],["commerce","services","services"],c)}</div></section><section class="section"><div class="wrap">{section_head(c["aud_tag"],c["aud_title"])}<div class="audiences">{audience}</div></div></section>'+cta(c)
+ return hero(c,c['home_tag'],c['home_title'],c['home_desc'],True)+f'<div class="feature-band"><div class="wrap feature-band-inner"><b>{esc(c["home_band"])}</b><div class="band-items">{band}</div></div></div>{merchant_story(c)}{concept_home(c)}{home_ai(c)}<section class="section section-soft"><div class="wrap">{section_head(c["service_tag"],c["service_title"],c["service_desc"])}{cards(c["service_names"],c["service_text"],["shop","code","spark"],["commerce","services","services"],c)}</div></section><section class="section"><div class="wrap">{section_head(c["aud_tag"],c["aud_title"])}<div class="audiences">{audience}</div></div></section>'+cta(c)
 def commerce(c):
- return hero(c,c['commerce_tag'],c['commerce_title'],c['commerce_desc'],variant='commerce')+f'{product_showcase(c)}<section class="section"><div class="wrap">{section_head(c["product_tag"],c["product_title"])}{cards(c["feature_names"],c["feature_text"],["shop","panel","spark"])}</div></section><section class="section section-soft"><div class="wrap">{section_head(c["how_tag"],c["commerce_steps"],c["commerce_steps_desc"])}{steps(c)}<p style="margin-top:2rem">{button(c["nav"][2],link("how-it-works"),"outline")}</p></div></section>'+cta(c)
+ return hero(c,c['commerce_tag'],c['commerce_title'],c['commerce_desc'],variant='commerce')+f'{product_showcase(c)}{future_concept(c)}<section class="section"><div class="wrap">{section_head(c["product_tag"],c["product_title"])}{cards(c["feature_names"],c["feature_text"],["shop","panel","spark"])}</div></section><section class="section section-soft"><div class="wrap">{section_head(c["how_tag"],c["commerce_steps"],c["commerce_steps_desc"])}{steps(c)}<p style="margin-top:2rem">{button(c["nav"][2],link("how-it-works"),"outline")}</p></div></section>'+cta(c)
 def how(c):
  items=''.join(f'<article class="journey-item" id="step-{i}"><span class="journey-num">{i:02}</span><div><h2>{esc(n)}</h2><p>{esc(d)}</p></div><div class="journey-art"><div class="dashboard"><div class="card-head"><span>{esc(short)}</span><span class="pill">{esc(c["examples"])}</span></div><div class="mock-row"><span class="mock-icon">{icon(ic)}</span><b>{esc(n)}</b></div><p class="dashboard-note">{esc(c["dash_note"])}</p></div></div></article>' for i,(n,d,short,ic) in enumerate(zip(c['steps'],c['step_text'],c['step_short'],('chat','shop','panel','spark')),1))
  faq=''.join(f'<details class="card"><summary><b>{esc(q)}</b></summary><p>{esc(a)}</p></details>' for q,a in zip(c['faq_q'],c['faq_a']))

@@ -24,7 +24,7 @@ def main():
         with sync_playwright() as p:
             path = os.environ.get('GALLERY_CHROME', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
             browser = p.chromium.launch(executable_path=path, headless=True)
-            for width, height in ((1440, 900), (1100, 800), (768, 1024), (390, 844), (320, 780)):
+            for width, height in ((1440, 900), (1100, 800), (768, 1024), (390, 844), (375, 812), (320, 568), (568, 320)):
                 context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce')
                 page = context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
@@ -35,7 +35,12 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name, page.evaluate('document.documentElement.scrollWidth'))
                         assert page.locator('main').inner_text().strip(), (width, locale, name)
-                        assert page.locator('[data-update] .version').inner_text() == '7.2.0'
+                        assert page.locator('[data-update] .version').inner_text() == '7.3.0'
+                        if width <= 700:
+                            for control in page.locator('.controls .control, .controls summary').all():
+                                if control.is_visible():
+                                    box = control.bounding_box()
+                                    assert box['width'] >= 44 and box['height'] >= 44, (width, locale, name, box)
                         if name == 'contact':
                             assert page.locator('form input').first.is_enabled()
                             assert page.locator('a[href="https://wa.me/601139023123"]').count() >= 1
@@ -67,6 +72,12 @@ def main():
             page.locator('.service-preview-row').first.click()
             assert page.url.endswith('#service-offerings')
             page.goto(base + 'commerce.html')
+            posted_scenes = []
+            page.on('request', lambda request: posted_scenes.append(request.url) if request.method != 'GET' else None)
+            assert page.locator('[data-scene-switch]').count() == 3
+            page.locator('[data-scene-switch]').nth(0).locator('[data-scene-button]').nth(1).click()
+            assert page.locator('[data-scene-switch]').nth(0).locator('[data-scene-detail]').nth(1).is_visible()
+            assert page.locator('[data-scene-switch]').nth(0).locator('[data-scene-button]').nth(1).get_attribute('aria-pressed') == 'true'
             tablist = page.locator('[data-tour-tabs]')
             assert tablist.is_visible() and tablist.get_attribute('aria-orientation') == 'horizontal'
             assert page.locator('[data-tour-panel="0"]').is_visible()
@@ -74,10 +85,18 @@ def main():
             page.locator('[data-tour-tab="1"]').click()
             assert page.locator('[data-tour-panel="1"]').is_visible()
             assert page.locator('[data-tour-tab="1"]').get_attribute('aria-selected') == 'true'
+            page.locator('[data-scene-switch]').nth(1).locator('[data-scene-button]').nth(2).click()
+            assert 'Preparing' in page.locator('[data-scene-switch]').nth(1).locator('[data-scene-detail]').nth(2).inner_text()
             page.locator('[data-tour-tab="1"]').press('ArrowRight')
             assert page.locator('[data-tour-panel="2"]').is_visible()
             assert page.locator('[data-tour-tab="2"]').evaluate('(el) => document.activeElement === el')
             assert 'No AI request is sent.' in page.locator('[data-tour-panel="2"]').inner_text()
+            page.locator('[data-scene-switch]').nth(2).locator('[data-scene-button]').nth(1).click()
+            assert page.locator('[data-scene-switch]').nth(2).locator('[data-scene-detail]').nth(1).is_visible()
+            assert 'Share a ceramic mug' in page.locator('.tour-message-user').inner_text()
+            assert 'warm drink' in page.locator('.tour-message-answer').inner_text()
+            assert 'Future concept' in page.locator('.future-section').inner_text()
+            assert not posted_scenes, posted_scenes
             page.locator('[data-theme-toggle]').click()
             page.wait_for_function("document.documentElement.dataset.theme === 'dark'")
             assert page.locator('h1').is_visible()
@@ -93,10 +112,10 @@ def main():
             assert page.locator('form input[name="name"]').input_value() == 'Sample name'
             assert not posted, posted
             page.goto(base + 'contact.html')
-            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.2.1"}'))
+            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.3.1"}'))
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.2.1' in page.locator('[data-status]').inner_text()
+            assert '7.3.1' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
             page.wait_for_load_state('load')
             page.wait_for_function("document.querySelector('[data-status]').textContent.includes('could not be verified')")
@@ -114,11 +133,13 @@ def main():
             assert static.locator('[data-tour-tabs]').is_hidden()
             assert static.locator('[data-tour-panel]').count() == 3
             assert all(panel.is_visible() for panel in static.locator('[data-tour-panel]').all())
+            assert static.locator('[data-scene-buttons]').first.is_hidden()
+            assert all(detail.is_visible() for detail in static.locator('[data-scene-detail]').all())
             static.goto(base + 'contact.html')
             assert static.locator('form input').first.is_disabled()
             nojs.close()
             browser.close()
-        print('PASS: 90 page/viewport checks, themes, locale navigation, sample contact form, product concept tabs and update detection')
+        print('PASS: 126 page/viewport checks, themes, locale navigation, sample contact form, product concept tabs and update detection')
     finally:
         server.shutdown()
 
