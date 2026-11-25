@@ -111,7 +111,9 @@ function createPicker(button, setLanguage) {
     select.append(option);
   }
   const dialog = document.createElement("dialog");
-  if (typeof dialog.showModal === "function") {
+  const nativeDialog = typeof dialog.showModal === "function";
+  const labelTarget = document.getElementById(button.getAttribute("aria-labelledby"));
+  if (nativeDialog) {
     dialog.className = "mini-language-dialog";
     dialog.id = "mini-language-dialog";
     dialog.setAttribute("aria-labelledby", "mini-language-heading");
@@ -139,10 +141,8 @@ function createPicker(button, setLanguage) {
       button.setAttribute("aria-expanded", "true");
       select.focus();
     });
-    for (const type of ["keydown", "keyup"]) {
-      dialog.addEventListener(type, (event) => event.stopPropagation());
-    }
-    form.addEventListener("submit", () => setLanguage(select.value, true));
+    dialog.addEventListener("keydown", (event) => event.stopPropagation());
+    select.addEventListener("change", () => setLanguage(select.value, true));
     dialog.addEventListener("close", () => {
       button.setAttribute("aria-expanded", "false");
       button.focus();
@@ -152,13 +152,18 @@ function createPicker(button, setLanguage) {
     button.hidden = true;
     select.addEventListener("change", () => setLanguage(select.value, true));
   }
+  button.disabled = false;
 
   return () => {
     select.value = language;
-    const label = exactCopy("Choose language") + " · " + languages.get(language);
-    select.setAttribute("aria-label", exactCopy("Language"));
-    button.setAttribute("aria-label", label);
-    button.title = label;
+    const label = exactCopy("Language") + " · " + languages.get(language);
+    if (!nativeDialog) select.setAttribute("aria-label", exactCopy("Language"));
+    if (labelTarget) {
+      labelTarget.textContent = label;
+    } else {
+      button.setAttribute("aria-label", label);
+      button.title = label;
+    }
     const display = button.querySelector("[data-language-label]");
     if (display) display.textContent = {"en": "EN", "zh-Hans": "中文", "ms": "MS"}[language];
   };
