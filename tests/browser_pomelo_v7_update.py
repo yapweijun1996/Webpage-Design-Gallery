@@ -25,7 +25,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         path = urlsplit(self.path).path
         build = 'new' if Handler.release else 'old'
-        version = '7.4.1' if Handler.release else '7.4.0'
+        version = '7.5.1' if Handler.release else '7.5.0'
         if path == '/bootstrap':
             return self.send_text('<!doctype html><title>Worker test</title>', 'text/html')
         if path == '/version.json':
@@ -33,7 +33,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if path == PREFIX + 'release.json':
             return self.send_text(json.dumps({'version':version}), 'application/json')
         if path == PREFIX + 'index.html':
-            html = (ROOT / path.lstrip('/')).read_text(encoding='utf-8').replace('7.4.0', version)
+            html = (ROOT / path.lstrip('/')).read_text(encoding='utf-8').replace('7.5.0', version)
             return self.send_text(html, 'text/html')
         if path == '/v7-test-sw.js':
             # Separate cached navigations reproduce the Gallery worker's parent scope.
@@ -73,13 +73,13 @@ def main():
             page.evaluate("navigator.serviceWorker.register('/v7-test-sw.js', {scope:'/'}).then(() => navigator.serviceWorker.ready)")
             page.goto(base + PREFIX + 'index.html')
             assert page.evaluate('!!navigator.serviceWorker.controller')
-            assert page.locator('[data-update] .version').inner_text() == '7.4.0'
+            assert page.locator('[data-update] .version').inner_text() == '7.5.0'
             Handler.release = 1
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.4.1' in page.locator('[data-status]').inner_text()
+            assert '7.5.1' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
-            page.wait_for_function("document.querySelector('[data-update] .version').textContent === '7.4.1'", timeout=25000)
+            page.wait_for_function("document.querySelector('[data-update] .version').textContent === '7.5.1'", timeout=25000)
             page.wait_for_function("document.querySelector('[data-status]').textContent === 'Update applied.'")
             browser.close()
         print('PASS: parent worker update and V7 version verified after reload')
