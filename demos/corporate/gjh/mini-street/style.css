@@ -24,11 +24,10 @@ html[data-site-theme="light"] { color-scheme: light; }
   z-index: var(--layer-masthead);
   border-bottom: 1px solid var(--line);
   background: var(--color-masthead);
-  padding-block-start: env(safe-area-inset-top, 0px);
+  padding-block-start: var(--safe-area-top);
 }
 .masthead-inner {
-  --masthead-edge: 1.75rem;
-  width: min(100% - max(var(--masthead-edge), env(safe-area-inset-left, 0px)) - max(var(--masthead-edge), env(safe-area-inset-right, 0px)), 1512px);
+  width: min(100% - max(var(--masthead-gutter), var(--safe-area-left)) - max(var(--masthead-gutter), var(--safe-area-right)), 1512px);
   margin-inline: auto;
 }
 .masthead-inner {
@@ -176,20 +175,20 @@ html[data-site-theme="light"] { color-scheme: light; }
 
 .mini-update-toast {
   --sds-z-toast: var(--layer-masthead);
-  --sds-gutter: 12px;
-  --sds-safe-top: env(safe-area-inset-top, 0px);
-  --sds-safe-right: env(safe-area-inset-right, 0px);
-  --sds-safe-bottom: env(safe-area-inset-bottom, 0px);
-  --sds-safe-left: env(safe-area-inset-left, 0px);
-  --sds-space-1: 2px;
-  --sds-space-3: 12px;
+  --sds-gutter: var(--toast-spacing);
+  --sds-safe-top: var(--safe-area-top);
+  --sds-safe-right: var(--safe-area-right);
+  --sds-safe-bottom: var(--safe-area-bottom);
+  --sds-safe-left: var(--safe-area-left);
+  --sds-space-1: var(--toast-focus-outline);
+  --sds-space-3: var(--toast-spacing);
   --sds-radius-lg: var(--radius-inline-detail);
   --sds-color-border-strong: var(--color-dialog-border);
   --sds-color-surface: var(--color-dialog-surface);
   --sds-color-text: var(--site-ink);
   --sds-color-focus: var(--color-focus);
   --sds-shadow-2: var(--shadow-stop);
-  --mini-update-toast-top: calc(max(var(--mini-update-protected-top, 0px), var(--sds-safe-top)) + var(--sds-space-3));
+  --mini-update-toast-top: calc(max(var(--mini-update-protected-top, var(--sds-safe-top)), var(--sds-safe-top)) + var(--sds-space-3));
   inset-block: var(--mini-update-toast-top) auto;
   max-block-size: calc(100dvh - var(--mini-update-toast-top) - max(var(--sds-gutter), var(--sds-safe-bottom)));
   overflow: auto;
@@ -275,7 +274,6 @@ html:not([data-site-theme="light"]) .mini-theme-sun,
 html[data-site-theme="light"] .mini-theme-moon { display: none; }
 
 @media (max-width: 720px) {
-  .masthead-inner { --masthead-edge: 12px; }
   .masthead-inner, .masthead-inner:has(> .mini-basket-dock) {
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas: "identity nav nav" "utilities utilities basket";
