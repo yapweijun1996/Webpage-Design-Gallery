@@ -42,6 +42,17 @@ def run():
                         page.set_viewport_size({"width": width, "height": 900})
                         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), (locale, name, width)
             page.set_viewport_size({"width": 1440, "height": 900})
+            page.goto(base + "solutions.html")
+            assert page.locator(".v6-connection-grid a").count() == 4
+            for name, selector in (("online-shopping", ".v6-shop-preview"), ("whatsapp-orders", ".v6-chat-preview"),
+                                   ("ai-integration", ".v6-ai-preview"), ("custom-systems", ".v6-system-preview")):
+                page.goto(base + name + ".html")
+                assert page.locator(selector).count() == 1, name
+                descriptions = page.locator(".v6-features .v6-feature p").all_text_contents()
+                assert len(set(descriptions)) == 3, name
+            page.goto(base + "online-shopping.html")
+            page.locator(".v6-mock-action").click()
+            expect(page.locator("#demo-1")).to_be_visible()
             page.goto(base + "showcase.html")
             page.locator("[data-action=basket]").click()
             expect(page.locator("#demo-1 [data-status]")).to_contain_text("1 example")

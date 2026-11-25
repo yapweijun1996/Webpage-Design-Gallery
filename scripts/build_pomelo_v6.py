@@ -28,6 +28,34 @@ ICONS={
  'update':'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 12-2L20 12M4 12l2.4 5a7 7 0 0 0 12-2"/></svg>',
  'menu':'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
 }
+SERVICE_ICONS=[
+'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 9h16l-1 11H5L4 9Z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg>',
+'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 18 3 21l1-5A8 8 0 1 1 8 20l-3-2Z"/><path d="M8 10h8m-8 4h5"/></svg>',
+'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Zm7 12 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg>',
+'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="8.5" y="15" width="7" height="6" rx="1"/><path d="M6.5 11v2h11v-2M12 13v2"/></svg>'
+]
+SERVICE_DETAIL={
+'en':[
+ ['Make products easy to find.','Show useful product information.','Let customers choose how to enquire.'],
+ ['Capture the customer’s question.','Keep missing details visible for review.','Pass confirmed details to the team.'],
+ ['Bring relevant information together.','Prepare an example for a person to review.','Keep the final decision with your team.'],
+ ['Start with the work your team does.','Bring the right information into view.','Improve the handoff together.']],
+'zh':[
+ ['让顾客更容易找到商品。','清楚展示有用的商品资料。','让顾客选择下一步询问方式。'],
+ ['记录顾客的询问。','清楚显示仍需确认的资料。','把已确认的详情交给团队。'],
+ ['把相关资料整理在一起。','准备示例供人员审核。','由团队保留最终决定权。'],
+ ['从团队实际工作开始。','让需要的资料清楚可见。','一起改善工作交接。']],
+'ms':[
+ ['Mudahkan pelanggan menemui produk.','Paparkan maklumat produk yang berguna.','Biar pelanggan memilih cara bertanya.'],
+ ['Catat pertanyaan pelanggan.','Paparkan butiran yang perlu disemak.','Serahkan butiran yang disahkan kepada pasukan.'],
+ ['Kumpulkan maklumat berkaitan.','Sediakan contoh untuk semakan manusia.','Kekalkan keputusan akhir bersama pasukan.'],
+ ['Mulakan dengan kerja sebenar pasukan.','Paparkan maklumat yang diperlukan.','Perbaiki proses serahan bersama.']]
+}
+CONNECTION_COPY={
+'en':('Connected around your workflow','Start with one need. Explore how each solution can support the next step.'),
+'zh':('围绕你的工作流程连接起来','从一个需求开始，探索每项方案怎样支持下一步。'),
+'ms':('Terhubung mengikut aliran kerja anda','Mulakan dengan satu keperluan dan terokai bagaimana setiap penyelesaian menyokong langkah seterusnya.')
+}
 UPDATE_COPY={
 'en':('Check update','Checking for updates…','Up to date.','Update available','Update now','Unable to check. Check your connection and retry.','Retry','Current version','Latest version','Updating reloads this page and resets the demo. Continue?','Update applied.','Update could not be verified. Retry.','Checking is unavailable without JavaScript.'),
 'zh':('检查更新','正在检查更新…','已是最新版本。','发现新版本','立即更新','无法检查更新，请检查网络后重试。','重试','当前版本','最新版本','更新会重新加载页面并重置演示，继续吗？','更新成功。','无法验证更新，请重试。','检查更新需要 JavaScript。'),
@@ -139,19 +167,27 @@ def render(language,page):
  def intro(tag,title,desc):return f'<section class="page-intro"><div class="wrap"><p class="eyebrow">{esc(tag)}</p><h1>{esc(title)}</h1><p>{esc(desc)}</p></div></section>'
  faq_copy={'en':('Frequently asked questions','What is this solution intended to help with?','Does the preview make real changes?'),'zh':('常见问题','这个方案希望帮助解决什么？','预览会产生真实操作吗？'),'ms':('Soalan lazim','Apakah tujuan penyelesaian ini?','Adakah pratonton membuat perubahan sebenar?')}
  def cta():return f'<section class="v6-cta"><div class="wrap v6-cta-inner"><div><h2>{esc(t["cta_title"])}</h2><p>{esc(t["cta_desc"])}</p></div><a class="button" href="{link("contact")}">{esc(t["talk"])} ↗</a></div></section>'
- cards=''.join(f'<a class="service-card" href="{link(p)}"><span class="service-num">0{i+1}</span><h3>{esc(q["service_names"][i])}</h3><p>{esc(q["service_desc"][i])}</p><span class="card-link">{esc(t["learn"])} ↗</span></a>' for i,p in enumerate(SERVICE_PAGES))
+ cards=''.join(f'<a class="service-card" href="{link(p)}"><span class="v6-service-card-top"><span class="service-symbol">{SERVICE_ICONS[i]}</span><span class="service-num">0{i+1}</span></span><h3>{esc(q["service_names"][i])}</h3><p>{esc(q["service_desc"][i])}</p><span class="card-link">{esc(t["learn"])} ↗</span></a>' for i,p in enumerate(SERVICE_PAGES))
  mock=f"""<div class="mock v6-dashboard"><div class="mock-head"><span>{esc(q['mock_label'])}</span><span class="badge">{esc(q['concept'])}</span></div><div class="v6-dashboard-top"><span>{esc(q['mock_title'])}</span><small>{esc(q['mock_note'])}</small></div><div class="mock-body"><div class="mock-card"><strong>{esc(q['mock_products'])}</strong><img src="{product}" alt=""><h3>{esc(t['demo_product'])}</h3><p>{esc(t['product_desc'])}</p></div><div class="mock-card"><strong>{esc(q['mock_orders'])}</strong><div class="mock-order"><strong>PS-0124</strong>{esc(q['status1'])}</div><div class="mock-order"><strong>PS-0125</strong>{esc(q['status2'])}</div></div></div><div class="mock-footer">{esc(t['demo_note'])}</div></div>"""
  if page=='index':
   main=f"""<main id="main"><section class="hero"><div class="wrap hero-grid"><div><p class="eyebrow">{esc(t['home_tag'])}</p><h1>{esc(t['home_title'])}</h1><p>{esc(t['home_desc'])}</p><div class="buttons"><a class="button" href="{link('solutions')}">{esc(t['explore_solutions'])} ↗</a><a class="button secondary" href="{link('showcase')}">{esc(t['view_showcase'])}</a></div></div>{mock}</div></section><section class="section section-tint"><div class="wrap"><div class="section-head"><div><p class="eyebrow">{esc(q['services_kicker'])}</p><h2>{esc(q['services_title'])}</h2></div><p>{esc(q['services_desc'])}</p></div><div class="services-grid">{cards}</div></div></section><section class="section"><div class="wrap v6-spotlight"><div><p class="eyebrow">{esc(t['showcase_kicker'])}</p><h2>{esc(t['showcase_title'])}</h2><p>{esc(t['showcase_desc'])}</p><a class="button" href="{link('showcase')}">{esc(t['view_showcase'])} ↗</a></div><div class="v6-spotlight-art"><span class="badge">{esc(q['concept'])}</span><div class="v6-spotlight-grid"><span>01<br>{esc(t['live_store'])}</span><span>02<br>{esc(t['live_wa'])}</span><span>03<br>{esc(t['live_ai'])}</span><span>04<br>{esc(t['live_sys'])}</span></div></div></div></section><section class="section section-tint"><div class="wrap story-teaser"><img src="{asset}hero.webp" alt="" loading="lazy"><div><p class="eyebrow">{esc(t['order_tag'])}</p><h2>{esc(t['order_title'])}</h2><p>{esc(t['order_desc'])}</p><ol class="v6-home-steps">{''.join(f'<li>{esc(n)}</li>' for n in q['chapter_names'])}</ol><a class="button" href="{link('how-it-works')}">{esc(t['follow'])} ↗</a></div></div></section><section class="section"><div class="wrap"><p class="eyebrow">{esc(t['promise_tag'])}</p><h2>{esc(t['promise_title'])}</h2><p class="v6-longcopy">{esc(t['promise_desc'])}</p><a href="{link('about')}">{esc(t['about_link'])} ↗</a></div></section>{cta()}</main>"""
  elif page=='solutions':
   needs=''.join(f'<a class="v6-need" href="{link(p)}"><span>0{i+1}</span>{esc(t["needs"][i])} ↗</a>' for i,p in enumerate(SERVICE_PAGES))
-  main=f'<main id="main">{intro(t["service_tag"],t["solutions_title"],t["solutions_desc"])}<section class="section"><div class="wrap"><h2>{esc(t["help_title"])}</h2><p>{esc(t["help_desc"])}</p><div class="v6-needs">{needs}</div></div></section><section class="section section-tint"><div class="wrap"><div class="services-grid">{cards}</div></div></section>{cta()}</main>'
+  main=f'<main id="main">{intro(t["service_tag"],t["solutions_title"],t["solutions_desc"])}<section class="section"><div class="wrap"><h2>{esc(t["help_title"])}</h2><p>{esc(t["help_desc"])}</p><div class="v6-needs">{needs}</div></div></section><section class="section section-tint"><div class="wrap"><div class="services-grid">{cards}</div></div></section><section class="section v6-connections"><div class="wrap"><div class="section-head"><div><p class="eyebrow">{esc(t["service_tag"])}</p><h2>{esc(CONNECTION_COPY[language][0])}</h2></div><p>{esc(CONNECTION_COPY[language][1])}</p></div><div class="v6-connection-grid">{''.join(f'<a href="{link(p)}" class="v6-connection"><span class="service-symbol">{SERVICE_ICONS[i]}</span><strong>{esc(q["service_names"][i])}</strong><span class="v6-connection-arrow" aria-hidden="true">→</span></a>' for i,p in enumerate(SERVICE_PAGES))}</div></div></section>{cta()}</main>'
  elif page in SERVICE_PAGES:
   i=SERVICE_PAGES.index(page)
-  example_tiles=''.join(f'<div class="v6-flow-tile"><span class="service-num">0{j+1}</span><strong>{esc(name)}</strong><p>{esc(q["panel_points"][i][min(j,1)])}</p></div>' for j,name in enumerate(t['service_steps'][i]))
-  service_visual=f'<div class="mock v6-service-preview"><div class="mock-head"><strong>{esc(q["service_names"][i])}</strong><span class="badge">{esc(q["concept"])}</span></div><div class="v6-service-flow">{example_tiles}</div><div class="mock-footer">{esc(t["demo_note"])}</div></div>'
-  if i==0: service_visual=mock
-  points=''.join(f'<article class="v6-feature"><span class="service-num">0{j+1}</span><h2>{esc(item)}</h2><p>{esc(q["panel_points"][i][j if j<2 else 1])}</p></article>' for j,item in enumerate(t['service_steps'][i]))
+  details=SERVICE_DETAIL[language][i]
+  steps=t['service_steps'][i]
+  if i==0:
+   service_content=f'<div class="v6-shop-preview"><div class="v6-shop-photo"><img src="{product}" alt=""></div><div><p class="eyebrow">{esc(t["store"])}</p><h2>{esc(t["demo_product"])}</h2><p>{esc(t["product_desc"])}</p><a class="v6-mock-action" href="{link("showcase")}#demo-1">{esc(t["service_cta"][0])} ↗</a></div></div>'
+  elif i==1:
+   service_content=f'<div class="v6-chat-preview"><div class="v6-chat-bubble"><small>{esc(steps[0])}</small><strong>{esc(t["demo_product"])} × 2</strong></div><div class="v6-chat-bubble v6-chat-reply"><small>{esc(steps[1])}</small><strong>{esc(t["choose"])}</strong></div><div class="v6-preview-status"><span class="v6-status-dot"></span>{esc(t["waiting"])}</div></div>'
+  elif i==2:
+   service_content=f'<div class="v6-ai-preview"><div class="v6-ai-source"><span class="service-symbol">{SERVICE_ICONS[i]}</span><div><small>{esc(steps[0])}</small><strong>{esc(t["demo_product"])} × 2</strong></div></div><div class="v6-ai-draft"><small>{esc(steps[1])}</small><p>{esc(t["draft_ready"])}</p></div><div class="v6-preview-status"><span class="v6-status-dot"></span>{esc(steps[2])}</div></div>'
+  else:
+   service_content=f'<div class="v6-system-preview"><div class="v6-system-head"><span>{esc(t["demo_product"])} × 2</span><span class="badge">PS-0124</span></div><ol>{"" .join(f'<li><span class="v6-system-dot">0{j+1}</span><div><strong>{esc(step)}</strong><small>{esc(details[j])}</small></div></li>' for j,step in enumerate(steps))}</ol></div>'
+  service_visual=f'<div class="mock v6-service-preview v6-service-preview-{i+1}"><div class="mock-head"><strong>{esc(q["service_names"][i])}</strong><span class="badge">{esc(q["concept"])}</span></div>{service_content}<div class="mock-footer">{esc(t["demo_note"])}</div></div>'
+  points=''.join(f'<article class="v6-feature"><span class="service-num">0{j+1}</span><h2>{esc(item)}</h2><p>{esc(details[j])}</p></article>' for j,item in enumerate(steps))
   f=faq_copy[language]
   faq=f'<section class="section"><div class="wrap v6-faq"><h2>{esc(f[0])}</h2><details><summary>{esc(f[1])}</summary><p>{esc(q["service_desc"][i])}</p></details><details><summary>{esc(f[2])}</summary><p>{esc(t["demo_note"])}</p></details></div></section>'
   main=f'<main id="main"><section class="hero"><div class="wrap hero-grid"><div><p class="eyebrow">{esc(t["service_tag"])} · {esc(q["service_names"][i])}</p><h1>{esc(t["service_titles"][i])}</h1><p>{esc(q["service_more"][i])}</p><div class="buttons"><a class="button" href="{link("showcase")}#demo-{i+1}">{esc(t["service_cta"][i])} ↗</a><a class="button secondary" href="{link("contact")}">{esc(t["talk"])}</a></div></div>{service_visual}</div></section><section class="section section-tint"><div class="wrap v6-features">{points}</div></section>{faq}{cta()}</main>'

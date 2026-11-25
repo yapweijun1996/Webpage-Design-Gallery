@@ -9,6 +9,8 @@ from playwright.sync_api import sync_playwright, expect
 
 ROOT = Path(__file__).resolve().parents[1]
 CURRENT = json.loads((ROOT / "demos/corporate/pomelo-stem/v6/release.json").read_text())["version"]
+parts = CURRENT.split(".")
+NEXT = ".".join(parts[:2] + [str(int(parts[2]) + 1)])
 
 def run():
     server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(ROOT)))
@@ -50,9 +52,9 @@ def run():
             expect(page.locator("[data-update-retry]")).to_be_visible()
             assert not page.locator(".update-control").evaluate("(el) => el.classList.contains('is-checking')")
             page.unroute("**/release.json?*")
-            page.route("**/release.json?*", lambda route: route.fulfill(json={"version": "6.2.0"}))
+            page.route("**/release.json?*", lambda route: route.fulfill(json={"version": NEXT}))
             page.locator("[data-update-retry]").click()
-            expect(page.locator("[data-update-status]")).to_contain_text("v6.2.0")
+            expect(page.locator("[data-update-status]")).to_contain_text("v" + NEXT)
             page.once("dialog", lambda dialog: dialog.dismiss())
             page.locator("[data-update-apply]").click()
             assert page.locator("[data-update-apply]").is_visible()
@@ -62,17 +64,17 @@ def run():
             expect(page.locator("[data-update-status]")).to_have_text("Update could not be verified. Retry.")
             assert page.locator(".update-control summary").inner_text() == "v" + CURRENT
             page.locator("[data-update-retry]").click()
-            expect(page.locator("[data-update-status]")).to_contain_text("v6.2.0")
+            expect(page.locator("[data-update-status]")).to_contain_text("v" + NEXT)
             def next_document(route):
                 response = route.fetch()
-                content = response.text().replace(CURRENT, "6.2.0")
+                content = response.text().replace(CURRENT, NEXT)
                 route.fulfill(response=response, body=content)
             page.route("**/showcase.html?*", next_document)
             page.once("dialog", lambda dialog: dialog.accept())
             page.locator("[data-update-apply]").click()
             page.wait_for_load_state("load")
             expect(page.locator("[data-update-status]")).to_have_text("Update applied.")
-            assert page.locator(".update-control summary").inner_text() == "v6.2.0"
+            assert page.locator(".update-control summary").inner_text() == "v" + NEXT
             page.unroute_all(behavior="wait")
             page.goto(base + "showcase.html")
             page.evaluate("(version) => sessionStorage.setItem('pomelo-v6-expected-update', version)", CURRENT)
