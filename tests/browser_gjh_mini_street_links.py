@@ -108,7 +108,7 @@ def main():
                     if fragment == "vending":
                         exercise_vending(page)
                     page.locator("dialog[open] .close").click()
-                    expect(page.locator("dialog")).not_to_have_attribute("open", "")
+                    expect(page.locator("#stop-dialog")).not_to_have_attribute("open", "")
                     expect(page).to_have_url(base + "?source=test")
                     expect(page.locator(f"[data-stop={fragment}]")).to_be_focused()
                     if fragment == "vending":
@@ -119,7 +119,7 @@ def main():
                         page.locator("[data-slot=B2]").click()
                         pause_drop(page.get_by_role("button", name="Vend", exact=True))
                         page.go_back(wait_until="domcontentloaded")
-                        expect(page.locator("dialog")).not_to_have_attribute("open", "")
+                        expect(page.locator("#stop-dialog")).not_to_have_attribute("open", "")
                         page.go_forward(wait_until="domcontentloaded")
                         expect(page.locator("dialog[open] #vending")).to_be_visible()
                         expect(page.locator(".vending-message")).to_have_text("Choose a drink")
@@ -138,7 +138,7 @@ def main():
                 expect(page.locator("dialog[open] #shop")).to_be_visible()
                 assert page.url.endswith("#shop"), page.url
                 page.go_back(wait_until="domcontentloaded")
-                expect(page.locator("dialog")).not_to_have_attribute("open", "")
+                expect(page.locator("#stop-dialog")).not_to_have_attribute("open", "")
                 expect(page).to_have_url(base)
                 page.go_forward(wait_until="domcontentloaded")
                 expect(page.locator("dialog[open] #shop")).to_be_visible()
@@ -152,7 +152,7 @@ def main():
                 page.go_forward(wait_until="domcontentloaded")
                 expect(page.locator(".vending-message")).to_have_text("Choose a drink")
                 page.keyboard.press("Escape")
-                expect(page.locator("dialog")).not_to_have_attribute("open", "")
+                expect(page.locator("#stop-dialog")).not_to_have_attribute("open", "")
                 expect(page).to_have_url(base)
                 expect(page.locator("[data-stop=vending]")).to_be_focused()
                 page.goto(base + "?before", wait_until="domcontentloaded")
@@ -178,7 +178,7 @@ def main():
                 expect(page.locator(".vending-message")).to_have_text("Choose a drink")
                 page.go_back(wait_until="domcontentloaded")
                 expect(page).to_have_url(base + "?reopen")
-                expect(page.locator("dialog")).not_to_have_attribute("open", "")
+                expect(page.locator("#stop-dialog")).not_to_have_attribute("open", "")
                 page.go_forward(wait_until="domcontentloaded")
                 expect(page.locator("dialog[open] #vending")).to_be_visible()
 
@@ -194,7 +194,7 @@ def main():
                 page = context.new_page()
                 page.goto(base + "#shop", wait_until="domcontentloaded")
                 state = page.evaluate("""() => ({ready: document.readyState,
-                  open: document.querySelector('dialog').open,
+                  open: document.querySelector('#stop-dialog').open,
                   shopVisible: !document.querySelector('#shop').hidden})""")
                 assert state == {"ready": "interactive", "open": True, "shopVisible": True}, state
                 expect(page.locator("dialog[open] #shop")).to_be_visible()
