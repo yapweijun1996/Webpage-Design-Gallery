@@ -20,6 +20,19 @@
   applyTheme();
 
   document.addEventListener("DOMContentLoaded", () => {
+    const controls = document.querySelectorAll(".mini-icon-button");
+    for (const control of controls) {
+      const resetTip = () => control.removeAttribute("data-tip-dismissed");
+      control.addEventListener("pointerenter", resetTip);
+      control.addEventListener("focus", resetTip);
+    }
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      for (const control of controls) {
+        if (control.matches(":hover, :focus-visible")) control.dataset.tipDismissed = "";
+      }
+    });
+
     const toggle = document.querySelector("#mini-theme");
     const renderToggle = () => toggle.setAttribute("aria-pressed", String(theme === "dark"));
     renderToggle();

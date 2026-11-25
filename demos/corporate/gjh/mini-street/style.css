@@ -111,8 +111,16 @@ html[data-site-theme="light"] { color-scheme: light; }
   opacity: 0;
   pointer-events: none;
 }
-.mini-icon-button:is(:hover, :focus-visible) .mini-tip { opacity: 1; }
-#mini-language[aria-expanded="true"] .mini-tip { opacity: 0; }
+.mini-tip::before {
+  content: "";
+  position: absolute;
+  inset: -6px 0 auto;
+  height: 6px;
+}
+.mini-icon-button:not([data-tip-dismissed], [aria-expanded="true"]):is(:hover, :focus-visible) .mini-tip {
+  opacity: 1;
+  pointer-events: auto;
+}
 .mini-version {
   justify-self: end;
   min-width: 0;
