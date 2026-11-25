@@ -3,7 +3,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 ROUTE = "/demos/corporate/gjh/mini-street/"
@@ -108,8 +108,8 @@ def run():
             page.get_by_role("dialog", name="Virtual basket").wait_for(state="hidden")
             assert page.url.endswith("#shop-interior"), "Escape should close only the basket"
             page.get_by_role("button", name="Exit shop").click()
-            page.wait_for_selector("#stop-dialog[open]")
-            assert page.url.endswith("#shop")
+            page.wait_for_url(url)
+            expect(page.locator('a[data-stop="shop"]')).to_be_focused()
             assert not errors, errors
 
             # A browser without WebGL retains the packshots and browser-local basket.
