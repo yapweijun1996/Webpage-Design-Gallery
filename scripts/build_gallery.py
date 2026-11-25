@@ -1,10 +1,12 @@
 """Build company-first static pages and an allowlisted GitHub Pages artifact."""
 
 import argparse
+import base64
 import html
 import hashlib
 import importlib.util
 import json
+import posixpath
 import re
 import struct
 from pathlib import Path
@@ -13,6 +15,7 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 GJH_ENTRY = Path("demos/corporate/gjh/v11/index.html")
+MINI_STREET = GJH_ENTRY.parent.parent / "mini-street"
 GJH_FIRST_VIEW = Path("data/gjh-first-view.json")
 DS_SPEC = importlib.util.spec_from_file_location("build_design_system", ROOT / "scripts/build_design_system.py")
 design_system = importlib.util.module_from_spec(DS_SPEC)
@@ -348,11 +351,8 @@ def runtime_resources(catalog):
                 resources.add(localized.relative_to(ROOT))
         resources.update(directory / name for name in ("style.css", "script.js", "i18n.js") if (ROOT / directory / name).is_file())
         if design["id"] == "gjh-mini-street":
-            resources.update(directory / name for name in (
-                "scene.js", "world.js", "surfaces.js", "vending.js", "vending-viewer.js", "vending-model.js", "vending-audio.js", "vending-sequence.js",
-                "shop-experience.js", "shop-experience.css", "shop-interior.js", "shop-interior-world.js", "shop-interior.css",
-                "product-hand.js", "shop-product-catalog.js", "shop-product-ui.js", "shop-product-ui.css", "basket.js", "basket.css",
-            ))
+            resources.update(p.relative_to(ROOT) for p in (ROOT / directory).iterdir()
+                             if p.is_file() and p.suffix in (".js", ".css"))
         resources.update(p.relative_to(ROOT) for p in (ROOT / directory / "assets").iterdir() if p.is_file())
         assets = ROOT / directory / "assets"
         for nested in ("brand-kit", "brands", "gallery-assets", "signage", "interiors", "chibi-crowd", "elevator", "tram", "audio", "districts"):
@@ -441,6 +441,66 @@ def build_gjh_entry():
     ])
     template = (ROOT / "templates/gallery/gjh-v11-index.html").read_text(encoding="utf-8")
     return template.replace("__GJH_WALK_PRELOADS__", links)
+
+
+def build_mini_street(catalog, version):
+    entry = MINI_STREET / "index.html"
+    resources = set(runtime_resources(catalog))
+    runtime = {path for path in resources if path.is_relative_to(MINI_STREET)
+               and path.relative_to(MINI_STREET).parts[0] != "screenshots"
+               and path.name not in ("mini-street-anchor.webp", "thumbnail.webp")
+               and path.suffix != ".md"}
+    runtime.update(GJH_ENTRY.parent / "vendor" / name for name in
+                   ("three.module.min.js", "GLTFLoader.js", "BufferGeometryUtils.js"))
+    for product in ("nz-425g", "au-425g", "sa-425g", "mx-454g"):
+        runtime.add(GJH_ENTRY.parent / "assets" / f"new-moon-{product}-front.webp")
+        runtime.add(GJH_ENTRY.parent / "assets" / f"new-moon-can-{product}-lod1.glb")
+    if not runtime <= resources:
+        raise ValueError(f"Missing Mini Street runtime resources: {sorted(runtime - resources)}")
+    hashes = {name: hashlib.sha256(source_bytes(ROOT / name)).digest() for name in sorted(runtime)}
+    # Revision the publication format separately from the runtime source digests.
+    fingerprint = hashlib.sha256(b"mini-street-pages-v1\0")
+    for name, digest in hashes.items():
+        fingerprint.update(name.as_posix().encode("utf-8") + b"\0" + digest)
+    build = fingerprint.hexdigest()[:16]
+    release = {"version": version, "build": build}
+
+    imports = {}
+    integrity = {}
+    for name, digest in hashes.items():
+        if name.suffix not in (".css", ".js"):
+            continue
+        local = posixpath.relpath(name.as_posix(), MINI_STREET.as_posix())
+        if not local.startswith("../"):
+            local = "./" + local
+        pinned = f"{local}?build={build}"
+        imports[local] = pinned
+        integrity[pinned] = "sha256-" + base64.b64encode(digest).decode("ascii")
+    import_map = {
+        "imports": {name: pinned for name, pinned in imports.items() if name.endswith(".js")},
+        "integrity": {name: digest for name, digest in integrity.items() if ".js?" in name},
+    }
+
+    def pin_entry_asset(match):
+        tag = match.group()
+        url = re.search(r'\b(?:href|src)="([^"]+)"', tag)
+        if not url:
+            return tag
+        path = url.group(1)
+        pinned = imports.get(path if path.startswith(("./", "../")) else "./" + path)
+        if not pinned:
+            return tag
+        style = " data-mini-street-style" if path.endswith(".css") else ""
+        return (tag[:url.start(1)] + pinned + tag[url.end(1):-1] +
+                f' integrity="{integrity[pinned]}"{style}>')
+
+    page = (ROOT / entry).read_text(encoding="utf-8")
+    page = re.sub(r"<(?:link|script)\b[^>]*>", pin_entry_asset, page)
+    identity = (f'  <meta name="mini-street-version" content="{version}">\n'
+                f'  <meta name="mini-street-build" content="{build}">\n'
+                f'  <script type="importmap">{json.dumps(import_map)}</script>')
+    page = page.replace("<head>", f"<head>\n{identity}", 1)
+    return page, json.dumps(release, indent=2) + "\n"
 
 
 def pwa_outputs(pages, catalog, release):
@@ -545,6 +605,11 @@ def build(output=ROOT, check=False):
     pages = build_pages(catalog, release)
     pages[GJH_ENTRY.as_posix()] = build_gjh_entry()
     pages.update(pwa_outputs(pages, catalog, release))
+    mini_street_page, mini_street_release = build_mini_street(catalog, release["version"])
+    pages[(MINI_STREET / "release.json").as_posix()] = mini_street_release
+    if output != ROOT:
+        # Keep the authored index directly usable for local development.
+        pages[(MINI_STREET / "index.html").as_posix()] = mini_street_page
     if check:
         stale = [name for name, text in pages.items() if not (ROOT / name).exists() or (ROOT / name).read_text(encoding="utf-8") != text]
         if stale:
