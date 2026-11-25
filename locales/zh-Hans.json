@@ -330,7 +330,9 @@
     "Find a flavour": "按风味找饮品",
     "Explore the dragon kiln": "探索龙窑",
     "Plan your visit": "规划参观行程",
-    "Open a company collection to try a live design or compare two directions side by side.": "进入公司设计集，体验可操作的演示，或并排比较两种设计。"
+    "Open a company collection to try a live design or compare two directions side by side.": "进入公司设计集，体验可操作的演示，或并排比较两种设计。",
+    "Explore a merchant story, sample product estimates and pickup preparation across six pages in English, Chinese and Malay.": "探索商家故事、商品示例估算与自取备货，六个页面提供英语、中文和马来语版本。",
+    "Pomelo STEM Connected Commerce": "Pomelo STEM 互联商务"
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "显示 {total} 家匹配公司中的 {shown} 家",

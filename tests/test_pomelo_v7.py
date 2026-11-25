@@ -55,8 +55,81 @@ class Document(HTMLParser):
 
 
 class PomeloContracts(unittest.TestCase):
+    def test_commerce_chapter_links_reach_unique_keyboard_targets(self):
+        targets = ('product-preview', 'sample-comparison', 'sample-estimate', 'sample-orders')
+        for lang, c in pomelo.COPY.items():
+            with self.subTest(lang=lang):
+                root = Document(pomelo.render(lang, 'commerce')).root
+                guide, = root.find(**{'class': 'commerce-guide'})
+                self.assertEqual(guide.tag, 'nav')
+                self.assertEqual(guide.attrs['aria-label'], c['guide_title'])
+                for target, label in zip(targets, c['guide_links']):
+                    link, = guide.find(href='#' + target)
+                    self.assertEqual(link.tag, 'a')
+                    self.assertIn(label, link.content())
+                    destination, = root.find(id=target)
+                    self.assertEqual(destination.attrs['tabindex'], '-1')
+                    self.assertNotIn('hidden', destination.attrs)
+                    heading, = destination.find(id=destination.attrs['aria-labelledby'])
+                    self.assertEqual(heading.tag, 'h2')
+                ids = []
+                def collect(node):
+                    if 'id' in node.attrs:
+                        ids.append(node.attrs['id'])
+                    for child in node.children:
+                        collect(child)
+                collect(root)
+                self.assertEqual(len(ids), len(set(ids)))
+
+    def test_commerce_hero_connects_labelled_illustrative_views(self):
+        for lang, c in pomelo.COPY.items():
+            with self.subTest(lang=lang):
+                root = Document(pomelo.render(lang, 'commerce')).root
+                visual, = root.find(**{'class': 'page-visual page-visual-commerce'})
+                image, = visual.find(**{'class': 'commerce-hero-image'})
+                self.assertTrue(image.attrs['src'].endswith('/assets/homeware-still.webp'))
+                self.assertEqual(image.attrs['alt'], '')
+                for label in (c['store_brand'], c['store_title'], c['dashboard'],
+                              c['band'][2], c['dash_note'], c['sample_label']):
+                    self.assertIn(label, visual.content())
+                self.assertEqual(len(visual.find(**{'class': 'commerce-workspace-rows'})), 1)
+
+    def test_comparison_and_order_index_use_existing_sample_data(self):
+        for lang, c in pomelo.COPY.items():
+            with self.subTest(lang=lang):
+                root = Document(pomelo.render(lang, 'commerce')).root
+                comparison, = root.find(**{'data-comparison': None})
+                for selector in ('data-compare-first', 'data-compare-second'):
+                    control, = comparison.find(**{selector: None})
+                    self.assertIn('disabled', control.attrs)
+                    self.assertEqual([option.attrs['value'] for option in control.children], ['0', '1', '2'])
+                for i in range(3):
+                    card, = comparison.find(**{'data-compare-card': str(i)})
+                    self.assertNotIn('hidden', card.attrs)
+                    for value in (c['store_items'][i], c['sample_prices'][i], f'PH-00{i+1}', c['materials'][i], c['sizes'][i], c['cares'][i]):
+                        self.assertIn(value, card.content())
+                same, = comparison.find(**{'data-compare-same': None})
+                self.assertEqual(same.content(), c['compare_same'])
+                self.assertIn('hidden', same.attrs)
+                for i in range(3):
+                    card, = comparison.find(**{'data-compare-card': str(i)})
+                    self.assertEqual(card.attrs['aria-labelledby'], f'compare-name-{i}')
+                    position, = card.find(**{'data-compare-position': None})
+                    self.assertIn('hidden', position.attrs)
+                    self.assertEqual(position.attrs['id'], f'compare-position-{i}')
+                target, = root.find(id='scene-1-1')
+                self.assertEqual(target.attrs['tabindex'], '-1')
+                self.assertEqual(target.attrs['role'], 'region')
+                self.assertIn(c['order_title'], target.attrs['aria-label'])
+                self.assertIn('PS-0124', target.attrs['aria-label'])
+                index_status, = root.find(**{'data-index-pickup-status': None})
+                self.assertEqual(index_status.content(), c['order_preparing'])
+                self.assertEqual(len(root.find(href='#scene-1-1')), 1)
+                self.assertEqual(len(root.find(href='#sample-pickup')), 1)
+                self.assertEqual(len(root.find(id='sample-pickup')), 1)
+
     def test_generated_pages_and_release_match_source(self):
-        self.assertEqual(json.loads((DEMO / 'release.json').read_text())['version'], '7.12.0')
+        self.assertEqual(json.loads((DEMO / 'release.json').read_text())['version'], '7.16.0')
         for lang in pomelo.COPY:
             for page in pomelo.PAGES:
                 path = DEMO / ('' if lang == 'en' else lang) / (page + '.html')
@@ -68,6 +141,12 @@ class PomeloContracts(unittest.TestCase):
                     self.assertIn(pomelo.COPY[lang]['brand_line'], main.content())
                     caption, = main.find(**{'class': 'hero-art-caption'})
                     self.assertIn(pomelo.COPY[lang]['story_steps'][0], caption.content())
+                    store, = main.find(**{'class': 'hero-store'})
+                    self.assertIn(pomelo.COPY[lang]['store_brand'], store.content())
+                    self.assertIn(pomelo.COPY[lang]['sample_label'], store.content())
+                    studio, = main.find(**{'class': 'floating-card'})
+                    self.assertIn(pomelo.COPY[lang]['dashboard'], studio.content())
+                    self.assertIn(pomelo.COPY[lang]['examples'], studio.content())
                     self.assertEqual(len(main.find(src='./assets/pomelo-compact.svg' if lang == 'en' else '../assets/pomelo-compact.svg')), 1)
 
     def test_editorial_story_and_second_order_agree(self):
@@ -92,6 +171,25 @@ class PomeloContracts(unittest.TestCase):
                 self.assertIn(c['seller_task'], seller.content())
                 self.assertIn(c['order_disclaimer'], commerce.content())
 
+    def test_home_value_entries_link_to_labelled_examples(self):
+        for lang, c in pomelo.COPY.items():
+            with self.subTest(lang=lang):
+                home = Document(pomelo.render(lang, 'index')).root
+                band, = home.find(**{'class': 'feature-band'})
+                self.assertEqual(band.attrs['aria-labelledby'], 'home-values-title')
+                entries = band.find(**{'class': 'value-card'})
+                self.assertEqual([entry.attrs['href'] for entry in entries],
+                                 ['./commerce.html#product-preview', '#home-studio', '#home-ai'])
+                for entry, title, desc in zip(entries, c['band'], c['band_desc']):
+                    self.assertEqual(entry.tag, 'a')
+                    for value in (title, desc, c['examples']):
+                        self.assertIn(value, entry.content())
+                self.assertIn(c['feature_note'], band.content())
+                self.assertEqual(len(home.find(id='home-studio')), 1)
+                self.assertEqual(len(home.find(id='home-ai')), 1)
+                commerce = Document(pomelo.render(lang, 'commerce')).root
+                self.assertEqual(len(commerce.find(id='product-preview')), 1)
+
     def test_pickup_practice_has_static_context_and_accessible_controls(self):
         for lang, c in pomelo.COPY.items():
             with self.subTest(lang=lang):
@@ -113,8 +211,63 @@ class PomeloContracts(unittest.TestCase):
                 seller, = example.find(**{'data-order-view': 'seller'})
                 for text in (*c['prep_checks'], c['prep_note'], c['prep_nojs'], c['seller_task']):
                     self.assertIn(text, seller.content())
+                reset, = seller.find(**{'data-pickup-reset': None})
+                self.assertEqual(reset.tag, 'button')
+                self.assertEqual(reset.attrs['type'], 'button')
+                self.assertIn('disabled', reset.attrs)
+                self.assertEqual(reset.content(), c['prep_reset'])
+                self.assertEqual(example.attrs['data-reset-done'], c['prep_reset_done'])
                 announcement, = example.find(**{'data-pickup-announcement': None})
                 self.assertEqual(announcement.attrs['role'], 'status')
+
+    def test_estimator_and_collection_have_accessible_fallbacks(self):
+        for lang, c in pomelo.COPY.items():
+            with self.subTest(lang=lang):
+                root = Document(pomelo.render(lang, 'commerce')).root
+                estimate, = root.find(**{'data-estimator': None})
+                product, = estimate.find(**{'data-estimate-product': None})
+                quantity, = estimate.find(**{'data-estimate-quantity': None})
+                self.assertIn('disabled', product.attrs)
+                self.assertIn('disabled', quantity.attrs)
+                self.assertEqual([x.attrs['value'] for x in product.children], ['3990', '3200', '4800'])
+                self.assertEqual([x.attrs['value'] for x in quantity.children], [str(i) for i in range(1, 7)])
+                result, = estimate.find(**{'data-estimate-total': None})
+                self.assertEqual(result.content(), 'RM 39.90')
+                self.assertEqual(result.attrs['aria-live'], 'polite')
+                for text in (c['estimate_note'], c['estimate_nojs']):
+                    self.assertIn(text, estimate.content())
+                example, = root.find(**{'data-pickup-example': None})
+                self.assertEqual(example.attrs['data-collected'], c['collected_status'])
+                collected, = example.find(**{'data-pickup-collected': None})
+                self.assertEqual(collected.attrs['type'], 'checkbox')
+                self.assertIn('disabled', collected.attrs)
+                self.assertIn(c['collected_hint'], example.content())
+                self.assertIn(c['collected'], example.content())
+                home = Document(pomelo.render(lang, 'index')).root
+                for audience in c['aud_names']:
+                    self.assertIn(audience, home.content())
+                self.assertIn(c['future_text'], root.content())
+
+    def test_estimate_links_and_pickup_progress_are_consistent(self):
+        for lang, c in pomelo.COPY.items():
+            with self.subTest(lang=lang):
+                root = Document(pomelo.render(lang, 'commerce')).root
+                estimate, = root.find(**{'data-estimator': None})
+                breakdown, = estimate.find(**{'data-estimate-breakdown': None})
+                self.assertEqual(breakdown.content(), 'RM 39.90 × 1')
+                self.assertIn(c['estimate_breakdown'], estimate.content())
+                for i, price in enumerate(c['sample_prices']):
+                    detail, = root.find(id=f'scene-0-{i}')
+                    choice, = detail.find(**{'data-estimate-choice': str(i)})
+                    self.assertIn('hidden', choice.attrs)
+                    self.assertIn(c['store_items'][i], choice.content())
+                    option = estimate.find(**{'data-estimate-product': None})[0].children[i]
+                    self.assertEqual(Decimal(option.attrs['value']) / 100, Decimal(price.removeprefix('RM ')))
+                order, = root.find(**{'data-pickup-example': None})
+                self.assertEqual([x.content() for x in order.find(**{'data-prep-progress': None})], ['0 / 2', '0 / 2'])
+                for role in ('customer', 'seller'):
+                    view, = order.find(**{'data-order-view': role})
+                    self.assertIn(c['prep_progress'], view.content())
 
     def test_sample_cards_and_scenes_are_complete_without_javascript(self):
         shapes = ('object-cup', 'object-bowl', 'object-basket')

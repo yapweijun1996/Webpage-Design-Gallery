@@ -101,18 +101,105 @@
     var productHint = visual.querySelector('[data-product-hint]');
     if (productHint) productHint.hidden = false;
   });
+  document.querySelectorAll('[data-estimator]').forEach(function (example) {
+    var product = example.querySelector('[data-estimate-product]');
+    var quantity = example.querySelector('[data-estimate-quantity]');
+    var total = example.querySelector('[data-estimate-total]');
+    var breakdown = example.querySelector('[data-estimate-breakdown]');
+    function update() {
+      var cents = Number(product.value) * Number(quantity.value);
+      total.textContent = 'RM ' + (cents / 100).toFixed(2);
+      if (breakdown) breakdown.textContent = 'RM ' + (Number(product.value) / 100).toFixed(2) + ' × ' + quantity.value;
+    }
+    document.querySelectorAll('[data-estimate-choice]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        product.selectedIndex = Number(button.dataset.estimateChoice);
+        update();
+        product.focus();
+      });
+      button.hidden = false;
+    });
+    product.addEventListener('change', update);
+    quantity.addEventListener('change', update);
+    product.disabled = false;
+    quantity.disabled = false;
+    update();
+  });
+  document.querySelectorAll('[data-comparison]').forEach(function (comparison) {
+    var first = comparison.querySelector('[data-compare-first]');
+    var second = comparison.querySelector('[data-compare-second]');
+    var cards = comparison.querySelectorAll('[data-compare-card]');
+    function update() {
+      var same = first.value === second.value;
+      cards.forEach(function (card) {
+        var isFirst = card.dataset.compareCard === first.value;
+        var isSecond = card.dataset.compareCard === second.value;
+        card.hidden = !isFirst && !isSecond;
+        var position = card.querySelector && card.querySelector('[data-compare-position]');
+        if (position) {
+          position.textContent = isFirst && isSecond ? comparison.dataset.firstLabel + ' / ' + comparison.dataset.secondLabel : isFirst ? comparison.dataset.firstLabel : comparison.dataset.secondLabel;
+          position.hidden = card.hidden;
+          card.setAttribute('aria-labelledby', 'compare-position-' + card.dataset.compareCard + ' compare-name-' + card.dataset.compareCard);
+        }
+      });
+      var sameNotice = comparison.querySelector('[data-compare-same]');
+      if (sameNotice) sameNotice.hidden = !same;
+      // Move the actual articles so visual and assistive-technology reading order agree.
+      var ordered = Array.from(cards);
+      ordered.sort(function (a, b) {
+        function rank(card) { return card.dataset.compareCard === first.value ? 0 : card.dataset.compareCard === second.value ? 1 : 2; }
+        return rank(a) - rank(b);
+      });
+      if (ordered[0] && ordered[0].parentNode) ordered.forEach(function (card) { card.parentNode.appendChild(card); });
+    }
+    first.addEventListener('change', update);
+    second.addEventListener('change', update);
+    first.disabled = false;
+    second.disabled = false;
+    update();
+  });
+  document.querySelectorAll('[data-open-delivery]').forEach(function (link) {
+    link.addEventListener('click', function () {
+      var tab = document.querySelector('[data-tour-tab="1"]');
+      var scene = document.querySelector('[data-scene-kind="1"] [data-scene-button="1"]');
+      if (tab && scene) {
+        tab.click(); scene.click();
+        var target = document.querySelector('#scene-1-1');
+        if (target) target.focus({ preventScroll: true });
+      }
+    });
+  });
   document.querySelectorAll('[data-pickup-example]').forEach(function (example) {
     var checks = Array.from(example.querySelectorAll('[data-prep-check]'));
     var statuses = example.querySelectorAll('[data-pickup-status]');
     var announcement = example.querySelector('[data-pickup-announcement]');
+    var progress = example.querySelectorAll('[data-prep-progress]');
+    var collected = example.querySelector('[data-pickup-collected]');
+    var reset = example.querySelector('[data-pickup-reset]');
+    function update(resetNotice) {
+      var ready = checks.every(function (item) { return item.checked; });
+      if (!ready) collected.checked = false;
+      collected.disabled = !ready;
+      var status = collected.checked ? example.dataset.collected : ready ? example.dataset.ready : example.dataset.preparing;
+      statuses.forEach(function (label) { label.textContent = status; });
+      var indexStatus = document.querySelector('[data-index-pickup-status]');
+      if (indexStatus) indexStatus.textContent = status;
+      progress.forEach(function (label) { label.textContent = checks.filter(function (item) { return item.checked; }).length + ' / ' + checks.length; });
+      announcement.textContent = (resetNotice === true ? example.dataset.resetDone + ' · ' : '') + status + (example.dataset.progressLabel ? ' · ' + example.dataset.progressLabel + ': ' + checks.filter(function (item) { return item.checked; }).length + ' / ' + checks.length : '');
+    }
     checks.forEach(function (check) {
       check.disabled = false;
-      check.addEventListener('change', function () {
-        var status = checks.every(function (item) { return item.checked; }) ? example.dataset.ready : example.dataset.preparing;
-        statuses.forEach(function (label) { label.textContent = status; });
-        announcement.textContent = status;
-      });
+      check.addEventListener('change', update);
     });
+    collected.addEventListener('change', update);
+    if (reset) {
+      reset.disabled = false;
+      reset.addEventListener('click', function () {
+        checks.forEach(function (check) { check.checked = false; });
+        collected.checked = false;
+        update(true);
+      });
+    }
   });
   document.querySelectorAll('details.panel').forEach(function (panel) {
     panel.addEventListener('toggle', function () {

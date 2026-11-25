@@ -330,7 +330,9 @@
     "Find a flavour": "Find a flavour",
     "Explore the dragon kiln": "Explore the dragon kiln",
     "Plan your visit": "Plan your visit",
-    "Open a company collection to try a live design or compare two directions side by side.": "Open a company collection to try a live design or compare two directions side by side."
+    "Open a company collection to try a live design or compare two directions side by side.": "Open a company collection to try a live design or compare two directions side by side.",
+    "Explore a merchant story, sample product estimates and pickup preparation across six pages in English, Chinese and Malay.": "Explore a merchant story, sample product estimates and pickup preparation across six pages in English, Chinese and Malay.",
+    "Pomelo STEM Connected Commerce": "Pomelo STEM Connected Commerce"
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "Showing {shown} of {total} matching company",

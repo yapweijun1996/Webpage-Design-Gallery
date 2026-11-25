@@ -35,7 +35,7 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name, page.evaluate('document.documentElement.scrollWidth'))
                         assert page.locator('main').inner_text().strip(), (width, locale, name)
-                        assert page.locator('[data-update] .version').inner_text() == '7.12.0'
+                        assert page.locator('[data-update] .version').inner_text() == '7.16.0'
                         if width <= 700:
                             for control in page.locator('.controls .control, .controls summary').all():
                                 if control.is_visible():
@@ -57,6 +57,11 @@ def main():
                             page.wait_for_function("[...document.querySelectorAll('.story-editorial-images img')].every((img) => img.naturalWidth > 0)")
                         if name == 'commerce':
                             assert page.locator('.tour-products .object-basket').count() == 1
+                            if width in (320, 568):
+                                for product in page.locator('.tour-products .demo-product').all():
+                                    assert product.bounding_box()['height'] >= 44
+                                    assert float(product.locator('b').evaluate('(el) => parseFloat(getComputedStyle(el).fontSize)')) >= 14
+                                    assert product.locator('b').bounding_box()['width'] >= 80
                             for view in page.locator('[data-order-view]').all():
                                 assert view.is_visible() and 'PS-0125' in view.inner_text()
                                 assert 'RM 96.00' in view.inner_text()
@@ -94,7 +99,48 @@ def main():
                 ('zh/', ('陶瓷杯', '日用碗', '编织篮'), ('新订单', '准备中'), ('陶瓷', '陶瓷', '编织纤维'), '快递配送', '你的两只陶瓷杯正在为快递配送做准备'),
                 ('ms/', ('Cawan seramik', 'Mangkuk harian', 'Bakul anyaman'), ('Pesanan baharu', 'Sedang disiapkan'), ('Seramik', 'Seramik', 'Serat anyaman'), 'Penghantaran kurier', 'Dua cawan seramik anda sedang disediakan'),
             ):
+                for target_id in ('home-studio', 'home-ai'):
+                    page.goto(base + locale + 'index.html')
+                    page.locator(f'.value-card[href="#{target_id}"]').focus()
+                    page.keyboard.press('Enter')
+                    target = page.locator(f'#{target_id}')
+                    assert page.url.endswith('#' + target_id)
+                    assert target.evaluate('element => element === document.activeElement')
+                    assert page.locator('#' + target.get_attribute('aria-labelledby')).inner_text().strip()
                 page.goto(base + locale + 'commerce.html')
+                comparison = page.locator('[data-comparison]')
+                visible_cards = comparison.locator('[data-compare-card]:visible')
+                assert visible_cards.evaluate_all("cards => cards.map(card => card.dataset.compareCard)") == ['0', '1']
+                comparison.locator('[data-compare-first]').select_option('2')
+                comparison.locator('[data-compare-second]').select_option('0')
+                assert visible_cards.evaluate_all("cards => cards.map(card => card.dataset.compareCard)") == ['2', '0']
+                for card, selector in zip(visible_cards.all(), ('[data-compare-first]', '[data-compare-second]')):
+                    label = comparison.locator(selector).locator('..').evaluate('(label) => label.firstChild.textContent.trim()')
+                    assert card.locator('[data-compare-position]').text_content().strip() == label
+                    ids = card.get_attribute('aria-labelledby').split()
+                    assert len(ids) == 2 and card.locator('#' + ids[0]).text_content().strip() == label
+                    assert names[int(card.get_attribute('data-compare-card'))] in card.locator('#' + ids[1]).inner_text()
+                comparison.locator('[data-compare-second]').select_option('2')
+                assert visible_cards.count() == 1 and visible_cards.first.get_attribute('data-compare-card') == '2'
+                assert comparison.locator('[data-compare-same]').is_visible()
+                assert all(comparison.locator(selector).locator('..').evaluate('(label) => label.firstChild.textContent.trim()') in visible_cards.first.locator('[data-compare-position]').text_content() for selector in ('[data-compare-first]', '[data-compare-second]'))
+                pickup_link = page.locator('a[href="#sample-pickup"]')
+                pickup_link.focus()
+                page.keyboard.press('Enter')
+                pickup_target = page.locator('#sample-pickup')
+                assert page.url.endswith('#sample-pickup')
+                assert pickup_target.evaluate('element => element === document.activeElement')
+                assert pickup_target.get_attribute('aria-labelledby') == 'sample-pickup-heading'
+                link = page.locator('[data-open-delivery]')
+                link.focus()
+                page.keyboard.press('Enter')
+                target = page.locator('#scene-1-1')
+                assert page.locator('[data-tour-panel="1"]').is_visible()
+                assert target.is_visible() and target.evaluate('element => element === document.activeElement')
+                assert target.get_attribute('role') == 'region' and 'PS-0124' in target.get_attribute('aria-label')
+                assert page.url.endswith('#scene-1-1')
+                assert target.evaluate('element => { const r = element.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; }')
+                page.locator('[data-tour-tab="0"]').click()
                 for i, name in enumerate(names):
                     page.locator('[data-product-button]').nth(i).click()
                     detail = page.locator('[data-scene-kind="0"] [data-scene-detail]').nth(i)
@@ -106,6 +152,12 @@ def main():
                     assert card.locator('[data-product-state]').inner_text() == card.get_attribute('data-selected-label')
                     announcement = page.locator('[data-scene-kind="0"] [data-scene-status]').text_content()
                     assert name in announcement and ('RM 39.90', 'RM 32.00', 'RM 48.00')[i] in announcement
+                    choice = detail.locator('[data-estimate-choice]')
+                    choice.focus()
+                    page.keyboard.press('Enter')
+                    assert page.locator('[data-estimate-product]').evaluate('(el) => document.activeElement === el')
+                    assert page.locator('[data-estimate-product]').input_value() == ('3990', '3200', '4800')[i]
+                    assert ('RM 39.90', 'RM 32.00', 'RM 48.00')[i] in page.locator('[data-estimate-breakdown]').inner_text()
                     detail.locator('[data-view-studio]').click()
                     assert page.locator('[data-tour-panel="1"]').is_visible()
                     listing = page.locator('[data-studio-product]').nth(i)
@@ -130,19 +182,65 @@ def main():
                     assert 'PH-001' in handoff.inner_text()
                     page.keyboard.press('Space')
                     assert handoff.get_attribute('open') is None
+                estimator = page.locator('[data-estimator]')
+                product = estimator.locator('[data-estimate-product]')
+                quantity = estimator.locator('[data-estimate-quantity]')
+                for value, count, expected in (('3990', '2', 'RM 79.80'), ('3200', '3', 'RM 96.00'), ('4800', '6', 'RM 288.00')):
+                    product.select_option(value)
+                    quantity.select_option(count)
+                    assert estimator.locator('[data-estimate-total]').inner_text() == expected
+                assert '#PS-0125' in page.locator('[data-order-view=customer]').inner_text()
+                assert 'RM 96.00' in page.locator('[data-order-view=customer]').inner_text()
                 pickup = page.locator('[data-pickup-example]')
                 checks = pickup.locator('[data-prep-check]')
                 preparing = pickup.get_attribute('data-preparing')
                 ready = pickup.get_attribute('data-ready')
+                assert pickup.locator('[data-prep-progress]').all_inner_texts() == ['0 / 2', '0 / 2']
                 checks.nth(0).focus()
                 page.keyboard.press('Space')
                 assert pickup.locator('[data-pickup-status]').all_inner_texts() == [preparing, preparing]
+                assert pickup.locator('[data-prep-progress]').all_inner_texts() == ['1 / 2', '1 / 2']
                 checks.nth(1).focus()
                 page.keyboard.press('Space')
                 assert pickup.locator('[data-pickup-status]').all_inner_texts() == [ready, ready]
-                assert pickup.locator('[data-pickup-announcement]').text_content() == ready
+                assert page.locator('[data-index-pickup-status]').inner_text() == ready
+                assert pickup.locator('[data-prep-progress]').all_inner_texts() == ['2 / 2', '2 / 2']
+                assert ready in pickup.locator('[data-pickup-announcement]').text_content()
+                assert '2 / 2' in pickup.locator('[data-pickup-announcement]').text_content()
+                collected = pickup.locator('[data-pickup-collected]')
+                assert collected.is_enabled()
+                collected.focus()
                 page.keyboard.press('Space')
+                completed = pickup.get_attribute('data-collected')
+                assert pickup.locator('[data-pickup-status]').all_inner_texts() == [completed, completed]
+                assert page.locator('[data-index-pickup-status]').inner_text() == completed
+                reset = pickup.locator('[data-pickup-reset]')
+                assert reset.is_enabled() and reset.bounding_box()['height'] >= 44
+                comparison_before = [comparison.locator(selector).input_value() for selector in ('[data-compare-first]', '[data-compare-second]')]
+                estimate_before = [page.locator(selector).input_value() for selector in ('[data-estimate-product]', '[data-estimate-quantity]')]
+                reset.focus()
+                page.keyboard.press('Enter')
+                assert reset.evaluate('element => element === document.activeElement')
+                assert all(not check.is_checked() for check in checks.all())
+                assert collected.is_disabled() and not collected.is_checked()
                 assert pickup.locator('[data-pickup-status]').all_inner_texts() == [preparing, preparing]
+                assert page.locator('[data-index-pickup-status]').inner_text() == preparing
+                assert pickup.locator('[data-prep-progress]').all_inner_texts() == ['0 / 2', '0 / 2']
+                announcement = pickup.locator('[data-pickup-announcement]')
+                assert pickup.get_attribute('data-reset-done') in announcement.text_content()
+                assert preparing in announcement.text_content() and '0 / 2' in announcement.text_content()
+                assert [comparison.locator(selector).input_value() for selector in ('[data-compare-first]', '[data-compare-second]')] == comparison_before
+                assert [page.locator(selector).input_value() for selector in ('[data-estimate-product]', '[data-estimate-quantity]')] == estimate_before
+                checks.nth(0).check()
+                reset.press('Space')
+                assert all(not check.is_checked() for check in checks.all())
+                assert pickup.locator('[data-prep-progress]').all_inner_texts() == ['0 / 2', '0 / 2']
+                checks.nth(0).check()
+                checks.nth(1).check()
+                collected.check()
+                checks.nth(1).uncheck()
+                assert pickup.locator('[data-pickup-status]').all_inner_texts() == [preparing, preparing]
+                assert collected.is_disabled() and not collected.is_checked()
                 page.locator('[data-theme-toggle]').click()
                 assert page.locator('html').get_attribute('data-theme') == 'dark'
                 handoff.locator('summary').press('Enter')
@@ -245,10 +343,10 @@ def main():
             assert page.locator('form input[name="name"]').input_value() == 'Sample name'
             assert not posted, posted
             page.goto(base + 'contact.html')
-            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.12.1"}'))
+            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.16.1"}'))
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.12.1' in page.locator('[data-status]').inner_text()
+            assert '7.16.1' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
             page.wait_for_load_state('load')
             page.wait_for_function("document.querySelector('[data-status]').textContent.includes('could not be verified')")
@@ -262,6 +360,11 @@ def main():
             nojs = browser.new_context(java_script_enabled=False)
             static = nojs.new_page()
             for locale in ('', 'zh/', 'ms/'):
+                for target_id in ('home-studio', 'home-ai'):
+                    static.goto(base + locale + 'index.html')
+                    static.locator(f'.value-card[href="#{target_id}"]').focus()
+                    static.keyboard.press('Enter')
+                    assert static.locator(f'#{target_id}').evaluate('element => element === document.activeElement')
                 static.goto(base + locale + 'commerce.html')
                 assert static.locator('h1').is_visible()
                 assert static.locator('[data-tour-tabs]').is_hidden()
@@ -281,6 +384,20 @@ def main():
                     assert handoff.get_attribute('open') is not None and 'PH-001' in handoff.inner_text()
                 assert all(action.is_hidden() for action in static.locator('[data-view-studio]').all())
                 assert all(check.is_disabled() for check in static.locator('[data-prep-check]').all())
+                assert static.locator('[data-pickup-collected]').is_disabled()
+                assert static.locator('[data-pickup-reset]').is_disabled()
+                assert static.locator('[data-estimate-product]').is_disabled()
+                assert static.locator('[data-estimate-quantity]').is_disabled()
+                assert static.locator('[data-estimate-total]').inner_text() == 'RM 39.90'
+                assert static.locator('[data-compare-first]').is_disabled()
+                assert static.locator('[data-compare-second]').is_disabled()
+                assert all(card.is_visible() for card in static.locator('[data-compare-card]').all())
+                static_link = static.locator('[data-open-delivery]')
+                assert static_link.get_attribute('href') == '#scene-1-1'
+                static_link.focus()
+                static.keyboard.press('Enter')
+                assert static.url.endswith('#scene-1-1') and static.locator('#scene-1-1').is_visible()
+                assert static.locator('#sample-pickup').is_visible()
                 assert static.locator('[data-order-view=customer]').is_visible() and static.locator('[data-order-view=seller]').is_visible()
             static.goto(base + 'contact.html')
             assert static.locator('form input').first.is_disabled()
