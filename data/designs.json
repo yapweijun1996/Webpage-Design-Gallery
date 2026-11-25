@@ -1242,6 +1242,45 @@
     "disclaimer": "Independent concept. The order story is fictional and does not submit an order."
   },
   {
+    "id": "pomelo-stem-v7",
+    "companyId": "pomelo-stem",
+    "slug": "v7",
+    "version": "v7",
+    "title": "Pomelo STEM Connected Commerce",
+    "description": "Explore Pomelo Commerce and services across six pages in English, Chinese and Malay.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 7,
+    "demoPath": "demos/corporate/pomelo-stem/v7/index.html",
+    "thumbnail": "demos/corporate/pomelo-stem/v7/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/pomelo-stem/v7/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/pomelo-stem/v7/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/pomelo-stem/v7/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent concept. Product visuals are illustrative; the contact form is not connected."
+  },
+  {
     "id": "pomelo-stem-v1",
     "companyId": "pomelo-stem",
     "slug": "v1",
