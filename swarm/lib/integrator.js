@@ -21,7 +21,7 @@ const UUID = /^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/;
 const ANCHOR_ID = /^v(?:00[1-9]|0[1-9]\d|[1-9]\d{2,})$/;
 const CATALOGS = ['i18n/en.json', 'i18n/zh-Hans.json', 'i18n/ms.json'];
 const PREVIEW_ROOTS = ['sections', 'assets', 'tokens.css', 'brief.md', ...CATALOGS,
-  ...['tokens.css', 'themes.css', 'components.css', 'runtime.js', 'i18n.js', ...CATALOGS]
+  ...['tokens.css', 'themes.css', 'components.css', 'toast.css', 'runtime.js', 'i18n.js', ...CATALOGS]
     .map(file => `design-system/${file}`)];
 const sessions = new WeakMap();
 const active = new Map();

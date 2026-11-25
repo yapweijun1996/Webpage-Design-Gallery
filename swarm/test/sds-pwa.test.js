@@ -30,7 +30,8 @@ function fixture(t) {
   const system = {
     'tokens.css': ':root { --sds-color-bg: #eef3e8; }',
     'themes.css': '[data-theme="dark"] { --sds-color-bg: #101c16; }',
-    'components.css': '.sds-spinner { color: currentColor; }',
+    'components.css': '@import "./toast.css";\n.sds-spinner { color: currentColor; }',
+    'toast.css': '.sds-toast { position: fixed; }',
     'boot.js': 'document.documentElement.setAttribute("data-loading", "");',
     'runtime.js': 'window.SDS = { version: "1.0.0" };',
     'i18n.js': 'window.SDS.i18n = {};',
@@ -78,7 +79,7 @@ test('exports the full PWA and precaches exactly the files on disk', t => {
   f.export();
   const expected = [
     'assets/logo.png', 'assets/v11-card.png', 'design-system/components.css', 'design-system/i18n.js',
-    'design-system/runtime.js', 'design-system/themes.css', 'design-system/tokens.css', 'i18n/en.json',
+    'design-system/runtime.js', 'design-system/themes.css', 'design-system/toast.css', 'design-system/tokens.css', 'i18n/en.json',
     'i18n/ms.json', 'i18n/zh-Hans.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png',
     'index.html', 'manifest.webmanifest', 'offline.html', 'sw.js', 'version.json',
   ];
@@ -103,6 +104,7 @@ test('exports the full PWA and precaches exactly the files on disk', t => {
     assert.ok(page.includes(`<link rel="stylesheet" href="design-system/${file}">`));
     assert.equal(f.text(`design-system/${file}`), f.system[file]);
   }
+  assert.equal(f.text('design-system/toast.css'), f.system['toast.css']);
   for (const control of ['theme', 'brand', 'lang']) assert.ok(page.includes(`data-sds-select="${control}"`));
   assert.ok(page.includes(`<p><span data-i18n="sds.version">Version</span> <span>${version.version}</span></p>`));
   assert.ok(page.includes('src="assets/logo.png?v=2"'));

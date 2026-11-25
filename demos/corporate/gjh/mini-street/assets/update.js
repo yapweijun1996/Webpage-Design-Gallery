@@ -1,5 +1,6 @@
 const updateParameter = "mini-street-update";
 const timeout = 8000;
+const confirmationDuration = 6000;
 const releaseURL = new URL("../release.json", import.meta.url);
 class OfflineError extends Error {}
 const icons = {
@@ -9,16 +10,6 @@ const icons = {
   available: "M12 4v12m-5-5 5 5 5-5M5 20h14",
   offline: "M3 8a14 14 0 0 1 18 0M6 12a9 9 0 0 1 12 0M9 16a4 4 0 0 1 6 0m-3 4h.01M3 3l18 18",
   error: "M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18Zm0 5v5m0 3h.01",
-};
-
-const labels = {
-  idle: ["update.check", "Check for updates"],
-  checking: ["update.checking", "Checking for updates…"],
-  current: ["update.check", "Check for updates"],
-  available: ["update.apply", "Apply update"],
-  applying: ["update.applying", "Applying update…"],
-  offline: ["update.check", "Check for updates"],
-  error: ["update.check", "Check for updates"],
 };
 
 function validRelease(release) {
@@ -90,10 +81,14 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
       { once: true });
     return;
   }
-  const label = button.querySelector("[data-update-label]");
   const path = button.querySelector("path[data-update-icon]");
+  const description = document.querySelector("#mini-build-description");
+  const announcement = document.querySelector("#mini-update-announcement");
   const messageText = status.querySelector("[data-update-message]");
   const installedBuild = status.querySelector("[data-installed-build]");
+  const actions = status.querySelector(".mini-update-actions");
+  const action = status.querySelector("[data-update-action]");
+  const dismiss = status.querySelector("[data-update-dismiss]");
   const styles = [...document.querySelectorAll("link[data-mini-street-style]")];
   const haveStyles = styles.length > 0 && styles.every((link) => link.sheet);
   const current = haveStyles ? pageRelease(document) : null;
@@ -101,29 +96,52 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
   let activeRequest;
   let state = "idle";
   let message;
+  let hideTimer;
+
+  function setText(element, text) {
+    if (element.textContent !== text) element.textContent = text;
+  }
 
   function refresh() {
-    const action = translate(...labels[state]);
-    const busy = Boolean(activeRequest) || state === "applying";
+    const busy = state === "checking" || state === "applying";
     button.dataset.state = state;
-    button.setAttribute("aria-label", action);
     button.setAttribute("aria-busy", String(busy));
     button.setAttribute("aria-disabled", String(button.disabled || busy));
-    if (label) label.textContent = action;
     path?.setAttribute("d", icons[state] ?? icons.checking);
-    version.textContent = current ? `v${current.version}` : translate("update.unavailableBuild", "Build unavailable");
-    version.title = current ? renderBuild(current) : version.textContent;
-    const detail = message ? translate(...message) : "";
-    const installed = current && message && message[0] !== "update.applied"
+    const unavailable = translate("update.unavailableBuild", "Build unavailable");
+    const installed = current
       ? translate("update.installedBuild", "Installed build · {build}", {build: renderBuild(current)}) : "";
-    if (messageText.textContent !== detail) messageText.textContent = detail;
-    if (installedBuild.textContent !== installed) installedBuild.textContent = installed;
+    setText(version, current ? `v${current.version}` : unavailable);
+    version.title = current ? renderBuild(current) : unavailable;
+    setText(description, installed || unavailable);
+
+    const detail = message ? translate(...message) : "";
+    const showBuild = Boolean(installed && message && !busy && message[0] !== "update.applied");
+    status.dataset.state = state;
+    status.setAttribute("aria-label", translate("update.title", "Mini Street update"));
+    setText(messageText, detail);
+    setText(installedBuild, showBuild ? installed : "");
+    installedBuild.hidden = !showBuild;
+    const retry = state === "error" || state === "offline";
+    action.hidden = !current || !(available || retry);
+    setText(action, available ? translate("update.apply", "Apply update") : translate("update.retry", "Check again"));
+    setText(dismiss, translate("update.dismiss", "Dismiss"));
+    actions.hidden = busy || state === "current" || !detail;
+    status.hidden = !detail;
+    setText(announcement, detail);
   }
 
   function show(next, key, english, values) {
+    view.clearTimeout(hideTimer);
     state = next;
     message = key ? [key, english, values] : undefined;
     refresh();
+    if (state === "current") {
+      hideTimer = view.setTimeout(() => {
+        message = undefined;
+        refresh();
+      }, confirmationDuration);
+    }
   }
 
   function cancelCheck() {
@@ -135,6 +153,18 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     cancelCheck();
     available = undefined;
     show("offline", "update.offline", "You are offline. Reconnect to check for updates.");
+  }
+
+  function offer(release) {
+    available = release;
+    show("available", "update.available", "Update available · {build}", {build: renderBuild(release)});
+  }
+
+  function preserveUnsavedBasket() {
+    if (!document.querySelector(".mini-basket-saving:not([hidden])") ||
+        !document.querySelector(".mini-basket-items:not([hidden])")) return false;
+    show("available", "update.unsavedBasket", "Your basket is saved for this visit only. Keep this page open to retain it.");
+    return true;
   }
 
   function verifyNavigation() {
@@ -151,10 +181,18 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     return true;
   }
 
+  const masthead = button.closest(".masthead");
+  const updateOffset = () => {
+    document.documentElement.style.setProperty("--mini-update-masthead-height", masthead.offsetHeight + "px");
+  };
+  updateOffset();
+  if ("ResizeObserver" in view) new view.ResizeObserver(updateOffset).observe(masthead);
+  else view.addEventListener("resize", updateOffset);
+
   view.addEventListener("mini:languagechange", refresh);
   if (!current) {
     button.disabled = true;
-    show("error", "update.unavailable", "Updates are unavailable in this preview.");
+    refresh();
     return refresh;
   }
 
@@ -171,14 +209,9 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     show("idle");
   });
 
-  button.addEventListener("click", async () => {
+  async function check(applying) {
     if (activeRequest || state === "applying") return;
-    const applying = available;
-    if (applying && document.querySelector(".mini-basket-saving:not([hidden])") &&
-      document.querySelector(".mini-basket-items:not([hidden])")) {
-      show("available", "update.unsavedBasket", "Your basket is saved for this visit only. Keep this page open to retain it.");
-      return;
-    }
+    if (applying && preserveUnsavedBasket()) return;
     available = undefined;
     const request = activeRequest = new view.AbortController();
     show(...(applying
@@ -191,23 +224,32 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
       const latest = await verifyLatest(view, page, cacheKey, request);
       if (activeRequest !== request) return;
       if (applying && sameRelease(applying, latest)) {
+        available = latest;
+        if (preserveUnsavedBasket()) return;
         view.location.replace(page);
       } else if (sameRelease(current, latest)) {
         show("current", "update.current", "Mini Street is up to date.");
       } else {
-        available = latest;
-        show("available", "update.available", "Update available · {build}", { build: renderBuild(latest) });
+        offer(latest);
       }
     } catch (error) {
       if (activeRequest !== request) return;
       if (error instanceof OfflineError) offline();
       else show("error", "update.failed", "The update could not be verified. Check again shortly.");
     } finally {
-      if (activeRequest === request) {
-        activeRequest = undefined;
-        refresh();
-      }
+      if (activeRequest === request) activeRequest = undefined;
     }
+  }
+
+  button.addEventListener("click", () => check());
+  action.addEventListener("click", () => {
+    button.focus({preventScroll: true});
+    check(available);
+  });
+  dismiss.addEventListener("click", () => {
+    button.focus({preventScroll: true});
+    available = undefined;
+    show("idle");
   });
   return refresh;
 }

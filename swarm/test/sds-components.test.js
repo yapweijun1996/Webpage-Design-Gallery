@@ -7,7 +7,10 @@ const test = require('node:test');
 const vm = require('node:vm');
 
 const dir = path.join(__dirname, '../design-system');
-const css = fs.readFileSync(path.join(dir, 'components.css'), 'utf8');
+const entry = fs.readFileSync(path.join(dir, 'components.css'), 'utf8');
+const toast = fs.readFileSync(path.join(dir, 'toast.css'), 'utf8');
+assert.ok(entry.startsWith('@import "./toast.css";'));
+const css = entry.replace('@import "./toast.css";', toast);
 const html = fs.readFileSync(path.join(dir, 'components.html'), 'utf8');
 
 // Independent copies of the public names in SDS_SPEC.md sections 2 and 3.

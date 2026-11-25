@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 from threading import Thread
+from time import sleep
 from urllib.parse import parse_qs, urlsplit
 
 from playwright.sync_api import expect, sync_playwright
@@ -17,6 +18,8 @@ from playwright.sync_api import expect, sync_playwright
 ROUTE = "/demos/corporate/gjh/mini-street/"
 SEL = "#mini-update"
 STATUS = "#mini-update-status"
+ACTION = f"{STATUS} [data-update-action]"
+DISMISS = f"{STATUS} [data-update-dismiss]"
 APPLY_TIMEOUT = 20000
 
 
@@ -34,6 +37,7 @@ class ReleaseHandler(SimpleHTTPRequestHandler):
                 build = server.initial["build"]
             self.respond(server.index.replace(server.initial["build"], build), "text/html")
         elif url.path == ROUTE + "release.json":
+            sleep(server.release_delay)
             if server.release_build is None:
                 self.send_error(503)
                 return
@@ -70,7 +74,23 @@ def expect_status(status, text):
     expect(status.locator("[data-update-message]")).to_contain_text(text)
     assert status.bounding_box()["height"] >= 16
 
-def run(site):
+def layout(page):
+    return page.evaluate("""() => Object.fromEntries(
+        ['.masthead', '#mini-update', '#stage', '.stops'].map(selector => {
+            const {x, y, width, height} = document.querySelector(selector).getBoundingClientRect();
+            return [selector, [x, y, width, height]];
+        })
+    )""")
+
+
+def record(page, directory, name):
+    if directory:
+        page.screenshot(path=str(directory / f"{name}.png"), animations="disabled")
+
+
+def run(site, evidence=None):
+    if evidence:
+        evidence.mkdir(parents=True, exist_ok=True)
     app = site / ROUTE.strip("/")
     handler = partial(ReleaseHandler, directory=site)
     with ThreadingHTTPServer(("127.0.0.1", 0), handler) as server, sync_playwright() as tools:
@@ -82,12 +102,14 @@ def run(site):
         server.release_build = initial
         server.document_build = initial
         server.stale_navigation = "disabled"
+        server.release_delay = 0
         Thread(target=server.serve_forever, daemon=True).start()
         base = f"http://127.0.0.1:{server.server_port}{ROUTE}"
         chrome = os.environ.get("GALLERY_CHROME")
         browser = tools.chromium.launch(executable_path=chrome, channel=None if chrome else "chrome", headless=True,
                                         args=["--enable-unsafe-swiftshader"])
-        context = browser.new_context(reduced_motion="reduce", service_workers="allow")
+        context = browser.new_context(viewport={"width": 390, "height": 844},
+                                      reduced_motion="reduce", service_workers="allow")
         page = context.new_page()
         errors = []
         page.on("pageerror", lambda error: errors.append(str(error)))
@@ -99,6 +121,25 @@ def run(site):
         expect_version(page, version, initial)
         expect(page.locator("#stage")).to_have_attribute("data-webgl", "", timeout=15000)
         nav_count = page.evaluate("performance.getEntriesByType('navigation').length")
+        baseline = layout(page)
+        live = page.locator("#mini-update-announcement")
+        expect(live).to_have_attribute("role", "status")
+        expect(live).to_have_attribute("aria-atomic", "true")
+        expect(button).to_have_accessible_description(f"Installed build · v{version} · {initial}")
+        expect(status).to_be_hidden()
+        server.release_delay = 0.8
+        button.press("Enter")
+        expect_status(status, "Checking for updates")
+        assert layout(page) == baseline
+        expect(button).to_be_focused()
+        expect_status(status, "up to date")
+        expect(live).to_contain_text("up to date")
+        assert layout(page) == baseline
+        assert status.evaluate("(element) => getComputedStyle(element).position") == "fixed"
+        record(page, evidence, "mini-street-update-up-to-date-390")
+        expect(status).to_be_hidden(timeout=8000)
+        assert layout(page) == baseline
+        server.release_delay = 0
         button.press("Enter")
         expect_status(status, "up to date")
         expect(status.locator("[data-installed-build]")).to_have_text(f"Installed build · v{version} · {initial}")
@@ -112,6 +153,12 @@ def run(site):
         button.click()
         expect(button).to_have_attribute("data-state", "error")
         expect_status(status, "could not be verified")
+        assert layout(page) == baseline
+        record(page, evidence, "mini-street-update-error-390")
+        expect(page.locator(ACTION)).to_have_accessible_name("Check again")
+        page.locator(DISMISS).press("Enter")
+        expect(status).to_be_hidden()
+        expect(button).to_be_focused()
         expect_version(page, version, initial)
 
         context.set_offline(True)
@@ -123,9 +170,31 @@ def run(site):
         server.document_build = latest
         button.click()
         expect(button).to_have_attribute("data-state", "available")
-        expect(button).to_have_accessible_name("Apply update")
+        action = page.locator(ACTION)
+        expect(button).to_have_accessible_name("Check for updates")
+        expect(action).to_have_accessible_name("Apply update")
         expect(button.locator("[data-update-label]")).to_be_visible()
         expect_status(status, f"Update available · v{version} · {latest}")
+        assert layout(page) == baseline
+        toast = status.bounding_box()
+        assert toast["x"] >= 12 and toast["x"] + toast["width"] <= 378
+        assert toast["y"] > baseline[".masthead"][3] and toast["y"] + toast["height"] < baseline[".stops"][1]
+        page.locator("#mini-language").click()
+        expect(page.get_by_role("dialog")).to_be_visible()
+        expect(status).to_be_hidden()
+        page.locator("#mini-language-choice").select_option("zh-Hans")
+        page.get_by_role("dialog").locator("button[type=submit]").click()
+        expect(action).to_have_accessible_name("应用更新")
+        expect(live).to_contain_text("有可用更新")
+        expect(status).to_be_visible()
+        record(page, evidence, "mini-street-update-available-zh-390")
+        page.locator("#mini-language").click()
+        page.locator("#mini-language-choice").select_option("en")
+        page.get_by_role("dialog").locator("button[type=submit]").click()
+        record(page, evidence, "mini-street-update-available-390")
+        assert action.bounding_box()["height"] >= 44
+        assert page.locator(DISMISS).bounding_box()["height"] >= 44
+        expect(status).to_be_visible()
         expect_version(page, version, initial)
         assert page.url == site_url, page.url
         assert button.locator("svg").evaluate("(svg) => getComputedStyle(svg).animationName") == "none"
@@ -139,7 +208,7 @@ def run(site):
           'gjh-mini-street:basket:v2', JSON.stringify({version: 2, items: {'nz-425g': 2}})
         )""")
         server.stale_navigation = latest + "."
-        apply_update(page, button, latest)
+        apply_update(page, action, latest)
         expect(button).to_have_attribute("data-state", "error")
         expect_status(status, "new build did not load")
         expect_version(page, version, initial)
@@ -148,7 +217,7 @@ def run(site):
         server.stale_navigation = "disabled"
         button.click()
         expect(button).to_have_attribute("data-state", "available")
-        apply_update(page, button, latest)
+        apply_update(page, action, latest)
         expect(button).to_have_attribute("data-state", "current")
         expect_status(status, f"Updated to v{version} · {latest}.")
         expect_version(page, version, latest)
@@ -157,7 +226,7 @@ def run(site):
         expect_version(second, version, initial)
         assert errors == [], errors
 
-        private = browser.new_context(service_workers="allow")
+        private = browser.new_context(viewport={"width": 320, "height": 568}, service_workers="allow")
         private.add_init_script("""Object.defineProperty(window, 'localStorage', {
           get: () => { throw new DOMException('Storage disabled', 'SecurityError'); },
         });
@@ -173,11 +242,15 @@ def run(site):
         private_button.click()
         expect(private_button).to_have_attribute("data-state", "error")
         expect_status(private_status, "could not be verified")
+        assert private_page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+        record(private_page, evidence, "mini-street-update-error-320")
         browser.close()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("site", type=Path)
-    run(parser.parse_args().site.resolve())
+    parser.add_argument("--evidence", type=Path)
+    args = parser.parse_args()
+    run(args.site.resolve(), args.evidence)
     print("Mini Street update browser checks passed")

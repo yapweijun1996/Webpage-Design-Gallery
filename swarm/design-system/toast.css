@@ -1,0 +1,32 @@
+.sds-toast {
+  position: fixed;
+  z-index: var(--sds-z-toast);
+  inset-block-end: calc(var(--sds-bar-h) + var(--sds-safe-bottom) + var(--sds-space-6));
+  left: max(var(--sds-gutter), var(--sds-safe-left));
+  right: max(var(--sds-gutter), var(--sds-safe-right));
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sds-space-3);
+  inline-size: fit-content;
+  max-inline-size: calc(100% - max(var(--sds-gutter), var(--sds-safe-left)) - max(var(--sds-gutter), var(--sds-safe-right)));
+  margin-inline: auto;
+  padding: var(--sds-space-3);
+  border: 1px solid var(--sds-color-border-strong);
+  border-radius: var(--sds-radius-lg);
+  background: var(--sds-color-surface);
+  color: var(--sds-color-text);
+  box-shadow: var(--sds-shadow-2);
+  overflow-wrap: anywhere;
+}
+
+.sds-toast[hidden] {
+  display: none;
+}
+
+:where(.sds-toast) :focus-visible {
+  outline: var(--sds-space-1) solid var(--sds-color-focus);
+  outline-offset: var(--sds-space-1);
+}

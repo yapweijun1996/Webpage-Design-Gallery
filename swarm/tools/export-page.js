@@ -16,6 +16,7 @@ const SHELL = path.join(SDS_ROOT, 'shell');
 const LANGUAGES = { en: 'English', 'zh-Hans': '简体中文', ms: 'Bahasa Melayu' };
 const BRANDS = ['none', 'forest-gold', 'gjh-classic', 'cny-red-gold'];
 const SDS_STYLES = ['tokens.css', 'themes.css', 'components.css'];
+const SDS_TOAST = 'toast.css';
 const ICONS = ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];
 const IMAGE_PREFIXES = [
   { prefixes: ['/gjh/'], directory: 'assets/companies/gjh', filenamePrefix: '' },
@@ -222,7 +223,7 @@ function sha256(content) {
 }
 
 function buildPwa(bundle, { projectDir, title, htmlTitle, brand, languages, styles, body }) {
-  for (const file of [...SDS_STYLES, 'runtime.js', 'i18n.js']) {
+  for (const file of [...SDS_STYLES, SDS_TOAST, 'runtime.js', 'i18n.js']) {
     bundle.set(`design-system/${file}`, readPwaFile(SDS_ROOT, file));
   }
   for (const language of languages) {
@@ -361,7 +362,10 @@ function main() {
   if (headings !== 1) warnings.push(`Expected exactly one <h1>, found ${headings}`);
 
   const baseCss = rewriteCss(pwa ? PWA_BASE_CSS : BASE_CSS, rewriteImage, minify);
-  const sds = values.sds && !pwa ? SDS_STYLES.map(name => fs.readFileSync(path.join(SDS_ROOT, name), 'utf8')) : [];
+  const sds = values.sds && !pwa ? SDS_STYLES.map(name => {
+    const css = fs.readFileSync(path.join(SDS_ROOT, name), 'utf8');
+    return css.replace('@import "./toast.css";', () => fs.readFileSync(path.join(SDS_ROOT, SDS_TOAST), 'utf8'));
+  }) : [];
   const styles = [tokens, ...sds, baseCss, ...sections.map(section => section.css)].map(css => `<style>\n${css}\n</style>`);
   const body = sections.map(section => section.html).join('\n');
   const destination = path.join(output, 'index.html');

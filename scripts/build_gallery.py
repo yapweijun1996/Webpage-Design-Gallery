@@ -16,6 +16,7 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 GJH_ENTRY = Path("demos/corporate/gjh/v11/index.html")
 MINI_STREET = GJH_ENTRY.parent.parent / "mini-street"
+MINI_STREET_TOAST = Path("swarm/design-system/toast.css")
 GJH_FIRST_VIEW = Path("data/gjh-first-view.json")
 DS_SPEC = importlib.util.spec_from_file_location("build_design_system", ROOT / "scripts/build_design_system.py")
 design_system = importlib.util.module_from_spec(DS_SPEC)
@@ -278,6 +279,7 @@ def runtime_resources(catalog):
         "data/companies.json", "data/categories.json", "data/styles.json", "manifest.webmanifest",
         "assets/icons/gallery.svg", "assets/icons/gallery-180.png", "assets/icons/gallery-192.png", "assets/icons/gallery-512.png", "assets/icons/gallery-maskable-512.png",
     )}
+    resources.add(MINI_STREET_TOAST)
     resources.update(Path("demos/corporate/gjh/v11") / name for name in
                      ("manifest.webmanifest", "offline.html", "pwa.js", "style.bundle.css", "script.bundle.js"))
     # Shared 3D UI ships with the demo; keep it out of the gallery shell precache.
@@ -450,6 +452,7 @@ def build_mini_street(catalog, version):
                and path.relative_to(MINI_STREET).parts[0] != "screenshots"
                and path.name not in ("mini-street-anchor.webp", "thumbnail.webp")
                and path.suffix != ".md"}
+    runtime.add(MINI_STREET_TOAST)
     runtime.update(GJH_ENTRY.parent / "vendor" / name for name in
                    ("three.module.min.js", "GLTFLoader.js", "BufferGeometryUtils.js"))
     for product in ("nz-425g", "au-425g", "sa-425g", "mx-454g"):
@@ -505,7 +508,11 @@ def build_mini_street(catalog, version):
 
 def pwa_outputs(pages, catalog, release):
     precache_runtime = (ROOT / "templates/gallery/precache.js").read_text(encoding="utf-8").rstrip()
-    paths = {name for name in pages if not name.startswith("demos/")} | {p.as_posix() for p in runtime_resources(catalog) if p.as_posix() not in ("src/demo-pwa.js", "assets/demo-pwa.css") and not p.as_posix().startswith(("demos/", "style-atlas/images/", "style-atlas/sheets/", "assets/onboarding/", "design-system/onboarding/"))}
+    demo_only = {Path("src/demo-pwa.js"), Path("assets/demo-pwa.css"), MINI_STREET_TOAST}
+    excluded_directories = ("demos/", "style-atlas/images/", "style-atlas/sheets/", "assets/onboarding/", "design-system/onboarding/")
+    paths = {name for name in pages if not name.startswith("demos/")}
+    paths.update(path.as_posix() for path in runtime_resources(catalog)
+                 if path not in demo_only and not path.as_posix().startswith(excluded_directories))
     paths.update(design["thumbnail"] for design in catalog["designs"])
     paths.update(c["demoDirectory"] + "/" + c["landing"]["image"] for c in catalog["companies"] if c.get("landing"))
     entries = []

@@ -532,7 +532,7 @@ frame.src = StudioPreview.stage;
     ['/preview-bridge.js', path.join(STUDIO_UI, 'preview-bridge.js')],
     ['/studio-preview.js', path.join(STUDIO_UI, 'studio-preview.js')],
     ['/studio.css', path.join(STUDIO_UI, 'studio.css')],
-    ...['tokens.css', 'themes.css', 'components.css', 'runtime.js', 'i18n.js']
+    ...['tokens.css', 'themes.css', 'components.css', 'toast.css', 'runtime.js', 'i18n.js']
       .map(name => ['/ds/' + name, path.join(DESIGN_SYSTEM, name)]),
   ]);
   return async function serve(send, { requestId, request }) {

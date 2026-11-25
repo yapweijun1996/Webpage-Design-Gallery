@@ -356,6 +356,11 @@ class GalleryTests(unittest.TestCase):
             street_page, street_release = gallery.build_mini_street(catalog, app_version)
             self.assertEqual((output / street / entry).read_text(), street_page)
             self.assertEqual((output / street / manifest).read_text(), street_release)
+            toast = gallery.MINI_STREET_TOAST
+            self.assertEqual((output / toast).read_bytes(), gallery.source_bytes(ROOT / toast))
+            build_id = json.loads(street_release)["build"]
+            toast_url = "../../../../" + toast.as_posix() + "?build=" + build_id
+            self.assertIn(f'href="{toast_url}" integrity="sha256-', street_page)
             files = {street / file for file in street_files - {entry, manifest}}
             for name in files | {v11 / file for file in street_dependencies}:
                 self.assertEqual((output / name).read_bytes(), gallery.source_bytes(ROOT / name), name)

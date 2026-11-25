@@ -2,7 +2,7 @@
 <html lang="en" data-gjh-design="mini-street">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#122a24">
   <meta name="description" content="A rainy shophouse street outside the GJH Virtual Mall, an independent design concept.">
   <title>GJH Mini Street · Independent Design Concept</title>
@@ -10,6 +10,7 @@
   <link rel="related" href="../../../../style-atlas/index.html#gjh-mini-street">
   <script src="mini-topbar.js"></script>
   <link rel="stylesheet" href="assets/theme.css">
+  <link rel="stylesheet" href="../../../../swarm/design-system/toast.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="mini-vending-ux.css">
   <link rel="stylesheet" href="shop-experience.css">
@@ -50,7 +51,8 @@
           <span class="mini-tip" id="mini-theme-label" data-i18n="topbar.theme">Website dark mode</span>
         </button>
         <button class="mini-icon-button mini-update-button" id="mini-update" type="button"
-                aria-labelledby="mini-update-label" aria-describedby="mini-version" disabled>
+                aria-labelledby="mini-update-label" aria-describedby="mini-build-description"
+                aria-controls="mini-update-status" disabled>
           <span id="mini-update-label" data-update-label>Check for updates</span>
           <span class="mini-release">
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false">
@@ -61,11 +63,20 @@
         </button>
       </div>
     </div>
-    <p id="mini-update-status" class="mini-status" role="status" aria-live="polite" aria-atomic="true">
-      <span data-update-message></span>
-      <span class="mini-installed-build" data-installed-build></span>
-    </p>
   </header>
+
+  <p id="mini-build-description" class="mini-update-visually-hidden">Build unavailable</p>
+  <p id="mini-update-announcement" class="mini-update-visually-hidden" role="status" aria-live="polite" aria-atomic="true" translate="no"></p>
+  <aside id="mini-update-status" class="sds-toast mini-update-toast" aria-label="Mini Street update" translate="no" hidden>
+    <div class="mini-update-copy">
+      <p data-update-message></p>
+      <p class="mini-installed-build" data-installed-build hidden></p>
+    </div>
+    <div class="mini-update-actions" hidden>
+      <button type="button" data-update-action hidden>Apply update</button>
+      <button type="button" data-update-dismiss>Dismiss</button>
+    </div>
+  </aside>
 
   <main id="street">
     <section class="street" aria-labelledby="street-title">

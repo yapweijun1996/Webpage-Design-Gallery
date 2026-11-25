@@ -1,3 +1,5 @@
+@import "./toast.css";
+
 /* Without scroll timelines, content starts visible and the runtime hook triggers a brief reveal. Chapter copy sits on an opaque theme surface for AA contrast. */
 
 .sds-container {
@@ -596,29 +598,6 @@ body:has(.sds-actionbar:not([hidden])) .sds-footer {
   background: none;
 }
 
-.sds-toast {
-  position: fixed;
-  z-index: var(--sds-z-toast);
-  inset-block-end: calc(var(--sds-bar-h) + var(--sds-safe-bottom) + var(--sds-space-6));
-  left: max(var(--sds-gutter), var(--sds-safe-left));
-  right: max(var(--sds-gutter), var(--sds-safe-right));
-  box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sds-space-3);
-  inline-size: fit-content;
-  margin-inline: auto;
-  padding: var(--sds-space-3);
-  border: 1px solid var(--sds-color-border-strong);
-  border-radius: var(--sds-radius-lg);
-  background: var(--sds-color-surface);
-  color: var(--sds-color-text);
-  box-shadow: var(--sds-shadow-2);
-  overflow-wrap: anywhere;
-}
-
 :is(.sds-btn, .sds-chip, .sds-card, .sds-rail__item, .sds-nav__brand, .sds-nav__links a, .sds-footer a):is(:disabled, [disabled], [aria-disabled="true"]),
 .sds-radio-chip:has(> input:disabled),
 :where(.sds-field, .sds-prefs) :is(input, select, textarea):disabled,
@@ -630,14 +609,14 @@ body:has(.sds-actionbar:not([hidden])) .sds-footer {
 }
 
 :where(.sds-btn, .sds-chip, .sds-visually-hidden, .sds-card, .sds-rail, .sds-rail__item):focus-visible,
-:where(.sds-container, .sds-nav, .sds-actionbar, .sds-chapter, .sds-rail, .sds-card, .sds-field, .sds-disclosure, .sds-footer, .sds-prefs, .sds-toast) :focus-visible,
+:where(.sds-container, .sds-nav, .sds-actionbar, .sds-chapter, .sds-rail, .sds-card, .sds-field, .sds-disclosure, .sds-footer, .sds-prefs) :focus-visible,
 .sds-radio-chip:has(> input:focus-visible),
 :where(.sds-nav__brand, .sds-nav__menu > summary):focus-visible {
   outline: var(--sds-space-1) solid var(--sds-color-focus);
   outline-offset: var(--sds-space-1);
 }
 
-[hidden]:is(.sds-stack, .sds-cluster, .sds-visually-hidden, .sds-eyebrow, .sds-badge, .sds-btn, .sds-chip, .sds-card, .sds-nav, .sds-nav__brand, .sds-nav__links, .sds-nav__menu, .sds-actionbar, .sds-chapter, .sds-chapter__body, .sds-chapter__actions, .sds-rail, .sds-rail__item, .sds-field, .sds-radio-chip, .sds-disclosure, .sds-footer, .sds-prefs, .sds-skeleton, .sds-spinner, .sds-progress, .sds-toast) {
+[hidden]:is(.sds-stack, .sds-cluster, .sds-visually-hidden, .sds-eyebrow, .sds-badge, .sds-btn, .sds-chip, .sds-card, .sds-nav, .sds-nav__brand, .sds-nav__links, .sds-nav__menu, .sds-actionbar, .sds-chapter, .sds-chapter__body, .sds-chapter__actions, .sds-rail, .sds-rail__item, .sds-field, .sds-radio-chip, .sds-disclosure, .sds-footer, .sds-prefs, .sds-skeleton, .sds-spinner, .sds-progress) {
   display: none;
 }
 

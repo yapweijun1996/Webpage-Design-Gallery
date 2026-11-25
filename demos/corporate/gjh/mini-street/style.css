@@ -24,9 +24,11 @@ html[data-site-theme="light"] { color-scheme: light; }
   z-index: var(--layer-masthead);
   border-bottom: 1px solid var(--line);
   background: var(--color-masthead);
+  padding-block-start: env(safe-area-inset-top, 0px);
 }
-.masthead-inner, .mini-status {
-  width: min(100% - 3.5rem, 1512px);
+.masthead-inner {
+  --masthead-edge: 1.75rem;
+  width: min(100% - max(var(--masthead-edge), env(safe-area-inset-left, 0px)) - max(var(--masthead-edge), env(safe-area-inset-right, 0px)), 1512px);
   margin-inline: auto;
 }
 .masthead-inner {
@@ -161,22 +163,68 @@ html[data-site-theme="light"] { color-scheme: light; }
 .mini-update-button[data-state="available"] .mini-release { color: inherit; }
 .mini-release svg { flex: none; width: 14px; height: 14px; }
 .mini-version { min-width: 0; }
-.mini-status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: end;
-  gap: 2px 10px;
-  color: var(--site-ink);
-  font-size: var(--type-toolbar);
-  overflow-wrap: anywhere;
+.mini-update-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
-.mini-status > :empty { display: none; }
-.mini-status:has(> :not(:empty)) { padding-block: 4px 8px; }
+
+.mini-update-toast {
+  --sds-z-toast: var(--layer-masthead);
+  --sds-gutter: 12px;
+  --sds-safe-top: env(safe-area-inset-top, 0px);
+  --sds-safe-right: env(safe-area-inset-right, 0px);
+  --sds-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --sds-safe-left: env(safe-area-inset-left, 0px);
+  --sds-space-1: 2px;
+  --sds-space-3: 12px;
+  --sds-radius-lg: var(--radius-inline-detail);
+  --sds-color-border-strong: var(--color-dialog-border);
+  --sds-color-surface: var(--color-dialog-surface);
+  --sds-color-text: var(--site-ink);
+  --sds-color-focus: var(--color-focus);
+  --sds-shadow-2: var(--shadow-stop);
+  --mini-update-toast-top: calc(max(var(--mini-update-masthead-height, 100px), var(--sds-safe-top)) + var(--sds-space-3));
+  inset-block: var(--mini-update-toast-top) auto;
+  max-block-size: calc(100dvh - var(--mini-update-toast-top) - max(var(--sds-gutter), var(--sds-safe-bottom)));
+  overflow: auto;
+  pointer-events: none;
+}
+
+body:has(dialog[open]) .mini-update-toast { visibility: hidden; }
+.mini-update-copy { max-inline-size: 34ch; }
+.mini-update-copy [data-update-message] { font-weight: 650; }
 .mini-installed-build {
+  margin-block-start: 4px;
   color: var(--muted);
   font: var(--font-build);
 }
+.mini-update-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.mini-update-actions button {
+  min-block-size: 44px;
+  min-inline-size: 44px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-dialog-border);
+  border-radius: var(--radius-masthead-control);
+  color: var(--site-ink);
+  background: var(--color-toolbar);
+  font-size: var(--type-toolbar);
+  font-weight: 650;
+  pointer-events: auto;
+}
+.mini-update-actions button:hover { background: var(--color-toolbar-hover); }
+.mini-update-actions [data-update-action] {
+  border-color: var(--color-toolbar-selected);
+  color: var(--color-stop-ink);
+  background: var(--color-toolbar-selected);
+}
+.mini-update-actions [data-update-action]:hover { background: var(--color-stop-hover); }
+
 .mini-language-dialog {
   width: min(22rem, calc(100% - 32px));
   padding: clamp(16px, 5vw, 24px);
@@ -229,7 +277,7 @@ html:not([data-site-theme="light"]) .mini-theme-sun,
 html[data-site-theme="light"] .mini-theme-moon { display: none; }
 
 @media (max-width: 720px) {
-  .masthead-inner, .mini-status { width: calc(100% - 24px); }
+  .masthead-inner { --masthead-edge: 12px; }
   .masthead-inner, .masthead-inner:has(> .mini-basket-dock) {
     grid-template-columns: auto minmax(0, 1fr) auto;
     grid-template-areas: "identity nav nav" "utilities utilities basket";
@@ -247,7 +295,6 @@ html[data-site-theme="light"] .mini-theme-moon { display: none; }
   .mini-utilities { grid-area: utilities; justify-content: start; }
   .mini-tip { inset-inline: 0 auto; }
   .mini-update-button { max-inline-size: 6rem; }
-  .mini-status { justify-content: start; }
 }
 @media (max-width: 360px) {
   .monogram { display: none; }
