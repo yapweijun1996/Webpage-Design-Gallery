@@ -937,6 +937,32 @@ export function buildWorld(scene, invalidate) {
     const steel = surface("#a6b1a8", 0.35);
     const liner = glow("#76654c");
     const drinkFinishes = drinks.map(({ color }) => glow(color));
+    // Printed faces make the same six fictional drinks recognisable from the street.
+    // Each label material is shared by the front and rear pack in its lane.
+    const drinkLabels = drinks.map(({ label, color, accent, code }) => {
+      const artwork = paintedTexture(192, 128, (ctx, width, height) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = accent;
+        ctx.fillRect(0, 13, width, 10);
+        ctx.fillRect(0, 106, width, 9);
+        ctx.fillStyle = "#fff1cf";
+        ctx.fillRect(8, 26, width - 16, 76);
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(12, 30, width - 24, 68);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#253d30";
+        ctx.font = "bold 28px Georgia, serif";
+        ctx.fillText(label, width / 2, 61, width - 32);
+        ctx.font = "bold 13px sans-serif";
+        ctx.fillText("MINI STREET", width / 2, 82);
+        ctx.fillStyle = accent;
+        ctx.font = "bold 11px monospace";
+        ctx.fillText(code, width / 2, height - 3);
+      });
+      return new THREE.MeshBasicMaterial({ map: artwork, toneMapped: false });
+    });
     const bay = x - 0.13;
     const panel = x + 0.397;
 
@@ -965,7 +991,7 @@ export function buildWorld(scene, invalidate) {
     }
     box(displayLight, bay, 1.967, z + 0.356, 0.74, 0.016, 0.036);
 
-    function packageAt(drink, finish, px, y, pz) {
+    function packageAt(drink, finish, label, px, y, pz) {
       if (drink.shape === "can") {
         tube(finish, px, y + 0.134, pz, 0.071, 0.236, 0.071);
         for (const rim of [0.017, 0.252]) tube(steel, px, y + rim, pz, 0.071, 0.019, 0.071);
@@ -978,7 +1004,9 @@ export function buildWorld(scene, invalidate) {
         tube(edge, px, y + 0.312, pz, 0.044, 0.033, 0.044);
         tube(lightCream, px, y + 0.126, pz, 0.063, 0.074, 0.063);
       }
-      box(finish, px, y + 0.113, pz + 0.068, 0.058, 0.021, 0.015);
+      const bottle = drink.shape === "bottle";
+      stamp(plane, label, px, y + (bottle ? 0.130 : 0.108),
+        pz + (bottle ? 0.0635 : 0.0725), bottle ? 0.093 : 0.108, 0.074, 1);
     }
 
     for (const [row, y] of [1.462, 0.937].entries()) {
@@ -988,8 +1016,9 @@ export function buildWorld(scene, invalidate) {
       for (const [column, drink] of lanes.entries()) {
         const px = bay + (column - 1) * 0.241;
         const finish = drinkFinishes[row * 3 + column];
-        packageAt(drink, finish, px + 0.026, y + 0.017, z + 0.208);
-        packageAt(drink, finish, px, y + 0.017, z + 0.344);
+        const label = drinkLabels[row * 3 + column];
+        packageAt(drink, finish, label, px + 0.026, y + 0.017, z + 0.208);
+        packageAt(drink, finish, label, px, y + 0.017, z + 0.344);
       }
       const codes = paintedTexture(384, 24, (ctx, w, h) => {
         ctx.fillStyle = "#2e2d25";
