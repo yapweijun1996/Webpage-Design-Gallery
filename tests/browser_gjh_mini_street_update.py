@@ -8,6 +8,7 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 from pathlib import Path
+import re
 from threading import Thread
 from urllib.parse import parse_qs, urlsplit
 
@@ -16,6 +17,7 @@ from playwright.sync_api import expect, sync_playwright
 ROUTE = "/demos/corporate/gjh/mini-street/"
 SEL = "#mini-update"
 STATUS = "#mini-update-status"
+APPLY_TIMEOUT = 20000
 
 
 class ReleaseHandler(SimpleHTTPRequestHandler):
@@ -47,6 +49,12 @@ class ReleaseHandler(SimpleHTTPRequestHandler):
         self.send_header("Cache-Control", "max-age=3600")
         self.end_headers()
         self.wfile.write(payload)
+
+
+def apply_update(page, button, build):
+    target = re.compile(rf"[?&]mini-street-update={build}\.[a-z0-9]+")
+    with page.expect_navigation(url=target, wait_until="domcontentloaded", timeout=APPLY_TIMEOUT):
+        button.click()
 
 
 def run(site):
@@ -81,6 +89,10 @@ def run(site):
         expect(status).to_contain_text("up to date")
         assert page.evaluate("performance.getEntriesByType('navigation').length") == nav_count
 
+        second = context.new_page()
+        second.goto(base + "?source=second-tab", wait_until="domcontentloaded")
+        expect(second.locator("#mini-version")).to_contain_text(initial[:8])
+
         server.release_build = latest
         button.click()
         expect(button).to_have_attribute("data-state", "error")
@@ -109,11 +121,9 @@ def run(site):
         page.evaluate("""() => localStorage.setItem(
           'gjh-mini-street:basket:v2', JSON.stringify({version: 2, items: {'nz-425g': 2}})
         )""")
-        second = context.new_page()
-        second.goto(site_url, wait_until="domcontentloaded")  # Existing cached tab remains on its own build.
-        expect(second.locator("#mini-version")).to_contain_text(initial[:8])
         server.stale_navigation = latest + "."
-        button.click()
+        apply_update(page, button, latest)
+        expect(button).to_have_attribute("data-state", "error")
         expect(status).to_contain_text("new build did not load")
         expect(page.locator("#mini-version")).to_contain_text(initial[:8])
         expect(page).to_have_url(site_url)
@@ -121,7 +131,8 @@ def run(site):
         server.stale_navigation = "disabled"
         button.click()
         expect(button).to_have_attribute("data-state", "available")
-        button.click()
+        apply_update(page, button, latest)
+        expect(button).to_have_attribute("data-state", "current")
         expect(status).to_contain_text("Updated to")
         expect(page.locator("#mini-version")).to_contain_text(latest[:8])
         expect(page).to_have_url(site_url)
