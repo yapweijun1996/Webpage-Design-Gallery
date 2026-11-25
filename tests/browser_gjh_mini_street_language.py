@@ -40,7 +40,7 @@ def exercise(browser, url):
     expect(page.locator("#shop-title")).to_have_text("New Moon 商店")
     expect(page.locator("#shop .pack-list img").first).to_have_attribute("alt", "New Moon 新西兰鲍鱼包装正面")
     page.get_by_role("button", name="将澳大利亚鲍鱼加入购物篮").click()
-    expect(page.locator("#shop [role=status]")).to_have_text("已添加澳大利亚鲍鱼。关闭此展示即可查看购物篮。")
+    expect(page.locator("#shop").get_by_role("status")).to_have_text("已添加澳大利亚鲍鱼。关闭此展示即可查看购物篮。")
     page.locator("#stop-dialog .close").click()
     expect(page.locator(".mini-basket-launcher")).to_have_accessible_name("购物篮，1 件商品")
 
