@@ -24,7 +24,7 @@ def main():
         with sync_playwright() as p:
             path = os.environ.get('GALLERY_CHROME', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
             browser = p.chromium.launch(executable_path=path, headless=True)
-            for width, height in ((1440, 900), (768, 1024), (390, 844), (320, 780)):
+            for width, height in ((1440, 900), (1100, 800), (768, 1024), (390, 844), (320, 780)):
                 context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce')
                 page = context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
@@ -35,9 +35,9 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name, page.evaluate('document.documentElement.scrollWidth'))
                         assert page.locator('main').inner_text().strip(), (width, locale, name)
-                        assert page.locator('[data-update] .version').inner_text() == '7.0.0'
+                        assert page.locator('[data-update] .version').inner_text() == '7.1.0'
                         if name == 'contact':
-                            assert page.locator('form input').first.is_disabled()
+                            assert page.locator('form input').first.is_enabled()
                             assert page.locator('a[href="https://wa.me/601139023123"]').count() >= 1
                 page.goto(base + 'index.html')
                 page.locator('[data-theme-toggle]').click()
@@ -57,13 +57,34 @@ def main():
                     page.goto(base + 'index.html', wait_until='load')
                     page.screenshot(path=str(DEMO / 'screenshots' / f'{width}.png'))
                 context.close()
+            context = browser.new_context(viewport={'width':390,'height':844}, reduced_motion='reduce')
+            page = context.new_page()
+            page.goto(base + 'how-it-works.html')
+            page.locator('.hero-journey-row').nth(2).click()
+            assert page.url.endswith('#step-3')
+            page.goto(base + 'services.html')
+            page.locator('.service-preview-row').first.click()
+            assert page.url.endswith('#service-offerings')
+            page.goto(base + 'commerce.html')
+            page.locator('[data-theme-toggle]').click()
+            page.wait_for_function("document.documentElement.dataset.theme === 'dark'")
+            assert page.locator('h1').is_visible()
+            context.close()
             context = browser.new_context(viewport={'width':1440,'height':900})
             page = context.new_page()
             page.goto(base + 'contact.html')
-            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.0.1"}'))
+            posted = []
+            page.on('request', lambda request: posted.append(request.url) if request.method != 'GET' else None)
+            page.locator('form input[name="name"]').fill('Sample name')
+            page.locator('form button[type="submit"]').click()
+            assert page.locator('[data-demo-result]').inner_text() == 'This is a preview only. No enquiry was sent.'
+            assert page.locator('form input[name="name"]').input_value() == 'Sample name'
+            assert not posted, posted
+            page.goto(base + 'contact.html')
+            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.1.1"}'))
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.0.1' in page.locator('[data-status]').inner_text()
+            assert '7.1.1' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
             page.wait_for_load_state('load')
             page.wait_for_function("document.querySelector('[data-status]').textContent.includes('could not be verified')")
@@ -78,9 +99,11 @@ def main():
             static = nojs.new_page()
             static.goto(base + 'commerce.html')
             assert static.locator('h1').is_visible() and static.get_by_role('link', name='Contact Us').first.is_visible()
+            static.goto(base + 'contact.html')
+            assert static.locator('form input').first.is_disabled()
             nojs.close()
             browser.close()
-        print('PASS: 72 page/viewport checks, themes, locale navigation, disabled contact form and update detection')
+        print('PASS: 90 page/viewport checks, themes, locale navigation, sample contact form and update detection')
     finally:
         server.shutdown()
 

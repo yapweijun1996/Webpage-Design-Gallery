@@ -17,6 +17,16 @@
   });
   syncTheme();
   document.querySelectorAll('[data-locale]').forEach(function (link) { link.addEventListener('click', function () { try { localStorage.setItem('pomelo-v7-language', link.dataset.locale); } catch (_) {} }); });
+  document.querySelectorAll('[data-demo-form]').forEach(function (form) {
+    var fields = form.querySelector('[data-demo-fields]');
+    var result = form.querySelector('[data-demo-result]');
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      result.textContent = form.dataset.result;
+      result.hidden = false;
+    });
+    fields.disabled = false;
+  });
   document.querySelectorAll('details.panel').forEach(function (panel) {
     panel.addEventListener('toggle', function () {
       if (panel.open) document.querySelectorAll('details.panel[open]').forEach(function (other) { if (other !== panel) other.open = false; });
