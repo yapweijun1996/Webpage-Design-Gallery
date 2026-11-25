@@ -2242,7 +2242,7 @@
         "gold": "#e5b87b",
         "line": "#e6c69538",
         "display": "Georgia, \"Times New Roman\", serif",
-        "color-focus": "#ffd899",
+        "color-focus": "var(--color-focus-scene)",
         "color-masthead": "#122a24",
         "color-concept": "#ead3ae",
         "scene-fallback": "linear-gradient(159deg, #243b48, #122d26 70%)",
@@ -2440,9 +2440,69 @@
         "shop-product-ui-color-1": "#173429",
         "shop-product-ui-background-5": "#f0d4a8",
         "shop-product-ui-background-6": "#fff0d1",
-        "shop-product-ui-z-index-2": "1"
+        "shop-product-ui-z-index-2": "1",
+        "site-ink": "var(--cream)",
+        "site-background": "var(--deep)",
+        "site-card": "var(--green)",
+        "site-accent": "var(--gold)",
+        "color-focus-scene": "#ffd899",
+        "color-site-light-focus": "#854d0e",
+        "font-masthead-title": "600 1rem/1.1 var(--display)",
+        "font-build": "600 .68rem/1.3 ui-monospace, monospace",
+        "type-masthead-concept": ".65rem",
+        "type-masthead-concept-small": ".6rem",
+        "type-masthead-tooltip": ".75rem",
+        "radius-masthead-control": "8px",
+        "radius-masthead-tooltip": "6px",
+        "layer-masthead": "2",
+        "layer-masthead-tooltip": "1",
+        "type-scene-heading": "clamp(1.5rem, 4vw, 2.5rem)",
+        "type-scene-eyebrow": "0.7rem",
+        "type-scene-mobile-label": "0.88rem"
       },
-      "overrides": []
+      "overrides": [
+        {
+          "state": "[data-site-theme=\"light\"]",
+          "tokens": {
+            "site-ink": "#19372d",
+            "site-background": "#f3eee4",
+            "site-card": "#fffcf4",
+            "site-accent": "#765020",
+            "line": "#9c8b70",
+            "color-masthead": "#fcf7ed",
+            "color-concept": "#655138",
+            "muted": "#486156",
+            "color-toolbar": "#fffaf0",
+            "color-toolbar-hover": "#e5ecdf",
+            "color-toolbar-selected": "#c9dfcd",
+            "color-dialog-copy": "#3d5549",
+            "color-dialog-surface": "#fffcf4",
+            "color-dialog-border": "#9c8b70",
+            "color-close": "#eff1e6",
+            "color-close-hover": "#dde7da",
+            "color-pack-surface": "#f3eee4",
+            "color-pack-meta": "#586747",
+            "color-back-link": "#315947",
+            "color-focus": "var(--color-site-light-focus)"
+          }
+        },
+        {
+          "state": "[data-site-theme=\"light\"]",
+          "selector": ".stage",
+          "tokens": {
+            "color-focus": "var(--color-focus-scene)"
+          }
+        },
+        {
+          "state": "[data-site-theme=\"light\"]",
+          "selector": ".shop-product-panel",
+          "tokens": {
+            "shop-product-ui-background-1": "#e9f0e5",
+            "shop-product-ui-background-2": "#d6e5d6",
+            "color-focus": "var(--color-site-light-focus)"
+          }
+        }
+      ]
     }
   }
 }

@@ -1,10 +1,6 @@
 :root {
   color-scheme: dark;
   font: var(--font-body);
-  --site-ink: var(--cream);
-  --site-background: var(--deep);
-  --site-card: var(--green);
-  --site-accent: var(--gold);
   color: var(--site-ink);
   background: var(--site-background);
 }
@@ -21,33 +17,11 @@ a:focus-visible, button:focus-visible {
 svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 1.55; stroke-linecap: round; stroke-linejoin: round; }
 h1, h2, p { margin: 0; }
 
-html[data-site-theme="light"] {
-  color-scheme: light;
-  --site-ink: #19372d;
-  --site-background: #f3eee4;
-  --site-card: #fffcf4;
-  --site-accent: #765020;
-  --line: #9c8b70;
-  --color-focus: #854d0e;
-  --color-masthead: #fcf7ed;
-  --color-concept: #655138;
-  --muted: #486156;
-  --color-toolbar: #fffaf0;
-  --color-toolbar-hover: #e5ecdf;
-  --color-toolbar-selected: #c9dfcd;
-  --color-dialog-copy: #3d5549;
-  --color-dialog-surface: #fffcf4;
-  --color-dialog-border: #9c8b70;
-  --color-close: #eff1e6;
-  --color-close-hover: #dde7da;
-  --color-pack-surface: #f3eee4;
-  --color-pack-meta: #586747;
-  --color-back-link: #315947;
-}
+html[data-site-theme="light"] { color-scheme: light; }
 
 .masthead {
   position: relative;
-  z-index: 2;
+  z-index: var(--layer-masthead);
   border-bottom: 1px solid var(--line);
   background: var(--color-masthead);
 }
@@ -78,16 +52,16 @@ html[data-site-theme="light"] {
   height: 40px;
   padding-inline: 4px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-masthead-control);
   color: var(--site-accent);
   font: var(--font-monogram);
   letter-spacing: -.04em;
 }
 .identity-copy { display: grid; gap: 3px; line-height: 1.15; }
-.identity-copy strong { font: 600 1rem/1.1 var(--display); }
+.identity-copy strong { font: var(--font-masthead-title); }
 .concept {
   color: var(--color-concept);
-  font-size: .65rem;
+  font-size: var(--type-masthead-concept);
   letter-spacing: .055em;
   text-transform: uppercase;
 }
@@ -99,7 +73,7 @@ html[data-site-theme="light"] {
   justify-content: center;
   min-width: 44px;
   min-height: 44px;
-  border-radius: 8px;
+  border-radius: var(--radius-masthead-control);
 }
 .mini-nav a {
   padding-inline: clamp(5px, 1.15vw, 14px);
@@ -123,17 +97,17 @@ html[data-site-theme="light"] {
 .mini-icon-button svg { display: block; width: 20px; height: 20px; }
 .mini-tip {
   position: absolute;
-  z-index: 1;
+  z-index: var(--layer-masthead-tooltip);
   top: calc(100% + 5px);
   inset-inline-end: 0;
   padding: 5px 8px;
   width: max-content;
   max-width: min(14rem, 80vw);
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: var(--radius-masthead-tooltip);
   color: var(--site-ink);
   background: var(--color-masthead);
-  font-size: .75rem;
+  font-size: var(--type-masthead-tooltip);
   opacity: 0;
   pointer-events: none;
 }
@@ -143,7 +117,7 @@ html[data-site-theme="light"] {
   justify-self: end;
   min-width: 0;
   color: var(--muted);
-  font: 600 .68rem/1.3 ui-monospace, monospace;
+  font: var(--font-build);
   overflow-wrap: anywhere;
   text-align: end;
 }
@@ -172,7 +146,7 @@ html[data-site-theme="light"] {
   min-height: 44px;
   padding: 6px 12px;
   border: 1px solid var(--color-dialog-border);
-  border-radius: 8px;
+  border-radius: var(--radius-masthead-control);
   font: inherit;
 }
 .mini-language-select {
@@ -199,9 +173,6 @@ html[data-site-theme="light"] :is(.mini-basket-launcher, .mini-basket-notice, .m
   color: var(--site-ink);
 }
 html[data-site-theme="light"] .shop-product-panel {
-  --shop-product-ui-background-1: #e9f0e5;
-  --shop-product-ui-background-2: #d6e5d6;
-  --color-focus: #854d0e;
   color: var(--site-ink);
 }
 html[data-site-theme="light"] .shop-product-panel .shop-product-brand { color: var(--site-accent); }
@@ -229,7 +200,7 @@ html[data-site-theme="light"] .mini-theme-moon { display: none; }
 }
 @media (max-width: 360px) {
   .identity { gap: 6px; }
-  .concept { font-size: .6rem; }
+  .concept { font-size: var(--type-masthead-concept-small); }
   .mini-utilities { gap: 2px; }
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -263,7 +234,6 @@ html[data-site-theme="light"] .mini-theme-moon { display: none; }
   touch-action: none;
   cursor: grab;
 }
-html[data-site-theme="light"] .stage { --color-focus: #ffd899; }
 .stage[data-webgl] #view { visibility: visible; }
 #view[data-dragging] { cursor: grabbing; }
 #view:focus-visible { outline: 2px solid var(--color-focus); outline-offset: -4px; }
