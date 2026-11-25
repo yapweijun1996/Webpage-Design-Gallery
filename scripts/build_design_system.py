@@ -19,6 +19,8 @@ SHOWCASE_TOKEN_OUTPUT = "demos/corporate/pomelo-stem/v5/assets/tokens.css"
 SHOWCASE_TOKEN_SOURCE = "design-system/pomelo-showcase-tokens.json"
 V6_TOKEN_OUTPUT = "demos/corporate/pomelo-stem/v6/assets/tokens.css"
 V6_TOKEN_SOURCE = "design-system/pomelo-v6-tokens.json"
+V7_TOKEN_OUTPUT = "demos/corporate/pomelo-stem/v7/assets/primitives.css"
+V7_TOKEN_SOURCE = "design-system/pomelo-v7-tokens.json"
 DEMO_THEME_OUTPUTS = {
     "mini-street": "demos/corporate/gjh/mini-street/assets/theme.css",
     "v20": "demos/corporate/gjh/v20/assets/theme.css",
@@ -193,6 +195,7 @@ def outputs(root=ROOT):
             ORDER_JOURNEY_TOKEN_OUTPUT: render_pomelo_tokens(root, ORDER_JOURNEY_TOKEN_SOURCE),
             SHOWCASE_TOKEN_OUTPUT: render_pomelo_tokens(root, SHOWCASE_TOKEN_SOURCE),
             V6_TOKEN_OUTPUT: render_pomelo_tokens(root, V6_TOKEN_SOURCE),
+            V7_TOKEN_OUTPUT: render_pomelo_tokens(root, V7_TOKEN_SOURCE),
             "assets/gjh-themes.css": render_themes(root, lambda version: version not in DEMO_THEME_OUTPUTS),
             **{path: render_themes(root, lambda version: version == edition)
                for edition, path in DEMO_THEME_OUTPUTS.items()}}
