@@ -35,7 +35,7 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name, page.evaluate('document.documentElement.scrollWidth'))
                         assert page.locator('main').inner_text().strip(), (width, locale, name)
-                        assert page.locator('[data-update] .version').inner_text() == '7.5.0'
+                        assert page.locator('[data-update] .version').inner_text() == '7.9.0'
                         if width <= 700:
                             for control in page.locator('.controls .control, .controls summary').all():
                                 if control.is_visible():
@@ -43,12 +43,19 @@ def main():
                                     assert box['width'] >= 44 and box['height'] >= 44, (width, locale, name, box)
                         if name == 'index':
                             assert page.locator('.hero-photo').get_attribute('src').endswith('merchant.webp')
+                            assert page.locator('.hero-copy .eyebrow img').get_attribute('src').endswith('pomelo-compact.svg')
                             story_image = page.locator('.story-image img')
                             assert story_image.get_attribute('src').endswith('ceramic-study.webp')
+                            assert page.locator('.merchant-story .story-step').count() == 3
+                            assert page.locator('.home-services .card').count() == 3
+                            if width <= 700:
+                                assert page.locator('.merchant-story').evaluate('(el) => parseFloat(getComputedStyle(el).paddingTop)') == 48
+                                for link in page.locator('.home-services .text-link').all():
+                                    assert link.bounding_box()['height'] >= 44
                             story_image.scroll_into_view_if_needed()
                             page.wait_for_function("document.querySelector('.story-image img').naturalWidth > 0")
                         if name == 'commerce':
-                            assert page.locator('.demo-product-art .object-basket').count() == 1
+                            assert page.locator('.tour-products .object-basket').count() == 1
                             shop_image = page.locator('.tour-shop-hero img')
                             shop_image.scroll_into_view_if_needed()
                             page.wait_for_function("document.querySelector('.tour-shop-hero img').naturalWidth > 0")
@@ -76,6 +83,46 @@ def main():
                 context.close()
             context = browser.new_context(viewport={'width':390,'height':844}, reduced_motion='reduce')
             page = context.new_page()
+            posted_scenes = []
+            page.on('request', lambda request: posted_scenes.append(request.url) if request.method != 'GET' else None)
+            for locale, names, statuses, materials, delivery, ai_answer in (
+                ('', ('Ceramic mug', 'Everyday bowl', 'Woven basket'), ('New order', 'Preparing'), ('Ceramic', 'Ceramic', 'Woven fibre'), 'Courier delivery', 'Your two ceramic mugs are being prepared'),
+                ('zh/', ('陶瓷杯', '日用碗', '编织篮'), ('新订单', '准备中'), ('陶瓷', '陶瓷', '编织纤维'), '快递配送', '你的两只陶瓷杯正在为快递配送做准备'),
+                ('ms/', ('Cawan seramik', 'Mangkuk harian', 'Bakul anyaman'), ('Pesanan baharu', 'Sedang disiapkan'), ('Seramik', 'Seramik', 'Serat anyaman'), 'Penghantaran kurier', 'Dua cawan seramik anda sedang disediakan'),
+            ):
+                page.goto(base + locale + 'commerce.html')
+                for i, name in enumerate(names):
+                    page.locator('[data-product-button]').nth(i).click()
+                    detail = page.locator('[data-scene-kind="0"] [data-scene-detail]').nth(i)
+                    assert detail.is_visible() and name in detail.inner_text()
+                    assert ('RM 39.90', 'RM 32.00', 'RM 48.00')[i] in detail.inner_text()
+                    assert f'PH-00{i+1}' in detail.inner_text() and materials[i] in detail.inner_text()
+                    assert detail.locator('.sample-product-details').get_attribute('open') is not None
+                    card = page.locator('[data-product-button]').nth(i)
+                    assert card.locator('[data-product-state]').inner_text() == card.get_attribute('data-selected-label')
+                    announcement = page.locator('[data-scene-kind="0"] [data-scene-status]').text_content()
+                    assert name in announcement and ('RM 39.90', 'RM 32.00', 'RM 48.00')[i] in announcement
+                    detail.locator('[data-view-studio]').click()
+                    assert page.locator('[data-tour-panel="1"]').is_visible()
+                    listing = page.locator('[data-studio-product]').nth(i)
+                    assert listing.is_visible() and name in listing.inner_text()
+                    assert all(value in listing.inner_text() for value in (f'PH-00{i+1}', materials[i], ('RM 39.90', 'RM 32.00', 'RM 48.00')[i]))
+                    assert name in page.locator('[data-scene-kind="1"] [data-scene-status]').text_content()
+                    assert sum(item.is_visible() for item in page.locator('[data-studio-product]').all()) == 1
+                    page.locator('[data-tour-tab="0"]').click()
+                page.locator('[data-tour-tab="1"]').click()
+                for i, status in enumerate(statuses, 1):
+                    page.locator('[data-scene-kind="1"] [data-scene-button]').nth(i).click()
+                    detail = page.locator('[data-scene-kind="1"] [data-scene-detail]').nth(i)
+                    assert detail.locator('.pill').inner_text() == status
+                    assert delivery in detail.locator('.sample-fulfilment').inner_text()
+                    assert detail.locator('.sample-order-progress [aria-current=step]').inner_text() == status
+                    assert status in page.locator('[data-scene-kind="1"] [data-scene-status]').text_content()
+                    assert all(value in detail.inner_text() for value in ('#PS-0124', 'PH-001', 'RM 79.80', 'RM 8.00', 'RM 87.80'))
+                page.locator('[data-tour-tab="2"]').click()
+                page.locator('[data-scene-kind="2"] [data-scene-button]').nth(2).click()
+                assert ai_answer in page.locator('.tour-message-answer').inner_text()
+                assert ai_answer in page.locator('[data-scene-kind="2"] [data-scene-status]').text_content()
             page.goto(base + 'how-it-works.html')
             page.locator('.hero-journey-row').nth(2).click()
             assert page.url.endswith('#step-3')
@@ -83,25 +130,56 @@ def main():
             page.locator('.service-preview-row').first.click()
             assert page.url.endswith('#service-offerings')
             page.goto(base + 'commerce.html')
-            posted_scenes = []
-            page.on('request', lambda request: posted_scenes.append(request.url) if request.method != 'GET' else None)
             assert page.locator('[data-scene-switch]').count() == 3
-            page.locator('[data-scene-switch]').nth(0).locator('[data-scene-button]').nth(1).click()
-            assert page.locator('[data-scene-switch]').nth(0).locator('[data-scene-detail]').nth(1).is_visible()
-            assert page.locator('[data-scene-switch]').nth(0).locator('[data-scene-button]').nth(1).get_attribute('aria-pressed') == 'true'
             tablist = page.locator('[data-tour-tabs]')
             assert tablist.is_visible() and tablist.get_attribute('aria-orientation') == 'horizontal'
             assert page.locator('[data-tour-panel="0"]').is_visible()
             assert page.locator('[data-tour-panel="1"]').is_hidden()
-            assert page.locator('.demo-product-price').all_inner_texts() == ['RM 39.90', 'RM 32.00', 'RM 48.00']
-            page.locator('[data-tour-tab="1"]').click()
+            assert page.locator('.tour-products .demo-product-price').all_inner_texts() == ['RM 39.90', 'RM 32.00', 'RM 48.00']
+            page.locator('.tour-shop-action').focus()
+            page.keyboard.press('Enter')
+            assert page.url.endswith('#sample-collection')
+            products = page.locator('[data-product-button]')
+            for i, (name, price, shape, description) in enumerate((
+                ('Ceramic mug', 'RM 39.90', 'object-cup', 'slow, everyday moments'),
+                ('Everyday bowl', 'RM 32.00', 'object-bowl', 'daily table'),
+                ('Woven basket', 'RM 48.00', 'object-basket', 'close by'),
+            )):
+                products.nth(i).focus()
+                page.keyboard.press('Space' if i == 1 else 'Enter')
+                assert products.nth(i).get_attribute('aria-pressed') == 'true'
+                assert products.nth(i).evaluate('(el) => el.matches(":focus-visible")')
+                detail = page.locator('[data-scene-kind="0"] [data-scene-detail]').nth(i)
+                assert detail.is_visible() and name in detail.inner_text() and price in detail.inner_text() and description in detail.inner_text()
+                assert detail.locator('.' + shape).count() == 1
+                assert sum(button.get_attribute('aria-pressed') == 'true' for button in products.all()) == 1
+            product_details = page.locator('[data-scene-kind="0"] [data-scene-detail="2"] .sample-product-details')
+            product_details.locator('summary').focus()
+            page.keyboard.press('Enter')
+            assert product_details.get_attribute('open') is None
+            page.locator('[data-scene-kind="0"] [data-view-studio="2"]').focus()
+            page.keyboard.press('Enter')
             assert page.locator('[data-tour-panel="1"]').is_visible()
-            order = page.locator('.sample-order')
-            assert order.locator('.sample-order-art .object-cup').count() == 1
-            assert all(value in order.inner_text() for value in ('#PS-0124', 'Ceramic mug × 2', 'RM 79.80', 'RM 8.00', 'RM 87.80', 'New order', 'Next: preparing'))
+            assert page.locator('[data-studio-product="2"]').is_visible()
+            assert page.locator('[data-scene-kind="1"] [data-scene-button="0"]').evaluate('(el) => document.activeElement === el')
             assert page.locator('[data-tour-tab="1"]').get_attribute('aria-selected') == 'true'
-            page.locator('[data-scene-switch]').nth(1).locator('[data-scene-button]').nth(2).click()
-            assert 'Preparing' in page.locator('[data-scene-switch]').nth(1).locator('[data-scene-detail]').nth(2).inner_text()
+            studio = page.locator('[data-scene-kind="1"]')
+            assert 'Ready for review' in studio.locator('[data-scene-detail="0"]').inner_text()
+            for i, status, note in ((1, 'New order', 'Next: preparing'), (2, 'Preparing', 'Preparing for the customer')):
+                studio.locator('[data-scene-button]').nth(i).focus()
+                page.keyboard.press('Enter')
+                order = studio.locator('[data-scene-detail]').nth(i)
+                assert order.is_visible() and studio.locator('[data-scene-button]').nth(i).get_attribute('aria-pressed') == 'true'
+                assert order.locator('.sample-order-art .object-cup').count() == 1
+                assert all(value in order.inner_text() for value in ('#PS-0124', 'Ceramic mug × 2', 'RM 79.80', 'RM 8.00', 'RM 87.80', status, note))
+                assert order.locator('.pill').inner_text() == status
+                assert studio.locator('[data-scene-detail]').nth(3-i).is_hidden()
+            page.locator('[data-tour-tab="0"]').click()
+            assert products.nth(2).get_attribute('aria-pressed') == 'true'
+            assert page.locator('[data-scene-kind="0"] [data-scene-detail="2"]').is_visible()
+            assert product_details.get_attribute('open') is None
+            page.locator('[data-tour-tab="1"]').click()
+            assert studio.locator('[data-scene-detail="2"]').is_visible()
             page.locator('[data-tour-tab="1"]').press('ArrowRight')
             assert page.locator('[data-tour-panel="2"]').is_visible()
             assert page.locator('[data-tour-tab="2"]').evaluate('(el) => document.activeElement === el')
@@ -115,6 +193,12 @@ def main():
             page.locator('[data-theme-toggle]').click()
             page.wait_for_function("document.documentElement.dataset.theme === 'dark'")
             assert page.locator('h1').is_visible()
+            page.locator('[data-tour-tab="0"]').click()
+            products.nth(1).click()
+            assert products.nth(1).get_attribute('aria-pressed') == 'true'
+            assert page.locator('[data-scene-kind="0"] [data-scene-detail="1"]').is_visible()
+            page.locator('[data-scene-kind="0"] [data-view-studio="1"]').click()
+            assert page.locator('[data-studio-product="1"]').is_visible()
             context.close()
             context = browser.new_context(viewport={'width':1440,'height':900})
             page = context.new_page()
@@ -127,10 +211,10 @@ def main():
             assert page.locator('form input[name="name"]').input_value() == 'Sample name'
             assert not posted, posted
             page.goto(base + 'contact.html')
-            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.5.1"}'))
+            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.9.1"}'))
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.5.1' in page.locator('[data-status]').inner_text()
+            assert '7.9.1' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
             page.wait_for_load_state('load')
             page.wait_for_function("document.querySelector('[data-status]').textContent.includes('could not be verified')")
@@ -143,13 +227,21 @@ def main():
             context.close()
             nojs = browser.new_context(java_script_enabled=False)
             static = nojs.new_page()
-            static.goto(base + 'commerce.html')
-            assert static.locator('h1').is_visible() and static.get_by_role('link', name='Contact Us').first.is_visible()
-            assert static.locator('[data-tour-tabs]').is_hidden()
-            assert static.locator('[data-tour-panel]').count() == 3
-            assert all(panel.is_visible() for panel in static.locator('[data-tour-panel]').all())
-            assert static.locator('[data-scene-buttons]').first.is_hidden()
-            assert all(detail.is_visible() for detail in static.locator('[data-scene-detail]').all())
+            for locale in ('', 'zh/', 'ms/'):
+                static.goto(base + locale + 'commerce.html')
+                assert static.locator('h1').is_visible()
+                assert static.locator('[data-tour-tabs]').is_hidden()
+                assert static.locator('[data-tour-panel]').count() == 3
+                assert all(panel.is_visible() for panel in static.locator('[data-tour-panel]').all())
+                assert all(controls.is_hidden() for controls in static.locator('[data-scene-buttons]').all())
+                assert all(button.is_disabled() for button in static.locator('[data-product-button]').all())
+                assert static.locator('[data-product-hint]').is_hidden()
+                assert static.locator('.collection-heading noscript span').is_visible()
+                assert static.locator('.tour-shop-action').get_attribute('href') == '#sample-collection'
+                assert all(detail.is_visible() for detail in static.locator('[data-scene-detail]').all())
+                assert all(detail.get_attribute('open') is not None for detail in static.locator('.sample-product-details').all())
+                assert all(listing.is_visible() for listing in static.locator('[data-studio-product]').all())
+                assert all(action.is_hidden() for action in static.locator('[data-view-studio]').all())
             static.goto(base + 'contact.html')
             assert static.locator('form input').first.is_disabled()
             nojs.close()

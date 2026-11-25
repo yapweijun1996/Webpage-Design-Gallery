@@ -99,3 +99,110 @@
 .sample-order-next{display:inline-block;padding:.35rem .6rem;background:var(--soft);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e);color:var(--green);font-weight:700}
 @media(max-width:700px){.story-image img{height:235px}.merchant-story .story-step{padding:1.15rem 0}.showcase-panel{grid-template-columns:minmax(0,1fr)}.tour-shop-hero-copy{padding:.85rem}.tour-shop-hero img{min-height:150px}.tour-products{gap:.45rem;padding:.15rem .65rem .85rem}.demo-product b{font-size:var(--pomelo-study-v-41c61ffb2551d1c1)}}
 @media(max-width:350px){.tour-shop-hero{grid-template-columns:minmax(0,1fr) minmax(70px,.65fr)}.tour-shop-hero-copy{padding:.7rem}.tour-shop-hero img{min-height:135px}.sample-order-item{flex-wrap:nowrap}.sample-order-art{width:42px;height:42px}}
+
+/* V7.6: clear sample selection and a calmer merchant journey. */
+.demo-product{display:block;width:100%;padding:.25rem;text-align:left;background:transparent;color:var(--ink);border:1px solid transparent;border-radius:var(--pomelo-study-v-a15202ec5909a3bd)}
+.demo-product:disabled{cursor:default;opacity:1}
+.demo-product:not(:disabled)[aria-pressed=true]{border-color:var(--green);background:var(--soft)}
+.demo-product:not(:disabled):hover{background:var(--soft)}
+.tour-shop-action{display:inline-flex;align-items:center;min-height:44px;text-decoration:none}
+.tour-shop-action:hover{text-decoration:underline}
+.selected-product{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;gap:1rem}
+.selected-product .demo-product-art{width:64px}
+.selected-product .demo-product-price{margin-top:.2rem}
+.scene-detail .sample-order{margin:0}
+.merchant-story .story-copy{align-content:start}
+.merchant-story .story-image{margin-top:.5rem}
+.home-ai{background:var(--soft)}
+@media(max-width:700px){.merchant-story .story-layout{gap:2.5rem}.home-concept-grid{gap:2.5rem}.home-ai .story-layout{gap:2rem}.selected-product{grid-template-columns:54px minmax(0,1fr)}.selected-product .demo-product-art{width:54px}}
+
+/* Home-only mobile rhythm: keep breathing room between each part of the story. */
+@media(max-width:700px){
+ .home-page>.hero{padding:2.7rem 0}
+ .home-page .hero-grid{gap:1.5rem}
+ .home-page .hero-copy{gap:1.15rem}
+ .home-page .feature-band-inner{gap:1.2rem;padding:1.4rem 0}
+ .home-page>.section{padding:3rem 0}
+ .home-page .merchant-story .story-layout{gap:1.75rem}
+ .home-page .story-copy{gap:1.15rem}
+ .home-page .merchant-story .story-step{padding:1rem 0}
+ .home-page .home-concept-grid{gap:1.75rem}
+ .home-page .home-concept-copy{gap:1.1rem}
+ .home-page .home-feature-list{gap:.7rem}
+ .home-page .home-ai .story-layout{gap:1.5rem}
+ .home-page .home-ai .future-card{padding:1.2rem}
+ .home-page .home-ai .future-prompt{margin:1rem 0;padding:.85rem}
+ .home-page .home-ai .future-canvas{padding:1.1rem}
+ .home-page .home-services .section-heading{gap:1rem;margin-bottom:1.75rem}
+ .home-page .home-services .cards{gap:.75rem}
+ .home-page .home-services .card{padding:1.3rem;gap:.75rem}
+ .home-page .home-services .text-link{min-height:44px;margin-top:0}
+}
+
+/* V7.7: recognisable identity and clearly inspectable sample scenes. */
+.visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.home-page .hero-copy .eyebrow:before{display:none}
+.home-page .hero-copy .eyebrow img{width:32px;height:32px;flex:none}
+.home-page .hero-art{background:var(--soft);border-radius:var(--pomelo-study-v-9bf0c8e6e77f9f3a)}
+.home-page .merchant-story .story-steps{background:var(--soft);border:1px solid var(--line);border-radius:var(--pomelo-study-v-09f97395c8a0f2ef);padding:.5rem 1.5rem}
+.home-page .merchant-story .story-step:last-child{border-bottom:0}
+.collection-heading{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.35rem 1rem;padding:.8rem .85rem .4rem;color:var(--ink);font-size:var(--pomelo-study-v-d03e951a79e3f35a)}
+.collection-heading span{color:var(--muted)}
+.demo-product:not(:disabled)[aria-pressed=true]{border-width:2px}
+.product-state{display:block;margin-top:.45rem;color:var(--green);font-weight:700;font-size:var(--pomelo-study-v-4cf179823936a6e2);line-height:1.3}
+.scene-hint{margin-top:.5rem;font-size:var(--pomelo-study-v-d03e951a79e3f35a);line-height:1.5}
+.sample-order-progress{margin-top:1rem;padding-top:.8rem;border-top:1px solid var(--line)}
+.sample-order-progress ol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;list-style:none;padding:0;margin:.5rem 0 0}
+.sample-order-progress li{padding:.45rem .55rem;border-left:2px solid var(--line);color:var(--muted);font-size:var(--pomelo-study-v-4cf179823936a6e2)}
+.sample-order-progress li[aria-current=step]{background:var(--soft);border-color:var(--green);color:var(--ink);font-weight:700}
+@media(max-width:700px){
+ .home-page .merchant-story .story-steps{padding:.25rem 1rem}
+ .tour-products .demo-product b{font-size:var(--pomelo-study-v-4cf179823936a6e2)}
+ .tour-products .demo-product-price{font-size:var(--pomelo-study-v-818b9f71cc18b13d)}
+}
+@media(max-width:360px){.tour-products{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* V7.8: a more composed home and richer, clearly fictional sample details. */
+.home-page .hero-art{outline:1px solid var(--line);outline-offset:-1px}
+.home-page .hero-photo{object-position:center 42%}
+.home-page .hero h1 em:after{width:72%}
+.home-page .feature-band-inner>b{font-family:var(--serif);font-size:var(--pomelo-study-v-37ff501588a824b4);font-weight:500;line-height:1.25}
+.home-page .merchant-story .story-step>span{background:var(--surface)}
+.home-page .story-image figcaption{align-items:baseline;line-height:1.4}
+.home-page .home-concept-caption{padding-bottom:.9rem;border-bottom:1px solid var(--line)}
+.home-page .home-feature-list li{padding:.25rem 0;border-bottom:1px solid var(--line)}
+.home-page .home-feature-list li:last-child{border-bottom:0}
+.sample-product-details{margin-top:.8rem;border-top:1px solid var(--line)}
+.sample-product-details summary{display:flex;align-items:center;justify-content:space-between;gap:.6rem;min-height:44px;color:var(--ink);font-size:var(--pomelo-study-v-d03e951a79e3f35a);font-weight:700;list-style:none}
+.sample-product-details summary::-webkit-details-marker{display:none}
+.sample-product-details summary:after{content:'+';color:var(--green);font-size:var(--pomelo-study-v-2569574d7e801068)}
+.sample-product-details[open] summary:after{content:'−'}
+.sample-product-details dl{margin:0;padding:0 0 .4rem;font-size:var(--pomelo-study-v-818b9f71cc18b13d)}
+.sample-product-details dl div{display:flex;justify-content:space-between;gap:1rem;padding:.25rem 0}
+.sample-product-details dt{color:var(--muted)}
+.sample-product-details dd{margin:0;color:var(--ink);font-weight:700;text-align:right}
+.sample-fulfilment{margin-top:.9rem;padding:.75rem;background:var(--soft);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e)}
+.sample-fulfilment strong{display:block;margin-top:.25rem;font-size:var(--pomelo-study-v-d03e951a79e3f35a)}
+.sample-fulfilment p{margin-top:.2rem;font-size:var(--pomelo-study-v-818b9f71cc18b13d)}
+@media(max-width:700px){.home-page .home-concept-caption{padding-bottom:.7rem}.home-page .home-feature-list li{padding:.15rem 0}}
+
+.sample-order-name small{display:block;margin-top:.2rem;color:var(--muted);font-size:var(--pomelo-study-v-4cf179823936a6e2);font-weight:400}
+.sample-studio-listing dt{color:var(--muted)}
+
+/* V7.9: a fuller merchant portrait and a connected fictional product journey. */
+.home-page .home-concept,.home-page .home-services{background:var(--soft)}
+.home-page .home-ai{background:var(--bg)}
+.home-page .home-concept .home-feature-icon{background:var(--surface)}
+.home-page .home-services .card{border-color:var(--line)}
+.view-studio{width:100%;margin-top:.75rem}
+[data-studio-product]+[data-studio-product]{margin-top:.75rem}
+@media(min-width:701px){
+ .home-page .hero-copy h1{font-size:var(--pomelo-study-v-69c52d2ca7805d5c)}
+ .home-page .hero-photo{width:100%}
+}
+
+/* Keep the sample listing readable on narrow screens. */
+@media(max-width:500px){
+ [data-studio-product] .sample-order-item{display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center}
+ [data-studio-product] .sample-order-item>span:last-child{grid-column:2}
+}

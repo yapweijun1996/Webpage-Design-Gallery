@@ -54,21 +54,52 @@
   });
   document.querySelectorAll('[data-scene-switch]').forEach(function (group) {
     var controls = group.querySelector('[data-scene-buttons]');
-    var buttons = Array.from(group.querySelectorAll('[data-scene-button]'));
+    var visual = group.closest('.showcase-visual');
+    var buttons = Array.from(group.dataset.sceneKind === '0' ? visual.querySelectorAll('[data-product-button]') : group.querySelectorAll('[data-scene-button]'));
     var details = Array.from(group.querySelectorAll('[data-scene-detail]'));
-    function select(index) {
-      buttons.forEach(function (button, i) { button.setAttribute('aria-pressed', String(i === index)); });
+    var status = group.querySelector('[data-scene-status]');
+    var tour = group.closest('[data-product-tour]');
+    function select(index, announce) {
+      buttons.forEach(function (button, i) {
+        button.setAttribute('aria-pressed', String(i === index));
+        var state = button.querySelector('[data-product-state]');
+        if (state) { state.textContent = i === index ? button.dataset.selectedLabel : button.dataset.viewLabel; state.hidden = false; }
+      });
       details.forEach(function (detail, i) { detail.hidden = i !== index; });
-      var visual = group.closest('.showcase-visual');
+      if (group.dataset.sceneKind === '0') {
+        tour.querySelectorAll('[data-studio-product]').forEach(function (listing, i) { listing.hidden = i !== index; });
+      }
       var prompt = visual.querySelector('.tour-message-user');
       var answer = visual.querySelector('.tour-message-answer p');
+      if (announce) {
+        var selectedDetail = group.dataset.sceneKind === '1' && index === 0 ? details[index].querySelector('[data-studio-product]:not([hidden])') : details[index];
+        var title = selectedDetail.querySelector('.selected-product strong, .sample-order-head strong, strong');
+        var value = selectedDetail.querySelector('.demo-product-price, .sample-order-head .pill');
+        var example = group.dataset.sceneKind === '2' ? details[index].querySelector('p') : null;
+        status.textContent = group.dataset.selectedLabel + ': ' + (title ? title.textContent : '') + (value ? ' · ' + value.textContent : '') + (example ? ' · ' + example.textContent : '');
+      }
       if (prompt && answer) {
         prompt.textContent = details[index].querySelector('strong').textContent;
         answer.textContent = details[index].querySelector('p').textContent;
       }
     }
-    buttons.forEach(function (button, index) { button.addEventListener('click', function () { select(index); }); });
-    select(0); controls.hidden = false;
+    buttons.forEach(function (button, index) {
+      button.addEventListener('click', function () { select(index, true); });
+      button.disabled = false;
+    });
+    select(0);
+    group.querySelectorAll('[data-view-studio]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        tour.querySelector('[data-tour-tab="1"]').click();
+        var productScene = tour.querySelector('[data-scene-kind="1"] [data-scene-button="0"]');
+        productScene.click();
+        productScene.focus();
+      });
+      link.hidden = false;
+    });
+    if (controls) controls.hidden = false;
+    var productHint = visual.querySelector('[data-product-hint]');
+    if (productHint) productHint.hidden = false;
   });
   document.querySelectorAll('details.panel').forEach(function (panel) {
     panel.addEventListener('toggle', function () {
