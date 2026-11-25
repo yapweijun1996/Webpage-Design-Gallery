@@ -12,6 +12,8 @@ The V7 visual primitives are maintained in `design-system/pomelo-v7-tokens.json`
 
 The `release.json` version must match the generated HTML version. The update control checks the V7 release and, when controlled by the Gallery worker, checks the waiting parent worker against the published Gallery identity before activation. The result after reload verifies version, boot, app and stylesheet readiness; it does not claim a complete security or asset-integrity audit. The V7 edition has no standalone worker.
 
+The Commerce page has an illustrative three-tab concept preview; it uses fictional content and makes no shop or AI requests. Without JavaScript all three examples remain visible.
+
 The contact form is an interactive sample only. Its browser-side submit handler displays an explicit notice that no enquiry was sent; it does not transmit or store input. Without JavaScript the fields remain disabled. WhatsApp opens the confirmed number. Fictional interfaces are labeled as illustrations. AI website design, self-registration and self-guided demos are future features, not live product claims.
 
 Focused browser checks:

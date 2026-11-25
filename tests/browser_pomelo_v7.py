@@ -35,7 +35,7 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name, page.evaluate('document.documentElement.scrollWidth'))
                         assert page.locator('main').inner_text().strip(), (width, locale, name)
-                        assert page.locator('[data-update] .version').inner_text() == '7.1.0'
+                        assert page.locator('[data-update] .version').inner_text() == '7.2.0'
                         if name == 'contact':
                             assert page.locator('form input').first.is_enabled()
                             assert page.locator('a[href="https://wa.me/601139023123"]').count() >= 1
@@ -55,6 +55,7 @@ def main():
                 page.wait_for_url('**/v7/index.html')
                 if width in (1440, 768, 390):
                     page.goto(base + 'index.html', wait_until='load')
+                    page.locator('.loader').wait_for(state='hidden')
                     page.screenshot(path=str(DEMO / 'screenshots' / f'{width}.png'))
                 context.close()
             context = browser.new_context(viewport={'width':390,'height':844}, reduced_motion='reduce')
@@ -66,6 +67,17 @@ def main():
             page.locator('.service-preview-row').first.click()
             assert page.url.endswith('#service-offerings')
             page.goto(base + 'commerce.html')
+            tablist = page.locator('[data-tour-tabs]')
+            assert tablist.is_visible() and tablist.get_attribute('aria-orientation') == 'horizontal'
+            assert page.locator('[data-tour-panel="0"]').is_visible()
+            assert page.locator('[data-tour-panel="1"]').is_hidden()
+            page.locator('[data-tour-tab="1"]').click()
+            assert page.locator('[data-tour-panel="1"]').is_visible()
+            assert page.locator('[data-tour-tab="1"]').get_attribute('aria-selected') == 'true'
+            page.locator('[data-tour-tab="1"]').press('ArrowRight')
+            assert page.locator('[data-tour-panel="2"]').is_visible()
+            assert page.locator('[data-tour-tab="2"]').evaluate('(el) => document.activeElement === el')
+            assert 'No AI request is sent.' in page.locator('[data-tour-panel="2"]').inner_text()
             page.locator('[data-theme-toggle]').click()
             page.wait_for_function("document.documentElement.dataset.theme === 'dark'")
             assert page.locator('h1').is_visible()
@@ -81,10 +93,10 @@ def main():
             assert page.locator('form input[name="name"]').input_value() == 'Sample name'
             assert not posted, posted
             page.goto(base + 'contact.html')
-            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.1.1"}'))
+            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.2.1"}'))
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.1.1' in page.locator('[data-status]').inner_text()
+            assert '7.2.1' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
             page.wait_for_load_state('load')
             page.wait_for_function("document.querySelector('[data-status]').textContent.includes('could not be verified')")
@@ -99,11 +111,14 @@ def main():
             static = nojs.new_page()
             static.goto(base + 'commerce.html')
             assert static.locator('h1').is_visible() and static.get_by_role('link', name='Contact Us').first.is_visible()
+            assert static.locator('[data-tour-tabs]').is_hidden()
+            assert static.locator('[data-tour-panel]').count() == 3
+            assert all(panel.is_visible() for panel in static.locator('[data-tour-panel]').all())
             static.goto(base + 'contact.html')
             assert static.locator('form input').first.is_disabled()
             nojs.close()
             browser.close()
-        print('PASS: 90 page/viewport checks, themes, locale navigation, sample contact form and update detection')
+        print('PASS: 90 page/viewport checks, themes, locale navigation, sample contact form, product concept tabs and update detection')
     finally:
         server.shutdown()
 

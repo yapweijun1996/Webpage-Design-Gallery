@@ -27,6 +27,31 @@
     });
     fields.disabled = false;
   });
+  document.querySelectorAll('[data-product-tour]').forEach(function (tour) {
+    var tablist = tour.querySelector('[data-tour-tabs]');
+    var tabs = Array.from(tour.querySelectorAll('[data-tour-tab]'));
+    var panels = Array.from(tour.querySelectorAll('[data-tour-panel]'));
+    function show(index, focus) {
+      tabs.forEach(function (tab, i) { tab.setAttribute('aria-selected', String(i === index)); tab.tabIndex = i === index ? 0 : -1; });
+      panels.forEach(function (panel, i) { panel.hidden = i !== index; });
+      if (focus) tabs[index].focus();
+    }
+    tabs.forEach(function (tab, index) {
+      tab.addEventListener('click', function () { show(index, false); });
+      tab.addEventListener('keydown', function (event) {
+        var next = index;
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index + tabs.length - 1) % tabs.length;
+        else if (event.key === 'Home') next = 0;
+        else if (event.key === 'End') next = tabs.length - 1;
+        else return;
+        event.preventDefault(); show(next, true);
+      });
+    });
+    function syncOrientation() { tablist.setAttribute('aria-orientation', matchMedia('(max-width: 900px)').matches ? 'horizontal' : 'vertical'); }
+    syncOrientation(); window.addEventListener('resize', syncOrientation);
+    show(0, false); tour.classList.add('tour-enabled'); tablist.hidden = false;
+  });
   document.querySelectorAll('details.panel').forEach(function (panel) {
     panel.addEventListener('toggle', function () {
       if (panel.open) document.querySelectorAll('details.panel[open]').forEach(function (other) { if (other !== panel) other.open = false; });
