@@ -7,8 +7,67 @@ const dialog = document.querySelector("#stop-dialog");
 const weather = document.querySelector("#weather");
 const sections = [...document.querySelectorAll(".stop-details .detail")];
 const vendingSection = document.querySelector("#vending");
+const lightingStorageKey = "gjh-mini-street-lighting";
+const lightingButtons = [...toolbar.querySelectorAll("[data-light]")];
+const stylesheet = document.createElement("link");
+stylesheet.rel = "stylesheet";
+stylesheet.href = new URL("./mini-scene-ux.css", import.meta.url).href;
+document.head.append(stylesheet);
+
+const cameraGroup = toolbar.querySelector(".camera-buttons");
+const cameraLabel = document.createElement("span");
+cameraLabel.className = "scene-camera-label";
+cameraLabel.textContent = "Camera";
+cameraGroup.before(cameraLabel);
+for (const button of cameraGroup.querySelectorAll("button")) {
+  button.title = button.getAttribute("aria-label");
+}
+
+const cameraHelp = document.createElement("details");
+cameraHelp.className = "scene-camera-help";
+const helpSummary = document.createElement("summary");
+helpSummary.textContent = "Camera help";
+cameraHelp.append(helpSummary);
+const helpContent = document.createElement("div");
+for (const instruction of [
+  "Mouse: drag to look around. Hold Shift and scroll to zoom.",
+  "Touch: drag to look around. Pinch to zoom.",
+  "Keyboard: focus the street view, then use the arrow keys to look, + or − to zoom, and Home to reset.",
+]) {
+  const paragraph = document.createElement("p");
+  paragraph.textContent = instruction;
+  helpContent.append(paragraph);
+}
+cameraHelp.append(helpContent);
+cameraGroup.after(cameraHelp);
+cameraHelp.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !cameraHelp.open) return;
+  event.preventDefault();
+  cameraHelp.open = false;
+  helpSummary.focus();
+});
+
 let vending;
 let vendingOpen = false;
+let directShopLink;
+
+function readSceneLighting() {
+  try {
+    return localStorage.getItem(lightingStorageKey) === "day" ? "day" : "night";
+  } catch {
+    return "night";
+  }
+}
+
+function applySceneLighting(mode) {
+  const night = mode === "night";
+  street.setNight(night);
+  weather.textContent = night ? "Rainy evening" : "After the rain";
+  stage.dataset.sceneLighting = mode;
+  for (const button of lightingButtons) {
+    button.setAttribute("aria-pressed", String(button.dataset.light === mode));
+  }
+}
 
 function setVendingOpen(open) {
   vendingOpen = open;
@@ -60,7 +119,10 @@ async function enterShop() {
       });
       await shopLoading;
     }
-    if (!shopUnavailable && decodedHash() === "#shop-interior") shopExperience.enter();
+    if (!shopUnavailable && decodedHash() === "#shop-interior") {
+      cameraHelp.open = false;
+      shopExperience.enter();
+    }
   } catch (error) {
     if (shopUnavailable || decodedHash() !== "#shop-interior") return;
     console.error("Could not enter the 3D shop", error);
@@ -76,7 +138,16 @@ if (typeof dialog.showModal === "function") {
   let deferredStop;
   let previousFocus;
   let activeSection;
+  let directOpener;
   dialog.append(...sections);
+
+  directShopLink = document.createElement("a");
+  directShopLink.className = "scene-shop-entry";
+  directShopLink.href = "#shop-interior";
+  directShopLink.textContent = "Enter New Moon Shop";
+  directShopLink.hidden = true;
+  stage.querySelector(".intro").append(directShopLink);
+
   const enter = document.createElement("button");
   enter.type = "button";
   enter.hidden = !street;
@@ -122,10 +193,13 @@ if (typeof dialog.showModal === "function") {
     }
     shopExperience?.exit();
     const selected = sectionsByHash.get(hash);
+    const returnToEntry = directOpener;
+    directOpener = undefined;
     const opener = pendingOpener || stops.find((stop) => stop.hash === hash);
     pendingOpener = null;
     if (!selected) {
       closeStop(false);
+      if (returnToEntry && !returnToEntry.hidden) returnToEntry.focus({preventScroll: true});
       return;
     }
     if (dialog.open && activeSection === selected) return;
@@ -147,7 +221,8 @@ if (typeof dialog.showModal === "function") {
       await street.focusShop();
       if (request !== routeRequest) return;
     }
-    pendingOpener = stop;
+    if (stop === directShopLink) directOpener = stop;
+    else pendingOpener = stop;
     if (decodedHash() !== stop.hash) {
       const previousState = history.state;
       const state = previousState && typeof previousState === "object" && !Array.isArray(previousState)
@@ -158,7 +233,8 @@ if (typeof dialog.showModal === "function") {
     syncLocation();
   }
 
-  for (const stop of stops.filter((link) => sectionsByHash.has(link.hash))) {
+  const routedStops = stops.filter((link) => sectionsByHash.has(link.hash));
+  for (const stop of [...routedStops, directShopLink]) {
     stop.addEventListener("click", (event) => {
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
@@ -240,6 +316,7 @@ function showShopFallback() {
   shopExperience?.exit();
   const enterButton = document.querySelector("#shop .enter-shop");
   if (enterButton) enterButton.hidden = true;
+  if (directShopLink) directShopLink.hidden = true;
   if (decodedHash() === "#shop-interior") redirectToShopDisplay();
   enableFallbackShopping();
 }
@@ -261,20 +338,23 @@ async function start() {
       fail: showFallback,
       startPaused: dialog.open || vendingOpen,
     });
+    applySceneLighting(readSceneLighting());
     stage.dataset.webgl = "";
     toolbar.hidden = false;
+    if (directShopLink) directShopLink.hidden = false;
     const enterShopButton = document.querySelector(".enter-shop");
     if (enterShopButton) enterShopButton.hidden = false;
     syncRoute();
     status.textContent = "3D street ready. Drag the street or use the camera controls.";
 
-    for (const button of toolbar.querySelectorAll("[data-light]")) {
+    for (const button of lightingButtons) {
       button.addEventListener("click", () => {
-        const night = button.dataset.light === "night";
-        street.setNight(night);
-        weather.textContent = night ? "Rainy evening" : "After the rain";
-        for (const option of toolbar.querySelectorAll("[data-light]")) {
-          option.setAttribute("aria-pressed", String(option === button));
+        const mode = button.dataset.light;
+        applySceneLighting(mode);
+        try {
+          localStorage.setItem(lightingStorageKey, mode);
+        } catch {
+          // Lighting still changes when the browser blocks storage.
         }
       });
     }
