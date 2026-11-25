@@ -177,7 +177,7 @@ html[data-site-theme="light"] .mini-theme-moon { display: none; }
   html[data-site-theme-ready] :is(.masthead, .mini-icon-button, .mini-nav a, .camera-buttons, .lighting, .stop-details .detail, dialog, .pack-list li, .vending-viewer, .vending-sound) {
     transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
   }
-  #mini-update:is([data-state="checking"], [data-state="applying"]) [data-update-icon] {
+  #mini-update:is([data-state="checking"], [data-state="applying"]) svg {
     animation: mini-update-spin 850ms linear infinite;
   }
   @keyframes mini-update-spin { to { transform: rotate(360deg); } }
