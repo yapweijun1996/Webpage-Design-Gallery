@@ -101,6 +101,19 @@
     var productHint = visual.querySelector('[data-product-hint]');
     if (productHint) productHint.hidden = false;
   });
+  document.querySelectorAll('[data-pickup-example]').forEach(function (example) {
+    var checks = Array.from(example.querySelectorAll('[data-prep-check]'));
+    var statuses = example.querySelectorAll('[data-pickup-status]');
+    var announcement = example.querySelector('[data-pickup-announcement]');
+    checks.forEach(function (check) {
+      check.disabled = false;
+      check.addEventListener('change', function () {
+        var status = checks.every(function (item) { return item.checked; }) ? example.dataset.ready : example.dataset.preparing;
+        statuses.forEach(function (label) { label.textContent = status; });
+        announcement.textContent = status;
+      });
+    });
+  });
   document.querySelectorAll('details.panel').forEach(function (panel) {
     panel.addEventListener('toggle', function () {
       if (panel.open) document.querySelectorAll('details.panel[open]').forEach(function (other) { if (other !== panel) other.open = false; });

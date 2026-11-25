@@ -35,7 +35,7 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name, page.evaluate('document.documentElement.scrollWidth'))
                         assert page.locator('main').inner_text().strip(), (width, locale, name)
-                        assert page.locator('[data-update] .version').inner_text() == '7.9.0'
+                        assert page.locator('[data-update] .version').inner_text() == '7.12.0'
                         if width <= 700:
                             for control in page.locator('.controls .control, .controls summary').all():
                                 if control.is_visible():
@@ -44,8 +44,9 @@ def main():
                         if name == 'index':
                             assert page.locator('.hero-photo').get_attribute('src').endswith('merchant.webp')
                             assert page.locator('.hero-copy .eyebrow img').get_attribute('src').endswith('pomelo-compact.svg')
-                            story_image = page.locator('.story-image img')
+                            story_image = page.locator('.story-editorial-images img').first
                             assert story_image.get_attribute('src').endswith('ceramic-study.webp')
+                            assert page.locator('.story-editorial-images img').count() == 2
                             assert page.locator('.merchant-story .story-step').count() == 3
                             assert page.locator('.home-services .card').count() == 3
                             if width <= 700:
@@ -53,9 +54,12 @@ def main():
                                 for link in page.locator('.home-services .text-link').all():
                                     assert link.bounding_box()['height'] >= 44
                             story_image.scroll_into_view_if_needed()
-                            page.wait_for_function("document.querySelector('.story-image img').naturalWidth > 0")
+                            page.wait_for_function("[...document.querySelectorAll('.story-editorial-images img')].every((img) => img.naturalWidth > 0)")
                         if name == 'commerce':
                             assert page.locator('.tour-products .object-basket').count() == 1
+                            for view in page.locator('[data-order-view]').all():
+                                assert view.is_visible() and 'PS-0125' in view.inner_text()
+                                assert 'RM 96.00' in view.inner_text()
                             shop_image = page.locator('.tour-shop-hero img')
                             shop_image.scroll_into_view_if_needed()
                             page.wait_for_function("document.querySelector('.tour-shop-hero img').naturalWidth > 0")
@@ -119,6 +123,32 @@ def main():
                     assert detail.locator('.sample-order-progress [aria-current=step]').inner_text() == status
                     assert status in page.locator('[data-scene-kind="1"] [data-scene-status]').text_content()
                     assert all(value in detail.inner_text() for value in ('#PS-0124', 'PH-001', 'RM 79.80', 'RM 8.00', 'RM 87.80'))
+                    handoff = detail.locator('.sample-handoff')
+                    handoff.locator('summary').focus()
+                    page.keyboard.press('Enter')
+                    assert handoff.get_attribute('open') is not None
+                    assert 'PH-001' in handoff.inner_text()
+                    page.keyboard.press('Space')
+                    assert handoff.get_attribute('open') is None
+                pickup = page.locator('[data-pickup-example]')
+                checks = pickup.locator('[data-prep-check]')
+                preparing = pickup.get_attribute('data-preparing')
+                ready = pickup.get_attribute('data-ready')
+                checks.nth(0).focus()
+                page.keyboard.press('Space')
+                assert pickup.locator('[data-pickup-status]').all_inner_texts() == [preparing, preparing]
+                checks.nth(1).focus()
+                page.keyboard.press('Space')
+                assert pickup.locator('[data-pickup-status]').all_inner_texts() == [ready, ready]
+                assert pickup.locator('[data-pickup-announcement]').text_content() == ready
+                page.keyboard.press('Space')
+                assert pickup.locator('[data-pickup-status]').all_inner_texts() == [preparing, preparing]
+                page.locator('[data-theme-toggle]').click()
+                assert page.locator('html').get_attribute('data-theme') == 'dark'
+                handoff.locator('summary').press('Enter')
+                assert handoff.get_attribute('open') is not None and 'PH-001' in handoff.inner_text()
+                handoff.locator('summary').press('Enter')
+                page.locator('[data-theme-toggle]').click()
                 page.locator('[data-tour-tab="2"]').click()
                 page.locator('[data-scene-kind="2"] [data-scene-button]').nth(2).click()
                 assert ai_answer in page.locator('.tour-message-answer').inner_text()
@@ -199,6 +229,10 @@ def main():
             assert page.locator('[data-scene-kind="0"] [data-scene-detail="1"]').is_visible()
             page.locator('[data-scene-kind="0"] [data-view-studio="1"]').click()
             assert page.locator('[data-studio-product="1"]').is_visible()
+            page.locator('[data-scene-kind="1"] [data-scene-button="2"]').click()
+            dark_handoff = page.locator('[data-scene-kind="1"] [data-scene-detail="2"] .sample-handoff')
+            dark_handoff.locator('summary').press('Enter')
+            assert dark_handoff.get_attribute('open') is not None and 'PH-001' in dark_handoff.inner_text()
             context.close()
             context = browser.new_context(viewport={'width':1440,'height':900})
             page = context.new_page()
@@ -211,10 +245,10 @@ def main():
             assert page.locator('form input[name="name"]').input_value() == 'Sample name'
             assert not posted, posted
             page.goto(base + 'contact.html')
-            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.9.1"}'))
+            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.12.1"}'))
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.9.1' in page.locator('[data-status]').inner_text()
+            assert '7.12.1' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
             page.wait_for_load_state('load')
             page.wait_for_function("document.querySelector('[data-status]').textContent.includes('could not be verified')")
@@ -241,7 +275,13 @@ def main():
                 assert all(detail.is_visible() for detail in static.locator('[data-scene-detail]').all())
                 assert all(detail.get_attribute('open') is not None for detail in static.locator('.sample-product-details').all())
                 assert all(listing.is_visible() for listing in static.locator('[data-studio-product]').all())
+                for handoff in static.locator('.sample-handoff').all():
+                    handoff.locator('summary').focus()
+                    static.keyboard.press('Enter')
+                    assert handoff.get_attribute('open') is not None and 'PH-001' in handoff.inner_text()
                 assert all(action.is_hidden() for action in static.locator('[data-view-studio]').all())
+                assert all(check.is_disabled() for check in static.locator('[data-prep-check]').all())
+                assert static.locator('[data-order-view=customer]').is_visible() and static.locator('[data-order-view=seller]').is_visible()
             static.goto(base + 'contact.html')
             assert static.locator('form input').first.is_disabled()
             nojs.close()
