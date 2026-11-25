@@ -170,6 +170,12 @@ html[data-gjh-design="mini-street"] {
   --basket-font-size-4: .9rem;
   --shop-experience-z-index-1: 5;
   --shop-experience-z-index-2: 3;
+  --shop-masthead-compact-height: calc(53px + env(safe-area-inset-top, 0px));
+  --shop-stage-z-index: 1;
+  --shop-stage-radius: 0;
+  --shop-inset-compact: 6px;
+  --shop-reticle-color: white;
+  --shop-reticle-shadow: 0 0 2px black;
   --shop-interior-z-index-1: 3;
   --shop-interior-color-1: #fff2d9;
   --shop-interior-font-1: 600 0.875rem/1.35 system-ui, sans-serif;

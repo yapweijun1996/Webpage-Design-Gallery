@@ -110,7 +110,7 @@
 @media (max-width: 720px), (max-height: 480px) {
   html:has(.stage[data-interior]) {
     overflow: hidden;
-    --shop-masthead-height: calc(53px + env(safe-area-inset-top, 0px));
+    --shop-masthead-height: var(--shop-masthead-compact-height);
   }
 
   body:has(.stage[data-interior]) .masthead {
@@ -132,11 +132,11 @@
 
   .street .stage[data-interior] {
     position: fixed;
-    z-index: 1;
+    z-index: var(--shop-stage-z-index);
     inset: var(--shop-masthead-height) 0 0;
     height: auto;
     min-height: 0;
     border: 0;
-    border-radius: 0;
+    border-radius: var(--shop-stage-radius);
   }
 }
