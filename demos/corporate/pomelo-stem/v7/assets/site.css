@@ -4,3 +4,5 @@
 .split>*{min-width:0}.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-cell{overflow-wrap:anywhere}.dashboard-title{flex-wrap:wrap}@media(max-width:350px){.header .brand span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.hero-grid{grid-template-columns:minmax(0,1fr)}}
 
 [hidden]{display:none!important}
+@media(prefers-reduced-motion:no-preference){.controls .panel[open] summary svg{animation:pomelo-icon-open .35s ease}.control:active svg{transform:rotate(35deg)}.control svg{transition:transform .2s ease}@keyframes pomelo-icon-open{to{transform:rotate(180deg)}}}
+@media(prefers-reduced-motion:no-preference){.controls .panel.checking[open] summary svg{animation:pomelo-spin 1s linear infinite}}
