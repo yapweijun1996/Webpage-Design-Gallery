@@ -9,7 +9,7 @@
 }
 
 .stage #street-title {
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-size: var(--type-scene-heading);
   line-height: 1.1;
   letter-spacing: -.04em;
   color: inherit;
@@ -18,7 +18,7 @@
 .stage #weather {
   grid-column: 1;
   margin: 5px 0 0;
-  font-size: 0.7rem;
+  font-size: var(--type-scene-eyebrow);
   letter-spacing: .09em;
 }
 
@@ -131,7 +131,7 @@
   .scene-shop-entry {
     max-width: min(44vw, 12rem);
     padding-inline: 6px;
-    font-size: 0.88rem;
+    font-size: var(--type-scene-mobile-label);
   }
 
   .stage[data-webgl] .stop {

@@ -294,7 +294,7 @@ export function createShopInterior({
     on(window, "keydown", (event) => {
       if (paused || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
       if (document.querySelector("dialog[open]") ||
-        event.target?.closest?.("input, select, textarea, [contenteditable]")) return;
+        event.target?.closest?.(".masthead, input, select, textarea, [contenteditable]")) return;
       const code = event.code;
       if (movementKeys.has(code)) {
         event.preventDefault();
@@ -311,6 +311,11 @@ export function createShopInterior({
     });
     on(window, "keyup", (event) => keys.delete(event.code));
     on(window, "blur", resetInput);
+    on(document, "focusin", (event) => {
+      if (!event.target?.closest?.(".masthead")) return;
+      resetInput();
+      unlock();
+    });
     on(document, "visibilitychange", () => {
       if (document.hidden) resetInput();
     });

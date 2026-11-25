@@ -45,6 +45,23 @@ def run():
             page.wait_for_selector(".shop-interior-controls")
             inspect = page.locator(".shop-interior-inspect")
             assert not inspect.is_enabled(), "The product should be out of reach at the entrance"
+            theme = page.locator("#mini-theme")
+            theme.focus()
+            assert theme.evaluate("button => document.activeElement === button")
+            camera = "window.__miniStreetSmokeCamera"
+            before = page.evaluate(f"{camera}.position.toArray()")
+            for key in ("w", "ArrowUp"):
+                page.keyboard.down(key)
+                page.evaluate("""async () => {
+                  for (let frame = 0; frame < 3; frame++) {
+                    await new Promise(requestAnimationFrame);
+                  }
+                }""")
+                page.keyboard.up(key)
+            assert page.evaluate(f"{camera}.position.toArray()") == before, "Topbar focus should block shop movement"
+            page.keyboard.press("Escape")
+            assert page.url.endswith("#shop-interior"), "Topbar Escape should not leave the shop"
+            page.locator(".shop-interior-controls").focus()
             # Wait for actual rendered movement, not a fixed wall-clock duration:
             # software rendering can run slowly while other browser tests execute.
             page.keyboard.down("w")
