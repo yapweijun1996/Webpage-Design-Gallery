@@ -334,9 +334,11 @@ class GalleryTests(unittest.TestCase):
                 "product-hand.js", "shop-product-catalog.js", "shop-product-ui.js", "shop-product-ui.css", "basket.js", "basket.css",
                 "assets/posable-right-hand.glb", "assets/posable-right-hand.LICENSE.md",
                 "assets/theme.css", "assets/thumbnail.webp", "assets/mini-street-anchor.webp",
-                "assets/new-moon-label-atlas.webp",
+                "assets/new-moon-label-atlas.webp", "assets/update.js", "release.json",
                 "screenshots/1440.png", "screenshots/768.png", "screenshots/390.png",
             )}
+            street_files.update(file.relative_to(ROOT / street) for file in (ROOT / street).iterdir()
+                                if file.is_file() and file.suffix in (".js", ".css"))
             self.assertEqual({file.relative_to(output / street) for file in (output / street).rglob("*")
                               if file.is_file()}, street_files)
             v11 = street.parent / "v11"
@@ -348,7 +350,14 @@ class GalleryTests(unittest.TestCase):
                 "assets/new-moon-nz-425g-front.webp", "assets/new-moon-au-425g-front.webp",
                 "assets/new-moon-sa-425g-front.webp", "assets/new-moon-mx-454g-front.webp",
             )}
-            for name in {street / file for file in street_files} | {v11 / file for file in street_dependencies}:
+            entry = Path("index.html")
+            manifest = Path("release.json")
+            app_version = json.loads((output / "version.json").read_text())["version"]
+            street_page, street_release = gallery.build_mini_street(catalog, app_version)
+            self.assertEqual((output / street / entry).read_text(), street_page)
+            self.assertEqual((output / street / manifest).read_text(), street_release)
+            files = {street / file for file in street_files - {entry, manifest}}
+            for name in files | {v11 / file for file in street_dependencies}:
                 self.assertEqual((output / name).read_bytes(), gallery.source_bytes(ROOT / name), name)
             worker = (output / "sw.js").read_text()
             entries = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", worker, re.S).group(1))
