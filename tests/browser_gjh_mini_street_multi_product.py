@@ -125,7 +125,6 @@ def check_shop(browser, url):
                   [LEGACY_KEY, legacy])
 
     page.locator('a[data-stop="shop"]').click()
-    page.get_by_role("button", name="Enter 3D shop", exact=True).click()
     expect(page.get_by_role("button", name="Walk closer and aim", exact=True)).to_be_disabled()
 
     basket = page.get_by_role("dialog", name="Virtual basket", exact=True)
@@ -355,7 +354,6 @@ def check_runtime_context_loss(browser, url):
                             reduced_motion="reduce")
     page.goto(url, wait_until="domcontentloaded")
     page.locator('a[data-stop="shop"]').click()
-    page.get_by_role("button", name="Enter 3D shop", exact=True).click()
     expect(basket_button(page, 0)).to_be_visible()
     page.evaluate("history.pushState(history.state, '', '#shop-interior')")
 

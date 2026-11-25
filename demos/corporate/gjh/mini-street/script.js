@@ -3,7 +3,10 @@ const canvas = document.querySelector("#view");
 const toolbar = document.querySelector("#toolbar");
 const status = document.querySelector("#scene-status");
 const stops = [...document.querySelectorAll("[data-stop]")];
+const shopStop = stops.find((stop) => stop.dataset.stop === "shop");
 const dialog = document.querySelector("#stop-dialog");
+const loadingDialog = document.querySelector("#shop-loading-dialog");
+const shopLoadFallback = document.querySelector("#shop-load-fallback");
 const weather = document.querySelector("#weather");
 const sections = [...document.querySelectorAll(".stop-details .detail")];
 const vendingSection = document.querySelector("#vending");
@@ -26,7 +29,7 @@ helpSummary.textContent = "Camera help";
 cameraHelp.append(helpSummary);
 const helpContent = document.createElement("div");
 for (const instruction of [
-  "Mouse: drag to look around. Hold Shift and scroll to zoom.",
+  "Mouse: drag to look around. Scroll over the street view to zoom.",
   "Touch: drag to look around. Pinch to zoom.",
   "Keyboard: focus the street view, then use the arrow keys to look, + or − to zoom, and Home to reset.",
 ]) {
@@ -86,44 +89,71 @@ import("./vending.js").then(({ setupVending }) => {
 
 let street;
 let shopExperience;
-let shopLoading;
+let shopModule;
+let shopEntry;
 let shopUnavailable = false;
 const historyMarker = "__gjhMiniStreetStop";
+const shopDisplayMarker = "__gjhMiniStreetShopDisplay";
 let syncRoute = () => {};
-let routeRequest = 0;
+let openCanvasShop = () => shopStop.click();
+
+function isShopLocation(hash = decodedHash()) {
+  return hash === "#shop-interior" || (hash === "#shop" && !history.state?.[shopDisplayMarker]);
+}
+
+function replaceShopLocation(hash, display = false) {
+  const url = new URL(location.href);
+  url.hash = hash;
+  const state = {...history.state};
+  if (display) state[shopDisplayMarker] = true;
+  else delete state[shopDisplayMarker];
+  history.replaceState(state, "", url);
+}
 
 function redirectToShopDisplay() {
-  const url = new URL(location.href);
-  url.hash = "shop";
-  const state = history.state;
-  const directState = state?.[historyMarker] ? {...state, [historyMarker]: false} : state;
-  history.replaceState(directState, "", url);
+  replaceShopLocation("shop", true);
   syncRoute();
 }
 
-async function enterShop() {
-  if (!street || shopUnavailable || decodedHash() !== "#shop-interior") return;
+function closeShopLoading() {
+  if (!loadingDialog.open) return;
+  loadingDialog.close();
+  street?.setPaused(false);
+}
+
+async function enterShop(entry, onExit) {
+  const isCurrent = () => entry === shopEntry && !entry.cancelled && !shopUnavailable && isShopLocation();
   try {
-    if (!shopExperience) {
-      shopLoading ||= import("./shop-experience.js").then(({createShopExperience}) => {
-        if (shopUnavailable) return;
-        shopExperience = createShopExperience({street, stage, toolbar, onExit: () => {
-          if (decodedHash() !== "#shop-interior") return;
-          if (history.state?.[historyMarker]) history.back();
-          else redirectToShopDisplay();
-        }});
-      });
-      await shopLoading;
-    }
-    if (!shopUnavailable && decodedHash() === "#shop-interior") {
-      cameraHelp.open = false;
-      shopExperience.enter();
-    }
+    // Give the browser a chance to paint the loading dialog before building the room.
+    const paint = new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const module = shopExperience ? null : shopModule ??= import("./shop-experience.js");
+    const [exports] = await Promise.all([module, paint]);
+    if (!isCurrent()) return;
+    shopExperience ??= exports.createShopExperience({street, stage, toolbar, onExit});
+    cameraHelp.open = false;
+    if (!shopExperience.enter()) throw new Error("The shop did not render an opening frame.");
+    if (!isCurrent()) return;
+    entry.ready = true;
+    loadingDialog.close();
+    if (decodedHash() === "#shop") replaceShopLocation("shop-interior");
+    stage.querySelector(".shop-interior-controls")?.focus({preventScroll: true});
   } catch (error) {
-    if (shopUnavailable || decodedHash() !== "#shop-interior") return;
+    if (!isCurrent()) return;
     console.error("Could not enter the 3D shop", error);
-    showShopFallback();
+    showShopFallback(true);
     status.textContent = "The 3D shop could not load. The product display remains available.";
+  }
+}
+
+function beginShopEntry(onExit) {
+  if (!shopEntry) {
+    shopEntry = {started: false, cancelled: false};
+    loadingDialog.showModal();
+    street?.setPaused(true);
+  }
+  if (street && !shopEntry.started) {
+    shopEntry.started = true;
+    enterShop(shopEntry, onExit);
   }
 }
 
@@ -134,7 +164,7 @@ if (typeof dialog.showModal === "function") {
   let deferredStop;
   let previousFocus;
   let activeSection;
-  let directOpener;
+  let shopOpener;
   dialog.append(...sections);
 
   directShopLink = document.createElement("a");
@@ -144,18 +174,33 @@ if (typeof dialog.showModal === "function") {
   directShopLink.hidden = true;
   stage.querySelector(".intro").append(directShopLink);
 
-  const enter = document.createElement("button");
-  enter.type = "button";
-  enter.hidden = !street;
-  enter.className = "enter-shop";
-  enter.textContent = "Enter 3D shop";
-  enter.addEventListener("click", () => {
-    if (!street || shopUnavailable) return;
-    routeRequest++;
-    history.pushState({...history.state, [historyMarker]: true}, "", "#shop-interior");
-    syncLocation();
+  shopLoadFallback.querySelector("button").addEventListener("click", () => {
+    // Reload the module graph since browsers may retain a failed dynamic import.
+    replaceShopLocation("shop-interior");
+    location.reload();
   });
-  sectionsByHash.get("#shop").querySelector("p").after(enter);
+
+  function leaveShop(useDisplay) {
+    if (!shopEntry || shopEntry.cancelled || !isShopLocation()) return;
+    shopEntry.cancelled = true;
+    if (history.state?.[historyMarker]) {
+      closingWithBack = true;
+      history.back();
+    } else if (useDisplay) {
+      redirectToShopDisplay();
+    } else {
+      replaceShopLocation("");
+      syncLocation();
+    }
+  }
+
+  function cancelShopEntry(event) {
+    event.preventDefault();
+    leaveShop(false);
+  }
+
+  loadingDialog.addEventListener("cancel", cancelShopEntry);
+  loadingDialog.querySelector("form").addEventListener("submit", cancelShopEntry);
 
   function closeStop(updateLocation) {
     if (!activeSection) return;
@@ -179,20 +224,28 @@ if (typeof dialog.showModal === "function") {
 
   function syncLocation() {
     const hash = decodedHash();
-    if (hash === "#shop-interior") {
-      directOpener = history.state?.[historyMarker] === "direct" ? directShopLink : undefined;
-      if (shopUnavailable) redirectToShopDisplay();
-      else {
-        closeStop(false);
-        enterShop();
-      }
+    if (isShopLocation(hash) && !shopUnavailable) {
+      closeStop(false);
+      const entryType = history.state?.[historyMarker];
+      const routeOpener = entryType === "direct" ? directShopLink : entryType === "shop-canvas" ? canvas : shopStop;
+      shopOpener ??= pendingOpener || routeOpener;
+      pendingOpener = null;
+      if (shopEntry?.ready && hash === "#shop") replaceShopLocation("shop-interior");
+      beginShopEntry(() => leaveShop(true));
       return;
     }
+    if (hash === "#shop-interior") {
+      redirectToShopDisplay();
+      return;
+    }
+    shopEntry = undefined;
+    closeShopLoading();
     shopExperience?.exit();
     const selected = sectionsByHash.get(hash);
-    const returnToEntry = directOpener;
-    directOpener = undefined;
-    const opener = pendingOpener || stops.find((stop) => stop.hash === hash);
+    const returnToEntry = shopOpener;
+    shopOpener = undefined;
+    const opener = pendingOpener || (selected?.id === "shop" && returnToEntry) ||
+      stops.find((stop) => stop.hash === hash);
     pendingOpener = null;
     if (!selected) {
       closeStop(false);
@@ -212,21 +265,23 @@ if (typeof dialog.showModal === "function") {
     selected.querySelector("h2").focus();
   }
 
-  async function openStop(stop) {
-    const request = ++routeRequest;
-    if (stop.dataset.stop === "shop" && street && !dialog.open) {
-      await street.focusShop();
-      if (request !== routeRequest) return;
-    }
-    if (stop !== directShopLink) pendingOpener = stop;
+  function openStop(stop, opener) {
+    pendingOpener = opener;
     if (decodedHash() !== stop.hash) {
       const previousState = history.state;
       const state = previousState && typeof previousState === "object" && !Array.isArray(previousState)
         ? {...previousState} : {};
-      state[historyMarker] = stop === directShopLink ? "direct" : true;
+      delete state[shopDisplayMarker];
+      state[historyMarker] = stop === directShopLink ? "direct" : opener === canvas ? "shop-canvas" : true;
       history.pushState(state, "", stop.hash);
     }
     syncLocation();
+  }
+
+  function requestStop(stop, opener = stop) {
+    // A close-triggered Back can still be pending when the user opens another stop.
+    if (closingWithBack) deferredStop = {stop, opener};
+    else openStop(stop, opener);
   }
 
   const routedStops = stops.filter((link) => sectionsByHash.has(link.hash));
@@ -234,17 +289,16 @@ if (typeof dialog.showModal === "function") {
     stop.addEventListener("click", (event) => {
       if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      // A close-triggered Back can still be pending when the user opens another stop.
-      if (closingWithBack) deferredStop = stop;
-      else openStop(stop);
+      requestStop(stop);
     });
   }
+  openCanvasShop = () => requestStop(shopStop, canvas);
+
   window.addEventListener("hashchange", () => {
-    routeRequest++;
     closingWithBack = false;
-    const stop = deferredStop;
+    const request = deferredStop;
     deferredStop = undefined;
-    if (stop) openStop(stop);
+    if (request) openStop(request.stop, request.opener);
     else syncLocation();
   });
   dialog.addEventListener("close", () => {
@@ -261,7 +315,9 @@ if (typeof dialog.showModal === "function") {
   syncLocation();
   if (document.readyState !== "complete") {
     window.addEventListener("load", () => requestAnimationFrame(() => {
-      if (dialog.open && !dialog.contains(document.activeElement)) {
+      if (loadingDialog.open && !loadingDialog.contains(document.activeElement)) {
+        loadingDialog.querySelector("button").focus({preventScroll: true});
+      } else if (dialog.open && !dialog.contains(document.activeElement)) {
         dialog.querySelector(".detail:not([hidden]) h2")?.focus();
       }
     }), {once: true});
@@ -307,13 +363,13 @@ function enableFallbackShopping() {
   return fallbackShopping;
 }
 
-function showShopFallback() {
+function showShopFallback(canRetry = false) {
   shopUnavailable = true;
   shopExperience?.exit();
-  const enterButton = document.querySelector("#shop .enter-shop");
-  if (enterButton) enterButton.hidden = true;
+  shopLoadFallback.hidden = !canRetry;
   if (directShopLink) directShopLink.hidden = true;
   if (decodedHash() === "#shop-interior") redirectToShopDisplay();
+  else syncRoute();
   enableFallbackShopping();
 }
 
@@ -330,16 +386,17 @@ async function start() {
     street = createStreet({
       canvas,
       stops,
-      activate: (name) => stops.find((stop) => stop.dataset.stop === name)?.click(),
+      activate: (name) => {
+        if (name === "shop") openCanvasShop();
+        else stops.find((stop) => stop.dataset.stop === name)?.click();
+      },
       fail: showFallback,
-      startPaused: dialog.open || vendingOpen,
+      startPaused: dialog.open || loadingDialog.open || vendingOpen,
     });
     applySceneLighting(readSceneLighting());
     stage.dataset.webgl = "";
     toolbar.hidden = false;
     if (directShopLink) directShopLink.hidden = false;
-    const enterShopButton = document.querySelector(".enter-shop");
-    if (enterShopButton) enterShopButton.hidden = false;
     syncRoute();
     status.textContent = "3D street ready. Drag the street or use the camera controls.";
 

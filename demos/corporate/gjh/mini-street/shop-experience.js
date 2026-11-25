@@ -18,8 +18,6 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
   const basketHost = document.createElement("div");
   basketHost.className = "shop-experience-basket";
   root.append(controls, basketHost);
-  stage.append(root);
-  const basket = createShopBasket({host: basketHost});
   let active = false;
   let frame = 0;
   let lastTime = 0;
@@ -155,6 +153,8 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     },
     onInvalidate: () => {},
   });
+  const basket = createShopBasket({host: basketHost});
+  stage.append(root);
 
   function render(now) {
     if (!active) return;
@@ -178,7 +178,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
 
   return {
     enter() {
-      if (active || disposed) return;
+      if (active || disposed) return false;
       exteriorView = street.getCameraState();
       street.setInteractive(false);
       street.setPaused(true);
@@ -189,8 +189,11 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
       indoor.enter();
       inputPaused = false;
       resize();
+      // Draw a usable shop frame before the loading modal leaves the top layer.
+      if (!indoor.render()) return false;
       lastTime = 0;
       frame = requestAnimationFrame(render);
+      return true;
     },
     exit() {
       if (!active) return;

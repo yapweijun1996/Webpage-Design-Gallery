@@ -433,10 +433,13 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
   }
 
   canvas.addEventListener("wheel", (event) => {
-    if (!interactive || paused || lost || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+    if (!interactive || paused || lost || event.ctrlKey || event.metaKey || event.altKey) return;
+    const mode = event.deltaMode;
+    const horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY);
+    const signaledDelta = horizontal ? (event.shiftKey ? event.deltaX : 0) : event.deltaY;
+    if (!signaledDelta) return;
     event.preventDefault();
-    const signaledDelta = Math.abs(event.deltaY) > Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? height : 1;
+    const unit = mode === 1 ? 16 : mode === 2 ? height : 1;
     const delta = THREE.MathUtils.clamp(signaledDelta * unit, -220, 220);
     zoomBy(Math.exp(-delta * 0.002));
   }, { passive: false });
@@ -480,7 +483,6 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
     canvas,
     renderer,
     focusStop,
-    focusShop: () => focusStop("shop"),
     getCameraState: () => ({ ...view }),
     restoreCameraState: (state, { animate = false } = {}) => setView(state, animate),
     setInteractive(value) {

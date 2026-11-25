@@ -114,7 +114,7 @@
 
       <div class="toolbar" id="toolbar" hidden>
         <div class="look">
-          <span id="orbit-help">Drag to look around. Shift + scroll or pinch to zoom.</span>
+          <span id="orbit-help">Drag to look around. Scroll over the street view or pinch to zoom.</span>
           <div class="camera-buttons" role="group" aria-label="Street camera">
             <button type="button" data-camera="left" aria-label="Look left"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button>
             <button type="button" data-camera="reset" aria-label="Reset view"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 10a7 7 0 1 1 1 7M5 5v5h5"/></svg></button>
@@ -140,6 +140,10 @@
     <div class="stop-details">
       <section class="detail" id="shop" aria-labelledby="shop-title">
         <h2 id="shop-title" tabindex="-1">New Moon Shop</h2>
+        <div id="shop-load-fallback" hidden>
+          <p role="status">The 3D shop could not load. The product display remains available.</p>
+          <button class="enter-shop" type="button">Retry 3D shop</button>
+        </div>
         <p>See four New Moon abalone packs from the Virtual Mall display.</p>
         <ul class="pack-list">
           <li><img loading="lazy" width="768" height="768" src="../v11/assets/new-moon-nz-425g-front.webp" alt="New Moon New Zealand abalone front packshot"><strong>New Zealand</strong><span>425 g</span></li>
@@ -216,6 +220,15 @@
       <button class="close" type="submit" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
       </button>
+    </form>
+  </dialog>
+  <dialog id="shop-loading-dialog" aria-labelledby="shop-loading-title" aria-describedby="shop-loading-status">
+    <svg class="shop-loading-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20.5 15.4A9 9 0 0 1 8.6 3.5 9 9 0 1 0 20.5 15.4Z"/></svg>
+    <h2 id="shop-loading-title">New Moon Shop</h2>
+    <p id="shop-loading-status" role="status">Loading the 3D shop…</p>
+    <span class="shop-loading-progress" aria-hidden="true"></span>
+    <form method="dialog">
+      <button class="enter-shop" type="submit" autofocus>Cancel</button>
     </form>
   </dialog>
 </body>

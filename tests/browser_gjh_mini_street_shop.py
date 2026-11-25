@@ -41,7 +41,6 @@ def run():
             page.route("**/mini-street/shop-interior.js", observe_camera)
             page.goto(url, wait_until="networkidle")
             page.locator('a[data-stop="shop"]').click()
-            page.get_by_role("button", name="Enter 3D shop").click()
             page.wait_for_selector(".shop-interior-controls")
             inspect = page.locator(".shop-interior-inspect")
             assert not inspect.is_enabled(), "The product should be out of reach at the entrance"

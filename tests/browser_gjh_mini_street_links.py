@@ -98,6 +98,7 @@ def main():
                 context = browser.new_context(viewport={"width": 390, "height": 844}, service_workers="block")
                 # Exercise the original HTML animation and history with the optional viewer unavailable.
                 context.route("**/vending-viewer.js", lambda route: route.abort())
+                context.route("**/mini-street/scene.js", lambda route: route.abort())
                 page = context.new_page()
                 errors = []
                 page.on("pageerror", lambda error: errors.append(str(error)))
@@ -188,11 +189,13 @@ def main():
                 context.close()
 
                 context = browser.new_context(service_workers="block")
+                context.route("**/mini-street/scene.js", lambda route: route.abort())
                 context.add_init_script("""document.addEventListener('DOMContentLoaded', () => {
                   const image = new Image(); image.src = '/slow-test.gif'; document.body.append(image);
                 });""")
                 page = context.new_page()
                 page.goto(base + "#shop", wait_until="domcontentloaded")
+                expect(page.locator("dialog[open] #shop")).to_be_visible()
                 state = page.evaluate("""() => ({ready: document.readyState,
                   open: document.querySelector('#stop-dialog').open,
                   shopVisible: !document.querySelector('#shop').hidden})""")
