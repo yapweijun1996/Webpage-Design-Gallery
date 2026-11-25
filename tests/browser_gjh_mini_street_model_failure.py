@@ -43,8 +43,18 @@ def check_selected_model_failure(browser, url):
     expect(dialog.get_by_role("button", name="Rotate right", exact=True)).to_be_hidden()
     dialog.get_by_role("button", name="Add to basket", exact=True).click()
     expect(dialog).to_be_hidden()
-    basket_button(page, 1).click()
-    check_basket_rows(page.get_by_role("dialog", name="Virtual basket"), {mexico.sku: 1})
+    expect(page.locator(".mini-basket-notice")).to_have_text(
+        "Added New Moon Mexico Abalone. 1 item in basket."
+    )
+    review = page.get_by_role("button", name="View basket", exact=True)
+    expect(review).to_be_focused()
+    review.press("Enter")
+    basket = page.get_by_role("dialog", name="Virtual basket", exact=True)
+    check_basket_rows(basket, {mexico.sku: 1})
+    expect(basket.get_by_role("button", name="Checkout")).to_have_count(0)
+    basket.get_by_role("button", name="Continue shopping", exact=True).press("Enter")
+    expect(basket).to_be_hidden()
+    expect(basket_button(page, 1)).to_be_focused()
     assert not errors, errors
     page.close()
 

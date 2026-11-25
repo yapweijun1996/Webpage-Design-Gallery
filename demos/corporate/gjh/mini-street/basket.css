@@ -5,7 +5,7 @@
 }
 
 .mini-basket button,
-.mini-basket-launcher {
+.mini-basket-dock button {
   min-width: 44px;
   min-height: 44px;
   padding: 6px 12px;
@@ -20,12 +20,12 @@
 }
 
 .mini-basket button:not(:disabled):hover,
-.mini-basket-launcher:hover {
+.mini-basket-dock button:hover {
   background: var(--color-close-hover);
 }
 
 .mini-basket button:not(:disabled):active,
-.mini-basket-launcher:active {
+.mini-basket-dock button:active {
   border-color: currentColor;
 }
 
@@ -35,7 +35,7 @@
 }
 
 .mini-basket button:focus-visible,
-.mini-basket-launcher:focus-visible {
+.mini-basket-dock button:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 3px;
 }
@@ -63,21 +63,50 @@
   font-variant-numeric: tabular-nums;
 }
 
-.mini-basket-notice {
+.mini-basket-feedback {
   position: absolute;
   z-index: var(--basket-z-index-1);
   inset-block-start: calc(100% + 8px);
   inset-inline-end: 0;
   width: min(17.5rem, 85vw);
   margin: 0;
+  pointer-events: none;
+}
+
+.mini-basket-feedback[data-visible] {
   padding: 10px 12px;
   border: 1px solid var(--color-dialog-border);
   border-radius: var(--radius-control);
   background: var(--color-dialog-surface);
   color: var(--site-ink);
   box-shadow: var(--shadow-stop);
+}
+
+.mini-basket-notice {
+  margin: 0;
+  overflow-wrap: anywhere;
   font-size: var(--basket-font-size-2);
-  pointer-events: none;
+}
+
+.mini-basket-feedback-actions:not([hidden]) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  pointer-events: auto;
+}
+
+.mini-basket-feedback-actions button {
+  flex: auto;
+}
+
+.mini-basket-dock .mini-basket-review {
+  color: var(--color-stop-ink);
+  background: var(--color-toolbar-selected);
+}
+
+.mini-basket-dock .mini-basket-review:hover {
+  background: var(--color-stop-hover);
 }
 
 .mini-basket-notice:empty,
@@ -99,13 +128,29 @@
   max-height: calc(100dvh - 24px);
   margin: auto;
   padding: clamp(16px, 5vw, 26px);
-  overflow: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
   border: 1px solid var(--color-dialog-border);
   border-radius: var(--radius-stage);
   background: var(--color-dialog-surface);
   color: var(--site-ink);
   box-shadow: var(--shadow-dialog);
+}
+
+.mini-basket[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-basket-content {
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.mini-basket-heading,
+.mini-basket #mini-basket-description,
+.mini-basket .mini-basket-continue {
+  flex-shrink: 0;
 }
 
 .mini-basket::backdrop {
@@ -157,7 +202,7 @@
   display: grid;
   gap: 8px;
   margin: 16px 0 0;
-  padding: 0;
+  padding: 4px;
   list-style: none;
 }
 
@@ -228,6 +273,7 @@
 
 .mini-basket .mini-basket-continue {
   display: block;
+  align-self: flex-start;
   margin-top: 16px;
   background: var(--color-toolbar-selected);
   color: var(--color-stop-ink);
@@ -237,7 +283,21 @@
   background: var(--color-stop-hover);
 }
 
-@media (max-width: 420px) {
+@media (max-width: 480px) {
+  .mini-basket {
+    margin: auto auto max(12px, env(safe-area-inset-bottom));
+  }
+
+  .mini-basket-item {
+    grid-template-columns: 56px minmax(0, 1fr);
+    padding: 8px;
+  }
+
+  .mini-basket-photo {
+    width: 56px;
+    height: 56px;
+  }
+
   .mini-basket .mini-basket-continue {
     width: 100%;
   }

@@ -27,7 +27,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
   let hand;
   let selectionToken;
   let selectionOpener;
-  let wasAdded = false;
+  let addedProduct;
   let disposed = false;
   let previewUI;
   let exteriorView;
@@ -49,7 +49,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     onDrag: (dx, dy) => hand?.rotate(dx * 0.016, dy * 0.010),
     onReset: () => hand?.resetRotation(),
     onPutBack: () => hand?.putBack(),
-    onAddToBasket: () => hand?.addToBasket(),
+    onAddToBasket: () => hand.addToBasket(),
   });
   previewUI = productUI;
 
@@ -63,9 +63,13 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
       phase: state.phase,
       product: state.product,
       fallback: state.phase === "inspecting" && state.modelReady === false,
-      added: wasAdded,
+      added: Boolean(addedProduct),
       opener: selectionOpener,
     });
+    if (!inspecting && addedProduct) {
+      if (active) basket.acknowledgeAdd(addedProduct);
+      addedProduct = undefined;
+    }
   }
 
   const contactGeometry = new THREE.PlaneGeometry(0.15, 0.15).rotateX(-Math.PI / 2);
@@ -121,7 +125,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     if (!active || hand.getState().phase !== "idle") return;
     selectionToken = {};
     selectionOpener = controls.querySelector(".shop-interior-controls") || document.activeElement;
-    wasAdded = false;
+    basket.dismissNotice();
     hand.select(product, anchor);
   }
 
@@ -145,8 +149,8 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     getProductObject: anchorId => indoor.getProductObject(anchorId),
     onStateChange: updateProductState,
     onAddRequested: product => {
-      const added = basket.add(product.id, selectionToken);
-      if (added) wasAdded = true;
+      const added = basket.add(product.id, selectionToken, {deferNotice: true});
+      if (added) addedProduct = product.id;
       return added;
     },
     onInvalidate: () => {},
@@ -194,6 +198,7 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
       cancelAnimationFrame(frame);
       frame = 0;
       basket.close();
+      basket.dismissNotice();
       hand.cancel();
       root.append(basketHost);
       indoor.exit();

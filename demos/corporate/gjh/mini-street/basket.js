@@ -34,6 +34,10 @@ function itemsChanged(previous, next) {
   return NEW_MOON_PRODUCTS.some(({id}) => previous[id] !== next[id]);
 }
 
+function addedMessage(product, total) {
+  return "Added " + product.name + ". " + total + (total === 1 ? " item" : " items") + " in basket.";
+}
+
 /** Mount one shopping basket. Pass a unique object to add() for each picked-up item. */
 export function createShopBasket({host = document.querySelector(".masthead-inner") ?? document.body} = {}) {
   const doc = host.ownerDocument;
@@ -53,11 +57,20 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
     '<button type="button" class="mini-basket-launcher" aria-haspopup="dialog" aria-controls="mini-basket">',
     '  <span>Basket</span><span class="mini-basket-badge" aria-hidden="true">0</span>',
     '</button>',
-    '<p class="mini-basket-notice" role="status" aria-atomic="true"></p>',
+    '<div class="mini-basket-feedback">',
+    '  <p class="mini-basket-notice" role="status" aria-atomic="true"></p>',
+    '  <div class="mini-basket-feedback-actions" hidden>',
+    '    <button type="button" class="mini-basket-review" aria-haspopup="dialog" aria-controls="mini-basket">View basket</button>',
+    '    <button type="button" class="mini-basket-dismiss" aria-label="Dismiss basket message">Dismiss</button>',
+    '  </div>',
+    '</div>',
   ].join("");
   const launcher = dock.querySelector("button");
   const badge = dock.querySelector(".mini-basket-badge");
   const notice = dock.querySelector(".mini-basket-notice");
+  const feedback = dock.querySelector(".mini-basket-feedback");
+  const feedbackActions = dock.querySelector(".mini-basket-feedback-actions");
+  const review = dock.querySelector(".mini-basket-review");
 
   const dialog = doc.createElement("dialog");
   dialog.id = "mini-basket";
@@ -71,7 +84,8 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
     '    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>',
     '  </button>',
     '</header>',
-    '<p id="mini-basket-description">Keep track of the products you pick in Mini Street.</p>',
+    '<p id="mini-basket-description">Your selections in this demo.</p>',
+    '<div class="mini-basket-content">',
     '<p class="mini-basket-empty">Your basket is empty.</p>',
     '<ul class="mini-basket-items" hidden></ul>',
     '<template>',
@@ -89,12 +103,14 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
     '  </li>',
     '</template>',
     '<p class="mini-basket-saving" hidden></p>',
+    '</div>',
     '<p class="mini-basket-status" role="status" aria-atomic="true"></p>',
     '<button type="button" class="mini-basket-continue">Continue shopping</button>',
   ].join("");
 
   const heading = dialog.querySelector("h2");
   const items = dialog.querySelector(".mini-basket-items");
+  const content = dialog.querySelector(".mini-basket-content");
   const empty = dialog.querySelector(".mini-basket-empty");
   const continueButton = dialog.querySelector(".mini-basket-continue");
   const saveWarning = dialog.querySelector(".mini-basket-saving");
@@ -124,10 +140,10 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
 
   function render() {
     const total = countItems(quantities);
-    let focusRemoved = false;
+    const previousFocus = doc.activeElement;
+    const focusedIndex = rows.findIndex(({row}) => row.contains(previousFocus));
     for (const {product, row, photo, quantityLabel, increment} of rows) {
       const quantity = quantities[product.id] ?? 0;
-      if (!quantity && row.contains(doc.activeElement)) focusRemoved = true;
       row.hidden = !quantity;
       if (quantity && !photo.hasAttribute("src")) photo.src = product.photo;
       quantityLabel.textContent = String(quantity);
@@ -138,17 +154,43 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
     badge.textContent = total > 99 ? "99+" : String(total);
     launcher.setAttribute("aria-label", "Basket, " + total + (total === 1 ? " item" : " items"));
     saveWarning.hidden = Boolean(storage);
-    if (focusRemoved) continueButton.focus();
+    if (focusedIndex >= 0) {
+      const focused = rows[focusedIndex];
+      if (focused.row.hidden) {
+        const neighbor = rows.slice(focusedIndex + 1).find(({row}) => !row.hidden) ??
+          rows.slice(0, focusedIndex).findLast(({row}) => !row.hidden);
+        (neighbor?.remove ?? continueButton).focus();
+      } else if (previousFocus === focused.increment && focused.increment.disabled) {
+        focused.decrement.focus();
+      }
+    }
   }
 
-  function announce(message) {
+  function dismissNotice() {
+    view.clearTimeout(noticeTimer);
+    notice.textContent = "";
+    feedbackActions.hidden = true;
+    delete feedback.dataset.visible;
+  }
+
+  function announce(message, showReview = false) {
     if (dialog.open) {
       dialogStatus.textContent = message;
       return;
     }
+    feedback.dataset.visible = "";
+    feedbackActions.hidden = !showReview;
     notice.textContent = message;
     view.clearTimeout(noticeTimer);
-    noticeTimer = view.setTimeout(() => { notice.textContent = ""; }, 5000);
+    if (!showReview) noticeTimer = view.setTimeout(dismissNotice, 5000);
+  }
+
+  function acknowledgeAdd(id) {
+    const product = getNewMoonProduct(id);
+    if (!product || abort.signal.aborted) return;
+    const message = addedMessage(product, countItems(quantities));
+    announce(storage ? message : message + " " + visitOnly, true);
+    review.focus({preventScroll: true});
   }
 
   function currentQuantities() {
@@ -202,17 +244,17 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
     }
 
     render();
-    if (changed) {
+    if (changed && describe) {
       const message = describe(next, countItems(quantities));
       announce(storage ? message : message + " " + visitOnly);
-    } else if (next > limit) {
+    } else if (next > limit && describe) {
       announce("The basket has reached its quantity limit.");
     }
     if (itemsChanged(previous, quantities)) events.dispatchEvent(new view.Event("change"));
     return changed;
   }
 
-  function add(sku, pickedItem) {
+  function add(sku, pickedItem, {deferNotice = false} = {}) {
     const product = getNewMoonProduct(sku);
     if (abort.signal.aborted || !product) return false;
     if (pickedItem != null && (typeof pickedItem !== "object" || pickedItems.has(pickedItem))) return false;
@@ -222,9 +264,8 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
 
     if (pickedItem == null) lastAdds.set(sku, now);
     else pickedItems.add(pickedItem);
-    const changed = changeQuantity(sku, (value) => value + 1, (_, total) => (
-      "Added " + product.name + ". " + total + (total === 1 ? " item" : " items") + " in basket."
-    ));
+    const describe = deferNotice ? undefined : (_, total) => addedMessage(product, total);
+    const changed = changeQuantity(sku, (value) => value + 1, describe);
     if (!changed) {
       if (pickedItem != null) pickedItems.delete(pickedItem);
       else if (previousAdd === undefined) lastAdds.delete(sku);
@@ -242,9 +283,9 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
       return false;
     }
     opener = trigger instanceof view.HTMLElement ? trigger : launcher;
-    view.clearTimeout(noticeTimer);
-    notice.textContent = "";
+    dismissNotice();
     dialogStatus.textContent = "";
+    content.scrollTop = 0;
     heading.focus({preventScroll: true});
     return true;
   }
@@ -262,6 +303,11 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
 
   const listen = (target, type, handler) => target.addEventListener(type, handler, {signal: abort.signal});
   listen(launcher, "click", () => open(launcher));
+  listen(review, "click", () => open(launcher));
+  listen(dock.querySelector(".mini-basket-dismiss"), "click", () => {
+    dismissNotice();
+    launcher.focus({preventScroll: true});
+  });
   listen(dialog, "cancel", (event) => {
     event.preventDefault();
     close();
@@ -306,10 +352,10 @@ export function createShopBasket({host = document.querySelector(".masthead-inner
   function cleanup() {
     close();
     abort.abort();
-    view.clearTimeout(noticeTimer);
+    dismissNotice();
     dialog.remove();
     dock.remove();
   }
 
-  return {add, open, close, count: () => countItems(quantities), subscribe, cleanup};
+  return {add, acknowledgeAdd, dismissNotice, open, close, count: () => countItems(quantities), subscribe, cleanup};
 }

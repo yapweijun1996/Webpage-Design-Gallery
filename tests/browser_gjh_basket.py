@@ -202,6 +202,12 @@ def check_legacy_migration(browser, url):
     expect(panel.get_by_role("listitem")).to_have_count(4)
     assert first.evaluate("""() => {
       const panel = document.querySelector('.mini-basket');
+      const content = panel.querySelector('.mini-basket-content');
+      const continuation = panel.querySelector('.mini-basket-continue').getBoundingClientRect();
+      return content.scrollHeight > content.clientHeight && continuation.bottom <= innerHeight;
+    }""")
+    assert first.evaluate("""() => {
+      const panel = document.querySelector('.mini-basket');
       return panel.scrollWidth === panel.clientWidth && document.documentElement.scrollWidth <= innerWidth;
     }""")
     panel.get_by_role("button", name="Increase quantity for New Moon Mexico Abalone").click()
@@ -211,7 +217,12 @@ def check_legacy_migration(browser, url):
         "items": {"au-425g": 2, "nz-425g": 1, "sa-425g": 1, "mx-454g": 2},
     }
     for origin in row_paths:
-        panel.get_by_role("button", name=f"Remove New Moon {origin} Abalone").click()
+        remove = panel.get_by_role("button", name=f"Remove New Moon {origin} Abalone")
+        remove.press("Enter")
+        following_origin = list(row_paths)[list(row_paths).index(origin) + 1:]
+        next_action = (f"Remove New Moon {following_origin[0]} Abalone"
+                       if following_origin else "Continue shopping")
+        expect(panel.get_by_role("button", name=next_action, exact=True)).to_be_focused()
     expect(panel.get_by_text("Your basket is empty.")).to_be_visible()
     second.reload()
     expect(launcher(second, 0)).to_be_visible()

@@ -19,6 +19,7 @@ export function createShopProductUI({
   const root = document.createElement("section");
   root.className = "shop-product";
   root.setAttribute("role", "dialog");
+  root.setAttribute("aria-modal", "true");
   root.setAttribute("aria-labelledby", "shop-product-title");
   root.hidden = true;
   root.innerHTML = `
@@ -68,6 +69,8 @@ export function createShopProductUI({
   const { signal } = events;
   let previousFocus;
   let currentProduct;
+  let addFailed = false;
+  const inertSiblings = [];
   let drag;
 
   function bind(button, action) {
@@ -81,7 +84,23 @@ export function createShopProductUI({
   bind(reset, onReset);
   bind(right, () => onRotate(1));
   bind(putBack, onPutBack);
-  bind(add, () => onAddToBasket(currentProduct.id));
+  bind(add, () => {
+    if (onAddToBasket(currentProduct.id) === false) {
+      addFailed = true;
+      status.textContent = "The basket has reached its quantity limit.";
+    }
+  });
+
+  function isolatePage() {
+    for (let child = root; child.parentElement && child !== document.body; child = child.parentElement) {
+      for (const sibling of child.parentElement.children) {
+        if (sibling !== child && typeof sibling.inert === "boolean" && !sibling.inert) {
+          sibling.inert = true;
+          inertSiblings.push(sibling);
+        }
+      }
+    }
+  }
 
   function endDrag(pointerId = drag?.id) {
     if (!drag || drag.id !== pointerId) return;
@@ -109,19 +128,32 @@ export function createShopProductUI({
   }
 
   document.addEventListener("keydown", (event) => {
-    if (root.hidden || event.defaultPrevented || event.key !== "Escape") return;
-    // Escape returns to the shop even after the shared canvas took pointer focus.
-    if (!root.contains(document.activeElement) && document.activeElement !== document.body) return;
-    event.preventDefault();
-    event.stopPropagation();
-    if (!event.repeat) onClose();
+    if (root.hidden || event.defaultPrevented) return;
+    const active = document.activeElement;
+    if (event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!event.repeat) onClose();
+    } else if (event.key === "Tab") {
+      const buttons = [...root.querySelectorAll("button:not(:disabled)")]
+        .filter(button => !button.closest("[hidden]"));
+      const first = buttons[0];
+      const last = buttons.at(-1);
+      if (!buttons.includes(active) || active === (event.shiftKey ? first : last)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      }
+    }
   }, { signal });
   mount.append(root);
 
   function render({ phase = "idle", product, fallback = false, added = false, opener } = {}) {
     const visible = phase !== "idle";
-    if (visible && root.hidden) previousFocus = opener ?? document.activeElement;
     const wasVisible = !root.hidden;
+    if (visible && !wasVisible) {
+      previousFocus = opener ?? document.activeElement;
+      addFailed = false;
+    }
     const activeControl = root.contains(document.activeElement) ? document.activeElement : null;
     const selected = getNewMoonProduct(product?.id) ?? (wasVisible ? currentProduct : undefined) ?? NEW_MOON_DEFAULT_PRODUCT;
     if (currentProduct !== selected) {
@@ -145,14 +177,18 @@ export function createShopProductUI({
     add.textContent = added ? "Added to basket" : "Add to basket";
     photo.hidden = !visible || !fallback;
     if (!photo.hidden && photo.src !== selected.photo) photo.src = selected.photo;
-    const message = added ? "Added to the virtual basket." :
+    const message = added && phase !== "stowing" ? "Added to the virtual basket." :
+      addFailed && inspecting ? "The basket has reached its quantity limit." :
       phaseMessages[phase] ?? (fallback && inspecting ? "Showing product photo." : "");
     if (status.textContent !== message) status.textContent = message;
     root.hidden = !visible;
 
     if (visible && (!wasVisible || activeControl?.disabled)) {
       close.focus({ preventScroll: true });
+      if (!wasVisible) isolatePage();
     } else if (!visible && wasVisible) {
+      for (const sibling of inertSiblings) sibling.inert = false;
+      inertSiblings.length = 0;
       previousFocus?.focus({ preventScroll: true });
       previousFocus = undefined;
     }

@@ -92,6 +92,7 @@ test("product controls and static fallback share one responsive scene", async ()
     for (const settings of [
       { viewport: { width: 1440, height: 900 } },
       { viewport: { width: 320, height: 568 }, hasTouch: true, isMobile: true, reducedMotion: "reduce" },
+      { viewport: { width: 568, height: 320 }, hasTouch: true, isMobile: true, reducedMotion: "reduce" },
     ]) {
       const page = await browser.newPage(settings);
       const errors = [];
@@ -119,6 +120,11 @@ test("product controls and static fallback share one responsive scene", async ()
       if (process.env.PRODUCT_UI_SCREENSHOT_DIR) {
         await page.screenshot({ path: `${process.env.PRODUCT_UI_SCREENSHOT_DIR}/product-${settings.viewport.width}.jpg`, quality: 45 });
       }
+      await page.keyboard.press("Shift+Tab");
+      assert.ok(await add.evaluate(button => button === document.activeElement));
+      await page.keyboard.press("Tab");
+      assert.equal(await page.evaluate(() => document.activeElement.textContent.trim()), "Close");
+      assert.ok(await opener.evaluate(button => button.inert));
       await page.keyboard.press("Tab");
       assert.equal(await page.evaluate(() => document.activeElement.getAttribute("aria-label")), "Rotate left");
       await page.keyboard.press("Enter");
