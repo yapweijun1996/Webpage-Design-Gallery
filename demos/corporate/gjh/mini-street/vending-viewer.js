@@ -44,7 +44,9 @@ export function createVendingViewer(preview, { drinks, motion, onFailure }) {
     canvas.remove();
 
     const resources = new Set([scene.environment]);
-    scene.traverse(({ geometry, material }) => {
+    scene.traverse((part) => {
+      const { geometry, material } = part;
+      if (part.isInstancedMesh) resources.add(part);
       resources.add(geometry);
       if (!material) return;
       resources.add(material);
@@ -174,8 +176,12 @@ export function createVendingViewer(preview, { drinks, motion, onFailure }) {
     for (const button of preview.querySelectorAll("[data-orbit]")) {
       button.addEventListener("click", commands[button.dataset.orbit], { signal });
     }
-    observer = new ResizeObserver(invalidate);
-    observer.observe(viewport);
+    if (typeof ResizeObserver === "function") {
+      observer = new ResizeObserver(invalidate);
+      observer.observe(viewport);
+    } else {
+      window.addEventListener("resize", invalidate, { signal });
+    }
     if (typeof IntersectionObserver === "function") {
       intersection = new IntersectionObserver(([entry]) => {
         inView = entry.isIntersecting;

@@ -96,6 +96,9 @@ html[data-gjh-design="mini-street"] {
   --color-vending-slot-trim: #a08b6d;
   --color-vending-slot-text: #fff3d9;
   --surface-vending-slot: linear-gradient(transparent 58%, #181c17 59%);
+  --color-vending-slot-divider: #50634b;
+  --surface-vending-slot-shelf: linear-gradient(176deg, #ddf6e222, transparent 38%), linear-gradient(#435b45, #283d2c 66%, #222a20 67%, #171d17 92%, #4c543a 92%);
+  --surface-vending-slot-coil: repeating-linear-gradient(113deg, #7c8270 0 1px, transparent 1px 4px), #19211d;
   --shadow-vending-slot: 0 2px 2px #14100b;
   --color-vending-slot-hover: #d2bf93;
   --color-vending-slot-selected: #ffe6a5;
@@ -113,6 +116,7 @@ html[data-gjh-design="mini-street"] {
   --surface-vending-can-finish: linear-gradient(90deg, #1b262966, transparent 22%, #fff5 37%, transparent 51%, #13191c66), linear-gradient(0deg, #c4c6b7 0 6%, transparent 7% 25%, #fffa 26% 41%, transparent 42% 84%, #fff7 85% 88%, transparent 89%);
   --surface-vending-can-lid: radial-gradient(ellipse, #707a6e 12%, #bcc2b9 17% 44%, #e8eadc 52%, #9aa09a 73%);
   --surface-vending-bottle-finish: linear-gradient(97deg, #18313167, transparent 22%, #fff9 36%, transparent 52%, #18313160), linear-gradient(0deg, #fff6 0 7%, transparent 8% 26%, #fff9 27% 50%, transparent 51%);
+  --surface-vending-bottle-ribs: repeating-linear-gradient(90deg, #ffffff33 0 1px, transparent 1px 3px);
   --color-vending-bottle-cap-trim: #ffecb3;
   --surface-vending-bottle-cap: repeating-linear-gradient(90deg, #3a6057 0 2px, #24483e 2px 3px);
   --layer-vending-stock-detail: 1;
@@ -149,6 +153,7 @@ html[data-gjh-design="mini-street"] {
   --color-vending-tray-label: #e7dcc0;
   --color-vending-pocket-trim: #77694e;
   --surface-vending-pocket: linear-gradient(#0c100c, #231e13 65%, #675036 68%, #382d1f 74%);
+  --surface-vending-pocket-ribs: repeating-linear-gradient(90deg, transparent 0 8px, #ebc48729 8px 9px, #0004 9px 10px) 50% 100% / 85% 28% no-repeat;
   --shadow-vending-pocket: inset 0 3px 5px #050804;
   --type-vending-tray-label: clamp(.73rem, 2.9vw, .89rem);
   --shadow-vending-tray-ready: inset 0 1px 4px #16180c, 0 0 9px #ffd17f4a;

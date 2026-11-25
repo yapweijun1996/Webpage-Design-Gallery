@@ -547,7 +547,6 @@ dialog h2 { margin-right: 44px; }
 dialog[aria-labelledby="vending-title"] { width: min(100% - 26px, 510px); }
 #vending { padding-inline: clamp(12px, 4vw, 26px); }
 .vending-guide { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-block: 8px 14px; }
-#vending-instructions { margin: 0; }
 .vending-sound {
   display: inline-flex;
   flex: none;

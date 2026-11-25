@@ -153,7 +153,11 @@
         <h2 id="vending-title" tabindex="-1">Vending machine</h2>
         <p id="vending-note">This virtual drink machine requires JavaScript to operate.</p>
         <div class="vending-guide" hidden>
-          <p id="vending-instructions">Pick a drink, vend, then collect it. Free demo.</p>
+          <ol class="vending-steps" aria-label="Free vending demo" role="list">
+            <li data-vending-step="choose" aria-current="step">Choose</li>
+            <li data-vending-step="vend">Vend</li>
+            <li data-vending-step="collect">Collect</li>
+          </ol>
           <button class="vending-sound" type="button" aria-pressed="false" hidden>
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M3 9v6h4l5 4V5L7 9H3Z"/>
@@ -195,6 +199,9 @@
             <button class="vending-tray" type="button" aria-disabled="true">
               <span class="vending-pocket" aria-hidden="true"></span>
               <span class="vending-tray-label">Collect drink</span>
+              <svg class="vending-tray-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 4v10m-4-4 4 4 4-4M5 16v4h14v-4"/>
+              </svg>
             </button>
             <div class="vending-vent" aria-hidden="true"></div>
           </div>

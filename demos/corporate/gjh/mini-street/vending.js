@@ -2,20 +2,23 @@ import { createVendingAudio } from "./vending-audio.js";
 import { CHUTE_CONTACT, RELEASE, TRAY_IMPACT, TRAY_RATTLE, VEND_DURATION } from "./vending-sequence.js";
 
 export const drinks = [
-  { code: "A1", name: "Lime Soda", label: "LIME", color: "#9fce63", shape: "can" },
-  { code: "A2", name: "Peach Tea", label: "PEACH", color: "#f2a65f", shape: "bottle" },
-  { code: "A3", name: "Berry Fizz", label: "BERRY", color: "#d17dae", shape: "can" },
-  { code: "B1", name: "Ginger Ale", label: "GINGER", color: "#efc76a", shape: "can" },
-  { code: "B2", name: "Still Water", label: "WATER", color: "#7dd1ea", shape: "bottle" },
-  { code: "B3", name: "Lemon Tea", label: "LEMON", color: "#d9d875", shape: "bottle" },
+  { code: "A1", name: "Lime Soda", label: "LIME", color: "#9fce63", accent: "#317858", shape: "can" },
+  { code: "A2", name: "Peach Tea", label: "PEACH", color: "#f2a65f", accent: "#9e4b35", shape: "bottle" },
+  { code: "A3", name: "Berry Fizz", label: "BERRY", color: "#d17dae", accent: "#803a73", shape: "can" },
+  { code: "B1", name: "Ginger Ale", label: "GINGER", color: "#efc76a", accent: "#8c5629", shape: "can" },
+  { code: "B2", name: "Still Water", label: "WATER", color: "#7dd1ea", accent: "#27679b", shape: "bottle" },
+  { code: "B3", name: "Lemon Tea", label: "LEMON", color: "#d9d875", accent: "#61773c", shape: "bottle" },
 ];
 
-function drinkArt({ label, color, shape }) {
+const stepByPhase = { idle: "choose", selected: "vend", dispensing: "vend", ready: "collect" };
+
+function drinkArt({ label, color, accent, shape }) {
   const art = document.createElement("span");
   art.className = "drink-art";
   art.dataset.shape = shape;
   art.dataset.label = label;
   art.style.setProperty("--drink-color", color);
+  art.style.setProperty("--drink-accent", accent);
   art.setAttribute("aria-hidden", "true");
   return art;
 }
@@ -38,6 +41,7 @@ export function setupVending(section) {
   const viewport = preview.querySelector(".vending-orbit");
   const guide = section.querySelector(".vending-guide");
   const soundButton = guide.querySelector(".vending-sound");
+  const steps = guide.querySelectorAll("[data-vending-step]");
   const dialog = section.closest("dialog");
   const heading = section.querySelector("h2");
   const machine = section.querySelector(".vending-machine");
@@ -82,6 +86,10 @@ export function setupVending(section) {
     message.textContent = text;
     serve.setAttribute("aria-disabled", String(phase !== "selected"));
     tray.setAttribute("aria-disabled", String(phase !== "ready"));
+    for (const step of steps) {
+      if (step.dataset.vendingStep === stepByPhase[phase]) step.setAttribute("aria-current", "step");
+      else step.removeAttribute("aria-current");
+    }
     for (const [index, slot] of slots.entries()) {
       slot.setAttribute("aria-pressed", String(index === selection));
       slot.disabled = phase === "dispensing" || phase === "ready";
@@ -100,7 +108,11 @@ export function setupVending(section) {
     const name = document.createElement("span");
     name.className = "vending-drink-name";
     name.textContent = drink.name;
-    slot.append(drinkArt(drink), code, name);
+    const product = document.createElement("span");
+    product.className = "vending-product";
+    product.setAttribute("aria-hidden", "true");
+    product.append(drinkArt(drink));
+    slot.append(product, code, name);
     slot.addEventListener("click", (event) => {
       selection = index;
       setPhase("selected", `${drink.code} · ${drink.name}`);

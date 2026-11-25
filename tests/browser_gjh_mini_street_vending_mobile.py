@@ -41,14 +41,17 @@ def exercise_phone(browser, base, size, language, theme):
     vend = dialog.locator(".vending-serve")
     tray = dialog.locator(".vending-tray")
     message = dialog.get_by_role("status")
+    step = dialog.locator(".vending-steps [aria-current=step]")
     slot = dialog.locator("[data-slot=A2]")
+    landscape = width > height
 
     expect(page.locator("html")).to_have_attribute("lang", language)
     expect(page.locator("html")).to_have_attribute("data-site-theme", theme)
     expect(title).to_be_focused()
     expect(orbit.locator("canvas")).to_be_visible(timeout=15000)
-    expect(vend).to_be_in_viewport(ratio=1)
-    expect(tray).to_be_in_viewport(ratio=1)
+    if not landscape:
+        expect(vend).to_be_in_viewport(ratio=1)
+        expect(tray).to_be_in_viewport(ratio=1)
     assert dialog.evaluate("dialog => dialog.clientWidth === dialog.scrollWidth"), (size, language, theme)
     for target in [close, vend, tray, *dialog.locator(".vending-slot, [data-orbit], .vending-sound").all()]:
         bounds = target.bounding_box()
@@ -62,6 +65,7 @@ def exercise_phone(browser, base, size, language, theme):
     }"""), (size, language, theme)
     expect(vend).to_have_attribute("aria-disabled", "true")
     expect(tray).to_have_attribute("aria-disabled", "true")
+    expect(step).to_have_attribute("data-vending-step", "choose")
 
     if reduced_motion == "no-preference":
         initial = orbit.screenshot()
@@ -73,6 +77,8 @@ def exercise_phone(browser, base, size, language, theme):
 
     slot.tap()
     expect(slot).to_have_attribute("aria-pressed", "true")
+    expect(step).to_have_attribute("data-vending-step", "vend")
+    assert slot.evaluate("""slot => getComputedStyle(slot, "::before").borderBottomWidth === "2px" """)
     expect(message).to_have_text(selected_text)
     expect(vend).to_have_attribute("aria-disabled", "false")
     vend.tap()
@@ -80,10 +86,14 @@ def exercise_phone(browser, base, size, language, theme):
         expect(dialog.locator(".vending-machine")).to_have_attribute("data-phase", "dispensing")
         assert not dialog.locator(".vending-machine").evaluate("machine => machine.hasAttribute('data-local-vend')")
     expect(message).to_have_text(ready_text)
+    expect(step).to_have_attribute("data-vending-step", "collect")
     expect(tray).to_have_attribute("aria-disabled", "false")
+    if landscape:
+        tray.scroll_into_view_if_needed()
     expect(tray).to_be_in_viewport(ratio=1)
     tray.tap()
     expect(message).to_have_text(collected_text)
+    expect(step).to_have_attribute("data-vending-step", "choose")
     expect(tray).to_have_attribute("aria-disabled", "true")
 
     # Force overflow even when the full form fits on a taller phone.
@@ -123,7 +133,9 @@ def main():
             try:
                 for size, language, theme in product(PHONE_SIZES, COPY, ("dark", "light")):
                     exercise_phone(browser, base, size, language, theme)
-                print(f"PASS: {browser.browser_type.name} mobile vending, 18 viewport/language/theme combinations")
+                for size in [(568, 320), (844, 390)]:
+                    exercise_phone(browser, base, size, "en", "dark")
+                print(f"PASS: {browser.browser_type.name} mobile vending, 18 portrait combinations and 2 landscape sizes")
             finally:
                 browser.close()
 

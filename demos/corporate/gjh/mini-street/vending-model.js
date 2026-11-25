@@ -108,6 +108,19 @@ export function buildVendingModel(scene, drinks, theme) {
     return part;
   }
 
+  function instanceBoxes(material, positions, [width, height, depth], tilt = 0) {
+    const parts = new THREE.InstancedMesh(block, material, positions.length);
+    const transform = new THREE.Object3D();
+    transform.scale.set(width, height, depth);
+    transform.rotation.x = tilt;
+    positions.forEach(([x, y, z], index) => {
+      transform.position.set(x, y, z);
+      transform.updateMatrix();
+      parts.setMatrixAt(index, transform.matrix);
+    });
+    cabinet.add(parts);
+  }
+
   function bevel(material, x, y, z, w, h, d, edge) {
     const u = w / 2 - edge;
     const v = h / 2 - edge;
@@ -180,7 +193,7 @@ export function buildVendingModel(scene, drinks, theme) {
     box(black, BAY, y, 0.288, 0.789, 0.039, 0.398);
     box(brass, BAY, y, 0.492, 0.792, 0.026, 0.027);
   }
-  box(lamp, BAY, 1.965, 0.375, 0.724, 0.013, 0.025);
+  instanceBoxes(lamp, [[BAY, 1.965, 0.375], [BAY, 1.408, 0.375]], [0.724, 0.013, 0.025]);
   for (const y of [1.91, 1.39]) {
     const caseLight = new THREE.PointLight("#ffdfab", 0.95, 0.85, 1.7);
     caseLight.position.set(BAY, y, 0.399);
@@ -189,18 +202,31 @@ export function buildVendingModel(scene, drinks, theme) {
 
   const glass = paintedTexture(256, 384, (ctx, w, h) => {
     const tint = ctx.createLinearGradient(0, 0, w, h * 0.5);
-    tint.addColorStop(0, "#b9e6d631");
-    tint.addColorStop(0.34, "#ffffff02");
-    tint.addColorStop(1, "#b5d5c522");
+    tint.addColorStop(0, "#c2eadd34");
+    tint.addColorStop(0.29, "#ffffff02");
+    tint.addColorStop(0.73, "#b5d5c514");
+    tint.addColorStop(1, "#97c8b938");
     ctx.fillStyle = tint;
     ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = "#fffae922";
+
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#e9fff480";
+    ctx.strokeRect(2, 2, w - 4, h - 4);
+    ctx.strokeStyle = "#10201972";
+    ctx.strokeRect(6, 6, w - 12, h - 12);
+    ctx.fillStyle = "#fffae929";
     ctx.beginPath();
     ctx.moveTo(w * 0.60, 0);
     ctx.lineTo(w * 0.78, 0);
     ctx.lineTo(0, h * 0.68);
     ctx.lineTo(0, h * 0.53);
     ctx.fill();
+    ctx.strokeStyle = "#e5fff332";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(w * 0.98, 0);
+    ctx.lineTo(0, h * 0.83);
+    ctx.stroke();
   });
   decal(print(glass, true), BAY, 1.406, 0.493, 0.763, 1.152);
 
@@ -228,12 +254,15 @@ export function buildVendingModel(scene, drinks, theme) {
       ctx.fillRect(0, 0, w, h);
       ctx.fillStyle = cream;
       ctx.fillRect(0, 36, w, 60);
-      ctx.fillStyle = darkGreen;
-      ctx.fillRect(0, 26, w, 4);
-      ctx.fillRect(0, 101, w, 4);
+      ctx.fillStyle = drink.accent;
+      ctx.fillRect(0, 26, w, 10);
+      ctx.fillRect(0, 94, w, 11);
       for (const x of [64, 192, 320]) {
         ctx.fillStyle = darkGreen;
-        moon(ctx, x, 18, 10);
+        moon(ctx, x, 16, 10);
+        ctx.strokeStyle = drink.accent;
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x - 56, 42, 112, 46);
         lettering(ctx, drink.label, x, 61, "bold 26px Georgia", darkGreen);
         lettering(ctx, bottle ? "REFRESHMENT" : "MINI STREET", x, 84, "11px monospace", darkGreen);
         lettering(ctx, drink.code, x, 116, "bold 13px monospace", darkGreen);
@@ -244,7 +273,7 @@ export function buildVendingModel(scene, drinks, theme) {
       sleeve, 0, bottle ? -0.050 : 0, 0, group).rotation.y = Math.PI;
 
     if (bottle) {
-      mesh(cap, frame, 0, 0.137, 0, group);
+      mesh(cap, metal(drink.accent, 0.13, 0.38), 0, 0.137, 0, group);
       tube(steel, 0, 0.117, 0, 0.035, 0.005, group);
     } else {
       tube(steel, 0, -0.122, 0, 0.056, 0.012, group);
@@ -302,9 +331,8 @@ export function buildVendingModel(scene, drinks, theme) {
         "bold 21px monospace", darkGreen);
     }
   });
-  for (const dx of [-0.046, 0, 0.046]) {
-    for (const y of [1.649, 1.601, 1.553]) box(steel, PANEL + dx, y, 0.540, 0.033, 0.034, 0.020);
-  }
+  instanceBoxes(steel, [-0.046, 0, 0.046].flatMap(dx =>
+    [1.649, 1.601, 1.553].map(y => [PANEL + dx, y, 0.540])), [0.033, 0.034, 0.020]);
   decal(print(keys, true), PANEL, 1.601, 0.551, 0.138, 0.144);
   const vendButton = new THREE.Group();
   vendButton.name = "Vend button";
@@ -341,9 +369,8 @@ export function buildVendingModel(scene, drinks, theme) {
     box(brass, x, 0.506, 0.492, 0.028, 0.287, 0.034);
   }
   box(steel, BAY, 0.384, 0.328, 0.683, 0.033, 0.306);
-  for (const x of [-0.28, -0.21, -0.14, -0.07, 0, 0.07, 0.14, 0.21, 0.28]) {
-    box(black, BAY + x, 0.404, 0.333, 0.012, 0.008, 0.231);
-  }
+  instanceBoxes(black, Array.from({ length: 9 }, (_, index) =>
+    [BAY + (index - 4) * 0.07, 0.404, 0.333]), [0.012, 0.008, 0.231]);
   box(trayTrim, BAY, 0.399, 0.496, 0.758, 0.029, 0.044);
   box(brass, BAY, 0.649, 0.492, 0.758, 0.032, 0.042);
   const flap = new THREE.Group();
@@ -357,7 +384,7 @@ export function buildVendingModel(scene, drinks, theme) {
 
   const pickup = paintedTexture(256, 34, (ctx, w, h) => lettering(ctx, "P I C K   U P", w / 2, h / 2, "bold 25px monospace", cream));
   decal(print(pickup, true), BAY, 0.334, 0.493, 0.32, 0.035);
-  for (const y of [0.192, 0.215, 0.238, 0.261]) box(black, 0, y, 0.467, 0.662, 0.009, 0.013);
+  instanceBoxes(black, [0.192, 0.215, 0.238, 0.261].map(y => [0, y, 0.467]), [0.662, 0.009, 0.013]);
 
   function screw(x, y, z, rotation) {
     const head = tube(steel, x, y, z, 0.012, 0.009);
@@ -430,9 +457,8 @@ export function buildVendingModel(scene, drinks, theme) {
     box(steel, Math.sin(angle) * 0.108, 0.632 + Math.cos(angle) * 0.108, -0.542, 0.068, 0.155, 0.007).rotation.z = -angle + 0.32;
   }
   tube(steel, 0, 0.632, -0.548, 0.056, 0.014).rotation.x = Math.PI / 2;
-  for (let i = 0; i < 14; i += 1) {
-    box(frame, 0, 0.407 + i * 0.035, -0.561, 0.740, 0.011, 0.016).rotation.x = 0.38;
-  }
+  instanceBoxes(frame, Array.from({ length: 14 }, (_, index) =>
+    [0, 0.407 + index * 0.035, -0.561]), [0.740, 0.011, 0.016], 0.38);
   box(black, 0.383, 0.295, -0.506, 0.080, 0.055, 0.020);
   box(steel, 0.383, 0.295, -0.520, 0.044, 0.025, 0.010);
   const lead = new THREE.CatmullRomCurve3([
