@@ -1,6 +1,7 @@
 const updateParameter = "mini-street-update";
 const timeout = 8000;
 const releaseURL = new URL("../release.json", import.meta.url);
+class OfflineError extends Error {}
 const icons = {
   idle: "M20 7v5h-5M4 17v-5h5M6 8a7 7 0 0 1 12-2l2 3M4 15l2 3a7 7 0 0 0 12-2",
   checking: "M20 12a8 8 0 1 1-8-8",
@@ -51,6 +52,12 @@ async function verifyLatest(view, page, cacheKey, abort) {
       credentials: "same-origin",
       redirect: "error",
       signal: abort.signal,
+    }).catch((error) => {
+      // An explicit check can reach the server even when the browser reports offline.
+      if (!view.navigator.onLine && !abort.signal.aborted) {
+        throw new OfflineError("The release request failed while offline.", {cause: error});
+      }
+      throw error;
     });
     if (!response.ok) throw new Error("Update information unavailable.");
     return response;
@@ -152,10 +159,7 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
   }
 
   button.disabled = false;
-  if (!verifyNavigation()) {
-    if (view.navigator.onLine) refresh();
-    else offline();
-  }
+  if (!verifyNavigation()) refresh();
   view.addEventListener("offline", offline);
   view.addEventListener("online", () => {
     if (state === "offline") show("idle");
@@ -164,16 +168,11 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     if (!event.persisted) return;
     available = undefined;
     cancelCheck();
-    if (view.navigator.onLine) show("idle");
-    else offline();
+    show("idle");
   });
 
   button.addEventListener("click", async () => {
     if (activeRequest || state === "applying") return;
-    if (!view.navigator.onLine) {
-      offline();
-      return;
-    }
     const applying = available;
     if (applying && document.querySelector(".mini-basket-saving:not([hidden])") &&
       document.querySelector(".mini-basket-items:not([hidden])")) {
@@ -191,9 +190,7 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     try {
       const latest = await verifyLatest(view, page, cacheKey, request);
       if (activeRequest !== request) return;
-      if (!view.navigator.onLine) {
-        offline();
-      } else if (applying && sameRelease(applying, latest)) {
+      if (applying && sameRelease(applying, latest)) {
         view.location.replace(page);
       } else if (sameRelease(current, latest)) {
         show("current", "update.current", "Mini Street is up to date.");
@@ -201,10 +198,10 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
         available = latest;
         show("available", "update.available", "Update available · {build}", { build: renderBuild(latest) });
       }
-    } catch {
+    } catch (error) {
       if (activeRequest !== request) return;
-      if (view.navigator.onLine) show("error", "update.failed", "The update could not be verified. Check again shortly.");
-      else offline();
+      if (error instanceof OfflineError) offline();
+      else show("error", "update.failed", "The update could not be verified. Check again shortly.");
     } finally {
       if (activeRequest === request) {
         activeRequest = undefined;

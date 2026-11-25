@@ -160,13 +160,19 @@ def run(site):
         private = browser.new_context(service_workers="allow")
         private.add_init_script("""Object.defineProperty(window, 'localStorage', {
           get: () => { throw new DOMException('Storage disabled', 'SecurityError'); },
-        })""")
+        });
+        Object.defineProperty(navigator, 'onLine', {get: () => false});""")
         private_page = private.new_page()
         private_page.goto(site_url, wait_until="domcontentloaded")
-        expect(private_page.locator(SEL)).to_be_enabled()
+        private_button = private_page.locator(SEL)
+        private_status = private_page.locator(STATUS)
+        expect(private_button).to_have_attribute("data-state", "idle")
+        private_button.click()
+        expect_status(private_status, "up to date")
         server.release_build = None
-        private_page.locator(SEL).click()
-        expect(private_page.locator(SEL)).to_have_attribute("data-state", "error")
+        private_button.click()
+        expect(private_button).to_have_attribute("data-state", "error")
+        expect_status(private_status, "could not be verified")
         browser.close()
 
 
