@@ -135,8 +135,10 @@ def check_shop(browser, url):
 
     mexico = PRODUCTS[-1]
     dialog = inspect_product(page, mexico)
+    expect(page.locator(".shop-experience-basket")).to_be_hidden()
     dialog.get_by_role("button", name="Put back", exact=True).click()
     expect(dialog).to_be_hidden()
+    expect(page.locator(".shop-experience-basket")).to_be_visible()
     assert page.evaluate("id => window.__miniStreetTestContactVisible(id)", ANCHORS[mexico.sku]) is True
     expect(basket_button(page, 2)).to_be_visible()
     assert read_storage(page, BASKET_KEY) is None
@@ -145,6 +147,7 @@ def check_shop(browser, url):
     # The first edit must retain the legacy AU quantity while adding a different SKU.
     for product in (mexico, *PRODUCTS[:-1]):
         dialog = inspect_product(page, product)
+        expect(dialog).not_to_have_attribute("data-fallback", "")
         dialog.get_by_role("button", name="Rotate right", exact=True).click()
         dialog.get_by_role("button", name="Reset rotation", exact=True).click()
         dialog.get_by_role("button", name="Add to basket", exact=True).click()
@@ -222,6 +225,7 @@ def check_desktop_inspection_controls(browser, url):
     request = pending[0]
     request.fulfill(response=request.fetch())
     expect(dialog).to_have_attribute("data-phase", "inspecting")
+    expect(dialog).not_to_have_attribute("data-fallback", "")
     front = page.evaluate("window.__miniStreetTestCanRotation()")
     rotate = dialog.get_by_role("button", name="Rotate right", exact=True)
     rotate.press("Enter")

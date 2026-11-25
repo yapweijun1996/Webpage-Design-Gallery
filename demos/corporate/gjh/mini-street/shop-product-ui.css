@@ -129,8 +129,8 @@
   align-self: end;
   min-width: 0;
   max-height: 100%;
-  overflow: auto;
-  overscroll-behavior: contain;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
   padding: clamp(12px, 2vw, 21px);
   border: 1px solid var(--color-dialog-border);
   border-radius: var(--radius-stage);
@@ -138,6 +138,17 @@
   background: var(--color-dialog-surface);
   box-shadow: var(--shop-product-ui-box-shadow-1);
   pointer-events: auto;
+}
+
+.shop-product-info {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.shop-product-info:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: -2px;
 }
 
 .shop-product-brand {
@@ -194,6 +205,7 @@
 }
 
 .shop-product-rotate {
+  grid-row: 2;
   grid-template-columns: repeat(3, minmax(44px, 1fr));
 }
 
@@ -204,6 +216,7 @@
 }
 
 .shop-product-actions {
+  grid-row: 3;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
 }
 
@@ -223,7 +236,7 @@
 @media (max-width: 720px) {
   .shop-product {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(8rem, 1fr) minmax(0, auto);
+    grid-template-rows: minmax(90px, 1fr) minmax(0, auto);
     gap: 7px;
   }
 
@@ -235,7 +248,8 @@
   }
 
   .shop-product-panel {
-    padding: 11px 12px;
+    min-height: 0;
+    padding: 8px 10px;
     border-radius: var(--radius-stage-mobile);
   }
 
@@ -269,12 +283,16 @@
 
 @media (min-width: 520px) and (max-width: 720px) and (max-height: 480px) {
   .shop-product {
-    grid-template-columns: minmax(0, 1fr) minmax(230px, 44%);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(230px, 53%);
+    grid-template-rows: minmax(0, 1fr);
   }
 
   .shop-product .shop-product-close {
-    position: static;
+    inset-inline: max(10px, env(safe-area-inset-left)) auto;
+  }
+
+  .shop-product-actions button {
+    padding-inline: 4px;
   }
 }
 

@@ -7,6 +7,8 @@ const HAND = {
 };
 const shelfHandYaw = 0.16;
 const inspectionHandYaw = 0.17;
+// Keep the palm to the side so it does not cover the front label.
+const inspectionHandOffset = 0.012;
 const gripDiameter = 0.0775;
 const maxTurnSpeed = 4.2;
 const durations = { reaching: 0.65, lifting: 0.61, returning: 1.28, stowing: 0.40 };
@@ -343,6 +345,7 @@ export function createProductHand({
   const startCanRotation = new T.Quaternion();
   const cans = new Map();
   const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const compactLandscape = window.matchMedia("(min-width: 520px) and (max-width: 720px) and (max-height: 480px)");
   const lifetime = new AbortController();
   const loader = new GLTFLoader();
 
@@ -386,6 +389,7 @@ export function createProductHand({
     carrier.visible = false;
     heldProduct.visible = false;
     heldProduct.clear();
+    if (hand) hand.object.position.x = 0;
     transition("idle");
   }
 
@@ -459,7 +463,9 @@ export function createProductHand({
     }
     const vertical = Math.tan(T.MathUtils.degToRad(camera.getEffectiveFOV()) / 2);
     const horizontal = vertical * camera.aspect;
-    const distance = Math.max(camera.near + 0.22, 0.40, 0.105 / Math.min(vertical * ratioY, horizontal * ratioX));
+    // A shorter inspection distance uses the compact landscape preview area.
+    const minimumDistance = compactLandscape.matches ? 0.27 : 0.40;
+    const distance = Math.max(camera.near + 0.22, minimumDistance, 0.105 / Math.min(vertical * ratioY, horizontal * ratioX));
     inspection.set(screenX * horizontal * distance, screenY * vertical * distance, -distance);
     inspection.applyQuaternion(cameraRotation).add(eye);
     approach.set(horizontal * distance * 1.45, -vertical * distance * 1.40, -distance);
@@ -516,6 +522,7 @@ export function createProductHand({
       // Rest at the side so the panel remains legible, then roll briefly toward
       // the viewer while the upper fingers lift and reseat during the turn.
       const wristRoll = (0.15 + 0.22 * Math.sin(yaw * 4) ** 2) * turnMotion;
+      hand.object.position.x = inspectionHandOffset;
       hand.object.rotation.set(0, inspectionHandYaw - wristRoll, 0);
       poseTurnGrip(turnMotion);
     }
@@ -699,6 +706,7 @@ export function createProductHand({
         carrier.quaternion.multiply(poseOffset.setFromAxisAngle(axes.right, 0.18 * arc));
         heldProduct.quaternion.slerp(viewPose.setFromAxisAngle(axes.up, active.can.frontYaw), lift);
         if (hand) {
+          hand.object.position.x = inspectionHandOffset * lift;
           hand.object.rotation.y = T.MathUtils.lerp(shelfHandYaw, inspectionHandYaw, lift);
           hand.pose(1, { inspection: lift });
         }
@@ -713,6 +721,7 @@ export function createProductHand({
         viewPose.copy(viewHeading).invert().multiply(stockPose);
         heldProduct.quaternion.copy(startCanRotation).slerp(viewPose, approachShelf);
         if (hand) {
+          hand.object.position.x = inspectionHandOffset * (1 - approachShelf);
           hand.object.rotation.y = T.MathUtils.lerp(startHandYaw, shelfHandYaw, approachShelf);
           poseTurnGrip(turnMotion * (1 - approachShelf), 1 - approachShelf);
         }

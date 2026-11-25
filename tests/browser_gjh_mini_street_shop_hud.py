@@ -1,5 +1,7 @@
 """Check the localized indoor HUD and real touch input on narrow screens."""
 import argparse
+import os
+import sys
 from functools import partial
 from http.server import ThreadingHTTPServer
 from itertools import combinations
@@ -12,11 +14,11 @@ from browser_gjh_mini_street_language import switch_language
 from browser_gjh_mini_street_links import Quiet, ROOT, ROUTE
 
 CASES = {
-    "ms": ("Kedai New Moon", "Gunakan kayu bedik untuk berjalan dan seret untuk melihat", "‹ Keluar dari kedai"),
-    "en": ("New Moon Shop", "Use the stick to walk and drag to look", "‹ Exit shop"),
+    "ms": ("Kedai New Moon", "Kayu bedik untuk jalan. Seret untuk lihat.", "‹ Keluar dari kedai"),
+    "en": ("New Moon Shop", "Stick to walk. Drag to look.", "‹ Exit shop"),
     "zh-Hans": ("New Moon 商店", "用摇杆行走，拖动查看四周", "‹ 离开商店"),
 }
-VIEWPORTS = [(320, 568), (375, 667), (390, 844)]
+VIEWPORTS = [(320, 568), (375, 667), (390, 844), (568, 320)]
 CONTROLS = (
     ".shop-interior-title", ".shop-interior-exit", ".mini-basket-launcher",
     ".shop-interior-stick", ".shop-interior-inspect",
@@ -25,6 +27,12 @@ CONTROLS = (
 
 def check_layout(stage, label):
     bounds = stage.bounding_box()
+    viewport = stage.page.viewport_size
+    padding = stage.locator(".shop-interior-controls").evaluate("""element => {
+      const style = getComputedStyle(element);
+      return [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft].map(parseFloat);
+    }""")
+    top, right, bottom, left = padding
     boxes = {}
     for selector in CONTROLS:
         control = stage.locator(selector)
@@ -34,6 +42,8 @@ def check_layout(stage, label):
             assert bounds[start] <= box[start] < box[start] + box[size] <= bounds[start] + bounds[size], (
                 label, selector, box, bounds,
             )
+        assert bounds["x"] + left <= box["x"] <= viewport["width"] - right - box["width"], (label, selector, box)
+        assert bounds["y"] + top <= box["y"] <= viewport["height"] - bottom - box["height"], (label, selector, box)
         if selector != ".shop-interior-title":
             assert min(box["width"], box["height"]) >= 44, (label, selector, box)
         boxes[selector] = box
@@ -67,14 +77,20 @@ def check_insets_and_text_size(page, stage, evidence):
           return {top: parseFloat(css.paddingTop), right: parseFloat(css.paddingRight),
                   bottom: parseFloat(css.paddingBottom), left: parseFloat(css.paddingLeft)};
         }""")
-        assert pad == insets, pad
-        for lang in CASES:
-            switch_language(page, lang)
-            check_layout(stage, f"{lang} 200% text size with safe insets")
-        if evidence:
-            stage.screenshot(path=evidence / "shop-hud-320x568-safe-insets-200pct-text.png", animations="disabled")
+        # The fixed utility bar already clears the top inset.
+        assert stage.bounding_box()["y"] >= insets["top"]
+        assert pad == {**insets, "top": 6}, pad
+        for width, height in VIEWPORTS:
+            page.set_viewport_size({"width": width, "height": height})
+            for lang in CASES:
+                switch_language(page, lang)
+                check_layout(stage, f"{width}x{height} {lang} 200% text size with safe insets")
+            if evidence:
+                stage.screenshot(path=evidence / f"shop-hud-{width}x{height}-safe-insets-200pct-text.png",
+                                 animations="disabled")
     finally:
         enlarged.evaluate("style => style.remove()")
+        page.set_viewport_size({"width": 320, "height": 568})
         session.send("Emulation.setSafeAreaInsetsOverride", {"insets": dict.fromkeys(insets, 0)})
         session.detach()
 
@@ -124,9 +140,10 @@ def check_resize_fallback(context, url):
         previous = page.evaluate("window.__shopHudTestAspect()")
         page.set_viewport_size({"width": 390, "height": 844})
         page.wait_for_function("""previous => {
-          const stage = document.querySelector("#stage").getBoundingClientRect();
+          const canvas = document.querySelector("#view");
           const next = window.__shopHudTestAspect();
-          return next !== previous && Math.abs(next - stage.width / stage.height) < 0.001;
+          return next !== previous && Math.abs(next - canvas.clientWidth / canvas.clientHeight) < 0.001 &&
+            Math.abs(next - canvas.width / canvas.height) < 0.005;
         }""", arg=previous)
     finally:
         page.close()
@@ -204,15 +221,17 @@ def main(evidence=None):
         Thread(target=server.serve_forever, daemon=True).start()
         url = f"http://127.0.0.1:{server.server_port}{ROUTE}"
         with sync_playwright() as playwright:
+            default_chrome = ("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+                              if sys.platform == "darwin" else "/usr/bin/google-chrome")
             browser = playwright.chromium.launch(
-                executable_path="/usr/bin/google-chrome",
+                executable_path=os.environ.get("GALLERY_CHROME", default_chrome),
                 args=["--use-angle=swiftshader", "--enable-unsafe-swiftshader"],
             )
             try:
                 exercise(browser, url, evidence)
             finally:
                 browser.close()
-    print("PASS: Shop HUD at 320/375/390 px, all locales and both themes, safe areas, enlarged text, real touch and focus")
+    print("PASS: Shop HUD at 320×568, 375×667, 390×844 and 568×320, all locales and both themes, safe areas, enlarged text, real touch and focus")
 
 
 if __name__ == "__main__":

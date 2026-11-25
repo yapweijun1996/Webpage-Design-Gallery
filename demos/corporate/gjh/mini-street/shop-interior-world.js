@@ -173,7 +173,7 @@ const provisionStock = {
   teh: { name: ["JASMINE", "TEA"], note: "LOOSE LEAF", script: "茉莉花茶", color: "#406455", accent: "#d5bc7d", shape: "box", size: [0.135, 0.190, 0.102] },
   crackers: { name: ["CREAM", "CRACKERS"], note: "TRADITIONAL BISCUITS", script: "梳打饼", color: "#9f5839", accent: "#e8c180", shape: "box", size: [0.164, 0.195, 0.137] },
   kaya: { name: ["PANDAN", "KAYA"], note: "COCONUT JAM", script: "斑斓咖椰", color: "#73774b", accent: "#cbd39a", shape: "can", size: [0.104, 0.122, 0.104] },
-  sardines: { name: ["SARDINES"], note: "IN TOMATO SAUCE", script: "茄汁沙丁鱼", color: "#a34b3e", accent: "#f1b379", shape: "can", size: [0.108, 0.148, 0.108] },
+  sardines: { name: ["SARDINES"], note: "IN TOMATO SAUCE", script: "茄汁沙丁鱼", color: "#a34b3e", accent: "#f1b379", shape: "can", size: [0.155, 0.074, 0.104] },
   lychee: { name: ["LYCHEES"], note: "IN LIGHT SYRUP", script: "糖水荔枝", color: "#377a6d", accent: "#efb69d", shape: "can", size: [0.117, 0.151, 0.117] },
   soy: { name: ["LIGHT SOY", "SAUCE"], note: "SOY SAUCE", script: "生抽", color: "#4d352a", accent: "#bc6755", shape: "bottle", size: [0.094, 0.295, 0.094] },
 };
@@ -308,49 +308,90 @@ function paintContact(ctx, x, y, radiusX, radiusY) {
 
 const SHELF_DEPTH = 0.56;
 const SHELF_CENTER = 0.013;
+const SHELF_THICKNESS = 0.064;
 
-function addShelfDecks(THREE, room, boards) {
-  // Static contact shading for all board tops uses one texture and one draw call.
+function paintShelfTickets(ctx, width, plan, features) {
+  ctx.fillStyle = "#383f35";
+  ctx.fillRect(0, 0, width, 24);
+  ctx.fillStyle = "#c2ac81";
+  ctx.fillRect(0, 1, width, 2);
+  ctx.fillRect(0, 21, width, 1);
+  ctx.textAlign = "center";
+  ctx.font = "bold 10px sans-serif";
+  const laneWidth = width / plan.length;
+  for (const [bay, id] of plan.entries()) {
+    const x = (bay + 0.5) * laneWidth;
+    if (features.some(({ slot }) => Math.abs(slot * width - x) < 65)) continue;
+    ctx.fillStyle = bay % 3 === 1 ? "#e6cb7b" : "#f1e7d1";
+    ctx.fillRect(x - 24, 5, 48, 14);
+    ctx.fillStyle = "#3b382b";
+    ctx.fillText(id.toUpperCase(), x - 4, 16, 32);
+    for (const offset of [15, 18, 20]) ctx.fillRect(x + offset, 7, 1, 9);
+  }
+  for (const { slot, product } of features) {
+    const x = slot * width;
+    ctx.fillStyle = "#e3bf72";
+    ctx.fillRect(x - 45, 4, 90, 16);
+    ctx.fillStyle = "#382e21";
+    ctx.fillText(`${product.origin} · ${product.size}`, x, 16, 84);
+  }
+}
+
+function addShelfSurfaces(THREE, room, boards) {
   const width = 1024;
-  const height = 256;
+  const height = 512;
   const stride = Math.floor(height / boards.length);
+  const deckHeight = stride - 24;
+  // Share one atlas and mesh for the deck contacts and front ticket strips.
   const texture = paintedTexture(width, height, (ctx) => {
     for (const [index, board] of boards.entries()) {
       const top = index * stride;
-      const tone = ctx.createLinearGradient(0, top, 0, top + stride);
+      const tone = ctx.createLinearGradient(0, top, 0, top + deckHeight);
       tone.addColorStop(0, "#c4b79c");
       tone.addColorStop(0.60, "#a89173");
-      tone.addColorStop(1, "#655745");
+      tone.addColorStop(1, "#574833");
       ctx.fillStyle = tone;
-      ctx.fillRect(0, top, width, stride);
+      ctx.fillRect(0, top, width, deckHeight);
       ctx.save();
       ctx.beginPath();
-      ctx.rect(0, top, width, stride);
+      ctx.rect(0, top, width, deckHeight);
       ctx.clip();
       for (const [x, z, packWidth, packDepth] of board.stock) {
         paintContact(ctx, (0.5 + x / board.width) * width,
-          top + (0.5 - (z - SHELF_CENTER) / SHELF_DEPTH) * stride,
-          packWidth * 0.74 / board.width * width, packDepth * 0.80 / SHELF_DEPTH * stride);
+          top + (0.5 - (z - SHELF_CENTER) / SHELF_DEPTH) * deckHeight,
+          packWidth * 0.79 / board.width * width, packDepth * 0.94 / SHELF_DEPTH * deckHeight);
       }
+      ctx.restore();
+      ctx.save();
+      ctx.translate(0, top + deckHeight);
+      paintShelfTickets(ctx, width, board.plan, board.features);
       ctx.restore();
     }
   });
   const positions = [];
   const uvs = [];
   const indices = [];
-  for (const [index, board] of boards.entries()) {
+  function quad(board, upperY, upperZ, lowerY, lowerZ, top, bottom, faceUp) {
     const half = board.width / 2;
-    const front = SHELF_CENTER + SHELF_DEPTH / 2;
-    const back = SHELF_CENTER - SHELF_DEPTH / 2;
-    const y = board.y + 0.0015;
-    for (const [x, z] of [[-half, front], [half, front], [-half, back], [half, back]]) {
+    const base = positions.length / 3;
+    for (const [x, y, z] of [[-half, upperY, upperZ], [half, upperY, upperZ],
+      [-half, lowerY, lowerZ], [half, lowerY, lowerZ]]) {
       positions.push(...board.group.localToWorld(new THREE.Vector3(x, y, z)).toArray());
     }
-    const frontUV = 1 - (index * stride + 1) / height;
-    const backUV = 1 - ((index + 1) * stride - 1) / height;
-    uvs.push(0, frontUV, 1, frontUV, 0, backUV, 1, backUV);
-    const base = index * 4;
-    indices.push(base, base + 1, base + 2, base + 2, base + 1, base + 3);
+    const topUV = 1 - (top + 1) / height;
+    const bottomUV = 1 - (bottom - 1) / height;
+    uvs.push(0, topUV, 1, topUV, 0, bottomUV, 1, bottomUV);
+    if (faceUp) indices.push(base, base + 1, base + 2, base + 2, base + 1, base + 3);
+    else indices.push(base, base + 2, base + 1, base + 2, base + 3, base + 1);
+  }
+  const front = SHELF_CENTER + SHELF_DEPTH / 2;
+  const back = SHELF_CENTER - SHELF_DEPTH / 2;
+  for (const [index, board] of boards.entries()) {
+    const top = index * stride;
+    const y = board.y;
+    quad(board, y + 0.0015, front, y + 0.0015, back, top, top + deckHeight, true);
+    quad(board, y - 0.009, front + 0.003, y - SHELF_THICKNESS + 0.009, front + 0.003,
+      top + deckHeight, top + stride, false);
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
@@ -366,7 +407,7 @@ function shadowMap() {
   });
 }
 
-export function buildShopInterior(THREE, scene, productCount) {
+export function buildShopInterior(THREE, scene, products) {
   const random = seededRandom();
   const textureRandom = seededRandom();
   const room = new THREE.Group();
@@ -380,7 +421,7 @@ export function buildShopInterior(THREE, scene, productCount) {
   const boards = [];
   const colliders = [];
   const occluders = [];
-  const occupiedAnchors = SHOP_ANCHORS.slice(0, productCount);
+  const occupiedAnchors = SHOP_ANCHORS.slice(0, products.length);
   const finish = (color, roughness = 0.86, metalness = 0) =>
     new THREE.MeshStandardMaterial({ color, roughness, metalness });
   const wall = new THREE.MeshStandardMaterial({
@@ -584,43 +625,6 @@ export function buildShopInterior(THREE, scene, productCount) {
     }
   }
 
-  function shelfTickets(plan, featureSlots) {
-    return new THREE.MeshStandardMaterial({
-      map: paintedTexture(512, 16, (ctx, width, height) => {
-        ctx.fillStyle = "#7d8174";
-        ctx.fillRect(0, 0, width, height);
-        ctx.fillStyle = "#ccc9b6";
-        ctx.fillRect(0, 1, width, 1);
-        ctx.fillRect(0, height - 2, width, 1);
-        const laneWidth = width / plan.length;
-        for (const [bay, id] of plan.entries()) {
-          const position = (bay + 0.5) * laneWidth;
-          if (featureSlots.some((slot) => Math.abs(slot * width - position) < 24)) continue;
-          const x = position - 10;
-          ctx.fillStyle = bay % 3 === 1 ? "#e6cb7b" : "#f1e7d1";
-          ctx.fillRect(x, 3, 20, 10);
-          ctx.fillStyle = "#3b382b";
-          ctx.font = "bold 7px sans-serif";
-          ctx.fillText(id.toUpperCase(), x + 2, 10, 11);
-          ctx.fillRect(x + 16, 5, 1, 6);
-          ctx.fillRect(x + 18, 5, 1, 6);
-        }
-        for (const slot of featureSlots) {
-          const x = slot * width - 12;
-          ctx.fillStyle = "#d7b66c";
-          ctx.fillRect(x, 2, 24, 12);
-          ctx.strokeStyle = "#6e522b";
-          ctx.strokeRect(x + 1, 3, 22, 10);
-          ctx.fillStyle = "#382e21";
-          ctx.textAlign = "center";
-          ctx.font = "bold 7px sans-serif";
-          ctx.fillText("ABALONE", x + 12, 10, 20);
-        }
-      }),
-      roughness: 0.66,
-    });
-  }
-
   function wallShelf(name, x, z, width, yaw, plan) {
     const group = area(name, x, z, yaw);
     box(group, shelfBack, [width, 2.24, 0.07], [0, 1.20, -0.235], true);
@@ -636,16 +640,22 @@ export function buildShopInterior(THREE, scene, productCount) {
       }
       shelfTrim(group, brushed, [0.014, 2.06, 0.005], railX, 1.12, 0.278);
     }
-    const clearances = occupiedAnchors.map(({ position }) => group.worldToLocal(new THREE.Vector3(...position)))
-      .filter(({ x, z }) => Math.abs(x) < width / 2 && Math.abs(z - 0.17) < 0.12);
+    const clearances = occupiedAnchors.map(({ position }, index) => ({
+      local: group.worldToLocal(new THREE.Vector3(...position)),
+      product: products[index],
+    })).filter(({ local: { x, z } }) => Math.abs(x) < width / 2 && Math.abs(z - 0.17) < 0.12);
     for (const [row, y] of [0.31, 0.81, 1.31, 1.81, 2.29].entries()) {
-      box(group, shelf, [width, 0.036, SHELF_DEPTH], [0, y - 0.018, SHELF_CENTER], true);
+      box(group, shelf, [width, SHELF_THICKNESS, SHELF_DEPTH],
+        [0, y - SHELF_THICKNESS / 2, SHELF_CENTER], true);
       const footprints = [];
-      boards.push({ group, width, y, stock: footprints });
-      const reserved = clearances.filter((anchor) => Math.abs(anchor.y - y) < 0.14);
-      const featureSlots = reserved.map(({ x }) => x / width + 0.5);
-      plane(group, shelfTickets(plan[row], featureSlots), width, 0.041, 0, y - 0.019, 0.295);
-      shelfTrim(group, paintedGreen, [width, 0.018, 0.022], 0, y - 0.045, 0.263);
+      const reserved = clearances.filter(({ local }) => Math.abs(local.y - y) < 0.14);
+      const features = reserved.map(({ local, product }) => ({ slot: local.x / width + 0.5, product }));
+      boards.push({ group, width, y, stock: footprints, plan: plan[row], features });
+      shelfTrim(group, brushed, [width, 0.008, 0.012], 0, y - 0.006, 0.297);
+      shelfTrim(group, paintedGreen, [width, 0.012, 0.022], 0, y - 0.063, 0.286);
+      for (const bracket of [-0.33, 0, 0.33]) {
+        shelfTrim(group, paintedGreen, [0.054, 0.077, 0.38], width * bracket, y - 0.088, -0.016);
+      }
       const laneWidth = width / plan[row].length;
       for (const [lane, id] of plan[row].entries()) {
         const [packWidth] = provisionStock[id].size;
@@ -653,11 +663,15 @@ export function buildShopInterior(THREE, scene, productCount) {
         const count = Math.floor((laneWidth - 0.065) / pitch);
         for (let pack = 0; pack < count; pack += 1) {
           const localX = -width / 2 + laneWidth * (lane + 0.5) + pitch * (pack - (count - 1) / 2);
-          if (reserved.some((anchor) => Math.abs(anchor.x - localX) < 0.16 + packWidth / 2)) continue;
+          if (reserved.some(({ local }) => Math.abs(local.x - localX) < 0.16 + packWidth / 2)) continue;
           if (row === 4 && (lane % 2 || pack % 3 === 1 || (yaw === 0 && Math.abs(localX) < 1.62))) continue;
-          packageAt(group, id, localX, y, 0.160 - random() * 0.022, (random() - 0.5) * 0.14, footprints);
+          const gap = (lane * 3 + pack + row * 2) % 11 === 0;
+          const frontZ = 0.162 - random() * 0.035;
+          const turn = (random() - 0.5) * 0.19;
+          if (!gap) packageAt(group, id, localX, y, frontZ, turn, footprints);
           if (row < 4 && (lane + pack) % 3 !== 1) {
-            packageAt(group, id, localX, y, -0.025 - random() * 0.032, (random() - 0.5) * 0.21, footprints);
+            packageAt(group, id, localX + (random() - 0.5) * 0.022, y,
+              -0.035 - random() * 0.040, (random() - 0.5) * 0.27, footprints);
           }
         }
       }
@@ -679,7 +693,7 @@ export function buildShopInterior(THREE, scene, productCount) {
     ["crackers", "rice", "crackers", "rice", "crackers", "rice"],
   ]);
   block(3.23, -0.33, 0.64, 5.12);
-  addShelfDecks(THREE, room, boards);
+  addShelfSurfaces(THREE, room, boards);
 
   // These shallow ledges keep the existing walkable camera bounds clear.
   const ledges = area("Left provision ledges", -3.43, -0.55, Math.PI / 2);

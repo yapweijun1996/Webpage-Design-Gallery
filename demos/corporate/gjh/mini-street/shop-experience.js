@@ -161,16 +161,24 @@ export function createShopExperience({street, stage, toolbar, onExit}) {
     const delta = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0;
     lastTime = now;
     const blocked = hand.getState().phase !== "idle" ||
-      Boolean(document.querySelector("#mini-basket")?.open);
+      Boolean(document.querySelector("dialog[open]"));
     setInputPaused(blocked);
     hand.update(delta);
     indoor.render(delta);
     frame = requestAnimationFrame(render);
   }
+  const renderSize = new THREE.Vector2();
   function resize() {
     if (!active) return;
-    const rect = stage.getBoundingClientRect();
-    indoor.resize(rect.width, rect.height);
+    const width = Math.max(1, street.canvas.clientWidth);
+    const height = Math.max(1, street.canvas.clientHeight);
+    // Limit fill cost in the tall, full-screen shop while retaining its CSS aspect.
+    const pixelRatio = Math.min(window.devicePixelRatio, width <= 720 && height > width ? 1.25 : 1.45);
+    street.renderer.getSize(renderSize);
+    if (renderSize.x !== width || renderSize.y !== height || street.renderer.getPixelRatio() !== pixelRatio) {
+      street.renderer.setDrawingBufferSize(width, height, pixelRatio);
+    }
+    indoor.resize(width, height);
   }
   const resizeObserver = typeof ResizeObserver === "function" ? new ResizeObserver(resize) : null;
   if (resizeObserver) resizeObserver.observe(stage);

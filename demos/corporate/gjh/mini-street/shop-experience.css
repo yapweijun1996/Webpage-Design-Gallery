@@ -23,6 +23,10 @@
   /* The dialog restores focus to this launcher before the scene resumes. */
   visibility: visible;
 }
+/* The inspection dialog owns the controls until it closes. */
+.shop-experience.is-inspecting .shop-experience-basket {
+  visibility: hidden;
+}
 .shop-experience-basket :is(.mini-basket-dock, .mini-basket-launcher) {
   max-width: 100%;
 }
@@ -101,4 +105,38 @@
 }
 @keyframes shop-loading {
   to { transform: translateX(150%); }
+}
+
+@media (max-width: 720px), (max-height: 480px) {
+  html:has(.stage[data-interior]) {
+    overflow: hidden;
+    --shop-masthead-height: calc(53px + env(safe-area-inset-top, 0px));
+  }
+
+  body:has(.stage[data-interior]) .masthead {
+    position: fixed;
+    inset: 0 0 auto;
+  }
+
+  body:has(.stage[data-interior]) .masthead-inner {
+    display: flex;
+    justify-content: end;
+    height: 52px;
+    min-height: 0;
+    padding-block: 0;
+  }
+
+  body:has(.stage[data-interior]) .masthead :is(.identity, .mini-nav, #mini-update) {
+    display: none;
+  }
+
+  .street .stage[data-interior] {
+    position: fixed;
+    z-index: 1;
+    inset: var(--shop-masthead-height) 0 0;
+    height: auto;
+    min-height: 0;
+    border: 0;
+    border-radius: 0;
+  }
 }

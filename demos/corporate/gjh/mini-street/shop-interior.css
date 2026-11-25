@@ -135,17 +135,33 @@ canvas[data-shop-interior]:active {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 10px;
-  height: 10px;
+  width: 16px;
+  height: 16px;
   transform: translate(-50%, -50%);
   border: var(--shop-interior-border-3);
   border-radius: var(--shop-interior-border-radius-2);
   box-shadow: var(--shop-interior-box-shadow-2);
 }
 
+.shop-interior-reticle::before,
+.shop-interior-reticle::after {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 8px;
+  height: 2px;
+  transform: translate(-50%, -50%);
+  background: white;
+  box-shadow: 0 0 2px black;
+  content: "";
+}
+
+.shop-interior-reticle::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
 .shop-interior-reticle--target {
-  width: 13px;
-  height: 13px;
+  width: 20px;
+  height: 20px;
   border: var(--shop-interior-border-4);
   box-shadow: var(--shop-interior-box-shadow-3);
 }
@@ -185,4 +201,56 @@ canvas[data-shop-interior]:active {
   .shop-interior-title .shop-interior-touch-hint {
     display: block;
   }
+}
+
+@media (max-width: 720px), (max-height: 480px) {
+  .shop-interior-controls {
+    grid-template-areas:
+      "exit basket"
+      "title title"
+      ". ."
+      "actions actions";
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    --shop-inset: 6px;
+    padding-block-start: var(--shop-inset);
+    line-height: 1.15;
+  }
+
+  .shop-interior-exit { justify-self: start; }
+
+  .shop-interior-controls :is(.shop-interior-exit, .shop-interior-actions > button) {
+    padding: 5px 8px;
+  }
+
+  .shop-interior-title { padding: 5px 8px; }
+
+  .shop-interior-stick {
+    width: clamp(58px, 16vmin, 78px);
+  }
+
+  .shop-interior-controls .mini-basket-launcher {
+    gap: 5px;
+    color: inherit;
+    background: var(--shop-interior-background-1);
+    padding-inline: 6px;
+    overflow-wrap: anywhere;
+  }
+
+  .shop-interior-controls .mini-basket-badge {
+    min-height: 23px;
+    height: auto;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 480px) {
+  .shop-interior-controls {
+    grid-template-areas:
+      "exit title basket"
+      ". . ."
+      "actions actions actions";
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .shop-interior-title { justify-self: center; }
 }

@@ -126,6 +126,8 @@ test("product controls and static fallback share one responsive scene", async ()
       assert.equal(await page.evaluate(() => document.activeElement.textContent.trim()), "Close");
       assert.ok(await opener.evaluate(button => button.inert));
       await page.keyboard.press("Tab");
+      assert.ok(await dialog.locator(".shop-product-info").evaluate(info => info === document.activeElement));
+      await page.keyboard.press("Tab");
       assert.equal(await page.evaluate(() => document.activeElement.getAttribute("aria-label")), "Rotate left");
       await page.keyboard.press("Enter");
       await controls.getByRole("button", { name: "Rotate right" }).press("Space");

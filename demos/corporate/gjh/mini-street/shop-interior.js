@@ -86,7 +86,7 @@ function createControls(root, basketHost, onExit, onInspect, onLock, signal) {
   title.append(hint);
   const touchHint = document.createElement("small");
   touchHint.className = "shop-interior-touch-hint";
-  touchHint.textContent = "Use the stick to walk and drag to look";
+  touchHint.textContent = "Stick to walk. Drag to look.";
   title.append(touchHint);
 
   const exit = add(group, "button", "shop-interior-exit", "‹ Exit shop");
@@ -134,7 +134,7 @@ export function createShopInterior({
   const camera = new THREE.PerspectiveCamera(54, 1, 0.045, 20);
   camera.rotation.order = "YXZ";
   scene.add(camera);
-  const world = buildShopInterior(THREE, scene, products.length);
+  const world = buildShopInterior(THREE, scene, products);
   const stock = new Map();
   const hitTargets = [];
   const hitArea = new THREE.BoxGeometry(0.28, 0.26, 0.27);
@@ -180,6 +180,8 @@ export function createShopInterior({
   let lookPointer;
   let walkPointer;
   let useCursor = false;
+  let resumeCursor = false;
+  let guidance;
   let locked = false;
   let unlockedAt = -Infinity;
   let yaw = 0;
@@ -207,7 +209,6 @@ export function createShopInterior({
     }
     if (controls) {
       controls.inspect.disabled = !next;
-      controls.inspect.textContent = next ? `Inspect ${next.product.name}` : "Walk closer and aim";
       controls.reticle.classList.toggle("shop-interior-reticle--target", Boolean(next));
     }
     onProductFocus?.(next?.product ?? null, next?.anchor ?? null);
@@ -223,8 +224,27 @@ export function createShopInterior({
     return !obstacle || hit.distance < obstacle.distance ? stock.get(hit.object.userData.anchorId) : undefined;
   }
 
+  function updateGuidance() {
+    if (!controls) return;
+    const nearby = !focus && hitTargets.some(({ parent }) => {
+      const { x, y, z } = parent.position;
+      const { position } = camera;
+      return (x - position.x) ** 2 + (y + 0.094 - position.y) ** 2 +
+        (z - position.z) ** 2 <= PICK_DISTANCE ** 2;
+    });
+    const label = focus ? `Inspect ${focus.product.name}` :
+      nearby ? "Aim the crosshair at a New Moon can" : "Walk closer and aim";
+    if (guidance === label) return;
+    guidance = label;
+    controls.inspect.textContent = label;
+  }
+
+  function canReceiveInput() {
+    return !paused && !document.querySelector("dialog[open]");
+  }
+
   function select(item) {
-    if (active && !paused && item) onProductSelect?.(item.product, item.anchor);
+    if (active && canReceiveInput() && item) onProductSelect?.(item.product, item.anchor);
   }
 
   function look(dx, dy) {
@@ -254,6 +274,7 @@ export function createShopInterior({
       if (canWalk(camera.position.x, camera.position.z + dz)) camera.position.z += dz;
     }
     setFocus(pick(useCursor && !locked ? cursor : center));
+    updateGuidance();
   }
 
   function resetInput() {
@@ -275,11 +296,17 @@ export function createShopInterior({
   }
 
   function setPaused(value) {
-    paused = Boolean(value);
+    if (paused === value) return;
+    paused = value;
     if (paused) {
+      resumeCursor = useCursor;
       resetInput();
       unlock();
       setFocus(undefined);
+    } else {
+      useCursor = resumeCursor;
+      setFocus(pick(useCursor ? cursor : center));
+      updateGuidance();
     }
     controls?.group.toggleAttribute("data-paused", paused);
   }
@@ -294,9 +321,8 @@ export function createShopInterior({
   function bindInputs(signal) {
     const on = (target, type, listener) => target.addEventListener(type, listener, { signal });
     on(window, "keydown", (event) => {
-      if (paused || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
-      if (document.querySelector("dialog[open]") ||
-        event.target?.closest?.(".masthead, input, select, textarea, [contenteditable]")) return;
+      if (!canReceiveInput() || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.isComposing) return;
+      if (event.target?.closest?.(".masthead, input, select, textarea, [contenteditable]")) return;
       const code = event.code;
       if (movementKeys.has(code)) {
         event.preventDefault();
@@ -328,16 +354,16 @@ export function createShopInterior({
       if (locked && paused) unlock();
       controls?.lock.setAttribute("aria-pressed", String(locked));
       if (controls) controls.lock.textContent = locked ? "Release mouse" : "Capture mouse";
-      useCursor = false;
+      if (locked) useCursor = false;
       lookPointer = undefined;
     });
     on(document, "mousemove", (event) => {
-      if (paused || !locked) return;
+      if (!canReceiveInput() || !locked) return;
       look(event.movementX * 0.0028, event.movementY * 0.0028);
     });
 
     on(canvas, "pointerdown", (event) => {
-      if (paused || event.button !== 0 || lookPointer) return;
+      if (!canReceiveInput() || event.button !== 0 || lookPointer) return;
       if (locked) {
         select(pick());
         return;
@@ -346,7 +372,7 @@ export function createShopInterior({
       canvas.setPointerCapture(event.pointerId);
     });
     on(canvas, "pointermove", (event) => {
-      if (paused || locked) return;
+      if (!canReceiveInput() || locked) return;
       if (lookPointer?.id === event.pointerId) {
         const dx = event.clientX - lookPointer.x;
         const dy = event.clientY - lookPointer.y;
@@ -391,13 +417,13 @@ export function createShopInterior({
       thumb.style.transform = `translate(${walkX * radius}px, ${walkY * radius}px)`;
     }
     on(stick, "pointerdown", (event) => {
-      if (paused || walkPointer !== undefined || event.button !== 0) return;
+      if (!canReceiveInput() || walkPointer !== undefined || event.button !== 0) return;
       walkPointer = event.pointerId;
       stick.setPointerCapture(walkPointer);
       steer(event);
     });
     on(stick, "pointermove", (event) => {
-      if (event.pointerId === walkPointer) steer(event);
+      if (canReceiveInput() && event.pointerId === walkPointer) steer(event);
     });
     for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) {
       on(stick, type, (event) => {
@@ -449,6 +475,7 @@ export function createShopInterior({
     bindInputs(events.signal);
     controls?.group.focus({ preventScroll: true });
     setFocus(pick());
+    updateGuidance();
     return true;
   }
 
@@ -461,6 +488,7 @@ export function createShopInterior({
     events.abort();
     controls?.group.remove();
     controls = undefined;
+    guidance = undefined;
     canvas.removeAttribute("data-shop-interior");
     setFocus(undefined);
   }

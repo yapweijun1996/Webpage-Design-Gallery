@@ -32,13 +32,15 @@ export function createShopProductUI({
       <img class="shop-product-photo" width="768" height="768" decoding="async" alt="" hidden>
     </div>
     <div class="shop-product-panel">
-      <p class="shop-product-brand">New Moon</p>
-      <h2 id="shop-product-title"></h2>
-      <dl class="shop-product-specs">
-        <div><dt>Pack size</dt><dd></dd></div>
-        <div><dt>Origin</dt><dd></dd></div>
-      </dl>
-      <p class="shop-product-status" role="status" aria-atomic="true"></p>
+      <div class="shop-product-info" tabindex="0">
+        <p class="shop-product-brand">New Moon</p>
+        <h2 id="shop-product-title"></h2>
+        <dl class="shop-product-specs">
+          <div><dt>Pack size</dt><dd></dd></div>
+          <div><dt>Origin</dt><dd></dd></div>
+        </dl>
+        <p class="shop-product-status" role="status" aria-atomic="true"></p>
+      </div>
       <div class="shop-product-rotate" role="group" aria-label="Product view controls">
         <button type="button" data-product-rotate="left" aria-label="Rotate left" title="Rotate left">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>
@@ -135,11 +137,11 @@ export function createShopProductUI({
       event.stopPropagation();
       if (!event.repeat) onClose();
     } else if (event.key === "Tab") {
-      const buttons = [...root.querySelectorAll("button:not(:disabled)")]
+      const controls = [...root.querySelectorAll("button:not(:disabled), [tabindex='0']")]
         .filter(button => !button.closest("[hidden]"));
-      const first = buttons[0];
-      const last = buttons.at(-1);
-      if (!buttons.includes(active) || active === (event.shiftKey ? first : last)) {
+      const first = controls[0];
+      const last = controls.at(-1);
+      if (!controls.includes(active) || active === (event.shiftKey ? first : last)) {
         event.preventDefault();
         (event.shiftKey ? last : first).focus();
       }
