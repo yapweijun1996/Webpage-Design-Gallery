@@ -230,17 +230,25 @@ def exercise_shop_loading(browser, url):
 
 
 def exercise_shop_retry(browser, url):
-    page = browser.new_page(service_workers="block", reduced_motion="reduce")
+    page = browser.new_page(viewport={"width": 390, "height": 844}, has_touch=True,
+                            is_mobile=True, service_workers="block", reduced_motion="reduce")
     module = "**/mini-street/shop-experience.js"
     page.route(module, lambda route: route.abort())
     page.goto(url, wait_until="domcontentloaded")
     expect(page.locator("#stage")).to_have_attribute("data-webgl", "", timeout=15000)
-    page.get_by_role("link", name="Enter New Moon Shop").click()
+    entry = page.locator(".scene-shop-entry")
+    entry.tap()
     display = page.locator("#stop-dialog")
     expect(display.get_by_text("The 3D shop could not load. The product display remains available.")).to_be_visible()
     expect(display.locator(".pack-list li")).to_have_count(4)
     expect(page.locator("#shop-loading-dialog")).to_be_hidden()
     expect(page).to_have_url(url + "#shop")
+    expect(entry).to_be_hidden()
+    display.get_by_role("button", name="Close", exact=True).tap()
+    expect(page).to_have_url(url)
+    expect(page.get_by_role("link", name="New Moon Shop", exact=True)).to_be_focused()
+    page.go_forward()
+    expect(display).to_be_visible()
 
     page.unroute(module)
     display.get_by_role("button", name="Retry 3D shop").click()

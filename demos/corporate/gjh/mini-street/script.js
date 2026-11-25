@@ -202,9 +202,14 @@ if (typeof dialog.showModal === "function") {
   loadingDialog.addEventListener("cancel", cancelShopEntry);
   loadingDialog.querySelector("form").addEventListener("submit", cancelShopEntry);
 
+  function shopFocusTarget(opener) {
+    return opener?.isConnected && !opener.closest("[hidden], [inert]") ? opener : shopStop;
+  }
+
   function closeStop(updateLocation) {
     if (!activeSection) return;
     const hash = `#${activeSection.id}`;
+    const returnFocus = activeSection.id === "shop" ? shopFocusTarget(previousFocus) : previousFocus;
     if (activeSection === vendingSection) setVendingOpen(false);
     activeSection = undefined;
     if (dialog.open) dialog.close();
@@ -219,7 +224,7 @@ if (typeof dialog.showModal === "function") {
       }
     }
     street?.setPaused(false);
-    previousFocus?.focus();
+    returnFocus?.focus();
   }
 
   function syncLocation() {
@@ -249,7 +254,7 @@ if (typeof dialog.showModal === "function") {
     pendingOpener = null;
     if (!selected) {
       closeStop(false);
-      if (returnToEntry && !returnToEntry.hidden) returnToEntry.focus({preventScroll: true});
+      if (returnToEntry) shopFocusTarget(returnToEntry).focus({preventScroll: true});
       return;
     }
     if (dialog.open && activeSection === selected) return;
