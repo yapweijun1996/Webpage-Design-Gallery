@@ -1,0 +1,31 @@
+/* Toast: one region per page, bottom centre on phones, bottom right on desktop. */
+.toast-region {
+  position: fixed; z-index: var(--z-toast); display: grid; gap: var(--space-2);
+  left: max(var(--space-4), env(safe-area-inset-left, 0px)); right: max(var(--space-4), env(safe-area-inset-right, 0px));
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--space-4)); pointer-events: none;
+}
+.toast {
+  display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border-radius: var(--radius-md); background: var(--c-toast-bg); color: var(--c-toast-text); box-shadow: var(--shadow-lg);
+  pointer-events: auto; font-size: var(--size-text-sm);
+  animation: pomelo-toast-in var(--motion-base) var(--ease-out);
+}
+.toast.is-leaving { opacity: 0; transform: translateY(var(--space-2)); transition: opacity var(--motion-base) var(--ease-in), transform var(--motion-base) var(--ease-in); }
+.toast__icon { display: inline-grid; padding-top: var(--space-1); }
+.toast__icon .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
+.toast--success .toast__icon { color: var(--c-highlight); }
+.toast--warning .toast__icon, .toast--error .toast__icon { color: var(--c-highlight); }
+.toast__text { flex: 1; min-width: 0; padding-block: var(--space-1); }
+.toast__action {
+  min-height: var(--size-tap); padding-inline: var(--space-3); border: 0; border-radius: var(--radius-pill);
+  background: var(--c-highlight); color: var(--c-on-highlight); font-weight: var(--weight-semibold); cursor: pointer;
+}
+.toast__close { display: inline-grid; place-items: center; width: var(--size-tap); height: var(--size-tap); border: 0; border-radius: var(--radius-pill); background: transparent; color: inherit; cursor: pointer; }
+@keyframes pomelo-toast-in { from { opacity: 0; transform: translateY(var(--size-nudge)); } to { opacity: 1; transform: none; } }
+@media (min-width: 768px) {
+  .toast-region { left: auto; width: min(var(--size-toast), calc(100vw - var(--space-6))); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast { animation: none; }
+  .toast.is-leaving { transform: none; }
+}

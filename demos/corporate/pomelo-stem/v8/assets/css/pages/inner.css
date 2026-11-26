@@ -1,0 +1,35 @@
+/* Commerce, Services, About and Contact layouts. */
+.ai-mini { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: var(--space-4); align-items: center; }
+.service-list { display: grid; gap: var(--space-4); }
+.service { display: grid; gap: var(--space-3); align-content: start; padding: var(--space-5); background: var(--c-surface); border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-lg); }
+.service__icon { display: inline-grid; place-items: center; width: var(--size-tap); height: var(--size-tap); border-radius: var(--radius-md); background: var(--c-accent-soft); color: var(--c-accent); }
+.service__fit { padding-top: var(--space-3); border-top: var(--size-border) solid var(--c-border-subtle); color: var(--c-text-soft); font-size: var(--size-text-sm); }
+.process { display: grid; gap: var(--space-4); counter-reset: process; }
+.process li { display: grid; gap: var(--space-1); padding-left: var(--space-7); position: relative; }
+.process li::before {
+  counter-increment: process; content: counter(process);
+  position: absolute; left: 0; top: 0; display: inline-grid; place-items: center; width: var(--size-tap); height: var(--size-tap);
+  border-radius: var(--radius-pill); border: var(--size-border) solid var(--c-highlight); color: var(--c-highlight); font-weight: var(--weight-bold);
+}
+.philosophy { padding-left: var(--space-4); border-left: var(--size-focus) solid var(--c-highlight); font-family: var(--font-display); font-size: var(--size-text-xl); line-height: var(--lineheight-snug); color: var(--c-text-soft); }
+.pomelo-segments { display: inline-grid; place-items: center; width: var(--space-8); height: var(--space-8); border-radius: var(--radius-pill); background: var(--c-highlight-soft); color: var(--c-accent); }
+.pomelo-segments .icon { width: var(--space-7); height: var(--space-7); }
+.facts { display: grid; gap: var(--space-3); margin-top: var(--space-4); }
+.facts div { display: grid; gap: var(--space-1); padding: var(--space-4); background: var(--c-surface); border-radius: var(--radius-md); border: var(--size-border) solid var(--c-border-subtle); }
+.facts dt { font-size: var(--size-text-xs); text-transform: uppercase; letter-spacing: var(--tracking-label); color: var(--c-text-muted); }
+.facts dd { font-weight: var(--weight-semibold); }
+.contact__grid { display: grid; gap: var(--space-6); align-items: start; }
+.contact__primary { display: grid; gap: var(--space-4); }
+.contact__number { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); font-size: var(--size-text-lg); font-variant-numeric: tabular-nums; }
+.next-steps { display: grid; gap: var(--space-4); margin-top: var(--space-5); counter-reset: next; }
+.next-steps li { display: flex; gap: var(--space-3); align-items: flex-start; }
+.next-steps__n::before { counter-increment: next; content: counter(next); display: inline-grid; place-items: center; width: var(--size-tap); height: var(--size-tap); border-radius: var(--radius-pill); background: var(--c-accent); color: var(--c-on-accent); font-weight: var(--weight-bold); }
+.next-steps p { padding-top: var(--space-2); }
+@media (min-width: 768px) {
+  .service-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .process { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+  .next-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .contact__grid { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-8); }
+}

@@ -1,0 +1,45 @@
+<section class="page-hero page-hero--contact">
+  <div class="container">
+    <h1 class="display-lg">{{t:contact.h1}}</h1>
+    <p class="lead">{{t:contact.lead}}</p>
+  </div>
+</section>
+
+<section class="section section--tight contact" aria-label="{{t:nav.contact}}">
+  <div class="container contact__grid">
+    <div class="contact__primary">
+      <a class="button button--primary button--block" href="https://wa.me/601139023123" rel="noopener" target="_blank">{{icon:message-circle}}{{t:contact.whatsapp}}</a>
+      <p class="contact__number"><span data-copy-source translate="no">{{t:contact.number}}</span><button class="button button--ghost" type="button" data-copy>{{t:contact.copy}}</button></p>
+      <figure class="media media--wide">{{img:a12-contact-desk|contact.alt|(min-width: 1024px) 40vw, 100vw}}</figure>
+    </div>
+    <form class="form card" data-contact-form novalidate>
+      <div class="form__head"><h2 class="display-sm">{{t:form.title}}</h2>{{> demo-note}}</div>
+      <div class="field">
+        <label for="f-name">{{t:form.name}}</label>
+        <input id="f-name" name="name" autocomplete="name" required aria-describedby="f-name-error">
+        <p class="field__error" id="f-name-error" hidden>{{t:form.required}}</p>
+      </div>
+      <div class="field">
+        <label for="f-business">{{t:form.business}}</label>
+        <input id="f-business" name="business" autocomplete="organization">
+      </div>
+      <div class="field">
+        <label for="f-message">{{t:form.message}}</label>
+        <textarea id="f-message" name="message" rows="5" required aria-describedby="f-message-error"></textarea>
+        <p class="field__error" id="f-message-error" hidden>{{t:form.required}}</p>
+      </div>
+      <button class="button button--primary" type="submit">{{t:form.submit}}</button>
+    </form>
+  </div>
+</section>
+
+<section class="section section--muted" aria-labelledby="next-title">
+  <div class="container">
+    <h2 id="next-title" class="display-sm">{{t:next.title}}</h2>
+    <ol class="next-steps">
+      <li><span class="next-steps__n" aria-hidden="true"></span><p>{{t:next.1}}</p></li>
+      <li><span class="next-steps__n" aria-hidden="true"></span><p>{{t:next.2}}</p></li>
+      <li><span class="next-steps__n" aria-hidden="true"></span><p>{{t:next.3}}</p></li>
+    </ol>
+  </div>
+</section>

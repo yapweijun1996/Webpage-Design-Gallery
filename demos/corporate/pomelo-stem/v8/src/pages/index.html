@@ -1,0 +1,101 @@
+<section class="hero">
+  <div class="container hero__grid">
+    <div class="hero__copy">
+      <p class="eyebrow"><span translate="no">{{t:site.brand}}</span> · <span translate="no">{{t:site.tagline}}</span></p>
+      <h1 class="display-lg">{{t:home.h1}}</h1>
+      <p class="lead">{{t:home.lead}}</p>
+      {{> cta-pair}}
+    </div>
+    <figure class="hero__media media media--portrait">
+      {{img:a01-home-hero-merchant|home.heroAlt|(min-width: 1024px) 40vw, 100vw|eager}}
+    </figure>
+  </div>
+</section>
+
+<section class="section story" aria-labelledby="story-title">
+  <div class="container">
+    <header class="section-head">
+      <p class="eyebrow">{{t:story.eyebrow}}</p>
+      <h2 id="story-title" class="display-md">{{t:story.title}}</h2>
+    </header>
+    <ol class="story__steps">
+      <li class="story-step">
+        <figure class="media media--portrait">{{img:a02-story-customer-sees|story.1.alt|(min-width: 1024px) 40vw, 100vw}}</figure>
+        <div class="story-step__copy">
+          <p class="story-step__label">{{t:story.1.label}}</p>
+          <h3>{{t:story.1.title}}</h3>
+          <p>{{t:story.1.body}}</p>
+        </div>
+      </li>
+      <li class="story-step">
+        <figure class="media media--square">{{img:a03-story-order-packed|story.2.alt|(min-width: 1024px) 40vw, 100vw}}</figure>
+        <div class="story-step__copy">
+          <p class="story-step__label">{{t:story.2.label}}</p>
+          <h3>{{t:story.2.title}}</h3>
+          <p>{{t:story.2.body}}</p>
+          <div class="order-card">
+            <span class="order-card__icon">{{icon:package}}</span>
+            <div><p class="order-card__id" translate="no">{{t:order.id}}</p><p>{{t:order.item}}</p></div>
+            <span class="pill pill--accent">{{t:order.status}}</span>
+          </div>
+        </div>
+      </li>
+      <li class="story-step">
+        <figure class="media media--wide">{{img:a04-story-studio-prep|story.3.alt|(min-width: 1024px) 40vw, 100vw}}</figure>
+        <div class="story-step__copy">
+          <p class="story-step__label" translate="no">{{t:story.3.label}}</p>
+          <h3>{{t:story.3.title}}</h3>
+          <p>{{t:story.3.body}}</p>
+          <div class="mini-card">
+            <p class="mini-card__title">{{t:studio.mini.title}}</p>
+            <ul class="mini-list">
+              <li><span class="mini-list__tick">{{icon:check}}</span>{{t:studio.mini.1}}</li>
+              <li><span class="mini-list__tick">{{icon:check}}</span>{{t:studio.mini.2}}</li>
+              <li><span class="mini-list__tick mini-list__tick--open"></span>{{t:studio.mini.3}}</li>
+            </ul>
+          </div>
+        </div>
+      </li>
+      <li class="story-step">
+        <figure class="media media--square">{{img:a05-story-ai-photo|story.4.alt|(min-width: 1024px) 40vw, 100vw}}</figure>
+        <div class="story-step__copy">
+          <p class="story-step__label">{{t:story.4.label}}</p>
+          <h3>{{t:story.4.title}}</h3>
+          <p>{{t:story.4.body}}</p>
+          <div class="mini-card">
+            <p class="pill pill--highlight">{{icon:sparkles}}{{t:ai.mini.badge}}</p>
+            <p class="mini-card__draft">{{t:ai.mini.draft}}</p>
+          </div>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="band-title">
+  <div class="container">
+    <header class="section-head">
+      <p class="eyebrow">{{t:band.eyebrow}}</p>
+      <h2 id="band-title" class="display-md">{{t:band.title}}</h2>
+    </header>
+    <ul class="band__grid">
+      <li><span class="band__icon">{{icon:shopping-bag}}</span><h3>{{t:band.commerce.title}}</h3><p>{{t:band.commerce.body}}</p></li>
+      <li><span class="band__icon">{{icon:package}}</span><h3>{{t:band.software.title}}</h3><p>{{t:band.software.body}}</p></li>
+      <li><span class="band__icon">{{icon:sparkles}}</span><h3>{{t:band.ai.title}}</h3><p>{{t:band.ai.body}}</p></li>
+    </ul>
+    <a class="text-link text-link--band" href="{{href:services}}">{{t:band.link}}{{icon:arrow-right}}</a>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="who-title">
+  <div class="container">
+    <h2 id="who-title" class="display-sm">{{t:who.title}}</h2>
+    <ul class="card-grid">
+      <li class="card"><h3>{{t:who.shop.title}}</h3><p>{{t:who.shop.body}}</p></li>
+      <li class="card"><h3>{{t:who.wholesale.title}}</h3><p>{{t:who.wholesale.body}}</p></li>
+      <li class="card"><h3>{{t:who.multi.title}}</h3><p>{{t:who.multi.body}}</p></li>
+    </ul>
+  </div>
+</section>
+
+{{> closing}}

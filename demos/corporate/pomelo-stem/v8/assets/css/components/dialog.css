@@ -1,0 +1,31 @@
+/* Dialog: modal, alertdialog, and bottom sheet on phones. */
+.dialog-backdrop {
+  position: fixed; inset: 0; z-index: var(--z-modal); display: grid; align-items: end;
+  background: var(--c-scrim); animation: pomelo-fade var(--motion-slow) var(--ease-out);
+}
+.dialog {
+  position: relative; display: grid; gap: var(--space-4); width: 100%; max-height: 85vh; overflow: auto;
+  padding: var(--space-5) max(var(--space-5), env(safe-area-inset-right, 0px)) calc(var(--space-5) + env(safe-area-inset-bottom, 0px)) max(var(--space-5), env(safe-area-inset-left, 0px));
+  background: var(--c-surface); color: var(--c-text); border-start-start-radius: var(--radius-lg); border-start-end-radius: var(--radius-lg); box-shadow: var(--shadow-lg);
+  animation: pomelo-sheet-in var(--motion-slow) var(--ease-out);
+}
+.dialog__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.dialog__title { font-family: var(--font-display); font-size: var(--size-text-xl); font-weight: var(--weight-regular); }
+.dialog__body { display: grid; gap: var(--space-3); }
+.dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
+.dialog-nav { display: grid; gap: var(--space-1); }
+.dialog-nav a { display: flex; align-items: center; min-height: var(--size-tap); padding-inline: var(--space-3); border-radius: var(--radius-md); color: var(--c-text); text-decoration: none; }
+.dialog-nav a[aria-current="page"] { background: var(--c-accent-soft); color: var(--c-accent); font-weight: var(--weight-semibold); }
+.dialog-langs { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.dialog-langs a { display: inline-flex; align-items: center; min-height: var(--size-tap); padding-inline: var(--space-3); border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-pill); color: var(--c-text); text-decoration: none; font-size: var(--size-text-sm); }
+.dialog-langs a[aria-current="true"] { border-color: var(--c-accent); color: var(--c-accent); font-weight: var(--weight-semibold); }
+@keyframes pomelo-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pomelo-sheet-in { from { transform: translateY(var(--space-7)); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes pomelo-pop-in { from { transform: scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (min-width: 768px) {
+  .dialog-backdrop { align-items: center; justify-items: center; padding: var(--space-5); }
+  .dialog { max-width: var(--size-dialog); border-radius: var(--radius-lg); padding: var(--space-6); animation-name: pomelo-pop-in; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dialog { animation-name: pomelo-fade; }
+}

@@ -1,0 +1,20 @@
+/* Cards and the photo band. Cards are used by role, not everywhere. */
+.card { display: grid; gap: var(--space-3); padding: var(--space-5); background: var(--c-surface); border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-lg); min-width: 0; align-content: start; }
+.card--feature { padding: var(--space-6); }
+.band { position: relative; background: var(--c-band); color: var(--c-band-text); padding-block: var(--space-8); overflow: hidden; }
+.band .eyebrow { color: var(--c-highlight); }
+.band p { color: var(--c-band-muted); }
+.band__grid { display: grid; gap: var(--space-5); margin-bottom: var(--space-5); }
+.band__grid li { display: grid; gap: var(--space-2); align-content: start; }
+.band__icon { display: inline-grid; place-items: center; width: var(--size-tap); height: var(--size-tap); border-radius: var(--radius-md); background: var(--c-band-text); color: var(--c-band); opacity: 0.92; }
+.text-link--band { color: var(--c-highlight); }
+.band--photo { padding-top: 0; }
+.band--photo > img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: 12% 50%; margin-bottom: var(--space-6); }
+.band__content { position: relative; }
+@media (min-width: 768px) {
+  .band { padding-block: var(--space-9); }
+  .band__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
+  .band--photo { padding-top: var(--space-9); }
+  .band--photo > img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; margin: 0; object-position: 15% 50%; }
+  .band--photo .band__content { padding-left: max(var(--space-4), 34%); }
+}

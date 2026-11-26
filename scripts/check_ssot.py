@@ -53,6 +53,9 @@ def css_paths(root=ROOT):
                  root / design_system.SHOWCASE_TOKEN_OUTPUT,
                  root / design_system.V6_TOKEN_OUTPUT,
                  root / design_system.V7_TOKEN_OUTPUT,
+                 # Pomelo V8 builds both files from its own token JSON and checked sources.
+                 root / "demos/corporate/pomelo-stem/v8/assets/css/tokens.css",
+                 root / "demos/corporate/pomelo-stem/v8/assets/css/site.bundle.css",
                  *(root / path for path in design_system.DEMO_THEME_OUTPUTS.values())}
     return sorted(path for path in paths if "vendor" not in path.parts and path not in generated)
 

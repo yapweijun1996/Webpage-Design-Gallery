@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="{{htmllang}}" data-page="{{page}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#fbf9f3">
+<meta name="pomelo-version" content="{{version}}">
+<meta name="pomelo-build" content="{{build}}">
+<meta name="pomelo-root" content="{{root}}">
+<title>{{t:meta.{{metakey}}.title}}</title>
+<meta name="description" content="{{t:meta.{{metakey}}.description}}">
+{{hreflang}}
+<link rel="manifest" href="{{root}}manifest.webmanifest">
+<link rel="icon" href="{{root}}assets/img/pomelo-mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{root}}assets/img/icon-192.png">
+<script>{{theme-boot}}</script>
+<link rel="stylesheet" href="{{root}}assets/css/site.bundle.css?v={{build}}">
+<script type="module" src="{{root}}assets/js/main.js?v={{build}}"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">{{t:site.skip}}</a>
+{{> header}}
+<main id="main" tabindex="-1">
+{{content}}
+</main>
+{{> footer}}
+<div class="toast-region" data-toast-region aria-label="{{t:toast.region}}"></div>
+<script type="application/json" id="i18n-runtime">{{i18n-runtime}}</script>
+</body>
+</html>
