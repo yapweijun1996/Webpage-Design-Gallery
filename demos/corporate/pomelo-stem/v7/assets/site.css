@@ -601,7 +601,7 @@
 .overview-products{display:grid;grid-template-columns:1fr repeat(3,1.05fr);gap:1rem;padding:1.25rem;background:var(--sand);border-radius:var(--pomelo-study-v-145f2f5348aecb27)}
 .overview-intro{padding:.5rem 1rem}
 .overview-intro .eyebrow:before{display:none}
-.overview-intro h2{font-size:var(--pomelo-study-v-5eac6f82753c8c7d);margin:1rem 0}
+.overview-intro h2{font-size:var(--pomelo-study-v-bca5ebd7886ec04f);margin:1rem 0}
 .overview-intro>p:last-child{max-width:20rem}
 .overview-card{display:grid;align-content:start;gap:.5rem;min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--line);border-radius:var(--pomelo-study-v-145f2f5348aecb27);color:var(--ink);text-decoration:none}
 .overview-card:hover{border-color:var(--green)}
@@ -610,9 +610,20 @@
 .overview-card>p{font-size:var(--pomelo-study-v-685068479b2f6766)}
 .overview-icon{display:grid;place-items:center;width:34px;height:34px;flex:none;background:var(--green);color:var(--surface);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e)}
 .overview-preview{display:flex;align-items:center;min-height:130px;padding:1rem;border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e);background:var(--soft)}
-.overview-preview span{max-width:11rem;font-family:var(--serif);font-size:var(--pomelo-study-v-37ff501588a824b4);line-height:1.15;color:var(--ink)}
-.overview-preview-0,.overview-preview-2{background:linear-gradient(90deg,var(--soft),transparent),url('./homeware-still.webp') center/cover}
-.overview-preview-1{background:var(--soft);border:1px solid var(--line)}
+.overview-shop-title{max-width:8rem;font-family:var(--serif);font-size:var(--pomelo-study-v-37ff501588a824b4);line-height:1.15;color:var(--ink)}
+.overview-preview-0{background:linear-gradient(90deg,var(--soft),transparent 65%),url('./overview-shop.webp') center/cover}
+.overview-preview-2{justify-content:flex-end;background:url('./overview-shipping.webp') center/cover}
+.overview-preview-1{gap:.5rem;padding:.5rem;background:var(--soft);border:1px solid var(--line)}
+.overview-studio-nav{display:grid;gap:.5rem;color:var(--green)}
+.overview-studio-nav .icon{width:18px;height:18px}
+.overview-studio-list{display:grid;gap:.35rem;flex:1;min-width:0;padding:.4rem;background:var(--surface);border:1px solid var(--line);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e)}
+.overview-studio-row{display:flex;align-items:center;gap:.5rem}
+.overview-studio-thumb{display:grid;place-items:center;width:30px;height:30px;flex:none;background:var(--soft);color:var(--green);border-radius:var(--pomelo-study-v-7adef6a048b9ce2c)}
+.overview-studio-thumb .icon{width:16px;height:16px}
+.overview-studio-lines{width:40%;height:13px;background:linear-gradient(var(--line) 0 5px,transparent 5px 8px,var(--line) 8px)}
+.overview-studio-status{width:22%;height:12px;margin-left:auto;border-radius:var(--pomelo-study-v-7adef6a048b9ce2c);background:var(--soft)}
+.overview-shipping-label{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.4rem;padding:.65rem;background:var(--surface);color:var(--ink);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e);font-size:var(--pomelo-study-v-818b9f71cc18b13d);font-weight:700}
+.overview-shipping-label .icon{width:17px;height:17px;color:var(--green)}
 .overview-cta{margin-top:1.25rem;padding:1rem 0;background:var(--deep);color:var(--surface)}
 .overview-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:1.25rem}
 .overview-cta h2{font-size:var(--pomelo-study-v-72140a70a10ab61d)}
@@ -622,8 +633,10 @@
  body:has(.home-page) .header-inner,.home-page .wrap{width:min(100% - 3rem,1410px)}
  body:has(.home-page) .header-inner{min-height:68px}
  .home-page .hero{padding:1.4rem 0 0}
+ .home-page .hero-copy{gap:.75rem}
  .home-page .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,2.05fr);gap:2rem;align-items:start}
  .home-page .hero-copy h1{font-size:var(--pomelo-study-v-34e8fdeef47c2b39)}
+ html[lang="en"] .home-page .hero-copy h1 em{display:block;max-width:11ch}
  .home-page .hero-copy>p:not(.eyebrow){font-size:var(--pomelo-study-v-8c6e288266fe93dd)}
  .home-page .hero-copy .btn{padding:.7rem 1rem;font-size:var(--pomelo-study-v-8da80e15a507a3d6)}
  .home-page .hero-art{min-height:380px;background:var(--sand) url('./merchant-desktop.webp') center/cover}
@@ -634,6 +647,7 @@
  .home-page .mock-row{gap:.4rem;padding:.4rem 0}
  .home-page .mock-icon{width:30px;height:30px}
  .home-page .hero-store-body{padding:.75rem}
+ .overview-benefits{padding:1.5rem 0}
 }
 @media(max-width:1099px){
  .overview-products{grid-template-columns:repeat(2,minmax(0,1fr))}
