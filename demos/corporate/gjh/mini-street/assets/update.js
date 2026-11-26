@@ -147,7 +147,8 @@ export function initMiniUpdate({ button, version, status, translate = englishTex
     const unavailable = translate("update.unavailableBuild", "Build unavailable");
     const installed = current
       ? translate("update.installedBuild", "Installed build · {build}", {build: renderBuild(current)}) : "";
-    setText(version, current ? `v${current.version}` : unavailable);
+    setText(version, current ? `v${current.version} · ${current.build.slice(0, 8)}` : unavailable);
+    version.classList.toggle("has-build", Boolean(current));
     version.title = current ? renderBuild(current) : unavailable;
     setText(description, installed || unavailable);
 

@@ -66,8 +66,14 @@ def apply_update(page, button, build):
 def expect_version(page, version, build):
     badge = page.locator("#mini-version")
     expect(badge).to_be_visible()
-    expect(badge).to_have_text(f"v{version}")
+    expect(badge).to_have_text(f"v{version} · {build[:8]}")
     expect(badge).to_have_attribute("title", f"v{version} · {build}")
+    assert badge.evaluate("""el => {
+      const button = el.closest('button').getBoundingClientRect();
+      const box = el.getBoundingClientRect();
+      const range = document.createRange(); range.selectNodeContents(el);
+      return range.getClientRects().length === 1 && box.left >= button.left && box.right <= button.right;
+    }"""), "The version and short build must fit on one line inside the button"
 
 
 def expect_status(status, text):
@@ -300,6 +306,18 @@ def run(site, evidence=None):
         expect_version(second, version, initial)
         assert errors == [], errors
 
+        # The visible build must fit in the compact header in all supported languages.
+        for language in ("en", "zh-Hans", "ms"):
+            landscape = browser.new_context(viewport={"width": 568, "height": 320},
+                                            has_touch=True, is_mobile=True, service_workers="block")
+            landscape.add_init_script(f"localStorage.setItem('wdg.language', '{language}')")
+            landscape_page = landscape.new_page()
+            landscape_page.goto(site_url, wait_until="domcontentloaded")
+            expect_version(landscape_page, version, latest)
+            assert landscape_page.evaluate("document.documentElement.scrollWidth <= innerWidth"), language
+            assert landscape_page.locator(SEL).bounding_box()["x"] + landscape_page.locator(SEL).bounding_box()["width"] <= 568, language
+            landscape.close()
+
         private = browser.new_context(viewport={"width": 320, "height": 568}, service_workers="allow")
         private.add_init_script("""Object.defineProperty(window, 'localStorage', {
           get: () => { throw new DOMException('Storage disabled', 'SecurityError'); },
@@ -310,6 +328,7 @@ def run(site, evidence=None):
         private_button = private_page.locator(SEL)
         private_status = private_page.locator(STATUS)
         expect(private_button).to_have_attribute("data-state", "idle")
+        expect_version(private_page, version, latest)
         private_button.click()
         expect_status(private_status, "up to date")
         server.release_build = None

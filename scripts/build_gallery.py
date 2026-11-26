@@ -470,6 +470,13 @@ def build_gjh_entry():
     return template.replace("__GJH_WALK_PRELOADS__", links)
 
 
+def mini_street_version():
+    version = read_json(ROOT / "data/mini-street.json")["version"]
+    if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+        raise ValueError("Mini Street version must use major.minor.patch")
+    return version
+
+
 def build_mini_street(catalog, version):
     entry = MINI_STREET / "index.html"
     resources = set(runtime_resources(catalog))
@@ -644,7 +651,7 @@ def build(output=ROOT, check=False):
     pages = build_pages(catalog, release)
     pages[GJH_ENTRY.as_posix()] = build_gjh_entry()
     pages.update(pwa_outputs(pages, catalog, release))
-    mini_street_page, mini_street_release = build_mini_street(catalog, release["version"])
+    mini_street_page, mini_street_release = build_mini_street(catalog, mini_street_version())
     pages[(MINI_STREET / "release.json").as_posix()] = mini_street_release
     if output != ROOT:
         # Keep the authored index directly usable for local development.

@@ -1301,6 +1301,9 @@ export function buildWorld(scene, invalidate) {
     const shoulder = 0.81;
     for (const side of [-1, 1]) {
       ellipsoid(ink, x + side * 0.12, 0.105, z, 0.091, 0.09, 0.14);
+      ellipsoid(wood, x + side * 0.12, 0.125, z + 0.012, 0.083, 0.067, 0.125);
+      ellipsoid(ink, x + side * 0.12, 0.055, z + 0.015, 0.097, 0.028, 0.145);
+      box(cane, x + side * 0.12, 0.152, z + 0.119, 0.073, 0.012, 0.014);
       tube(wood, x + side * 0.12, 0.28, z - 0.03, 0.06, 0.30, 0.065);
       const arm = x + side * 0.22;
       ellipsoid(coat, arm, shoulder - 0.13, z, 0.085, 0.24, 0.088, 0, 0, side * 0.21);
@@ -1309,6 +1312,8 @@ export function buildWorld(scene, invalidate) {
     ellipsoid(coat, x, 0.60, z, 0.225, 0.30, 0.159);
     ellipsoid(coat, x, 0.435, z, 0.247, 0.115, 0.168);
     ellipsoid(coatTrim, x, 0.85, z - 0.06, 0.235, 0.105, 0.145);
+    box(coatTrim, x - 0.014, 0.625, z + 0.157, 0.018, 0.36, 0.012);
+    box(coatTrim, x, 0.405, z + 0.164, 0.38, 0.018, 0.012);
     for (const side of [-1, 1]) {
       box(coatTrim, x + side * 0.125, 0.55, z + 0.146, 0.09, 0.095, 0.027, 0, 0, side * 0.08);
       box(coat, x + side * 0.125, 0.562, z + 0.161, 0.075, 0.06, 0.018, 0, 0, side * 0.08);
@@ -1321,6 +1326,12 @@ export function buildWorld(scene, invalidate) {
     ellipsoid(hair, x - 0.22, 1.02, z - 0.055, 0.09, 0.11, 0.09);
     for (const offset of [-0.113, 0.03]) {
       ellipsoid(ink, x + offset - 0.071, 1.095, z + 0.248, 0.024, 0.034, 0.018);
+    }
+    // A small curved smile and catchlights are visible in the visitor close-up.
+    const smile = new THREE.TorusGeometry(0.039, 0.005, 4, 10, Math.PI);
+    stamp(smile, wood, x - 0.105, 1.035, z + 0.249, 1, 0.6, 1, 0, 0, Math.PI);
+    for (const offset of [-0.113, 0.03]) {
+      ellipsoid(lightCream, x + offset - 0.077, 1.108, z + 0.264, 0.007, 0.008, 0.005);
     }
     for (const y of [0.55, 0.68, 0.80]) {
       ellipsoid(wood, x - 0.014, y, z + 0.162, 0.022, 0.024, 0.017);

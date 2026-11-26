@@ -354,8 +354,7 @@ class GalleryTests(unittest.TestCase):
             )}
             entry = Path("index.html")
             manifest = Path("release.json")
-            app_version = json.loads((output / "version.json").read_text())["version"]
-            street_page, street_release = gallery.build_mini_street(catalog, app_version)
+            street_page, street_release = gallery.build_mini_street(catalog, gallery.mini_street_version())
             self.assertEqual((output / street / entry).read_text(), street_page)
             self.assertEqual((output / street / manifest).read_text(), street_release)
             toast = gallery.MINI_STREET_TOAST

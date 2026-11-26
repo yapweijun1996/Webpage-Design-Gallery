@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import re
 import unittest
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,6 +29,21 @@ class MiniStreetReleaseTest(unittest.TestCase):
         self.assertNotEqual(self.release["build"], next_release["build"])
         self.assertIn('name="mini-street-version" content="1.4.1"', next_page)
         self.assertIn(f'name="mini-street-build" content="{next_release["build"]}"', next_page)
+
+    def test_gallery_version_does_not_change_mini_street_release(self):
+        version = gallery.mini_street_version()
+        before = gallery.build_mini_street(self.catalog, version)[1]
+        read_json = gallery.read_json
+
+        def changed_gallery_version(path):
+            if path == ROOT / "data/app.json":
+                return {"version": "99.0.0"}
+            return read_json(path)
+
+        with patch.object(gallery, "read_json", side_effect=changed_gallery_version):
+            self.assertEqual(gallery.release_info(self.catalog)["version"], "99.0.0")
+            after = gallery.build_mini_street(self.catalog, gallery.mini_street_version())[1]
+        self.assertEqual(before, after)
 
     def test_page_assets_are_pinned_to_the_exported_bytes(self):
         build = self.release["build"]

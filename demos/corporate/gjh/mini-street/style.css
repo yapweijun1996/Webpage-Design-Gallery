@@ -162,6 +162,7 @@ html[data-site-theme="light"] { color-scheme: light; }
 .mini-update-button[data-state="available"] .mini-release { color: inherit; }
 .mini-release svg { flex: none; width: 14px; height: 14px; }
 .mini-version { min-width: 0; }
+.mini-version.has-build { white-space: nowrap; }
 .mini-update-visually-hidden {
   position: absolute;
   width: 1px;
@@ -289,7 +290,7 @@ html[data-site-theme="light"] .mini-theme-moon { display: none; }
   .mini-nav a { padding-inline: 5px; }
   .mini-utilities { grid-area: utilities; justify-content: start; }
   .mini-tip { inset-inline: 0 auto; }
-  .mini-update-button { max-inline-size: 6rem; }
+  .mini-update-button { max-inline-size: 9rem; }
 }
 @media (max-width: 360px) {
   .monogram { display: none; }
