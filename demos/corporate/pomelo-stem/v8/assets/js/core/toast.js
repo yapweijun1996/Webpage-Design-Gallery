@@ -26,6 +26,7 @@ function regions() {
   }
   region.setAttribute('role', 'region');
   region.setAttribute('aria-label', t('toast.region'));
+  region.hidden = region.children.length === 0;
   live = document.createElement('div');
   live.className = 'visually-hidden';
   live.setAttribute('role', 'status');
@@ -37,8 +38,24 @@ function regions() {
 }
 
 function changed() {
+  region.hidden = region.children.length === 0;
   // Update floating-control clearance synchronously, before the next painted frame.
   region.dispatchEvent(new Event('toastchange'));
+}
+
+function moveFocusFrom(item) {
+  if (!item.contains(document.activeElement)) return;
+  const items = Array.from(region.children);
+  const index = items.indexOf(item);
+  const next = [...items.slice(index + 1), ...items.slice(0, index)]
+    .find(candidate => !candidate.classList.contains('is-leaving'));
+  const previous = item._returnFocus;
+  const main = document.querySelector('#main');
+  const target = next ? next.querySelector('.toast__close')
+    : previous?.isConnected && previous !== document.body && previous !== document.documentElement ? previous : main;
+  target?.focus({preventScroll: true});
+  // An opener may still be connected but hidden or disabled.
+  if (item.contains(document.activeElement) || document.activeElement === document.body) main?.focus({preventScroll: true});
 }
 
 function remove(item, immediate = false) {
@@ -46,9 +63,10 @@ function remove(item, immediate = false) {
   clearTimeout(item._timer);
   clearTimeout(item._removalTimer);
   clearTimeout(item._announcementTimer);
-  const done = () => { item.remove(); changed(); };
+  const done = () => { moveFocusFrom(item); item.remove(); changed(); };
   if (immediate) { done(); return; }
   item.classList.add('is-leaving');
+  moveFocusFrom(item);
   const duration = parseFloat(getComputedStyle(item).transitionDuration) || 0;
   if (duration === 0) done();
   else item._removalTimer = setTimeout(done, duration * 1000);
@@ -91,7 +109,10 @@ function createItem() {
   item.append(glyph, divider, text, close);
   item.addEventListener('mouseenter', () => { item._hovered = true; pause(item); });
   item.addEventListener('mouseleave', () => { item._hovered = false; resume(item); });
-  item.addEventListener('focusin', () => pause(item));
+  item.addEventListener('focusin', (event) => {
+    if (!item.contains(event.relatedTarget)) item._returnFocus = event.relatedTarget;
+    pause(item);
+  });
   item.addEventListener('focusout', () => queueMicrotask(() => resume(item)));
   return item;
 }
@@ -124,11 +145,7 @@ export function toast(options) {
   for (const existing of items) {
     if (existing !== item && identical(existing)) remove(existing, true);
   }
-  if (!item) {
-    // Capacity eviction must finish synchronously, even while exit transitions run.
-    while (region.children.length >= MAX) remove(region.firstElementChild, true);
-    item = createItem();
-  }
+  if (!item) item = createItem();
   clearTimeout(item._timer);
   clearTimeout(item._removalTimer);
   item.className = `toast toast--${type}`;
@@ -162,6 +179,9 @@ export function toast(options) {
     action.remove();
   }
   if (!item.isConnected) region.append(item);
+  // Make the new close button focusable before synchronous capacity eviction.
+  region.hidden = false;
+  while (region.children.length > MAX) remove(region.firstElementChild, true);
   changed();
   announce(item, type, [title, detail].filter(Boolean).join(' '));
   resume(item);
