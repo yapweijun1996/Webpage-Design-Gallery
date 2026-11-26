@@ -7,6 +7,7 @@ import subprocess
 import unittest
 from collections import Counter
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / "demos/corporate/pomelo-stem/v8"
@@ -53,7 +54,31 @@ class PomeloV8Test(unittest.TestCase):
                 text = (DEMO / f"{folder}{page}.html").read_text("utf-8")
                 self.assertIn(f'<html lang="{lang}"', text)
                 self.assertEqual(text.count("<h1"), 1, (folder, page))
-                self.assertEqual(text.count('rel="alternate" hreflang='), 3)
+                self.assertEqual(text.count('rel="alternate" hreflang='), 4)
+
+    def test_hreflang_urls_are_absolute_and_resolve_to_generated_pages(self):
+        outputs = pomelo.outputs()
+        base = urlsplit(pomelo.BASE_URL)
+        for name, source in outputs.items():
+            if not name.endswith(".html"):
+                continue
+            with self.subTest(page=name):
+                alternates = {attrs["hreflang"]: attrs["href"] for tag, attrs, _ in pomelo.PageStructure(source).elements
+                              if tag == "link" and attrs.get("rel") == "alternate" and "hreflang" in attrs}
+                self.assertEqual(set(alternates), {"en", "zh-Hans", "ms", "x-default"})
+                self.assertEqual(alternates["x-default"], alternates["en"])
+                page = "index.html" if name.startswith("design/") else Path(name).name
+                for lang, href in alternates.items():
+                    url = urlsplit(href)
+                    self.assertEqual((url.scheme, url.netloc), (base.scheme, base.netloc))
+                    self.assertTrue(href.startswith(pomelo.BASE_URL))
+                    target = url.path.removeprefix(base.path)
+                    folder = {"en": "", "zh-Hans": "zh/", "ms": "ms/", "x-default": ""}[lang]
+                    self.assertEqual(target, folder + page)
+                    self.assertIn(target, outputs)
+                    self.assertTrue((DEMO / target).is_file())
+        build_source = (ROOT / "scripts/build_pomelo_v8.py").read_text("utf-8")
+        self.assertEqual(build_source.count(pomelo.BASE_URL), 1)
 
     def test_two_ctas_only(self):
         en = json.loads((DEMO / "i18n/en.json").read_text("utf-8"))
@@ -81,6 +106,19 @@ class PomeloV8Test(unittest.TestCase):
                 self.assertEqual(regions[0].get("role"), "region")
                 self.assertTrue(regions[0].get("aria-label"))
                 self.assertNotIn("aria-live", regions[0])
+                self.assertIn("hidden", regions[0])
+
+    def test_every_toast_detail_has_a_conservative_character_budget(self):
+        budgets = {"en": 48, "ms": 48, "zh": 24}
+        for lang, table in pomelo.dictionaries().items():
+            for key, value in table.items():
+                if not (key.startswith("toast.") and key.endswith(".detail")):
+                    continue
+                # The prescribed Malay reconnect sentence is 52 characters; keep all other details at 48.
+                budget = 52 if (lang, key) == ("ms", "toast.online.detail") else budgets[lang]
+                detail = pomelo.fmt(value, {"version": pomelo.release()["version"]})
+                with self.subTest(locale=lang, key=key, detail=detail):
+                    self.assertLessEqual(len(detail), budget)
 
     def test_every_toast_caller_has_localized_title_and_detail(self):
         tables = pomelo.dictionaries()
@@ -157,6 +195,48 @@ class PomeloV8Test(unittest.TestCase):
         self.assertIn("key = 'pomelo-v8-heal'", guard)
         self.assertIn("sessionStorage.getItem(key) === want", guard)
         self.assertIn("sessionStorage.setItem(key, want)", guard)
+
+    def test_manual_update_and_sw_guard_share_identical_unsaved_checks(self):
+        module = (DEMO / "assets/js/core/unsaved.js").read_text("utf-8")
+        update = (DEMO / "assets/js/core/update.js").read_text("utf-8")
+        checks = ("document.querySelector('[data-dirty=\"true\"]')", "form input, form textarea, form select",
+                  "field.type === 'checkbox' || field.type === 'radio'", "field.checked !== field.defaultChecked",
+                  "field.tagName === 'SELECT'", "field.multiple", "option.selected !== option.defaultSelected",
+                  "option.defaultSelected", "!option.disabled", "option.parentElement.tagName === 'OPTGROUP'",
+                  "option.parentElement.disabled", "field.selectedIndex !== initial", "field.value !== field.defaultValue")
+        for source in (module, pomelo.SW_GUARD):
+            for check in checks:
+                self.assertIn(check, source)
+        module_function = module[module.index("function hasUnsavedInput()") :]
+        inline_function = re.search(r"function hasUnsavedInput\(\) \{.*?\n  \}", pomelo.SW_GUARD, re.S)[0]
+        self.assertEqual(" ".join(module_function.split()), " ".join(inline_function.split()))
+        self.assertIn("import {hasUnsavedInput} from './unsaved.js';", update)
+        self.assertRegex(update, r"if \(hasUnsavedInput\(\)\) \{\s*const ok = await confirm\(")
+        self.assertNotIn("[data-dirty=", update)
+        self.assertIn('"assets/js/core/unsaved.js"', pomelo.outputs()["sw.js"])
+
+    @unittest.skipUnless(shutil.which("node"), "Node.js is required for the release comparison contract")
+    def test_update_detects_same_version_new_build_and_higher_semver(self):
+        source = (DEMO / "assets/js/core/update.js").read_text("utf-8")
+        self.assertIn("isNewRelease(remote, {version: current, build: currentBuild})", source)
+        self.assertIn('currentBuild = document.querySelector(\'meta[name="pomelo-build"]\').content;', source)
+        source = re.sub(r"^import .*?;\n", "", source, flags=re.M)
+        checks = r"""
+import assert from 'node:assert/strict';
+const local = {version: '8.2.2', build: '20261126.8'};
+assert.equal(isNewRelease({...local}, local), false);
+assert.equal(isNewRelease({...local, build: '20261126.9'}, local), true);
+assert.equal(isNewRelease({...local, build: '20261126.7'}, local), true); // Any different build is offered.
+for (const version of ['8.2.3', '8.10.0', '9.0.0']) {
+  assert.equal(isNewRelease({version, build: local.build}, local), true, version);
+}
+for (const version of ['8.2.1', '8.1.99', '7.99.99']) {
+  assert.equal(isNewRelease({version, build: '20990101.1'}, local), false, version);
+}
+"""
+        result = subprocess.run([shutil.which("node"), "--input-type=module"], input=source + checks,
+                                text=True, capture_output=True, timeout=15, cwd=ROOT)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_contact_and_commerce_mark_unsaved_input(self):
         contact = (DEMO / "assets/js/components/contact-form.js").read_text("utf-8")
@@ -283,6 +363,16 @@ class PomeloV8Test(unittest.TestCase):
         self.assertIn("title: toastButton.dataset.toastTitle", review_js)
         self.assertIn("detail: toastButton.dataset.toastDetail", review_js)
 
+    def test_focused_toast_removal_has_focus_handoff_and_return_target(self):
+        source = (DEMO / "assets/js/core/toast.js").read_text("utf-8")
+        self.assertIn("if (!item.contains(document.activeElement)) return;", source)
+        self.assertIn("next.querySelector('.toast__close')", source)
+        self.assertIn("previous?.isConnected", source)
+        self.assertIn("document.querySelector('#main')", source)
+        self.assertIn("item._returnFocus = event.relatedTarget", source)
+        self.assertRegex(source, r"const done = \(\) => \{ moveFocusFrom\(item\); item.remove\(\); changed\(\); \};")
+        self.assertRegex(source, r"region.append\(item\);[\s\S]*region.hidden = false;\s*while \(region.children.length > MAX\) remove\(region.firstElementChild, true\);")
+
     @unittest.skipUnless(shutil.which("node"), "Node.js is required for the toast runtime contract")
     def test_toast_replacement_pause_announcements_and_capacity_at_runtime(self):
         source = (DEMO / "assets/js/core/toast.js").read_text("utf-8")
@@ -291,7 +381,7 @@ class PomeloV8Test(unittest.TestCase):
         harness = r"""
 import assert from 'node:assert/strict';
 class Element {
-  constructor(tag) { this.tagName = tag; this.children = []; this.dataset = {}; this.attributes = {}; this.events = {}; this.className = ''; }
+  constructor(tag) { this.tagName = tag; this.children = []; this.dataset = {}; this.attributes = {}; this.events = {}; this.className = ''; this.hidden = false; }
   get classList() { return {
     contains: name => this.className.split(' ').includes(name),
     add: name => { this.className += ' ' + name; }
@@ -306,18 +396,27 @@ class Element {
   contains(node) { return this === node || this.children.some(child => child.contains(node)); }
   querySelector(selector) {
     for (const child of this.children) {
-      if (selector.startsWith('.') ? child.classList.contains(selector.slice(1)) : selector === '[data-toast-region]' && 'data-toast-region' in child.attributes) return child;
+      if (selector.startsWith('.') ? child.classList.contains(selector.slice(1)) : selector.startsWith('#') ? child.attributes.id === selector.slice(1) : selector === '[data-toast-region]' && 'data-toast-region' in child.attributes) return child;
       const found = child.querySelector(selector); if (found) return found;
     }
     return null;
   }
   addEventListener(type, fn) { (this.events[type] ||= []).push(fn); }
   dispatchEvent(event) { for (const fn of this.events[event.type] || []) fn(event); }
-  focus() { document.activeElement = this; this.parentElement?.dispatchEvent(new Event('focusin')); }
+  focus() {
+    const previous = document.activeElement;
+    document.activeElement = this;
+    const event = new Event('focusin');
+    Object.defineProperty(event, 'relatedTarget', {value: previous});
+    this.parentElement?.dispatchEvent(event);
+  }
 }
 const body = new Element('body');
 globalThis.document = {body, documentElement: new Element('html'), activeElement: body,
   createElement: tag => new Element(tag), querySelector: selector => body.querySelector(selector), addEventListener() {}};
+const main = new Element('main');
+main.setAttribute('id', 'main');
+body.append(main);
 const icon = name => Object.assign(new Element('svg'), {glyph: name});
 const t = (key, vars = {}) => (strings[key] ?? key).replace(/\{(\w+)\}/g, (match, name) => vars[name] ?? match);
 const timers = new Map();
@@ -342,10 +441,14 @@ init();
 const stack = document.querySelector('[data-toast-region]');
 assert.equal(stack.attributes.role, 'region');
 assert.equal(stack.attributes['aria-label'], strings['toast.region']);
+assert.equal(stack.hidden, true);
 const statusNode = body.children.find(node => node.attributes.role === 'status');
 const alertNode = body.children.find(node => node.attributes.role === 'alert');
 assert.equal(statusNode.attributes['aria-live'], 'polite');
+assert.equal(statusNode.hidden, false);
+assert.equal(alertNode.hidden, false);
 const first = toast({key: 'theme', title: 'Dark theme on.', detail: 'The interface switched to Dark.', icon: 'moon'});
+assert.equal(stack.hidden, false);
 assert.equal(first.dataset.icon, 'moon');
 const close = first.querySelector('.toast__close');
 const other = toast({message: 'Other notification'});
@@ -382,7 +485,7 @@ assert.equal(first.querySelector('.toast__detail').textContent, '');
 assert.equal(first.querySelector('.toast__detail').hidden, true);
 advance(200);
 assert.equal(first.isConnected, true); // The old exit callback cannot delete the replacement.
-function reset() { timers.clear(); stack.replaceChildren(); document.activeElement = body; }
+function reset() { timers.clear(); stack.replaceChildren(); stack.hidden = true; document.activeElement = body; }
 reset();
 toast({key: 'update', type: 'error', message: 'Stale error'});
 toast({key: 'update', type: 'success', message: 'Recovered', detail: 'Try again in a moment.'});
@@ -419,6 +522,8 @@ advance(1999);
 assert.equal(timed.classList.contains('is-leaving'), false);
 advance(201);
 assert.equal(timed.isConnected, false); // Resume uses the remaining time.
+assert.equal(stack.hidden, true);
+assert.equal(statusNode.isConnected && alertNode.isConnected, true);
 reset();
 const focused = toast({key: 'network', message: 'Offline'});
 focused.querySelector('.toast__close').focus();
@@ -458,6 +563,49 @@ assert.equal(stack.firstElementChild.dataset.message, 'Message 2');
 dismissNewest();
 toast({message: 'New while leaving'});
 assert.equal(stack.children.length, 3);
+reset();
+const opener = new Element('button');
+body.append(opener);
+opener.focus();
+const evicted = toast({message: 'Focused first', sticky: true});
+const next = toast({message: 'Second', sticky: true});
+const third = toast({message: 'Third', sticky: true});
+evicted.querySelector('.toast__close').focus();
+toast({message: 'Fourth', sticky: true});
+assert.equal(evicted.isConnected, false);
+assert.equal(stack.children.length, 3);
+assert.equal(document.activeElement, next.querySelector('.toast__close'));
+assert.equal(document.activeElement.isConnected, true);
+document.activeElement.dispatchEvent(new Event('click'));
+assert.equal(document.activeElement, third.querySelector('.toast__close')); // Close-click also transfers focus.
+advance(200);
+assert.equal(next.isConnected, false);
+reset();
+const only = toast({message: 'Only active toast', sticky: true});
+const leaving = toast({message: 'Leaving second', sticky: true});
+const alsoLeaving = toast({message: 'Leaving third', sticky: true});
+leaving.querySelector('.toast__close').dispatchEvent(new Event('click'));
+alsoLeaving.querySelector('.toast__close').dispatchEvent(new Event('click'));
+only.querySelector('.toast__close').focus();
+const incoming = toast({message: 'Incoming', sticky: true});
+assert.equal(only.isConnected, false);
+assert.equal(document.activeElement, incoming.querySelector('.toast__close')); // New toast is the only viable destination.
+reset();
+opener.focus();
+const final = toast({message: 'Final', sticky: true});
+final.querySelector('.toast__close').focus();
+assert.equal(dismissNewest(), true); // Escape uses this same removal path.
+assert.equal(document.activeElement, opener);
+advance(200);
+assert.equal(stack.hidden, true);
+reset();
+opener.focus();
+const orphan = toast({message: 'Opener removed', sticky: true});
+orphan.querySelector('.toast__close').focus();
+opener.remove();
+dismissNewest();
+assert.equal(document.activeElement, main);
+assert.equal(document.activeElement.isConnected, true);
 console.log('Toast runtime contracts passed');
 """
         result = subprocess.run([shutil.which("node"), "--input-type=module"],

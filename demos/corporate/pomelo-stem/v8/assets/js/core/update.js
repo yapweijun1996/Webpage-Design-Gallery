@@ -2,6 +2,7 @@
 import {t} from './i18n.js';
 import {toast} from './toast.js';
 import {confirm} from './dialog.js';
+import {hasUnsavedInput} from './unsaved.js';
 
 const THROTTLE = 10 * 60 * 1000;
 const TIMEOUT = 8000;
@@ -9,6 +10,7 @@ const APPLY_TIMEOUT = 12000;
 let button;
 let status;
 let current;
+let currentBuild;
 let available = '';
 let lastCheck = 0;
 let busy = false;
@@ -20,6 +22,11 @@ export function compare(a, b) {
     if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) > (pb[i] || 0) ? 1 : -1;
   }
   return 0;
+}
+
+export function isNewRelease(remote, local) {
+  const order = compare(remote.version, local.version);
+  return order > 0 || (order === 0 && remote.build !== local.build);
 }
 
 function root() {
@@ -57,7 +64,7 @@ export async function check({manual = false} = {}) {
   setState('checking', t('update.checking'));
   try {
     const remote = await fetchRelease();
-    if (compare(remote.version, current) > 0) {
+    if (isNewRelease(remote, {version: current, build: currentBuild})) {
       available = remote.version;
       setState('available', t('update.available', {version: available}));
       button.classList.remove('is-pulse');
@@ -92,8 +99,7 @@ function waitForWaiting(registration) {
 
 export async function apply() {
   if (button.dataset.state === 'applying') return;
-  const dirty = document.querySelector('[data-dirty="true"]');
-  if (dirty) {
+  if (hasUnsavedInput()) {
     const ok = await confirm({title: t('update.unsavedTitle'), body: t('update.unsavedBody'), confirmLabel: t('update.apply')});
     if (!ok) return;
   }
@@ -120,6 +126,7 @@ export function init() {
   status = document.querySelector('[data-update-status]');
   if (!button || !status) return;
   current = document.querySelector('meta[name="pomelo-version"]').content;
+  currentBuild = document.querySelector('meta[name="pomelo-build"]').content;
   setState('idle');
   button.addEventListener('click', () => {
     if (button.dataset.state === 'available') apply();

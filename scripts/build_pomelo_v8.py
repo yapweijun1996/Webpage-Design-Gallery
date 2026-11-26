@@ -19,10 +19,12 @@ import struct
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urljoin
 
 ROOT = Path(__file__).resolve().parents[1]
 V8 = ROOT / "demos/corporate/pomelo-stem/v8"
 DESIGN_ID = "pomelo-stem-v8"
+BASE_URL = "https://yapweijun1996.github.io/Webpage-Design-Gallery/demos/corporate/pomelo-stem/v8/"
 LOCALES = {"en": {"dir": "", "html": "en", "intl": "en-MY"},
            "zh": {"dir": "zh", "html": "zh-Hans", "intl": "zh-Hans-MY"},
            "ms": {"dir": "ms", "html": "ms", "intl": "ms-MY"}}
@@ -219,7 +221,8 @@ def render(lang, page, ctx):
                 f'<span class="lang-menu__short">{t("lang.short")}</span>'
                 f'<span class="lang-menu__chevron">{icon_svg(icon_data, "chevron-down")}</span></button>'
                 f'<ul class="lang-menu__list" id="{list_id}" hidden>{"".join(langs)}</ul></div>')
-    hreflang = "\n".join(f'<link rel="alternate" hreflang="{LOCALES[o]["html"]}" href="{page_href(page, o, lang)}">' for o in LOCALES)
+    hreflang = "\n".join(f'<link rel="alternate" hreflang="{LOCALES[o]["html"]}" href="{urljoin(BASE_URL, page_href(page, o, "en"))}">' for o in LOCALES)
+    hreflang += f'\n<link rel="alternate" hreflang="x-default" href="{urljoin(BASE_URL, page_href(page, "en"))}">'
     runtime = {k: fmt(v, {}) for k, v in strings.items() if k.startswith(RUNTIME_PREFIXES)}
     runtime["_intl"] = LOCALES[lang]["intl"]
     products = []
@@ -494,8 +497,8 @@ def check_rules(result):
             continue
         if text.count("<h1") != 1 and "how-it-works" not in name:
             errors.append(f"{name} must have exactly one h1")
-        if text.count('rel="alternate" hreflang=') != 3:
-            errors.append(f"{name} must link three hreflang alternates")
+        if text.count('rel="alternate" hreflang=') != 4:
+            errors.append(f"{name} must link three locale alternates and x-default")
     # Every referenced local file exists.
     for name, text in result.items():
         if not name.endswith(".html"):

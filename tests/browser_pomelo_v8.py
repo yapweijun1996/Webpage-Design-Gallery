@@ -12,7 +12,8 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / 'demos/corporate/pomelo-stem/v8'
 PAGES = ('index', 'commerce', 'services', 'about', 'contact')
-VERSION = json.loads((DEMO / 'release.json').read_text('utf-8'))['version']
+RELEASE = json.loads((DEMO / 'release.json').read_text('utf-8'))
+VERSION = RELEASE['version']
 major, minor, patch = map(int, VERSION.split('.'))
 NEWER = f'{major}.{minor}.{patch + 1}'
 
@@ -156,6 +157,81 @@ def check_toasts(browser, base, errors):
         context.close()
 
 
+def check_release_recheck(browser, base, errors):
+    """Cover same-version builds, generic dirty-page consent and focus during eviction."""
+    context = browser.new_context(viewport={'width': 320, 'height': 568}, reduced_motion='no-preference', service_workers='block')
+    page = context.new_page()
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    try:
+        page.route('**/release.json*', lambda route: route.fulfill(content_type='application/json', body=json.dumps({
+            'version': VERSION, 'build': RELEASE['build'] + '.recheck',
+        })))
+        titles = {
+            '': 'Reload and lose unsaved changes?',
+            'zh/': '重新加载并清除未保存的内容？',
+            'ms/': 'Muat semula dan buang perubahan yang belum disimpan?',
+        }
+        for locale, title in titles.items():
+            page.goto(base + locale + 'commerce.html', wait_until='load')
+            page.evaluate("""async () => {
+              const root = new URL(document.querySelector('meta[name="pomelo-root"]').content, document.baseURI);
+              await (await import(new URL('assets/js/core/update.js', root))).check({manual: true});
+            }""")
+            page.wait_for_function("document.querySelector('[data-update]').dataset.state === 'available'")
+            assert page.locator('.update-button__chip').inner_text() == 'v' + VERSION
+            assert page.locator('.toast[data-key="update"]').count() == 1
+            page.locator('[data-add="mug"]').click()
+            assert page.locator('[data-commerce-demo]').get_attribute('data-dirty') == 'true'
+            page.locator('[data-update]').click()
+            page.locator('.dialog[role="alertdialog"]').wait_for()
+            assert page.locator('.dialog__title').inner_text() == title, locale
+            page.keyboard.press('Escape')
+            page.locator('.dialog').wait_for(state='detached')
+            assert page.locator('[data-update]').get_attribute('data-state') == 'available'
+
+        # Restored/autofilled input must trigger consent without an input event or data-dirty.
+        page.goto(base + 'contact.html', wait_until='load')
+        page.evaluate("""async () => {
+          document.querySelector('form input').value = 'Restored input';
+          const module = await import('./assets/js/core/update.js');
+          void module.apply();
+        }""")
+        page.locator('.dialog[role="alertdialog"]').wait_for()
+        assert not page.locator('[data-dirty="true"]').count()
+        assert page.locator('.dialog__title').inner_text() == titles['']
+        page.keyboard.press('Escape')
+        page.locator('.dialog').wait_for(state='detached')
+
+        page.goto(base + 'index.html', wait_until='load')
+        page.wait_for_function("document.querySelector('[data-update]').dataset.state === 'available'")
+        page.locator('.toast__close').evaluate_all('buttons => buttons.forEach(button => button.click())')
+        page.wait_for_function("document.querySelector('[data-toast-region]').hidden")
+        page.evaluate("""async () => {
+          const {toast} = await import('./assets/js/core/toast.js');
+          const region = document.querySelector('[data-toast-region]');
+          if (!region.hidden) throw new Error('Empty toast region must be hidden');
+          const first = toast({key: 'focus-first', title: 'First', sticky: true});
+          const second = toast({key: 'focus-second', title: 'Second', sticky: true});
+          toast({key: 'focus-third', title: 'Third', sticky: true});
+          first.querySelector('.toast__close').focus();
+          toast({key: 'focus-fourth', title: 'Fourth', sticky: true});
+          if (first.isConnected || region.children.length !== 3) throw new Error('Capacity eviction failed');
+          if (document.activeElement !== second.querySelector('.toast__close') || !document.activeElement.isConnected) {
+            throw new Error('Focused eviction must move focus to the next toast close button');
+          }
+          if (region.hidden || region.getAttribute('role') !== 'region' || !region.getAttribute('aria-label')) {
+            throw new Error('Populated toast region must remain accessible and named');
+          }
+        }""")
+        assert page.evaluate("document.activeElement.matches('.toast__close') && document.activeElement.isConnected")
+        page.locator('.toast__close').evaluate_all('buttons => buttons.forEach(button => button.click())')
+        page.wait_for_function("document.querySelector('[data-toast-region]').hidden")
+        assert page.locator('[role="status"]').count() >= 1
+        assert page.locator('[role="alert"]').count() == 1
+    finally:
+        context.close()
+
+
 def main():
     handler = functools.partial(Quiet, directory=str(ROOT))
     server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
@@ -166,6 +242,7 @@ def main():
         with sync_playwright() as p:
             browser = launch(p)
             check_toasts(browser, base, errors)
+            check_release_recheck(browser, base, errors)
             for width, height in ((1440, 900), (768, 1024), (390, 844), (375, 812), (320, 568)):
                 context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce', service_workers='block')
                 page = context.new_page()
