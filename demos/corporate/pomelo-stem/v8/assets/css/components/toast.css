@@ -32,7 +32,12 @@
 .toast[data-icon="sun"] .toast__icon { background: var(--c-toast-tile-sun-bg); color: var(--c-toast-tile-sun-fg); }
 .toast[data-icon="moon"] .toast__icon { background: var(--c-toast-tile-moon-bg); color: var(--c-toast-tile-moon-fg); }
 .toast__divider { grid-area: 1 / 2; width: var(--size-border); height: var(--size-icon-lg); background: var(--c-toast-divider); }
-.toast__text { grid-area: 1 / 3; min-width: 0; font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
+.toast__text { grid-area: 1 / 3; display: grid; gap: var(--space-1); min-width: 0; overflow-wrap: anywhere; }
+.toast__title, .toast__detail {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
+.toast__title { font-weight: var(--weight-semibold); }
+.toast__detail { font-size: var(--size-text-xs); font-weight: var(--weight-regular); color: var(--c-toast-detail); }
 .toast :focus-visible { outline-color: var(--c-toast-focus); }
 .toast__action {
   grid-area: 2 / 3 / auto / -1; justify-self: start; min-width: var(--size-tap); min-height: var(--size-tap);

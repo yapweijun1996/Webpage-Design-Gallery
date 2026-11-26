@@ -1,10 +1,9 @@
 // Registers the V8 service worker (scope: the V8 folder) and reports offline/online changes.
-import {t} from './i18n.js';
 import {toast} from './toast.js';
 
 export function init() {
-  window.addEventListener('offline', () => toast({key: 'network', type: 'warning', message: t('update.offline')}));
-  window.addEventListener('online', () => toast({key: 'network', type: 'success', message: t('update.online')}));
+  window.addEventListener('offline', () => toast({key: 'network', type: 'warning', messageKey: 'toast.offline.title', detailKey: 'toast.offline.detail'}));
+  window.addEventListener('online', () => toast({key: 'network', type: 'success', messageKey: 'toast.online.title', detailKey: 'toast.online.detail'}));
   if (!('serviceWorker' in navigator) || !location.protocol.startsWith('http')) return;
   const meta = document.querySelector('meta[name="pomelo-root"]');
   const scope = new URL(meta ? meta.content : './', document.baseURI);

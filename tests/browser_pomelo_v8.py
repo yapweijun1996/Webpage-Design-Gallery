@@ -39,11 +39,15 @@ def check_toasts(browser, base, errors):
             toggle = page.locator('[data-theme-toggle]').first
             toggle.evaluate('button => button.click()')
             page.wait_for_function("document.querySelector('.toast[data-key=theme]') !== null")
-            page.evaluate("window.__themeToast = document.querySelector('.toast[data-key=theme]'); window.__themeIcon = window.__themeToast.querySelector('svg').outerHTML")
+            strings = page.evaluate("JSON.parse(document.querySelector('#i18n-runtime').textContent)")
+            assert page.locator('.toast__title').inner_text() == strings['toast.themeDark.title'], width
+            assert page.locator('.toast__detail').inner_text() == strings['toast.themeDark.detail'], width
+            page.evaluate("window.__themeToast = document.querySelector('.toast[data-key=theme]'); window.__themeIcon = window.__themeToast.querySelector('svg').outerHTML; window.__themeDetail = window.__themeToast.querySelector('.toast__detail').textContent")
             toggle.evaluate('button => button.click()')
             assert page.locator('.toast').count() == 1, width
-            expected = page.evaluate("JSON.parse(document.querySelector('#i18n-runtime').textContent)['theme.light']")
-            assert page.locator('.toast__text').inner_text() == expected, width
+            assert page.locator('.toast__title').inner_text() == strings['toast.themeLight.title'], width
+            assert page.locator('.toast__detail').inner_text() == strings['toast.themeLight.detail'], width
+            assert page.evaluate("window.__themeDetail !== window.__themeToast.querySelector('.toast__detail').textContent"), width
             assert page.evaluate("window.__themeToast === document.querySelector('.toast[data-key=theme]')"), width
             assert page.evaluate("window.__themeIcon !== window.__themeToast.querySelector('svg').outerHTML"), width
             page.locator('.toast__close').evaluate('button => button.click()')
@@ -78,24 +82,33 @@ def check_toasts(browser, base, errors):
             }""")
             page.evaluate("""async () => {
               const {toast} = await import('./assets/js/core/toast.js');
-              toast({key: 'clearance', messageKey: 'theme.light', sticky: true});
+              toast({key: 'clearance', messageKey: 'toast.themeLight.title', detailKey: 'toast.themeLight.detail', sticky: true});
             }""")
             page.wait_for_timeout(260)
             box = page.locator('.toast').bounding_box()
-            assert box['width'] <= 360 and 56 <= box['height'] <= 60, (width, box)
+            assert box['width'] <= 360 and box['height'] >= 64, (width, box)
+            title = page.locator('.toast__title').bounding_box()
+            detail = page.locator('.toast__detail').bounding_box()
+            assert detail['y'] >= title['y'] + title['height'], (width, title, detail)
+            one_line_each = page.locator('.toast__text').evaluate("text => [...text.children].every(line => line.getBoundingClientRect().height <= parseFloat(getComputedStyle(line).lineHeight) + 0.5)")
+            if one_line_each:
+                assert 64 <= box['height'] <= 70, (width, box)
+            assert page.locator('.toast-region').evaluate('region => parseFloat(getComputedStyle(region).rowGap)') == 8
             close = page.locator('.toast__close').bounding_box()
             assert close['width'] >= 44 and close['height'] >= 44, (width, close)
             page.evaluate("""async () => {
               const {toast} = await import('./assets/js/core/toast.js');
-              toast({type: 'success', messageKey: 'update.online', sticky: true});
-              toast({type: 'warning', messageKey: 'update.offline', sticky: true});
+              toast({type: 'success', messageKey: 'toast.online.title', detailKey: 'toast.online.detail', sticky: true});
+              toast({type: 'warning', messageKey: 'toast.formNotSent.title', detailKey: 'toast.formNotSent.detail', sticky: true});
             }""")
             page.wait_for_timeout(260)
             assert page.locator('.toast').count() == 3
+            assert page.locator('.toast__title').count() == page.locator('.toast__detail:visible').count() == 3
+            assert page.locator('.toast__title, .toast__detail').evaluate_all("lines => lines.every(line => getComputedStyle(line).webkitLineClamp === '2' && line.getBoundingClientRect().height <= 2 * parseFloat(getComputedStyle(line).lineHeight) + 0.5)"), width
             page.evaluate("""async () => {
               const {toast} = await import('./assets/js/core/toast.js');
               const {t} = await import('./assets/js/core/i18n.js');
-              toast({key: 'clearance', type: 'error', messageKey: 'update.error',
+              toast({key: 'clearance', type: 'error', messageKey: 'toast.updateError.title', detailKey: 'toast.updateError.detail',
                 action: {label: t('update.retry'), onClick() {}}});
             }""")
             page.wait_for_timeout(260)
@@ -122,13 +135,13 @@ def check_toasts(browser, base, errors):
         started = time.monotonic()
         page.evaluate("""async () => {
           const {toast} = await import('./assets/js/core/toast.js');
-          window.__timedToast = toast({messageKey: 'theme.light'});
+          window.__timedToast = toast({messageKey: 'toast.themeLight.title', detailKey: 'toast.themeLight.detail'});
         }""")
         page.wait_for_function('!window.__timedToast.isConnected', timeout=3500)
         assert time.monotonic() - started >= 2.8
         page.evaluate("""async () => {
           const {toast} = await import('./assets/js/core/toast.js');
-          window.__timedToast = toast({messageKey: 'theme.light'});
+          window.__timedToast = toast({messageKey: 'toast.themeLight.title', detailKey: 'toast.themeLight.detail'});
         }""")
         page.locator('.toast').hover()
         page.wait_for_timeout(3500)

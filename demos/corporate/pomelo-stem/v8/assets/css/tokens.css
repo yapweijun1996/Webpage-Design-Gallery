@@ -47,7 +47,7 @@
   --space-7: 3rem;
   --space-8: 4rem;
   --space-9: 6rem;
-  --space-toast-block: 0.375rem;
+  --space-toast-block: 0.6875rem;
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 20px;
@@ -146,6 +146,7 @@
   --c-danger: var(--p-red-700);
   --c-toast-bg: var(--p-cream-50);
   --c-toast-text: var(--p-ink-900);
+  --c-toast-detail: var(--p-ink-500);
   --c-toast-focus: var(--p-forest-700);
   --c-toast-border: var(--p-sand-200);
   --c-toast-divider: var(--p-sand-300);
@@ -197,6 +198,7 @@
     --c-danger: var(--p-red-200);
     --c-toast-bg: var(--p-forest-900);
     --c-toast-text: var(--p-mist-50);
+    --c-toast-detail: var(--p-mist-200);
     --c-toast-focus: var(--p-forest-300);
     --c-toast-border: var(--p-forest-500);
     --c-toast-divider: var(--p-forest-700);
@@ -248,6 +250,7 @@
   --c-danger: var(--p-red-200);
   --c-toast-bg: var(--p-forest-900);
   --c-toast-text: var(--p-mist-50);
+  --c-toast-detail: var(--p-mist-200);
   --c-toast-focus: var(--p-forest-300);
   --c-toast-border: var(--p-forest-500);
   --c-toast-divider: var(--p-forest-700);

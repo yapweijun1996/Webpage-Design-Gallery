@@ -1,5 +1,5 @@
 // Commerce demo: products feed one order; Seller Studio prep feeds the pickup checklist.
-import {t, formatPrice} from '../core/i18n.js';
+import {formatPrice} from '../core/i18n.js';
 import {toast} from '../core/toast.js';
 import {addItem, setPrep, subscribe, count, total} from '../store/demo-store.js';
 
@@ -41,7 +41,7 @@ export function init() {
       const product = button.closest('[data-product]');
       const name = product.querySelector('.product__name').textContent;
       addItem(product.dataset.product, name, Number(product.dataset.price));
-      toast({type: 'success', message: t('product.added', {item: name})});
+      toast({type: 'success', messageKey: 'toast.productAdded.title', detailKey: 'toast.productAdded.detail', vars: {item: name}});
     });
     subscribe((state) => renderOrder(root, state));
   }
@@ -53,7 +53,7 @@ export function init() {
       if (!event.target.matches('[data-prep]')) return;
       studio.dataset.dirty = 'true';
       setPrep(event.target.id, event.target.checked);
-      if (boxes.every((box) => box.checked)) toast({type: 'success', message: t('studio.done')});
+      if (boxes.every((box) => box.checked)) toast({type: 'success', messageKey: 'toast.studioDone.title', detailKey: 'toast.studioDone.detail'});
     });
   }
 }

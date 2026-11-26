@@ -76,8 +76,13 @@ function createItem() {
   const divider = document.createElement('span');
   divider.className = 'toast__divider';
   divider.setAttribute('aria-hidden', 'true');
-  const text = document.createElement('p');
+  const text = document.createElement('div');
   text.className = 'toast__text';
+  const title = document.createElement('p');
+  title.className = 'toast__title';
+  const detail = document.createElement('p');
+  detail.className = 'toast__detail';
+  text.append(title, detail);
   const close = document.createElement('button');
   close.type = 'button';
   close.className = 'toast__close';
@@ -102,19 +107,22 @@ function announce(item, type, message) {
 }
 
 /**
- * toast({key, icon, type, message | messageKey, vars, action: {label, onClick}, duration, sticky})
- * Same keys replace in place; identical messages merge. Errors and sticky toasts persist.
+ * toast({key, icon, type, title | titleKey | message | messageKey, detail | detailKey,
+ *   vars, action: {label, onClick}, duration, sticky})
+ * Same keys replace in place; identical title/detail pairs merge. Errors and sticky toasts persist.
  */
 export function toast(options) {
   regions();
   const type = ICONS[options.type] ? options.type : 'info';
-  const message = options.message || t(options.messageKey, options.vars);
+  const title = options.title ?? options.message ?? t(options.titleKey ?? options.messageKey, options.vars);
+  const detail = options.detail ?? (options.detailKey ? t(options.detailKey, options.vars) : '');
   const key = options.key == null ? '' : String(options.key);
   const items = Array.from(region.children);
   let item = key ? items.find(existing => existing.dataset.key === key) : null;
-  item ||= items.find(existing => existing.dataset.message === message);
+  const identical = existing => existing.dataset.message === title && existing.dataset.detail === detail;
+  item ||= items.find(identical);
   for (const existing of items) {
-    if (existing !== item && existing.dataset.message === message) remove(existing, true);
+    if (existing !== item && identical(existing)) remove(existing, true);
   }
   if (!item) {
     // Capacity eviction must finish synchronously, even while exit transitions run.
@@ -125,14 +133,18 @@ export function toast(options) {
   clearTimeout(item._removalTimer);
   item.className = `toast toast--${type}`;
   if (key) item.dataset.key = key;
-  item.dataset.message = message;
+  item.dataset.message = title;
+  item.dataset.detail = detail;
   item._sequence = ++sequence;
   item._duration = options.sticky || type === 'error' ? toastDuration('sticky') : options.duration ?? toastDuration(options.action ? 'action' : 'default');
   item._remaining = item._duration;
   item._deadline = 0;
   item.dataset.icon = options.icon || ICONS[type];
   item.querySelector('.toast__icon').replaceChildren(icon(item.dataset.icon));
-  item.querySelector('.toast__text').textContent = message;
+  item.querySelector('.toast__title').textContent = title;
+  const description = item.querySelector('.toast__detail');
+  description.textContent = detail;
+  description.hidden = !detail;
   const close = item.querySelector('.toast__close');
   close.setAttribute('aria-label', t('toast.close'));
   let action = item.querySelector('.toast__action');
@@ -151,7 +163,7 @@ export function toast(options) {
   }
   if (!item.isConnected) region.append(item);
   changed();
-  announce(item, type, message);
+  announce(item, type, [title, detail].filter(Boolean).join(' '));
   resume(item);
   return item;
 }
