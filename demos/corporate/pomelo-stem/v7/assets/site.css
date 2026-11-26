@@ -834,3 +834,27 @@ body{font-size:var(--pomelo-study-v-1a81f5208b29348c)}
 .sample-actions .btn{width:100%;min-width:0;justify-content:center;text-align:center;white-space:normal}
 .sample-actions .btn[hidden]{display:none}
 @media(max-width:420px){.sample-actions{grid-template-columns:1fr}}
+
+/* Seller Studio sample workspace. */
+#tour-panel-1 .showcase-visual{display:block;background:transparent;padding:0}
+#tour-panel-1 .scene-switch{margin:0;padding:0;border:0;background:transparent}
+#tour-panel-1 .scene-switch>.mini-kicker{padding:1rem 1.25rem 0;background:var(--soft);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e)}
+#tour-panel-1 .scene-hint{margin:0;padding:.45rem 1.25rem 1rem;background:var(--soft);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e)}
+#tour-panel-1 .scene-buttons{margin:1.5rem 0}
+#tour-panel-1 [data-studio-product]{display:grid;grid-template-columns:minmax(110px,180px) minmax(0,1fr) auto;grid-template-areas:"photo title status" "photo description price" "photo specs specs";align-items:center;gap:.75rem 1.5rem;padding:1.5rem;background:var(--bg)}
+#tour-panel-1 [data-studio-product][hidden]{display:none}
+#tour-panel-1 [data-studio-product] .sample-order-head,#tour-panel-1 [data-studio-product] .sample-order-item{display:contents}
+#tour-panel-1 [data-studio-product] .sample-order-head>div{grid-area:title}
+#tour-panel-1 [data-studio-product] .sample-order-head strong{font-size:var(--pomelo-study-v-248e6098f0b29da3)}
+#tour-panel-1 [data-studio-product] .pill{grid-area:status}
+#tour-panel-1 [data-studio-product] .sample-order-art{grid-area:photo;width:100%;height:150px;background-position:center;background-size:cover}
+#tour-panel-1 [data-studio-product] .art-0{background-image:url('./ai-mug-example.webp')}
+#tour-panel-1 [data-studio-product] .art-1{background-image:url('./sample-bowl.webp')}
+#tour-panel-1 [data-studio-product] .art-2{background-image:url('./sample-basket.webp')}
+#tour-panel-1 [data-studio-product] .sample-order-art i{visibility:hidden}
+#tour-panel-1 [data-studio-product] .sample-order-name{grid-area:description;color:var(--muted)}
+#tour-panel-1 [data-studio-product] .sample-order-item>span:last-child{grid-area:price;font-family:var(--serif);font-weight:700;font-size:var(--pomelo-study-v-2569574d7e801068);color:var(--green)}
+#tour-panel-1 [data-studio-product] .sample-studio-listing{grid-area:specs;display:flex;flex-wrap:wrap;gap:1rem 2rem;padding-top:.75rem}
+#tour-panel-1 [data-studio-product] .sample-studio-listing div{display:block}
+#tour-panel-1 [data-studio-product] .sample-studio-listing dd{margin-top:.2rem;color:var(--ink)}
+@media(max-width:700px){#tour-panel-1 [data-studio-product]{grid-template-columns:95px minmax(0,1fr);grid-template-areas:"photo title" "photo description" "photo price" "specs specs";gap:.65rem 1rem;padding:1rem}#tour-panel-1 [data-studio-product] .sample-order-art{height:110px}#tour-panel-1 [data-studio-product] .pill{grid-area:auto;grid-column:1 / -1;justify-self:start}}

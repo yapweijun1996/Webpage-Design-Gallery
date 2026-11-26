@@ -154,7 +154,7 @@ class PomeloContracts(unittest.TestCase):
                 self.assertEqual(len(root.find(id='sample-pickup')), 1)
 
     def test_generated_pages_and_release_match_source(self):
-        self.assertEqual(json.loads((DEMO / 'release.json').read_text())['version'], '7.18.7')
+        self.assertEqual(json.loads((DEMO / 'release.json').read_text())['version'], '7.18.8')
         for lang in pomelo.COPY:
             for page in pomelo.PAGES:
                 path = DEMO / ('' if lang == 'en' else lang) / (page + '.html')
