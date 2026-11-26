@@ -1,0 +1,28 @@
+<footer class="site-footer">
+  <div class="container site-footer__grid">
+    <div class="site-footer__brand">
+      <p class="brand brand--footer"><img class="brand__mark" src="{{root}}assets/img/pomelo-mark.svg" alt="" width="32" height="32"><span translate="no">{{t:site.brand}}</span></p>
+      <p class="site-footer__tagline" translate="no">{{t:site.tagline}}</p>
+    </div>
+    <nav class="site-footer__col" aria-label="{{t:footer.explore}}">
+      <p class="eyebrow">{{t:footer.explore}}</p>
+      <ul class="link-list">
+        <li><a href="{{href:index}}">{{t:nav.home}}</a></li>
+        <li><a href="{{href:commerce}}">{{t:nav.commerce}}</a></li>
+        <li><a href="{{href:services}}">{{t:nav.services}}</a></li>
+      </ul>
+    </nav>
+    <nav class="site-footer__col" aria-label="{{t:footer.company}}">
+      <p class="eyebrow">{{t:footer.company}}</p>
+      <ul class="link-list">
+        <li><a href="{{href:about}}">{{t:nav.about}}</a></li>
+        <li><a href="{{href:contact}}">{{t:nav.contact}}</a></li>
+      </ul>
+    </nav>
+    <div class="site-footer__note">
+      {{> demo-note}}
+      <p class="site-footer__disclaimer">{{t:footer.disclaimer}}</p>
+      <p class="site-footer__version">{{t:footer.version}}</p>
+    </div>
+  </div>
+</footer>

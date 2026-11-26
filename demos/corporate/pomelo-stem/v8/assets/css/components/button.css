@@ -1,0 +1,26 @@
+/* Buttons and text links. Only primary, secondary and ghost. */
+.cta-pair { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.button {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-height: var(--size-tap); padding: var(--space-3) var(--space-5);
+  border: var(--size-border) solid transparent; border-radius: var(--radius-pill);
+  font-weight: var(--weight-semibold); text-decoration: none; cursor: pointer; text-align: center;
+  transition: transform var(--motion-fast) var(--ease-out), background-color var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+}
+.button:active { transform: scale(0.98); }
+.button--primary { background: var(--c-accent); color: var(--c-on-accent); }
+.button--secondary { background: var(--c-surface); color: var(--c-accent); border-color: var(--c-accent); }
+.button--ghost { background: transparent; color: var(--c-accent); border-color: var(--c-border-subtle); }
+.button--small { min-height: var(--size-tap); padding: var(--space-2) var(--space-4); font-size: var(--size-text-sm); }
+.button--block { width: 100%; }
+.button .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
+.text-link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--size-tap); font-weight: var(--weight-semibold); text-underline-offset: var(--space-1); }
+.text-link .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); transition: transform var(--motion-fast) var(--ease-out); }
+@media (max-width: 479px) {
+  .cta-pair .button { width: 100%; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .button--primary:hover { background: var(--c-accent-strong); box-shadow: var(--shadow-md); transform: translateY(var(--size-lift)); }
+  .button--secondary:hover, .button--ghost:hover { background: var(--c-accent-soft); }
+  .text-link:hover .icon { transform: translateX(var(--space-1)); }
+}

@@ -1,0 +1,47 @@
+<section class="hero hero--about">
+  <div class="container hero__grid">
+    <div class="hero__copy">
+      <h1 class="display-lg">{{t:about.h1}}</h1>
+      <blockquote class="philosophy"><p>{{t:about.philosophy}}</p></blockquote>
+    </div>
+    <figure class="hero__media media media--wide">{{img:a11-about-team|about.alt|(min-width: 1024px) 50vw, 100vw|eager}}</figure>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="pomelo-title">
+  <div class="container card-grid card-grid--two">
+    <article class="card card--feature">
+      <span class="pomelo-segments">{{icon:pomelo-segments}}</span>
+      <h2 id="pomelo-title" class="display-sm">{{t:about.pomelo.title}}</h2>
+      <p>{{t:about.pomelo.body}}</p>
+    </article>
+    <article class="card card--feature">
+      <h2 class="display-sm" translate="no">{{t:about.stem.title}}</h2>
+      <p>{{t:about.stem.body}}</p>
+    </article>
+  </div>
+</section>
+
+<section class="section section--muted" aria-labelledby="principles-title">
+  <div class="container split__grid">
+    <div class="split__copy">
+      <h2 id="principles-title" class="display-sm">{{t:about.principles}}</h2>
+      <ul class="tick-list tick-list--large">
+        <li>{{icon:check}}{{t:about.p1}}</li>
+        <li>{{icon:check}}{{t:about.p2}}</li>
+        <li>{{icon:check}}{{t:about.p3}}</li>
+        <li>{{icon:check}}{{t:about.p4}}</li>
+      </ul>
+    </div>
+    <div>
+      <h2 class="display-sm">{{t:about.facts}}</h2>
+      <dl class="facts">
+        <div><dt>{{t:about.fact.regionLabel}}</dt><dd>{{t:about.fact.region}}</dd></div>
+        <div><dt>{{t:about.fact.langLabel}}</dt><dd>{{t:about.fact.lang}}</dd></div>
+        <div><dt>{{t:about.fact.sizeLabel}}</dt><dd>{{t:about.fact.size}}</dd></div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+{{> closing}}

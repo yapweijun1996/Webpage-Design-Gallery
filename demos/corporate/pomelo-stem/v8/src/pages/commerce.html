@@ -1,0 +1,95 @@
+<section class="page-hero">
+  <div class="container">
+    <h1 class="display-lg">{{t:commerce.h1}}</h1>
+    <p class="lead">{{t:commerce.lead}}</p>
+  </div>
+</section>
+
+<section class="section section--tight" id="demo" aria-labelledby="demo-title">
+  <div class="container">
+    <div class="demo-shell" data-commerce-demo>
+      <div class="demo-shell__bar">
+        <span class="demo-shell__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="demo-shell__url" id="demo-title" translate="no">{{t:shop.url}}</span>
+        {{> demo-note}}
+      </div>
+      <div class="tabs" data-tabs>
+        <div class="tabs__list" role="tablist" aria-label="{{t:shop.tabs}}">
+          <button class="tabs__tab" role="tab" type="button" id="tab-shop" aria-controls="panel-shop" aria-selected="true">{{icon:shopping-bag}}{{t:tab.shop}}</button>
+          <button class="tabs__tab" role="tab" type="button" id="tab-order" aria-controls="panel-order" aria-selected="false" tabindex="-1">{{icon:package}}{{t:tab.order}}<span class="tabs__count" data-order-count hidden></span></button>
+          <button class="tabs__tab" role="tab" type="button" id="tab-pickup" aria-controls="panel-pickup" aria-selected="false" tabindex="-1">{{icon:check}}{{t:tab.pickup}}</button>
+        </div>
+        <div class="tabs__panels">
+          <div class="tabs__panel" role="tabpanel" id="panel-shop" aria-labelledby="tab-shop" tabindex="0">
+            <ul class="product-grid">
+              {{products}}
+            </ul>
+          </div>
+          <div class="tabs__panel" role="tabpanel" id="panel-order" aria-labelledby="tab-order" tabindex="0" hidden>
+            <h2 class="panel-title" translate="no">{{t:order.title}}</h2>
+            <p class="muted" data-order-empty>{{t:order.empty}}</p>
+            <ul class="order-lines" data-order-lines></ul>
+            <p class="order-total" data-order-total-row hidden><span>{{t:order.total}}</span><strong data-order-total></strong></p>
+            <p class="muted">{{t:order.pickupLine}}</p>
+          </div>
+          <div class="tabs__panel" role="tabpanel" id="panel-pickup" aria-labelledby="tab-pickup" tabindex="0" hidden>
+            <h2 class="panel-title">{{t:pickup.title}}</h2>
+            <ol class="checklist" data-pickup-list>
+              <li data-step="paid"><span class="checklist__box">{{icon:check}}</span>{{t:pickup.step1}}</li>
+              <li data-step="packed"><span class="checklist__box">{{icon:check}}</span>{{t:pickup.step2}}</li>
+              <li data-step="collected"><span class="checklist__box">{{icon:check}}</span>{{t:pickup.step3}}</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section split" aria-labelledby="pickup-title">
+  <div class="container split__grid">
+    <figure class="media media--wide">{{img:a09-commerce-pickup|pickup.alt|(min-width: 1024px) 50vw, 100vw}}</figure>
+    <div class="split__copy">
+      <h2 id="pickup-title" class="display-sm">{{t:pickup.h2}}</h2>
+      <p>{{t:pickup.body}}</p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--muted" aria-labelledby="studio-title">
+  <div class="container split__grid">
+    <div class="split__copy">
+      <p class="eyebrow" translate="no">{{t:story.3.label}}</p>
+      <h2 id="studio-title" class="display-sm">{{t:studio.h2}}</h2>
+      <p>{{t:studio.body}}</p>
+    </div>
+    <div class="mini-card mini-card--large" data-studio>
+      <p class="mini-card__title">{{t:studio.mini.title}}</p>
+      <ul class="check-group">
+        <li><input type="checkbox" id="prep-1" data-prep><label for="prep-1">{{t:studio.mini.1}}</label></li>
+        <li><input type="checkbox" id="prep-2" data-prep><label for="prep-2">{{t:studio.mini.2}}</label></li>
+        <li><input type="checkbox" id="prep-3" data-prep><label for="prep-3">{{t:studio.mini.3}}</label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="ai-title">
+  <div class="container split__grid">
+    <div class="split__copy">
+      <p class="eyebrow">{{t:story.4.label}}</p>
+      <h2 id="ai-title" class="display-sm">{{t:ai.h2}}</h2>
+      <p>{{t:ai.body}}</p>
+    </div>
+    <div class="ai-mini">
+      <figure class="media media--square ai-mini__photo">{{img:a05-story-ai-photo|ai.photoAlt|(min-width: 1024px) 20vw, 40vw}}</figure>
+      <div class="mini-card">
+        <p class="pill pill--accent">{{icon:check}}<span translate="no">{{t:ai.mcp}}</span></p>
+        <p class="mini-card__draft">{{t:ai.mini.draft}}</p>
+        <p class="pill pill--highlight">{{icon:sparkles}}{{t:ai.mini.badge}}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{{> closing}}

@@ -1,0 +1,66 @@
+<section class="page-hero">
+  <div class="container">
+    <h1 class="display-lg">{{t:services.h1}}</h1>
+    <p class="lead">{{t:services.lead}}</p>
+  </div>
+</section>
+
+<section class="section section--tight" aria-label="{{t:nav.services}}">
+  <div class="container">
+    <ul class="service-list">
+      <li class="service" id="commerce">
+        <span class="service__icon">{{icon:shopping-bag}}</span>
+        <h2 class="display-sm">{{t:svc.commerce.title}}</h2>
+        <p>{{t:svc.commerce.body}}</p>
+        <ul class="tick-list"><li>{{icon:check}}{{t:svc.commerce.d1}}</li><li>{{icon:check}}{{t:svc.commerce.d2}}</li><li>{{icon:check}}{{t:svc.commerce.d3}}</li></ul>
+        <p class="service__fit"><strong>{{t:svc.fit}}</strong> {{t:svc.commerce.fit}}</p>
+      </li>
+      <li class="service" id="software">
+        <span class="service__icon">{{icon:package}}</span>
+        <h2 class="display-sm">{{t:svc.software.title}}</h2>
+        <p>{{t:svc.software.body}}</p>
+        <ul class="tick-list"><li>{{icon:check}}{{t:svc.software.d1}}</li><li>{{icon:check}}{{t:svc.software.d2}}</li><li>{{icon:check}}{{t:svc.software.d3}}</li></ul>
+        <p class="service__fit"><strong>{{t:svc.fit}}</strong> {{t:svc.software.fit}}</p>
+      </li>
+      <li class="service" id="ai">
+        <span class="service__icon">{{icon:sparkles}}</span>
+        <h2 class="display-sm">{{t:svc.ai.title}}</h2>
+        <p>{{t:svc.ai.body}}</p>
+        <ul class="tick-list"><li>{{icon:check}}{{t:svc.ai.d1}}</li><li>{{icon:check}}{{t:svc.ai.d2}}</li><li>{{icon:check}}{{t:svc.ai.d3}}</li></ul>
+        <p class="service__fit"><strong>{{t:svc.fit}}</strong> {{t:svc.ai.fit}}</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section class="band band--photo" id="process" aria-labelledby="process-title">
+  {{img:a10-services-dark-band|process.alt|100vw}}
+  <div class="container band__content">
+    <header class="section-head">
+      <p class="eyebrow">{{t:process.eyebrow}}</p>
+      <h2 id="process-title" class="display-md">{{t:process.title}}</h2>
+    </header>
+    <ol class="process">
+      <li><h3>{{t:process.1.title}}</h3><p>{{t:process.1.body}}</p></li>
+      <li><h3>{{t:process.2.title}}</h3><p>{{t:process.2.body}}</p></li>
+      <li><h3>{{t:process.3.title}}</h3><p>{{t:process.3.body}}</p></li>
+      <li><h3>{{t:process.4.title}}</h3><p>{{t:process.4.body}}</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="faq-title">
+  <div class="container container--narrow">
+    <h2 id="faq-title" class="display-sm">{{t:faq.title}}</h2>
+    <div class="accordion" data-accordion>
+      <h3 class="accordion__heading"><button type="button" class="accordion__trigger" aria-expanded="false" aria-controls="faq-1" id="faq-1-btn">{{t:faq.1.q}}{{icon:chevron-down}}</button></h3>
+      <div class="accordion__panel" id="faq-1" role="region" aria-labelledby="faq-1-btn" hidden><p>{{t:faq.1.a}}</p></div>
+      <h3 class="accordion__heading"><button type="button" class="accordion__trigger" aria-expanded="false" aria-controls="faq-2" id="faq-2-btn">{{t:faq.2.q}}{{icon:chevron-down}}</button></h3>
+      <div class="accordion__panel" id="faq-2" role="region" aria-labelledby="faq-2-btn" hidden><p>{{t:faq.2.a}}</p></div>
+      <h3 class="accordion__heading"><button type="button" class="accordion__trigger" aria-expanded="false" aria-controls="faq-3" id="faq-3-btn">{{t:faq.3.q}}{{icon:chevron-down}}</button></h3>
+      <div class="accordion__panel" id="faq-3" role="region" aria-labelledby="faq-3-btn" hidden><p>{{t:faq.3.a}}</p></div>
+    </div>
+  </div>
+</section>
+
+{{> closing}}

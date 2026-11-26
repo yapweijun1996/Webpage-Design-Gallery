@@ -1,0 +1,28 @@
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a class="brand" href="{{href:index}}" aria-label="{{t:nav.homeLink}}">
+      <img class="brand__mark" src="{{root}}assets/img/pomelo-mark.svg" alt="" width="32" height="32">
+      <span class="brand__name" translate="no">{{t:site.brand}}</span>
+    </a>
+    <nav class="site-nav" aria-label="{{t:nav.label}}" data-site-nav>
+      {{navlinks}}
+    </nav>
+    <div class="site-header__tools">
+      <div class="lang-switch" data-lang-switch>
+        <span class="visually-hidden">{{t:lang.label}}</span>
+        {{langlinks}}
+      </div>
+      <button class="icon-button" type="button" data-theme-toggle aria-label="{{t:theme.toggle}}">
+        <span class="theme-icon theme-icon--light">{{icon:sun}}</span>
+        <span class="theme-icon theme-icon--dark">{{icon:moon}}</span>
+      </button>
+      <button class="update-button" type="button" data-update data-state="idle" aria-label="{{t:update.label}}">
+        <span class="update-button__icon">{{icon:refresh-cw}}</span>
+        <span class="update-button__chip">{{t:update.chip}}</span>
+        <span class="update-button__dot" aria-hidden="true"></span>
+      </button>
+      <span class="visually-hidden" role="status" data-update-status></span>
+      <button class="icon-button site-header__menu" type="button" data-menu-open aria-label="{{t:menu.open}}" aria-haspopup="dialog">{{icon:menu}}</button>
+    </div>
+  </div>
+</header>

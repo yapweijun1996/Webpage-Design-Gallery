@@ -1,0 +1,33 @@
+/* Pills, the demo note label, order card and mini cards. */
+.pill {
+  display: inline-flex; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill); font-size: var(--size-text-xs); font-weight: var(--weight-semibold);
+}
+.pill .icon { width: var(--size-icon-xs); height: var(--size-icon-xs); }
+.pill--accent { background: var(--c-accent-soft); color: var(--c-accent); }
+.pill--highlight { background: var(--c-highlight-soft); color: var(--c-text); }
+.demo-note {
+  display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--size-tap); padding-inline: var(--space-3);
+  border: var(--size-border) dashed var(--c-border-control); border-radius: var(--radius-pill); background: transparent;
+  color: var(--c-text-muted); font-size: var(--size-text-xs); font-weight: var(--weight-semibold); cursor: pointer;
+}
+.demo-note .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
+.order-card, .mini-card {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-4);
+  background: var(--c-surface); border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.mini-card { display: grid; justify-items: start; }
+.mini-card--large { padding: var(--space-5); gap: var(--space-4); }
+.order-card__icon { display: inline-grid; place-items: center; width: var(--size-tap); height: var(--size-tap); border-radius: var(--radius-md); background: var(--c-accent-soft); color: var(--c-accent); }
+.order-card__id, .mini-card__title { font-weight: var(--weight-bold); font-variant-numeric: tabular-nums; }
+.mini-card__draft { font-size: var(--size-text-sm); color: var(--c-text-soft); }
+.mini-list { display: grid; gap: var(--space-2); font-size: var(--size-text-sm); }
+.mini-list li { display: flex; align-items: center; gap: var(--space-2); }
+.mini-list__tick { display: inline-grid; place-items: center; width: var(--size-icon-lg); height: var(--size-icon-lg); border-radius: var(--radius-pill); background: var(--c-accent); color: var(--c-on-accent); }
+.mini-list__tick .icon { width: var(--size-icon-xs); height: var(--size-icon-xs); }
+.mini-list__tick--open { background: transparent; border: var(--size-border) solid var(--c-border-control); }
+.tick-list { display: grid; gap: var(--space-2); }
+.tick-list li { display: flex; gap: var(--space-2); align-items: flex-start; }
+.tick-list .icon { color: var(--c-accent); margin-top: var(--space-1); width: var(--size-icon-sm); height: var(--size-icon-sm); }
+.tick-list--large { gap: var(--space-3); font-size: var(--size-text-lg); }

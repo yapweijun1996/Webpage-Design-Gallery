@@ -1,0 +1,42 @@
+/* Commerce demo shell and tabs. Panels share one grid cell so switching never changes height. */
+.demo-shell { border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-lg); background: var(--c-surface); box-shadow: var(--shadow-md); overflow: hidden; }
+.demo-shell__bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-4); background: var(--c-surface-muted); border-bottom: var(--size-border) solid var(--c-border-subtle); }
+.demo-shell__dots { display: inline-flex; gap: var(--space-1); }
+.demo-shell__dots i { width: var(--space-2); height: var(--space-2); border-radius: var(--radius-pill); background: var(--c-border-control); opacity: 0.4; }
+.demo-shell__url { flex: 1; min-width: 0; padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--c-surface); color: var(--c-text-muted); font-family: var(--font-mono); font-size: var(--size-text-sm); }
+.tabs__list { display: flex; gap: var(--space-1); padding: var(--space-2) var(--space-3); overflow-x: auto; scrollbar-width: none; border-bottom: var(--size-border) solid var(--c-border-subtle); }
+.tabs__tab {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--size-tap); padding-inline: var(--space-4);
+  border: 0; border-radius: var(--radius-pill); background: transparent; color: var(--c-text-muted); font-weight: var(--weight-semibold); cursor: pointer; white-space: nowrap;
+  transition: background-color var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out);
+}
+.tabs__tab .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
+.tabs__tab[aria-selected="true"] { background: var(--c-accent); color: var(--c-on-accent); }
+.tabs__count { display: inline-grid; place-items: center; min-width: var(--size-icon-md); height: var(--size-icon-md); padding-inline: var(--space-1); border-radius: var(--radius-pill); background: var(--c-highlight); color: var(--c-on-highlight); font-size: var(--size-text-xs); font-variant-numeric: tabular-nums; }
+.tabs__panels { display: grid; }
+.tabs__panel { grid-area: 1 / 1; padding: var(--space-5) var(--space-4); }
+.tabs__panel[hidden] { display: block !important; visibility: hidden; }
+.panel-title { font-size: var(--size-text-xl); font-family: var(--font-display); font-weight: var(--weight-regular); margin-bottom: var(--space-3); }
+.product-grid { display: grid; gap: var(--space-4); }
+.product { display: grid; gap: var(--space-3); }
+.product__body { display: grid; gap: var(--space-2); justify-items: start; }
+.product__name { font-size: var(--size-text-md); }
+.product__price { color: var(--c-text-muted); font-variant-numeric: tabular-nums; }
+.order-lines { display: grid; gap: var(--space-2); margin-block: var(--space-3); }
+.order-lines li { display: flex; justify-content: space-between; gap: var(--space-3); padding-block: var(--space-2); border-bottom: var(--size-border) solid var(--c-border-subtle); font-variant-numeric: tabular-nums; }
+.order-total { display: flex; justify-content: space-between; margin-bottom: var(--space-3); font-size: var(--size-text-lg); font-variant-numeric: tabular-nums; }
+.checklist { display: grid; gap: var(--space-3); }
+.checklist li { display: flex; align-items: center; gap: var(--space-3); color: var(--c-text-muted); }
+.checklist__box { display: inline-grid; place-items: center; width: var(--size-tap); height: var(--size-tap); border-radius: var(--radius-pill); border: var(--size-border) solid var(--c-border-control); color: transparent; }
+.checklist li.is-done { color: var(--c-text); }
+.checklist li.is-done .checklist__box { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-on-accent); }
+.check-group { display: grid; gap: var(--space-2); width: 100%; }
+.check-group li { display: flex; align-items: center; gap: var(--space-3); min-height: var(--size-tap); }
+.check-group input { width: var(--size-icon-lg); height: var(--size-icon-lg); accent-color: var(--c-accent); }
+@media (min-width: 768px) {
+  .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tabs__panel { padding: var(--space-6); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .tabs__tab:hover:not([aria-selected="true"]) { background: var(--c-accent-soft); color: var(--c-text); }
+}

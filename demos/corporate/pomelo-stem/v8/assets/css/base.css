@@ -1,0 +1,48 @@
+/* Base: reset, typography, focus. Values come from tokens.css only. */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--size-header) + var(--space-4)); }
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font-family: var(--font-body);
+  font-size: var(--size-text-md);
+  line-height: var(--lineheight-body);
+  text-rendering: optimizeLegibility;
+}
+:lang(zh-Hans) body, body:lang(zh-Hans) { line-height: var(--lineheight-cjk); }
+img { display: block; max-width: 100%; height: auto; }
+h1, h2, h3, p, ul, ol, dl, dd, figure, blockquote { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+h1, h2, h3 { text-wrap: balance; }
+h3 { font-size: var(--size-text-lg); font-weight: var(--weight-semibold); line-height: var(--lineheight-snug); }
+a { color: var(--c-accent); }
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: var(--size-focus) solid var(--c-focus); outline-offset: var(--space-1); }
+[hidden] { display: none !important; }
+.icon { width: var(--size-icon-md); height: var(--size-icon-md); flex: none; }
+.visually-hidden {
+  position: absolute; width: var(--size-border); height: var(--size-border); overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+.skip-link {
+  position: absolute; left: var(--space-4); top: calc(-1 * var(--size-header));
+  z-index: var(--z-loader); background: var(--c-accent); color: var(--c-on-accent);
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm);
+}
+.skip-link:focus { top: calc(env(safe-area-inset-top, 0px) + var(--space-2)); }
+body.is-locked { overflow: hidden; }
+.display-lg, .display-md, .display-sm {
+  font-family: var(--font-display); font-weight: var(--weight-regular); line-height: var(--lineheight-tight);
+  letter-spacing: -0.01em;
+}
+.display-lg { font-size: var(--size-display-lg); }
+.display-md { font-size: var(--size-display-md); }
+.display-sm { font-size: var(--size-display-sm); }
+.lead { font-size: var(--size-text-lg); color: var(--c-text-soft); max-width: var(--size-measure); }
+.muted { color: var(--c-text-muted); }
+.eyebrow {
+  font-size: var(--size-text-xs); font-weight: var(--weight-semibold); text-transform: uppercase;
+  letter-spacing: var(--tracking-label); color: var(--c-accent);
+}
+:lang(zh-Hans) .eyebrow { letter-spacing: 0; }

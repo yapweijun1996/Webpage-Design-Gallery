@@ -35,6 +35,7 @@ class GalleryTests(unittest.TestCase):
                     ("pomelo-stem-v5", "demos/corporate/pomelo-stem/v5/index.html"),
                     ("pomelo-stem-v6", "demos/corporate/pomelo-stem/v6/index.html"),
                     ("pomelo-stem-v7", "demos/corporate/pomelo-stem/v7/index.html"),
+                    ("pomelo-stem-v8", "demos/corporate/pomelo-stem/v8/index.html"),
                     ("pomelo-stem-v1", "demos/corporate/pomelo-stem/v1/index.html")
                 ])
             else:

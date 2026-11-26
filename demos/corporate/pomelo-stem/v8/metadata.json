@@ -1,0 +1,20 @@
+{
+  "company": "Pomelo STEM",
+  "industry": "STEM & Technology",
+  "title": "Pomelo STEM - Calm Commerce",
+  "version": "v8",
+  "designStyle": "A calm, photo-led multi-page site for small and growing merchants, built on one token design system.",
+  "thumbnail": "assets/thumbnail.webp",
+  "demoRoute": "demos/corporate/pomelo-stem/v8/",
+  "officialWebsite": "https://pomelostem.com/",
+  "disclaimer": "Independent concept. Shop data, prices and people are illustrative; the contact form is not connected.",
+  "id": "pomelo-stem-v8",
+  "companyId": "pomelo-stem",
+  "displayTitle": "Pomelo STEM Calm Commerce",
+  "summary": "Try a small shop demo, an order and pickup checklist, and a versioned update button across five pages in English, Chinese and Malay.",
+  "styles": [
+    "corporate",
+    "editorial"
+  ],
+  "order": 8
+}

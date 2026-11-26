@@ -1,0 +1,11 @@
+/* Contact form fields. Body text is at least 16px so phones do not zoom on focus. */
+.form { display: grid; gap: var(--space-4); align-content: start; }
+.form__head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.field { display: grid; gap: var(--space-2); }
+.field label { font-weight: var(--weight-semibold); }
+.field input, .field textarea {
+  width: 100%; min-height: var(--size-tap); padding: var(--space-3); font-size: var(--size-text-md);
+  border: var(--size-border) solid var(--c-border-control); border-radius: var(--radius-md); background: var(--c-bg);
+}
+.field [aria-invalid="true"] { border-color: var(--c-danger); }
+.field__error { color: var(--c-danger); font-size: var(--size-text-sm); }

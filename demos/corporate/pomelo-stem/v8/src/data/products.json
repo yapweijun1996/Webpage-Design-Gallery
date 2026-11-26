@@ -1,0 +1,8 @@
+{
+  "currency": "MYR",
+  "products": [
+    {"id": "mug", "sku": "PS-MUG-01", "price": 38, "image": "a06-product-mug"},
+    {"id": "bowl", "sku": "PS-BWL-02", "price": 45, "image": "a07-product-bowl"},
+    {"id": "basket", "sku": "PS-BSK-03", "price": 59, "image": "a08-product-basket"}
+  ]
+}

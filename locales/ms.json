@@ -332,7 +332,9 @@
     "Plan your visit": "Rancang lawatan anda",
     "Open a company collection to try a live design or compare two directions side by side.": "Buka koleksi syarikat untuk mencuba demo atau membandingkan dua reka bentuk secara bersebelahan.",
     "Explore a merchant story, sample product estimates and pickup preparation across six pages in English, Chinese and Malay.": "Terokai kisah peniaga, anggaran produk contoh dan penyediaan ambil di kedai dalam enam halaman bahasa Inggeris, Cina dan Melayu.",
-    "Pomelo STEM Connected Commerce": "Perdagangan Terhubung Pomelo STEM"
+    "Pomelo STEM Connected Commerce": "Perdagangan Terhubung Pomelo STEM",
+    "Try a small shop demo, an order and pickup checklist, and a versioned update button across five pages in English, Chinese and Malay.": "Cuba demo kedai kecil, senarai semak pesanan dan ambil sendiri, serta butang kemas kini berversi merentas lima halaman dalam bahasa Inggeris, Cina dan Melayu.",
+    "Pomelo STEM Calm Commerce": "Perdagangan Tenang Pomelo STEM"
   },
   "patterns": {
     "Showing {shown} of {total} matching company": "Memaparkan {shown} daripada {total} syarikat sepadan",

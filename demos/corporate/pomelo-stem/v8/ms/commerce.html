@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="ms" data-page="commerce">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#fbf9f3">
+<meta name="pomelo-version" content="8.0.0">
+<meta name="pomelo-build" content="20261126.1">
+<meta name="pomelo-root" content="../">
+<title>Demo kedai · Pomelo STEM</title>
+<meta name="description" content="Cuba kedai contoh dengan tiga produk, satu pesanan dan satu pengambilan.">
+<link rel="alternate" hreflang="en" href="../commerce.html">
+<link rel="alternate" hreflang="zh-Hans" href="../zh/commerce.html">
+<link rel="alternate" hreflang="ms" href="../ms/commerce.html">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../assets/img/pomelo-mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/img/icon-192.png">
+<script>(function(){try{var t=localStorage.getItem('pomelo-v8-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<link rel="stylesheet" href="../assets/css/site.bundle.css?v=20261126.1">
+<script type="module" src="../assets/js/main.js?v=20261126.1"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Langkau ke kandungan</a>
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a class="brand" href="../ms/index.html" aria-label="Laman utama Pomelo STEM">
+      <img class="brand__mark" src="../assets/img/pomelo-mark.svg" alt="" width="32" height="32">
+      <span class="brand__name" translate="no">Pomelo STEM</span>
+    </a>
+    <nav class="site-nav" aria-label="Utama" data-site-nav>
+      <a class="site-nav__link" href="../ms/index.html">Utama</a>
+      <a class="site-nav__link" href="../ms/commerce.html" aria-current="page">Demo kedai</a>
+      <a class="site-nav__link" href="../ms/services.html">Perkhidmatan</a>
+      <a class="site-nav__link" href="../ms/about.html">Tentang kami</a>
+      <a class="site-nav__link" href="../ms/contact.html">Hubungi</a>
+    </nav>
+    <div class="site-header__tools">
+      <div class="lang-switch" data-lang-switch>
+        <span class="visually-hidden">Bahasa</span>
+        <a class="lang-switch__link" href="../commerce.html" hreflang="en" lang="en" data-lang="en">English</a>
+        <a class="lang-switch__link" href="../zh/commerce.html" hreflang="zh-Hans" lang="zh-Hans" data-lang="zh">简体中文</a>
+        <a class="lang-switch__link" href="../ms/commerce.html" hreflang="ms" lang="ms" data-lang="ms" aria-current="true">Bahasa Melayu</a>
+      </div>
+      <button class="icon-button" type="button" data-theme-toggle aria-label="Tukar antara tema cerah dan gelap">
+        <span class="theme-icon theme-icon--light"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>
+        <span class="theme-icon theme-icon--dark"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
+      </button>
+      <button class="update-button" type="button" data-update data-state="idle" aria-label="Semak kemas kini, versi 8.0.0">
+        <span class="update-button__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></span>
+        <span class="update-button__chip">v8.0.0</span>
+        <span class="update-button__dot" aria-hidden="true"></span>
+      </button>
+      <span class="visually-hidden" role="status" data-update-status></span>
+      <button class="icon-button site-header__menu" type="button" data-menu-open aria-label="Buka menu" aria-haspopup="dialog"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+<section class="page-hero">
+  <div class="container">
+    <h1 class="display-lg">Cuba kedai ini seperti pelanggan anda.</h1>
+    <p class="lead">Tiga produk contoh, satu pesanan dan pengambilan pada hari Sabtu. Semua di sini ialah data contoh.</p>
+  </div>
+</section>
+
+<section class="section section--tight" id="demo" aria-labelledby="demo-title">
+  <div class="container">
+    <div class="demo-shell" data-commerce-demo>
+      <div class="demo-shell__bar">
+        <span class="demo-shell__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="demo-shell__url" id="demo-title" translate="no">yourshop.com</span>
+        <button class="demo-note" type="button" data-demo-note><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>Data demo</span></button>
+
+      </div>
+      <div class="tabs" data-tabs>
+        <div class="tabs__list" role="tablist" aria-label="Paparan demo kedai">
+          <button class="tabs__tab" role="tab" type="button" id="tab-shop" aria-controls="panel-shop" aria-selected="true"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>Kedai</button>
+          <button class="tabs__tab" role="tab" type="button" id="tab-order" aria-controls="panel-order" aria-selected="false" tabindex="-1"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>Pesanan<span class="tabs__count" data-order-count hidden></span></button>
+          <button class="tabs__tab" role="tab" type="button" id="tab-pickup" aria-controls="panel-pickup" aria-selected="false" tabindex="-1"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg>Ambil</button>
+        </div>
+        <div class="tabs__panels">
+          <div class="tabs__panel" role="tabpanel" id="panel-shop" aria-labelledby="tab-shop" tabindex="0">
+            <ul class="product-grid">
+              <li class="product" data-product="mug" data-price="38"><figure class="media media--square"><img src="../assets/img/a06-product-mug-768.webp" srcset="../assets/img/a06-product-mug-768.webp 768w, ../assets/img/a06-product-mug-1440.webp 1440w" sizes="(min-width: 768px) 30vw, 100vw" width="1440" height="1440" alt="Mug seramik krim berbintik dengan tapak tanah liat asli di atas kain linen." loading="lazy" decoding="async"></figure><div class="product__body"><h3 class="product__name">Mug seramik berbintik</h3><p class="product__price">RM38.00</p><button class="button button--secondary button--small" type="button" data-add="mug"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Tambah ke pesanan</button></div></li>
+              <li class="product" data-product="bowl" data-price="45"><figure class="media media--square"><img src="../assets/img/a07-product-bowl-768.webp" srcset="../assets/img/a07-product-bowl-768.webp 768w, ../assets/img/a07-product-bowl-1440.webp 1440w" sizes="(min-width: 768px) 30vw, 100vw" width="1440" height="1440" alt="Mangkuk seramik hijau sage matte di atas kain linen." loading="lazy" decoding="async"></figure><div class="product__body"><h3 class="product__name">Mangkuk harian sage</h3><p class="product__price">RM45.00</p><button class="button button--secondary button--small" type="button" data-add="bowl"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Tambah ke pesanan</button></div></li>
+              <li class="product" data-product="basket" data-price="59"><figure class="media media--square"><img src="../assets/img/a08-product-basket-768.webp" srcset="../assets/img/a08-product-basket-768.webp 768w, ../assets/img/a08-product-basket-1440.webp 1440w" sizes="(min-width: 768px) 30vw, 100vw" width="1440" height="1440" alt="Bakul rotan bulat anyaman tangan di atas kain linen." loading="lazy" decoding="async"></figure><div class="product__body"><h3 class="product__name">Bakul rotan</h3><p class="product__price">RM59.00</p><button class="button button--secondary button--small" type="button" data-add="basket"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Tambah ke pesanan</button></div></li>
+            </ul>
+          </div>
+          <div class="tabs__panel" role="tabpanel" id="panel-order" aria-labelledby="tab-order" tabindex="0" hidden>
+            <h2 class="panel-title" translate="no">Pesanan PS-0124</h2>
+            <p class="muted" data-order-empty>Pesanan anda masih kosong. Pilih sesuatu dari kedai.</p>
+            <ul class="order-lines" data-order-lines></ul>
+            <p class="order-total" data-order-total-row hidden><span>Jumlah</span><strong data-order-total></strong></p>
+            <p class="muted">Ambil di kaunter pada hari Sabtu.</p>
+          </div>
+          <div class="tabs__panel" role="tabpanel" id="panel-pickup" aria-labelledby="tab-pickup" tabindex="0" hidden>
+            <h2 class="panel-title">Senarai semak pengambilan</h2>
+            <ol class="checklist" data-pickup-list>
+              <li data-step="paid"><span class="checklist__box"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></span>Pesanan dibayar</li>
+              <li data-step="packed"><span class="checklist__box"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></span>Dibungkus dan dilabel</li>
+              <li data-step="collected"><span class="checklist__box"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg></span>Diambil di kaunter</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section split" aria-labelledby="pickup-title">
+  <div class="container split__grid">
+    <figure class="media media--wide"><img src="../assets/img/a09-commerce-pickup-768.webp" srcset="../assets/img/a09-commerce-pickup-768.webp 768w, ../assets/img/a09-commerce-pickup-1440.webp 1440w" sizes="(min-width: 1024px) 50vw, 100vw" width="1440" height="959" alt="Pemilik kedai menghulurkan bungkusan kraf kepada pelanggan di kaunter." loading="lazy" decoding="async"></figure>
+    <div class="split__copy">
+      <h2 id="pickup-title" class="display-sm">Siap di kaunter pada hari Sabtu.</h2>
+      <p>Pelanggan menerima mesej pengambilan, menunjukkan nombor pesanan dan membawa bungkusan pulang. Anda melihat pesanan ditanda sebagai sudah diambil.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section section--muted" aria-labelledby="studio-title">
+  <div class="container split__grid">
+    <div class="split__copy">
+      <p class="eyebrow" translate="no">Seller Studio</p>
+      <h2 id="studio-title" class="display-sm">Seller Studio memastikan senarai persediaan ringkas.</h2>
+      <p>Tandakan setiap langkah apabila selesai. Apabila semuanya siap, pesanan sedia untuk diambil.</p>
+    </div>
+    <div class="mini-card mini-card--large" data-studio>
+      <p class="mini-card__title">Persediaan hari ini</p>
+      <ul class="check-group">
+        <li><input type="checkbox" id="prep-1" data-prep><label for="prep-1">Bungkus mug untuk PS-0124</label></li>
+        <li><input type="checkbox" id="prep-2" data-prep><label for="prep-2">Stok mangkuk: 6</label></li>
+        <li><input type="checkbox" id="prep-3" data-prep><label for="prep-3">Cetak slip pengambilan</label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="ai-title">
+  <div class="container split__grid">
+    <div class="split__copy">
+      <p class="eyebrow">Pembantu AI</p>
+      <h2 id="ai-title" class="display-sm">Penerangan dirangka oleh pembantu pilihan anda.</h2>
+      <p>Pomelo STEM tidak menyertakan AI sendiri. Anda menyambungkan pembantu yang anda percayai melalui MCP, dan setiap draf menunggu semakan anda.</p>
+    </div>
+    <div class="ai-mini">
+      <figure class="media media--square ai-mini__photo"><img src="../assets/img/a05-story-ai-photo-768.webp" srcset="../assets/img/a05-story-ai-photo-768.webp 768w, ../assets/img/a05-story-ai-photo-1440.webp 1440w" sizes="(min-width: 1024px) 20vw, 40vw" width="1440" height="1440" alt="Gambar input: mug seramik di atas linen." loading="lazy" decoding="async"></figure>
+      <div class="mini-card">
+        <p class="pill pill--accent"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><span translate="no">Disambung melalui MCP</span></p>
+        <p class="mini-card__draft">Mug seramik berbintik dengan tapak tanah liat asli. Muatan kira-kira 350 ml. Setiap sepuh sedikit berbeza.</p>
+        <p class="pill pill--highlight"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>Semak sebelum terbit</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section closing" aria-labelledby="closing-title">
+  <div class="container closing__inner">
+    <h2 id="closing-title" class="display-md">Beritahu kami apa yang melambatkan kedai anda.</h2>
+    <p class="lead">Panggilan ringkas sudah cukup untuk melihat sama ada kami boleh membantu.</p>
+    <div class="cta-pair">
+  <a class="button button--primary" href="../ms/contact.html">Tempah panggilan 20 minit<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+  <a class="button button--secondary" href="../ms/commerce.html#demo">Cuba demo kedai</a>
+</div>
+
+  </div>
+</section>
+
+
+</main>
+<footer class="site-footer">
+  <div class="container site-footer__grid">
+    <div class="site-footer__brand">
+      <p class="brand brand--footer"><img class="brand__mark" src="../assets/img/pomelo-mark.svg" alt="" width="32" height="32"><span translate="no">Pomelo STEM</span></p>
+      <p class="site-footer__tagline" translate="no">Growing Smarter Solutions.</p>
+    </div>
+    <nav class="site-footer__col" aria-label="Teroka">
+      <p class="eyebrow">Teroka</p>
+      <ul class="link-list">
+        <li><a href="../ms/index.html">Utama</a></li>
+        <li><a href="../ms/commerce.html">Demo kedai</a></li>
+        <li><a href="../ms/services.html">Perkhidmatan</a></li>
+      </ul>
+    </nav>
+    <nav class="site-footer__col" aria-label="Syarikat">
+      <p class="eyebrow">Syarikat</p>
+      <ul class="link-list">
+        <li><a href="../ms/about.html">Tentang kami</a></li>
+        <li><a href="../ms/contact.html">Hubungi</a></li>
+      </ul>
+    </nav>
+    <div class="site-footer__note">
+      <button class="demo-note" type="button" data-demo-note><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>Data demo</span></button>
+
+      <p class="site-footer__disclaimer">Konsep bebas. Gambar sekadar ilustrasi dan borang hubungan tidak disambungkan.</p>
+      <p class="site-footer__version">Versi 8.0.0</p>
+    </div>
+  </div>
+</footer>
+
+<div class="toast-region" data-toast-region aria-label="Pemberitahuan"></div>
+<script type="application/json" id="i18n-runtime">{"_intl": "ms-MY", "contact.copied": "Nombor disalin.", "contact.copyFailed": "Tidak dapat menyalin. Pilih nombor itu secara manual.", "demo.note": "Data demo", "demo.noteBody": "Produk, harga, pesanan dan orang di laman ini ialah contoh. Tiada pesanan sebenar dan tiada perkhidmatan yang disambungkan.", "demo.noteTitle": "Tentang demo ini", "dialog.cancel": "Batal", "dialog.close": "Tutup", "dialog.confirm": "Teruskan", "form.business": "Nama perniagaan", "form.message": "Apa yang anda perlukan bantuan?", "form.name": "Nama anda", "form.notSent": "Borang demo ini tidak disambungkan, jadi tiada apa yang dihantar. Sila gunakan WhatsApp.", "form.required": "Sila isi ruangan ini.", "form.submit": "Hantar mesej", "form.title": "Hantar mesej", "menu.open": "Buka menu", "menu.title": "Menu", "order.empty": "Pesanan anda masih kosong. Pilih sesuatu dari kedai.", "product.added": "{item} ditambah ke pesanan PS-0124.", "studio.done": "PS-0124 sedia untuk diambil.", "theme.dark": "Tema gelap dihidupkan.", "theme.light": "Tema cerah dihidupkan.", "theme.toggle": "Tukar antara tema cerah dan gelap", "toast.close": "Tutup pemberitahuan", "toast.region": "Pemberitahuan", "update.apply": "Muat semula untuk kemas kini", "update.applying": "Sedang dikemas kini…", "update.available": "Versi {version} sudah sedia.", "update.checking": "Menyemak kemas kini…", "update.chip": "v{version}", "update.current": "Anda menggunakan versi terkini, v{version}.", "update.error": "Kemas kini tidak dapat disemak. Cuba lagi sebentar nanti.", "update.label": "Semak kemas kini, versi {version}", "update.offline": "Anda di luar talian. Versi yang disimpan dipaparkan.", "update.online": "Anda kembali dalam talian.", "update.retry": "Cuba lagi", "update.unsavedBody": "Borang hubungan masih ada teks. Muat semula untuk kemas kini akan mengosongkannya.", "update.unsavedTitle": "Muat semula dan hilangkan mesej anda?"}</script>
+</body>
+</html>

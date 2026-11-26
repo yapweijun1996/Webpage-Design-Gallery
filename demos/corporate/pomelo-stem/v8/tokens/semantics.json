@@ -1,0 +1,22 @@
+{
+  "light": {
+    "bg": "cream-50", "surface": "white", "surface-muted": "cream-100", "surface-sunken": "sand-200",
+    "text": "ink-900", "text-muted": "ink-500", "text-soft": "ink-700",
+    "accent": "forest-700", "accent-strong": "forest-800", "accent-soft": "sage-100", "on-accent": "white",
+    "highlight": "lime-400", "on-highlight": "ink-900", "highlight-soft": "lime-200",
+    "border-subtle": "sand-200", "border-control": "ink-500", "focus": "forest-500",
+    "band": "forest-900", "band-text": "mist-50", "band-muted": "mist-200",
+    "success": "forest-700", "warning": "amber-800", "danger": "red-700",
+    "toast-bg": "ink-900", "toast-text": "cream-50", "scrim": "scrim"
+  },
+  "dark": {
+    "bg": "night-900", "surface": "night-800", "surface-muted": "night-700", "surface-sunken": "night-600",
+    "text": "mist-50", "text-muted": "mist-400", "text-soft": "mist-200",
+    "accent": "forest-300", "accent-strong": "sage-200", "accent-soft": "night-700", "on-accent": "forest-950",
+    "highlight": "lime-400", "on-highlight": "ink-900", "highlight-soft": "night-600",
+    "border-subtle": "night-600", "border-control": "mist-400", "focus": "forest-300",
+    "band": "forest-950", "band-text": "mist-50", "band-muted": "mist-200",
+    "success": "forest-300", "warning": "amber-200", "danger": "red-200",
+    "toast-bg": "mist-50", "toast-text": "ink-900", "scrim": "scrim"
+  }
+}

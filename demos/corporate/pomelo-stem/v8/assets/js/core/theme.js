@@ -1,0 +1,22 @@
+// Light / dark theme. The inline boot script in <head> applies a saved choice before first paint.
+import {t} from './i18n.js';
+import {toast} from './toast.js';
+
+const KEY = 'pomelo-v8-theme';
+
+function current() {
+  const explicit = document.documentElement.getAttribute('data-theme');
+  if (explicit) return explicit;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+export function init() {
+  for (const button of document.querySelectorAll('[data-theme-toggle]')) {
+    button.addEventListener('click', () => {
+      const next = current() === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem(KEY, next); } catch (error) { /* storage blocked: still switch for this view */ }
+      toast({type: 'info', message: t(next === 'dark' ? 'theme.dark' : 'theme.light'), duration: 2500});
+    });
+  }
+}

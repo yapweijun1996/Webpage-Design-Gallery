@@ -1,0 +1,14 @@
+/* Accordion built from buttons and regions (no native details). */
+.accordion { display: grid; margin-top: var(--space-5); border-top: var(--size-border) solid var(--c-border-subtle); }
+.accordion__heading { font-size: var(--size-text-md); }
+.accordion__trigger {
+  display: flex; width: 100%; align-items: center; justify-content: space-between; gap: var(--space-3);
+  min-height: var(--size-tap); padding-block: var(--space-4); border: 0; border-bottom: var(--size-border) solid var(--c-border-subtle);
+  background: transparent; text-align: start; font-weight: var(--weight-semibold); cursor: pointer;
+}
+.accordion__trigger .icon { transition: transform var(--motion-base) var(--ease-out); }
+.accordion__trigger[aria-expanded="true"] .icon { transform: rotate(180deg); }
+.accordion__panel { padding-block: var(--space-3) var(--space-4); color: var(--c-text-soft); }
+@media (hover: hover) and (pointer: fine) {
+  .accordion__trigger:hover { color: var(--c-accent); }
+}

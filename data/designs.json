@@ -1281,6 +1281,45 @@
     "disclaimer": "Independent concept. Product visuals are illustrative; the contact form is not connected."
   },
   {
+    "id": "pomelo-stem-v8",
+    "companyId": "pomelo-stem",
+    "slug": "v8",
+    "version": "v8",
+    "title": "Pomelo STEM Calm Commerce",
+    "description": "Try a small shop demo, an order and pickup checklist, and a versioned update button across five pages in English, Chinese and Malay.",
+    "styles": [
+      "corporate",
+      "editorial"
+    ],
+    "status": "concept",
+    "order": 8,
+    "demoPath": "demos/corporate/pomelo-stem/v8/index.html",
+    "thumbnail": "demos/corporate/pomelo-stem/v8/assets/thumbnail.webp",
+    "screenshots": {
+      "desktop": {
+        "path": "demos/corporate/pomelo-stem/v8/screenshots/1440.png",
+        "width": 1440,
+        "height": 900
+      },
+      "tablet": {
+        "path": "demos/corporate/pomelo-stem/v8/screenshots/768.png",
+        "width": 768,
+        "height": 1024
+      },
+      "mobile": {
+        "path": "demos/corporate/pomelo-stem/v8/screenshots/390.png",
+        "width": 390,
+        "height": 844
+      }
+    },
+    "devices": [
+      "desktop",
+      "tablet",
+      "mobile"
+    ],
+    "disclaimer": "Independent concept. Shop data, prices and people are illustrative; the contact form is not connected."
+  },
+  {
     "id": "pomelo-stem-v1",
     "companyId": "pomelo-stem",
     "slug": "v1",
