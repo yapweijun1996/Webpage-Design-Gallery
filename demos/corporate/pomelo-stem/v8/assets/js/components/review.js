@@ -9,9 +9,9 @@ export function init() {
     const toastButton = event.target.closest('[data-review-toast]');
     if (toastButton) {
       const type = toastButton.dataset.reviewToast;
-      const messages = {info: 'theme.light', success: 'update.online', warning: 'update.offline', error: 'update.error', action: 'update.available'};
       toast({key: `review-${type}`, type: type === 'action' ? 'info' : type,
-        message: t(messages[type], {version: document.querySelector('meta[name="pomelo-version"]').content}),
+        title: toastButton.dataset.toastTitle.replace('{version}', document.querySelector('meta[name="pomelo-version"]').content),
+        detail: toastButton.dataset.toastDetail,
         action: type === 'action' ? {label: t('update.apply'), onClick: () => {}} : undefined});
     }
     const dialogButton = event.target.closest('[data-review-dialog]');

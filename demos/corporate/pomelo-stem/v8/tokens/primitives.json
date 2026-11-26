@@ -39,7 +39,7 @@
     "red-900": "#442622",
     "scrim": "rgba(11, 22, 17, 0.56)"
   },
-  "space": {"1": "0.25rem", "2": "0.5rem", "3": "0.75rem", "4": "1rem", "5": "1.5rem", "6": "2rem", "7": "3rem", "8": "4rem", "9": "6rem", "toast-block": "0.375rem"},
+  "space": {"1": "0.25rem", "2": "0.5rem", "3": "0.75rem", "4": "1rem", "5": "1.5rem", "6": "2rem", "7": "3rem", "8": "4rem", "9": "6rem", "toast-block": "0.6875rem"},
   "radius": {"sm": "6px", "md": "12px", "lg": "20px", "pill": "999px", "toast": "16px"},
   "font": {
     "display": "Georgia, 'Times New Roman', 'Songti SC', 'Noto Serif CJK SC', serif",

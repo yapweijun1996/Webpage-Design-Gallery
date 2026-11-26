@@ -1,5 +1,4 @@
 // Contact form: validates, marks itself dirty, and never sends (demo).
-import {t} from '../core/i18n.js';
 import {toast} from '../core/toast.js';
 
 export function init() {
@@ -26,7 +25,7 @@ export function init() {
         if (empty && !firstInvalid) firstInvalid = field;
       }
       if (firstInvalid) { firstInvalid.focus(); return; }
-      toast({type: 'info', message: t('form.notSent'), duration: 6000});
+      toast({type: 'info', messageKey: 'toast.formNotSent.title', detailKey: 'toast.formNotSent.detail', duration: 6000});
     });
   }
   const copy = document.querySelector('[data-copy]');
@@ -35,14 +34,14 @@ export function init() {
       const source = document.querySelector('[data-copy-source]');
       try {
         await navigator.clipboard.writeText(source.textContent.trim());
-        toast({type: 'success', message: t('contact.copied')});
+        toast({type: 'success', messageKey: 'toast.copied.title', detailKey: 'toast.copied.detail'});
       } catch (error) {
         const range = document.createRange();
         range.selectNodeContents(source);
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
-        toast({type: 'warning', message: t('contact.copyFailed')});
+        toast({type: 'warning', messageKey: 'toast.copyFailed.title', detailKey: 'toast.copyFailed.detail'});
       }
     });
   }

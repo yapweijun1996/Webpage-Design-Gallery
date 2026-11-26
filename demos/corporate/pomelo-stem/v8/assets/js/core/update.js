@@ -63,16 +63,16 @@ export async function check({manual = false} = {}) {
       button.classList.remove('is-pulse');
       void button.offsetWidth;
       button.classList.add('is-pulse');
-      toast({key: 'update', type: 'info', message: t('update.available', {version: available}),
+      toast({key: 'update', type: 'info', messageKey: 'toast.updateAvailable.title', detailKey: 'toast.updateAvailable.detail', vars: {version: available},
         action: {label: t('update.apply'), onClick: apply}});
     } else {
       setState('current', t('update.current', {version: current}));
-      if (manual) toast({key: 'update', type: 'success', message: t('update.current', {version: current})});
+      if (manual) toast({key: 'update', type: 'success', messageKey: 'toast.updateCurrent.title', detailKey: 'toast.updateCurrent.detail', vars: {version: current}});
       setTimeout(() => { if (button.dataset.state === 'current') setState('idle'); }, 3000);
     }
   } catch (error) {
     setState('error', t('update.error'));
-    if (manual) toast({key: 'update', type: 'error', message: t('update.error'), action: {label: t('update.retry'), onClick: () => check({manual: true})}});
+    if (manual) toast({key: 'update', type: 'error', messageKey: 'toast.updateError.title', detailKey: 'toast.updateError.detail', action: {label: t('update.retry'), onClick: () => check({manual: true})}});
   } finally {
     busy = false;
   }

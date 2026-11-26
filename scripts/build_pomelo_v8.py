@@ -30,8 +30,7 @@ PAGES = ("index", "commerce", "services", "about", "contact")
 NAV = ("index", "commerce", "services", "about", "contact")
 NAV_KEYS = {"index": "nav.home", "commerce": "nav.commerce", "services": "nav.services",
             "about": "nav.about", "contact": "nav.contact"}
-RUNTIME_PREFIXES = ("update.", "toast.", "dialog.", "theme.", "menu.", "lang.", "top.", "demo.", "product.added",
-                    "studio.done", "form.", "contact.copied", "contact.copyFailed", "order.empty")
+RUNTIME_PREFIXES = ("update.", "toast.", "dialog.", "theme.", "menu.", "lang.", "top.", "demo.", "form.", "order.empty")
 CSS_ORDER = ("tokens.css", "base.css", "layout.css")
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 

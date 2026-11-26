@@ -82,6 +82,37 @@ class PomeloV8Test(unittest.TestCase):
                 self.assertTrue(regions[0].get("aria-label"))
                 self.assertNotIn("aria-live", regions[0])
 
+    def test_every_toast_caller_has_localized_title_and_detail(self):
+        tables = pomelo.dictionaries()
+        expected = {"themeLight", "themeDark", "offline", "online", "updateAvailable", "updateCurrent",
+                    "updateError", "productAdded", "studioDone", "formNotSent", "copied", "copyFailed"}
+        used = set()
+        calls = 0
+        for path in (DEMO / "assets/js").rglob("*.js"):
+            if path.name in ("toast.js", "review.js"):
+                continue
+            for call in re.findall(r"\btoast\(\{(.*?)\}\)", path.read_text("utf-8"), re.S):
+                calls += 1
+                with self.subTest(caller=path.name, call=call):
+                    titles = re.findall(r"'toast\.([\w]+)\.title'", call)
+                    details = re.findall(r"'toast\.([\w]+)\.detail'", call)
+                    self.assertTrue(titles)
+                    self.assertEqual(titles, details)
+                    self.assertRegex(call, r"\b(?:titleKey|messageKey):")
+                    self.assertIn("detailKey:", call)
+                    used.update(titles)
+                    for name in titles:
+                        for lang, table in tables.items():
+                            for part in ("title", "detail"):
+                                key = f"toast.{name}.{part}"
+                                self.assertTrue(table.get(key), (path.name, lang, key))
+        self.assertEqual(calls, 11)
+        self.assertEqual(used, expected)
+        for name, source in pomelo.outputs().items():
+            if name.endswith(".html"):
+                runtime = json.loads(re.search(r'<script type="application/json" id="i18n-runtime">(.*?)</script>', source, re.S)[1])
+                self.assertTrue(all(f"toast.{name}.{part}" in runtime for name in expected for part in ("title", "detail")))
+
     def test_rendered_pages_never_skip_heading_levels(self):
         pages = {name: source for name, source in pomelo.outputs().items()
                  if name.endswith(".html") and not name.startswith("design/")}
@@ -167,7 +198,7 @@ class PomeloV8Test(unittest.TestCase):
             return sum(channel * weight for channel, weight in zip(linear, (0.2126, 0.7152, 0.0722)))
 
         for theme, tokens in themes.items():
-            required = {"toast-bg", "toast-text", "toast-focus", "toast-border", "toast-divider", "toast-accent",
+            required = {"toast-bg", "toast-text", "toast-detail", "toast-focus", "toast-border", "toast-divider", "toast-accent",
                         "toast-close-bg", "toast-close-hover", "toast-close-text", "toast-action-bg", "toast-action-text"}
             required.update(f"toast-{kind}-{part}" for kind in ("info", "success", "warning", "error") for part in ("bg", "icon"))
             required.update(f"toast-tile-{glyph}-{part}" for glyph in ("sun", "moon") for part in ("bg", "fg"))
@@ -178,7 +209,7 @@ class PomeloV8Test(unittest.TestCase):
             else:
                 self.assertGreater(background, 0.7)
             pairs = [("toast-focus", "toast-bg", 3), ("focus", "surface", 3),
-                     ("toast-text", "toast-bg", 4.5), ("toast-action-text", "toast-action-bg", 4.5),
+                     ("toast-text", "toast-bg", 4.5), ("toast-detail", "toast-bg", 4.5), ("toast-action-text", "toast-action-bg", 4.5),
                      ("toast-close-text", "toast-close-bg", 4.5), ("toast-close-text", "toast-close-hover", 4.5)]
             pairs += [(f"toast-{kind}-icon", f"toast-{kind}-bg", 3) for kind in ("info", "success", "warning", "error")]
             pairs += [(f"toast-tile-{glyph}-fg", f"toast-tile-{glyph}-bg", 3) for glyph in ("sun", "moon")]
@@ -193,8 +224,9 @@ class PomeloV8Test(unittest.TestCase):
             bg, accent = (colors[tokens[key]] for key in ("toast-bg", "toast-accent"))
             composite = "#" + "".join(f"{round(int(bg[i:i + 2], 16) * (1 - alpha) + int(accent[i:i + 2], 16) * alpha):02x}"
                                        for i in (1, 3, 5))
-            values = sorted((luminance(composite), luminance(colors[tokens["toast-text"]])))
-            self.assertGreaterEqual((values[1] + 0.05) / (values[0] + 0.05), 4.5, theme)
+            for text in ("toast-text", "toast-detail"):
+                values = sorted((luminance(composite), luminance(colors[tokens[text]])))
+                self.assertGreaterEqual((values[1] + 0.05) / (values[0] + 0.05), 4.5, (theme, text))
         toast = (DEMO / "assets/css/components/toast.css").read_text("utf-8")
         self.assertRegex(toast, r"\.toast :focus-visible\s*\{\s*outline-color: var\(--c-toast-focus\);")
 
@@ -232,10 +264,24 @@ class PomeloV8Test(unittest.TestCase):
         self.assertGreaterEqual(int(tokens["size"]["tap"].rstrip("px")), 44)
         self.assertIn("height: var(--size-tap)", css)
         self.assertIn("radial-gradient", css)
+        self.assertIn("font-size: var(--size-text-xs)", css)
+        self.assertIn("color: var(--c-toast-detail)", css)
+        self.assertRegex(css, r"\.toast__title, \.toast__detail\s*\{[^}]*-webkit-line-clamp: 2; line-clamp: 2;")
+        padding = float(tokens["space"]["toast-block"].removesuffix("rem")) * 16
+        height = int(tokens["size"]["tap"].removesuffix("px")) + 2 * padding + 2
+        self.assertTrue(64 <= height <= 70, height)
         review = (DEMO / "design/components.html").read_text("utf-8")
         for kind in ("info", "success", "warning", "error", "action"):
             self.assertIn(f'data-review-toast="{kind}"', review)
         self.assertNotIn("{{t:", review)
+        previews = [attrs for _, attrs, _ in pomelo.PageStructure(review).elements if "data-review-toast" in attrs]
+        self.assertEqual(len(previews), 5)
+        for attrs in previews:
+            self.assertTrue(attrs.get("data-toast-title"))
+            self.assertTrue(attrs.get("data-toast-detail"))
+        review_js = (DEMO / "assets/js/components/review.js").read_text("utf-8")
+        self.assertIn("title: toastButton.dataset.toastTitle", review_js)
+        self.assertIn("detail: toastButton.dataset.toastDetail", review_js)
 
     @unittest.skipUnless(shutil.which("node"), "Node.js is required for the toast runtime contract")
     def test_toast_replacement_pause_announcements_and_capacity_at_runtime(self):
@@ -273,7 +319,7 @@ const body = new Element('body');
 globalThis.document = {body, documentElement: new Element('html'), activeElement: body,
   createElement: tag => new Element(tag), querySelector: selector => body.querySelector(selector), addEventListener() {}};
 const icon = name => Object.assign(new Element('svg'), {glyph: name});
-const t = key => key;
+const t = (key, vars = {}) => (strings[key] ?? key).replace(/\{(\w+)\}/g, (match, name) => vars[name] ?? match);
 const timers = new Map();
 let now = 10, timerId = 0;
 globalThis.performance = {now: () => now};
@@ -295,16 +341,16 @@ globalThis.getComputedStyle = () => ({transitionDuration: '0.2s',
 init();
 const stack = document.querySelector('[data-toast-region]');
 assert.equal(stack.attributes.role, 'region');
-assert.equal(stack.attributes['aria-label'], 'toast.region');
+assert.equal(stack.attributes['aria-label'], strings['toast.region']);
 const statusNode = body.children.find(node => node.attributes.role === 'status');
 const alertNode = body.children.find(node => node.attributes.role === 'alert');
 assert.equal(statusNode.attributes['aria-live'], 'polite');
-const first = toast({key: 'theme', message: 'Dark theme on.', icon: 'moon'});
+const first = toast({key: 'theme', title: 'Dark theme on.', detail: 'The interface switched to Dark.', icon: 'moon'});
 assert.equal(first.dataset.icon, 'moon');
 const close = first.querySelector('.toast__close');
 const other = toast({message: 'Other notification'});
 advance(500);
-const replacement = toast({key: 'theme', type: 'success', message: 'Light theme on.', icon: 'sun', duration: toastDuration('theme')});
+const replacement = toast({key: 'theme', type: 'success', messageKey: 'toast.themeLight.title', detailKey: 'toast.themeLight.detail', icon: 'sun', duration: toastDuration('theme')});
 assert.equal(replacement, first);
 assert.equal(first.querySelector('.toast__close'), close);
 assert.equal(stack.firstElementChild, first);
@@ -312,32 +358,49 @@ assert.equal(stack.children.length, 2);
 assert.equal(first.className, 'toast toast--success');
 assert.equal(first.dataset.icon, 'sun');
 assert.equal(first.querySelector('.toast__icon').children[0].glyph, 'sun');
-assert.equal(first.querySelector('.toast__text').textContent, 'Light theme on.');
+assert.equal(first.querySelector('.toast__title').textContent, 'Light theme on.');
+assert.equal(first.querySelector('.toast__detail').textContent, 'The interface switched to Light.');
+assert.equal(first.querySelector('.toast__detail').hidden, false);
 assert.equal(first._duration, 2500);
 advance(0);
-assert.equal(statusNode.textContent, 'Light theme on.');
-assert.equal(toast({key: 'theme', message: 'Light theme on.', icon: 'sun'}), first);
+assert.equal(statusNode.textContent, 'Light theme on. The interface switched to Light.');
+assert.equal(toast({key: 'theme', titleKey: 'toast.themeLight.title', detailKey: 'toast.themeLight.detail', icon: 'sun'}), first);
 assert.equal(statusNode.textContent, '');
 advance(0);
-assert.equal(statusNode.textContent, 'Light theme on.');
-assert.equal(toast({key: 'theme', message: 'Dark theme on.', icon: 'moon'}), first);
+assert.equal(statusNode.textContent, 'Light theme on. The interface switched to Light.');
+assert.equal(toast({key: 'theme', message: 'Dark theme on.', detail: 'The interface switched to Dark.', icon: 'moon'}), first);
+assert.equal(first.querySelector('.toast__detail').textContent, 'The interface switched to Dark.');
 assert.equal(first.dataset.icon, 'moon');
 assert.equal(first.querySelector('.toast__icon').children[0].glyph, 'moon');
-assert.equal(toast({message: 'Dark theme on.'}), first);
+assert.equal(toast({message: 'Dark theme on.', detail: 'The interface switched to Dark.'}), first);
 assert.equal(first.dataset.icon, 'info'); // Reusing a theme toast must clear its old tint.
 assert.equal(stack.children.length, 2);
 assert.equal(dismissNewest(), true); // Latest replacement is newest without moving its DOM position.
 assert.equal(first.classList.contains('is-leaving'), true);
 assert.equal(toast({key: 'theme', message: 'Replaced during exit'}), first);
+assert.equal(first.querySelector('.toast__detail').textContent, '');
+assert.equal(first.querySelector('.toast__detail').hidden, true);
 advance(200);
 assert.equal(first.isConnected, true); // The old exit callback cannot delete the replacement.
 function reset() { timers.clear(); stack.replaceChildren(); document.activeElement = body; }
 reset();
 toast({key: 'update', type: 'error', message: 'Stale error'});
-toast({key: 'update', type: 'success', message: 'Recovered'});
+toast({key: 'update', type: 'success', message: 'Recovered', detail: 'Try again in a moment.'});
 advance(0);
 assert.notEqual(alertNode.textContent, 'Stale error');
-assert.equal(statusNode.textContent, 'Recovered');
+assert.equal(statusNode.textContent, 'Recovered Try again in a moment.');
+reset();
+toast({type: 'error', messageKey: 'toast.updateError.title', detailKey: 'toast.updateError.detail'});
+advance(0);
+assert.equal(alertNode.textContent, "Couldn't check for updates. Try again in a moment.");
+reset();
+const versioned = toast({messageKey: 'toast.updateCurrent.title', detailKey: 'toast.updateCurrent.detail', vars: {version: '8.2.1'}});
+assert.equal(versioned.querySelector('.toast__title').textContent, "You're up to date.");
+assert.equal(versioned.querySelector('.toast__detail').textContent, 'Version v8.2.1 is in use.');
+advance(0);
+assert.equal(statusNode.textContent, "You're up to date. Version v8.2.1 is in use.");
+const product = toast({titleKey: 'toast.productAdded.title', detailKey: 'toast.productAdded.detail', vars: {item: 'Pomelo'}});
+assert.equal(product.querySelector('.toast__title').textContent, 'Pomelo added.');
 reset();
 const timed = toast({message: 'Timed'});
 assert.equal(timed._duration, 3000);
@@ -378,10 +441,16 @@ toast({key: 'update', message: 'Retry update', action: {label: 'Retry', onClick:
 actionable.querySelector('.toast__action').onclick();
 assert.equal(actionResult, 'new');
 reset();
-const keyed = toast({key: 'update', message: 'Checking'});
-toast({message: 'Already shown'});
-assert.equal(toast({key: 'update', message: 'Already shown'}), keyed);
-assert.equal(stack.children.length, 1); // Key replacement also merges an existing identical message.
+const keyed = toast({key: 'update', title: 'Checking', detail: 'Old detail'});
+toast({title: 'Already shown', detail: 'Same detail'});
+assert.equal(toast({key: 'update', title: 'Already shown', detail: 'Same detail'}), keyed);
+assert.equal(keyed.querySelector('.toast__detail').textContent, 'Same detail');
+assert.equal(stack.children.length, 1); // Key replacement merges only an identical title/detail pair.
+const different = toast({title: 'Already shown', detail: 'Different detail'});
+assert.notEqual(different, keyed);
+assert.equal(stack.children.length, 2);
+assert.equal(toast({title: 'Already shown', detail: 'Different detail'}), different);
+assert.equal(stack.children.length, 2);
 reset();
 for (let i = 0; i < 5; i++) toast({message: 'Message ' + i});
 assert.equal(stack.children.length, 3);
@@ -392,7 +461,8 @@ assert.equal(stack.children.length, 3);
 console.log('Toast runtime contracts passed');
 """
         result = subprocess.run([shutil.which("node"), "--input-type=module"],
-                                input=harness + "\nconst durationTokens = " + json.dumps(durations) + ";\n" + source + checks,
+                                input="const strings = " + json.dumps(pomelo.dictionaries()["en"]) + ";\n" + harness
+                                + "\nconst durationTokens = " + json.dumps(durations) + ";\n" + source + checks,
                                 text=True, capture_output=True, timeout=15, cwd=ROOT)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
