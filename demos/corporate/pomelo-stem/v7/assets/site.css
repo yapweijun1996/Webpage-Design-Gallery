@@ -694,3 +694,23 @@ body{font-size:var(--pomelo-study-v-1a81f5208b29348c)}
 @media(max-width:999px){
  .home-page .merchant-story .story-layout{grid-template-columns:minmax(0,1fr);gap:1.5rem}
 }
+
+/* A single ceramic study and a clear merchant story. */
+.home-page .story-editorial{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(2rem,4vw,4rem);overflow:visible;background:transparent;border:0;box-shadow:none}
+.home-page .story-editorial-images{display:block;min-height:0;padding:0;background:transparent}
+.home-page .story-editorial-images img:last-child{width:100%;height:auto;aspect-ratio:4 / 3;min-height:0;margin:0;object-fit:cover;border-radius:var(--pomelo-study-v-09f97395c8a0f2ef)}
+.home-page .story-editorial figcaption{justify-content:center;gap:1rem;padding:1rem 0;border:0}
+.home-page .story-editorial figcaption strong{max-width:none;font-size:var(--pomelo-study-v-7a2a0a4f48fb5112)}
+.home-page .merchant-identity{gap:.8rem;padding:1.25rem 0 0 1.5rem}
+.home-page .merchant-identity b{font-size:var(--pomelo-study-v-7a2a0a4f48fb5112);font-weight:500}
+.home-page .merchant-identity ul li{border:0;border-radius:var(--pomelo-study-v-cf197d3f29d77daa)}
+.home-page .story-bridge{margin-top:2rem;padding:1.5rem 2rem;gap:.75rem 2rem}
+@media(min-width:701px){
+ .home-page .story-bridge{grid-template-columns:minmax(0,.8fr) minmax(0,2fr)}
+ .home-page .story-bridge p,.home-page .story-bridge a{border-left:2px solid var(--lime);padding-left:2rem}
+}
+@media(max-width:700px){
+ .home-page .story-editorial{grid-template-columns:minmax(0,1fr);gap:1.25rem}
+ .home-page .story-editorial figcaption{padding:0}
+ .home-page .story-bridge{padding:1.25rem}
+}

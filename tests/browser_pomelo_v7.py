@@ -45,8 +45,8 @@ def main():
                             assert page.locator('.hero-photo').get_attribute('src').endswith('merchant.webp')
                             assert page.locator('.hero-copy .eyebrow img').get_attribute('src').endswith('pomelo-compact.svg')
                             story_image = page.locator('.story-editorial-images img').first
-                            assert story_image.get_attribute('src').endswith('ceramic-study.webp')
-                            assert page.locator('.story-editorial-images img').count() == 2
+                            assert story_image.get_attribute('src').endswith('ceramic-editorial.webp')
+                            assert page.locator('.story-editorial-images img').count() == 1
                             assert page.locator('.merchant-story .story-step').count() == 3
                             assert page.locator('.home-services .card').count() == 3
                             if width <= 700:

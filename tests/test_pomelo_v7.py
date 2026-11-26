@@ -181,7 +181,7 @@ class PomeloContracts(unittest.TestCase):
             with self.subTest(lang=lang):
                 home = Document(pomelo.render(lang, 'index')).root
                 editorial, = home.find(**{'class': 'story-editorial'})
-                self.assertEqual(len(editorial.find(loading='lazy')), 2)
+                self.assertEqual(len(editorial.find(loading='lazy')), 1)
                 self.assertIn(c['story_image_label'], editorial.content())
                 commerce = Document(pomelo.render(lang, 'commerce')).root
                 card, = commerce.find(**{'data-product-button': str(order['product'])})
