@@ -35,7 +35,7 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name, page.evaluate('document.documentElement.scrollWidth'))
                         assert page.locator('main').inner_text().strip(), (width, locale, name)
-                        assert page.locator('[data-update] .version').inner_text() == '7.16.0'
+                        assert page.locator('[data-update] .version').inner_text() == '7.18.0'
                         if width <= 700:
                             for control in page.locator('.controls .control, .controls summary').all():
                                 if control.is_visible():
@@ -108,6 +108,14 @@ def main():
                     assert target.evaluate('element => element === document.activeElement')
                     assert page.locator('#' + target.get_attribute('aria-labelledby')).inner_text().strip()
                 page.goto(base + locale + 'commerce.html')
+                for kind, amounts in (('delivery', ('RM 39.90', 'RM 79.80', 'RM 8.00', 'RM 87.80')), ('pickup', ('RM 32.00', 'RM 96.00', 'RM 0.00'))):
+                    explanation = page.locator(f'[data-order-context="{kind}"]')
+                    explanation.locator('summary').focus()
+                    page.keyboard.press('Enter')
+                    assert explanation.get_attribute('open') is not None
+                    assert all(value in explanation.inner_text() for value in amounts)
+                    page.keyboard.press('Enter')
+                    assert explanation.get_attribute('open') is None
                 comparison = page.locator('[data-comparison]')
                 visible_cards = comparison.locator('[data-compare-card]:visible')
                 assert visible_cards.evaluate_all("cards => cards.map(card => card.dataset.compareCard)") == ['0', '1']
@@ -148,6 +156,13 @@ def main():
                     assert ('RM 39.90', 'RM 32.00', 'RM 48.00')[i] in detail.inner_text()
                     assert f'PH-00{i+1}' in detail.inner_text() and materials[i] in detail.inner_text()
                     assert detail.locator('.sample-product-details').get_attribute('open') is not None
+                    context_detail = detail.locator('[data-product-context]')
+                    context_detail.locator('summary').focus()
+                    page.keyboard.press('Enter')
+                    assert context_detail.get_attribute('open') is not None
+                    assert all(value in context_detail.inner_text() for value in (name, f'PH-00{i+1}', materials[i], ('RM 39.90', 'RM 32.00', 'RM 48.00')[i]))
+                    page.keyboard.press('Enter')
+                    assert context_detail.get_attribute('open') is None
                     card = page.locator('[data-product-button]').nth(i)
                     assert card.locator('[data-product-state]').inner_text() == card.get_attribute('data-selected-label')
                     announcement = page.locator('[data-scene-kind="0"] [data-scene-status]').text_content()
@@ -343,10 +358,10 @@ def main():
             assert page.locator('form input[name="name"]').input_value() == 'Sample name'
             assert not posted, posted
             page.goto(base + 'contact.html')
-            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.16.1"}'))
+            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.18.1"}'))
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.16.1' in page.locator('[data-status]').inner_text()
+            assert '7.18.1' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
             page.wait_for_load_state('load')
             page.wait_for_function("document.querySelector('[data-status]').textContent.includes('could not be verified')")
@@ -378,6 +393,13 @@ def main():
                 assert all(detail.is_visible() for detail in static.locator('[data-scene-detail]').all())
                 assert all(detail.get_attribute('open') is not None for detail in static.locator('.sample-product-details').all())
                 assert all(listing.is_visible() for listing in static.locator('[data-studio-product]').all())
+                for detail in static.locator('[data-product-context], [data-order-context]').all():
+                    detail.locator('summary').focus()
+                    static.keyboard.press('Enter')
+                    assert detail.get_attribute('open') is not None
+                    assert detail.locator('.sample-context-body').is_visible()
+                    static.keyboard.press('Enter')
+                    assert detail.get_attribute('open') is None
                 for handoff in static.locator('.sample-handoff').all():
                     handoff.locator('summary').focus()
                     static.keyboard.press('Enter')

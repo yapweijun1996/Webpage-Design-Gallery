@@ -522,3 +522,41 @@
  .tour-products .demo-product{grid-template-columns:56px minmax(0,1fr);column-gap:.6rem}
  .tour-products .demo-product-art{width:56px}
 }
+
+/* V7.17: connect the fictional merchant's identity to the collection. */
+.home-page .merchant-identity{display:grid;gap:.6rem;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--line)}
+.home-page .merchant-identity b{font-family:var(--serif);font-size:var(--pomelo-study-v-2569574d7e801068);color:var(--ink)}
+.home-page .merchant-identity p{color:var(--muted)}
+.home-page .merchant-identity ul{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;margin:.25rem 0 0;padding:0}
+.home-page .merchant-identity li{padding:.4rem .65rem;background:var(--soft);border:1px solid var(--line);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e);color:var(--ink);font-size:var(--pomelo-study-v-818b9f71cc18b13d)}
+.sample-context{margin:1rem 0;border-block:1px solid var(--line);color:var(--ink)}
+.sample-context summary{min-height:44px;display:flex;align-items:center;gap:.75rem;padding:.65rem 0;cursor:pointer;font-weight:700;list-style:none}
+.sample-context summary::-webkit-details-marker{display:none}
+.sample-context summary::after{content:'+';margin-left:auto;font-size:var(--pomelo-study-v-2569574d7e801068);color:var(--green)}
+.sample-context[open] summary::after{content:'−'}
+.sample-context summary:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.sample-context-body{display:grid;gap:.8rem;padding:0 0 1rem;color:var(--muted)}
+.sample-context-body b{color:var(--ink)}
+
+/* Round 1: keep a clear path through the illustrated Commerce journey. */
+.commerce-return{display:inline-flex;align-items:center;min-height:44px;margin-top:1rem;padding:.45rem .75rem;border:1px solid var(--line);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e);background:var(--surface);color:var(--green);font-weight:700;text-decoration:none}
+.commerce-return:hover{border-color:var(--green)}
+.commerce-return:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+#commerce-guide{scroll-margin-top:1rem}
+.home-page .hero-art-caption{border-left:4px solid var(--lime)}
+.home-page .hero-store-head{border-bottom:2px solid var(--lime)}
+@media(max-width:700px){.page-hero-commerce .button-row .btn{width:100%}}
+
+/* Round 2: connect each listing to its matching fixed example order. */
+.product-order-link{display:flex;align-items:center;gap:.5rem;min-height:44px;margin:.75rem 0;color:var(--green);font-weight:700;text-decoration:underline;text-underline-offset:.2em}
+.product-order-link .icon{width:1rem;flex:none}
+.product-order-note{margin:.75rem 0;color:var(--muted)}
+#sample-order-delivery,#sample-order-pickup{scroll-margin-top:1rem}
+
+/* Round 3: emphasise the editorial identity and the order index. */
+.home-page .merchant-identity{border-left:4px solid var(--lime);padding-left:1rem}
+.order-index [data-index-delivery-status],.order-index [data-index-pickup-status]{font-weight:700;color:var(--green)}
+
+/* Round 5: keep return journeys readable and clearly secondary. */
+.order-index .order-product-return{color:var(--muted);text-decoration:underline;text-underline-offset:.2em}
+.home-page .merchant-identity ul li{border-color:var(--line)}

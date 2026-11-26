@@ -55,6 +55,31 @@ class Document(HTMLParser):
 
 
 class PomeloContracts(unittest.TestCase):
+    def test_merchant_identity_and_native_exploration_are_localized_and_consistent(self):
+        for lang, c in pomelo.COPY.items():
+            with self.subTest(lang=lang):
+                home = Document(pomelo.render(lang, 'index')).root
+                identity, = home.find(**{'class': 'merchant-identity'})
+                for value in (c['identity_tag'], c['identity_title'], c['identity_text'], *c['identity_words']):
+                    self.assertIn(value, identity.content())
+                commerce = Document(pomelo.render(lang, 'commerce')).root
+                for i in range(3):
+                    detail, = commerce.find(**{'data-product-context': str(i)})
+                    self.assertEqual(detail.tag, 'details')
+                    self.assertNotIn('open', detail.attrs)
+                    self.assertEqual(detail.children[0].tag, 'summary')
+                    for value in (c['customer_context'], c['seller_context'], c['store_items'][i], c['sample_prices'][i], f'PH-00{i+1}', c['materials'][i], c['sizes'][i], c['cares'][i], c['product_link_note']):
+                        self.assertIn(value, detail.content())
+                for key, text in (('delivery', c['delivery_explain']), ('pickup', c['pickup_explain'])):
+                    detail, = commerce.find(**{'data-order-context': key})
+                    self.assertEqual(detail.tag, 'details')
+                    self.assertNotIn('open', detail.attrs)
+                    self.assertEqual(detail.children[0].tag, 'summary')
+                    self.assertIn(text, detail.content())
+                    self.assertIn(c['order_context_note'], detail.content())
+                self.assertEqual(Decimal('39.90') * 2 + Decimal('8.00'), Decimal('87.80'))
+                self.assertEqual(pomelo.SECOND_ORDER['unit'] * pomelo.SECOND_ORDER['quantity'] + pomelo.SECOND_ORDER['delivery'], Decimal('96.00'))
+
     def test_commerce_chapter_links_reach_unique_keyboard_targets(self):
         targets = ('product-preview', 'sample-comparison', 'sample-estimate', 'sample-orders')
         for lang, c in pomelo.COPY.items():
@@ -129,7 +154,7 @@ class PomeloContracts(unittest.TestCase):
                 self.assertEqual(len(root.find(id='sample-pickup')), 1)
 
     def test_generated_pages_and_release_match_source(self):
-        self.assertEqual(json.loads((DEMO / 'release.json').read_text())['version'], '7.16.0')
+        self.assertEqual(json.loads((DEMO / 'release.json').read_text())['version'], '7.18.0')
         for lang in pomelo.COPY:
             for page in pomelo.PAGES:
                 path = DEMO / ('' if lang == 'en' else lang) / (page + '.html')

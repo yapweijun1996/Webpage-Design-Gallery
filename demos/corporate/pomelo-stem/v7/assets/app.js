@@ -66,6 +66,11 @@
         if (state) { state.textContent = i === index ? button.dataset.selectedLabel : button.dataset.viewLabel; state.hidden = false; }
       });
       details.forEach(function (detail, i) { detail.hidden = i !== index; });
+      if (group.dataset.sceneKind === '1' && index > 0) {
+        var deliveryIndex = document.querySelector('[data-index-delivery-status]');
+        var deliveryStatus = details[index].querySelector('.sample-order-head .pill');
+        if (deliveryIndex && deliveryStatus) deliveryIndex.textContent = deliveryStatus.textContent;
+      }
       if (group.dataset.sceneKind === '0') {
         tour.querySelectorAll('[data-studio-product]').forEach(function (listing, i) { listing.hidden = i !== index; });
       }
@@ -152,6 +157,14 @@
       });
       if (ordered[0] && ordered[0].parentNode) ordered.forEach(function (card) { card.parentNode.appendChild(card); });
     }
+    document.querySelectorAll('[data-compare-choice]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        first.value = button.dataset.compareChoice;
+        update();
+        first.focus();
+      });
+      button.hidden = false;
+    });
     first.addEventListener('change', update);
     second.addEventListener('change', update);
     first.disabled = false;
