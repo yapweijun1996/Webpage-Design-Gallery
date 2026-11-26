@@ -236,7 +236,7 @@ def render(lang, page, ctx):
               "{{navlinks}}": "\n      ".join(nav), "{{langmenu}}": langmenu,
               "{{footerlanglinks}}": "".join(langs),
               "{{products}}": "\n              ".join(products),
-              "{{theme-boot}}": ctx["theme_boot"],
+              "{{theme-boot}}": ctx["theme_boot"], "{{sw-guard}}": ctx["sw_guard"],
               "{{i18n-runtime}}": json.dumps(runtime, ensure_ascii=False, sort_keys=True).replace("</", "<\\/")}
     for key, value in simple.items():
         text = text.replace(key, value)
@@ -259,6 +259,18 @@ def render(lang, page, ctx):
 
 THEME_BOOT = ("(function(){try{var t=localStorage.getItem('pomelo-v8-theme');"
               "if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();")
+
+# Heals a page whose HTML is newer than the assets an older service worker still serves:
+# ask the controlling worker for its build; on mismatch activate the waiting worker and reload once.
+SW_GUARD = ("(function(){var sw=navigator.serviceWorker;if(!sw||!sw.controller||!window.MessageChannel)return;"
+            "var m=document.querySelector('meta[name=\"pomelo-build\"]');if(!m)return;var want=m.content,key='pomelo-v8-heal';"
+            "var ch=new MessageChannel();ch.port1.onmessage=function(e){if(!e.data||e.data.build===want)return;"
+            "try{if(sessionStorage.getItem(key)===want)return;sessionStorage.setItem(key,want);}catch(x){return;}"
+            "sw.addEventListener('controllerchange',function(){location.reload();});"
+            "function go(w){w.postMessage({type:'SKIP_WAITING'});}"
+            "sw.getRegistration().then(function(r){if(!r)return;return r.update().catch(function(){}).then(function(){"
+            "if(r.waiting)return go(r.waiting);var w=r.installing;if(w)w.addEventListener('statechange',function(){if(w.state==='installed')go(w);});});})"
+            ".catch(function(){});};sw.controller.postMessage({type:'GET_BUILD'},[ch.port2]);})();")
 
 
 def components_page(ctx):
@@ -303,7 +315,7 @@ def manifest(ctx):
 
 def outputs():
     rel = release()
-    ctx = {"strings": dictionaries(), "icons": icons(), "release": rel, "theme_boot": THEME_BOOT,
+    ctx = {"strings": dictionaries(), "icons": icons(), "release": rel, "theme_boot": THEME_BOOT, "sw_guard": SW_GUARD,
            "products": read_json(V8 / "src/data/products.json")}
     result = {}
     tokens = token_css()
