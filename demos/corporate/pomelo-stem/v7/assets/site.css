@@ -577,6 +577,7 @@
  .home-page .hero-store{left:auto;right:calc(36% + 1.75rem);bottom:1.25rem;width:34%}
  .home-page .floating-card{left:auto;right:1.25rem;width:36%;min-width:0;padding:.85rem}
  .home-page .floating-card .card-head{gap:.3rem}
+ .home-page .floating-card .card-head>span:first-child{white-space:nowrap}
  .home-page .mock-row{gap:.45rem;padding:.45rem 0}
  .home-page .mock-icon{width:30px;height:30px}
  .home-page .hero-store-body{padding:.8rem}
@@ -588,4 +589,60 @@
 @media(prefers-reduced-motion:reduce){
  .home-page .value-card{transition:none}
  .home-page .value-card:hover{transform:none}
+}
+
+/* Product overview and desktop composition. */
+.overview-benefits{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem;padding:2rem 0}
+.overview-benefit{display:flex;align-items:center;justify-content:center;gap:1rem}
+.overview-benefit+.overview-benefit{border-left:1px solid var(--line)}
+.overview-benefit>.icon{width:34px;height:34px;color:var(--green)}
+.overview-benefit strong{color:var(--ink)}
+.overview-benefit p{font-size:var(--pomelo-study-v-685068479b2f6766)}
+.overview-products{display:grid;grid-template-columns:1fr repeat(3,1.05fr);gap:1rem;padding:1.25rem;background:var(--sand);border-radius:var(--pomelo-study-v-145f2f5348aecb27)}
+.overview-intro{padding:.5rem 1rem}
+.overview-intro .eyebrow:before{display:none}
+.overview-intro h2{font-size:var(--pomelo-study-v-5eac6f82753c8c7d);margin:1rem 0}
+.overview-intro>p:last-child{max-width:20rem}
+.overview-card{display:grid;align-content:start;gap:.5rem;min-width:0;padding:1rem;background:var(--surface);border:1px solid var(--line);border-radius:var(--pomelo-study-v-145f2f5348aecb27);color:var(--ink);text-decoration:none}
+.overview-card:hover{border-color:var(--green)}
+.overview-card-head{display:flex;align-items:center;gap:.5rem}
+.overview-card-head .pill{margin-left:auto}
+.overview-card>p{font-size:var(--pomelo-study-v-685068479b2f6766)}
+.overview-icon{display:grid;place-items:center;width:34px;height:34px;flex:none;background:var(--green);color:var(--surface);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e)}
+.overview-preview{display:flex;align-items:center;min-height:130px;padding:1rem;border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e);background:var(--soft)}
+.overview-preview span{max-width:11rem;font-family:var(--serif);font-size:var(--pomelo-study-v-37ff501588a824b4);line-height:1.15;color:var(--ink)}
+.overview-preview-0,.overview-preview-2{background:linear-gradient(90deg,var(--soft),transparent),url('./homeware-still.webp') center/cover}
+.overview-preview-1{background:var(--soft);border:1px solid var(--line)}
+.overview-cta{margin-top:1.25rem;padding:1rem 0;background:var(--deep);color:var(--surface)}
+.overview-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:1.25rem}
+.overview-cta h2{font-size:var(--pomelo-study-v-72140a70a10ab61d)}
+.overview-cta p{color:inherit}
+.overview-cta .btn{white-space:nowrap}
+@media(min-width:1100px){
+ body:has(.home-page) .header-inner,.home-page .wrap{width:min(100% - 3rem,1410px)}
+ body:has(.home-page) .header-inner{min-height:68px}
+ .home-page .hero{padding:1.4rem 0 0}
+ .home-page .hero-grid{grid-template-columns:minmax(0,1fr) minmax(0,2.05fr);gap:2rem;align-items:start}
+ .home-page .hero-copy h1{font-size:var(--pomelo-study-v-34e8fdeef47c2b39)}
+ .home-page .hero-copy>p:not(.eyebrow){font-size:var(--pomelo-study-v-8c6e288266fe93dd)}
+ .home-page .hero-copy .btn{padding:.7rem 1rem;font-size:var(--pomelo-study-v-8da80e15a507a3d6)}
+ .home-page .hero-art{min-height:380px;background:var(--sand) url('./merchant-desktop.webp') center/cover}
+ .home-page .hero-photo{opacity:0}
+ .home-page .hero-store{left:auto;right:calc(26% + 1.75rem);bottom:4rem;width:24%}
+ .home-page .floating-card{left:auto;right:1rem;bottom:4rem;width:25%;min-width:0;padding:.85rem}
+ .home-page .floating-card .card-head{gap:.3rem}
+ .home-page .mock-row{gap:.4rem;padding:.4rem 0}
+ .home-page .mock-icon{width:30px;height:30px}
+ .home-page .hero-store-body{padding:.75rem}
+}
+@media(max-width:1099px){
+ .overview-products{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .overview-cta-inner{flex-wrap:wrap}
+}
+@media(max-width:700px){
+ .overview-benefits,.overview-products{grid-template-columns:minmax(0,1fr)}
+ .overview-benefit{justify-content:flex-start}
+ .overview-benefit+.overview-benefit{border-left:0}
+ .overview-cta-inner{display:grid}
+ .overview-cta .btn{white-space:normal}
 }
