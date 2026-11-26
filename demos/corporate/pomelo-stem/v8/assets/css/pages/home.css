@@ -3,7 +3,7 @@
 .hero__grid { display: grid; gap: var(--space-6); align-items: center; }
 .hero__copy { display: grid; gap: var(--space-4); min-width: 0; }
 .hero__copy .cta-pair { margin-top: var(--space-2); }
-.story__steps { display: grid; gap: var(--space-7); counter-reset: step; }
+.story__steps { display: grid; gap: var(--space-6); counter-reset: step; }
 .story-step { display: grid; gap: var(--space-4); align-items: center; }
 /* Phones: one landscape crop for every story photo and the hero keeps the page short. */
 .story-step > .media, .hero .hero__media { aspect-ratio: 3 / 2; }

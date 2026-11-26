@@ -8,9 +8,9 @@
   display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
   border-radius: var(--radius-md); background: var(--c-toast-bg); color: var(--c-toast-text); box-shadow: var(--shadow-lg);
   pointer-events: auto; font-size: var(--size-text-sm);
-  animation: pomelo-toast-in var(--motion-base) var(--ease-out);
+  animation: pomelo-toast-in var(--motion-base) var(--motion-ease-out);
 }
-.toast.is-leaving { opacity: 0; transform: translateY(var(--space-2)); transition: opacity var(--motion-base) var(--ease-in), transform var(--motion-base) var(--ease-in); }
+.toast.is-leaving { opacity: 0; transform: translateY(var(--space-2)); transition: opacity var(--motion-base) var(--motion-ease-in), transform var(--motion-base) var(--motion-ease-in); }
 .toast__icon { display: inline-grid; padding-top: var(--space-1); }
 .toast__icon .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
 .toast--success .toast__icon { color: var(--c-highlight); }

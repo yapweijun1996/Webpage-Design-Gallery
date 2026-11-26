@@ -8,7 +8,7 @@
 .tabs__tab {
   display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--size-tap); padding-inline: var(--space-4);
   border: 0; border-radius: var(--radius-pill); background: transparent; color: var(--c-text-muted); font-weight: var(--weight-semibold); cursor: pointer; white-space: nowrap;
-  transition: background-color var(--motion-fast) var(--ease-out), color var(--motion-fast) var(--ease-out);
+  transition: background-color var(--motion-fast) var(--motion-ease-out), color var(--motion-fast) var(--motion-ease-out);
 }
 .tabs__tab .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
 .tabs__tab[aria-selected="true"] { background: var(--c-accent); color: var(--c-on-accent); }

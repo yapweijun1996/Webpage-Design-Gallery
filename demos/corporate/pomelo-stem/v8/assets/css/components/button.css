@@ -5,7 +5,7 @@
   min-height: var(--size-tap); padding: var(--space-3) var(--space-5);
   border: var(--size-border) solid transparent; border-radius: var(--radius-pill);
   font-weight: var(--weight-semibold); text-decoration: none; cursor: pointer; text-align: center;
-  transition: transform var(--motion-fast) var(--ease-out), background-color var(--motion-fast) var(--ease-out), box-shadow var(--motion-fast) var(--ease-out);
+  transition: transform var(--motion-fast) var(--motion-ease-out), background-color var(--motion-fast) var(--motion-ease-out);
 }
 .button:active { transform: scale(0.98); }
 .button--primary { background: var(--c-accent); color: var(--c-on-accent); }
@@ -15,7 +15,7 @@
 .button--block { width: 100%; }
 .button .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
 .text-link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--size-tap); font-weight: var(--weight-semibold); text-underline-offset: var(--space-1); }
-.text-link .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); transition: transform var(--motion-fast) var(--ease-out); }
+.text-link .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); transition: transform var(--motion-fast) var(--motion-ease-out); }
 @media (max-width: 479px) {
   .cta-pair .button { width: 100%; }
 }

@@ -17,6 +17,7 @@ import json
 import re
 import struct
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -29,7 +30,7 @@ PAGES = ("index", "commerce", "services", "about", "contact")
 NAV = ("index", "commerce", "services", "about", "contact")
 NAV_KEYS = {"index": "nav.home", "commerce": "nav.commerce", "services": "nav.services",
             "about": "nav.about", "contact": "nav.contact"}
-RUNTIME_PREFIXES = ("update.", "toast.", "dialog.", "theme.", "menu.", "demo.", "product.added",
+RUNTIME_PREFIXES = ("update.", "toast.", "dialog.", "theme.", "menu.", "lang.", "top.", "demo.", "product.added",
                     "studio.done", "form.", "contact.copied", "contact.copyFailed", "order.empty")
 CSS_ORDER = ("tokens.css", "base.css", "layout.css")
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
@@ -206,8 +207,18 @@ def render(lang, page, ctx):
     langs = []
     for other in LOCALES:
         current = ' aria-current="true"' if other == lang else ""
-        langs.append(f'<a class="lang-switch__link" href="{page_href(page, other, lang)}" hreflang="{LOCALES[other]["html"]}" '
-                     f'lang="{LOCALES[other]["html"]}" data-lang="{other}"{current}>{t("lang." + other)}</a>')
+        check = icon_svg(icon_data, "check") if other == lang else ""
+        langs.append(f'<li><a class="lang-option" href="{page_href(page, other, lang)}" hreflang="{LOCALES[other]["html"]}" '
+                     f'lang="{LOCALES[other]["html"]}" data-lang="{other}" data-lang-option{current}>'
+                     f'<span>{t("lang." + other)}</span>{check}</a></li>')
+    language_label = html.escape(fmt(strings["lang.button"], {"language": strings["lang." + lang]}), quote=True)
+    list_id = f"header-languages-{lang}-{page}"
+    langmenu = (f'<div class="lang-menu" data-lang-menu data-state="closed">'
+                f'<button class="lang-menu__button" type="button" hidden aria-expanded="false" '
+                f'aria-controls="{list_id}" aria-label="{language_label}">{icon_svg(icon_data, "globe")}'
+                f'<span class="lang-menu__short">{t("lang.short")}</span>'
+                f'<span class="lang-menu__chevron">{icon_svg(icon_data, "chevron-down")}</span></button>'
+                f'<ul class="lang-menu__list" id="{list_id}" hidden>{"".join(langs)}</ul></div>')
     hreflang = "\n".join(f'<link rel="alternate" hreflang="{LOCALES[o]["html"]}" href="{page_href(page, o, lang)}">' for o in LOCALES)
     runtime = {k: fmt(v, {}) for k, v in strings.items() if k.startswith(RUNTIME_PREFIXES)}
     runtime["_intl"] = LOCALES[lang]["intl"]
@@ -222,7 +233,8 @@ def render(lang, page, ctx):
             f'<button class="button button--secondary button--small" type="button" data-add="{pid}">{icon_svg(icon_data, "plus")}{t("product.add")}</button></div></li>')
     simple = {"{{htmllang}}": LOCALES[lang]["html"], "{{page}}": page, "{{root}}": root, "{{version}}": rel["version"],
               "{{build}}": rel["build"], "{{metakey}}": metakey, "{{hreflang}}": hreflang,
-              "{{navlinks}}": "\n      ".join(nav), "{{langlinks}}": "\n        ".join(langs),
+              "{{navlinks}}": "\n      ".join(nav), "{{langmenu}}": langmenu,
+              "{{footerlanglinks}}": "".join(langs),
               "{{products}}": "\n              ".join(products),
               "{{theme-boot}}": ctx["theme_boot"],
               "{{i18n-runtime}}": json.dumps(runtime, ensure_ascii=False, sort_keys=True).replace("</", "<\\/")}
@@ -311,6 +323,29 @@ def outputs():
 
 # ---------------------------------------------------------------- checks
 
+class PageStructure(HTMLParser):
+    """Collect elements with their ancestors for generated shell contracts."""
+    VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}
+
+    def __init__(self, source):
+        super().__init__(convert_charrefs=True)
+        self.elements = []
+        self.stack = []
+        self.feed(source)
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        self.elements.append((tag, attrs, tuple(self.stack)))
+        if tag not in self.VOID:
+            self.stack.append((tag, attrs))
+
+    def handle_endtag(self, tag):
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index][0] == tag:
+                del self.stack[index:]
+                break
+
+
 def load_check_ssot():
     import importlib.util
     spec = importlib.util.spec_from_file_location("check_ssot", ROOT / "scripts/check_ssot.py")
@@ -392,7 +427,18 @@ def check_rules(result):
         errors.append("sw.js build does not match release.json")
     # Every page links its three locales and has exactly one h1 and one banner.
     for name, text in result.items():
-        if not name.endswith(".html") or name.startswith("design/"):
+        if not name.endswith(".html"):
+            continue
+        elements = PageStructure(text).elements
+        language_menus = [attrs for _, attrs, _ in elements if "data-lang-menu" in attrs]
+        language_buttons = [attrs for tag, attrs, ancestors in elements if tag == "button"
+                            and any("data-lang-menu" in parent for _, parent in ancestors)]
+        top_buttons = [attrs for tag, attrs, _ in elements if tag == "button" and "data-back-to-top" in attrs]
+        if len(language_menus) != 1 or len(language_buttons) != 1:
+            errors.append(f"{name} must have exactly one [data-lang-menu] button")
+        if len(top_buttons) != 1:
+            errors.append(f"{name} must have exactly one back-to-top button")
+        if name.startswith("design/"):
             continue
         if text.count("<h1") != 1 and "how-it-works" not in name:
             errors.append(f"{name} must have exactly one h1")
