@@ -560,3 +560,17 @@
 /* Round 5: keep return journeys readable and clearly secondary. */
 .order-index .order-product-return{color:var(--muted);text-decoration:underline;text-underline-offset:.2em}
 .home-page .merchant-identity ul li{border-color:var(--line)}
+
+/* A compact introduction keeps the merchant and product previews in view. */
+.home-page .hero{padding:clamp(2rem,4vw,4rem) 0 1rem}
+.home-page .hero-grid{gap:clamp(2rem,3vw,3rem)}
+.home-page .hero-copy{gap:1.1rem}
+.home-page .hero-copy h1{font-size:var(--pomelo-study-v-69c52d2ca7805d5c)}
+.home-page .hero-art{min-height:440px}
+.home-page .feature-band-inner{padding:2rem 0 3rem}
+.home-page .band-items .value-copy strong{font-family:var(--sans);font-size:var(--pomelo-study-v-8c6e288266fe93dd);font-weight:750}
+.home-page .value-card{min-height:0;background:var(--surface)}
+@media(max-width:900px){
+ .home-page .hero-copy h1{font-size:var(--pomelo-study-v-d6f55af3fa86dd28)}
+ .home-page .hero-art{min-height:0}
+}
