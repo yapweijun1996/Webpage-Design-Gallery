@@ -87,3 +87,7 @@ The earlier `06e505d627ee533b` run served generated files by request interceptio
 3. Open the shop once and verify the loading dialog enters automatically; inspect its four products and virtual basket. With WebGL unavailable, check the fallback packshots and weights. In vending, select a can and then a bottle. Check the selection, press Vend, watch the drink settle in the tray, and collect it. Start again, close during the drop and reopen with the same link. Repeat with the keyboard and with reduced motion enabled.
 4. Switch Day on and return to Night. Check the sky, window glow, road reflections and rain. Repeat with reduced motion enabled.
 5. On a phone, turn right until the full mall arch is in view. Tap or click the 3D doorway to open v11, then use browser Back to return. Repeat with the Enter Mall link using Tab and Enter and under a nested URL prefix. Disable WebGL and repeat the HTML stop flows, then disable JavaScript and check the inline shop and vending details and the Enter Mall link.
+
+## Experimental visitor candidate
+
+The optional `?visitorCandidate=1` preview loads a static Girl visitor with a raincoat, umbrella and shopping bag. The normal route retains the original visitor. If the candidate cannot load, the original visitor is restored. [Source and provenance](../../../../models/mini-street/README.md) describe the experimental asset and its limitations; it is not a motion-ready character.

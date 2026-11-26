@@ -13,7 +13,7 @@ const DAY = {
 
 export const REFLECTED = 1;
 
-export function buildWorld(scene, invalidate) {
+export function buildWorld(scene, invalidate, { candidateVisitor = false } = {}) {
   let seed = 21973;
   function random() {
     seed = (Math.imul(1664525, seed) + 1013904223) >>> 0;
@@ -1595,7 +1595,7 @@ export function buildWorld(scene, invalidate) {
   box(stone, 4.40, 0.023, 10.26, 1.92, 0.055, 3.05);
   planter(4.12, 9.40, 1.65, false, 0.0505);
   planter(4.58, 9.85, 1.20, true, 0.0505);
-  visitor(1.13, 3.25);
+  if (!candidateVisitor) visitor(1.13, 3.25);
   decal(shade, 1.13, 0.016, 3.25, 0.95, 0.71, -Math.PI / 2, 1);
 
   const boardTilt = -0.16;
@@ -1620,13 +1620,24 @@ export function buildWorld(scene, invalidate) {
   });
   stamp(plane, boardInk, -2.844, 0.534, 1.471, 0.57, 0.69, 1, boardTilt, boardTurn);
 
-  for (const [geometry, materials] of instances) {
-    for (const [material, matrices] of materials) {
-      const batch = new THREE.InstancedMesh(geometry, material, matrices.length);
-      matrices.forEach((matrix, i) => batch.setMatrixAt(i, matrix));
-      batch.layers.enable(REFLECTED);
-      scene.add(batch);
+  function flushInstances() {
+    for (const [geometry, materials] of instances) {
+      for (const [material, matrices] of materials) {
+        const batch = new THREE.InstancedMesh(geometry, material, matrices.length);
+        matrices.forEach((matrix, i) => batch.setMatrixAt(i, matrix));
+        batch.layers.enable(REFLECTED);
+        scene.add(batch);
+      }
     }
+    instances.clear();
+  }
+  flushInstances();
+  let visitorRestored = false;
+  function restoreVisitor() {
+    if (!candidateVisitor || visitorRestored) return;
+    visitorRestored = true;
+    visitor(1.13, 3.25);
+    flushInstances();
   }
 
   function setNight(night) {
@@ -1655,5 +1666,5 @@ export function buildWorld(scene, invalidate) {
     for (const material of signMaterials) material.emissiveIntensity = night ? 0.77 : 0.14;
   }
 
-  return { hitTargets, mallAnchor, setNight };
+  return { hitTargets, mallAnchor, setNight, restoreVisitor };
 }

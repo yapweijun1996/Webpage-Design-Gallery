@@ -165,7 +165,24 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
 
   const world = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(38, 1, 0.15, 150);
-  const street = buildWorld(world, invalidate);
+  // Opt-in candidate preview. The normal street keeps its existing visitor.
+  const candidateVisitor = new URL(location.href).searchParams.get("visitorCandidate") === "1";
+  const street = buildWorld(world, invalidate, { candidateVisitor });
+  if (candidateVisitor) {
+    canvas.dataset.visitorCandidate = "loading";
+    const restoreVisitor = () => { canvas.dataset.visitorCandidate = "failed"; street.restoreVisitor(); invalidate(); };
+    import("../v11/vendor/GLTFLoader.js").then(({ GLTFLoader }) => {
+      new GLTFLoader().load(new URL("./assets/visitor-candidate-v10.glb", import.meta.url).href,
+        ({ scene: model }) => {
+          model.position.set(1.13, 0.025, 3.25);
+          model.scale.setScalar(1.6);
+          model.traverse((object) => { if (object.isMesh) object.layers.enable(REFLECTED); });
+          world.add(model);
+          canvas.dataset.visitorCandidate = "ready";
+          invalidate();
+        }, undefined, restoreVisitor);
+    }).catch(restoreVisitor);
+  }
   const landmarks = { ...LANDMARKS, mall: street.mallAnchor };
   const stopViews = {
     shop: { target: [-5.25, 1.82, 0.02], width: 4.7, distance: 6.7, closest: 3.25, angle: -0.12, eye: 2.35 },

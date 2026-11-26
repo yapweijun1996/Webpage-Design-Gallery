@@ -334,7 +334,7 @@ class GalleryTests(unittest.TestCase):
                 "vending-viewer.js", "vending-model.js", "vending-audio.js", "vending-sequence.js",
                 "shop-experience.js", "shop-experience.css", "shop-interior.js", "shop-interior-world.js", "shop-interior.css",
                 "product-hand.js", "shop-product-catalog.js", "shop-product-ui.js", "shop-product-ui.css", "basket.js", "basket.css",
-                "assets/posable-right-hand.glb", "assets/posable-right-hand.LICENSE.md",
+                "assets/posable-right-hand.glb", "assets/posable-right-hand.LICENSE.md", "assets/visitor-candidate-v10.glb",
                 "assets/theme.css", "assets/thumbnail.webp", "assets/mini-street-anchor.webp",
                 "assets/new-moon-label-atlas.webp", "assets/update.js", "release.json",
                 "screenshots/1440.png", "screenshots/768.png", "screenshots/390.png",
