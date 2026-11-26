@@ -1,6 +1,7 @@
 /* Footer with the single full demo disclaimer. */
 .site-footer { padding-block: var(--space-7) calc(var(--space-7) + env(safe-area-inset-bottom, 0px)); border-top: var(--size-border) solid var(--c-border-subtle); background: var(--c-surface-muted); color: var(--c-text-soft); font-size: var(--size-text-sm); }
-.site-footer__grid { display: grid; gap: var(--space-6); }
+.site-footer__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-5); }
+.site-footer__brand, .site-footer__note { grid-column: 1 / -1; }
 .site-footer__brand, .site-footer__col, .site-footer__note { display: grid; gap: var(--space-3); align-content: start; }
 .brand--footer { color: var(--c-text); }
 .site-footer__tagline { font-family: var(--font-display); font-size: var(--size-text-lg); color: var(--c-text); }
@@ -9,6 +10,7 @@
 .site-footer__note .demo-note { justify-self: start; }
 .site-footer__version { font-variant-numeric: tabular-nums; color: var(--c-text-muted); }
 @media (min-width: 768px) {
+  .site-footer__brand, .site-footer__note { grid-column: auto; }
   .site-footer__grid { grid-template-columns: 1.4fr 1fr 1fr 1.6fr; }
 }
 @media (hover: hover) and (pointer: fine) {

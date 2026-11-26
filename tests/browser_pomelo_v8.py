@@ -12,6 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / 'demos/corporate/pomelo-stem/v8'
 PAGES = ('index', 'commerce', 'services', 'about', 'contact')
 VERSION = json.loads((DEMO / 'release.json').read_text('utf-8'))['version']
+major, minor, patch = map(int, VERSION.split('.'))
+NEWER = f'{major}.{minor}.{patch + 1}'
 
 
 class Quiet(http.server.SimpleHTTPRequestHandler):
@@ -45,6 +47,8 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name)
                         assert page.locator('.update-button__chip').inner_text() == 'v' + VERSION
+                        if width == 390 and name == 'index':
+                            assert page.evaluate('document.documentElement.scrollHeight') <= 6000, (locale, page.evaluate('document.documentElement.scrollHeight'))
                         if width <= 400:
                             for control in page.locator('.site-header button:visible').all():
                                 box = control.bounding_box()
@@ -100,7 +104,7 @@ def main():
             # Update button: manual check says current, then a newer release offers an update.
             page.locator('[data-update]').click()
             page.wait_for_function("document.querySelector('[data-update]').dataset.state === 'current'")
-            page.route('**/release.json*', lambda route: route.fulfill(content_type='application/json', body=json.dumps({'version': '8.0.1', 'build': '20990101.1'})))
+            page.route('**/release.json*', lambda route: route.fulfill(content_type='application/json', body=json.dumps({'version': NEWER, 'build': '20990101.1'})))
             page.evaluate("localStorage.clear()")
             page.reload()
             page.locator('[data-update]').click()
