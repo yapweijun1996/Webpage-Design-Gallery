@@ -35,7 +35,7 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name, page.evaluate('document.documentElement.scrollWidth'))
                         assert page.locator('main').inner_text().strip(), (width, locale, name)
-                        assert page.locator('[data-update] .version').inner_text() == '7.18.4'
+                        assert page.locator('[data-update] .version').inner_text() == '7.18.5'
                         if width <= 700:
                             for control in page.locator('.controls .control, .controls summary').all():
                                 if control.is_visible():
@@ -358,10 +358,10 @@ def main():
             assert page.locator('form input[name="name"]').input_value() == 'Sample name'
             assert not posted, posted
             page.goto(base + 'contact.html')
-            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.18.5"}'))
+            page.route('**/release.json?*', lambda route: route.fulfill(status=200, content_type='application/json', body='{"version":"7.18.6"}'))
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.18.5' in page.locator('[data-status]').inner_text()
+            assert '7.18.6' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
             page.wait_for_load_state('load')
             page.wait_for_function("document.querySelector('[data-status]').textContent.includes('could not be verified')")
