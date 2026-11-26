@@ -736,3 +736,15 @@ body{font-size:var(--pomelo-study-v-1a81f5208b29348c)}
  .home-concept .dashboard-cell-header .dashboard-cell-icon{display:grid}
  .home-concept .dashboard-sample-row{flex-wrap:wrap}
 }
+
+/* A clearly labelled, prewritten AI example with an illustrative mug. */
+.home-ai .future-card{padding:clamp(1.25rem,2vw,2rem)}
+.home-ai .future-canvas{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:center;gap:1.25rem}
+.home-ai .future-canvas .mini-kicker{grid-column:1 / -1}
+.home-ai .future-canvas img{width:100%;aspect-ratio:4 / 3;object-fit:cover;border-radius:var(--pomelo-study-v-09f97395c8a0f2ef)}
+.home-ai .future-canvas p{font-size:var(--pomelo-study-v-1a81f5208b29348c);color:var(--ink)}
+.home-ai .future-card>p{font-size:var(--pomelo-study-v-eb916cd9e4238c7f)}
+@media(max-width:520px){
+ .home-ai .future-canvas{grid-template-columns:minmax(0,1fr)}
+ .home-ai .future-canvas .mini-kicker{grid-column:auto}
+}
