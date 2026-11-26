@@ -16,11 +16,12 @@
 .toast--success .toast__icon { color: var(--c-highlight); }
 .toast--warning .toast__icon, .toast--error .toast__icon { color: var(--c-highlight); }
 .toast__text { flex: 1; min-width: 0; padding-block: var(--space-1); }
+.toast :focus-visible { outline-color: var(--c-toast-focus); }
 .toast__action {
-  min-height: var(--size-tap); padding-inline: var(--space-3); border: 0; border-radius: var(--radius-pill);
+  min-width: var(--size-tap); min-height: var(--size-tap); padding-inline: var(--space-3); border: 0; border-radius: var(--radius-pill);
   background: var(--c-highlight); color: var(--c-on-highlight); font-weight: var(--weight-semibold); cursor: pointer;
 }
-.toast__close { display: inline-grid; place-items: center; width: var(--size-tap); height: var(--size-tap); border: 0; border-radius: var(--radius-pill); background: transparent; color: inherit; cursor: pointer; }
+.toast__close { display: inline-grid; flex: none; place-items: center; width: var(--size-tap); height: var(--size-tap); border: 0; border-radius: var(--radius-pill); background: transparent; color: inherit; cursor: pointer; }
 @keyframes pomelo-toast-in { from { opacity: 0; transform: translateY(var(--size-nudge)); } to { opacity: 1; transform: none; } }
 @media (min-width: 768px) {
   .toast-region { left: auto; width: min(var(--size-toast), calc(100vw - var(--space-6))); }

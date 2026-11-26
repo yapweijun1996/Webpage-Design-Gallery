@@ -107,6 +107,7 @@
   "commerce.lead": "Three sample products, one order and a Saturday pickup. Everything here is example data.",
   "shop.url": "yourshop.com",
   "shop.tabs": "Shop demo views",
+  "shop.products": "Shop products",
   "tab.shop": "Shop",
   "tab.order": "Order",
   "tab.pickup": "Pickup",

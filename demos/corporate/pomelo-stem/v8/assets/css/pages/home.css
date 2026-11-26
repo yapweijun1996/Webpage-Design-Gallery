@@ -17,6 +17,12 @@
 .story-step h3 { font-family: var(--font-display); font-weight: var(--weight-regular); font-size: var(--size-display-sm); line-height: var(--lineheight-tight); }
 .closing { background: var(--c-accent-soft); }
 .closing__inner { display: grid; gap: var(--space-4); justify-items: start; }
+/* Phone spacing leaves room for full tap targets without changing content or image crops. */
+@media (max-width: 767px) {
+  :root[data-page="index"] .section, :root[data-page="index"] .band { padding-block: var(--space-7); }
+  :root[data-page="index"] .hero { padding-block: var(--space-5) var(--space-6); }
+  :root[data-page="index"] .story__steps { gap: var(--space-5); }
+}
 @media (min-width: 768px) {
   .story__steps { gap: var(--space-8); }
   .story-step > .media--portrait, .hero .hero__media { aspect-ratio: 4 / 5; }

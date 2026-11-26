@@ -37,6 +37,7 @@ export function init() {
     root.addEventListener('click', (event) => {
       const button = event.target.closest('[data-add]');
       if (!button) return;
+      root.dataset.dirty = 'true';
       const product = button.closest('[data-product]');
       const name = product.querySelector('.product__name').textContent;
       addItem(product.dataset.product, name, Number(product.dataset.price));
@@ -48,8 +49,9 @@ export function init() {
   if (studio) {
     const boxes = [...studio.querySelectorAll('[data-prep]')];
     for (const box of boxes) setPrep(box.id, box.checked);
-    studio.addEventListener('change', (event) => {
+    studio.addEventListener('input', (event) => {
       if (!event.target.matches('[data-prep]')) return;
+      studio.dataset.dirty = 'true';
       setPrep(event.target.id, event.target.checked);
       if (boxes.every((box) => box.checked)) toast({type: 'success', message: t('studio.done')});
     });

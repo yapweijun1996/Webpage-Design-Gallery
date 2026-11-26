@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex,nofollow">
 <meta http-equiv="refresh" content="0; url=services.html#process">
 <meta name="theme-color" content="#fbf9f3">
-<meta name="pomelo-version" content="8.1.1">
-<meta name="pomelo-build" content="20261126.4">
+<meta name="pomelo-version" content="8.1.2">
+<meta name="pomelo-build" content="20261126.5">
 <meta name="pomelo-root" content="../">
 <title>工作方式 · Pomelo STEM</title>
 <meta name="description" content="这个页面已移到「服务」。">
@@ -19,9 +19,56 @@
 <link rel="icon" href="../assets/img/pomelo-mark.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../assets/img/icon-192.png">
 <script>(function(){try{var t=localStorage.getItem('pomelo-v8-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<script>(function(){var sw=navigator.serviceWorker;if(!sw||!sw.controller||!window.MessageChannel)return;var m=document.querySelector('meta[name="pomelo-build"]');if(!m)return;var want=m.content,key='pomelo-v8-heal';var ch=new MessageChannel();ch.port1.onmessage=function(e){if(!e.data||e.data.build===want)return;try{if(sessionStorage.getItem(key)===want)return;sessionStorage.setItem(key,want);}catch(x){return;}sw.addEventListener('controllerchange',function(){location.reload();});function go(w){w.postMessage({type:'SKIP_WAITING'});}sw.getRegistration().then(function(r){if(!r)return;return r.update().catch(function(){}).then(function(){if(r.waiting)return go(r.waiting);var w=r.installing;if(w)w.addEventListener('statechange',function(){if(w.state==='installed')go(w);});});}).catch(function(){});};sw.controller.postMessage({type:'GET_BUILD'},[ch.port2]);})();</script>
-<link rel="stylesheet" href="../assets/css/site.bundle.css?v=20261126.4">
-<script type="module" src="../assets/js/main.js?v=20261126.4"></script>
+<script>(function () {
+  var sw = navigator.serviceWorker;
+  if (!sw || !sw.controller || !window.MessageChannel) return;
+  var meta = document.querySelector('meta[name="pomelo-build"]');
+  if (!meta) return;
+  var want = meta.content, key = 'pomelo-v8-heal';
+  function hasUnsavedInput() {
+    if (document.querySelector('[data-dirty="true"]')) return true;
+    return Array.from(document.querySelectorAll('form input, form textarea, form select')).some(function (field) {
+      if (field.type === 'checkbox' || field.type === 'radio') return field.checked !== field.defaultChecked;
+      if (field.tagName === 'SELECT') {
+        var options = Array.from(field.options);
+        if (field.multiple) return options.some(function (option) { return option.selected !== option.defaultSelected; });
+        var initial = -1;
+        options.forEach(function (option, index) { if (option.defaultSelected) initial = index; });
+        if (initial < 0) initial = options.findIndex(function (option) {
+          return !option.disabled && !(option.parentElement.tagName === 'OPTGROUP' && option.parentElement.disabled);
+        });
+        return field.selectedIndex !== initial;
+      }
+      return field.value !== field.defaultValue;
+    });
+  }
+  var channel = new MessageChannel();
+  channel.port1.onmessage = function (event) {
+    if (!event.data || event.data.build === want) return;
+    try {
+      if (sessionStorage.getItem(key) === want) return;
+      sessionStorage.setItem(key, want);
+    } catch (error) { return; }
+    sw.addEventListener('controllerchange', function () {
+      if (hasUnsavedInput()) return;
+      location.reload();
+    }, {once: true});
+    function go(worker) { worker.postMessage({type: 'SKIP_WAITING'}); }
+    sw.getRegistration().then(function (registration) {
+      if (!registration) return;
+      return registration.update().catch(function () {}).then(function () {
+        if (registration.waiting) return go(registration.waiting);
+        var worker = registration.installing;
+        if (worker) worker.addEventListener('statechange', function () {
+          if (worker.state === 'installed') go(worker);
+        });
+      });
+    }).catch(function () {});
+  };
+  sw.controller.postMessage({type: 'GET_BUILD'}, [channel.port2]);
+})();</script>
+<link rel="stylesheet" href="../assets/css/site.bundle.css?v=20261126.5">
+<script type="module" src="../assets/js/main.js?v=20261126.5"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">跳到主要内容</a>
@@ -44,9 +91,9 @@
         <span class="theme-icon theme-icon--light"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>
         <span class="theme-icon theme-icon--dark"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
       </button>
-      <button class="update-button" type="button" data-update data-state="idle" aria-label="检查更新，当前版本 8.1.1">
+      <button class="update-button" type="button" data-update data-state="idle" aria-label="检查更新，当前版本 8.1.2">
         <span class="update-button__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></span>
-        <span class="update-button__chip">v8.1.1</span>
+        <span class="update-button__chip">v8.1.2</span>
         <span class="update-button__dot" aria-hidden="true"></span>
       </button>
       <span class="visually-hidden" role="status" data-update-status></span>
@@ -92,14 +139,14 @@
       <button class="demo-note" type="button" data-demo-note><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>演示数据</span></button>
 
       <p class="site-footer__disclaimer">独立概念作品。图片仅作示意，联系表单未连接。</p>
-      <p class="site-footer__version">版本 8.1.1</p>
+      <p class="site-footer__version">版本 8.1.2</p>
     </div>
   </div>
 </footer>
 
 <button class="back-to-top" type="button" data-back-to-top data-state="hidden" inert aria-hidden="true" aria-label="回到顶部"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></button>
 
-<div class="toast-region" data-toast-region aria-label="通知"></div>
+<div class="toast-region" data-toast-region role="region" aria-label="通知"></div>
 <script type="application/json" id="i18n-runtime">{"_intl": "zh-Hans-MY", "contact.copied": "号码已复制。", "contact.copyFailed": "无法复制，请手动选取号码。", "demo.note": "演示数据", "demo.noteBody": "本网站上的商品、价格、订单和人物都是示例，不是真实订单，也没有连接任何服务。", "demo.noteTitle": "关于这个演示", "dialog.cancel": "取消", "dialog.close": "关闭", "dialog.confirm": "继续", "form.business": "公司或店名", "form.message": "想请我们帮什么忙？", "form.name": "你的名字", "form.notSent": "这个演示表单没有连接，所以没有发送任何内容。请改用 WhatsApp。", "form.required": "请填写这一栏。", "form.submit": "发送留言", "form.title": "发送留言", "lang.button": "语言：{language}", "lang.en": "English", "lang.label": "语言", "lang.ms": "Bahasa Melayu", "lang.short": "中文", "lang.zh": "简体中文", "menu.open": "打开菜单", "menu.theme": "浅色或深色主题", "menu.title": "菜单", "order.empty": "订单还是空的，从商店里挑一件吧。", "product.added": "已将{item}加入订单 PS-0124。", "studio.done": "PS-0124 已可取货。", "theme.dark": "已切换为深色主题。", "theme.light": "已切换为浅色主题。", "theme.toggle": "切换浅色或深色主题", "toast.close": "关闭通知", "toast.region": "通知", "top.label": "回到顶部", "update.apply": "重新加载以更新", "update.applying": "正在更新…", "update.available": "新版本 {version} 已准备好。", "update.checking": "正在检查更新…", "update.chip": "v{version}", "update.current": "已是最新版本 v{version}。", "update.error": "暂时无法检查更新，请稍后再试。", "update.label": "检查更新，当前版本 {version}", "update.offline": "你目前离线，正在显示已保存的版本。", "update.online": "已恢复联网。", "update.retry": "重试", "update.unsavedBody": "联系表单里还有未发送的内容，重新加载更新后会被清空。", "update.unsavedTitle": "重新加载会清除你的留言，要继续吗？"}</script>
 </body>
 </html>

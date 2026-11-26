@@ -6,9 +6,8 @@
 .demo-shell__url { flex: 1; min-width: 0; padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--c-surface); color: var(--c-text-muted); font-family: var(--font-mono); font-size: var(--size-text-sm); }
 .tabs__list { display: flex; gap: var(--space-1); padding: var(--space-2) var(--space-3); overflow-x: auto; scrollbar-width: none; border-bottom: var(--size-border) solid var(--c-border-subtle); }
 .tabs__tab {
-  display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--size-tap); padding-inline: var(--space-4);
+  display: inline-flex; align-items: center; gap: var(--space-2); min-width: var(--size-tap); min-height: var(--size-tap); padding-inline: var(--space-4);
   border: 0; border-radius: var(--radius-pill); background: transparent; color: var(--c-text-muted); font-weight: var(--weight-semibold); cursor: pointer; white-space: nowrap;
-  transition: background-color var(--motion-fast) var(--motion-ease-out), color var(--motion-fast) var(--motion-ease-out);
 }
 .tabs__tab .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
 .tabs__tab[aria-selected="true"] { background: var(--c-accent); color: var(--c-on-accent); }
@@ -32,7 +31,8 @@
 .checklist li.is-done .checklist__box { background: var(--c-accent); border-color: var(--c-accent); color: var(--c-on-accent); }
 .check-group { display: grid; gap: var(--space-2); width: 100%; }
 .check-group li { display: flex; align-items: center; gap: var(--space-3); min-height: var(--size-tap); }
-.check-group input { width: var(--size-icon-lg); height: var(--size-icon-lg); accent-color: var(--c-accent); }
+.check-group label { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-width: var(--size-tap); min-height: var(--size-tap); cursor: pointer; }
+.check-group input { flex: none; width: var(--size-icon-lg); height: var(--size-icon-lg); margin: 0; accent-color: var(--c-accent); }
 @media (min-width: 768px) {
   .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .tabs__panel { padding: var(--space-6); }

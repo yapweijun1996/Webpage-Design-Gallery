@@ -6,7 +6,7 @@ export function init() {
   const form = document.querySelector('[data-contact-form]');
   if (form) {
     form.addEventListener('input', (event) => {
-      form.dataset.dirty = String([...form.elements].some((field) => field.value && field.value.trim()));
+      form.dataset.dirty = 'true';
       const field = event.target;
       if (field.required && field.value.trim()) {
         field.removeAttribute('aria-invalid');

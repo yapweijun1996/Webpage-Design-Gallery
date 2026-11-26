@@ -21,6 +21,7 @@
         </div>
         <div class="tabs__panels">
           <div class="tabs__panel" role="tabpanel" id="panel-shop" aria-labelledby="tab-shop" tabindex="0">
+            <h2 class="visually-hidden">{{t:shop.products}}</h2>
             <ul class="product-grid">
               {{products}}
             </ul>
@@ -66,9 +67,9 @@
     <div class="mini-card mini-card--large" data-studio>
       <p class="mini-card__title">{{t:studio.mini.title}}</p>
       <ul class="check-group">
-        <li><input type="checkbox" id="prep-1" data-prep><label for="prep-1">{{t:studio.mini.1}}</label></li>
-        <li><input type="checkbox" id="prep-2" data-prep><label for="prep-2">{{t:studio.mini.2}}</label></li>
-        <li><input type="checkbox" id="prep-3" data-prep><label for="prep-3">{{t:studio.mini.3}}</label></li>
+        <li><label for="prep-1"><input type="checkbox" id="prep-1" data-prep>{{t:studio.mini.1}}</label></li>
+        <li><label for="prep-2"><input type="checkbox" id="prep-2" data-prep>{{t:studio.mini.2}}</label></li>
+        <li><label for="prep-3"><input type="checkbox" id="prep-3" data-prep>{{t:studio.mini.3}}</label></li>
       </ul>
     </div>
   </div>

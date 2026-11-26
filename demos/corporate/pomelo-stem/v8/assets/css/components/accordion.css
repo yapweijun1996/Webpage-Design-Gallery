@@ -3,7 +3,7 @@
 .accordion__heading { font-size: var(--size-text-md); }
 .accordion__trigger {
   display: flex; width: 100%; align-items: center; justify-content: space-between; gap: var(--space-3);
-  min-height: var(--size-tap); padding-block: var(--space-4); border: 0; border-bottom: var(--size-border) solid var(--c-border-subtle);
+  min-width: var(--size-tap); min-height: var(--size-tap); padding-block: var(--space-4); border: 0; border-bottom: var(--size-border) solid var(--c-border-subtle);
   background: transparent; text-align: start; font-weight: var(--weight-semibold); cursor: pointer;
 }
 .accordion__trigger .icon { transition: transform var(--motion-base) var(--motion-ease-out); }

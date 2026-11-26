@@ -1,7 +1,7 @@
 /* Versioned update button: icon + version chip, six states. */
 .update-button {
   position: relative; display: inline-flex; align-items: center; gap: var(--space-1);
-  min-height: var(--size-tap); padding-inline: var(--space-2) var(--space-3);
+  min-width: var(--size-tap); min-height: var(--size-tap); padding-inline: var(--space-2) var(--space-3);
   border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-pill);
   background: var(--c-surface); color: var(--c-text); cursor: pointer; font-size: var(--size-text-xs);
   font-variant-numeric: tabular-nums; transition: transform var(--motion-fast) var(--motion-ease-out);
