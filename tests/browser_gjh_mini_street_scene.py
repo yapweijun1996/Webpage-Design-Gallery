@@ -15,6 +15,14 @@ def observe_scene(route):
     assert source.count(camera) == source.count(lighting) == 1
     source = source.replace(camera, """
       getCameraState: window.miniStreetCamera = () => ({ ...view }),
+      getVisitorPoints: window.miniStreetVisitorPoints = () => {
+        const rect = canvas.getBoundingClientRect();
+        return [[1.13, 1.1, 3.25], [0.81, 0.32, 3.325], [1.4, 1.9, 3.355]].map(coords => {
+          const point = camera.position.clone().set(...coords).project(camera);
+          return [rect.left + (point.x + 1) * rect.width / 2,
+                  rect.top + (1 - point.y) * rect.height / 2];
+        });
+      },
       getShopPoint: window.miniStreetShopPoint = () => {
         const shop = street.hitTargets.find(target => target.name === "shop");
         const point = shop.position.clone().project(camera);
@@ -155,6 +163,27 @@ def exercise_mobile(browser, url):
     page.close()
 
 
+def exercise_mobile_visitor_framing(browser, url):
+    # Check the actual projected visitor, bag and umbrella points at common phone sizes.
+    for width, height in ((320, 568), (390, 844), (430, 932)):
+        page = browser.new_page(viewport={"width": width, "height": height}, has_touch=True,
+                                is_mobile=True, reduced_motion="reduce")
+        page.route("**/mini-street/scene.js", observe_scene)
+        page.goto(url, wait_until="domcontentloaded")
+        expect(page.locator("#stage")).to_have_attribute("data-webgl", "", timeout=30000)
+        page.wait_for_function("typeof window.miniStreetVisitorPoints === 'function'")
+        points = page.evaluate("window.miniStreetVisitorPoints()")
+        canvas = page.locator("#view").bounding_box()
+        for point in points:
+            assert canvas["x"] + 10 < point[0] < canvas["x"] + canvas["width"] - 10, (width, point)
+            assert canvas["y"] + 10 < point[1] < canvas["y"] + canvas["height"] - 10, (width, point)
+            for control in page.locator("[data-stop]").all():
+                box = control.bounding_box()
+                assert not (box and box["x"] <= point[0] <= box["x"] + box["width"]
+                            and box["y"] <= point[1] <= box["y"] + box["height"]), (width, point, box)
+        page.close()
+
+
 def exercise_fallback(browser, url):
     page = browser.new_page()
     page.route("**/mini-street/scene.js", lambda route: route.abort())
@@ -273,6 +302,7 @@ def main():
             try:
                 exercise_desktop(browser, url)
                 exercise_mobile(browser, url)
+                exercise_mobile_visitor_framing(browser, url)
                 exercise_fallback(browser, url)
                 exercise_shop_loading(browser, url)
                 exercise_shop_retry(browser, url)

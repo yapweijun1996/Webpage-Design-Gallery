@@ -267,8 +267,9 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
     } else {
       const wideFocus = clamp(2.90 - camera.aspect * 1.65, -0.53, 1.95);
       const mallTurn = narrow ? clamp(azimuth / PHONE_MALL_TURN, 0, 1) : 0;
+      // Keep the street visitor and shopping bag in the default phone frame.
       const center = narrow
-        ? lerp(-3.95, street.mallAnchor[0], mallTurn) + Math.min(0, azimuth) * 10.1
+        ? lerp(0.40, street.mallAnchor[0], mallTurn) + Math.min(0, azimuth) * 10.1
         : wideFocus + azimuth * 7.1;
       // Fit the full arch and approach at the end of the phone's rightward pan.
       const mallDistance = Math.max(16.6, 10.9 / horizontalSpan);
@@ -276,7 +277,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
       closest = narrow ? 6.3 : 5.6;
       angle = (narrow ? -0.50 : -0.63) + azimuth * 0.28;
       eye = 4.73 + elevation;
-      cameraTarget.set(center, narrow ? lerp(2.78, 3.40, mallTurn) : 3.00, -0.40);
+      cameraTarget.set(center, narrow ? lerp(2.40, 3.40, mallTurn) : 3.00, -0.40);
     }
     distance = zoom < 1 ? distance / zoom : lerp(distance, closest, (zoom - 1) / (MAX_ZOOM - 1));
     camera.position.set(
