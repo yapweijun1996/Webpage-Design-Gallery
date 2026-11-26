@@ -763,3 +763,19 @@ body{font-size:var(--pomelo-study-v-1a81f5208b29348c)}
 @media(max-width:700px){
  .home-services .service-card-body{padding:1.25rem}
 }
+
+/* Merchant audiences, contact and footer. */
+.home-page .audiences{gap:1rem;border:0;border-radius:var(--pomelo-study-v-5feceb66ffc86f38);overflow:visible}
+.home-page .audience{min-width:0;padding:0;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:var(--pomelo-study-v-145f2f5348aecb27)}
+.audience-image{position:relative}
+.audience-image img{width:100%;aspect-ratio:2.35 / 1;object-fit:cover}
+.audience-image small{position:absolute;top:.5rem;right:.5rem;padding:.2rem .4rem;background:var(--surface);color:var(--ink);border-radius:var(--pomelo-study-v-cf197d3f29d77daa);font-size:var(--pomelo-study-v-818b9f71cc18b13d)}
+.audience-body{display:grid;gap:.35rem;padding:0 1.25rem 1.25rem}
+.audience-icon{display:grid;place-items:center;width:46px;height:46px;margin-top:-1rem;position:relative;background:var(--soft);color:var(--green);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e)}
+.audience-body b{font-size:var(--pomelo-study-v-1a81f5208b29348c);line-height:1.25}
+.home-page .section:has(.audiences){padding-bottom:2.5rem}
+.home-page .cta{padding:2.25rem clamp(2rem,5vw,4.5rem)}
+.home-page>.section:last-child{padding:0 0 2rem}
+@media(min-width:1000px){
+ body:has(.home-page) .footer-grid>div+div{border-left:1px solid var(--line);padding-left:3rem}
+}
