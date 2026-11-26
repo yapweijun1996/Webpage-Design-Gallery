@@ -23,6 +23,11 @@
   :root[data-page="index"] .hero { padding-block: var(--space-5) var(--space-6); }
   :root[data-page="index"] .story__steps { gap: var(--space-5); }
 }
+/* Narrow phones retain the same content and tap targets with tighter vertical rhythm. */
+@media (max-width: 359px) {
+  :root[data-page="index"] .section, :root[data-page="index"] .band { padding-block: var(--space-6); }
+  :root[data-page="index"] .story__steps { gap: var(--space-4); }
+}
 @media (min-width: 768px) {
   .story__steps { gap: var(--space-8); }
   .story-step > .media--portrait, .hero .hero__media { aspect-ratio: 4 / 5; }

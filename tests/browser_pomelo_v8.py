@@ -12,6 +12,7 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / 'demos/corporate/pomelo-stem/v8'
 PAGES = ('index', 'commerce', 'services', 'about', 'contact')
+HOME_HEIGHT_LIMITS = {320: 6000, 390: 5900}
 RELEASE = json.loads((DEMO / 'release.json').read_text('utf-8'))
 VERSION = RELEASE['version']
 major, minor, patch = map(int, VERSION.split('.'))
@@ -255,8 +256,9 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name)
                         assert page.locator('.update-button__chip').inner_text() == 'v' + VERSION
-                        if width == 390 and name == 'index':
-                            assert page.evaluate('document.documentElement.scrollHeight') <= 5900, (locale, page.evaluate('document.documentElement.scrollHeight'))
+                        if name == 'index' and width in HOME_HEIGHT_LIMITS:
+                            home_height = page.evaluate('document.documentElement.scrollHeight')
+                            assert home_height <= HOME_HEIGHT_LIMITS[width], (width, locale, home_height, HOME_HEIGHT_LIMITS[width])
                         if width <= 400:
                             for control in page.locator('a[href]:visible, button:visible, .check-group label:visible').all():
                                 if control.get_attribute('class') == 'skip-link':
