@@ -95,10 +95,55 @@ def main():
             page.locator('[data-menu-open]').click()
             assert page.locator('.dialog .dialog-nav a').count() == 5
             page.keyboard.press('Escape')
+            # Language button: disclosure with keyboard support, page does not move.
+            page.goto(base + 'services.html#faq')
+            lang_button = page.locator('[data-lang-menu] button')
+            assert lang_button.is_visible() and lang_button.get_attribute('aria-expanded') == 'false'
+            y = page.evaluate('scrollY')
+            lang_button.click()
+            assert lang_button.get_attribute('aria-expanded') == 'true'
+            assert abs(page.evaluate('scrollY') - y) < 2
+            assert page.locator('[data-lang-menu] [aria-current="true"]').get_attribute('data-lang') == 'en'
+            assert page.locator('[data-lang-menu] a[data-lang="zh"]').get_attribute('href').endswith('services.html#faq')
+            box = page.locator('[data-lang-menu] ul').bounding_box()
+            assert box['x'] >= 0 and box['x'] + box['width'] <= 390, box
+            page.keyboard.press('Escape')
+            assert lang_button.get_attribute('aria-expanded') == 'false'
+            assert page.evaluate("document.activeElement.closest('[data-lang-menu]') !== null")
+            lang_button.focus()
+            page.keyboard.press('ArrowDown')
+            assert page.evaluate("document.activeElement.dataset.lang") == 'en'
+            page.mouse.click(5, 400)
+            assert lang_button.get_attribute('aria-expanded') == 'false'
+            page.locator('[data-lang-menu] button').click()
+            page.locator('[data-lang-menu] a[data-lang="ms"]').click()
+            page.wait_for_url('**/ms/services.html#faq')
+            # Back-to-top appears after scrolling, returns to top and focuses h1.
+            page.goto(base + 'index.html')
+            top = page.locator('[data-back-to-top]')
+            assert top.get_attribute('data-state') == 'hidden'
+            page.evaluate('window.scrollTo(0, innerHeight * 3)')
+            page.wait_for_function("document.querySelector('[data-back-to-top]').dataset.state === 'visible'")
+            tb = top.bounding_box()
+            assert tb['width'] >= 44 and tb['x'] + tb['width'] <= 390 and tb['y'] + tb['height'] <= 844
+            top.click()
+            page.wait_for_function('scrollY === 0')
+            page.wait_for_function("document.activeElement && document.activeElement.tagName === 'H1'")
+            page.wait_for_function("document.querySelector('[data-back-to-top]').dataset.state === 'hidden'")
+            # Four distinct toasts do not freeze the page and at most three stay.
+            page.goto(base + 'commerce.html')
+            for item in ('mug', 'bowl', 'basket'):
+                page.locator(f'[data-add="{item}"]').click()
+            page.locator('[data-theme-toggle]').first.evaluate('b => b.click()')
+            assert page.evaluate('1 + 1') == 2
+            assert page.locator('.toast-region .toast:not(.is-leaving)').count() <= 3
+            page.evaluate("document.documentElement.removeAttribute('data-theme'); localStorage.removeItem('pomelo-v8-theme')")
             # Theme toggle persists.
             page.goto(base + 'index.html')
-            page.locator('[data-theme-toggle]').click()
+            page.locator('[data-menu-open]').click()
+            page.locator('.dialog [data-theme-toggle]').click()
             assert page.locator('html').get_attribute('data-theme') == 'dark'
+            page.keyboard.press('Escape')
             page.reload()
             assert page.locator('html').get_attribute('data-theme') == 'dark'
             # Update button: manual check says current, then a newer release offers an update.

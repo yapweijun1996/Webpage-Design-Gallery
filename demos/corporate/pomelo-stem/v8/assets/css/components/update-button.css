@@ -14,14 +14,14 @@
 .update-button__dot {
   position: absolute; top: var(--space-1); right: var(--space-1); width: var(--space-2); height: var(--space-2);
   border-radius: var(--radius-pill); background: var(--c-highlight); outline: var(--size-border) solid var(--c-surface);
-  opacity: 0; transform: scale(0.6); transition: opacity var(--motion-base) var(--ease-out), transform var(--motion-base) var(--ease-out);
+  opacity: 0; transform: scale(0.6); transition: opacity var(--motion-base) var(--motion-ease-out), transform var(--motion-base) var(--motion-ease-out);
 }
 .update-button[data-state="checking"] .update-button__icon,
 .update-button[data-state="applying"] .update-button__icon { animation: pomelo-spin var(--motion-spin) linear infinite; }
 .update-button[data-state="current"] .update-button__icon { color: var(--c-success); }
 .update-button[data-state="available"] { border-color: var(--c-highlight); background: var(--c-highlight-soft); }
 .update-button[data-state="available"] .update-button__dot { opacity: 1; transform: scale(1); }
-.update-button.is-pulse .update-button__dot { animation: pomelo-pulse var(--motion-pulse) var(--ease-out) 1; }
+.update-button.is-pulse .update-button__dot { animation: pomelo-pulse var(--motion-pulse) var(--motion-ease-out) 1; }
 .update-button[data-state="error"] { border-color: var(--c-danger); }
 .update-button[data-state="error"] .update-button__icon { color: var(--c-danger); }
 .review-states { display: flex; flex-wrap: wrap; gap: var(--space-2); }

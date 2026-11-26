@@ -6,7 +6,7 @@
   min-height: var(--size-tap); padding-block: var(--space-4); border: 0; border-bottom: var(--size-border) solid var(--c-border-subtle);
   background: transparent; text-align: start; font-weight: var(--weight-semibold); cursor: pointer;
 }
-.accordion__trigger .icon { transition: transform var(--motion-base) var(--ease-out); }
+.accordion__trigger .icon { transition: transform var(--motion-base) var(--motion-ease-out); }
 .accordion__trigger[aria-expanded="true"] .icon { transform: rotate(180deg); }
 .accordion__panel { padding-block: var(--space-3) var(--space-4); color: var(--c-text-soft); }
 @media (hover: hover) and (pointer: fine) {

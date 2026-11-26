@@ -54,7 +54,10 @@ body::before {
   .site-header__menu { display: none; }
 }
 @media (max-width: 479px) {
-  .site-header .brand__name, .site-header [data-theme-toggle] { display: none; }
+  .site-header [data-theme-toggle] { display: none; }
+}
+@media (max-width: 374px) {
+  .site-header .brand__name { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .site-header, .icon-button { transition: none; }

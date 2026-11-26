@@ -139,6 +139,13 @@ class PomeloV8Test(unittest.TestCase):
         self.assertNotIn("lang-switch.js", sw)
         self.assertIn("arrow-up", pomelo.icons())
 
+    def test_css_custom_properties_are_defined(self):
+        css = (DEMO / "assets/css/site.bundle.css").read_text("utf-8")
+        defined = set(re.findall(r"(--[\w-]+)\s*:", css))
+        runtime = {"--lang-menu-shift", "--back-to-top-lift"}
+        used = set(re.findall(r"var\((--[\w-]+)", css))
+        self.assertEqual(used - defined - runtime, set())
+
 
 if __name__ == "__main__":
     unittest.main()

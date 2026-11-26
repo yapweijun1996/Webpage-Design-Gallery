@@ -56,7 +56,7 @@ export function init() {
     }
     const theme = header.querySelector('[data-theme-toggle]').cloneNode(true);
     theme.className = 'button button--ghost dialog-theme';
-    theme.append(document.createTextNode(t('theme.toggle')));
+    theme.append(document.createTextNode(t('menu.theme')));
     wrap.append(nav, langs, theme);
     open({title: t('menu.title'), content: wrap, variant: 'sheet'});
   });
