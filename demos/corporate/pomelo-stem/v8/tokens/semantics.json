@@ -7,7 +7,14 @@
     "border-subtle": "sand-200", "border-control": "ink-500", "focus": "forest-500",
     "band": "forest-900", "band-text": "mist-50", "band-muted": "mist-200",
     "success": "forest-700", "warning": "amber-800", "danger": "red-700",
-    "toast-bg": "ink-900", "toast-text": "cream-50", "toast-focus": "cream-50", "scrim": "scrim"
+    "toast-bg": "cream-50", "toast-text": "ink-900", "toast-focus": "forest-700",
+    "toast-border": "sand-200", "toast-divider": "sand-300", "toast-accent": "amber-200",
+    "toast-close-bg": "cream-100", "toast-close-hover": "sand-200", "toast-close-text": "ink-700",
+    "toast-action-bg": "forest-700", "toast-action-text": "white",
+    "toast-info-bg": "sky-100", "toast-info-icon": "sky-700",
+    "toast-success-bg": "sage-100", "toast-success-icon": "forest-700",
+    "toast-warning-bg": "amber-100", "toast-warning-icon": "amber-800",
+    "toast-error-bg": "red-100", "toast-error-icon": "red-700", "scrim": "scrim"
   },
   "dark": {
     "bg": "night-900", "surface": "night-800", "surface-muted": "night-700", "surface-sunken": "night-600",
@@ -17,6 +24,13 @@
     "border-subtle": "night-600", "border-control": "mist-400", "focus": "forest-300",
     "band": "forest-950", "band-text": "mist-50", "band-muted": "mist-200",
     "success": "forest-300", "warning": "amber-200", "danger": "red-200",
-    "toast-bg": "mist-50", "toast-text": "ink-900", "toast-focus": "ink-900", "scrim": "scrim"
+    "toast-bg": "forest-900", "toast-text": "mist-50", "toast-focus": "forest-300",
+    "toast-border": "forest-500", "toast-divider": "forest-700", "toast-accent": "forest-300",
+    "toast-close-bg": "night-700", "toast-close-hover": "night-600", "toast-close-text": "mist-200",
+    "toast-action-bg": "forest-300", "toast-action-text": "forest-950",
+    "toast-info-bg": "sky-900", "toast-info-icon": "sky-300",
+    "toast-success-bg": "night-700", "toast-success-icon": "forest-300",
+    "toast-warning-bg": "amber-900", "toast-warning-icon": "amber-200",
+    "toast-error-bg": "red-900", "toast-error-icon": "red-200", "scrim": "scrim"
   }
 }

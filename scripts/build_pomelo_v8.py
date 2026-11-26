@@ -317,6 +317,7 @@ def components_page(ctx):
     """Every component and state on one review page, generated from the English page partials."""
     page = render("en", "index", ctx)
     body = (V8 / "src/components.html").read_text(encoding="utf-8")
+    body = re.sub(r"\{\{t:([\w.-]+)\}\}", lambda m: html.escape(ctx["strings"]["en"][m.group(1)], quote=True), body)
     start, end = page.index('<main id="main" tabindex="-1">'), page.index("</main>")
     shell = page[:start] + '<main id="main" tabindex="-1">\n' + body + "\n" + page[end:]
     shell = shell.replace('data-page="index"', 'data-page="components"')

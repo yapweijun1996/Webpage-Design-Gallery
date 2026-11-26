@@ -3,8 +3,8 @@ import {t} from './i18n.js';
 import {toast} from './toast.js';
 
 export function init() {
-  window.addEventListener('offline', () => toast({type: 'warning', message: t('update.offline')}));
-  window.addEventListener('online', () => toast({type: 'success', message: t('update.online'), duration: 2500}));
+  window.addEventListener('offline', () => toast({key: 'network', type: 'warning', message: t('update.offline')}));
+  window.addEventListener('online', () => toast({key: 'network', type: 'success', message: t('update.online')}));
   if (!('serviceWorker' in navigator) || !location.protocol.startsWith('http')) return;
   const meta = document.querySelector('meta[name="pomelo-root"]');
   const scope = new URL(meta ? meta.content : './', document.baseURI);

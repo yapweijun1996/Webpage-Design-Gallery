@@ -2,6 +2,8 @@
 import importlib.util
 import json
 import re
+import shutil
+import subprocess
 import unittest
 from collections import Counter
 from pathlib import Path
@@ -165,13 +167,226 @@ class PomeloV8Test(unittest.TestCase):
             return sum(channel * weight for channel, weight in zip(linear, (0.2126, 0.7152, 0.0722)))
 
         for theme, tokens in themes.items():
-            for ring, surface in (("toast-focus", "toast-bg"), ("focus", "surface")):
+            required = {"toast-bg", "toast-text", "toast-focus", "toast-border", "toast-divider", "toast-accent",
+                        "toast-close-bg", "toast-close-hover", "toast-close-text", "toast-action-bg", "toast-action-text"}
+            required.update(f"toast-{kind}-{part}" for kind in ("info", "success", "warning", "error") for part in ("bg", "icon"))
+            self.assertLessEqual(required, tokens.keys(), theme)
+            background = luminance(colors[tokens["toast-bg"]])
+            if theme == "dark":
+                self.assertLess(background, 0.1)
+            else:
+                self.assertGreater(background, 0.7)
+            pairs = [("toast-focus", "toast-bg", 3), ("focus", "surface", 3),
+                     ("toast-text", "toast-bg", 4.5), ("toast-action-text", "toast-action-bg", 4.5),
+                     ("toast-close-text", "toast-close-bg", 4.5), ("toast-close-text", "toast-close-hover", 4.5)]
+            pairs += [(f"toast-{kind}-icon", f"toast-{kind}-bg", 3) for kind in ("info", "success", "warning", "error")]
+            for ring, surface, minimum in pairs:
                 with self.subTest(theme=theme, ring=ring, surface=surface):
                     values = sorted(luminance(colors[tokens[key]]) for key in (ring, surface))
                     contrast = (values[1] + 0.05) / (values[0] + 0.05)
-                    self.assertGreaterEqual(contrast, 3)
+                    self.assertGreaterEqual(contrast, minimum)
+            # The decorative glow must preserve text contrast even at its strongest point.
+            opacity = json.loads((DEMO / "tokens/primitives.json").read_text("utf-8"))["opacity"]["toast-accent"]
+            alpha = float(opacity.rstrip("%")) / 100
+            bg, accent = (colors[tokens[key]] for key in ("toast-bg", "toast-accent"))
+            composite = "#" + "".join(f"{round(int(bg[i:i + 2], 16) * (1 - alpha) + int(accent[i:i + 2], 16) * alpha):02x}"
+                                       for i in (1, 3, 5))
+            values = sorted((luminance(composite), luminance(colors[tokens["toast-text"]])))
+            self.assertGreaterEqual((values[1] + 0.05) / (values[0] + 0.05), 4.5, theme)
         toast = (DEMO / "assets/css/components/toast.css").read_text("utf-8")
         self.assertRegex(toast, r"\.toast :focus-visible\s*\{\s*outline-color: var\(--c-toast-focus\);")
+
+    def test_toast_keys_icons_and_duration_single_source(self):
+        toast = (DEMO / "assets/js/core/toast.js").read_text("utf-8")
+        theme = (DEMO / "assets/js/core/theme.js").read_text("utf-8")
+        network = (DEMO / "assets/js/core/sw-register.js").read_text("utf-8")
+        update = (DEMO / "assets/js/core/update.js").read_text("utf-8")
+        self.assertIn("existing.dataset.key === key", toast)
+        self.assertIn("options.icon || ICONS[type]", toast)
+        self.assertIn("key: 'theme'", theme)
+        self.assertIn("icon: next === 'dark' ? 'moon' : 'sun'", theme)
+        self.assertIn("duration: toastDuration('theme')", theme)
+        self.assertEqual(network.count("key: 'network'"), 2)
+        self.assertEqual(update.count("key: 'update'"), update.count("toast({"))
+        tokens = json.loads((DEMO / "tokens/primitives.json").read_text("utf-8"))
+        self.assertEqual(tokens["duration"], {"toast-default": "3000ms", "toast-theme": "2500ms",
+                                            "toast-action": "6000ms", "toast-sticky": "0ms"})
+        self.assertIn("--duration-toast-${kind}", toast)
+        self.assertIn("options.sticky || type === 'error' ? toastDuration('sticky')", toast)
+        for source in (toast, theme, network):
+            self.assertNotRegex(source, r"\b(?:2500|3000|4000|6000)\b")
+        reduced = pomelo.token_css().split("@media (prefers-reduced-motion: reduce)")[1]
+        self.assertNotIn("--duration-toast-", reduced)
+
+    def test_toast_css_uses_only_tokens_and_preserves_compact_tap_targets(self):
+        css = (DEMO / "assets/css/components/toast.css").read_text("utf-8")
+        source = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
+        self.assertNotRegex(source, r"#[0-9a-fA-F]{3,8}\b|\b\d*\.?\d+px\b")
+        self.assertNotRegex(source, r"\b(?:rgba?|hsla?)\(")
+        self.assertEqual(pomelo.load_check_ssot().violations("toast.css", source), {})
+        tokens = json.loads((DEMO / "tokens/primitives.json").read_text("utf-8"))
+        self.assertEqual(tokens["size"]["toast"], "360px")
+        self.assertEqual(tokens["size"]["toast-close"], "32px")
+        self.assertGreaterEqual(int(tokens["size"]["tap"].rstrip("px")), 44)
+        self.assertIn("height: var(--size-tap)", css)
+        self.assertIn("radial-gradient", css)
+        review = (DEMO / "design/components.html").read_text("utf-8")
+        for kind in ("info", "success", "warning", "error", "action"):
+            self.assertIn(f'data-review-toast="{kind}"', review)
+        self.assertNotIn("{{t:", review)
+
+    @unittest.skipUnless(shutil.which("node"), "Node.js is required for the toast runtime contract")
+    def test_toast_replacement_pause_announcements_and_capacity_at_runtime(self):
+        source = (DEMO / "assets/js/core/toast.js").read_text("utf-8")
+        source = re.sub(r"^import .*?;\n", "", source, flags=re.M)
+        durations = json.loads((DEMO / "tokens/primitives.json").read_text("utf-8"))["duration"]
+        harness = r"""
+import assert from 'node:assert/strict';
+class Element {
+  constructor(tag) { this.tagName = tag; this.children = []; this.dataset = {}; this.attributes = {}; this.events = {}; this.className = ''; }
+  get classList() { return {
+    contains: name => this.className.split(' ').includes(name),
+    add: name => { this.className += ' ' + name; }
+  }; }
+  get isConnected() { return this === body || Boolean(this.parentElement?.isConnected); }
+  get firstElementChild() { return this.children[0]; }
+  setAttribute(name, value) { this.attributes[name] = value; }
+  append(...nodes) { for (const node of nodes) { node.remove(); node.parentElement = this; this.children.push(node); } }
+  insertBefore(node, target) { node.remove(); node.parentElement = this; this.children.splice(this.children.indexOf(target), 0, node); }
+  remove() { if (this.parentElement) { const siblings = this.parentElement.children; siblings.splice(siblings.indexOf(this), 1); this.parentElement = null; } }
+  replaceChildren(...nodes) { for (const child of [...this.children]) child.remove(); this.append(...nodes); }
+  contains(node) { return this === node || this.children.some(child => child.contains(node)); }
+  querySelector(selector) {
+    for (const child of this.children) {
+      if (selector.startsWith('.') ? child.classList.contains(selector.slice(1)) : selector === '[data-toast-region]' && 'data-toast-region' in child.attributes) return child;
+      const found = child.querySelector(selector); if (found) return found;
+    }
+    return null;
+  }
+  addEventListener(type, fn) { (this.events[type] ||= []).push(fn); }
+  dispatchEvent(event) { for (const fn of this.events[event.type] || []) fn(event); }
+  focus() { document.activeElement = this; this.parentElement?.dispatchEvent(new Event('focusin')); }
+}
+const body = new Element('body');
+globalThis.document = {body, documentElement: new Element('html'), activeElement: body,
+  createElement: tag => new Element(tag), querySelector: selector => body.querySelector(selector), addEventListener() {}};
+const icon = name => Object.assign(new Element('svg'), {glyph: name});
+const t = key => key;
+const timers = new Map();
+let now = 10, timerId = 0;
+globalThis.performance = {now: () => now};
+globalThis.setTimeout = (fn, delay) => { timers.set(++timerId, {fn, at: now + delay}); return timerId; };
+globalThis.clearTimeout = id => timers.delete(id);
+function advance(ms) {
+  const end = now + ms;
+  for (;;) {
+    const next = [...timers].filter(([, task]) => task.at <= end).sort((a, b) => a[1].at - b[1].at || a[0] - b[0])[0];
+    if (!next) break;
+    timers.delete(next[0]); now = next[1].at; next[1].fn();
+  }
+  now = end;
+}
+globalThis.getComputedStyle = () => ({transitionDuration: '0.2s',
+  getPropertyValue: name => durationTokens[name.replace('--duration-', '')]});
+"""
+        checks = r"""
+init();
+const stack = document.querySelector('[data-toast-region]');
+assert.equal(stack.attributes.role, 'region');
+assert.equal(stack.attributes['aria-label'], 'toast.region');
+const statusNode = body.children.find(node => node.attributes.role === 'status');
+const alertNode = body.children.find(node => node.attributes.role === 'alert');
+assert.equal(statusNode.attributes['aria-live'], 'polite');
+const first = toast({key: 'theme', message: 'Dark theme on.', icon: 'moon'});
+const close = first.querySelector('.toast__close');
+const other = toast({message: 'Other notification'});
+advance(500);
+const replacement = toast({key: 'theme', type: 'success', message: 'Light theme on.', icon: 'sun', duration: toastDuration('theme')});
+assert.equal(replacement, first);
+assert.equal(first.querySelector('.toast__close'), close);
+assert.equal(stack.firstElementChild, first);
+assert.equal(stack.children.length, 2);
+assert.equal(first.className, 'toast toast--success');
+assert.equal(first.querySelector('.toast__icon').children[0].glyph, 'sun');
+assert.equal(first.querySelector('.toast__text').textContent, 'Light theme on.');
+assert.equal(first._duration, 2500);
+advance(0);
+assert.equal(statusNode.textContent, 'Light theme on.');
+assert.equal(toast({key: 'theme', message: 'Light theme on.', icon: 'sun'}), first);
+assert.equal(statusNode.textContent, '');
+advance(0);
+assert.equal(statusNode.textContent, 'Light theme on.');
+assert.equal(toast({message: 'Light theme on.'}), first);
+assert.equal(stack.children.length, 2);
+assert.equal(dismissNewest(), true); // Latest replacement is newest without moving its DOM position.
+assert.equal(first.classList.contains('is-leaving'), true);
+assert.equal(toast({key: 'theme', message: 'Replaced during exit'}), first);
+advance(200);
+assert.equal(first.isConnected, true); // The old exit callback cannot delete the replacement.
+function reset() { timers.clear(); stack.replaceChildren(); document.activeElement = body; }
+reset();
+toast({key: 'update', type: 'error', message: 'Stale error'});
+toast({key: 'update', type: 'success', message: 'Recovered'});
+advance(0);
+assert.notEqual(alertNode.textContent, 'Stale error');
+assert.equal(statusNode.textContent, 'Recovered');
+reset();
+const timed = toast({message: 'Timed'});
+assert.equal(timed._duration, 3000);
+advance(1000);
+timed.dispatchEvent(new Event('mouseenter'));
+advance(4000);
+assert.equal(timed.isConnected, true);
+timed.querySelector('.toast__close').focus();
+timed.dispatchEvent(new Event('mouseleave'));
+advance(4000);
+assert.equal(timed.isConnected, true); // Focus continues the pause after the pointer leaves.
+document.activeElement = body;
+timed.dispatchEvent(new Event('focusout'));
+await Promise.resolve();
+advance(1999);
+assert.equal(timed.classList.contains('is-leaving'), false);
+advance(201);
+assert.equal(timed.isConnected, false); // Resume uses the remaining time.
+reset();
+const focused = toast({key: 'network', message: 'Offline'});
+focused.querySelector('.toast__close').focus();
+toast({key: 'network', type: 'success', message: 'Online'});
+advance(10000);
+assert.equal(focused.isConnected, true); // Replacement also respects the active pause.
+reset();
+for (const options of [{type: 'error', duration: 1}, {sticky: true}]) {
+  const persistent = toast({...options, message: JSON.stringify(options)});
+  assert.equal(persistent._duration, 0);
+  advance(10000);
+  assert.equal(persistent.isConnected, true);
+}
+assert.equal(alertNode.textContent, JSON.stringify({type: 'error', duration: 1}));
+reset();
+let actionResult = '';
+const actionable = toast({key: 'update', message: 'Update', action: {label: 'Old', onClick: () => { actionResult = 'old'; }}});
+assert.equal(actionable._duration, 6000);
+toast({key: 'update', message: 'Retry update', action: {label: 'Retry', onClick: () => { actionResult = 'new'; }}});
+actionable.querySelector('.toast__action').onclick();
+assert.equal(actionResult, 'new');
+reset();
+const keyed = toast({key: 'update', message: 'Checking'});
+toast({message: 'Already shown'});
+assert.equal(toast({key: 'update', message: 'Already shown'}), keyed);
+assert.equal(stack.children.length, 1); // Key replacement also merges an existing identical message.
+reset();
+for (let i = 0; i < 5; i++) toast({message: 'Message ' + i});
+assert.equal(stack.children.length, 3);
+assert.equal(stack.firstElementChild.dataset.message, 'Message 2');
+dismissNewest();
+toast({message: 'New while leaving'});
+assert.equal(stack.children.length, 3);
+console.log('Toast runtime contracts passed');
+"""
+        result = subprocess.run([shutil.which("node"), "--input-type=module"],
+                                input=harness + "\nconst durationTokens = " + json.dumps(durations) + ";\n" + source + checks,
+                                text=True, capture_output=True, timeout=15, cwd=ROOT)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_prep_checkbox_labels_cover_the_whole_tap_row(self):
         for folder in ("", "zh/", "ms/"):
