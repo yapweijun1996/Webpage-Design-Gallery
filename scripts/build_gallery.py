@@ -319,7 +319,7 @@ def runtime_resources(catalog):
             if directory != Path("demos/corporate/pomelo-stem/v7"):
                 raise ValueError("Unexpected Pomelo V7 route")
             local_files = [directory / lang / (page + ".html") for lang in ("", "zh", "ms") for page in pomelo_v7.PAGES]
-            local_files += [directory / "assets" / name for name in ("site.css", "tokens.css", "primitives.css", "app.js", "boot.js", "update.js", "merchant.webp", "merchant-desktop.webp", "merchant-story.webp", "ai-mug-example.webp", "overview-shop.webp", "overview-shipping.webp", "ceramic-study.webp", "ceramic-editorial.webp", "homeware-still.webp", "pomelo-compact.svg")]
+            local_files += [directory / "assets" / name for name in ("site.css", "tokens.css", "primitives.css", "app.js", "boot.js", "update.js", "merchant.webp", "merchant-desktop.webp", "merchant-story.webp", "ai-mug-example.webp", "service-commerce.webp", "service-software.webp", "service-automation.webp", "overview-shop.webp", "overview-shipping.webp", "ceramic-study.webp", "ceramic-editorial.webp", "homeware-still.webp", "pomelo-compact.svg")]
             local_files += [directory / "release.json", Path(design["thumbnail"])]
             local_files += [Path(item["path"]) for item in design["screenshots"].values()]
             for path in local_files:
