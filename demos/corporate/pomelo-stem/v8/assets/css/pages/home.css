@@ -3,8 +3,10 @@
 .hero__grid { display: grid; gap: var(--space-6); align-items: center; }
 .hero__copy { display: grid; gap: var(--space-4); min-width: 0; }
 .hero__copy .cta-pair { margin-top: var(--space-2); }
-.story__steps { display: grid; gap: var(--space-8); counter-reset: step; }
-.story-step { display: grid; gap: var(--space-5); align-items: center; }
+.story__steps { display: grid; gap: var(--space-7); counter-reset: step; }
+.story-step { display: grid; gap: var(--space-4); align-items: center; }
+/* Phones: one landscape crop for every story photo and the hero keeps the page short. */
+.story-step > .media, .hero .hero__media { aspect-ratio: 3 / 2; }
 .story-step__copy { display: grid; gap: var(--space-3); justify-items: start; min-width: 0; }
 .story-step__label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--size-text-xs); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--c-accent); }
 .story-step__label::before {
@@ -16,6 +18,9 @@
 .closing { background: var(--c-accent-soft); }
 .closing__inner { display: grid; gap: var(--space-4); justify-items: start; }
 @media (min-width: 768px) {
+  .story__steps { gap: var(--space-8); }
+  .story-step > .media--portrait, .hero .hero__media { aspect-ratio: 4 / 5; }
+  .story-step > .media--square { aspect-ratio: 1 / 1; }
   .story-step { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-7); }
   .story-step:nth-child(even) > figure { order: 2; }
 }
