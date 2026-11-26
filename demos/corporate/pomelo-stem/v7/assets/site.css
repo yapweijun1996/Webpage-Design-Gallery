@@ -779,3 +779,22 @@ body{font-size:var(--pomelo-study-v-1a81f5208b29348c)}
 @media(min-width:1000px){
  body:has(.home-page) .footer-grid>div+div{border-left:1px solid var(--line);padding-left:3rem}
 }
+
+/* Commerce hero: a merchant scene behind the illustrative workspace. */
+.commerce-store-products{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;padding:0 .65rem .75rem}
+.commerce-store-products>span{display:grid;place-items:center;min-height:58px;background:var(--soft);border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e)}
+.commerce-store-products i{display:block;width:25px;height:27px;background:var(--pomelo-study-v-d8e78b7d1815dcd0);border-radius:var(--pomelo-study-v-109692d2cb2a8ac4)}
+.commerce-store-products .object-bowl{width:32px;height:16px;background:var(--pomelo-study-v-803daca255eea54e);border-radius:var(--pomelo-study-v-957f1d45094f5846)}
+.commerce-store-products .object-basket{background:var(--pomelo-study-v-53cd028597b12401)}
+@media(max-width:900px){
+ .commerce-workspace{grid-template-columns:minmax(0,1fr)}
+}
+@media(min-width:1100px){
+ body:has(.page-hero-commerce) .header-inner{width:min(100% - 3rem,1580px)}
+ .page-hero-commerce{display:flex;align-items:center;min-height:700px;padding:3rem 0;background:linear-gradient(90deg,var(--bg) 0%,var(--bg) 28%,transparent 52%),url('./merchant-desktop.webp') right center / auto 100% no-repeat;background-color:var(--bg)}
+ .page-hero-commerce .page-hero-grid{width:min(100% - 3rem,1580px);grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:3rem}
+ .page-hero-commerce .page-visual-commerce{background:transparent;padding:0}
+ .page-hero-commerce .commerce-hero-image{opacity:0}
+ .page-hero-commerce .commerce-workspace{margin-top:2rem}
+ .page-hero-commerce .commerce-hero-note{margin-top:1rem}
+}

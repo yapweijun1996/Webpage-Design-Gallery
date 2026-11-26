@@ -112,7 +112,7 @@ class PomeloContracts(unittest.TestCase):
                 root = Document(pomelo.render(lang, 'commerce')).root
                 visual, = root.find(**{'class': 'page-visual page-visual-commerce'})
                 image, = visual.find(**{'class': 'commerce-hero-image'})
-                self.assertTrue(image.attrs['src'].endswith('/assets/homeware-still.webp'))
+                self.assertTrue(image.attrs['src'].endswith('/assets/merchant-desktop.webp'))
                 self.assertEqual(image.attrs['alt'], '')
                 for label in (c['store_brand'], c['store_title'], c['dashboard'],
                               c['band'][2], c['dash_note'], c['sample_label']):
@@ -154,7 +154,7 @@ class PomeloContracts(unittest.TestCase):
                 self.assertEqual(len(root.find(id='sample-pickup')), 1)
 
     def test_generated_pages_and_release_match_source(self):
-        self.assertEqual(json.loads((DEMO / 'release.json').read_text())['version'], '7.18.3')
+        self.assertEqual(json.loads((DEMO / 'release.json').read_text())['version'], '7.18.4')
         for lang in pomelo.COPY:
             for page in pomelo.PAGES:
                 path = DEMO / ('' if lang == 'en' else lang) / (page + '.html')

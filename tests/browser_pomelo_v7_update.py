@@ -26,7 +26,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         path = urlsplit(self.path).path
         build = 'new' if Handler.release else 'old'
-        version = '7.18.3' if Handler.release else '7.18.2'
+        version = '7.18.4' if Handler.release else '7.18.3'
         if path == '/bootstrap':
             return self.send_text('<!doctype html><title>Worker test</title>', 'text/html')
         if path == '/version.json':
@@ -34,7 +34,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if path == PREFIX + 'release.json':
             return self.send_text(json.dumps({'version':version}), 'application/json')
         if path == PREFIX + 'index.html':
-            html = (ROOT / path.lstrip('/')).read_text(encoding='utf-8').replace('7.18.3', version)
+            html = (ROOT / path.lstrip('/')).read_text(encoding='utf-8').replace('7.18.4', version)
             return self.send_text(html, 'text/html')
         if path == '/v7-test-sw.js':
             # Separate cached navigations reproduce the Gallery worker's parent scope.
@@ -74,13 +74,13 @@ def main():
             page.evaluate("navigator.serviceWorker.register('/v7-test-sw.js', {scope:'/'}).then(() => navigator.serviceWorker.ready)")
             page.goto(base + PREFIX + 'index.html')
             assert page.evaluate('!!navigator.serviceWorker.controller')
-            assert page.locator('[data-update] .version').inner_text() == '7.18.2'
+            assert page.locator('[data-update] .version').inner_text() == '7.18.3'
             Handler.release = 1
             page.locator('[data-update] summary').click()
             page.locator('[data-apply]').wait_for(state='visible')
-            assert '7.18.3' in page.locator('[data-status]').inner_text()
+            assert '7.18.4' in page.locator('[data-status]').inner_text()
             page.locator('[data-apply]').click()
-            page.wait_for_function("document.querySelector('[data-update] .version').textContent === '7.18.3'", timeout=25000)
+            page.wait_for_function("document.querySelector('[data-update] .version').textContent === '7.18.4'", timeout=25000)
             page.wait_for_function("document.querySelector('[data-status]').textContent === 'Update applied.'")
             page.locator('#home-ai').scroll_into_view_if_needed()
             page.wait_for_function("document.querySelector('#home-ai img').naturalWidth > 0")
