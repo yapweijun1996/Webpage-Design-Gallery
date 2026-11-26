@@ -828,3 +828,9 @@ body{font-size:var(--pomelo-study-v-1a81f5208b29348c)}
  #tour-panel-0 .tour-shop-hero img{height:clamp(190px,16vw,250px)}
  #tour-panel-0 .tour-products .demo-product-art{height:110px}
 }
+
+/* Keep sample actions balanced while allowing translated labels to wrap. */
+.sample-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;margin-top:1rem}
+.sample-actions .btn{width:100%;min-width:0;justify-content:center;text-align:center;white-space:normal}
+.sample-actions .btn[hidden]{display:none}
+@media(max-width:420px){.sample-actions{grid-template-columns:1fr}}
