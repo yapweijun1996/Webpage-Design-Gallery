@@ -1,5 +1,8 @@
 // Each row keeps its canonical English copy together with the other two locales.
 export const miniMessages = [
+  ["Off screen", "画面外", "Di luar skrin"],
+  ["Destination is outside the current view", "地点在当前画面之外", "Destinasi di luar paparan semasa"],
+  ["Scene lighting", "场景光线", "Pencahayaan pemandangan"],
   ["Independent Design Concept", "独立设计概念", "Konsep Reka Bentuk Bebas"],
   ["GJH Mini Street · Independent Design Concept", "GJH Mini Street · 独立设计概念", "GJH Mini Street · Konsep Reka Bentuk Bebas"],
   ["A rainy shophouse street outside the GJH Virtual Mall, an independent design concept.", "GJH Virtual Mall 外的雨中店屋街景，一个独立设计概念。", "Jalan rumah kedai berhujan di luar GJH Virtual Mall, sebuah konsep reka bentuk bebas."],

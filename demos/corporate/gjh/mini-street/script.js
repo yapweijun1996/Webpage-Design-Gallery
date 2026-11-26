@@ -396,6 +396,10 @@ async function start() {
         else stops.find((stop) => stop.dataset.stop === name)?.click();
       },
       fail: showFallback,
+      onZoomChange: (zoom, min, max) => {
+        cameraGroup.querySelector('[data-camera="zoom-out"]').setAttribute("aria-disabled", String(zoom <= min));
+        cameraGroup.querySelector('[data-camera="zoom-in"]').setAttribute("aria-disabled", String(zoom >= max));
+      },
       startPaused: dialog.open || loadingDialog.open || vendingOpen,
     });
     applySceneLighting(readSceneLighting());
@@ -417,7 +421,9 @@ async function start() {
       });
     }
     for (const button of toolbar.querySelectorAll("[data-camera]")) {
-      button.addEventListener("click", () => street.look(button.dataset.camera));
+      button.addEventListener("click", () => {
+        if (button.getAttribute("aria-disabled") !== "true") street.look(button.dataset.camera);
+      });
     }
   } catch {
     showFallback();

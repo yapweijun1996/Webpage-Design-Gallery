@@ -155,7 +155,7 @@ function wetRoad(scene) {
   };
 }
 
-export function createStreet({ canvas, stops, activate, fail, startPaused = false }) {
+export function createStreet({ canvas, stops, activate, fail, onZoomChange = () => {}, startPaused = false }) {
   const attributes = { antialias: true, alpha: false, powerPreference: "low-power" };
   const context = canvas.getContext("webgl2", attributes);
   if (!context) throw new Error("WebGL 2 is unavailable.");
@@ -213,11 +213,21 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
   }
 
   function placeStops() {
-    if (portrait.matches) return;
+    if (portrait.matches) {
+      for (const element of stops) {
+        delete element.dataset.offscreen;
+        element.removeAttribute("aria-describedby");
+      }
+      return;
+    }
     const positions = stops.map((element) => {
       const stop = element.dataset.stop;
       projected.set(...landmarks[stop]).project(camera);
       const half = element.offsetWidth / 2 + 10;
+      const offscreen = projected.z < -1 || projected.z > 1 || Math.abs(projected.x) > 1 || Math.abs(projected.y) > 1;
+      element.toggleAttribute("data-offscreen", offscreen);
+      if (offscreen) element.setAttribute("aria-describedby", "stop-offscreen-help");
+      else element.removeAttribute("aria-describedby");
       const lift = stop === "mall" ? 8 : 29;
       return {
         element,
@@ -320,6 +330,7 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
   function setView(next, animate) {
     finishTransition(false);
     view = { ...next, azimuth: Math.min(next.azimuth, portrait.matches ? PHONE_MALL_TURN : 1.15) };
+    onZoomChange(view.zoom, MIN_ZOOM, MAX_ZOOM);
     invalidate();
     if (!animate || paused || lost || document.hidden || motion.matches) return Promise.resolve(!lost);
     return new Promise((resolve) => {
@@ -347,6 +358,7 @@ export function createStreet({ canvas, stops, activate, fail, startPaused = fals
     const zoom = THREE.MathUtils.clamp(view.zoom * factor, MIN_ZOOM, MAX_ZOOM);
     if (zoom === view.zoom) return;
     view.zoom = zoom;
+    onZoomChange(zoom, MIN_ZOOM, MAX_ZOOM);
     invalidate();
   }
 
