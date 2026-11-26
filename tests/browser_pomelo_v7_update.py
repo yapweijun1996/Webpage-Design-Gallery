@@ -2,6 +2,7 @@
 import functools
 import http.server
 import json
+import os
 import threading
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -33,7 +34,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if path == PREFIX + 'release.json':
             return self.send_text(json.dumps({'version':version}), 'application/json')
         if path == PREFIX + 'index.html':
-            html = (ROOT / path.lstrip('/')).read_text(encoding='utf-8').replace('7.18.0', version)
+            html = (ROOT / path.lstrip('/')).read_text(encoding='utf-8').replace('7.18.1', version)
             return self.send_text(html, 'text/html')
         if path == '/v7-test-sw.js':
             # Separate cached navigations reproduce the Gallery worker's parent scope.
@@ -66,7 +67,7 @@ def main():
     base = f'http://127.0.0.1:{server.server_port}'
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch(executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
+            browser = p.chromium.launch(executable_path=os.environ.get('GALLERY_CHROME', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'))
             context = browser.new_context()
             page = context.new_page()
             page.goto(base + '/bootstrap')
@@ -81,6 +82,9 @@ def main():
             page.locator('[data-apply]').click()
             page.wait_for_function("document.querySelector('[data-update] .version').textContent === '7.18.1'", timeout=25000)
             page.wait_for_function("document.querySelector('[data-status]').textContent === 'Update applied.'")
+            page.locator('#home-ai').scroll_into_view_if_needed()
+            page.wait_for_function("document.querySelector('#home-ai img').naturalWidth > 0")
+            assert page.locator('#home-ai img').get_attribute('src').endswith('ai-mug-example.webp')
             browser.close()
         print('PASS: parent worker update and V7 version verified after reload')
     finally:
