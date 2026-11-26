@@ -181,7 +181,7 @@
 /* Keep the three destinations and the full controls within short viewports. */
 @media (max-width: 720px) {
   .street { margin-block: 4px; }
-  .stage[data-webgl] { height: clamp(100px, calc(100svh - 230px), 700px); }
+  .stage[data-webgl] { height: clamp(100px, calc(100svh - 246px), 700px); }
   #toolbar { padding-top: 0; gap: 0; }
   #toolbar .look { gap: 0; }
   #toolbar .scene-camera-label { display: none; }
@@ -221,4 +221,32 @@
     left: max(8px, calc(env(safe-area-inset-left, 0px) - 12px));
     right: max(8px, calc(env(safe-area-inset-right, 0px) - 12px));
   }
+}
+
+.scene-visitor-focus {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  color: var(--color-weather);
+  background: var(--color-toolbar);
+  font: inherit;
+  cursor: pointer;
+}
+.scene-visitor-focus:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+@media (max-width: 720px) {
+  #toolbar .scene-camera-help { grid-column: 1; grid-row: 2; }
+  #toolbar .scene-visitor-focus { grid-column: 2; grid-row: 2; justify-self: end; margin-top: -4px; }
+}
+@media (max-width: 720px) and (max-height: 480px) {
+  #toolbar { grid-template-columns: auto 1fr auto; }
+  #toolbar .scene-visitor-focus { grid-column: 2; grid-row: 1; justify-self: center; margin-top: 0; }
+  #toolbar .lighting { grid-column: 3; }
+}
+
+@media (max-width: 720px) and (max-height: 480px) {
+  .stage[data-visitor-focus] .stops { display: none; }
 }

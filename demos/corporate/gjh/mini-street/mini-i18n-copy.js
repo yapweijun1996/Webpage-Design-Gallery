@@ -40,6 +40,8 @@ export const miniMessages = [
   ["Enter New Moon Shop", "进入 New Moon 商店", "Masuk ke Kedai New Moon"],
   ["Drag to look around. Scroll over the street view or pinch to zoom.", "拖动查看四周。在街景上滚动鼠标滚轮，或用双指缩放。", "Seret untuk melihat sekeliling. Tatal pada pemandangan jalan atau cubit untuk zum."],
   ["Camera", "视角", "Kamera"],
+  ["Visitor", "路人", "Pengunjung"],
+  ["View visitor close-up", "查看路人近景", "Lihat pengunjung dari dekat"],
   ["Camera help", "视角操作说明", "Bantuan kamera"],
   ["Mouse: drag to look around. Scroll over the street view to zoom.", "鼠标：拖动查看四周。在街景上滚动鼠标滚轮来缩放。", "Tetikus: seret untuk melihat sekeliling. Tatal pada pemandangan jalan untuk zum."],
   ["Touch: drag to look around. Pinch to zoom.", "触屏：拖动查看四周。用双指缩放。", "Sentuhan: seret untuk melihat sekeliling. Cubit untuk zum."],

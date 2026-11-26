@@ -400,6 +400,7 @@ async function start() {
         cameraGroup.querySelector('[data-camera="zoom-out"]').setAttribute("aria-disabled", String(zoom <= min));
         cameraGroup.querySelector('[data-camera="zoom-in"]').setAttribute("aria-disabled", String(zoom >= max));
       },
+      onViewChange: (view) => stage.toggleAttribute("data-visitor-focus", view.stop === "visitor"),
       startPaused: dialog.open || loadingDialog.open || vendingOpen,
     });
     applySceneLighting(readSceneLighting());

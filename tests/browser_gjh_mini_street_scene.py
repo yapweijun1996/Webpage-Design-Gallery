@@ -181,7 +181,41 @@ def exercise_mobile_visitor_framing(browser, url):
                 box = control.bounding_box()
                 assert not (box and box["x"] <= point[0] <= box["x"] + box["width"]
                             and box["y"] <= point[1] <= box["y"] + box["height"]), (width, point, box)
+        close_up = page.get_by_role("button", name="View visitor close-up")
+        close_up.click()
+        page.wait_for_function("miniStreetCamera().stop === 'visitor'")
+        page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+        for point in page.evaluate("window.miniStreetVisitorPoints()"):
+            assert canvas["x"] + 10 < point[0] < canvas["x"] + canvas["width"] - 10, (width, point)
+            assert canvas["y"] + 10 < point[1] < canvas["y"] + canvas["height"] - 10, (width, point)
+            for control in page.locator("[data-stop]").all():
+                box = control.bounding_box()
+                assert not (box and box["x"] <= point[0] <= box["x"] + box["width"]
+                            and box["y"] <= point[1] <= box["y"] + box["height"]), (width, point, box)
+        page.get_by_role("button", name="Reset view").click()
+        page.wait_for_function("miniStreetCamera().stop === null")
         page.close()
+
+
+def exercise_landscape_visitor(browser, url):
+    page = browser.new_page(viewport={"width": 568, "height": 320}, has_touch=True,
+                            is_mobile=True, reduced_motion="reduce")
+    page.route("**/mini-street/scene.js", observe_scene)
+    page.goto(url, wait_until="domcontentloaded")
+    expect(page.locator("#stage")).to_have_attribute("data-webgl", "", timeout=30000)
+    page.get_by_role("button", name="View visitor close-up").tap()
+    page.wait_for_function("miniStreetCamera().stop === 'visitor'")
+    expect(page.locator("#stage")).to_have_attribute("data-visitor-focus", "")
+    expect(page.locator('[data-stop="shop"]')).to_be_hidden()
+    page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+    canvas = page.locator("#view").bounding_box()
+    for point in page.evaluate("window.miniStreetVisitorPoints()"):
+        assert canvas["x"] < point[0] < canvas["x"] + canvas["width"], point
+        assert canvas["y"] < point[1] < canvas["y"] + canvas["height"], point
+    page.get_by_role("button", name="Reset view").tap()
+    page.wait_for_function("miniStreetCamera().stop === null")
+    expect(page.locator('[data-stop="shop"]')).to_be_visible()
+    page.close()
 
 
 def exercise_fallback(browser, url):
@@ -303,6 +337,7 @@ def main():
                 exercise_desktop(browser, url)
                 exercise_mobile(browser, url)
                 exercise_mobile_visitor_framing(browser, url)
+                exercise_landscape_visitor(browser, url)
                 exercise_fallback(browser, url)
                 exercise_shop_loading(browser, url)
                 exercise_shop_retry(browser, url)

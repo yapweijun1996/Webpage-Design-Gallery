@@ -1332,13 +1332,16 @@ export function buildWorld(scene, invalidate) {
     rod(cane, [bagX + 0.075, 0.43, z + 0.095], [bagX + 0.025, 0.59, z + 0.067], 0.012);
     box(porcelain, bagX, 0.32, z + 0.075, 0.245, 0.235, 0.105);
     box(cream, bagX, 0.425, z + 0.08, 0.245, 0.026, 0.109);
+    // Folded side and bottom edges keep the small paper bag readable up close.
+    box(cream, bagX - 0.118, 0.32, z + 0.08, 0.012, 0.215, 0.11);
+    box(cane, bagX, 0.212, z + 0.13, 0.225, 0.009, 0.008);
     // Simple crescent emblem remains legible without a new texture or shader.
     ellipsoid(slate, bagX, 0.33, z + 0.132, 0.046, 0.052, 0.006);
     ellipsoid(porcelain, bagX + 0.016, 0.345, z + 0.139, 0.039, 0.044, 0.006);
     const handleX = x + 0.27;
     rod(coat, [x + 0.18, 0.79, z + 0.04], [handleX - 0.073, 0.91, z + 0.15], 0.072);
     ellipsoid(face, handleX - 0.073, 0.91, z + 0.15, 0.068, 0.063, 0.059);
-    tube(brass, handleX, 1.38, z + 0.15, 0.020, 1.05, 0.020, 0, 0, -0.15);
+    tube(brass, handleX + 0.025, 1.47, z + 0.105, 0.020, 1.23, 0.020, 0, 0, -0.20);
     // The crook continues from the shaft beneath the gripping hand.
     const umbrellaHook = new THREE.TorusGeometry(0.075, 0.014, 5, 12, Math.PI);
     stamp(umbrellaHook, wood, handleX - 0.15, 0.855, z + 0.15, 1, 1, 1, 0, 0, Math.PI);
@@ -1351,11 +1354,21 @@ export function buildWorld(scene, invalidate) {
     }
     const edge = mesh(rim, cream, handleX + 0.11, 1.814, z + 0.105);
     edge.rotation.set(Math.PI / 2, 0, -0.15, "ZYX");
-    const rib = new THREE.TorusGeometry(0.71, 0.007, 3, 10, Math.PI * 0.39);
+    // Follow the flattened, tilted canopy so ribs meet both its apex and rim.
+    const tilt = -0.15;
     for (let i = 0; i < 8; i += 1) {
-      stamp(rib, brass, handleX + 0.086, 1.68, z + 0.105, 0.56, 1, 1, 0, -i * Math.PI / 4, Math.PI / 2 - 0.15);
+      const phi = i * Math.PI / 4;
+      const point = (step) => {
+        const theta = Math.PI * 0.39 * step / 5;
+        const px = -0.73 * Math.cos(phi) * Math.sin(theta);
+        const py = 0.73 * 0.56 * Math.cos(theta);
+        return [handleX + 0.086 + px * Math.cos(tilt) - py * Math.sin(tilt),
+          1.68 + px * Math.sin(tilt) + py * Math.cos(tilt),
+          z + 0.105 + 0.73 * Math.sin(phi) * Math.sin(theta)];
+      };
+      for (let segment = 0; segment < 5; segment += 1) rod(brass, point(segment), point(segment + 1), 0.007);
     }
-    ellipsoid(brass, handleX + 0.03, 2.10, z + 0.105, 0.027, 0.032, 0.027);
+    ellipsoid(brass, handleX + 0.147, 2.084, z + 0.105, 0.027, 0.032, 0.027);
   }
 
   function bench(x, z) {

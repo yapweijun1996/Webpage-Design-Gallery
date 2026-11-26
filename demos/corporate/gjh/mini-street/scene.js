@@ -155,7 +155,7 @@ function wetRoad(scene) {
   };
 }
 
-export function createStreet({ canvas, stops, activate, fail, onZoomChange = () => {}, startPaused = false }) {
+export function createStreet({ canvas, stops, activate, fail, onZoomChange = () => {}, onViewChange = () => {}, startPaused = false }) {
   const attributes = { antialias: true, alpha: false, powerPreference: "low-power" };
   const context = canvas.getContext("webgl2", attributes);
   if (!context) throw new Error("WebGL 2 is unavailable.");
@@ -170,6 +170,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
   const stopViews = {
     shop: { target: [-5.25, 1.82, 0.02], width: 4.7, distance: 6.7, closest: 3.25, angle: -0.12, eye: 2.35 },
     vending: { target: [-0.89, 1.29, 0.47], width: 2.25, distance: 4.15, closest: 2.30, angle: 0.08, eye: 1.66 },
+    visitor: { target: [1.13, 1.14, 3.25], width: 2.35, distance: 4.2, closest: 3.0, angle: -0.12, eye: 1.58 },
     mall: {
       target: [street.mallAnchor[0], 3.27, street.mallAnchor[2] - 1.25],
       width: 9.4, distance: 11.1, closest: 4.5, angle: -0.1, eye: 3.42,
@@ -259,7 +260,8 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
     let eye;
     if (stop) {
       const focus = stopViews[stop];
-      distance = Math.max(focus.distance, focus.width / horizontalSpan);
+      const focusDistance = stop === "visitor" && narrow && camera.aspect > 2 ? 3.2 : focus.distance;
+      distance = Math.max(focusDistance, focus.width / horizontalSpan);
       closest = focus.closest;
       angle = focus.angle + azimuth * .52;
       eye = focus.eye + elevation;
@@ -332,6 +334,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
     finishTransition(false);
     view = { ...next, azimuth: Math.min(next.azimuth, portrait.matches ? PHONE_MALL_TURN : 1.15) };
     onZoomChange(view.zoom, MIN_ZOOM, MAX_ZOOM);
+    onViewChange({ ...view });
     invalidate();
     if (!animate || paused || lost || document.hidden || motion.matches) return Promise.resolve(!lost);
     return new Promise((resolve) => {
@@ -367,6 +370,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
     if (!interactive || paused || lost) return;
     switch (direction) {
       case "reset": setView(DEFAULT_VIEW, true); break;
+      case "visitor": focusStop("visitor"); break;
       case "left": turn(-0.30); break;
       case "right": turn(0.30); break;
       case "up": turn(0, 0.40); break;
