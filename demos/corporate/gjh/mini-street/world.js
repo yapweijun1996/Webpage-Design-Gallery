@@ -1547,9 +1547,9 @@ export function buildWorld(scene, invalidate) {
     tube(ink, x, 0.30, z, 0.066, 0.53, 0.066);
     ellipsoid(brass, x, 0.56, z, 0.092, 0.063, 0.092);
   }
-  box(stone, 3.9675, 0.023, 10.26, 2.265, 0.055, 3.58);
-  planter(3.74, 9.40, 2.08, false, 0.0505);
-  planter(4.16, 9.85, 1.52, true, 0.0505);
+  box(stone, 4.40, 0.023, 10.26, 1.92, 0.055, 3.05);
+  planter(4.12, 9.40, 1.65, false, 0.0505);
+  planter(4.58, 9.85, 1.20, true, 0.0505);
   visitor(1.13, 3.25);
   decal(shade, 1.13, 0.016, 3.25, 0.95, 0.71, -Math.PI / 2, 1);
 

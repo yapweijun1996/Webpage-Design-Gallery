@@ -136,7 +136,7 @@ function wetRoad(scene) {
       target.setSize(Math.max(1, Math.round(width * scale)), Math.max(1, Math.round(height * scale)));
     },
     update(renderer, camera, night) {
-      material.uniforms.strength.value = night ? 0.79 : 0.29;
+      material.uniforms.strength.value = night ? 0.68 : 0.25;
       mirror.position.copy(camera.position);
       mirror.position.y = 2 * roadY - camera.position.y;
       camera.getWorldDirection(forward);
@@ -265,10 +265,10 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
       eye = focus.eye + elevation;
       cameraTarget.set(...focus.target);
     } else {
-      const wideFocus = clamp(3.05 - camera.aspect * 1.65, -0.38, 1.95);
+      const wideFocus = clamp(2.90 - camera.aspect * 1.65, -0.53, 1.95);
       const mallTurn = narrow ? clamp(azimuth / PHONE_MALL_TURN, 0, 1) : 0;
       const center = narrow
-        ? lerp(-4.15, street.mallAnchor[0], mallTurn) + Math.min(0, azimuth) * 10.1
+        ? lerp(-3.95, street.mallAnchor[0], mallTurn) + Math.min(0, azimuth) * 10.1
         : wideFocus + azimuth * 7.1;
       // Fit the full arch and approach at the end of the phone's rightward pan.
       const mallDistance = Math.max(16.6, 10.9 / horizontalSpan);

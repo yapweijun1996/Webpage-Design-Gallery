@@ -121,91 +121,127 @@ def check_v11_crowd(browser, base):
     context.add_init_script("""localStorage.setItem('gjh-v11-tutorial-v1','dismissed');
                               localStorage.setItem('gjh-v11-graphics-quality-v1','balanced');""")
     page = context.new_page()
-    errors, requested = [], set()
+    errors, requested, failed_requests = [], set(), []
+    stage = "initialization"
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.on("console", lambda message: errors.append(message.text) if message.type == "error" else None)
     page.on("request", lambda request: requested.add(request.url))
-    page.goto(base + "demos/corporate/gjh/v11/", wait_until="domcontentloaded")
-    assert not any('/chibi-crowd/' in url for url in requested), requested
-    page.locator("#arrival-walk").click()
-    page.wait_for_function("window.__sceneReady || window.__sceneFailed", timeout=90000)
-    assert page.evaluate("window.__sceneReady && __mall.ready"), page.locator("#loader-status").inner_text()
-    page.locator("#app-loader").wait_for(state="hidden", timeout=90000)
-    assert page.evaluate("__mall.teleport('atrium')")
-    # The wardrobe has verified clothing, so dressed modular visitors appear and animate.
-    page.wait_for_function("""() => {
-        const live = window.__mall.state.npcs?.modular.active.some(npc => npc.visible);
-        if (live) window.__crowdSnapshot = structuredClone(window.__mall.state);
-        return live;
-    }""", timeout=45000)
-    state = page.evaluate("window.__crowdSnapshot")
-    npcs = state["npcs"]
-    assert 1 <= npcs["visible"] <= npcs["active"] <= npcs["limit"] == 2, npcs
-    assert state["renderBudget"]["totalCalls"] <= 200, state["renderBudget"]
-    assert page.evaluate("innerWidth === 390 && document.documentElement.scrollWidth <= innerWidth")
-    actor = next(npc for npc in npcs["modular"]["active"] if npc["visible"])
-    outfit = actor["outfit"]
-    assert outfit["body"] == "neutral-body" and outfit["shoes"] == "shoes-sneakers" and outfit["top"].startswith("top-"), actor
-    assert ("bottom" in outfit) == (outfit["top"] != "top-dress"), actor
-    # NPCs rotate in and out, so watch every active slot and accept any whose animation time advances.
-    page.wait_for_function("""() => {
-        const seen = window.__crowdTimes ||= {};
-        let advanced = false;
-        for (const npc of __mall.state.npcs.modular.active) {
-            const before = seen[npc.slot];
-            if (before !== undefined && npc.time > before + .1) advanced = true;
-            if (before === undefined || npc.time < before) seen[npc.slot] = npc.time;
-        }
-        return advanced;
-    }""", timeout=45000)
-    page.locator("#mall-tools").click()
-    assert page.locator("#menu-heading-text").inner_text() == "Menu"
-    assert page.locator("#menu-back").is_hidden()
-    assert page.locator("#context-navigation-global").is_hidden()
-    assert page.locator("#mini-map-plan svg").count() == 1
-    page.locator("#menu-minimap-toggle").uncheck()
-    assert page.locator("#mini-map").is_hidden()
-    page.locator("#menu-minimap-toggle").check()
-    page.locator("#mall-speaker").click()
-    assert page.locator("#mall-speaker").get_attribute("aria-pressed") == "true"
-    page.keyboard.press("m")
-    assert page.locator("#mall-speaker").get_attribute("aria-pressed") == "false"
-    open_menu_page(page, "help")
-    assert page.locator("#menu-heading-text").inner_text() == "Help"
-    assert page.locator("dialog:modal").count() == 1
-    page.locator("#menu-back").click()
-    assert page.locator("#menu-heading-text").inner_text() == "Menu"
-    page.keyboard.press("Escape")
-    assert page.locator("#keyboard-help").is_hidden()
-    assert page.evaluate("document.activeElement.id") == "mall-tools"
-    page.locator("#header-menu").click()
-    assert page.locator("#menu-heading-text").inner_text() == "Settings"
-    open_menu_page(page, "controls")
-    assert page.locator('[data-menu-guide="touch"]').is_visible()
-    assert page.locator('[data-menu-guide="keyboard"]').is_hidden()
-    page.locator("#menu-back").click()
-    open_menu_page(page, "graphics")
-    page.wait_for_function("__mall.state.paused")
-    position = page.evaluate("() => [__mall.state.x, __mall.state.y, __mall.state.z]")
-    page.locator("#graphics-quality").select_option("low")
-    # The Low tier takes effect after the room and signage GPU work finishes.
-    # This is a behavior check. Mobile cadence spreads preparation over many frames.
-    page.wait_for_function(
-        """() => {
-            const {graphics, npcs, paused} = __mall.state;
-            const {interiors, signage} = __mall.performanceReport();
-            return paused && graphics.quality.tier === 'low'
-                && interiors.tier === 'low' && signage.tier === 'low'
-                && npcs.tier === 'low' && npcs.modular.active.length === 0 && npcs.limit === 1;
+    page.on("requestfailed", lambda request: failed_requests.append({"url": request.url, "failure": request.failure}))
+    # Software WebGL can spend many seconds preparing GPU assets before NPCs appear.
+    # Keep assertions intact and bound each stage; failure diagnostics identify stalls.
+    try:
+        stage = "navigation"
+        page.goto(base + "demos/corporate/gjh/v11/", wait_until="domcontentloaded")
+        assert not any('/chibi-crowd/' in url for url in requested), requested
+        page.locator("#arrival-walk").click()
+        stage = "scene readiness"
+        page.wait_for_function("window.__sceneReady || window.__sceneFailed", timeout=180000)
+        assert page.evaluate("window.__sceneReady && __mall.ready"), page.locator("#loader-status").inner_text()
+        stage = "loader dismissal"
+        page.locator("#app-loader").wait_for(state="hidden", timeout=180000)
+        assert page.evaluate("__mall.teleport('atrium')")
+        stage = "visible modular crowd"
+        # The wardrobe has verified clothing, so dressed modular visitors appear and animate.
+        page.wait_for_function("""() => {
+            const live = window.__mall.state.npcs?.modular.active.some(npc => npc.visible);
+            if (live) window.__crowdSnapshot = structuredClone(window.__mall.state);
+            return live;
+        }""", timeout=120000)
+        state = page.evaluate("window.__crowdSnapshot")
+        npcs = state["npcs"]
+        assert 1 <= npcs["visible"] <= npcs["active"] <= npcs["limit"] == 2, npcs
+        assert state["renderBudget"]["totalCalls"] <= 200, state["renderBudget"]
+        assert page.evaluate("innerWidth === 390 && document.documentElement.scrollWidth <= innerWidth")
+        actor = next(npc for npc in npcs["modular"]["active"] if npc["visible"])
+        outfit = actor["outfit"]
+        assert outfit["body"] == "neutral-body" and outfit["shoes"] == "shoes-sneakers" and outfit["top"].startswith("top-"), actor
+        assert ("bottom" in outfit) == (outfit["top"] != "top-dress"), actor
+        stage = "crowd animation"
+        # NPCs rotate in and out, so watch every active slot and accept any whose animation time advances.
+        page.wait_for_function("""() => {
+            const seen = window.__crowdTimes ||= {};
+            let advanced = false;
+            for (const npc of __mall.state.npcs.modular.active) {
+                const before = seen[npc.slot];
+                if (before !== undefined && npc.time > before + .1) advanced = true;
+                if (before === undefined || npc.time < before) seen[npc.slot] = npc.time;
+            }
+            return advanced;
         }""", timeout=45000)
-    assert page.locator("#keyboard-help").evaluate("panel => panel.open")
-    assert page.evaluate("() => [__mall.state.x, __mall.state.y, __mall.state.z]") == position
-    assert not errors, errors
-    context.close()
-    print(f"v11 / 390px: dressed modular crowd, animation, pause, Low fallback and layout PASS; "
-          f"{npcs['visible']} visible, {state['renderBudget']['totalCalls']} total draws", flush=True)
-    return {"width": 390, "npcCount": npcs["visible"], "drawCalls": state["renderBudget"]["totalCalls"],
-            "modular": "dressed visitors", "layoutOverflow": "PASS", "consoleErrors": errors}
+        stage = "menu and controls"
+        page.locator("#mall-tools").click()
+        assert page.locator("#menu-heading-text").inner_text() == "Menu"
+        assert page.locator("#menu-back").is_hidden()
+        assert page.locator("#context-navigation-global").is_hidden()
+        assert page.locator("#mini-map-plan svg").count() == 1
+        page.locator("#menu-minimap-toggle").uncheck()
+        assert page.locator("#mini-map").is_hidden()
+        page.locator("#menu-minimap-toggle").check()
+        page.locator("#mall-speaker").click()
+        assert page.locator("#mall-speaker").get_attribute("aria-pressed") == "true"
+        page.keyboard.press("m")
+        assert page.locator("#mall-speaker").get_attribute("aria-pressed") == "false"
+        open_menu_page(page, "help")
+        assert page.locator("#menu-heading-text").inner_text() == "Help"
+        assert page.locator("dialog:modal").count() == 1
+        page.locator("#menu-back").click()
+        assert page.locator("#menu-heading-text").inner_text() == "Menu"
+        page.keyboard.press("Escape")
+        assert page.locator("#keyboard-help").is_hidden()
+        assert page.evaluate("document.activeElement.id") == "mall-tools"
+        page.locator("#header-menu").click()
+        assert page.locator("#menu-heading-text").inner_text() == "Settings"
+        open_menu_page(page, "controls")
+        assert page.locator('[data-menu-guide="touch"]').is_visible()
+        assert page.locator('[data-menu-guide="keyboard"]').is_hidden()
+        page.locator("#menu-back").click()
+        open_menu_page(page, "graphics")
+        page.wait_for_function("__mall.state.paused")
+        position = page.evaluate("() => [__mall.state.x, __mall.state.y, __mall.state.z]")
+        stage = "low-quality transition"
+        page.locator("#graphics-quality").select_option("low")
+        # The Low tier takes effect after the room and signage GPU work finishes.
+        # This is a behavior check. Mobile cadence spreads preparation over many frames.
+        page.wait_for_function(
+            """() => {
+                const {graphics, npcs, paused} = __mall.state;
+                const {interiors, signage} = __mall.performanceReport();
+                return paused && graphics.quality.tier === 'low'
+                    && interiors.tier === 'low' && signage.tier === 'low'
+                    && npcs.tier === 'low' && npcs.modular.active.length === 0 && npcs.limit === 1;
+            }""", timeout=120000)
+        assert page.locator("#keyboard-help").evaluate("panel => panel.open")
+        assert page.evaluate("() => [__mall.state.x, __mall.state.y, __mall.state.z]") == position
+        assert not errors, errors
+        print(f"v11 / 390px: dressed modular crowd, animation, pause, Low fallback and layout PASS; "
+              f"{npcs['visible']} visible, {state['renderBudget']['totalCalls']} total draws", flush=True)
+        return {"width": 390, "npcCount": npcs["visible"], "drawCalls": state["renderBudget"]["totalCalls"],
+                "modular": "dressed visitors", "layoutOverflow": "PASS", "consoleErrors": errors}
+
+    except Exception:
+        try:
+            snapshot = page.evaluate("""() => {
+                const mall = window.__mall;
+                const state = mall?.state;
+                const perf = mall?.performanceReport?.();
+                const loader = document.querySelector('#app-loader');
+                return {
+                    sceneReady: window.__sceneReady, sceneFailed: window.__sceneFailed,
+                    mallReady: mall?.ready, loaderHidden: loader ? getComputedStyle(loader).display === 'none' || loader.hidden : null,
+                    loaderStatus: document.querySelector('#loader-status')?.textContent,
+                    paused: state?.paused, position: state && {x: state.x, y: state.y, z: state.z},
+                    npcs: state?.npcs, renderBudget: state?.renderBudget, graphics: state?.graphics,
+                    performance: perf && {fps: perf.fps, samples: perf.samples, uploads: perf.uploads,
+                        warm: perf.warm, interiors: perf.interiors, signageTier: perf.signage?.tier}
+                };
+            }""")
+            print("v11 failure diagnostics: " + json.dumps({"stage": stage, "snapshot": snapshot,
+                  "errors": errors[-20:], "failedRequests": failed_requests[-20:]}, default=str), flush=True)
+        except Exception as diagnostic_error:
+            print(f"v11 failure diagnostics unavailable at {stage}: {diagnostic_error}", flush=True)
+        raise
+    finally:
+        context.close()
 
 
 def run(axe_script=None):

@@ -109,9 +109,6 @@ def check_shop_priority(browser, base, server):
     page.route(url, permit_shop_camera_fixture)
     page.route("**/mini-street/shop-interior.js?build=*", route_camera)
     page.goto(url, wait_until="domcontentloaded")
-    page.locator(".scene-shop-entry").click(timeout=15000)
-    expect(page.locator("#stage")).to_have_attribute("data-interior", "")
-
     button = page.locator(SEL)
     status = page.locator(STATUS)
     live = page.locator("#mini-update-announcement")
@@ -119,6 +116,12 @@ def check_shop_priority(browser, base, server):
     button.press("Enter")
     expect_status(status, "could not be verified")
     expect(live).to_contain_text("could not be verified")
+    page.locator(".scene-shop-entry").click(timeout=15000)
+    expect(page.locator("#stage")).to_have_attribute("data-interior", "")
+    # The compact shop masthead hides the update trigger, so exercise an
+    # existing notice rather than trying to activate a non-visible control.
+    expect(button).to_be_hidden()
+    expect_status(status, "could not be verified")
 
     australia = PRODUCTS[0]
     product = inspect_product(page, australia)
@@ -143,12 +146,15 @@ def check_shop_priority(browser, base, server):
     product = inspect_product(page, australia)
     product.get_by_role("button", name="Add to basket", exact=True).click()
     expect(review).to_be_focused()
+    expect(page.get_by_role("button", name="Basket, 2 items", exact=True)).to_be_visible()
+    page.get_by_role("button", name="Exit shop").click()
+    expect(page.locator("#stage")).not_to_have_attribute("data-interior", "")
+    expect(button).to_be_visible()
     server.release_build = server.document_build
     button.click()
     expect(review).to_be_hidden()
     expect_status(status, "up to date")
     expect(live).to_contain_text("up to date")
-    expect(page.get_by_role("button", name="Basket, 2 items", exact=True)).to_be_visible()
     page.close()
 
 
