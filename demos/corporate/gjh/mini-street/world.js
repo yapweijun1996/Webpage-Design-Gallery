@@ -1293,6 +1293,7 @@ export function buildWorld(scene, invalidate) {
     const coat = surface("#e3ae4e");
     const face = surface("#e4ae8c");
     const hair = surface("#392a2d");
+    const coatTrim = surface("#b8802e");
     const umbrella = ["#7c94b5", "#a9bfd1"].map((color) => new THREE.MeshStandardMaterial({
       color, side: THREE.DoubleSide, roughness: 0.41, transparent: true, opacity: 0.62,
     }));
@@ -1304,37 +1305,57 @@ export function buildWorld(scene, invalidate) {
       const arm = x + side * 0.22;
       ellipsoid(coat, arm, shoulder - 0.13, z, 0.085, 0.24, 0.088, 0, 0, side * 0.21);
     }
+    // A flared hem, collar and pockets give the raincoat a readable silhouette.
     ellipsoid(coat, x, 0.60, z, 0.225, 0.30, 0.159);
+    ellipsoid(coat, x, 0.435, z, 0.247, 0.115, 0.168);
+    ellipsoid(coatTrim, x, 0.85, z - 0.06, 0.235, 0.105, 0.145);
+    for (const side of [-1, 1]) {
+      box(coatTrim, x + side * 0.125, 0.55, z + 0.146, 0.09, 0.095, 0.027, 0, 0, side * 0.08);
+      box(coat, x + side * 0.125, 0.562, z + 0.161, 0.075, 0.06, 0.018, 0, 0, side * 0.08);
+    }
     ellipsoid(face, x - 0.055, 1.11, z + 0.062, 0.233, 0.25, 0.205, 0, angle);
     ellipsoid(hair, x + 0.017, 1.22, z - 0.035, 0.253, 0.242, 0.200, 0, angle);
     ellipsoid(hair, x - 0.13, 1.23, z + 0.182, 0.15, 0.077, 0.067, 0, angle, 0.32);
     ellipsoid(hair, x + 0.20, 1.15, z - 0.055, 0.111, 0.143, 0.103);
+    ellipsoid(hair, x + 0.19, 1.02, z - 0.065, 0.102, 0.115, 0.096);
+    ellipsoid(hair, x - 0.22, 1.02, z - 0.055, 0.09, 0.11, 0.09);
     for (const offset of [-0.113, 0.03]) {
       ellipsoid(ink, x + offset - 0.071, 1.095, z + 0.248, 0.024, 0.034, 0.018);
     }
     for (const y of [0.55, 0.68, 0.80]) {
       ellipsoid(wood, x - 0.014, y, z + 0.162, 0.022, 0.024, 0.017);
     }
-    stamp(cupHandle, wood, x - 0.25, 0.67, z + 0.06, 0.081, 0.145, 0.075, 0, -0.19, -0.14);
-    box(porcelain, x - 0.26, 0.48, z + 0.065, 0.244, 0.25, 0.105, 0, -0.19, -0.14);
-    box(deepGreen, x - 0.26, 0.385, z + 0.078, 0.244, 0.056, 0.111, 0, -0.19, -0.14);
+    // Two handles meet the lowered hand and stay clear of the body.
+    const bagX = x - 0.32;
+    ellipsoid(face, bagX, 0.60, z + 0.055, 0.065, 0.065, 0.06);
+    rod(cane, [bagX - 0.075, 0.43, z + 0.095], [bagX - 0.025, 0.59, z + 0.067], 0.012);
+    rod(cane, [bagX + 0.075, 0.43, z + 0.095], [bagX + 0.025, 0.59, z + 0.067], 0.012);
+    box(porcelain, bagX, 0.32, z + 0.075, 0.245, 0.235, 0.105);
+    box(cream, bagX, 0.425, z + 0.08, 0.245, 0.026, 0.109);
+    // Simple crescent emblem remains legible without a new texture or shader.
+    ellipsoid(slate, bagX, 0.33, z + 0.132, 0.046, 0.052, 0.006);
+    ellipsoid(porcelain, bagX + 0.016, 0.345, z + 0.139, 0.039, 0.044, 0.006);
     const handleX = x + 0.27;
-    ellipsoid(face, handleX - 0.073, 0.91, z + 0.109, 0.068, 0.063, 0.059);
-    tube(brass, handleX, 1.38, z + 0.045, 0.020, 1.05, 0.020, 0, 0, -0.15);
+    rod(coat, [x + 0.18, 0.79, z + 0.04], [handleX - 0.073, 0.91, z + 0.15], 0.072);
+    ellipsoid(face, handleX - 0.073, 0.91, z + 0.15, 0.068, 0.063, 0.059);
+    tube(brass, handleX, 1.38, z + 0.15, 0.020, 1.05, 0.020, 0, 0, -0.15);
+    // The crook continues from the shaft beneath the gripping hand.
+    const umbrellaHook = new THREE.TorusGeometry(0.075, 0.014, 5, 12, Math.PI);
+    stamp(umbrellaHook, wood, handleX - 0.15, 0.855, z + 0.15, 1, 1, 1, 0, 0, Math.PI);
     const rim = new THREE.TorusGeometry(0.686, 0.013, 4, 16);
     for (let slice = 0; slice < 8; slice += 1) {
       const wedge = new THREE.SphereGeometry(0.73, 3, 5, slice * Math.PI / 4, Math.PI / 4, 0, Math.PI * 0.39);
-      const panel = mesh(wedge, umbrella[slice % 2], handleX + 0.086, 1.68, z, true);
+      const panel = mesh(wedge, umbrella[slice % 2], handleX + 0.086, 1.68, z + 0.105, true);
       panel.scale.y = 0.56;
       panel.rotation.z = -0.15;
     }
-    const edge = mesh(rim, cream, handleX + 0.11, 1.814, z);
+    const edge = mesh(rim, cream, handleX + 0.11, 1.814, z + 0.105);
     edge.rotation.set(Math.PI / 2, 0, -0.15, "ZYX");
     const rib = new THREE.TorusGeometry(0.71, 0.007, 3, 10, Math.PI * 0.39);
     for (let i = 0; i < 8; i += 1) {
-      stamp(rib, brass, handleX + 0.086, 1.68, z, 0.56, 1, 1, 0, -i * Math.PI / 4, Math.PI / 2 - 0.15);
+      stamp(rib, brass, handleX + 0.086, 1.68, z + 0.105, 0.56, 1, 1, 0, -i * Math.PI / 4, Math.PI / 2 - 0.15);
     }
-    ellipsoid(brass, handleX + 0.03, 2.10, z, 0.027, 0.032, 0.027);
+    ellipsoid(brass, handleX + 0.03, 2.10, z + 0.105, 0.027, 0.032, 0.027);
   }
 
   function bench(x, z) {
