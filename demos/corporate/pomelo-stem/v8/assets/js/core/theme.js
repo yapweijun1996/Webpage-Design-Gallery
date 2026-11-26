@@ -1,6 +1,6 @@
 // Light / dark theme. The inline boot script in <head> applies a saved choice before first paint.
 import {t} from './i18n.js';
-import {toast} from './toast.js';
+import {toast, toastDuration} from './toast.js';
 
 const KEY = 'pomelo-v8-theme';
 
@@ -16,6 +16,7 @@ export function init() {
     const next = current() === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     try { localStorage.setItem(KEY, next); } catch (error) { /* storage blocked: still switch for this view */ }
-    toast({type: 'info', message: t(next === 'dark' ? 'theme.dark' : 'theme.light'), duration: 2500});
+    toast({key: 'theme', icon: next === 'dark' ? 'moon' : 'sun', type: 'info',
+      message: t(next === 'dark' ? 'theme.dark' : 'theme.light'), duration: toastDuration('theme')});
   });
 }

@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import threading
+import time
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,6 +27,122 @@ def launch(p):
     return p.chromium.launch(executable_path=path, headless=True) if path else p.chromium.launch(headless=True)
 
 
+def check_toasts(browser, base, errors):
+    """Exercise real motion, replacement and dismissal without writing screenshots."""
+    for width, height in ((1440, 900), (768, 1024), (390, 844), (320, 568)):
+        context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='no-preference', service_workers='block')
+        page = context.new_page()
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        try:
+            page.goto(base + 'index.html', wait_until='load')
+            page.evaluate("document.documentElement.setAttribute('data-theme', 'light')")
+            toggle = page.locator('[data-theme-toggle]').first
+            toggle.evaluate('button => button.click()')
+            page.wait_for_function("document.querySelector('.toast[data-key=theme]') !== null")
+            page.evaluate("window.__themeToast = document.querySelector('.toast[data-key=theme]'); window.__themeIcon = window.__themeToast.querySelector('svg').outerHTML")
+            toggle.evaluate('button => button.click()')
+            assert page.locator('.toast').count() == 1, width
+            expected = page.evaluate("JSON.parse(document.querySelector('#i18n-runtime').textContent)['theme.light']")
+            assert page.locator('.toast__text').inner_text() == expected, width
+            assert page.evaluate("window.__themeToast === document.querySelector('.toast[data-key=theme]')"), width
+            assert page.evaluate("window.__themeIcon !== window.__themeToast.querySelector('svg').outerHTML"), width
+            page.locator('.toast__close').evaluate('button => button.click()')
+            page.wait_for_function("document.querySelector('.toast') === null")
+
+            # Sample every animation frame while the button is visible, including enter/exit/replace.
+            page.evaluate('window.scrollTo(0, innerHeight * 3)')
+            page.wait_for_function("document.querySelector('[data-back-to-top]').dataset.state === 'visible'")
+            page.wait_for_timeout(250)
+            page.evaluate("""() => {
+              window.__clearanceActive = true;
+              window.__clearanceFailures = [];
+              window.__clearanceSamples = 0;
+              const sample = () => {
+                if (!window.__clearanceActive) return;
+                const button = document.querySelector('[data-back-to-top]');
+                const region = document.querySelector('[data-toast-region]');
+                const gap = parseFloat(getComputedStyle(region).rowGap);
+                const box = button.getBoundingClientRect();
+                if (button.dataset.state === 'visible') {
+                  for (const item of region.children) {
+                    const toast = item.getBoundingClientRect();
+                    window.__clearanceSamples += 1;
+                    if (toast.top - box.bottom < gap - 0.5 || box.top < 0 || box.bottom > innerHeight) {
+                      window.__clearanceFailures.push({toastTop: toast.top, buttonTop: box.top, buttonBottom: box.bottom, gap});
+                    }
+                  }
+                }
+                requestAnimationFrame(sample);
+              };
+              requestAnimationFrame(sample);
+            }""")
+            page.evaluate("""async () => {
+              const {toast} = await import('./assets/js/core/toast.js');
+              toast({key: 'clearance', messageKey: 'theme.light', sticky: true});
+            }""")
+            page.wait_for_timeout(260)
+            box = page.locator('.toast').bounding_box()
+            assert box['width'] <= 360 and 56 <= box['height'] <= 60, (width, box)
+            close = page.locator('.toast__close').bounding_box()
+            assert close['width'] >= 44 and close['height'] >= 44, (width, close)
+            page.evaluate("""async () => {
+              const {toast} = await import('./assets/js/core/toast.js');
+              toast({type: 'success', messageKey: 'update.online', sticky: true});
+              toast({type: 'warning', messageKey: 'update.offline', sticky: true});
+            }""")
+            page.wait_for_timeout(260)
+            assert page.locator('.toast').count() == 3
+            page.evaluate("""async () => {
+              const {toast} = await import('./assets/js/core/toast.js');
+              const {t} = await import('./assets/js/core/i18n.js');
+              toast({key: 'clearance', type: 'error', messageKey: 'update.error',
+                action: {label: t('update.retry'), onClick() {}}});
+            }""")
+            page.wait_for_timeout(260)
+            assert page.locator('.toast').count() == 3
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width
+            action = page.locator('.toast__action').bounding_box()
+            assert action['width'] >= 44 and action['height'] >= 44, (width, action)
+            page.locator('.toast__close').first.evaluate('button => button.click()')
+            page.wait_for_timeout(260)
+            page.locator('.toast__close').evaluate_all('buttons => buttons.forEach(button => button.click())')
+            page.wait_for_function("document.querySelector('.toast') === null")
+            page.evaluate('window.__clearanceActive = false')
+            assert page.evaluate('window.__clearanceSamples') > 10, width
+            assert not page.evaluate('window.__clearanceFailures'), (width, page.evaluate('window.__clearanceFailures'))
+        finally:
+            context.close()
+
+    context = browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce', service_workers='block')
+    page = context.new_page()
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    try:
+        page.goto(base + 'index.html', wait_until='load')
+        page.mouse.move(0, 0)
+        started = time.monotonic()
+        page.evaluate("""async () => {
+          const {toast} = await import('./assets/js/core/toast.js');
+          window.__timedToast = toast({messageKey: 'theme.light'});
+        }""")
+        page.wait_for_function('!window.__timedToast.isConnected', timeout=3500)
+        assert time.monotonic() - started >= 2.8
+        page.evaluate("""async () => {
+          const {toast} = await import('./assets/js/core/toast.js');
+          window.__timedToast = toast({messageKey: 'theme.light'});
+        }""")
+        page.locator('.toast').hover()
+        page.wait_for_timeout(3500)
+        assert page.locator('.toast').count() == 1
+        page.locator('.toast__close').focus()
+        page.mouse.move(0, 0)
+        page.wait_for_timeout(3500)
+        assert page.locator('.toast').count() == 1
+        page.locator('[data-menu-open]').focus()
+        page.wait_for_function('!window.__timedToast.isConnected', timeout=3500)
+    finally:
+        context.close()
+
+
 def main():
     handler = functools.partial(Quiet, directory=str(ROOT))
     server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
@@ -35,6 +152,7 @@ def main():
     try:
         with sync_playwright() as p:
             browser = launch(p)
+            check_toasts(browser, base, errors)
             for width, height in ((1440, 900), (768, 1024), (390, 844), (375, 812), (320, 568)):
                 context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce', service_workers='block')
                 page = context.new_page()

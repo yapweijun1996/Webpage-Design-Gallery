@@ -1,12 +1,19 @@
 // Only used by design/components.html to preview toast and dialog states.
 import {toast} from '../core/toast.js';
+import {t} from '../core/i18n.js';
 import {open, confirm} from '../core/dialog.js';
 
 export function init() {
   if (!document.querySelector('meta[name="pomelo-design-review"]')) return;
   document.addEventListener('click', (event) => {
     const toastButton = event.target.closest('[data-review-toast]');
-    if (toastButton) toast({type: toastButton.dataset.reviewToast, message: `${toastButton.dataset.reviewToast} toast preview`});
+    if (toastButton) {
+      const type = toastButton.dataset.reviewToast;
+      const messages = {info: 'theme.light', success: 'update.online', warning: 'update.offline', error: 'update.error', action: 'update.available'};
+      toast({key: `review-${type}`, type: type === 'action' ? 'info' : type,
+        message: t(messages[type], {version: document.querySelector('meta[name="pomelo-version"]').content}),
+        action: type === 'action' ? {label: t('update.apply'), onClick: () => {}} : undefined});
+    }
     const dialogButton = event.target.closest('[data-review-dialog]');
     if (!dialogButton) return;
     if (dialogButton.dataset.reviewDialog === 'alert') {

@@ -40,7 +40,10 @@ export function init() {
   window.addEventListener('pageshow', () => requestAnimationFrame(schedule));
   new MutationObserver(schedule).observe(document.body, {attributes: true, attributeFilter: ['class']});
   const sizes = new ResizeObserver(syncToasts);
-  if (region) sizes.observe(region);
+  if (region) {
+    region.addEventListener('toastchange', syncToasts);
+    sizes.observe(region);
+  }
   sizes.observe(document.body);
   syncToasts();
   sync();
