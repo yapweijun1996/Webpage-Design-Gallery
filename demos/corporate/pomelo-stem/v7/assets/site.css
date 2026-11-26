@@ -570,7 +570,22 @@
 .home-page .feature-band-inner{padding:2rem 0 3rem}
 .home-page .band-items .value-copy strong{font-family:var(--sans);font-size:var(--pomelo-study-v-8c6e288266fe93dd);font-weight:750}
 .home-page .value-card{min-height:0;background:var(--surface)}
+.home-page .value-card{transition:border-color .2s,box-shadow .2s,transform .2s}
+.home-page .value-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+.home-page .value-icon{background:var(--soft)}
+@media(min-width:1300px){
+ .home-page .hero-store{left:auto;right:calc(36% + 1.75rem);bottom:1.25rem;width:34%}
+ .home-page .floating-card{left:auto;right:1.25rem;width:36%;min-width:0;padding:.85rem}
+ .home-page .floating-card .card-head{gap:.3rem}
+ .home-page .mock-row{gap:.45rem;padding:.45rem 0}
+ .home-page .mock-icon{width:30px;height:30px}
+ .home-page .hero-store-body{padding:.8rem}
+}
 @media(max-width:900px){
  .home-page .hero-copy h1{font-size:var(--pomelo-study-v-d6f55af3fa86dd28)}
  .home-page .hero-art{min-height:0}
+}
+@media(prefers-reduced-motion:reduce){
+ .home-page .value-card{transition:none}
+ .home-page .value-card:hover{transform:none}
 }
