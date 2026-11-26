@@ -157,6 +157,10 @@
   --c-toast-action-text: var(--p-white);
   --c-toast-info-bg: var(--p-sky-100);
   --c-toast-info-icon: var(--p-sky-700);
+  --c-toast-tile-sun-bg: var(--p-amber-100);
+  --c-toast-tile-sun-fg: var(--p-amber-800);
+  --c-toast-tile-moon-bg: var(--p-forest-700);
+  --c-toast-tile-moon-fg: var(--p-mist-50);
   --c-toast-success-bg: var(--p-sage-100);
   --c-toast-success-icon: var(--p-forest-700);
   --c-toast-warning-bg: var(--p-amber-100);
@@ -204,6 +208,10 @@
     --c-toast-action-text: var(--p-forest-950);
     --c-toast-info-bg: var(--p-sky-900);
     --c-toast-info-icon: var(--p-sky-300);
+    --c-toast-tile-sun-bg: var(--p-amber-900);
+    --c-toast-tile-sun-fg: var(--p-amber-200);
+    --c-toast-tile-moon-bg: var(--p-forest-700);
+    --c-toast-tile-moon-fg: var(--p-forest-300);
     --c-toast-success-bg: var(--p-night-700);
     --c-toast-success-icon: var(--p-forest-300);
     --c-toast-warning-bg: var(--p-amber-900);
@@ -251,6 +259,10 @@
   --c-toast-action-text: var(--p-forest-950);
   --c-toast-info-bg: var(--p-sky-900);
   --c-toast-info-icon: var(--p-sky-300);
+  --c-toast-tile-sun-bg: var(--p-amber-900);
+  --c-toast-tile-sun-fg: var(--p-amber-200);
+  --c-toast-tile-moon-bg: var(--p-forest-700);
+  --c-toast-tile-moon-fg: var(--p-forest-300);
   --c-toast-success-bg: var(--p-night-700);
   --c-toast-success-icon: var(--p-forest-300);
   --c-toast-warning-bg: var(--p-amber-900);

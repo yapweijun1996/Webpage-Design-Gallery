@@ -29,6 +29,8 @@
 .toast--success .toast__icon { background: var(--c-toast-success-bg); color: var(--c-toast-success-icon); }
 .toast--warning .toast__icon { background: var(--c-toast-warning-bg); color: var(--c-toast-warning-icon); }
 .toast--error .toast__icon { background: var(--c-toast-error-bg); color: var(--c-toast-error-icon); }
+.toast[data-icon="sun"] .toast__icon { background: var(--c-toast-tile-sun-bg); color: var(--c-toast-tile-sun-fg); }
+.toast[data-icon="moon"] .toast__icon { background: var(--c-toast-tile-moon-bg); color: var(--c-toast-tile-moon-fg); }
 .toast__divider { grid-area: 1 / 2; width: var(--size-border); height: var(--size-icon-lg); background: var(--c-toast-divider); }
 .toast__text { grid-area: 1 / 3; min-width: 0; font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
 .toast :focus-visible { outline-color: var(--c-toast-focus); }

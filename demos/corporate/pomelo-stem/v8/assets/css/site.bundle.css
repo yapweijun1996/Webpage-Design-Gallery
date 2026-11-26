@@ -158,6 +158,10 @@
   --c-toast-action-text: var(--p-white);
   --c-toast-info-bg: var(--p-sky-100);
   --c-toast-info-icon: var(--p-sky-700);
+  --c-toast-tile-sun-bg: var(--p-amber-100);
+  --c-toast-tile-sun-fg: var(--p-amber-800);
+  --c-toast-tile-moon-bg: var(--p-forest-700);
+  --c-toast-tile-moon-fg: var(--p-mist-50);
   --c-toast-success-bg: var(--p-sage-100);
   --c-toast-success-icon: var(--p-forest-700);
   --c-toast-warning-bg: var(--p-amber-100);
@@ -205,6 +209,10 @@
     --c-toast-action-text: var(--p-forest-950);
     --c-toast-info-bg: var(--p-sky-900);
     --c-toast-info-icon: var(--p-sky-300);
+    --c-toast-tile-sun-bg: var(--p-amber-900);
+    --c-toast-tile-sun-fg: var(--p-amber-200);
+    --c-toast-tile-moon-bg: var(--p-forest-700);
+    --c-toast-tile-moon-fg: var(--p-forest-300);
     --c-toast-success-bg: var(--p-night-700);
     --c-toast-success-icon: var(--p-forest-300);
     --c-toast-warning-bg: var(--p-amber-900);
@@ -252,6 +260,10 @@
   --c-toast-action-text: var(--p-forest-950);
   --c-toast-info-bg: var(--p-sky-900);
   --c-toast-info-icon: var(--p-sky-300);
+  --c-toast-tile-sun-bg: var(--p-amber-900);
+  --c-toast-tile-sun-fg: var(--p-amber-200);
+  --c-toast-tile-moon-bg: var(--p-forest-700);
+  --c-toast-tile-moon-fg: var(--p-forest-300);
   --c-toast-success-bg: var(--p-night-700);
   --c-toast-success-icon: var(--p-forest-300);
   --c-toast-warning-bg: var(--p-amber-900);
@@ -733,6 +745,8 @@ body::before {
 .toast--success .toast__icon { background: var(--c-toast-success-bg); color: var(--c-toast-success-icon); }
 .toast--warning .toast__icon { background: var(--c-toast-warning-bg); color: var(--c-toast-warning-icon); }
 .toast--error .toast__icon { background: var(--c-toast-error-bg); color: var(--c-toast-error-icon); }
+.toast[data-icon="sun"] .toast__icon { background: var(--c-toast-tile-sun-bg); color: var(--c-toast-tile-sun-fg); }
+.toast[data-icon="moon"] .toast__icon { background: var(--c-toast-tile-moon-bg); color: var(--c-toast-tile-moon-fg); }
 .toast__divider { grid-area: 1 / 2; width: var(--size-border); height: var(--size-icon-lg); background: var(--c-toast-divider); }
 .toast__text { grid-area: 1 / 3; min-width: 0; font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
 .toast :focus-visible { outline-color: var(--c-toast-focus); }

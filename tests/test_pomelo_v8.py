@@ -170,6 +170,7 @@ class PomeloV8Test(unittest.TestCase):
             required = {"toast-bg", "toast-text", "toast-focus", "toast-border", "toast-divider", "toast-accent",
                         "toast-close-bg", "toast-close-hover", "toast-close-text", "toast-action-bg", "toast-action-text"}
             required.update(f"toast-{kind}-{part}" for kind in ("info", "success", "warning", "error") for part in ("bg", "icon"))
+            required.update(f"toast-tile-{glyph}-{part}" for glyph in ("sun", "moon") for part in ("bg", "fg"))
             self.assertLessEqual(required, tokens.keys(), theme)
             background = luminance(colors[tokens["toast-bg"]])
             if theme == "dark":
@@ -180,6 +181,7 @@ class PomeloV8Test(unittest.TestCase):
                      ("toast-text", "toast-bg", 4.5), ("toast-action-text", "toast-action-bg", 4.5),
                      ("toast-close-text", "toast-close-bg", 4.5), ("toast-close-text", "toast-close-hover", 4.5)]
             pairs += [(f"toast-{kind}-icon", f"toast-{kind}-bg", 3) for kind in ("info", "success", "warning", "error")]
+            pairs += [(f"toast-tile-{glyph}-fg", f"toast-tile-{glyph}-bg", 3) for glyph in ("sun", "moon")]
             for ring, surface, minimum in pairs:
                 with self.subTest(theme=theme, ring=ring, surface=surface):
                     values = sorted(luminance(colors[tokens[key]]) for key in (ring, surface))
@@ -298,6 +300,7 @@ const statusNode = body.children.find(node => node.attributes.role === 'status')
 const alertNode = body.children.find(node => node.attributes.role === 'alert');
 assert.equal(statusNode.attributes['aria-live'], 'polite');
 const first = toast({key: 'theme', message: 'Dark theme on.', icon: 'moon'});
+assert.equal(first.dataset.icon, 'moon');
 const close = first.querySelector('.toast__close');
 const other = toast({message: 'Other notification'});
 advance(500);
@@ -307,6 +310,7 @@ assert.equal(first.querySelector('.toast__close'), close);
 assert.equal(stack.firstElementChild, first);
 assert.equal(stack.children.length, 2);
 assert.equal(first.className, 'toast toast--success');
+assert.equal(first.dataset.icon, 'sun');
 assert.equal(first.querySelector('.toast__icon').children[0].glyph, 'sun');
 assert.equal(first.querySelector('.toast__text').textContent, 'Light theme on.');
 assert.equal(first._duration, 2500);
@@ -316,7 +320,11 @@ assert.equal(toast({key: 'theme', message: 'Light theme on.', icon: 'sun'}), fir
 assert.equal(statusNode.textContent, '');
 advance(0);
 assert.equal(statusNode.textContent, 'Light theme on.');
-assert.equal(toast({message: 'Light theme on.'}), first);
+assert.equal(toast({key: 'theme', message: 'Dark theme on.', icon: 'moon'}), first);
+assert.equal(first.dataset.icon, 'moon');
+assert.equal(first.querySelector('.toast__icon').children[0].glyph, 'moon');
+assert.equal(toast({message: 'Dark theme on.'}), first);
+assert.equal(first.dataset.icon, 'info'); // Reusing a theme toast must clear its old tint.
 assert.equal(stack.children.length, 2);
 assert.equal(dismissNewest(), true); // Latest replacement is newest without moving its DOM position.
 assert.equal(first.classList.contains('is-leaving'), true);

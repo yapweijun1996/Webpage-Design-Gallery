@@ -130,7 +130,8 @@ export function toast(options) {
   item._duration = options.sticky || type === 'error' ? toastDuration('sticky') : options.duration ?? toastDuration(options.action ? 'action' : 'default');
   item._remaining = item._duration;
   item._deadline = 0;
-  item.querySelector('.toast__icon').replaceChildren(icon(options.icon || ICONS[type]));
+  item.dataset.icon = options.icon || ICONS[type];
+  item.querySelector('.toast__icon').replaceChildren(icon(item.dataset.icon));
   item.querySelector('.toast__text').textContent = message;
   const close = item.querySelector('.toast__close');
   close.setAttribute('aria-label', t('toast.close'));
