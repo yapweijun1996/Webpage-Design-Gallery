@@ -69,6 +69,122 @@ class PomeloV8Test(unittest.TestCase):
         self.assertEqual(manifest["scope"], "./")
         self.assertEqual({icon["purpose"] for icon in manifest["icons"]}, {"any", "maskable"})
 
+    def test_toast_region_is_named_without_duplicate_live_announcements(self):
+        for name, source in pomelo.outputs().items():
+            if not name.endswith(".html"):
+                continue
+            with self.subTest(page=name):
+                regions = [attrs for _, attrs, _ in pomelo.PageStructure(source).elements if "data-toast-region" in attrs]
+                self.assertEqual(len(regions), 1)
+                self.assertEqual(regions[0].get("role"), "region")
+                self.assertTrue(regions[0].get("aria-label"))
+                self.assertNotIn("aria-live", regions[0])
+
+    def test_rendered_pages_never_skip_heading_levels(self):
+        pages = {name: source for name, source in pomelo.outputs().items()
+                 if name.endswith(".html") and not name.startswith("design/")}
+        self.assertEqual(len(pages), 18)
+        tables = pomelo.dictionaries()
+        for name, source in pages.items():
+            with self.subTest(page=name):
+                elements = pomelo.PageStructure(source).elements
+                headings = [int(tag[1]) for tag, _, _ in elements if re.fullmatch(r"h[1-6]", tag)]
+                for previous, current in zip([0] + headings, headings):
+                    self.assertLessEqual(current, previous + 1, headings)
+                if name.endswith("commerce.html"):
+                    self.assertEqual(headings[:4], [1, 2, 3, 3])
+                    locale = next((lang for lang, info in pomelo.LOCALES.items() if name.startswith(info["dir"] + "/")), "en")
+                    self.assertIn(f'<h2 class="visually-hidden">{tables[locale]["shop.products"]}</h2>', source)
+
+    def test_srcset_width_descriptors_match_real_images(self):
+        checked = 0
+        for name, source in pomelo.outputs().items():
+            if not name.endswith(".html"):
+                continue
+            for _, attrs, _ in pomelo.PageStructure(source).elements:
+                for candidate in attrs.get("srcset", "").split(","):
+                    if not candidate.strip():
+                        continue
+                    path, descriptor = candidate.split()
+                    with self.subTest(page=name, image=path):
+                        self.assertRegex(descriptor, r"^\d+w$")
+                        width, _ = pomelo.image_size((DEMO / name).parent / path)
+                        self.assertEqual(int(descriptor[:-1]), width)
+                        checked += 1
+        self.assertGreater(checked, 0)
+
+    def test_self_heal_checks_unsaved_input_at_reload_time(self):
+        guard = pomelo.SW_GUARD
+        self.assertIn("document.querySelector('[data-dirty=\"true\"]')", guard)
+        self.assertIn("form input, form textarea, form select", guard)
+        self.assertIn("field.value !== field.defaultValue", guard)
+        self.assertIn("field.checked !== field.defaultChecked", guard)
+        self.assertIn("option.defaultSelected", guard)
+        self.assertRegex(guard, r"'controllerchange', function \(\) \{\s*if \(hasUnsavedInput\(\)\) return;\s*location.reload\(\);")
+        self.assertIn("key = 'pomelo-v8-heal'", guard)
+        self.assertIn("sessionStorage.getItem(key) === want", guard)
+        self.assertIn("sessionStorage.setItem(key, want)", guard)
+
+    def test_contact_and_commerce_mark_unsaved_input(self):
+        contact = (DEMO / "assets/js/components/contact-form.js").read_text("utf-8")
+        commerce = (DEMO / "assets/js/components/commerce-demo.js").read_text("utf-8")
+        self.assertRegex(contact, r"form.addEventListener\('input', .*?\{\s*form.dataset.dirty = 'true';")
+        self.assertRegex(commerce, r"studio.addEventListener\('input',[\s\S]*?studio.dataset.dirty = 'true';")
+        self.assertIn("root.dataset.dirty = 'true';", commerce)
+
+    def test_offline_images_keep_small_precache_and_runtime_fallback(self):
+        outputs = pomelo.outputs()
+        precache = pomelo.precache_list(outputs)
+        images = [path for path in precache if path.endswith(".webp")]
+        self.assertTrue(images)
+        self.assertTrue(all(path.endswith("-768.webp") for path in images))
+        for name, source in outputs.items():
+            if not name.endswith(".html"):
+                continue
+            for _, attrs, _ in pomelo.PageStructure(source).elements:
+                for candidate in attrs.get("srcset", "").split(","):
+                    if not candidate.strip():
+                        continue
+                    image = ((DEMO / name).parent / candidate.split()[0]).resolve().relative_to(DEMO)
+                    fallback = re.sub(r"-\d+\.webp$", "-768.webp", image.as_posix())
+                    self.assertIn(fallback, precache, (name, image))
+        sw = outputs["sw.js"]
+        self.assertIn("if (isImage && response.ok)", sw)
+        self.assertIn("cache.put(clean, response.clone())", sw)
+        self.assertIn("clean.replace(/-\\d+\\.webp$/, '-768.webp')", sw)
+        self.assertIn("await cache.match(fallback)", sw)
+
+    def test_focus_tokens_have_three_to_one_surface_contrast(self):
+        colors = json.loads((DEMO / "tokens/primitives.json").read_text("utf-8"))["color"]
+        themes = json.loads((DEMO / "tokens/semantics.json").read_text("utf-8"))
+
+        def luminance(value):
+            channels = [int(value[index:index + 2], 16) / 255 for index in (1, 3, 5)]
+            linear = [channel / 12.92 if channel <= 0.04045 else ((channel + 0.055) / 1.055) ** 2.4
+                      for channel in channels]
+            return sum(channel * weight for channel, weight in zip(linear, (0.2126, 0.7152, 0.0722)))
+
+        for theme, tokens in themes.items():
+            for ring, surface in (("toast-focus", "toast-bg"), ("focus", "surface")):
+                with self.subTest(theme=theme, ring=ring, surface=surface):
+                    values = sorted(luminance(colors[tokens[key]]) for key in (ring, surface))
+                    contrast = (values[1] + 0.05) / (values[0] + 0.05)
+                    self.assertGreaterEqual(contrast, 3)
+        toast = (DEMO / "assets/css/components/toast.css").read_text("utf-8")
+        self.assertRegex(toast, r"\.toast :focus-visible\s*\{\s*outline-color: var\(--c-toast-focus\);")
+
+    def test_prep_checkbox_labels_cover_the_whole_tap_row(self):
+        for folder in ("", "zh/", "ms/"):
+            source = (DEMO / f"{folder}commerce.html").read_text("utf-8")
+            boxes = [(attrs, ancestors) for tag, attrs, ancestors in pomelo.PageStructure(source).elements
+                     if tag == "input" and "data-prep" in attrs]
+            self.assertEqual(len(boxes), 3)
+            for attrs, ancestors in boxes:
+                with self.subTest(locale=folder, checkbox=attrs["id"]):
+                    labels = [parent for tag, parent in ancestors if tag == "label"]
+                    self.assertEqual(len(labels), 1)
+                    self.assertEqual(labels[0].get("for"), attrs["id"])
+
 
     def test_shell_controls_and_no_js_language_links(self):
         tables = pomelo.dictionaries()

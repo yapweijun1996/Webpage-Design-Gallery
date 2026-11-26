@@ -7,7 +7,7 @@
     "border-subtle": "sand-200", "border-control": "ink-500", "focus": "forest-500",
     "band": "forest-900", "band-text": "mist-50", "band-muted": "mist-200",
     "success": "forest-700", "warning": "amber-800", "danger": "red-700",
-    "toast-bg": "ink-900", "toast-text": "cream-50", "scrim": "scrim"
+    "toast-bg": "ink-900", "toast-text": "cream-50", "toast-focus": "cream-50", "scrim": "scrim"
   },
   "dark": {
     "bg": "night-900", "surface": "night-800", "surface-muted": "night-700", "surface-sunken": "night-600",
@@ -17,6 +17,6 @@
     "border-subtle": "night-600", "border-control": "mist-400", "focus": "forest-300",
     "band": "forest-950", "band-text": "mist-50", "band-muted": "mist-200",
     "success": "forest-300", "warning": "amber-200", "danger": "red-200",
-    "toast-bg": "mist-50", "toast-text": "ink-900", "scrim": "scrim"
+    "toast-bg": "mist-50", "toast-text": "ink-900", "toast-focus": "ink-900", "scrim": "scrim"
   }
 }

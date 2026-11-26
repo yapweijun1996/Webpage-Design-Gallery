@@ -35,7 +35,7 @@ def main():
     try:
         with sync_playwright() as p:
             browser = launch(p)
-            for width, height in ((1440, 900), (768, 1024), (390, 844), (320, 568)):
+            for width, height in ((1440, 900), (768, 1024), (390, 844), (375, 812), (320, 568)):
                 context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce', service_workers='block')
                 page = context.new_page()
                 page.on('pageerror', lambda error: errors.append(str(error)))
@@ -48,11 +48,13 @@ def main():
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name)
                         assert page.locator('.update-button__chip').inner_text() == 'v' + VERSION
                         if width == 390 and name == 'index':
-                            assert page.evaluate('document.documentElement.scrollHeight') <= 6000, (locale, page.evaluate('document.documentElement.scrollHeight'))
+                            assert page.evaluate('document.documentElement.scrollHeight') <= 5900, (locale, page.evaluate('document.documentElement.scrollHeight'))
                         if width <= 400:
-                            for control in page.locator('.site-header button:visible').all():
+                            for control in page.locator('a[href]:visible, button:visible, .check-group label:visible').all():
+                                if control.get_attribute('class') == 'skip-link':
+                                    continue
                                 box = control.bounding_box()
-                                assert box['width'] >= 44 and box['height'] >= 44, (width, name, box)
+                                assert box['width'] >= 44 and box['height'] >= 44, (width, locale, name, control.evaluate('el => el.outerHTML'), box)
                 if width in (1440, 768, 390):
                     page.goto(base + 'index.html', wait_until='load')
                     page.wait_for_function("[...document.images].filter(i => i.loading !== 'lazy').every(i => i.complete)")

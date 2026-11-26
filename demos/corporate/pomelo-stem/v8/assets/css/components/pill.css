@@ -7,7 +7,7 @@
 .pill--accent { background: var(--c-accent-soft); color: var(--c-accent); }
 .pill--highlight { background: var(--c-highlight-soft); color: var(--c-text); }
 .demo-note {
-  display: inline-flex; align-items: center; gap: var(--space-1); min-height: var(--size-tap); padding-inline: var(--space-3);
+  display: inline-flex; align-items: center; gap: var(--space-1); min-width: var(--size-tap); min-height: var(--size-tap); padding-inline: var(--space-3);
   border: var(--size-border) dashed var(--c-border-control); border-radius: var(--radius-pill); background: transparent;
   color: var(--c-text-muted); font-size: var(--size-text-xs); font-weight: var(--weight-semibold); cursor: pointer;
 }

@@ -155,9 +155,10 @@ def image_size(path):
 def picture(root, image, alt, sizes, loading):
     small = f"assets/img/{image}-768.webp"
     large = f"assets/img/{image}-1440.webp"
+    small_width, _ = image_size(V8 / small)
     width, height = image_size(V8 / large)
     eager = loading == "eager"
-    return (f'<img src="{root}{small}" srcset="{root}{small} 768w, {root}{large} 1440w" sizes="{html.escape(sizes, quote=True)}" '
+    return (f'<img src="{root}{small}" srcset="{root}{small} {small_width}w, {root}{large} {width}w" sizes="{html.escape(sizes, quote=True)}" '
             f'width="{width}" height="{height}" alt="{html.escape(alt, quote=True)}" '
             f'loading="{"eager" if eager else "lazy"}" decoding="async"' + (' fetchpriority="high"' if eager else "") + ">")
 
@@ -261,16 +262,55 @@ THEME_BOOT = ("(function(){try{var t=localStorage.getItem('pomelo-v8-theme');"
               "if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();")
 
 # Heals a page whose HTML is newer than the assets an older service worker still serves:
-# ask the controlling worker for its build; on mismatch activate the waiting worker and reload once.
-SW_GUARD = ("(function(){var sw=navigator.serviceWorker;if(!sw||!sw.controller||!window.MessageChannel)return;"
-            "var m=document.querySelector('meta[name=\"pomelo-build\"]');if(!m)return;var want=m.content,key='pomelo-v8-heal';"
-            "var ch=new MessageChannel();ch.port1.onmessage=function(e){if(!e.data||e.data.build===want)return;"
-            "try{if(sessionStorage.getItem(key)===want)return;sessionStorage.setItem(key,want);}catch(x){return;}"
-            "sw.addEventListener('controllerchange',function(){location.reload();});"
-            "function go(w){w.postMessage({type:'SKIP_WAITING'});}"
-            "sw.getRegistration().then(function(r){if(!r)return;return r.update().catch(function(){}).then(function(){"
-            "if(r.waiting)return go(r.waiting);var w=r.installing;if(w)w.addEventListener('statechange',function(){if(w.state==='installed')go(w);});});})"
-            ".catch(function(){});};sw.controller.postMessage({type:'GET_BUILD'},[ch.port2]);})();")
+# ask the controlling worker for its build; activate on mismatch, but preserve unsaved input.
+SW_GUARD = r"""(function () {
+  var sw = navigator.serviceWorker;
+  if (!sw || !sw.controller || !window.MessageChannel) return;
+  var meta = document.querySelector('meta[name="pomelo-build"]');
+  if (!meta) return;
+  var want = meta.content, key = 'pomelo-v8-heal';
+  function hasUnsavedInput() {
+    if (document.querySelector('[data-dirty="true"]')) return true;
+    return Array.from(document.querySelectorAll('form input, form textarea, form select')).some(function (field) {
+      if (field.type === 'checkbox' || field.type === 'radio') return field.checked !== field.defaultChecked;
+      if (field.tagName === 'SELECT') {
+        var options = Array.from(field.options);
+        if (field.multiple) return options.some(function (option) { return option.selected !== option.defaultSelected; });
+        var initial = -1;
+        options.forEach(function (option, index) { if (option.defaultSelected) initial = index; });
+        if (initial < 0) initial = options.findIndex(function (option) {
+          return !option.disabled && !(option.parentElement.tagName === 'OPTGROUP' && option.parentElement.disabled);
+        });
+        return field.selectedIndex !== initial;
+      }
+      return field.value !== field.defaultValue;
+    });
+  }
+  var channel = new MessageChannel();
+  channel.port1.onmessage = function (event) {
+    if (!event.data || event.data.build === want) return;
+    try {
+      if (sessionStorage.getItem(key) === want) return;
+      sessionStorage.setItem(key, want);
+    } catch (error) { return; }
+    sw.addEventListener('controllerchange', function () {
+      if (hasUnsavedInput()) return;
+      location.reload();
+    }, {once: true});
+    function go(worker) { worker.postMessage({type: 'SKIP_WAITING'}); }
+    sw.getRegistration().then(function (registration) {
+      if (!registration) return;
+      return registration.update().catch(function () {}).then(function () {
+        if (registration.waiting) return go(registration.waiting);
+        var worker = registration.installing;
+        if (worker) worker.addEventListener('statechange', function () {
+          if (worker.state === 'installed') go(worker);
+        });
+      });
+    }).catch(function () {});
+  };
+  sw.controller.postMessage({type: 'GET_BUILD'}, [channel.port2]);
+})();"""
 
 
 def components_page(ctx):

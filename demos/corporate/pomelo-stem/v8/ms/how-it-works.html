@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex,nofollow">
 <meta http-equiv="refresh" content="0; url=services.html#process">
 <meta name="theme-color" content="#fbf9f3">
-<meta name="pomelo-version" content="8.1.1">
-<meta name="pomelo-build" content="20261126.4">
+<meta name="pomelo-version" content="8.1.2">
+<meta name="pomelo-build" content="20261126.5">
 <meta name="pomelo-root" content="../">
 <title>Cara kami bekerja · Pomelo STEM</title>
 <meta name="description" content="Halaman ini telah dipindahkan ke Perkhidmatan.">
@@ -19,9 +19,56 @@
 <link rel="icon" href="../assets/img/pomelo-mark.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../assets/img/icon-192.png">
 <script>(function(){try{var t=localStorage.getItem('pomelo-v8-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<script>(function(){var sw=navigator.serviceWorker;if(!sw||!sw.controller||!window.MessageChannel)return;var m=document.querySelector('meta[name="pomelo-build"]');if(!m)return;var want=m.content,key='pomelo-v8-heal';var ch=new MessageChannel();ch.port1.onmessage=function(e){if(!e.data||e.data.build===want)return;try{if(sessionStorage.getItem(key)===want)return;sessionStorage.setItem(key,want);}catch(x){return;}sw.addEventListener('controllerchange',function(){location.reload();});function go(w){w.postMessage({type:'SKIP_WAITING'});}sw.getRegistration().then(function(r){if(!r)return;return r.update().catch(function(){}).then(function(){if(r.waiting)return go(r.waiting);var w=r.installing;if(w)w.addEventListener('statechange',function(){if(w.state==='installed')go(w);});});}).catch(function(){});};sw.controller.postMessage({type:'GET_BUILD'},[ch.port2]);})();</script>
-<link rel="stylesheet" href="../assets/css/site.bundle.css?v=20261126.4">
-<script type="module" src="../assets/js/main.js?v=20261126.4"></script>
+<script>(function () {
+  var sw = navigator.serviceWorker;
+  if (!sw || !sw.controller || !window.MessageChannel) return;
+  var meta = document.querySelector('meta[name="pomelo-build"]');
+  if (!meta) return;
+  var want = meta.content, key = 'pomelo-v8-heal';
+  function hasUnsavedInput() {
+    if (document.querySelector('[data-dirty="true"]')) return true;
+    return Array.from(document.querySelectorAll('form input, form textarea, form select')).some(function (field) {
+      if (field.type === 'checkbox' || field.type === 'radio') return field.checked !== field.defaultChecked;
+      if (field.tagName === 'SELECT') {
+        var options = Array.from(field.options);
+        if (field.multiple) return options.some(function (option) { return option.selected !== option.defaultSelected; });
+        var initial = -1;
+        options.forEach(function (option, index) { if (option.defaultSelected) initial = index; });
+        if (initial < 0) initial = options.findIndex(function (option) {
+          return !option.disabled && !(option.parentElement.tagName === 'OPTGROUP' && option.parentElement.disabled);
+        });
+        return field.selectedIndex !== initial;
+      }
+      return field.value !== field.defaultValue;
+    });
+  }
+  var channel = new MessageChannel();
+  channel.port1.onmessage = function (event) {
+    if (!event.data || event.data.build === want) return;
+    try {
+      if (sessionStorage.getItem(key) === want) return;
+      sessionStorage.setItem(key, want);
+    } catch (error) { return; }
+    sw.addEventListener('controllerchange', function () {
+      if (hasUnsavedInput()) return;
+      location.reload();
+    }, {once: true});
+    function go(worker) { worker.postMessage({type: 'SKIP_WAITING'}); }
+    sw.getRegistration().then(function (registration) {
+      if (!registration) return;
+      return registration.update().catch(function () {}).then(function () {
+        if (registration.waiting) return go(registration.waiting);
+        var worker = registration.installing;
+        if (worker) worker.addEventListener('statechange', function () {
+          if (worker.state === 'installed') go(worker);
+        });
+      });
+    }).catch(function () {});
+  };
+  sw.controller.postMessage({type: 'GET_BUILD'}, [channel.port2]);
+})();</script>
+<link rel="stylesheet" href="../assets/css/site.bundle.css?v=20261126.5">
+<script type="module" src="../assets/js/main.js?v=20261126.5"></script>
 </head>
 <body>
 <a class="skip-link" href="#main">Langkau ke kandungan</a>
@@ -44,9 +91,9 @@
         <span class="theme-icon theme-icon--light"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>
         <span class="theme-icon theme-icon--dark"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
       </button>
-      <button class="update-button" type="button" data-update data-state="idle" aria-label="Semak kemas kini, versi 8.1.1">
+      <button class="update-button" type="button" data-update data-state="idle" aria-label="Semak kemas kini, versi 8.1.2">
         <span class="update-button__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></span>
-        <span class="update-button__chip">v8.1.1</span>
+        <span class="update-button__chip">v8.1.2</span>
         <span class="update-button__dot" aria-hidden="true"></span>
       </button>
       <span class="visually-hidden" role="status" data-update-status></span>
@@ -92,14 +139,14 @@
       <button class="demo-note" type="button" data-demo-note><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>Data demo</span></button>
 
       <p class="site-footer__disclaimer">Konsep bebas. Gambar sekadar ilustrasi dan borang hubungan tidak disambungkan.</p>
-      <p class="site-footer__version">Versi 8.1.1</p>
+      <p class="site-footer__version">Versi 8.1.2</p>
     </div>
   </div>
 </footer>
 
 <button class="back-to-top" type="button" data-back-to-top data-state="hidden" inert aria-hidden="true" aria-label="Kembali ke atas"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></button>
 
-<div class="toast-region" data-toast-region aria-label="Pemberitahuan"></div>
+<div class="toast-region" data-toast-region role="region" aria-label="Pemberitahuan"></div>
 <script type="application/json" id="i18n-runtime">{"_intl": "ms-MY", "contact.copied": "Nombor disalin.", "contact.copyFailed": "Tidak dapat menyalin. Pilih nombor itu secara manual.", "demo.note": "Data demo", "demo.noteBody": "Produk, harga, pesanan dan orang di laman ini ialah contoh. Tiada pesanan sebenar dan tiada perkhidmatan yang disambungkan.", "demo.noteTitle": "Tentang demo ini", "dialog.cancel": "Batal", "dialog.close": "Tutup", "dialog.confirm": "Teruskan", "form.business": "Nama perniagaan", "form.message": "Apa yang anda perlukan bantuan?", "form.name": "Nama anda", "form.notSent": "Borang demo ini tidak disambungkan, jadi tiada apa yang dihantar. Sila gunakan WhatsApp.", "form.required": "Sila isi ruangan ini.", "form.submit": "Hantar mesej", "form.title": "Hantar mesej", "lang.button": "Bahasa: {language}", "lang.en": "English", "lang.label": "Bahasa", "lang.ms": "Bahasa Melayu", "lang.short": "BM", "lang.zh": "简体中文", "menu.open": "Buka menu", "menu.theme": "Tema cerah atau gelap", "menu.title": "Menu", "order.empty": "Pesanan anda masih kosong. Pilih sesuatu dari kedai.", "product.added": "{item} ditambah ke pesanan PS-0124.", "studio.done": "PS-0124 sedia untuk diambil.", "theme.dark": "Tema gelap dihidupkan.", "theme.light": "Tema cerah dihidupkan.", "theme.toggle": "Tukar antara tema cerah dan gelap", "toast.close": "Tutup pemberitahuan", "toast.region": "Pemberitahuan", "top.label": "Kembali ke atas", "update.apply": "Muat semula untuk kemas kini", "update.applying": "Sedang dikemas kini…", "update.available": "Versi {version} sudah sedia.", "update.checking": "Menyemak kemas kini…", "update.chip": "v{version}", "update.current": "Anda menggunakan versi terkini, v{version}.", "update.error": "Kemas kini tidak dapat disemak. Cuba lagi sebentar nanti.", "update.label": "Semak kemas kini, versi {version}", "update.offline": "Anda di luar talian. Versi yang disimpan dipaparkan.", "update.online": "Anda kembali dalam talian.", "update.retry": "Cuba lagi", "update.unsavedBody": "Borang hubungan masih ada teks. Muat semula untuk kemas kini akan mengosongkannya.", "update.unsavedTitle": "Muat semula dan hilangkan mesej anda?"}</script>
 </body>
 </html>

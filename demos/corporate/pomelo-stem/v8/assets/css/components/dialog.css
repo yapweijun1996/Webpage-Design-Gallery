@@ -14,10 +14,10 @@
 .dialog__body { display: grid; gap: var(--space-3); }
 .dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); }
 .dialog-nav { display: grid; gap: var(--space-1); }
-.dialog-nav a { display: flex; align-items: center; min-height: var(--size-tap); padding-inline: var(--space-3); border-radius: var(--radius-md); color: var(--c-text); text-decoration: none; }
+.dialog-nav a { display: flex; align-items: center; min-width: var(--size-tap); min-height: var(--size-tap); padding-inline: var(--space-3); border-radius: var(--radius-md); color: var(--c-text); text-decoration: none; }
 .dialog-nav a[aria-current="page"] { background: var(--c-accent-soft); color: var(--c-accent); font-weight: var(--weight-semibold); }
 .dialog-langs { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-.dialog-langs a { display: inline-flex; align-items: center; min-height: var(--size-tap); padding-inline: var(--space-3); border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-pill); color: var(--c-text); text-decoration: none; font-size: var(--size-text-sm); }
+.dialog-langs a { display: inline-flex; align-items: center; min-width: var(--size-tap); min-height: var(--size-tap); padding-inline: var(--space-3); border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-pill); color: var(--c-text); text-decoration: none; font-size: var(--size-text-sm); }
 .dialog-langs a[aria-current="true"] { border-color: var(--c-accent); color: var(--c-accent); font-weight: var(--weight-semibold); }
 @keyframes pomelo-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pomelo-sheet-in { from { transform: translateY(var(--space-7)); opacity: 0; } to { transform: none; opacity: 1; } }

@@ -1,6 +1,6 @@
 /* Pomelo STEM V8 service worker. Generated from src/sw.template.js; do not edit sw.js. */
-const BUILD = "20261126.4";
-const VERSION = "8.1.1";
+const BUILD = "20261126.5";
+const VERSION = "8.1.2";
 const PREFIX = 'pomelo-v8-';
 const CACHE = PREFIX + BUILD;
 const PRECACHE = [
@@ -120,6 +120,21 @@ self.addEventListener('fetch', (event) => {
     const cache = await caches.open(CACHE);
     const hit = await cache.match(clean);
     if (hit) return hit;
-    return fetch(request);
+    const isImage = request.destination === 'image' || /\.(?:webp|png|jpe?g|gif|svg|avif|ico)$/i.test(url.pathname);
+    try {
+      const response = await fetch(request);
+      if (isImage && response.ok) {
+        // Cache by clean path, just like precached assets. A full cache must not hide a successful response.
+        await cache.put(clean, response.clone()).catch(() => {});
+      }
+      return response;
+    } catch (error) {
+      if (isImage) {
+        const fallback = clean.replace(/-\d+\.webp$/, '-768.webp');
+        const small = await cache.match(fallback);
+        if (small) return small;
+      }
+      return Response.error();
+    }
   })());
 });

@@ -19,7 +19,7 @@
 .lang-menu[data-state="open"] .lang-menu__list { opacity: 1; transform: none; pointer-events: auto; }
 .lang-option {
   display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
-  min-height: var(--size-tap); padding-inline: var(--space-3); border-radius: var(--radius-sm);
+  min-width: var(--size-tap); min-height: var(--size-tap); padding-inline: var(--space-3); border-radius: var(--radius-sm);
   color: var(--c-text-soft); text-decoration: none; font-size: var(--size-text-sm);
 }
 .lang-option[aria-current="true"] { color: var(--c-accent); background: var(--c-accent-soft); font-weight: var(--weight-semibold); }

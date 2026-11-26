@@ -125,6 +125,7 @@
   --c-danger: var(--p-red-700);
   --c-toast-bg: var(--p-ink-900);
   --c-toast-text: var(--p-cream-50);
+  --c-toast-focus: var(--p-cream-50);
   --c-scrim: var(--p-scrim);
 }
 @media (prefers-color-scheme: dark) {
@@ -155,6 +156,7 @@
     --c-danger: var(--p-red-200);
     --c-toast-bg: var(--p-mist-50);
     --c-toast-text: var(--p-ink-900);
+    --c-toast-focus: var(--p-ink-900);
     --c-scrim: var(--p-scrim);
   }
 }
@@ -185,6 +187,7 @@
   --c-danger: var(--p-red-200);
   --c-toast-bg: var(--p-mist-50);
   --c-toast-text: var(--p-ink-900);
+  --c-toast-focus: var(--p-ink-900);
   --c-scrim: var(--p-scrim);
 }
 @media (prefers-reduced-motion: reduce) {
