@@ -26,9 +26,13 @@ function regions() {
   document.body.append(live, alert);
 }
 
-function remove(item) {
+function remove(item, immediate = false) {
   if (!item.isConnected) return;
   clearTimeout(item._timer);
+  if (immediate) {
+    item.remove();
+    return;
+  }
   item.classList.add('is-leaving');
   const done = () => item.remove();
   const duration = parseFloat(getComputedStyle(item).transitionDuration) || 0;
@@ -49,12 +53,13 @@ export function toast(options) {
   const type = ICONS[options.type] ? options.type : 'info';
   const message = options.message || t(options.messageKey, options.vars);
   for (const existing of region.children) {
-    if (existing.dataset.message === message) {
+    if (existing.dataset.message === message && !existing.classList.contains('is-leaving')) {
       arm(existing, existing._duration);
       return existing;
     }
   }
-  while (region.children.length >= MAX) remove(region.firstElementChild);
+  // Capacity eviction must finish synchronously, even while exit transitions run.
+  while (region.children.length >= MAX) remove(region.firstElementChild, true);
   const sticky = options.sticky || type === 'error';
   const duration = sticky ? 0 : options.duration || (options.action ? 6000 : 4000);
   const item = document.createElement('div');

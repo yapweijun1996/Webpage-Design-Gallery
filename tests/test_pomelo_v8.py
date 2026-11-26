@@ -3,6 +3,7 @@ import importlib.util
 import json
 import re
 import unittest
+from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -67,6 +68,76 @@ class PomeloV8Test(unittest.TestCase):
         manifest = json.loads((DEMO / "manifest.webmanifest").read_text("utf-8"))
         self.assertEqual(manifest["scope"], "./")
         self.assertEqual({icon["purpose"] for icon in manifest["icons"]}, {"any", "maskable"})
+
+
+    def test_shell_controls_and_no_js_language_links(self):
+        tables = pomelo.dictionaries()
+        for name, source in pomelo.outputs().items():
+            if not name.endswith(".html"):
+                continue
+            with self.subTest(page=name):
+                elements = pomelo.PageStructure(source).elements
+                lang = next(attrs["lang"] for tag, attrs, _ in elements if tag == "html")
+                locale = next(key for key, info in pomelo.LOCALES.items() if info["html"] == lang)
+                table = tables[locale]
+                ids = Counter(attrs["id"] for _, attrs, _ in elements if "id" in attrs)
+                self.assertTrue(all(count == 1 for count in ids.values()), ids)
+                buttons = [attrs for tag, attrs, ancestors in elements if tag == "button"
+                           and any("data-lang-menu" in parent for _, parent in ancestors)]
+                self.assertEqual(len(buttons), 1)
+                button = buttons[0]
+                self.assertIn("hidden", button)
+                self.assertEqual(button["type"], "button")
+                self.assertEqual(button["aria-expanded"], "false")
+                self.assertEqual(button["aria-label"], table["lang.button"].format(language=table[f"lang.{locale}"]))
+                controlled = [attrs for tag, attrs, _ in elements if attrs.get("id") == button["aria-controls"] and tag == "ul"]
+                self.assertEqual(len(controlled), 1)
+                self.assertIn("hidden", controlled[0])
+                for hook in ("data-lang-menu", "data-lang-row"):
+                    links = [(attrs, ancestors) for tag, attrs, ancestors in elements if tag == "a"
+                             and any(hook in parent for _, parent in ancestors)]
+                    self.assertEqual({attrs["data-lang"] for attrs, _ in links}, set(pomelo.LOCALES))
+                    self.assertEqual(len(links), 3)
+                    for attrs, _ in links:
+                        target = attrs["data-lang"]
+                        self.assertEqual(attrs["lang"], pomelo.LOCALES[target]["html"])
+                        self.assertEqual(attrs["hreflang"], attrs["lang"])
+                        self.assertIn("data-lang-option", attrs)
+                        self.assertEqual(attrs.get("aria-current"), "true" if target == locale else None)
+                        checks = [node for tag, node, parents in elements if tag == "svg"
+                                  and any(parent is attrs for _, parent in parents)]
+                        self.assertEqual(len(checks), int(target == locale))
+                        self.assertTrue(((DEMO / name).parent / attrs["href"]).is_file())
+                top = [attrs for tag, attrs, _ in elements if tag == "button" and "data-back-to-top" in attrs]
+                self.assertEqual(len(top), 1)
+                self.assertIn("inert", top[0])
+                self.assertEqual(top[0]["aria-hidden"], "true")
+                self.assertEqual(top[0]["aria-label"], table["top.label"])
+                self.assertEqual(len([attrs for tag, attrs, _ in elements if tag == "a" and attrs.get("class") == "skip-link"]), 1)
+                self.assertFalse(any(attrs.get("role") == "menu" for _, attrs, _ in elements))
+                runtime = json.loads(re.search(r'<script type="application/json" id="i18n-runtime">(.*?)</script>', source, re.S)[1])
+                for key in ("lang.button", "lang.short", "lang.label", "top.label"):
+                    self.assertEqual(runtime[key], table[key])
+
+    def test_build_rejects_missing_or_duplicate_shell_controls(self):
+        result = pomelo.outputs()
+        for marker, label in (("data-lang-menu", "[data-lang-menu] button"), ("data-back-to-top", "back-to-top button")):
+            for duplicate in (False, True):
+                with self.subTest(marker=marker, duplicate=duplicate):
+                    broken = result.copy()
+                    if duplicate:
+                        addition = '<div data-lang-menu><button></button></div>' if marker == "data-lang-menu" else '<button data-back-to-top></button>'
+                        broken["index.html"] = result["index.html"].replace("</body>", addition + "</body>")
+                    else:
+                        broken["index.html"] = result["index.html"].replace(marker, "data-removed-control")
+                    self.assertIn(f"index.html must have exactly one {label}", pomelo.check_rules(broken))
+
+    def test_new_components_and_icon_are_precached(self):
+        sw = (DEMO / "sw.js").read_text("utf-8")
+        for name in ("lang-menu", "back-to-top"):
+            self.assertIn(f'"assets/js/components/{name}.js"', sw)
+        self.assertNotIn("lang-switch.js", sw)
+        self.assertIn("arrow-up", pomelo.icons())
 
 
 if __name__ == "__main__":

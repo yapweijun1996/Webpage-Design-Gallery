@@ -11,12 +11,11 @@ function current() {
 }
 
 export function init() {
-  for (const button of document.querySelectorAll('[data-theme-toggle]')) {
-    button.addEventListener('click', () => {
-      const next = current() === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      try { localStorage.setItem(KEY, next); } catch (error) { /* storage blocked: still switch for this view */ }
-      toast({type: 'info', message: t(next === 'dark' ? 'theme.dark' : 'theme.light'), duration: 2500});
-    });
-  }
+  document.addEventListener('click', (event) => {
+    if (!event.target.closest('[data-theme-toggle]')) return;
+    const next = current() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem(KEY, next); } catch (error) { /* storage blocked: still switch for this view */ }
+    toast({type: 'info', message: t(next === 'dark' ? 'theme.dark' : 'theme.light'), duration: 2500});
+  });
 }

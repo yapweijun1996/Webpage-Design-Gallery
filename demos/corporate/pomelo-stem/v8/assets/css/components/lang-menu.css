@@ -1,0 +1,36 @@
+/* One disclosure in the header; the same locale links also work without JS in the footer. */
+.lang-menu { position: relative; }
+.lang-menu__button {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  min-width: var(--size-tap); min-height: var(--size-tap); padding: var(--space-2);
+  border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-pill);
+  background: var(--c-surface); color: var(--c-text); cursor: pointer; font-size: var(--size-text-sm);
+}
+.lang-menu__short, .lang-menu__chevron { display: none; }
+.lang-menu__chevron .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
+.lang-menu__list {
+  position: absolute; inset-inline-end: calc(-1 * var(--lang-menu-shift, 0px)); top: calc(100% + var(--space-2));
+  width: max-content; max-width: calc(100vw - var(--space-6)); padding: var(--space-2);
+  border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-md);
+  background: var(--c-surface); box-shadow: var(--shadow-md);
+  opacity: 0; transform: translateY(calc(-1 * var(--space-2))); pointer-events: none;
+  transition: opacity var(--motion-fast) var(--motion-ease-out), transform var(--motion-fast) var(--motion-ease-out);
+}
+.lang-menu[data-state="open"] .lang-menu__list { opacity: 1; transform: none; pointer-events: auto; }
+.lang-option {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
+  min-height: var(--size-tap); padding-inline: var(--space-3); border-radius: var(--radius-sm);
+  color: var(--c-text-soft); text-decoration: none; font-size: var(--size-text-sm);
+}
+.lang-option[aria-current="true"] { color: var(--c-accent); background: var(--c-accent-soft); font-weight: var(--weight-semibold); }
+.lang-option .icon { width: var(--size-icon-sm); height: var(--size-icon-sm); }
+.footer-langs__list { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+@media (min-width: 1024px) {
+  .lang-menu__short, .lang-menu__chevron { display: inline-flex; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .lang-menu__button:hover, .lang-option:hover { background: var(--c-accent-soft); color: var(--c-accent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lang-menu__list { transition: none; transform: none; }
+}

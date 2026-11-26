@@ -44,10 +44,10 @@
     "display-md": "clamp(2rem, 1.4rem + 2.4vw, 3rem)",
     "display-lg": "clamp(2.375rem, 1.5rem + 3.4vw, 4.125rem)",
     "icon-xs": "14px", "icon-sm": "16px", "icon-md": "20px", "icon-lg": "24px", "icon-xl": "32px",
-    "tap": "44px", "header": "64px", "container": "1200px", "measure": "64ch", "dialog": "560px", "toast": "420px",
-    "border": "1px", "focus": "3px", "lift": "-3px", "nudge": "8px"
+    "fab": "48px", "tap": "44px", "header": "64px", "container": "1200px", "measure": "64ch", "dialog": "560px", "toast": "420px",
+    "border": "1px", "focus": "3px", "lift": "-3px", "nudge": "8px", "nav-underline": "2px", "header-blur": "12px"
   },
-  "z": {"header": "10", "toast": "30", "modal": "40", "loader": "50"},
+  "z": {"fab": "20", "header": "10", "toast": "30", "modal": "40", "loader": "50"},
   "motion": {
     "fast": "120ms", "base": "200ms", "slow": "320ms", "spin": "800ms", "pulse": "400ms",
     "ease-out": "cubic-bezier(.2, .8, .2, 1)", "ease-in": "cubic-bezier(.4, 0, 1, 1)"
@@ -59,5 +59,6 @@
   },
   "lineheight": {"tight": "1.12", "snug": "1.3", "body": "1.6", "cjk": "1.75"},
   "weight": {"regular": "400", "medium": "500", "semibold": "600", "bold": "700"},
+  "opacity": {"header-bg": "92%"},
   "tracking": {"label": "0.08em"}
 }

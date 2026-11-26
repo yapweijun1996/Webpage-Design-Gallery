@@ -48,8 +48,10 @@ export function open({title, content, variant = 'modal', actions = [], onClose} 
   }
   backdrop.append(panel);
 
-  const siblings = [...document.body.children].filter((node) => node.tagName !== 'SCRIPT');
-  for (const node of siblings) node.inert = true;
+  const siblings = [...document.body.children]
+    .filter((node) => node.tagName !== 'SCRIPT')
+    .map((node) => [node, node.inert]);
+  for (const [node] of siblings) node.inert = true;
   document.body.classList.add('is-locked');
   document.body.append(backdrop);
 
@@ -79,7 +81,7 @@ export function open({title, content, variant = 'modal', actions = [], onClose} 
       if (closed) return;
       closed = true;
       backdrop.remove();
-      for (const node of siblings) node.inert = false;
+      for (const [node, inert] of siblings) node.inert = inert;
       document.body.classList.remove('is-locked');
       window.scrollTo(0, scrollY);
       if (opener && opener.focus) opener.focus();

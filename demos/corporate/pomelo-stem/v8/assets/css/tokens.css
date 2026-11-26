@@ -59,6 +59,7 @@
   --size-icon-md: 20px;
   --size-icon-lg: 24px;
   --size-icon-xl: 32px;
+  --size-fab: 48px;
   --size-tap: 44px;
   --size-header: 64px;
   --size-container: 1200px;
@@ -69,6 +70,9 @@
   --size-focus: 3px;
   --size-lift: -3px;
   --size-nudge: 8px;
+  --size-nav-underline: 2px;
+  --size-header-blur: 12px;
+  --z-fab: 20;
   --z-header: 10;
   --z-toast: 30;
   --z-modal: 40;
@@ -91,6 +95,7 @@
   --weight-medium: 500;
   --weight-semibold: 600;
   --weight-bold: 700;
+  --opacity-header-bg: 92%;
   --tracking-label: 0.08em;
 }
 :root {
