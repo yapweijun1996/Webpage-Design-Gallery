@@ -714,3 +714,25 @@ body{font-size:var(--pomelo-study-v-1a81f5208b29348c)}
  .home-page .story-editorial figcaption{padding:0}
  .home-page .story-bridge{padding:1.25rem}
 }
+
+/* Seller Studio uses the same sample products and orders as the product tour. */
+.home-concept .dashboard{max-width:700px}
+.home-concept .dashboard-top{flex-wrap:wrap}
+.home-concept .dashboard-top .pill:first-of-type{margin-left:auto}
+.home-concept .dashboard-cell{display:block;padding:0;overflow:hidden;border:1px solid var(--line)}
+.home-concept .dashboard-cell-header{display:flex;align-items:center;gap:.6rem;min-width:0;padding:.7rem}
+.home-concept .dashboard-cell-header>div{min-width:0}
+.home-concept .dashboard-samples{background:var(--surface)}
+.home-concept .dashboard-sample-row{display:flex;align-items:center;gap:.5rem;padding:.45rem;border-top:1px solid var(--line);color:var(--ink)}
+.home-concept .dashboard-sample-row>span:nth-child(2){flex:1;min-width:0}
+.home-concept .dashboard-sample-row b,.home-concept .dashboard-sample-row small{display:block;overflow-wrap:anywhere}
+.home-concept .dashboard-sample-row small{color:var(--muted)}
+.home-concept .dashboard-sample-row strong{white-space:nowrap}
+.home-concept .dashboard-sample-art{display:grid;place-items:center;width:46px;height:42px;flex:none;border-radius:var(--pomelo-study-v-eb4ebe481cc0c70e);background:var(--soft)}
+.home-concept .dashboard-sample-art i{display:block;width:24px;height:25px;background:var(--pomelo-study-v-d8e78b7d1815dcd0);border-radius:var(--pomelo-study-v-109692d2cb2a8ac4)}
+.home-concept .dashboard-sample-art .object-bowl{width:28px;height:15px;background:var(--pomelo-study-v-803daca255eea54e);border-radius:var(--pomelo-study-v-957f1d45094f5846)}
+@media(max-width:520px){
+ .home-concept .dashboard-top .pill:first-of-type{margin-left:0}
+ .home-concept .dashboard-cell-header .dashboard-cell-icon{display:grid}
+ .home-concept .dashboard-sample-row{flex-wrap:wrap}
+}
