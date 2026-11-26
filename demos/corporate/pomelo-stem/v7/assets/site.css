@@ -598,7 +598,7 @@
 .overview-benefit>.icon{width:34px;height:34px;color:var(--green)}
 .overview-benefit strong{color:var(--ink)}
 .overview-benefit p{font-size:var(--pomelo-study-v-685068479b2f6766)}
-.overview-products{display:grid;grid-template-columns:1fr repeat(3,1.05fr);gap:1rem;padding:1.25rem;background:var(--sand);border-radius:var(--pomelo-study-v-145f2f5348aecb27)}
+.overview-products{display:grid;grid-template-columns:1fr repeat(3,1.05fr);gap:1rem;padding:1.25rem;background:color-mix(in srgb,var(--sand) 35%,var(--bg));border-radius:var(--pomelo-study-v-145f2f5348aecb27)}
 .overview-intro{padding:.5rem 1rem}
 .overview-intro .eyebrow:before{display:none}
 .overview-intro h2{font-size:var(--pomelo-study-v-bca5ebd7886ec04f);margin:1rem 0}
@@ -626,9 +626,10 @@
 .overview-shipping-label .icon{width:17px;height:17px;color:var(--green)}
 .overview-cta{margin-top:1.25rem;padding:1rem 0;background:var(--deep);color:var(--surface)}
 .overview-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:1.25rem}
-.overview-cta h2{font-size:var(--pomelo-study-v-72140a70a10ab61d)}
+.overview-cta h2{font-size:var(--pomelo-study-v-bca5ebd7886ec04f)}
 .overview-cta p{color:inherit}
 .overview-cta .btn{white-space:nowrap}
+.overview-cta .btn:last-child{background:transparent;color:var(--surface)}
 @media(min-width:1100px){
  body:has(.home-page) .header-inner,.home-page .wrap{width:min(100% - 3rem,1410px)}
  body:has(.home-page) .header-inner{min-height:68px}
@@ -647,7 +648,7 @@
  .home-page .mock-row{gap:.4rem;padding:.4rem 0}
  .home-page .mock-icon{width:30px;height:30px}
  .home-page .hero-store-body{padding:.75rem}
- .overview-benefits{padding:1.5rem 0}
+ .overview-benefits{padding:1rem 0}
 }
 @media(max-width:1099px){
  .overview-products{grid-template-columns:repeat(2,minmax(0,1fr))}

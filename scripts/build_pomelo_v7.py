@@ -254,6 +254,9 @@ ICON = {
 'spark':'<path d="m12 3 2 6 6 2-6 2-2 6-2-6-6-2 6-2 2-6Z"/>',
 'code':'<path d="m8 7-5 5 5 5m8-10 5 5-5 5m-3-14-2 18"/>',
 'chat':'<path d="M5 18 3 21l1-5A8 8 0 1 1 8 20l-3-2ZM8 10h8m-8 4h5"/>',
+'storefront':'<path d="M4 10v10h16V10M3 10l2-5h14l2 5M3 10c0 2 3 2 3 0 0 2 3 2 3 0 0 2 3 2 3 0 0 2 3 2 3 0 0 2 3 2 3 0M9 20v-6h6v6"/>',
+'growth':'<path d="M4 20h16M6 17v-5M11 17V8M16 17V4"/>',
+'sprout':'<path d="M12 21v-9M12 14C5 14 4 10 4 6c5 0 8 2 8 8ZM12 11c0-6 3-8 8-8 0 5-2 8-8 8Z"/>',
 }
 def esc(value): return escape(str(value), quote=True)
 def icon(name): return '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">'+ICON[name]+'</svg>'
@@ -406,14 +409,19 @@ def home_overview(c):
   'zh': ('轻松管理生意', '以实用工具支持日常工作。', '拓展线上业务', '让更多顾客认识你的品牌。', '为本地商家而设', '为日常需求提供实用科技。', '我们的产品', '连接业务所需的工具。', '实用工具助你销售、管理和成长。', '准备好让生意更从容地成长？', '了解 Pomelo STEM 如何协助你。'),
   'ms': ('Urus perniagaan dengan mudah', 'Alat praktikal untuk urusan harian.', 'Kembangkan jualan dalam talian', 'Bantu lebih ramai pelanggan mengenali jenama anda.', 'Dibina untuk perniagaan tempatan', 'Teknologi praktikal untuk keperluan harian.', 'PRODUK KAMI', 'Alat yang saling terhubung untuk perniagaan anda.', 'Alat praktikal untuk menjual, mengurus dan berkembang.', 'Bersedia memudahkan dan mengembangkan perniagaan?', 'Ketahui cara Pomelo STEM dapat membantu anda.'),
  }[lang]
- benefits = ''.join(f'<div class="overview-benefit">{icon(symbol)}<div><strong>{esc(title)}</strong><p>{esc(description)}</p></div></div>' for symbol, title, description in zip(('shop', 'panel', 'spark'), copy[0:6:2], copy[1:6:2]))
+ benefits = ''.join(f'<div class="overview-benefit">{icon(symbol)}<div><strong>{esc(title)}</strong><p>{esc(description)}</p></div></div>' for symbol, title, description in zip(('storefront', 'growth', 'sprout'), copy[0:6:2], copy[1:6:2]))
+ product_descriptions = {
+  'en': ('Your online shop for everyday business.', 'Manage products, orders, and content in one place.', 'A complete commerce experience, from shop to order.'),
+  'zh': ('为日常生意打造线上商店。', '在一处管理商品、订单和内容。', '从商店到订单的一体化体验。'),
+  'ms': ('Kedai dalam talian untuk perniagaan harian.', 'Urus produk, pesanan dan kandungan di satu tempat.', 'Pengalaman perniagaan dari kedai hingga pesanan.'),
+ }[lang]
  studio_rows = ''.join(f'<div class="overview-studio-row"><i class="overview-studio-thumb">{icon(symbol)}</i><i class="overview-studio-lines"></i><i class="overview-studio-status"></i></div>' for symbol in ('shop', 'panel', 'spark'))
  previews = (
   f'<span class="overview-shop-title">{esc(c["store_title"])}</span>',
   f'<div class="overview-studio-nav">{icon("shop")}{icon("panel")}{icon("spark")}</div><div class="overview-studio-list">{studio_rows}</div>',
   f'<div class="overview-shipping-label">{icon("shop")}<span>{esc(c["band"][0])}</span>{icon("panel")}<span>{esc(c["dash_labels"][1])}</span></div>',
  )
- cards = ''.join(f'<a class="overview-card" href="{esc(url)}"><div class="overview-card-head"><span class="overview-icon">{icon(symbol)}</span><strong>{esc(title)}</strong><span class="pill">{esc(c["sample_label"])}</span></div><p>{esc(description)}</p><div class="overview-preview overview-preview-{i}" aria-hidden="true">{preview}</div></a>' for i, (symbol, title, description, url, preview) in enumerate(zip(('shop', 'panel', 'shop'), ('Pomelo Home', 'Seller Studio', 'Pomelo Commerce'), (c['band_desc'][0], c['band_desc'][1], c['product_desc']), (link('commerce')+'#product-preview', '#home-studio', link('commerce')), previews)))
+ cards = ''.join(f'<a class="overview-card" href="{esc(url)}"><div class="overview-card-head"><span class="overview-icon">{icon(symbol)}</span><strong>{esc(title)}</strong><span class="pill">{esc(c["sample_label"])}</span></div><p>{esc(description)}</p><div class="overview-preview overview-preview-{i}" aria-hidden="true">{preview}</div></a>' for i, (symbol, title, description, url, preview) in enumerate(zip(('shop', 'panel', 'shop'), ('Pomelo Home', 'Seller Studio', 'Pomelo Commerce'), product_descriptions, (link('commerce')+'#product-preview', '#home-studio', link('commerce')), previews)))
  return f'<section class="wrap home-overview" aria-label="{esc(copy[6])}"><div class="overview-benefits">{benefits}</div><div class="overview-products"><div class="overview-intro"><p class="eyebrow">{esc(copy[6])}</p><h2>{esc(copy[7])}</h2><p>{esc(copy[8])}</p></div>{cards}</div></section><section class="overview-cta"><div class="wrap overview-cta-inner"><h2>{esc(copy[9])}</h2><p>{esc(copy[10])}</p>{button(c["cta"], link("contact"), "light")}{button(c["nav"][5], link("contact"), "light")}</div></section>'
 
 def home(c):
