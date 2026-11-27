@@ -1,6 +1,6 @@
 /* Pomelo STEM V8 service worker. Generated from src/sw.template.js; do not edit sw.js. */
-const BUILD = "20261127.8";
-const VERSION = "8.3.2";
+const BUILD = "20261127.9";
+const VERSION = "8.4.0";
 const PREFIX = 'pomelo-v8-';
 const CACHE = PREFIX + BUILD;
 const PRECACHE = [
@@ -28,6 +28,7 @@ const PRECACHE = [
   "assets/js/components/contact-form.js",
   "assets/js/components/demo-note.js",
   "assets/js/components/header.js",
+  "assets/js/components/hero-3d.js",
   "assets/js/components/lang-menu.js",
   "assets/js/components/motion.js",
   "assets/js/components/review.js",
@@ -42,6 +43,9 @@ const PRECACHE = [
   "assets/js/core/toast.js",
   "assets/js/core/unsaved.js",
   "assets/js/core/update.js",
+  "assets/js/hero3d/layout.js",
+  "assets/js/hero3d/scene.js",
+  "assets/js/hero3d/viewer.js",
   "assets/js/i18n-defaults.generated.js",
   "assets/js/icons.generated.js",
   "assets/js/main.js",

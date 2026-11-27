@@ -99,6 +99,7 @@
   --size-zoom: 1.03;
   --size-hero-bar: 3px;
   --size-stroke: 3px;
+  --z-stage: 1;
   --z-fab: 20;
   --z-header: 10;
   --z-toast: 30;
@@ -676,6 +677,29 @@ body::before {
 .next-steps__n::before { background: linear-gradient(180deg, var(--c-btn-from), var(--c-btn-to)); color: var(--c-on-accent); box-shadow: var(--shadow-glow) var(--c-glow); }
 .philosophy { border-left-color: var(--c-accent); }
 .section--muted { background: linear-gradient(180deg, var(--c-surface-muted), var(--c-bg)); }
+
+/* components/hero3d.css */
+/* Hero 3D stage: the photo is the poster; the canvas fades in over it once the scene is drawn. */
+[data-hero3d] { position: relative; }
+[data-hero3d] canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+  background: linear-gradient(180deg, var(--c-surface-muted), var(--c-hero-top));
+  animation: pomelo-fade var(--motion-slow) var(--motion-ease-out);
+}
+[data-hero3d] canvas:focus-visible { outline-offset: calc(-1 * var(--size-focus)); }
+.hero3d__button { position: absolute; inset-inline: 0; margin-inline: auto; width: fit-content; bottom: var(--space-3); z-index: var(--z-stage); background: var(--c-glass); -webkit-backdrop-filter: blur(var(--size-header-blur)); backdrop-filter: blur(var(--size-header-blur)); }
+.hero3d__status:empty { display: none; }
+.hero3d__status, .hero3d__hint {
+  position: absolute; inset-inline: 0; margin-inline: auto; width: fit-content; bottom: var(--space-3); z-index: var(--z-stage);
+  max-width: calc(100% - var(--space-5)); padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill);
+  background: var(--c-glass); color: var(--c-text); font-size: var(--size-text-xs); text-align: center;
+  -webkit-backdrop-filter: blur(var(--size-header-blur)); backdrop-filter: blur(var(--size-header-blur));
+  pointer-events: none;
+}
+[data-hero3d][data-state="ready"] .hero3d__status { display: none; }
+[data-hero3d][data-state="idle"] .hero3d__status { bottom: calc(var(--space-3) + var(--size-tap)); }
+[data-hero3d][data-state="ready"] .hero3d__hint { animation: pomelo-hint-out var(--motion-slow) var(--motion-ease-in) calc(10 * var(--motion-slow)) forwards; }
+@keyframes pomelo-hint-out { to { opacity: 0; } }
 
 /* components/lang-menu.css */
 /* One disclosure in the header; the same locale links also work without JS in the footer. */

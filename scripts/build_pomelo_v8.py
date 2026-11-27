@@ -650,6 +650,8 @@ def runtime_files():
     names = set(outputs())
     names.update(p.relative_to(V8).as_posix() for p in (V8 / "assets/js").rglob("*.js"))
     names.update(p.relative_to(V8).as_posix() for p in (V8 / "assets/img").iterdir() if p.is_file())
+    for folder in ("assets/vendor", "assets/3d"):
+        names.update(p.relative_to(V8).as_posix() for p in (V8 / folder).rglob("*") if p.is_file())
     names.update({"release.json", "assets/thumbnail.webp", "screenshots/1440.png", "screenshots/768.png", "screenshots/390.png"})
     names.discard("assets/css/tokens.css")
     return sorted(Path("demos/corporate/pomelo-stem/v8") / name for name in names)

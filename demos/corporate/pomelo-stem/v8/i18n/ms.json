@@ -249,5 +249,10 @@
   "loader.pageTitle": "Memuatkan…",
   "loader.tagline": "Penyelesaian pintar untuk terus berkembang.",
   "loader.updateTitle": "Mengemas kini ke v{version}",
-  "loader.updateDetail": "Halaman ini akan dimuat semula sebentar lagi."
+  "loader.updateDetail": "Halaman ini akan dimuat semula sebentar lagi.",
+  "hero3d.label": "Pemandangan 3D interaktif kedai dalam talian yang bersambung: kedai, gudang, penghantaran, pembayaran, analitik dan automasi. Guna kekunci anak panah kiri dan kanan atau seret ke tepi untuk memusingkannya.",
+  "hero3d.hint": "Seret ke tepi untuk memusing",
+  "hero3d.load": "Terokai dalam 3D",
+  "hero3d.loading": "Memuatkan pemandangan 3D…",
+  "hero3d.failed": "Pemandangan 3D tidak dapat dimuatkan. Foto kekal dipaparkan."
 }

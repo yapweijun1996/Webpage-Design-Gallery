@@ -61,7 +61,7 @@
     "border": "1px", "focus": "3px", "lift": "-3px", "nudge": "8px", "nav-underline": "2px", "header-blur": "12px",
     "reveal": "16px", "zoom": "1.03", "hero-bar": "3px", "stroke": "3px"
   },
-  "z": {"fab": "20", "header": "10", "toast": "30", "toast-accent": "-1", "modal": "40", "loader": "50"},
+  "z": {"stage": "1", "fab": "20", "header": "10", "toast": "30", "toast-accent": "-1", "modal": "40", "loader": "50"},
   "motion": {
     "fast": "120ms", "base": "200ms", "slow": "320ms", "spin": "800ms", "pulse": "400ms",
     "ease-out": "cubic-bezier(.2, .8, .2, 1)", "ease-in": "cubic-bezier(.4, 0, 1, 1)",

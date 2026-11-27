@@ -942,6 +942,51 @@ def main():
             assert page.locator('.story-step').first.evaluate("el => getComputedStyle(el).opacity") == '1'
             context.close()
 
+            # Hero 3D: the photo is the fallback for reduced motion and no JS; WebGL loads only on request then.
+            for lang in ('', 'zh/', 'ms/'):
+                context = browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce', service_workers='block')
+                page = context.new_page()
+                requests = []
+                page.on('request', lambda request: requests.append(request.url))
+                page.goto(base + lang + 'index.html')
+                page.wait_for_function("document.querySelector('[data-hero3d] .hero3d__button')")
+                assert page.locator('[data-hero3d] canvas').count() == 0
+                assert page.locator('[data-hero3d] img').first.is_visible()
+                assert page.locator('.hero3d__button').is_visible()
+                assert not [url for url in requests if '.glb' in url or 'three.module' in url], 'reduced motion must not auto-load 3D'
+                context.close()
+            context = browser.new_context(viewport={'width': 390, 'height': 844}, java_script_enabled=False, service_workers='block')
+            page = context.new_page()
+            page.goto(base + 'index.html')
+            assert page.locator('[data-hero3d] canvas').count() == 0
+            assert page.locator('[data-hero3d] img').first.is_visible()
+            context.close()
+            # Real scene (software GL): loads, draws a canvas over the photo and keeps the home page height.
+            gl = p.chromium.launch(executable_path=os.environ.get('GALLERY_CHROME') or None, headless=True,
+                                   args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+            context = gl.new_context(viewport={'width': 1440, 'height': 900}, reduced_motion='no-preference', service_workers='block')
+            page = context.new_page()
+            errors = []
+            page.on('pageerror', lambda error: errors.append(str(error)))
+            page.goto(base + 'index.html')
+            page.wait_for_selector('[data-hero3d][data-state="ready"]', timeout=60000)
+            assert page.locator('[data-hero3d] canvas').count() == 1
+            assert page.locator('[data-hero3d] canvas').get_attribute('aria-label')
+            assert not errors, errors
+            context.close()
+            # Reduced motion: nothing auto-loads; a real click on the button starts the scene and must reach the button.
+            context = gl.new_context(viewport={'width': 1440, 'height': 900}, reduced_motion='reduce', service_workers='block')
+            page = context.new_page()
+            page.goto(base + 'index.html')
+            page.wait_for_function("document.querySelector('.hero3d__button') && !document.querySelector('.hero3d__button').hidden")
+            box = page.locator('.hero3d__button').bounding_box()
+            page.mouse.move(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
+            page.mouse.down()
+            page.mouse.up()
+            page.wait_for_selector('[data-hero3d][data-state="ready"]', timeout=60000)
+            context.close()
+            gl.close()
+
             # Service worker installs and serves the home page offline.
             context = browser.new_context(viewport={'width': 1440, 'height': 900})
             page = context.new_page()

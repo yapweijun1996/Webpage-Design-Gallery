@@ -249,5 +249,10 @@
   "loader.pageTitle": "Loading…",
   "loader.tagline": "Growing Smarter Solutions.",
   "loader.updateTitle": "Updating to v{version}",
-  "loader.updateDetail": "This page will reload in a moment."
+  "loader.updateDetail": "This page will reload in a moment.",
+  "hero3d.label": "Interactive 3D scene of a connected online shop: shop, warehouse, delivery, payment, analytics and automation. Use the left and right arrow keys or drag sideways to turn it.",
+  "hero3d.hint": "Drag sideways to turn",
+  "hero3d.load": "Explore in 3D",
+  "hero3d.loading": "Loading 3D scene…",
+  "hero3d.failed": "The 3D scene could not load. The photo stays."
 }
