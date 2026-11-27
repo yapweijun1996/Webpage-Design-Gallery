@@ -645,6 +645,9 @@ body::before {
 /* Shared by the early page status and the modal update loader; also inlined by the generator. */
 .loader[hidden] { display: none !important; }
 body.is-loading { overflow: hidden; }
+/* Desktop engines with classic scrollbars keep the slot, so loaders and dialog scroll locks never shift layout.
+   Phones use overlay scrollbars, so small screens keep their full width. */
+@media (min-width: 1024px) { :root { scrollbar-gutter: stable; } }
 .loader {
   position: fixed; inset: 0; z-index: var(--z-loader); display: grid; place-items: center;
   overflow: auto; overscroll-behavior: contain; touch-action: none; background: var(--c-scrim);

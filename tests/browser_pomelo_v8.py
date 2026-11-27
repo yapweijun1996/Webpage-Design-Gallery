@@ -352,7 +352,10 @@ def check_page_loaders(browser, base, errors):
             assert page.locator('#main').get_attribute('aria-busy') == 'true'
             assert page.locator('#page-loader [role="status"]').get_attribute('aria-live') == 'polite'
             assert not page.locator('#page-loader').evaluate('node => node.contains(document.activeElement)')
-            assert page.locator('#page-loader').bounding_box() == {'x': 0, 'y': 0, 'width': 320, 'height': 568}
+            # scrollbar-gutter: stable keeps a scrollbar slot, so the loader covers the client area.
+            box = page.locator('#page-loader').bounding_box()
+            assert box['x'] == 0 and box['y'] == 0 and box['height'] == 568, box
+            assert 300 <= box['width'] <= 320, box
             assert page.locator('#page-loader .loader__indicator').evaluate('node => getComputedStyle(node).animationName') == 'none'
             assert page.locator('#page-loader .loader__indicator').is_hidden()
             assert page.locator('#page-loader').evaluate('node => node.getAnimations({subtree: true}).length') == 0
@@ -400,6 +403,98 @@ def check_page_loaders(browser, base, errors):
         context.close()
 
 
+def check_late_page_loader(browser, base, errors):
+    """Pause parsing before the body arrives, then keep readiness pending after it arrives."""
+    context = browser.new_context(viewport={'width': 320, 'height': 568}, service_workers='block')
+    context.add_init_script("""(() => {
+      const schedule = window.setTimeout.bind(window);
+      window.setTimeout = (callback, delay, ...args) => {
+        const timer = schedule(callback, delay, ...args);
+        if (delay === 8000) window.__loaderSafety = () => { clearTimeout(timer); callback(...args); };
+        return timer;
+      };
+    })();""")
+    page = context.new_page()
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    head, tail = [], []
+    html = (DEMO / 'index.html').read_text('utf-8')
+    html = html.replace('</head>', '<script src="late-head.js"></script></head>')
+    html = html.replace('</body>', '<script src="late-tail.js"></script></body>')
+    page.route('**/index.html', lambda route: route.fulfill(content_type='text/html', body=html))
+    page.route('**/late-head.js', lambda route: head.append(route))
+    page.route('**/late-tail.js', lambda route: tail.append(route))
+    try:
+        for cutoff in (False, True):
+            page.goto(base + 'index.html', wait_until='commit')
+            page.wait_for_function('typeof window.__loaderSafety === "function"')
+            page.wait_for_timeout(500)
+            assert head and page.locator('#page-loader').count() == 0
+            if cutoff:
+                page.evaluate('window.__loaderSafety()')
+            head.pop().fulfill(content_type='text/javascript', body='')
+            page.wait_for_function('document.querySelector("#main") !== null')
+            loader = page.locator('#page-loader')
+            if cutoff:
+                assert loader.is_hidden()
+            else:
+                loader.wait_for(state='visible')
+                assert page.locator('body').evaluate('node => node.classList.contains("is-loading")')
+                assert not loader.evaluate('node => node.contains(document.activeElement)')
+            assert tail
+            tail.pop().fulfill(content_type='text/javascript', body='')
+            page.wait_for_load_state('load')
+            assert loader.is_hidden()
+            assert not page.locator('body').evaluate('node => node.classList.contains("is-loading")')
+    finally:
+        context.close()
+
+
+def check_scroll_lock_width(browser, base, errors):
+    """Compare actual content widths for page loading, modal loading and dialogs on desktop.
+
+    The scrollbar slot is reserved from 1024px; phones use overlay scrollbars, and keeping small
+    screens at full width protects the 320/390 home-height limits.
+    """
+    for width in (1440, 1024):
+        context = browser.new_context(viewport={'width': width, 'height': 568}, service_workers='block')
+        page = context.new_page()
+        page.on('pageerror', lambda error: errors.append(str(error)))
+        try:
+            page.goto(base + 'index.html', wait_until='load')
+            assert page.locator('html').evaluate('node => getComputedStyle(node).scrollbarGutter') == 'stable'
+            # Custom scrollbars also exercise reserved desktop space on overlay-scrollbar hosts.
+            if width >= 768:
+                page.add_style_tag(content='::-webkit-scrollbar { width: 16px; }')
+            measure = """() => ['body', '#main', 'h1'].map(selector => {
+              const box = document.querySelector(selector).getBoundingClientRect();
+              return {width: box.width, left: box.left};
+            })"""
+            baseline = page.evaluate(measure)
+            assert baseline[0]['width'] > 0
+            page.evaluate("document.body.classList.add('is-loading'); document.querySelector('#page-loader').hidden = false")
+            assert page.evaluate(measure) == baseline, ('page loader', width)
+            page.evaluate("document.body.classList.remove('is-loading'); document.querySelector('#page-loader').hidden = true")
+            assert page.evaluate(measure) == baseline, ('page loader closed', width)
+            for overlay in ('loader', 'dialog'):
+                page.evaluate("""async overlay => {
+                  const button = document.querySelector('[data-update]');
+                  button.focus();
+                  if (overlay === 'loader') {
+                    const {show} = await import('./assets/js/core/loader.js');
+                    window.__widthOverlay = show({returnFocus: button});
+                  } else {
+                    const {open} = await import('./assets/js/core/dialog.js');
+                    window.__widthOverlay = open();
+                  }
+                }""", overlay)
+                assert page.locator('body').evaluate('node => node.classList.contains("is-locked")')
+                assert page.evaluate(measure) == baseline, (overlay, width)
+                page.evaluate('window.__widthOverlay.close()')
+                assert page.evaluate(measure) == baseline, (overlay + ' closed', width)
+        finally:
+            context.close()
+
+
 def check_release_safety(browser, base, errors):
     """Exercise timeout cancellation, final consent and native no-JS submission."""
     context = browser.new_context(viewport={'width': 390, 'height': 844}, service_workers='block')
@@ -425,10 +520,20 @@ def check_release_safety(browser, base, errors):
     page.on('framenavigated', lambda frame: navigations.append(frame.url) if frame == page.main_frame else None)
     try:
         page.goto(base + 'contact.html', wait_until='load')
+        # Old cached HTML may not contain any page-open loader template.
+        page.evaluate("""() => {
+          window.__markGeometry = node => [node.tagName, [...node.attributes]
+            .filter(attr => attr.name !== 'xmlns').map(attr => [attr.name, attr.value]).sort(),
+            [...node.children].map(window.__markGeometry)];
+          const mark = document.querySelector('#page-loader .loader__mark');
+          window.__expectedMark = window.__markGeometry(mark);
+          mark.remove();
+        }""")
         page.evaluate("async () => { const module = await import('./assets/js/core/update.js'); void module.apply(); }")
         page.wait_for_function('typeof window.__finishUpdate === "function"')
         loader = page.locator('[data-update-loader]')
         loader.wait_for(state='visible')
+        assert loader.locator('.loader__mark').evaluate('node => JSON.stringify(window.__markGeometry(node)) === JSON.stringify(window.__expectedMark)')
         assert loader.locator('[role="alertdialog"]').get_attribute('aria-modal') == 'true'
         assert loader.locator('[role="status"]').get_attribute('aria-live') == 'polite'
         assert loader.evaluate('node => node.contains(document.activeElement)')
@@ -442,7 +547,9 @@ def check_release_safety(browser, base, errors):
             page.evaluate('(theme) => { document.documentElement.dataset.theme = theme; }', theme)
             for width in (320, 390):
                 page.set_viewport_size({'width': width, 'height': 568})
-                assert loader.bounding_box() == {'x': 0, 'y': 0, 'width': width, 'height': 568}
+                box = loader.bounding_box()
+                # scrollbar-gutter: stable may reserve a classic scrollbar slot on desktop engines.
+                assert box['x'] == 0 and box['y'] == 0 and box['height'] == 568 and width - 20 <= box['width'] <= width, box
                 card = loader.locator('.loader__card').bounding_box()
                 assert card['x'] >= 0 and card['x'] + card['width'] <= width, (theme, width, card)
                 assert loader.locator('.loader__card').evaluate('node => getComputedStyle(node).color !== getComputedStyle(node).backgroundColor')
@@ -654,6 +761,8 @@ def main():
             check_toasts(browser, base, errors)
             check_release_recheck(browser, base, errors)
             check_page_loaders(browser, base, errors)
+            check_late_page_loader(browser, base, errors)
+            check_scroll_lock_width(browser, base, errors)
             check_update_loader_branding(browser, base, errors)
             check_release_safety(browser, base, errors)
             check_qa825(browser, base, errors)

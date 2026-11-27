@@ -4,6 +4,38 @@ import {t} from './i18n.js';
 
 let loaderCount = 0;
 
+// Same decorative geometry as pomelo-mark.svg, available even with older cached HTML.
+function fallbackMark() {
+  function node(tag, attrs) {
+    const element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [key, value] of Object.entries(attrs)) element.setAttribute(key, value);
+    return element;
+  }
+  const svg = node('svg', {class: 'loader__mark', width: '64', height: '64',
+    viewBox: '0 0 1024 1024', 'aria-hidden': 'true', focusable: 'false'});
+  const group = node('g', {transform: 'translate(512 505) scale(.985) translate(-469 -500)'});
+  const fruit = node('g', {});
+  const parts = [
+    ["path", {"d": "M 452 159 C 457 136 458 103 454 64 Q 451 42 471 38 Q 493 37 494 59 C 492 102 489 133 500 159 Z", "fill": "var(--c-accent)"}],
+    ["path", {"d": "M 482 104 C 550 40 610 23 676 44 C 742 65 769 112 776 158 C 700 142 655 176 591 154 C 540 137 517 95 482 104 Z", "fill": "var(--c-accent)"}],
+    ["circle", {"cx": "469", "cy": "550", "r": "370", "fill": "var(--c-surface)", "stroke": "var(--c-accent)", "stroke-width": "59"}],
+    ["path", {"d": "M 444.12 521.28 L 291.57 345.16 Q 272.58 323.24 312.37 288.29 A 305 305 0 0 1 394.70 254.19 Q 447.55 250.77 449.62 279.69 L 466.28 512.10 Z", "fill": "var(--c-accent)"}],
+    ["path", {"d": "M 471.72 512.10 L 488.38 279.69 Q 490.45 250.77 543.30 254.19 A 305 305 0 0 1 625.63 288.29 Q 665.42 323.24 646.43 345.16 L 493.88 521.28 Z", "fill": "var(--c-accent)"}],
+    ["path", {"d": "M 497.72 525.12 L 673.84 372.57 Q 695.76 353.58 730.71 393.37 A 305 305 0 0 1 764.81 475.70 Q 768.23 528.55 739.31 530.62 L 506.90 547.28 Z", "fill": "var(--c-accent)"}],
+    ["path", {"d": "M 506.90 552.72 L 739.31 569.38 Q 768.23 571.45 764.81 624.30 A 305 305 0 0 1 730.71 706.63 Q 695.76 746.42 673.84 727.43 L 497.72 574.88 Z", "fill": "var(--c-accent)"}],
+    ["path", {"d": "M 493.88 578.72 L 646.43 754.84 Q 665.42 776.76 625.63 811.71 A 305 305 0 0 1 543.30 845.81 Q 490.45 849.23 488.38 820.31 L 471.72 587.90 Z", "fill": "var(--c-accent)"}],
+    ["path", {"d": "M 466.28 587.90 L 449.62 820.31 Q 447.55 849.23 394.70 845.81 A 305 305 0 0 1 312.37 811.71 Q 272.58 776.76 291.57 754.84 L 444.12 578.72 Z", "fill": "var(--c-accent)"}],
+    ["path", {"d": "M 440.28 574.88 L 264.16 727.43 Q 242.24 746.42 207.29 706.63 A 305 305 0 0 1 173.19 624.30 Q 169.77 571.45 198.69 569.38 L 431.10 552.72 Z", "fill": "var(--c-accent)"}],
+    ["path", {"d": "M 431.10 547.28 L 198.69 530.62 Q 169.77 528.55 173.19 475.70 A 305 305 0 0 1 207.29 393.37 Q 242.24 353.58 264.16 372.57 L 440.28 525.12 Z", "fill": "var(--c-accent)"}],
+    ["circle", {"cx": "469", "cy": "550", "r": "54", "fill": "var(--c-accent)"}],
+    ["circle", {"cx": "469", "cy": "550", "r": "30", "fill": "var(--c-surface)"}]
+  ];
+  for (const [tag, attrs] of parts) fruit.append(node(tag, attrs));
+  group.append(fruit);
+  svg.append(group);
+  return svg;
+}
+
 export function show({title, detail, returnFocus} = {}) {
   window.__pomeloV8PageReady?.();
   const id = `loader-${++loaderCount}`;
@@ -19,7 +51,7 @@ export function show({title, detail, returnFocus} = {}) {
   panel.setAttribute('aria-describedby', id + '-detail');
   const brand = document.createElement('div');
   brand.className = 'loader__brand';
-  const mark = document.querySelector('#page-loader .loader__mark').cloneNode(true);
+  const mark = document.querySelector('#page-loader .loader__mark')?.cloneNode(true) || fallbackMark();
   const tagline = document.createElement('p');
   tagline.className = 'loader__tagline';
   tagline.textContent = t('loader.tagline');
