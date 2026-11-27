@@ -1,4 +1,5 @@
-"""Browser checks for Pomelo STEM V8; also writes the gallery screenshots and thumbnail."""
+"""Browser checks for Pomelo STEM V8; pass --no-capture to keep gallery media unchanged."""
+import argparse
 import functools
 import http.server
 import io
@@ -185,10 +186,12 @@ def check_release_recheck(browser, base, errors):
             assert page.locator('[data-commerce-demo]').get_attribute('data-dirty') == 'true'
             page.locator('[data-update]').click()
             page.locator('.dialog[role="alertdialog"]').wait_for()
+            assert page.locator('[data-update-loader]').count() == 0
             assert page.locator('.dialog__title').inner_text() == title, locale
             assert page.locator('.dialog').evaluate("panel => { const body = document.getElementById(panel.getAttribute('aria-describedby')); return body?.tagName === 'P' && panel.contains(body) && body.textContent.trim().length > 0; }")
             page.keyboard.press('Escape')
             page.locator('.dialog').wait_for(state='detached')
+            assert page.locator('[data-update-loader]').count() == 0
             assert page.locator('[data-update]').get_attribute('data-state') == 'available'
 
         # Restored/autofilled input must trigger consent without an input event or data-dirty.
@@ -234,6 +237,169 @@ def check_release_recheck(browser, base, errors):
         context.close()
 
 
+def assert_loader_brand(loader, tagline):
+    """Check decorative branding, placement, theme contrast and narrow text layout."""
+    mark = loader.locator('svg.loader__mark')
+    assert mark.is_visible()
+    assert mark.get_attribute('aria-hidden') == 'true'
+    assert mark.get_attribute('focusable') == 'false'
+    assert mark.locator('title, desc, [id], [href], [src]').count() == 0
+    text = loader.locator('.loader__tagline')
+    assert text.inner_text() == tagline
+    assert text.is_visible()
+    box = mark.bounding_box()
+    card = loader.locator('.loader__card').bounding_box()
+    assert box['width'] == box['height'] == 64
+    assert abs(box['x'] + box['width'] / 2 - card['x'] - card['width'] / 2) <= 1
+    assert text.bounding_box()['y'] >= box['y'] + box['height']
+    assert text.evaluate('node => node.scrollWidth <= node.clientWidth')
+    assert loader.locator('.loader__card').evaluate('node => node.scrollWidth <= node.clientWidth')
+    assert loader.evaluate("""node => {
+      const luminance = color => {
+        const channels = color.match(/[0-9.]+/g).slice(0, 3).map(v => {
+          const c = Number(v) / 255;
+          return c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
+        });
+        return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+      };
+      const background = luminance(getComputedStyle(node.querySelector('.loader__card')).backgroundColor);
+      const contrast = color => {
+        const foreground = luminance(color);
+        return (Math.max(foreground, background) + .05) / (Math.min(foreground, background) + .05);
+      };
+      return contrast(getComputedStyle(node.querySelector('.loader__mark path')).fill) >= 3 &&
+        contrast(getComputedStyle(node.querySelector('.loader__tagline')).color) >= 4.5;
+    }""")
+
+
+def check_update_loader_branding(browser, base, errors):
+    context = browser.new_context(viewport={'width': 320, 'height': 568}, service_workers='block')
+    page = context.new_page()
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    try:
+        for locale, tagline in {'': 'Growing Smarter Solutions.', 'zh/': '智慧方案，伴你成长。',
+                                'ms/': 'Penyelesaian pintar untuk terus berkembang.'}.items():
+            page.goto(base + locale + 'index.html', wait_until='load')
+            page.evaluate("""async version => {
+              const root = document.querySelector('meta[name=pomelo-root]').content;
+              const {show} = await import(root + 'assets/js/core/loader.js');
+              const {t} = await import(root + 'assets/js/core/i18n.js');
+              window.__brandLoader = show({title: t('loader.updateTitle', {version}), detail: t('loader.updateDetail')});
+            }""", VERSION)
+            loader = page.locator('[data-update-loader]')
+            assert loader.locator('.loader__mark').evaluate('node => node.outerHTML === document.querySelector("#page-loader .loader__mark").outerHTML')
+            for theme in ('light', 'dark'):
+                page.evaluate('theme => { document.documentElement.dataset.theme = theme; }', theme)
+                for motion in ('no-preference', 'reduce'):
+                    page.emulate_media(reduced_motion=motion)
+                    assert_loader_brand(loader, tagline)
+                    indicator = loader.locator('.loader__indicator')
+                    if motion == 'reduce':
+                        assert indicator.is_hidden()
+                        assert loader.evaluate('node => node.getAnimations({subtree: true}).length') == 0
+                    else:
+                        assert indicator.is_visible()
+                        assert indicator.evaluate('node => getComputedStyle(node).animationName') == 'loader-spin'
+            page.evaluate('window.__brandLoader.close()')
+    finally:
+        context.close()
+
+
+def check_page_loaders(browser, base, errors):
+    """Check early critical CSS, delayed readiness, module failure and the no-JS fallback."""
+    copies = {'': 'Loading…', 'zh/': '正在加载…', 'ms/': 'Memuatkan…'}
+    taglines = {'': 'Growing Smarter Solutions.', 'zh/': '智慧方案，伴你成长。',
+                'ms/': 'Penyelesaian pintar untuk terus berkembang.'}
+    context = browser.new_context(viewport={'width': 320, 'height': 568}, reduced_motion='reduce', service_workers='block')
+    page = context.new_page()
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    try:
+        page.add_init_script("""window.__loaderShows = 0;
+          new MutationObserver(records => {
+            for (const record of records) {
+              if (record.target.id === 'page-loader' && record.attributeName === 'hidden' && !record.target.hidden) window.__loaderShows += 1;
+            }
+          }).observe(document, {subtree: true, attributes: true, attributeFilter: ['hidden']});
+          const schedule = window.setTimeout.bind(window);
+          window.setTimeout = (fn, delay, ...args) => {
+            const timer = schedule(fn, delay, ...args);
+            if (delay === 8000) window.__loaderSafety = () => { clearTimeout(timer); fn(...args); };
+            return timer;
+          };
+        """)
+        page.goto(base + 'index.html', wait_until='load')
+        assert page.evaluate('window.__loaderShows') == 0
+        assert page.locator('#page-loader').is_hidden()
+
+        # Hold parsing at the end of the body, so neither modules nor DOMContentLoaded can mark it ready.
+        pending = []
+        styles = []
+        page.route('**/loader-test.js', lambda route: pending.append(route))
+        page.route('**/site.bundle.css*', lambda route: styles.append(route))
+
+        def delay_document(route):
+            locale = next((locale for locale in copies if locale and f'/{locale}' in route.request.url), '')
+            html = (DEMO / locale / 'index.html').read_text('utf-8')
+            route.fulfill(status=200, content_type='text/html', body=html.replace('</body>', '<script src="loader-test.js"></script></body>'))
+
+        page.route('**/index.html', delay_document)
+        for locale, copy in copies.items():
+            pending.clear()
+            styles.clear()
+            page.goto(base + locale + 'index.html', wait_until='commit')
+            page.locator('#page-loader').wait_for(state='visible')
+            assert page.locator('#page-loader .loader__title').inner_text() == copy
+            assert page.locator('#main').get_attribute('aria-busy') == 'true'
+            assert page.locator('#page-loader [role="status"]').get_attribute('aria-live') == 'polite'
+            assert not page.locator('#page-loader').evaluate('node => node.contains(document.activeElement)')
+            assert page.locator('#page-loader').bounding_box() == {'x': 0, 'y': 0, 'width': 320, 'height': 568}
+            assert page.locator('#page-loader .loader__indicator').evaluate('node => getComputedStyle(node).animationName') == 'none'
+            assert page.locator('#page-loader .loader__indicator').is_hidden()
+            assert page.locator('#page-loader').evaluate('node => node.getAnimations({subtree: true}).length') == 0
+            for theme in ('light', 'dark'):
+                page.evaluate('(theme) => { document.documentElement.dataset.theme = theme; }', theme)
+                assert page.locator('#page-loader .loader__card').evaluate('node => getComputedStyle(node).backgroundColor !== "rgba(0, 0, 0, 0)"')
+                assert_loader_brand(page.locator('#page-loader'), taglines[locale])
+            assert pending and styles
+            if locale == 'ms/':
+                page.evaluate('window.__loaderSafety()')
+            elif locale == 'zh/':
+                page.evaluate("window.dispatchEvent(new PageTransitionEvent('pageshow', {persisted: true}))")
+            else:
+                for route in styles:
+                    route.continue_()
+                styles.clear()
+                pending[0].fulfill(status=200, content_type='text/javascript', body='')
+                pending.clear()
+            page.locator('#page-loader').wait_for(state='hidden')
+            assert page.locator('#main').get_attribute('aria-busy') is None
+            assert not page.locator('body').evaluate('node => node.classList.contains("is-loading")')
+            for route in styles:
+                route.continue_()
+            for route in pending:
+                route.fulfill(status=200, content_type='text/javascript', body='')
+            page.wait_for_load_state('load')
+            assert page.locator('#page-loader').is_hidden()
+        page.unroute('**/index.html')
+        page.unroute('**/loader-test.js')
+        page.unroute('**/site.bundle.css*')
+        page.route('**/assets/js/main.js*', lambda route: route.abort())
+        page.goto(base + 'index.html', wait_until='load')
+        assert page.locator('#page-loader').is_hidden()
+        assert page.locator('h1').is_visible()
+    finally:
+        context.close()
+    context = browser.new_context(java_script_enabled=False, viewport={'width': 320, 'height': 568})
+    try:
+        page = context.new_page()
+        page.goto(base + 'index.html', wait_until='load')
+        assert page.locator('#page-loader').is_hidden()
+        assert page.locator('h1').is_visible()
+        assert page.locator('#main').get_attribute('aria-busy') is None
+    finally:
+        context.close()
+
+
 def check_release_safety(browser, base, errors):
     """Exercise timeout cancellation, final consent and native no-JS submission."""
     context = browser.new_context(viewport={'width': 390, 'height': 844}, service_workers='block')
@@ -261,6 +427,28 @@ def check_release_safety(browser, base, errors):
         page.goto(base + 'contact.html', wait_until='load')
         page.evaluate("async () => { const module = await import('./assets/js/core/update.js'); void module.apply(); }")
         page.wait_for_function('typeof window.__finishUpdate === "function"')
+        loader = page.locator('[data-update-loader]')
+        loader.wait_for(state='visible')
+        assert loader.locator('[role="alertdialog"]').get_attribute('aria-modal') == 'true'
+        assert loader.locator('[role="status"]').get_attribute('aria-live') == 'polite'
+        assert loader.evaluate('node => node.contains(document.activeElement)')
+        for key in ('Tab', 'Shift+Tab', 'Escape'):
+            page.keyboard.press(key)
+            assert loader.evaluate('node => node.contains(document.activeElement)')
+        assert page.locator('#main').evaluate('node => node.inert')
+        assert page.locator('[data-toast-region]').evaluate('node => node.inert')
+        assert page.evaluate("document.elementFromPoint(1, 1).closest('[data-update-loader]') !== null")
+        for theme in ('light', 'dark'):
+            page.evaluate('(theme) => { document.documentElement.dataset.theme = theme; }', theme)
+            for width in (320, 390):
+                page.set_viewport_size({'width': width, 'height': 568})
+                assert loader.bounding_box() == {'x': 0, 'y': 0, 'width': width, 'height': 568}
+                card = loader.locator('.loader__card').bounding_box()
+                assert card['x'] >= 0 and card['x'] + card['width'] <= width, (theme, width, card)
+                assert loader.locator('.loader__card').evaluate('node => getComputedStyle(node).color !== getComputedStyle(node).backgroundColor')
+                assert loader.locator('.loader__card').evaluate("node => { const p = document.getElementById(node.getAttribute('aria-describedby')); return p && node.contains(p) && p.textContent.length > 0; }")
+        page.emulate_media(reduced_motion='reduce')
+        assert loader.locator('.loader__indicator').evaluate('node => getComputedStyle(node).animationName') == 'none'
         page.evaluate('window.__finishUpdate()')
         page.wait_for_function('window.__skipWaiting === true')
         before = len(navigations)
@@ -268,23 +456,29 @@ def check_release_safety(browser, base, errors):
         page.wait_for_timeout(150)
         assert page.locator('[data-update]').get_attribute('data-state') == 'error'
         assert page.locator('[data-update]').is_enabled()
+        assert loader.count() == 0
+        assert page.locator('[data-update]').evaluate('node => document.activeElement === node')
+        assert not page.locator('#main').evaluate('node => node.inert')
         assert len(navigations) == before, navigations
 
         page.goto(base + 'contact.html', wait_until='load')
         page.evaluate("async () => { const module = await import('./assets/js/core/update.js'); void module.apply(); }")
         page.wait_for_function('typeof window.__finishUpdate === "function"')
-        page.locator('#f-name').fill('Keep this draft')
+        # Simulate restored input while the modal correctly prevents physical editing.
+        page.locator('#f-name').evaluate("node => { node.value = 'Keep this draft'; node.dispatchEvent(new Event('input', {bubbles: true})); }")
         page.evaluate('window.__finishUpdate()')
         page.wait_for_function('window.__skipWaiting === true')
         before = len(navigations)
         page.evaluate("window.__updateSW.dispatchEvent(new Event('controllerchange')); window.__updateSW.dispatchEvent(new Event('controllerchange'))")
         page.locator('.dialog[role="alertdialog"]').wait_for()
         assert page.locator('.dialog').count() == 1
+        assert loader.count() == 0
         page.keyboard.press('Escape')
         page.locator('.dialog').wait_for(state='detached')
         assert page.locator('#f-name').input_value() == 'Keep this draft'
         assert page.locator('[data-update]').get_attribute('data-state') == 'available'
         assert page.locator('[data-update]').is_enabled()
+        assert page.locator('[data-update]').evaluate('node => document.activeElement === node')
         page.evaluate("window.__updateSW.dispatchEvent(new Event('controllerchange'))")
         page.wait_for_timeout(100)
         assert len(navigations) == before
@@ -292,6 +486,7 @@ def check_release_safety(browser, base, errors):
         # Consent can be retried, and even duplicate controller events reload only once.
         page.evaluate('window.__finishUpdate = null')
         page.locator('[data-update]').click()
+        assert loader.count() == 0
         page.locator('.dialog__actions button').last.click()
         page.wait_for_function("document.querySelector('[data-update]').dataset.state === 'applying'")
         page.wait_for_function('typeof window.__finishUpdate === "function"')
@@ -302,6 +497,7 @@ def check_release_safety(browser, base, errors):
         page.wait_for_function('!window.__finishUpdate')
         page.wait_for_timeout(100)
         assert len(navigations) == before + 1, navigations
+        assert page.locator('[data-update-loader]').count() == 0
 
         page.goto(base + 'commerce.html', wait_until='load')
         page.locator('#prep-1').check()
@@ -331,6 +527,10 @@ def check_release_safety(browser, base, errors):
             url = base + locale + 'contact.html'
             page.goto(url, wait_until='load')
             assert page.locator('form button[type="submit"]').is_disabled()
+            note = page.locator('[data-form-fallback]')
+            assert note.is_visible()
+            assert note.locator('a').get_attribute('href') == 'https://wa.me/601139023123'
+            assert page.locator('form button[type="submit"]').evaluate("button => getComputedStyle(button).cursor") == 'not-allowed'
             page.locator('#f-name').fill('Private name')
             page.locator('#f-message').fill('Private message')
             page.locator('#f-name').press('Enter')
@@ -345,7 +545,104 @@ def check_release_safety(browser, base, errors):
         context.close()
 
 
+def check_qa825(browser, base, errors):
+    """Cover reversible drafts, nested dialogs, localized statuses and honest prep completion."""
+    context = browser.new_context(viewport={'width': 390, 'height': 844}, service_workers='block')
+    page = context.new_page()
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    try:
+        for locale in ('', 'zh/', 'ms/'):
+            strings = json.loads((DEMO / 'i18n' / (locale.strip('/') or 'en')).with_suffix('.json').read_text('utf-8'))
+            page.goto(base + locale + 'contact.html', wait_until='load')
+            page.wait_for_function("!document.querySelector('form button[type=submit]').disabled")
+            assert page.locator('[data-form-fallback]').is_hidden()
+            for field in ('#f-name', '#f-business', '#f-message'):
+                page.locator(field).fill('Draft')
+                assert page.evaluate("async () => { const root = new URL(document.querySelector('meta[name=pomelo-root]').content, document.baseURI); return (await import(new URL('assets/js/core/unsaved.js', root))).hasUnsavedInput(); }")
+                page.locator(field).fill('')
+                assert not page.evaluate("async () => { const root = new URL(document.querySelector('meta[name=pomelo-root]').content, document.baseURI); return (await import(new URL('assets/js/core/unsaved.js', root))).hasUnsavedInput(); }")
+            page.goto(base + locale + 'commerce.html', wait_until='load')
+            page.wait_for_function("document.querySelector('[data-order-total]').textContent.length > 0")
+            statuses = page.locator('[data-step-status]')
+            assert statuses.all_text_contents() == [strings['pickup.status.pending']] * 3
+            for index in range(1, 4):
+                page.locator(f'#prep-{index}').check()
+            assert page.locator('[data-step].is-done').count() == 0
+            assert page.locator('.toast__title').last.inner_text() == strings['toast.studioDone.detail']
+            assert page.locator('.toast__detail').last.is_hidden()
+            for index in range(1, 4):
+                page.locator(f'#prep-{index}').uncheck()
+            assert not page.evaluate("async () => { const root = new URL(document.querySelector('meta[name=pomelo-root]').content, document.baseURI); return (await import(new URL('assets/js/core/unsaved.js', root))).hasUnsavedInput(); }")
+            page.locator('[data-add="mug"]').click()
+            assert statuses.all_text_contents() == [strings['pickup.status.done'], strings['pickup.status.pending'], strings['pickup.status.pending']]
+            for index in range(1, 4):
+                page.locator(f'#prep-{index}').check()
+            assert statuses.all_text_contents() == [strings['pickup.status.done'], strings['pickup.status.done'], strings['pickup.status.pending']]
+            assert page.locator('.toast__title').last.inner_text() == strings['toast.studioDone.title']
+            page.locator('#prep-1').uncheck()
+            assert statuses.nth(1).text_content() == strings['pickup.status.pending']
+
+        page.goto(base + 'contact.html', wait_until='load')
+        page.locator('[data-menu-open]').click()
+        page.evaluate("""async () => {
+          const {confirm} = await import('./assets/js/core/dialog.js');
+          void confirm({title: 'Update confirmation', body: 'Reload this demo?'});
+        }""")
+        assert page.locator('.dialog').count() == 2
+        assert page.locator('.dialog-backdrop').first.evaluate('node => node.inert')
+        page.keyboard.press('Escape')
+        assert page.locator('.dialog').count() == 1
+        assert page.locator('body').evaluate("node => node.classList.contains('is-locked')")
+        assert page.locator('#main').evaluate('node => node.inert')
+        assert not page.locator('.dialog-backdrop').evaluate('node => node.inert')
+        assert page.evaluate("document.querySelector('.dialog').contains(document.activeElement)")
+        page.keyboard.press('Escape')
+        assert not page.locator('body').evaluate("node => node.classList.contains('is-locked')")
+        assert not page.locator('#main').evaluate('node => node.inert')
+
+        # A failed module must leave the server-rendered note available in every locale.
+        page.route('**/assets/js/main.js', lambda route: route.abort())
+        for locale in ('', 'zh/', 'ms/'):
+            page.goto(base + locale + 'contact.html', wait_until='load')
+            assert page.locator('form button[type="submit"]').is_disabled()
+            assert page.locator('[data-form-fallback]').is_visible()
+    finally:
+        context.close()
+
+    # Exercise both listeners in a real page. Exact reload-call counting is covered in Node.
+    context = browser.new_context(viewport={'width': 390, 'height': 844}, service_workers='block')
+    context.add_init_script("""(() => {
+      const sw = new EventTarget();
+      window.__controllerBuild = sessionStorage.getItem('qa825-controller-build') || 'old';
+      sw.controller = {postMessage(message, ports) { ports[0].postMessage({build: window.__controllerBuild}); }};
+      sw.register = async () => ({});
+      sw.getRegistration = async () => ({update: async () => {}, waiting: {postMessage() {
+        window.__waitingRequests = (window.__waitingRequests || 0) + 1;
+      }}});
+      Object.defineProperty(navigator, 'serviceWorker', {value: sw});
+      window.__sharedSW = sw;
+    })();""")
+    page = context.new_page()
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    navigations = []
+    page.on('framenavigated', lambda frame: navigations.append(frame.url) if frame == page.main_frame else None)
+    try:
+        page.goto(base + 'index.html', wait_until='load')
+        page.wait_for_function('window.__waitingRequests === 1')
+        page.evaluate("async () => { await (await import('./assets/js/core/update.js')).apply(); }")
+        page.wait_for_function('window.__waitingRequests === 2')
+        page.evaluate("window.__controllerBuild = document.querySelector('meta[name=pomelo-build]').content; sessionStorage.setItem('qa825-controller-build', window.__controllerBuild); window.__sharedSW.dispatchEvent(new Event('controllerchange'))")
+        page.wait_for_function('!window.__waitingRequests')
+        page.wait_for_timeout(150)
+        assert len(navigations) == 2, navigations
+    finally:
+        context.close()
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--no-capture', action='store_true', help='Run checks without rewriting gallery media')
+    args = parser.parse_args()
     handler = functools.partial(Quiet, directory=str(ROOT))
     server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -356,7 +653,10 @@ def main():
             browser = launch(p)
             check_toasts(browser, base, errors)
             check_release_recheck(browser, base, errors)
+            check_page_loaders(browser, base, errors)
+            check_update_loader_branding(browser, base, errors)
             check_release_safety(browser, base, errors)
+            check_qa825(browser, base, errors)
             for width, height in ((1440, 900), (768, 1024), (390, 844), (375, 812), (320, 568)):
                 context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce', service_workers='block')
                 page = context.new_page()
@@ -369,6 +669,8 @@ def main():
                         assert page.locator('h1').count() == 1, (width, locale, name)
                         assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, name)
                         assert page.locator('.update-button__chip').inner_text() == 'v' + VERSION
+                        assert page.locator('#page-loader').is_hidden()
+                        assert page.locator('[data-update-loader]').count() == 0
                         if name == 'index' and width in HOME_HEIGHT_LIMITS:
                             home_height = page.evaluate('document.documentElement.scrollHeight')
                             assert home_height <= HOME_HEIGHT_LIMITS[width], (width, locale, home_height, HOME_HEIGHT_LIMITS[width])
@@ -378,7 +680,7 @@ def main():
                                     continue
                                 box = control.bounding_box()
                                 assert box['width'] >= 44 and box['height'] >= 44, (width, locale, name, control.evaluate('el => el.outerHTML'), box)
-                if width in (1440, 768, 390):
+                if not args.no_capture and width in (1440, 768, 390):
                     page.goto(base + 'index.html', wait_until='load')
                     page.wait_for_function("[...document.images].filter(i => i.loading !== 'lazy').every(i => i.complete)")
                     page.screenshot(path=str(DEMO / 'screenshots' / f'{width}.png'))

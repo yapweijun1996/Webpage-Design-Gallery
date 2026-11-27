@@ -8,6 +8,7 @@ import unittest
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urlsplit
+from xml.etree import ElementTree
 
 ROOT = Path(__file__).resolve().parents[1]
 DEMO = ROOT / "demos/corporate/pomelo-stem/v8"
@@ -108,6 +109,88 @@ class PomeloV8Test(unittest.TestCase):
                 self.assertNotIn("aria-live", regions[0])
                 self.assertIn("hidden", regions[0])
 
+    def test_loader_is_progressive_localized_and_inlined_without_blocking_requests(self):
+        boot = (DEMO / "assets/js/core/loader-boot.js").read_text("utf-8")
+        css = (DEMO / "assets/css/components/loader.css").read_text("utf-8")
+        self.assertIn("}, 400)", boot)
+        self.assertIn("setTimeout(ready, 8000)", boot)
+        self.assertIn("'pageshow', ready", boot)
+        self.assertIn("'DOMContentLoaded', ready", boot)
+        self.assertIn("position: fixed; inset: 0; z-index: var(--z-loader)", css)
+        for side in ("top", "right", "bottom", "left"):
+            self.assertIn(f"env(safe-area-inset-{side}", css)
+        self.assertRegex(css, r"prefers-reduced-motion: reduce\)\s*\{\s*\.loader__indicator\s*\{\s*animation: none;\s*display: none;")
+        self.assertNotRegex(css, r"#[\da-fA-F]{3,8}\b|rgba?\(")
+        tables = pomelo.dictionaries()
+        expected = {
+            "en": ("Loading…", "Updating to v{version}", "This page will reload in a moment.", "Growing Smarter Solutions."),
+            "zh": ("正在加载…", "正在更新到 v{version}", "页面马上会重新加载。", "智慧方案，伴你成长。"),
+            "ms": ("Memuatkan…", "Mengemas kini ke v{version}", "Halaman ini akan dimuat semula sebentar lagi.", "Penyelesaian pintar untuk terus berkembang."),
+        }
+        keys = ("loader.pageTitle", "loader.updateTitle", "loader.updateDetail", "loader.tagline")
+        for lang, values in expected.items():
+            for key, value in zip(keys, values):
+                self.assertEqual(tables[lang][key], value)
+        for name, source in pomelo.outputs().items():
+            if not name.endswith(".html"):
+                continue
+            with self.subTest(page=name):
+                elements = pomelo.PageStructure(source).elements
+                loader = [attrs for _, attrs, _ in elements if attrs.get("id") == "page-loader"]
+                self.assertEqual(len(loader), 1)
+                self.assertIn("hidden", loader[0])
+                statuses = [attrs for _, attrs, _ in elements if attrs.get("aria-labelledby") == "page-loader-title"]
+                self.assertEqual(statuses[0]["role"], "status")
+                self.assertEqual(statuses[0]["aria-live"], "polite")
+                self.assertNotIn("tabindex", statuses[0])
+                main = next(attrs for tag, attrs, _ in elements if tag == "main")
+                self.assertNotIn("hidden", main)
+                self.assertNotIn("inert", main)
+                self.assertNotIn("aria-busy", main)
+                head = source.split("</head>")[0]
+                self.assertIn(f"<script data-loader-boot>{boot}</script>", head)
+                critical = re.search(r"<style data-loader-critical>(.*?)</style>", head, re.S)[1]
+                self.assertLess(len(critical.encode()), 6000)
+                self.assertIn(".loader[hidden]", critical)
+                self.assertIn("animation: none", critical)
+                self.assertIn('--c-surface:', critical)
+                self.assertIn(':root[data-theme="dark"]', critical)
+                self.assertNotIn("loader.css", head)
+                locale = name.split("/")[0] if name.startswith(("zh/", "ms/")) else "en"
+                self.assertIn(f'class="loader__title">{expected[locale][0]}</p>', source)
+                self.assertIn(f'class="loader__tagline">{expected[locale][3]}</p>', source)
+                runtime = json.loads(re.search(r'id="i18n-runtime">(.*?)</script>', source, re.S)[1])
+                self.assertTrue(all(key in runtime for key in keys))
+                self.assertEqual(runtime["loader.tagline"], expected[locale][3])
+        self.assertIn(css, pomelo.outputs()["assets/css/site.bundle.css"])
+        self.assertIn('"assets/js/core/loader.js"', pomelo.outputs()["sw.js"])
+        self.assertNotIn("loader", pomelo.SW_GUARD)
+
+    def test_loader_mark_reuses_header_svg_geometry_with_decorative_theme_colors(self):
+        header = (DEMO / "src/partials/header.html").read_text("utf-8")
+        self.assertIn('src="{{root}}assets/img/pomelo-mark.svg"', header)
+        original = ElementTree.parse(DEMO / "assets/img/pomelo-mark.svg").getroot()
+
+        def geometry(svg):
+            return [(node.tag, {key: value for key, value in node.attrib.items() if key not in ("id", "fill", "stroke")})
+                    for node in svg.iter() if node is not svg and node.tag.rsplit("}", 1)[-1] not in ("title", "desc")]
+
+        for name, source in pomelo.outputs().items():
+            if not name.endswith(".html"):
+                continue
+            with self.subTest(page=name):
+                markup = re.search(r'<svg class="loader__mark".*?</svg>', source, re.S)[0]
+                self.assertLess(len(markup.encode()), 4096)
+                self.assertNotRegex(markup, r'\b(?:src|href|id|role|aria-labelledby)="|#[\da-fA-F]{3,8}\b|<(?:title|desc)\b')
+                mark = ElementTree.fromstring(markup)
+                self.assertEqual(mark.get("aria-hidden"), "true")
+                self.assertEqual(mark.get("focusable"), "false")
+                self.assertEqual((mark.get("width"), mark.get("height")), ("64", "64"))
+                self.assertEqual(mark.get("viewBox"), original.get("viewBox"))
+                self.assertEqual(geometry(mark), geometry(original))
+                self.assertEqual({value for node in mark.iter() for key, value in node.attrib.items() if key in ("fill", "stroke")},
+                                 {"var(--c-accent)", "var(--c-surface)"})
+
     def test_every_toast_detail_has_a_conservative_character_budget(self):
         budgets = {"en": 48, "ms": 48, "zh": 24}
         for lang, table in pomelo.dictionaries().items():
@@ -135,7 +218,7 @@ class PomeloV8Test(unittest.TestCase):
                     titles = re.findall(r"'toast\.([\w]+)\.title'", call)
                     details = re.findall(r"'toast\.([\w]+)\.detail'", call)
                     self.assertTrue(titles)
-                    self.assertEqual(titles, details)
+                    self.assertEqual(set(titles), set(details))
                     self.assertRegex(call, r"\b(?:titleKey|messageKey):")
                     self.assertIn("detailKey:", call)
                     used.update(titles)
@@ -144,7 +227,7 @@ class PomeloV8Test(unittest.TestCase):
                             for part in ("title", "detail"):
                                 key = f"toast.{name}.{part}"
                                 self.assertTrue(table.get(key), (path.name, lang, key))
-        self.assertEqual(calls, 11)
+        self.assertEqual(calls, 12)
         self.assertEqual(used, expected)
         for name, source in pomelo.outputs().items():
             if name.endswith(".html"):
@@ -190,7 +273,7 @@ class PomeloV8Test(unittest.TestCase):
         self.assertIn("field.value !== field.defaultValue", guard)
         self.assertIn("field.checked !== field.defaultChecked", guard)
         self.assertIn("option.defaultSelected", guard)
-        self.assertRegex(guard, r"if \(hasUnsavedInput\(\)\) return;\s*reloaded = true;\s*location.reload\(\);")
+        self.assertRegex(guard, r"if \(hasUnsavedInput\(\)\) return;\s*if \(window\.__pomeloV8Reloading\) return;\s*window\.__pomeloV8Reloading = true;\s*reloaded = true;\s*location.reload\(\);")
         self.assertIn("key = 'pomelo-v8-heal'", guard)
         self.assertIn("sessionStorage.getItem(key) === want", guard)
         self.assertIn("sessionStorage.setItem(key, want)", guard)
@@ -239,11 +322,11 @@ for (const version of ['8.2.1', '8.1.99', '7.99.99']) {
                                 text=True, capture_output=True, timeout=15, cwd=ROOT)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_contact_and_commerce_mark_unsaved_input(self):
+    def test_control_defaults_track_reversible_changes_without_sticky_markers(self):
         contact = (DEMO / "assets/js/components/contact-form.js").read_text("utf-8")
         commerce = (DEMO / "assets/js/components/commerce-demo.js").read_text("utf-8")
-        self.assertRegex(contact, r"form.addEventListener\('input', .*?\{\s*form.dataset.dirty = 'true';")
-        self.assertRegex(commerce, r"studio.addEventListener\('input',[\s\S]*?studio.dataset.dirty = 'true';")
+        self.assertNotIn("form.dataset.dirty", contact)
+        self.assertNotIn("studio.dataset.dirty", commerce)
         self.assertIn("root.dataset.dirty = 'true';", commerce)
 
     @unittest.skipUnless(shutil.which("node"), "Node.js is required for the release safety contracts")
@@ -253,16 +336,46 @@ for (const version of ['8.2.1', '8.1.99', '7.99.99']) {
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_contact_submit_requires_javascript_and_uses_duration_token(self):
-        for locale in pomelo.LOCALES.values():
+        for lang, locale in pomelo.LOCALES.items():
             page = DEMO / locale["dir"] / "contact.html"
-            buttons = [attrs for tag, attrs, _ in pomelo.PageStructure(page.read_text("utf-8")).elements
+            source = page.read_text("utf-8")
+            elements = pomelo.PageStructure(source).elements
+            buttons = [attrs for tag, attrs, _ in elements
                        if tag == "button" and attrs.get("type") == "submit"]
             self.assertEqual(len(buttons), 1)
             self.assertIn("disabled", buttons[0])
+            notes = [attrs for _, attrs, _ in elements if "data-form-fallback" in attrs]
+            self.assertEqual(len(notes), 1)
+            self.assertNotIn("hidden", notes[0])
+            note = re.search(r'<p[^>]*data-form-fallback[^>]*>(.*?)</p>', source, re.S)[1]
+            self.assertIn(pomelo.dictionaries()[lang]["form.needsJs"], note)
+            self.assertIn('href="https://wa.me/601139023123"', note)
+            self.assertIn(pomelo.dictionaries()[lang]["contact.whatsapp"], note)
+            self.assertIn('rel="noopener"', note)
         source = (DEMO / "assets/js/components/contact-form.js").read_text("utf-8")
         self.assertIn("form.querySelector('[type=\"submit\"]').disabled = false;", source)
         self.assertIn("duration: toastDuration('action')", source)
         self.assertNotIn("6000", source)
+        self.assertIn("form.querySelector('[data-form-fallback]').hidden = true;", source)
+
+    def test_pickup_status_is_localized_in_markup_and_runtime(self):
+        for lang, locale in pomelo.LOCALES.items():
+            source = (DEMO / locale["dir"] / "commerce.html").read_text("utf-8")
+            statuses = re.findall(r'<span class="visually-hidden" data-step-status>(.*?)</span>', source)
+            self.assertEqual(statuses, [pomelo.dictionaries()[lang]["pickup.status.pending"]] * 3)
+            runtime = json.loads(re.search(r'<script type="application/json" id="i18n-runtime">(.*?)</script>', source, re.S)[1])
+            for state in ("pending", "done"):
+                self.assertEqual(runtime[f"pickup.status.{state}"], pomelo.dictionaries()[lang][f"pickup.status.{state}"])
+
+    def test_disabled_primary_buttons_use_legible_tokens_without_hover_effects(self):
+        css = (DEMO / "assets/css/components/button.css").read_text("utf-8")
+        disabled = re.search(r'\.button--primary:disabled\s*\{(.*?)\}', css, re.S)[1]
+        self.assertIn("background: var(--c-surface-sunken)", disabled)
+        self.assertIn("color: var(--c-text-muted)", disabled)
+        self.assertIn("cursor: not-allowed", disabled)
+        self.assertIn("transform: none", disabled)
+        self.assertIn(".button--primary:not(:disabled):hover", css)
+        self.assertNotRegex(disabled, r"#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\(")
 
     def test_offline_images_keep_small_precache_and_runtime_fallback(self):
         outputs = pomelo.outputs()
@@ -308,6 +421,7 @@ for (const version of ['8.2.1', '8.1.99', '7.99.99']) {
             else:
                 self.assertGreater(background, 0.7)
             pairs = [("toast-focus", "toast-bg", 3), ("focus", "surface", 3),
+                     ("text-muted", "surface-sunken", 4.5),
                      ("toast-text", "toast-bg", 4.5), ("toast-detail", "toast-bg", 4.5), ("toast-action-text", "toast-action-bg", 4.5),
                      ("toast-close-text", "toast-close-bg", 4.5), ("toast-close-text", "toast-close-hover", 4.5)]
             pairs += [(f"toast-{kind}-icon", f"toast-{kind}-bg", 3) for kind in ("info", "success", "warning", "error")]

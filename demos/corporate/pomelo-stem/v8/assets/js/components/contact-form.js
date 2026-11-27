@@ -1,11 +1,10 @@
-// Contact form: validates, marks itself dirty, and never sends (demo).
+// Contact form: validates and never sends (demo). Native defaults track unsaved input.
 import {toast, toastDuration} from '../core/toast.js';
 
 export function init() {
   const form = document.querySelector('[data-contact-form]');
   if (form) {
     form.addEventListener('input', (event) => {
-      form.dataset.dirty = 'true';
       const field = event.target;
       if (field.required && field.value.trim()) {
         field.removeAttribute('aria-invalid');
@@ -28,6 +27,7 @@ export function init() {
       toast({type: 'info', messageKey: 'toast.formNotSent.title', detailKey: 'toast.formNotSent.detail', duration: toastDuration('action')});
     });
     form.querySelector('[type="submit"]').disabled = false;
+    form.querySelector('[data-form-fallback]').hidden = true;
   }
   const copy = document.querySelector('[data-copy]');
   if (copy) {

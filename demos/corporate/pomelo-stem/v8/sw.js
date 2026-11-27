@@ -1,6 +1,6 @@
 /* Pomelo STEM V8 service worker. Generated from src/sw.template.js; do not edit sw.js. */
-const BUILD = "20261127.2";
-const VERSION = "8.2.4";
+const BUILD = "20261127.3";
+const VERSION = "8.2.5";
 const PREFIX = 'pomelo-v8-';
 const CACHE = PREFIX + BUILD;
 const PRECACHE = [
@@ -32,6 +32,8 @@ const PRECACHE = [
   "assets/js/components/tabs.js",
   "assets/js/core/dialog.js",
   "assets/js/core/i18n.js",
+  "assets/js/core/loader-boot.js",
+  "assets/js/core/loader.js",
   "assets/js/core/sw-register.js",
   "assets/js/core/theme.js",
   "assets/js/core/toast.js",

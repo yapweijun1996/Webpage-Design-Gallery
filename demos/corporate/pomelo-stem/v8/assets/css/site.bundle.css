@@ -420,6 +420,10 @@ body.is-locked .back-to-top { opacity: 0; transform: translateY(var(--space-3));
 }
 .button:active { transform: scale(0.98); }
 .button--primary { background: var(--c-accent); color: var(--c-on-accent); }
+.button--primary:disabled {
+  background: var(--c-surface-sunken); color: var(--c-text-muted); border-color: var(--c-border-control);
+  cursor: not-allowed; box-shadow: none; transform: none;
+}
 .button--secondary { background: var(--c-surface); color: var(--c-accent); border-color: var(--c-accent); }
 .button--ghost { background: transparent; color: var(--c-accent); border-color: var(--c-border-subtle); }
 .button--small { min-height: var(--size-tap); padding: var(--space-2) var(--space-4); font-size: var(--size-text-sm); }
@@ -431,7 +435,7 @@ body.is-locked .back-to-top { opacity: 0; transform: translateY(var(--space-3));
   .cta-pair .button { width: 100%; }
 }
 @media (hover: hover) and (pointer: fine) {
-  .button--primary:hover { background: var(--c-accent-strong); box-shadow: var(--shadow-md); transform: translateY(var(--size-lift)); }
+  .button--primary:not(:disabled):hover { background: var(--c-accent-strong); box-shadow: var(--shadow-md); transform: translateY(var(--size-lift)); }
   .button--secondary:hover, .button--ghost:hover { background: var(--c-accent-soft); }
   .text-link:hover .icon { transform: translateX(var(--space-1)); }
 }
@@ -636,6 +640,35 @@ body::before {
 @media (prefers-reduced-motion: reduce) {
   .lang-menu__list { transition: none; transform: none; }
 }
+
+/* components/loader.css */
+/* Shared by the early page status and the modal update loader; also inlined by the generator. */
+.loader[hidden] { display: none !important; }
+body.is-loading { overflow: hidden; }
+.loader {
+  position: fixed; inset: 0; z-index: var(--z-loader); display: grid; place-items: center;
+  overflow: auto; overscroll-behavior: contain; touch-action: none; background: var(--c-scrim);
+  padding: max(var(--space-4), env(safe-area-inset-top, 0px)) max(var(--space-4), env(safe-area-inset-right, 0px)) max(var(--space-4), env(safe-area-inset-bottom, 0px)) max(var(--space-4), env(safe-area-inset-left, 0px));
+}
+.loader__card {
+  box-sizing: border-box; display: grid; justify-items: center; gap: var(--space-4);
+  width: 100%; max-width: var(--size-dialog); min-width: 0; padding: var(--space-5);
+  border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg); background: var(--c-surface); color: var(--c-text);
+  font-family: var(--font-body); line-height: var(--lineheight-body); text-align: center; overflow-wrap: anywhere;
+}
+.loader__brand { display: grid; justify-items: center; gap: var(--space-2); min-width: 0; max-width: 100%; }
+.loader__mark { display: block; width: var(--space-8); height: var(--space-8); max-width: 100%; }
+.loader__tagline { margin: 0; font-size: var(--size-text-sm); color: var(--c-text-muted); }
+.loader__title { margin: 0; font-size: var(--size-text-lg); font-weight: var(--weight-semibold); }
+.loader__detail { margin: var(--space-2) 0 0; font-size: var(--size-text-sm); color: var(--c-text-muted); }
+.loader__indicator {
+  box-sizing: border-box; width: var(--size-icon-xl); height: var(--size-icon-xl);
+  border: var(--size-focus) solid var(--c-border-subtle); border-top-color: var(--c-accent); border-radius: var(--radius-pill);
+  animation: loader-spin var(--motion-spin) linear infinite;
+}
+@keyframes loader-spin { to { transform: rotate(1turn); } }
+@media (prefers-reduced-motion: reduce) { .loader__indicator { animation: none; display: none; } }
 
 /* components/pill.css */
 /* Pills, the demo note label, order card and mini cards. */

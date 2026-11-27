@@ -16,11 +16,14 @@
 <link rel="icon" href="{{root}}assets/img/pomelo-mark.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{{root}}assets/img/icon-192.png">
 <script>{{theme-boot}}</script>
+<style data-loader-critical>{{loader-critical}}</style>
+<script data-loader-boot>{{loader-boot}}</script>
 <script>{{sw-guard}}</script>
 <link rel="stylesheet" href="{{root}}assets/css/site.bundle.css?v={{build}}">
 <script type="module" src="{{root}}assets/js/main.js?v={{build}}"></script>
 </head>
 <body>
+{{> loader}}
 <a class="skip-link" href="#main">{{t:site.skip}}</a>
 {{> header}}
 <main id="main" tabindex="-1">

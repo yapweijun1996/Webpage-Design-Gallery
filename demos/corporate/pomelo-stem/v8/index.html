@@ -6,8 +6,8 @@
 <meta name="color-scheme" content="light dark">
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#fbf9f3">
-<meta name="pomelo-version" content="8.2.4">
-<meta name="pomelo-build" content="20261127.2">
+<meta name="pomelo-version" content="8.2.5">
+<meta name="pomelo-build" content="20261127.3">
 <meta name="pomelo-root" content="./">
 <title>Pomelo STEM · Growing Smarter Solutions.</title>
 <meta name="description" content="Online shop, order preparation and practical automation for small and growing businesses in Singapore and Malaysia.">
@@ -19,6 +19,47 @@
 <link rel="icon" href="./assets/img/pomelo-mark.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./assets/img/icon-192.png">
 <script>(function(){try{var t=localStorage.getItem('pomelo-v8-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style data-loader-critical>:root { --p-sand-200: #e7dfcd; --p-white: #ffffff; --p-ink-900: #1b2520; --p-ink-500: #56655b; --p-forest-700: #1d5737; --p-forest-300: #8fcfa4; --p-night-800: #162019; --p-night-600: #2c3b31; --p-mist-50: #eef3ec; --p-mist-400: #9aa89e; --p-scrim: rgba(11, 22, 17, 0.56); --space-2: 0.5rem; --space-4: 1rem; --space-5: 1.5rem; --space-8: 4rem; --radius-lg: 20px; --radius-pill: 999px; --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif; --size-text-sm: 0.875rem; --size-text-lg: 1.125rem; --size-icon-xl: 32px; --size-dialog: 560px; --size-border: 1px; --size-focus: 3px; --z-loader: 50; --motion-spin: 800ms; --shadow-lg: 0 24px 60px rgba(16, 36, 26, 0.18); --lineheight-body: 1.6; --weight-semibold: 600; } :root { color-scheme: light; --c-surface: var(--p-white); --c-text: var(--p-ink-900); --c-text-muted: var(--p-ink-500); --c-accent: var(--p-forest-700); --c-border-subtle: var(--p-sand-200); --c-scrim: var(--p-scrim); } @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; --c-surface: var(--p-night-800); --c-text: var(--p-mist-50); --c-text-muted: var(--p-mist-400); --c-accent: var(--p-forest-300); --c-border-subtle: var(--p-night-600); --c-scrim: var(--p-scrim); } } :root[data-theme="dark"] { color-scheme: dark; --c-surface: var(--p-night-800); --c-text: var(--p-mist-50); --c-text-muted: var(--p-mist-400); --c-accent: var(--p-forest-300); --c-border-subtle: var(--p-night-600); --c-scrim: var(--p-scrim); } @media (prefers-reduced-motion: reduce) { :root { --motion-spin: 0ms; } } .loader[hidden] { display: none !important; } body.is-loading { overflow: hidden; } .loader { position: fixed; inset: 0; z-index: var(--z-loader); display: grid; place-items: center; overflow: auto; overscroll-behavior: contain; touch-action: none; background: var(--c-scrim); padding: max(var(--space-4), env(safe-area-inset-top, 0px)) max(var(--space-4), env(safe-area-inset-right, 0px)) max(var(--space-4), env(safe-area-inset-bottom, 0px)) max(var(--space-4), env(safe-area-inset-left, 0px)); } .loader__card { box-sizing: border-box; display: grid; justify-items: center; gap: var(--space-4); width: 100%; max-width: var(--size-dialog); min-width: 0; padding: var(--space-5); border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); background: var(--c-surface); color: var(--c-text); font-family: var(--font-body); line-height: var(--lineheight-body); text-align: center; overflow-wrap: anywhere; } .loader__brand { display: grid; justify-items: center; gap: var(--space-2); min-width: 0; max-width: 100%; } .loader__mark { display: block; width: var(--space-8); height: var(--space-8); max-width: 100%; } .loader__tagline { margin: 0; font-size: var(--size-text-sm); color: var(--c-text-muted); } .loader__title { margin: 0; font-size: var(--size-text-lg); font-weight: var(--weight-semibold); } .loader__detail { margin: var(--space-2) 0 0; font-size: var(--size-text-sm); color: var(--c-text-muted); } .loader__indicator { box-sizing: border-box; width: var(--size-icon-xl); height: var(--size-icon-xl); border: var(--size-focus) solid var(--c-border-subtle); border-top-color: var(--c-accent); border-radius: var(--radius-pill); animation: loader-spin var(--motion-spin) linear infinite; } @keyframes loader-spin { to { transform: rotate(1turn); } } @media (prefers-reduced-motion: reduce) { .loader__indicator { animation: none; display: none; } }</style>
+<script data-loader-boot>// Inlined in <head>: no module or stylesheet dependency, and content is visible by default.
+(() => {
+  let done = false;
+  let main;
+  let busy;
+  let loader;
+  function ready() {
+    done = true;
+    clearTimeout(delay);
+    clearTimeout(safety);
+    if (loader) loader.hidden = true;
+    document.body?.classList.remove('is-loading');
+    if (main) {
+      if (busy === null) main.removeAttribute('aria-busy');
+      else main.setAttribute('aria-busy', busy);
+    }
+    main = null;
+    document.removeEventListener('DOMContentLoaded', ready);
+    window.removeEventListener('load', ready);
+  }
+  const delay = setTimeout(() => {
+    if (done) return;
+    loader = document.getElementById('page-loader');
+    if (!loader) return;
+    main = document.getElementById('main');
+    if (main) {
+      busy = main.getAttribute('aria-busy');
+      main.setAttribute('aria-busy', 'true');
+    }
+    document.body.classList.add('is-loading');
+    loader.hidden = false;
+  }, 400);
+  const safety = setTimeout(ready, 8000);
+  window.__pomeloV8PageReady = ready;
+  document.addEventListener('DOMContentLoaded', ready, {once: true});
+  window.addEventListener('load', ready, {once: true});
+  window.addEventListener('pageshow', ready);
+  window.addEventListener('pagehide', ready);
+})();
+</script>
 <script>(function () {
   var sw = navigator.serviceWorker;
   if (!sw || !sw.controller || !window.MessageChannel) return;
@@ -71,6 +112,8 @@
       }
       try { sessionStorage.setItem(key, want); } catch (error) { /* attempt limit still bounds reloads */ }
       if (hasUnsavedInput()) return;
+      if (window.__pomeloV8Reloading) return;
+      window.__pomeloV8Reloading = true;
       reloaded = true;
       location.reload();
     }
@@ -112,10 +155,21 @@
   };
   sw.controller.postMessage({type: 'GET_BUILD'}, [channel.port2]);
 })();</script>
-<link rel="stylesheet" href="./assets/css/site.bundle.css?v=20261127.2">
-<script type="module" src="./assets/js/main.js?v=20261127.2"></script>
+<link rel="stylesheet" href="./assets/css/site.bundle.css?v=20261127.3">
+<script type="module" src="./assets/js/main.js?v=20261127.3"></script>
 </head>
 <body>
+<div id="page-loader" class="loader" hidden>
+  <div class="loader__card" role="status" aria-live="polite" aria-labelledby="page-loader-title">
+    <div class="loader__brand">
+      <svg class="loader__mark" width="64" height="64" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" > <g transform="translate(512 505) scale(.985) translate(-469 -500)"><g> <path d="M 452 159 C 457 136 458 103 454 64 Q 451 42 471 38 Q 493 37 494 59 C 492 102 489 133 500 159 Z" fill="var(--c-accent)"/> <path d="M 482 104 C 550 40 610 23 676 44 C 742 65 769 112 776 158 C 700 142 655 176 591 154 C 540 137 517 95 482 104 Z" fill="var(--c-accent)"/> <circle cx="469" cy="550" r="370" fill="var(--c-surface)" stroke="var(--c-accent)" stroke-width="59"/> <path d="M 444.12 521.28 L 291.57 345.16 Q 272.58 323.24 312.37 288.29 A 305 305 0 0 1 394.70 254.19 Q 447.55 250.77 449.62 279.69 L 466.28 512.10 Z" fill="var(--c-accent)"/> <path d="M 471.72 512.10 L 488.38 279.69 Q 490.45 250.77 543.30 254.19 A 305 305 0 0 1 625.63 288.29 Q 665.42 323.24 646.43 345.16 L 493.88 521.28 Z" fill="var(--c-accent)"/> <path d="M 497.72 525.12 L 673.84 372.57 Q 695.76 353.58 730.71 393.37 A 305 305 0 0 1 764.81 475.70 Q 768.23 528.55 739.31 530.62 L 506.90 547.28 Z" fill="var(--c-accent)"/> <path d="M 506.90 552.72 L 739.31 569.38 Q 768.23 571.45 764.81 624.30 A 305 305 0 0 1 730.71 706.63 Q 695.76 746.42 673.84 727.43 L 497.72 574.88 Z" fill="var(--c-accent)"/> <path d="M 493.88 578.72 L 646.43 754.84 Q 665.42 776.76 625.63 811.71 A 305 305 0 0 1 543.30 845.81 Q 490.45 849.23 488.38 820.31 L 471.72 587.90 Z" fill="var(--c-accent)"/> <path d="M 466.28 587.90 L 449.62 820.31 Q 447.55 849.23 394.70 845.81 A 305 305 0 0 1 312.37 811.71 Q 272.58 776.76 291.57 754.84 L 444.12 578.72 Z" fill="var(--c-accent)"/> <path d="M 440.28 574.88 L 264.16 727.43 Q 242.24 746.42 207.29 706.63 A 305 305 0 0 1 173.19 624.30 Q 169.77 571.45 198.69 569.38 L 431.10 552.72 Z" fill="var(--c-accent)"/> <path d="M 431.10 547.28 L 198.69 530.62 Q 169.77 528.55 173.19 475.70 A 305 305 0 0 1 207.29 393.37 Q 242.24 353.58 264.16 372.57 L 440.28 525.12 Z" fill="var(--c-accent)"/> <circle cx="469" cy="550" r="54" fill="var(--c-accent)"/> <circle cx="469" cy="550" r="30" fill="var(--c-surface)"/> </g></g> </svg>
+      <p class="loader__tagline">Growing Smarter Solutions.</p>
+    </div>
+    <span class="loader__indicator" aria-hidden="true"></span>
+    <p id="page-loader-title" class="loader__title">Loading…</p>
+  </div>
+</div>
+
 <a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header" data-header>
   <div class="container site-header__inner">
@@ -136,9 +190,9 @@
         <span class="theme-icon theme-icon--light"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg></span>
         <span class="theme-icon theme-icon--dark"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></span>
       </button>
-      <button class="update-button" type="button" data-update data-state="idle" aria-label="Check for updates, version 8.2.4">
+      <button class="update-button" type="button" data-update data-state="idle" aria-label="Check for updates, version 8.2.5">
         <span class="update-button__icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></span>
-        <span class="update-button__chip">v8.2.4</span>
+        <span class="update-button__chip">v8.2.5</span>
         <span class="update-button__dot" aria-hidden="true"></span>
       </button>
       <span class="visually-hidden" role="status" data-update-status></span>
@@ -294,7 +348,7 @@
       <button class="demo-note" type="button" data-demo-note><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>Demo data</span></button>
 
       <p class="site-footer__disclaimer">Independent concept. Images are illustrative and the contact form is not connected.</p>
-      <p class="site-footer__version">Version 8.2.4</p>
+      <p class="site-footer__version">Version 8.2.5</p>
     </div>
   </div>
 </footer>
@@ -302,6 +356,6 @@
 <button class="back-to-top" type="button" data-back-to-top data-state="hidden" inert aria-hidden="true" aria-label="Back to top"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></button>
 
 <div class="toast-region" data-toast-region role="region" aria-label="Notifications" hidden></div>
-<script type="application/json" id="i18n-runtime">{"_intl": "en-MY", "demo.note": "Demo data", "demo.noteBody": "Products, prices, orders and people on this site are examples. Nothing here is a real order, and no service is connected.", "demo.noteTitle": "About this demo", "dialog.cancel": "Cancel", "dialog.close": "Close", "dialog.confirm": "Continue", "form.business": "Business name", "form.message": "What would you like help with?", "form.name": "Your name", "form.required": "Please fill in this field.", "form.submit": "Send message", "form.title": "Send a message", "lang.button": "Language: {language}", "lang.en": "English", "lang.label": "Language", "lang.ms": "Bahasa Melayu", "lang.short": "EN", "lang.zh": "简体中文", "menu.open": "Open menu", "menu.theme": "Light or dark theme", "menu.title": "Menu", "order.empty": "Your order is empty. Add something from the shop.", "theme.toggle": "Switch between light and dark theme", "toast.close": "Dismiss notification", "toast.copied.detail": "Paste it into WhatsApp or your phone.", "toast.copied.title": "Number copied.", "toast.copyFailed.detail": "Select the number instead.", "toast.copyFailed.title": "Couldn't copy.", "toast.formNotSent.detail": "Demo form only. Please use WhatsApp.", "toast.formNotSent.title": "Nothing was sent.", "toast.offline.detail": "Showing the saved version.", "toast.offline.title": "You're offline.", "toast.online.detail": "Refresh the page to see the latest content.", "toast.online.title": "You're back online.", "toast.productAdded.detail": "Order PS-0124 is updated.", "toast.productAdded.title": "{item} added.", "toast.region": "Notifications", "toast.studioDone.detail": "All prep steps are done.", "toast.studioDone.title": "PS-0124 is ready for pickup.", "toast.themeDark.detail": "The interface switched to Dark.", "toast.themeDark.title": "Dark theme on.", "toast.themeLight.detail": "The interface switched to Light.", "toast.themeLight.title": "Light theme on.", "toast.updateAvailable.detail": "Reload to start using it.", "toast.updateAvailable.title": "Version {version} is ready.", "toast.updateCurrent.detail": "Version v{version} is in use.", "toast.updateCurrent.title": "You're up to date.", "toast.updateError.detail": "Try again in a moment.", "toast.updateError.title": "Couldn't check for updates.", "top.label": "Back to top", "update.apply": "Reload to update", "update.applying": "Updating…", "update.available": "Version {version} is ready.", "update.checking": "Checking for updates…", "update.chip": "v{version}", "update.current": "You're on the latest version, v{version}.", "update.error": "Couldn't check for updates. Try again in a moment.", "update.label": "Check for updates, version {version}", "update.retry": "Retry", "update.unsavedBody": "This page has unfinished input or actions. Reloading will clear them.", "update.unsavedTitle": "Reload and lose unsaved changes?"}</script>
+<script type="application/json" id="i18n-runtime">{"_intl": "en-MY", "demo.note": "Demo data", "demo.noteBody": "Products, prices, orders and people on this site are examples. Nothing here is a real order, and no service is connected.", "demo.noteTitle": "About this demo", "dialog.cancel": "Cancel", "dialog.close": "Close", "dialog.confirm": "Continue", "form.business": "Business name", "form.message": "What would you like help with?", "form.name": "Your name", "form.needsJs": "This form needs JavaScript. Please use WhatsApp.", "form.required": "Please fill in this field.", "form.submit": "Send message", "form.title": "Send a message", "lang.button": "Language: {language}", "lang.en": "English", "lang.label": "Language", "lang.ms": "Bahasa Melayu", "lang.short": "EN", "lang.zh": "简体中文", "loader.pageTitle": "Loading…", "loader.tagline": "Growing Smarter Solutions.", "loader.updateDetail": "This page will reload in a moment.", "loader.updateTitle": "Updating to v{version}", "menu.open": "Open menu", "menu.theme": "Light or dark theme", "menu.title": "Menu", "order.empty": "Your order is empty. Add something from the shop.", "pickup.status.done": "Done", "pickup.status.pending": "Pending", "theme.toggle": "Switch between light and dark theme", "toast.close": "Dismiss notification", "toast.copied.detail": "Paste it into WhatsApp or your phone.", "toast.copied.title": "Number copied.", "toast.copyFailed.detail": "Select the number instead.", "toast.copyFailed.title": "Couldn't copy.", "toast.formNotSent.detail": "Demo form only. Please use WhatsApp.", "toast.formNotSent.title": "Nothing was sent.", "toast.offline.detail": "Showing the saved version.", "toast.offline.title": "You're offline.", "toast.online.detail": "Refresh the page to see the latest content.", "toast.online.title": "You're back online.", "toast.productAdded.detail": "Order PS-0124 is updated.", "toast.productAdded.title": "{item} added.", "toast.region": "Notifications", "toast.studioDone.detail": "All prep steps are done.", "toast.studioDone.title": "PS-0124 is ready for pickup.", "toast.themeDark.detail": "The interface switched to Dark.", "toast.themeDark.title": "Dark theme on.", "toast.themeLight.detail": "The interface switched to Light.", "toast.themeLight.title": "Light theme on.", "toast.updateAvailable.detail": "Reload to start using it.", "toast.updateAvailable.title": "Version {version} is ready.", "toast.updateCurrent.detail": "Version v{version} is in use.", "toast.updateCurrent.title": "You're up to date.", "toast.updateError.detail": "Try again in a moment.", "toast.updateError.title": "Couldn't check for updates.", "top.label": "Back to top", "update.apply": "Reload to update", "update.applying": "Updating…", "update.available": "Version {version} is ready.", "update.checking": "Checking for updates…", "update.chip": "v{version}", "update.current": "You're on the latest version, v{version}.", "update.error": "Couldn't check for updates. Try again in a moment.", "update.label": "Check for updates, version {version}", "update.retry": "Retry", "update.unsavedBody": "This page has unfinished input or actions. Reloading will clear them.", "update.unsavedTitle": "Reload and lose unsaved changes?"}</script>
 </body>
 </html>

@@ -143,6 +143,8 @@
   "order.total": "Total",
   "order.pickupLine": "Pickup on Saturday at the counter.",
   "pickup.title": "Pickup checklist",
+  "pickup.status.pending": "Pending",
+  "pickup.status.done": "Done",
   "pickup.step1": "Order paid",
   "pickup.step2": "Packed and labelled",
   "pickup.step3": "Collected at the counter",
@@ -229,6 +231,7 @@
   "contact.number": "+60 11-3902 3123",
   "contact.copy": "Copy number",
   "form.title": "Send a message",
+  "form.needsJs": "This form needs JavaScript. Please use WhatsApp.",
   "form.name": "Your name",
   "form.business": "Business name",
   "form.message": "What would you like help with?",
@@ -242,5 +245,9 @@
   "meta.redirect.title": "How it works · Pomelo STEM",
   "meta.redirect.description": "This page moved to Services.",
   "redirect.body": "This page moved to Services.",
-  "redirect.link": "Go to How we work"
+  "redirect.link": "Go to How we work",
+  "loader.pageTitle": "Loading…",
+  "loader.tagline": "Growing Smarter Solutions.",
+  "loader.updateTitle": "Updating to v{version}",
+  "loader.updateDetail": "This page will reload in a moment."
 }

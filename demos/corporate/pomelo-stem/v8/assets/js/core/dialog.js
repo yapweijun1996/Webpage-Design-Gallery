@@ -4,14 +4,30 @@ import {t} from './i18n.js';
 
 const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 let counter = 0;
+const stack = [];
+const originalInert = new Map();
+let wasLocked = false;
+let scrollY = 0;
+
+function syncInert() {
+  const top = stack[stack.length - 1];
+  for (const node of document.body.children) {
+    if (node.tagName === 'SCRIPT') continue;
+    if (node.matches('[data-toast-region], [data-toast-live]') && !top?.blockToasts) {
+      if (originalInert.has(node)) node.inert = originalInert.get(node);
+      continue;
+    }
+    if (!originalInert.has(node)) originalInert.set(node, node.inert);
+    node.inert = top ? node !== top.backdrop : originalInert.get(node);
+  }
+  if (!top) originalInert.clear();
+}
 
 /**
  * open({title, content: Node, variant: 'modal' | 'alertdialog' | 'sheet', actions: [Node], onClose})
  * Returns {close}. Focus moves in, Tab is trapped, focus returns to the opener on close.
  */
 export function open({title, content, variant = 'modal', actions = [], onClose} = {}) {
-  const opener = document.activeElement;
-  const scrollY = window.scrollY;
   const id = `dialog-title-${++counter}`;
   const backdrop = document.createElement('div');
   backdrop.className = 'dialog-backdrop';
@@ -52,23 +68,38 @@ export function open({title, content, variant = 'modal', actions = [], onClose} 
   }
   backdrop.append(panel);
 
-  const siblings = [...document.body.children]
-    .filter((node) => node.tagName !== 'SCRIPT' && !node.matches('[data-toast-region], [data-toast-live]'))
-    .map((node) => [node, node.inert]);
-  for (const [node] of siblings) node.inert = true;
+  const target = panel.querySelector('[data-autofocus]') || panel.querySelector(FOCUSABLE) || heading;
+  if (target === heading) heading.tabIndex = -1;
+  const api = mount(backdrop, panel, {onClose, initialFocus: target});
+  backdrop.addEventListener('click', (event) => {
+    if (event.target === backdrop && variant !== 'alertdialog') api.close(false);
+  });
+  return api;
+}
+
+/** Share modal stacking, inert restoration and scroll locking with non-dismissible overlays. */
+export function mount(backdrop, panel, {onClose, initialFocus = panel, opener = document.activeElement,
+  dismissible = true, blockToasts = false} = {}) {
+  if (!stack.length) {
+    scrollY = window.scrollY;
+    wasLocked = document.body.classList.contains('is-locked');
+  }
+  const entry = {backdrop, blockToasts, initialFocus};
+  stack.push(entry);
   document.body.classList.add('is-locked');
   document.body.append(backdrop);
+  syncInert();
 
   function onKey(event) {
-    if (backdrop.inert) return;
+    if (stack[stack.length - 1] !== entry) return;
     if (event.key === 'Escape') {
       event.stopPropagation();
-      api.close(false);
+      if (dismissible) api.close(false);
       return;
     }
     if (event.key !== 'Tab') return;
     const items = [...panel.querySelectorAll(FOCUSABLE)].filter((node) => node.offsetParent !== null);
-    if (!items.length) return;
+    if (!items.length) { event.preventDefault(); initialFocus.focus(); return; }
     const first = items[0];
     const last = items[items.length - 1];
     if (!panel.contains(document.activeElement)) { event.preventDefault(); (event.shiftKey ? last : first).focus(); }
@@ -76,9 +107,6 @@ export function open({title, content, variant = 'modal', actions = [], onClose} 
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   }
   document.addEventListener('keydown', onKey);
-  backdrop.addEventListener('click', (event) => {
-    if (event.target === backdrop && variant !== 'alertdialog') api.close(false);
-  });
 
   let closed = false;
   const api = {
@@ -87,17 +115,23 @@ export function open({title, content, variant = 'modal', actions = [], onClose} 
       if (closed) return;
       closed = true;
       document.removeEventListener('keydown', onKey);
+      const wasTop = stack[stack.length - 1] === entry;
+      stack.splice(stack.indexOf(entry), 1);
       backdrop.remove();
-      for (const [node, inert] of siblings) node.inert = inert;
-      document.body.classList.remove('is-locked');
-      window.scrollTo(0, scrollY);
-      if (opener && opener.focus) opener.focus();
+      syncInert();
+      if (!stack.length) {
+        document.body.classList.toggle('is-locked', wasLocked);
+        window.scrollTo(0, scrollY);
+      }
+      if (wasTop && opener?.isConnected && !opener.closest('[inert]')) opener.focus();
+      else if (wasTop && stack.length) {
+        const top = stack[stack.length - 1];
+        (top.backdrop.querySelector(FOCUSABLE) || top.initialFocus).focus();
+      }
       if (onClose) onClose(result);
     },
   };
-  const target = panel.querySelector('[data-autofocus]') || panel.querySelector(FOCUSABLE) || heading;
-  if (target === heading) heading.tabIndex = -1;
-  target.focus();
+  initialFocus.focus();
   return api;
 }
 
