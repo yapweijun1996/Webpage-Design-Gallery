@@ -7,8 +7,8 @@ import vm from 'node:vm';
 const demo = new URL('../demos/corporate/pomelo-stem/v8/', import.meta.url);
 const source = path => readFileSync(new URL(path, demo), 'utf8')
   .replace(/^import .*?;\n/gm, '').replace(/^export /gm, '');
-const generator = readFileSync(new URL('../scripts/build_pomelo_v8.py', import.meta.url), 'utf8');
-const guard = generator.match(/SW_GUARD = r"""([\s\S]*?)"""/)[1];
+const release = JSON.parse(source('release.json'));
+const guard = source('index.html').match(/<script>(\(function \(\) \{[\s\S]*?)<\/script>/)[1];
 const flush = async () => { for (let i = 0; i < 20; i += 1) await Promise.resolve(); };
 function deferred() {
   let resolve;
@@ -145,7 +145,7 @@ function domHarness() {
   return {document, Element};
 }
 
-function updateHarness({registration = null, hasWorker = true, locale} = {}) {
+function updateHarness({registration = null, hasWorker = true, locale, runtime, language} = {}) {
   const timers = clock();
   const sw = new Events();
   sw.getRegistration = async () => registration;
@@ -159,17 +159,23 @@ function updateHarness({registration = null, hasWorker = true, locale} = {}) {
   const strings = locale ? JSON.parse(source(`i18n/${locale}.json`)) : {};
   const context = {
     ...timers, URL, navigator: hasWorker ? {serviceWorker: sw} : {},
-    document: Object.assign(document, {baseURI: 'https://example.test/v8/', querySelector(selector) {
+    document: Object.assign(document, {baseURI: 'https://example.test/v8/',
+      documentElement: {lang: language || locale || 'en'},
+      getElementById: () => runtime === null ? null : {textContent: JSON.stringify(runtime)},
+      querySelector(selector) {
       if (selector === '#page-loader .loader__mark') return pageMark;
       if (selector === '[data-update]') return button;
       if (selector === '[data-update-status]') return {};
-      return {content: selector.includes('root') ? './' : '8.2.4'};
+      return {content: selector.includes('root') ? './' : selector.includes('build') ? release.build : release.version};
     }}),
     window: {scrollTo() {}, location: {reload() { if (state.reloadError) throw new Error('Navigation failed'); state.reloads += 1; }}}, location: {protocol: 'file:'},
     t: key => strings[key] ?? key, toast: options => state.toasts.push(options), hasUnsavedInput: () => state.dirty,
     confirm(options) { state.confirms.push(options); return Promise.resolve(state.answer); },
   };
-  const api = vm.runInNewContext('const mount = (() => {\n' + source('assets/js/core/dialog.js') + '\nreturn mount; })();\n' + source('assets/js/core/loader.js') +
+  const translations = runtime !== undefined ? 'const t = (() => {\n' + source('assets/js/i18n-defaults.generated.js') + '\n' +
+    source('assets/js/core/i18n.js') + '\ninit(); return t; })();\n' : '';
+  const api = vm.runInNewContext(translations + source('assets/js/core/reload.js') +
+    '\nconst mount = (() => {\n' + source('assets/js/core/dialog.js') + '\nreturn mount; })();\n' + source('assets/js/core/loader.js') +
     `\nconst showLoader = (...args) => {
       if (loaderState.showError) throw new Error('Loader show failed');
       const handle = show(...args);
@@ -329,6 +335,39 @@ test('update loader uses the localized brand tagline in every language', async (
     assert.equal(brand.children[1].textContent, expected, locale);
     assert.equal(brand.children[0].getAttribute('aria-hidden'), 'true', locale);
     h.fire(12000);
+  }
+});
+
+test('mixed-cache runtime without loader keys shows SSOT defaults in the document language', async () => {
+  for (const [language, locale] of [['en', 'en'], ['zh-Hans', 'zh'], ['zh', 'zh'], ['ms', 'ms'],
+    ['', 'en'], ['fr', 'en']]) {
+    const strings = JSON.parse(source(`i18n/${locale}.json`));
+    const oldRuntime = Object.fromEntries(Object.entries(strings).filter(([key]) => !key.startsWith('loader.')));
+    // The HTML language takes precedence over an old runtime's locale for defaults.
+    oldRuntime._intl = 'en-MY';
+    const h = updateHarness({registration: waitingRegistration(), runtime: oldRuntime, language});
+    const query = h.document.querySelector;
+    h.document.querySelector = selector => selector === '#page-loader .loader__mark' ? null : query(selector);
+    await h.apply();
+    const [brand, , status] = h.loader.children[0].children;
+    assert.equal(brand.children[1].textContent, strings['loader.tagline'], language);
+    assert.equal(status.children[0].textContent, strings['loader.updateTitle'].replace('{version}', release.version), language);
+    assert.equal(status.children[1].textContent, strings['loader.updateDetail'], language);
+    h.fire(12000);
+  }
+});
+
+test('i18n defaults only fill missing keys and retain unknown-key and interpolation behavior', () => {
+  for (const runtime of [null, '{invalid', JSON.stringify({'loader.tagline': 'Custom', 'existing': 'Hello {name}'})]) {
+    const document = {documentElement: {lang: 'ms'},
+      getElementById: () => runtime === null ? null : {textContent: runtime}};
+    const api = vm.runInNewContext(source('assets/js/i18n-defaults.generated.js') + '\n' +
+      source('assets/js/core/i18n.js') + '\ninit(); ({t})', {document});
+    const strings = JSON.parse(source('i18n/ms.json'));
+    assert.equal(api.t('loader.tagline'), runtime?.startsWith('{"') ? 'Custom' : strings['loader.tagline']);
+    assert.equal(api.t('loader.updateTitle', {version: release.version}), strings['loader.updateTitle'].replace('{version}', release.version));
+    assert.equal(api.t('unknown.key'), 'unknown.key');
+    if (runtime?.startsWith('{"')) assert.equal(api.t('existing', {name: 'World'}), 'Hello World');
   }
 });
 
@@ -580,7 +619,8 @@ function manualAlongsideHeal(h) {
     return {content: selector.includes('root') ? './' : 'wanted'};
   };
   Object.assign(h.context, {URL, t: key => key, toast() {}, confirm: async () => false, showLoader: () => ({close() {}})});
-  return vm.runInContext(source('assets/js/core/unsaved.js') + '\n' + source('assets/js/core/update.js') + '\ninit(); ({apply, button})', h.context);
+  return vm.runInContext(source('assets/js/core/reload.js') + '\n' + source('assets/js/core/unsaved.js') + '\n' +
+    source('assets/js/core/update.js') + '\ninit(); ({apply, button})', h.context);
 }
 
 test('self-heal and manual update coordinate one reload whichever path finishes first', async () => {
@@ -600,6 +640,67 @@ test('self-heal and manual update coordinate one reload whichever path finishes 
     assert.equal(h.state.reloads, 1);
     assert.equal(h.sw.count('controllerchange'), 0);
   }
+});
+
+test('a self-heal reply 3.5 seconds after manual reload cannot reload the same activation again', async () => {
+  for (const watchdogDelivered of [false, true]) {
+    const h = healHarness();
+    await flush();
+    await manualAlongsideHeal(h).apply();
+    h.state.build = 'wanted';
+    h.state.deferVerification = true;
+    h.sw.emit('controllerchange');
+    await flush();
+    assert.equal(h.state.reloads, 1);
+    h.advance(3500);
+    if (watchdogDelivered) h.fire(3000);
+    h.state.reply();
+    await flush();
+    assert.equal(h.state.reloads, 1);
+    assert.equal(h.sw.count('controllerchange'), 0);
+  }
+});
+
+test('a manual attempt already waiting for consent cannot repeat a slow self-heal reload', async () => {
+  const h = healHarness();
+  await flush();
+  const manual = manualAlongsideHeal(h);
+  await manual.apply();
+  const consent = deferred();
+  h.context.confirm = () => consent.promise;
+  h.state.dirty = true;
+  h.state.build = 'wanted';
+  h.state.deferVerification = true;
+  h.sw.emit('controllerchange');
+  await flush();
+  assert.equal(h.state.reloads, 0);
+  h.state.dirty = false;
+  h.state.reply();
+  assert.equal(h.state.reloads, 1);
+  h.advance(3500);
+  h.fire(3000);
+  consent.resolve(true);
+  await flush();
+  assert.equal(h.state.reloads, 1);
+});
+
+test('reload transactions allow a different controller or fallback build after a stale claim', () => {
+  const timers = clock();
+  const window = {};
+  const api = vm.runInNewContext(source('assets/js/core/reload.js') + '\n({claimReload, releaseReload})', {...timers, window});
+  const controller = {};
+  const first = api.claimReload('update', controller, 'first');
+  assert.ok(first);
+  timers.advance(3500);
+  api.releaseReload(first);
+  assert.equal(api.claimReload('self-heal', controller, 'first'), null);
+  assert.ok(api.claimReload('self-heal', {}, 'second'));
+  timers.advance(3500);
+  const fallback = api.claimReload('update', null, 'third');
+  assert.ok(fallback);
+  timers.advance(3500);
+  assert.equal(api.claimReload('self-heal', null, 'third'), null);
+  assert.ok(api.claimReload('self-heal', null, 'fourth'));
 });
 
 test('both reload paths preserve input entered while their shared update is waiting', async () => {

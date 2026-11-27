@@ -1,4 +1,6 @@
 // Runtime strings for the current page locale. The build embeds them from i18n/<lang>.json.
+import {LOADER_DEFAULTS} from '../i18n-defaults.generated.js';
+
 let table = {};
 
 export function init() {
@@ -11,7 +13,9 @@ export function init() {
 }
 
 export function t(key, vars = {}) {
-  const text = Object.prototype.hasOwnProperty.call(table, key) ? table[key] : key;
+  const language = (document.documentElement.lang || 'en').toLowerCase().split('-')[0];
+  const defaults = LOADER_DEFAULTS[language] || LOADER_DEFAULTS.en;
+  const text = Object.prototype.hasOwnProperty.call(table, key) ? table[key] : defaults[key] ?? key;
   return text.replace(/\{(\w+)\}/g, (match, name) => (name in vars ? String(vars[name]) : match));
 }
 

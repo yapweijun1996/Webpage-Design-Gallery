@@ -4,9 +4,11 @@ import json
 import re
 import shutil
 import subprocess
+import tempfile
 import unittest
 from collections import Counter
 from pathlib import Path
+from unittest import mock
 from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
@@ -96,6 +98,57 @@ class PomeloV8Test(unittest.TestCase):
         manifest = json.loads((DEMO / "manifest.webmanifest").read_text("utf-8"))
         self.assertEqual(manifest["scope"], "./")
         self.assertEqual({icon["purpose"] for icon in manifest["icons"]}, {"any", "maskable"})
+
+    def test_every_local_manifest_icon_is_precached(self):
+        outputs = pomelo.outputs()
+        manifest = json.loads(outputs["manifest.webmanifest"])
+        # Derivation must also cover a future icon, including a normalized relative path.
+        manifest["icons"] += [{"src": "./assets/img/future-icon.png"},
+                              {"src": "https://example.test/external-icon.png"}]
+        outputs["manifest.webmanifest"] = json.dumps(manifest)
+        precache = pomelo.precache_list(outputs)
+        for icon in manifest["icons"]:
+            url = urlsplit(icon["src"])
+            if not url.scheme and not url.netloc:
+                self.assertIn(pomelo.urljoin("manifest.webmanifest", icon["src"]), precache)
+            else:
+                self.assertNotIn(icon["src"], precache)
+        sw = (DEMO / "sw.js").read_text("utf-8")
+        installed = json.loads(re.search(r"const PRECACHE = (\[.*?\]);", sw, re.S)[1])
+        for icon in json.loads((DEMO / "manifest.webmanifest").read_text("utf-8"))["icons"]:
+            self.assertIn(icon["src"], installed)
+
+    def test_loader_critical_css_ignores_commented_rules_and_requires_html_rule(self):
+        tokens = pomelo.token_css()
+        base = (DEMO / "assets/css/base.css").read_text("utf-8")
+        css = (DEMO / "assets/css/components/loader.css").read_text("utf-8")
+        expected = pomelo.loader_critical_css(tokens)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "assets/css/components").mkdir(parents=True)
+            (root / "assets/css/components/loader.css").write_text(css, encoding="utf-8")
+            with mock.patch.object(pomelo, "V8", root):
+                for example in ("html{visibility:hidden}", "html { visibility: hidden; }"):
+                    comment = f"/* Documentation example:\n{example}\n*/\n"
+                    (root / "assets/css/base.css").write_text(comment + base, encoding="utf-8")
+                    actual = pomelo.loader_critical_css(tokens)
+                    self.assertEqual(actual, expected)
+                    self.assertNotIn("visibility", actual)
+                    (root / "assets/css/base.css").write_text(comment + "body { margin: 0; }", encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, r"html \{\} rule in assets/css/base\.css"):
+                        pomelo.loader_critical_css(tokens)
+
+    def test_loader_defaults_are_generated_from_i18n_and_precached(self):
+        outputs = pomelo.outputs()
+        name = "assets/js/i18n-defaults.generated.js"
+        defaults = json.loads(re.search(r"LOADER_DEFAULTS = (.*);", outputs[name], re.S)[1])
+        for lang, table in pomelo.dictionaries().items():
+            self.assertEqual(defaults[lang], {key: value for key, value in table.items() if key.startswith("loader.")})
+        self.assertIn(name, pomelo.precache_list(outputs))
+        # A changed SSOT value must reach the generated module without a manual copy.
+        strings = pomelo.dictionaries()
+        strings["zh"]["loader.updateTitle"] = "SSOT {version}"
+        self.assertIn('"loader.updateTitle": "SSOT {version}"', pomelo.i18n_defaults_js(strings))
 
     def test_toast_region_is_named_without_duplicate_live_announcements(self):
         for name, source in pomelo.outputs().items():
@@ -285,11 +338,19 @@ class PomeloV8Test(unittest.TestCase):
         self.assertIn("field.value !== field.defaultValue", guard)
         self.assertIn("field.checked !== field.defaultChecked", guard)
         self.assertIn("option.defaultSelected", guard)
-        self.assertLess(guard.index('if (hasUnsavedInput()) return;'), guard.index("owner: 'self-heal'"))
-        self.assertIn('claim && Date.now() - claim.timestamp < 3000', guard)
+        self.assertLess(guard.index('if (hasUnsavedInput()) return;'), guard.index("claimReload('self-heal'"))
+        self.assertIn('claim && Date.now() - claim.timestamp < RELOAD_TIMEOUT', guard)
         self.assertIn("key = 'pomelo-v8-heal'", guard)
         self.assertIn("sessionStorage.getItem(key) === want", guard)
         self.assertIn("sessionStorage.setItem(key, want)", guard)
+
+    def test_manual_update_and_sw_guard_share_identical_reload_claims(self):
+        module = (DEMO / "assets/js/core/reload.js").read_text("utf-8")
+        inline = re.sub(r"^export ", "", module, flags=re.M)
+        self.assertIn(inline, pomelo.SW_GUARD)
+        update = (DEMO / "assets/js/core/update.js").read_text("utf-8")
+        self.assertIn("import {claimReload, releaseReload, RELOAD_TIMEOUT} from './reload.js';", update)
+        self.assertIn('"assets/js/core/reload.js"', pomelo.outputs()["sw.js"])
 
     def test_manual_update_and_sw_guard_share_identical_unsaved_checks(self):
         module = (DEMO / "assets/js/core/unsaved.js").read_text("utf-8")
