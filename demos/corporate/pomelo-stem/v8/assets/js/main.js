@@ -17,3 +17,4 @@ import * as review from './components/review.js';
 for (const module of [i18n, toast, theme, update, sw, langMenu, header, backToTop, demoNote, accordion, tabs, commerce, contact, review]) {
   module.init();
 }
+window.__pomeloV8PageReady?.();

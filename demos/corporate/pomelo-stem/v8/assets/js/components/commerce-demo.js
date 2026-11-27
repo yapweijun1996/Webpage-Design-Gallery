@@ -1,5 +1,5 @@
 // Commerce demo: products feed one order; Seller Studio prep feeds the pickup checklist.
-import {formatPrice} from '../core/i18n.js';
+import {formatPrice, t} from '../core/i18n.js';
 import {toast} from '../core/toast.js';
 import {addItem, setPrep, subscribe, count, total} from '../store/demo-store.js';
 
@@ -24,7 +24,9 @@ function renderOrder(root, state) {
   badge.hidden = items === 0;
   badge.textContent = String(items);
   for (const step of root.querySelectorAll('[data-pickup-list] [data-step]')) {
-    step.classList.toggle('is-done', Boolean(state.steps[step.dataset.step]));
+    const done = Boolean(state.steps[step.dataset.step]);
+    step.classList.toggle('is-done', done);
+    step.querySelector('[data-step-status]').textContent = t(done ? 'pickup.status.done' : 'pickup.status.pending');
   }
 }
 
@@ -51,9 +53,10 @@ export function init() {
     for (const box of boxes) setPrep(box.id, box.checked);
     studio.addEventListener('input', (event) => {
       if (!event.target.matches('[data-prep]')) return;
-      studio.dataset.dirty = 'true';
-      setPrep(event.target.id, event.target.checked);
-      if (boxes.every((box) => box.checked)) toast({type: 'success', messageKey: 'toast.studioDone.title', detailKey: 'toast.studioDone.detail'});
+      const ready = setPrep(event.target.id, event.target.checked);
+      if (boxes.every((box) => box.checked)) toast({type: 'success',
+        messageKey: ready ? 'toast.studioDone.title' : 'toast.studioDone.detail',
+        detailKey: ready ? 'toast.studioDone.detail' : undefined});
     });
   }
 }

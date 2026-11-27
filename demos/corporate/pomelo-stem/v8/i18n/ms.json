@@ -143,6 +143,8 @@
   "order.total": "Jumlah",
   "order.pickupLine": "Ambil di kaunter pada hari Sabtu.",
   "pickup.title": "Senarai semak pengambilan",
+  "pickup.status.pending": "Belum selesai",
+  "pickup.status.done": "Selesai",
   "pickup.step1": "Pesanan dibayar",
   "pickup.step2": "Dibungkus dan dilabel",
   "pickup.step3": "Diambil di kaunter",
@@ -229,6 +231,7 @@
   "contact.number": "+60 11-3902 3123",
   "contact.copy": "Salin nombor",
   "form.title": "Hantar mesej",
+  "form.needsJs": "Borang ini memerlukan JavaScript. Sila gunakan WhatsApp.",
   "form.name": "Nama anda",
   "form.business": "Nama perniagaan",
   "form.message": "Apa yang anda perlukan bantuan?",
@@ -242,5 +245,9 @@
   "meta.redirect.title": "Cara kami bekerja · Pomelo STEM",
   "meta.redirect.description": "Halaman ini telah dipindahkan ke Perkhidmatan.",
   "redirect.body": "Halaman ini telah dipindahkan ke Perkhidmatan.",
-  "redirect.link": "Pergi ke Cara kami bekerja"
+  "redirect.link": "Pergi ke Cara kami bekerja",
+  "loader.pageTitle": "Memuatkan…",
+  "loader.tagline": "Penyelesaian pintar untuk terus berkembang.",
+  "loader.updateTitle": "Mengemas kini ke v{version}",
+  "loader.updateDetail": "Halaman ini akan dimuat semula sebentar lagi."
 }

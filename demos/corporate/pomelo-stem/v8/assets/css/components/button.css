@@ -9,6 +9,10 @@
 }
 .button:active { transform: scale(0.98); }
 .button--primary { background: var(--c-accent); color: var(--c-on-accent); }
+.button--primary:disabled {
+  background: var(--c-surface-sunken); color: var(--c-text-muted); border-color: var(--c-border-control);
+  cursor: not-allowed; box-shadow: none; transform: none;
+}
 .button--secondary { background: var(--c-surface); color: var(--c-accent); border-color: var(--c-accent); }
 .button--ghost { background: transparent; color: var(--c-accent); border-color: var(--c-border-subtle); }
 .button--small { min-height: var(--size-tap); padding: var(--space-2) var(--space-4); font-size: var(--size-text-sm); }
@@ -20,7 +24,7 @@
   .cta-pair .button { width: 100%; }
 }
 @media (hover: hover) and (pointer: fine) {
-  .button--primary:hover { background: var(--c-accent-strong); box-shadow: var(--shadow-md); transform: translateY(var(--size-lift)); }
+  .button--primary:not(:disabled):hover { background: var(--c-accent-strong); box-shadow: var(--shadow-md); transform: translateY(var(--size-lift)); }
   .button--secondary:hover, .button--ghost:hover { background: var(--c-accent-soft); }
   .text-link:hover .icon { transform: translateX(var(--space-1)); }
 }

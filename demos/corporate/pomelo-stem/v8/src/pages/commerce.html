@@ -36,9 +36,9 @@
           <div class="tabs__panel" role="tabpanel" id="panel-pickup" aria-labelledby="tab-pickup" tabindex="0" hidden>
             <h2 class="panel-title">{{t:pickup.title}}</h2>
             <ol class="checklist" data-pickup-list>
-              <li data-step="paid"><span class="checklist__box">{{icon:check}}</span>{{t:pickup.step1}}</li>
-              <li data-step="packed"><span class="checklist__box">{{icon:check}}</span>{{t:pickup.step2}}</li>
-              <li data-step="collected"><span class="checklist__box">{{icon:check}}</span>{{t:pickup.step3}}</li>
+              <li data-step="paid"><span class="checklist__box">{{icon:check}}</span>{{t:pickup.step1}} <span class="visually-hidden" data-step-status>{{t:pickup.status.pending}}</span></li>
+              <li data-step="packed"><span class="checklist__box">{{icon:check}}</span>{{t:pickup.step2}} <span class="visually-hidden" data-step-status>{{t:pickup.status.pending}}</span></li>
+              <li data-step="collected"><span class="checklist__box">{{icon:check}}</span>{{t:pickup.step3}} <span class="visually-hidden" data-step-status>{{t:pickup.status.pending}}</span></li>
             </ol>
           </div>
         </div>

@@ -3,6 +3,8 @@ const state = {lines: {}, steps: {paid: false, packed: false, collected: false},
 const listeners = new Set();
 
 function emit() {
+  const values = Object.values(state.prep);
+  state.steps.packed = count() > 0 && state.steps.paid && values.length > 0 && values.every(Boolean);
   for (const listener of listeners) listener(state);
 }
 
@@ -22,9 +24,8 @@ export function addItem(id, name, price) {
 
 export function setPrep(id, done) {
   state.prep[id] = done;
-  const values = Object.values(state.prep);
-  state.steps.packed = values.length > 0 && values.every(Boolean);
   emit();
+  return state.steps.packed;
 }
 
 export function count() {

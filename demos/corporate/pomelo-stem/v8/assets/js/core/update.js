@@ -3,6 +3,7 @@ import {t} from './i18n.js';
 import {toast} from './toast.js';
 import {confirm} from './dialog.js';
 import {hasUnsavedInput} from './unsaved.js';
+import {show as showLoader} from './loader.js';
 
 const THROTTLE = 10 * 60 * 1000;
 const TIMEOUT = 8000;
@@ -103,9 +104,17 @@ export async function apply() {
   applying = true;
   if (!await canReload()) { applying = false; return; }
   setState('applying', t('update.applying'));
+  const loaderOptions = {title: t('loader.updateTitle', {version: available || current}),
+    detail: t('loader.updateDetail'), returnFocus: button};
+  let loader = showLoader(loaderOptions);
   let cancelled = false;
   let reloading = false;
-  const fail = setTimeout(failAttempt, APPLY_TIMEOUT);
+  let ownsReload = false;
+  let fail = setTimeout(failAttempt, APPLY_TIMEOUT);
+  function hideLoader() {
+    loader?.close();
+    loader = null;
+  }
   function cleanup() {
     clearTimeout(fail);
     navigator.serviceWorker?.removeEventListener('controllerchange', reload);
@@ -115,20 +124,37 @@ export async function apply() {
     cancelled = true;
     cleanup();
     applying = false;
+    if (ownsReload) window.__pomeloV8Reloading = false;
     setState('error', t('update.error'));
+    hideLoader();
+    toast({key: 'update', type: 'error', messageKey: 'toast.updateError.title', detailKey: 'toast.updateError.detail',
+      action: {label: t('update.retry'), onClick: apply}});
   }
   async function reload() {
     if (cancelled || reloading) return;
     reloading = true;
     cleanup();
+    // Consent must be usable above the loader; restore it only if consent is accepted.
+    if (hasUnsavedInput()) hideLoader();
     if (!await canReload()) {
       cancelled = true;
       applying = false;
       available = available || current;
       setState('available', t('update.available', {version: available}));
+      hideLoader();
+      button.focus();
       return;
     }
-    if (!cancelled) window.location.reload();
+    if (!cancelled) {
+      if (!loader) loader = showLoader(loaderOptions);
+      // Keep a watchdog in case navigation is blocked or reload throws.
+      fail = setTimeout(failAttempt, APPLY_TIMEOUT);
+      if (!window.__pomeloV8Reloading) {
+        window.__pomeloV8Reloading = true;
+        ownsReload = true;
+        try { window.location.reload(); } catch (error) { failAttempt(); }
+      }
+    }
   }
   try {
     const registration = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration(root().href) : null;

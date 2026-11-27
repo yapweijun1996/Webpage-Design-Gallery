@@ -143,6 +143,8 @@
   "order.total": "合计",
   "order.pickupLine": "星期六在柜台取货。",
   "pickup.title": "取货清单",
+  "pickup.status.pending": "待完成",
+  "pickup.status.done": "已完成",
   "pickup.step1": "订单已付款",
   "pickup.step2": "已打包并贴好标签",
   "pickup.step3": "顾客已在柜台取走",
@@ -229,6 +231,7 @@
   "contact.number": "+60 11-3902 3123",
   "contact.copy": "复制号码",
   "form.title": "发送留言",
+  "form.needsJs": "此表单需要 JavaScript。请使用 WhatsApp 联系。",
   "form.name": "你的名字",
   "form.business": "公司或店名",
   "form.message": "想请我们帮什么忙？",
@@ -242,5 +245,9 @@
   "meta.redirect.title": "工作方式 · Pomelo STEM",
   "meta.redirect.description": "这个页面已移到「服务」。",
   "redirect.body": "这个页面已移到「服务」。",
-  "redirect.link": "前往「我们的工作方式」"
+  "redirect.link": "前往「我们的工作方式」",
+  "loader.pageTitle": "正在加载…",
+  "loader.tagline": "智慧方案，伴你成长。",
+  "loader.updateTitle": "正在更新到 v{version}",
+  "loader.updateDetail": "页面马上会重新加载。"
 }
