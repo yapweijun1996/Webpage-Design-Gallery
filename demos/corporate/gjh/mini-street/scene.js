@@ -197,6 +197,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
   const reflection = wetRoad(world);
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
   const portrait = matchMedia("(max-width: 720px)");
+  const shortLandscape = matchMedia("(orientation: landscape) and (max-height: 480px)");
   const pick = new THREE.Raycaster();
   const cursor = new THREE.Vector2();
   const projected = new THREE.Vector3();
@@ -277,7 +278,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
     let eye;
     if (stop) {
       const focus = stopViews[stop];
-      const focusDistance = stop === "visitor" && narrow && camera.aspect > 2 ? 3.2 : focus.distance;
+      const focusDistance = stop === "visitor" && shortLandscape.matches ? 3.9 : focus.distance;
       distance = Math.max(focusDistance, focus.width / horizontalSpan);
       closest = focus.closest;
       angle = focus.angle + azimuth * .52;
@@ -288,11 +289,11 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
       const mallTurn = narrow ? clamp(azimuth / PHONE_MALL_TURN, 0, 1) : 0;
       // Keep the street visitor and shopping bag in the default phone frame.
       const center = narrow
-        ? lerp(0.40, street.mallAnchor[0], mallTurn) + Math.min(0, azimuth) * 10.1
+        ? lerp(0.65, street.mallAnchor[0], mallTurn) + Math.min(0, azimuth) * 10.1
         : wideFocus + azimuth * 7.1;
       // Fit the full arch and approach at the end of the phone's rightward pan.
       const mallDistance = Math.max(16.6, 10.9 / horizontalSpan);
-      distance = narrow ? lerp(16.6, mallDistance, mallTurn) : clamp(24.8 / camera.aspect, 16.9, 37);
+      distance = narrow ? lerp(15.8, mallDistance, mallTurn) : clamp(24.8 / camera.aspect, 16.9, 37);
       closest = narrow ? 6.3 : 5.6;
       angle = (narrow ? -0.50 : -0.63) + azimuth * 0.28;
       eye = 4.73 + elevation;

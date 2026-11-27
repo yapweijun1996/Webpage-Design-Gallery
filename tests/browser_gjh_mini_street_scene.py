@@ -206,7 +206,14 @@ def exercise_landscape_visitor(browser, url):
     page.get_by_role("button", name="View visitor close-up").tap()
     page.wait_for_function("miniStreetCamera().stop === 'visitor'")
     expect(page.locator("#stage")).to_have_attribute("data-visitor-focus", "")
-    expect(page.locator('[data-stop="shop"]')).to_be_hidden()
+    nav = page.locator(".stage .stops")
+    assert nav.evaluate("e => getComputedStyle(e).clipPath") != "none"
+    shop = page.locator('[data-stop="shop"]')
+    shop.focus()
+    expect(shop).to_be_focused()
+    assert nav.evaluate("e => getComputedStyle(e).clipPath") == "none"
+    page.locator("#view").focus()
+    assert nav.evaluate("e => getComputedStyle(e).clipPath") != "none"
     page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
     canvas = page.locator("#view").bounding_box()
     for point in page.evaluate("window.miniStreetVisitorPoints()"):

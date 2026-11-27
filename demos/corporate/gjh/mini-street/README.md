@@ -91,3 +91,9 @@ The earlier `06e505d627ee533b` run served generated files by request interceptio
 ## Experimental visitor candidate
 
 The optional `?visitorCandidate=1` preview loads a static Girl visitor with a raincoat, umbrella and shopping bag. The normal route retains the original visitor. If the candidate cannot load, the original visitor is restored. [Source and provenance](../../../../models/mini-street/README.md) describe the experimental asset and its limitations; it is not a motion-ready character.
+
+### Visitor framing on short screens
+
+The visitor candidate preview uses a compact street layout on landscape viewports up to 480 CSS pixels high, with the stage and primary camera and lighting controls visible together. The Visitor focus uses a landscape-specific distance to fit the complete static model; portrait opening view is slightly closer to the visitor while preserving the rightward mall framing. Camera help remains available below the primary controls. The focused short-landscape view visually hides scene hotspot labels; keyboard focus reveals them, and reset restores their normal presentation.
+
+Chromium candidate checks at 568 × 320, 844 × 390, 320 × 568, 375 × 667 and 390 × 844 verified the projected candidate mesh fits in the stage, the Visitor tap does not scroll the page, controls are at least 44 px and no hotspot overlaps the model. Zoom bounds, day/night and reset were exercised. Existing Chromium and WebKit controls tests covered English, Chinese and Malay, and the scene regression covered touch pinch, mouse wheel, keyboard, shop entry, history, lighting and fallback. These browser simulations do not establish physical-device performance.
