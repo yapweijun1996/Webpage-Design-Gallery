@@ -133,6 +133,22 @@ export async function mount(stage, { base, signal }) {
       draw(performance.now());
     };
     ui = createModuleUI(stage, places, focusModule, signal);
+    // The traced reference frame is narrower than the outer Shop/Delivery plinths.
+    // Measure model bounds in the initial camera plane once, including mesh transforms.
+    const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+    const up = direction.clone().cross(right);
+    const extent = new THREE.Vector2();
+    const corner = new THREE.Vector3();
+    composed.root.updateMatrixWorld(true);
+    composed.root.traverse(object => {
+      const position = object.geometry?.attributes.position;
+      if (!position) return;
+      for (let i = 0; i < position.count; i += 1) {
+        corner.fromBufferAttribute(position, i).applyMatrix4(object.matrixWorld);
+        extent.x = Math.max(extent.x, Math.abs(corner.dot(right)));
+        extent.y = Math.max(extent.y, Math.abs(corner.dot(up)));
+      }
+    });
     const fit = () => {
       const width = stage.clientWidth;
       const height = Math.max(1, stage.clientHeight - ui.panel.offsetHeight);
@@ -140,7 +156,9 @@ export async function mount(stage, { base, signal }) {
       renderer.setSize(width, height, false);
       canvas.style.height = `${height}px`;
       const aspect = width / height;
-      const half = Math.max(FRAME.height / 2, FRAME.width / 2 / aspect) / FRAME.pixelsPerUnit / 1.3;
+      // Aim for 1.1x, constrained by the complete models plus breathing room.
+      const nominal = Math.max(FRAME.height / 2, FRAME.width / 2 / aspect) / FRAME.pixelsPerUnit / 1.1;
+      const half = Math.max(nominal, extent.y * 1.06, extent.x * 1.06 / aspect);
       Object.assign(camera, { left: -half * aspect, right: half * aspect, top: half, bottom: -half });
       camera.position.copy(controls.target).addScaledVector(direction, 60);
       camera.updateProjectionMatrix();
