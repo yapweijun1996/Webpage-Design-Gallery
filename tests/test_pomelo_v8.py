@@ -916,6 +916,21 @@ console.log('Toast runtime contracts passed');
         self.assertEqual(home.count('class="accent-word"'), 1)
         self.assertEqual(home.count('aria-hidden="true" focusable="false"><path pathLength="1"'), 1)
 
+    def test_hero_3d_assets_and_markup(self):
+        for name in ("analytics", "automation", "bags", "delivery", "payment", "shop", "warehouse"):
+            self.assertTrue((DEMO / f"assets/3d/commerce-hub/{name}.glb").is_file(), name)
+        for name in ("three.module.min.js", "OrbitControls.js", "GLTFLoader.js", "BufferGeometryUtils.js", "RoomEnvironment.js", "three.LICENSE"):
+            self.assertTrue((DEMO / "assets/vendor/three" / name).is_file(), name)
+        for path, root in (("index.html", "./"), ("zh/index.html", "../"), ("ms/index.html", "../")):
+            home = (DEMO / path).read_text("utf-8")
+            self.assertIn(f'data-hero3d="{root}assets/3d/commerce-hub/"', home)
+            self.assertEqual(home.count("data-hero3d="), 1)
+            for key in ("label", "hint", "load", "loading", "failed"):
+                self.assertRegex(home, rf'data-{key}="[^"]+"')
+        # Only the home page carries the scene, and the photo stays inside it as the fallback.
+        self.assertNotIn("data-hero3d", (DEMO / "about.html").read_text("utf-8"))
+        self.assertIn("hero-3d.js", (DEMO / "sw.js").read_text("utf-8"))
+
     def test_css_custom_properties_are_defined(self):
         css = (DEMO / "assets/css/site.bundle.css").read_text("utf-8")
         defined = set(re.findall(r"(--[\w-]+)\s*:", css))
