@@ -1,4 +1,4 @@
-// Accessible labels share selection with canvas picking; the panel stays below the scene.
+// Accessible labels share selection with canvas picking; the glass panel overlays the bottom of the card.
 import { t } from '../core/i18n.js';
 import { icon } from '../icons.generated.js';
 
@@ -23,7 +23,11 @@ export function createModuleUI(stage, places, focus, signal) {
   function show() {
     title.textContent = t(selected ? `hero3d.module.${selected}.label` : 'hero3d.overview.title');
     text.textContent = t(selected ? `hero3d.module.${selected}.text` : 'hero3d.overview.text');
-    close.textContent = t(selected ? 'hero3d.close' : 'hero3d.reset');
+    const closeLabel = t(selected ? 'hero3d.close' : 'hero3d.reset');
+    close.setAttribute('aria-label', closeLabel);
+    const closeText = document.createElement('span');
+    closeText.textContent = closeLabel;
+    close.replaceChildren(icon(selected ? 'x' : 'refresh-cw'), closeText);
     for (const [id, button] of buttons) button.setAttribute('aria-pressed', String(id === selected));
     stage.dataset.selected = selected || '';
   }
@@ -71,20 +75,22 @@ export function createModuleUI(stage, places, focus, signal) {
     placeLabels(anchors, camera, height) {
       const width = stage.clientWidth;
       const occupied = [];
+      const labelBottom = Math.max(44, height - panel.offsetHeight - 8);
       for (const [id, button] of buttons) {
         const point = anchors.get(id).pin.clone().project(camera);
+        const top = anchors.get(id).top.clone().project(camera);
         const w = button.offsetWidth, h = button.offsetHeight;
         const x = Math.max(0, Math.min(width - w, (point.x + 1) * width / 2 - w / 2));
-        let y = Math.max(0, Math.min(height - h, (1 - point.y) * height / 2 - h));
+        let y = Math.max(0, Math.min(height - h, (1 - top.y) * height / 2 - h));
         // Resolve neighbours without removing any module from the keyboard order.
         for (const box of occupied) {
           if (x < box.x + box.w && x + w > box.x && y < box.y + h && y + h > box.y) {
             y = box.y + h + 2;
           }
         }
-        y = Math.min(height - h, y);
+        y = Math.min(labelBottom - h, y);
         button.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
-        occupied.push({ x, y, w });
+        occupied.push({ x, y, w, h });
       }
     },
     dispose() { layer.remove(); panel.remove(); },

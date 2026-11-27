@@ -5,7 +5,7 @@ import * as THREE from '../../vendor/three/three.module.min.js';
 import { OrbitControls } from '../../vendor/three/OrbitControls.js';
 import { GLTFLoader } from '../../vendor/three/GLTFLoader.js';
 import { RoomEnvironment } from '../../vendor/three/RoomEnvironment.js';
-import { FRAME, placements, VIEW_ELEVATION, VIEW_YAW } from './layout.js';
+import { placements, VIEW_ELEVATION, VIEW_YAW } from './layout.js';
 import { animateParts, composeModules, createLinks, disposeTree, pickModule } from './scene.js';
 
 import { createModuleUI } from './modules.js';
@@ -137,7 +137,8 @@ export async function mount(stage, { base, signal }) {
     // Measure model bounds in the initial camera plane once, including mesh transforms.
     const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
     const up = direction.clone().cross(right);
-    const extent = new THREE.Vector2();
+    const minimum = new THREE.Vector2(Infinity, Infinity);
+    const maximum = new THREE.Vector2(-Infinity, -Infinity);
     const corner = new THREE.Vector3();
     composed.root.updateMatrixWorld(true);
     composed.root.traverse(object => {
@@ -145,21 +146,31 @@ export async function mount(stage, { base, signal }) {
       if (!position) return;
       for (let i = 0; i < position.count; i += 1) {
         corner.fromBufferAttribute(position, i).applyMatrix4(object.matrixWorld);
-        extent.x = Math.max(extent.x, Math.abs(corner.dot(right)));
-        extent.y = Math.max(extent.y, Math.abs(corner.dot(up)));
+        const x = corner.dot(right), y = corner.dot(up);
+        minimum.x = Math.min(minimum.x, x);
+        minimum.y = Math.min(minimum.y, y);
+        maximum.x = Math.max(maximum.x, x);
+        maximum.y = Math.max(maximum.y, y);
       }
     });
     const fit = () => {
       const width = stage.clientWidth;
-      const height = Math.max(1, stage.clientHeight - ui.panel.offsetHeight);
+      const height = stage.clientHeight;
       if (!width || !height) return;
       renderer.setSize(width, height, false);
       canvas.style.height = `${height}px`;
       const aspect = width / height;
-      // Aim for 1.1x, constrained by the complete models plus breathing room.
-      const nominal = Math.max(FRAME.height / 2, FRAME.width / 2 / aspect) / FRAME.pixelsPerUnit / 1.1;
-      const half = Math.max(nominal, extent.y * 1.06, extent.x * 1.06 / aspect);
-      Object.assign(camera, { left: -half * aspect, right: half * aspect, top: half, bottom: -half });
+      // Fit the actual meshes to 94% of the width, with labels above and glass below.
+      // The full-card canvas lets the panel overlay the scene without an empty canvas band.
+      const labelRoom = ui.layer.querySelector('button').offsetHeight;
+      const bottomRoom = Math.max(ui.panel.offsetHeight + 8, height * 0.22);
+      const usable = Math.max(1, height - labelRoom - bottomRoom);
+      const half = Math.max((maximum.x - minimum.x) / (2 * aspect * 0.94),
+        (maximum.y - minimum.y) * height / (2 * usable));
+      const centerX = (minimum.x + maximum.x) / 2;
+      const centerY = (minimum.y + maximum.y) / 2 - (bottomRoom - labelRoom) * half / height;
+      Object.assign(camera, { left: centerX - half * aspect, right: centerX + half * aspect,
+        top: centerY + half, bottom: centerY - half });
       camera.position.copy(controls.target).addScaledVector(direction, 60);
       camera.updateProjectionMatrix();
       draw(performance.now());

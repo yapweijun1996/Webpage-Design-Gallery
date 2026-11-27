@@ -38,6 +38,8 @@
 @media (min-width: 1024px) {
   .hero { padding-block: var(--space-8) var(--space-9); }
   .hero__grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-8); }
+  .hero--home .hero__grid { grid-template-columns: minmax(0, 44fr) minmax(0, 56fr); gap: var(--space-6); }
+  .hero--home h1 { font-size: var(--size-home-headline); }
   .hero--about .hero__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 }
 /* Home atmosphere: curved sweeps and soft leaves use no image downloads. */

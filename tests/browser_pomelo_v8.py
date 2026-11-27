@@ -846,6 +846,7 @@ def check_scene_framing(browser, base):
         }
       });
       window.__sceneBounds = bounds;
+      window.__labelTops = Object.fromEntries([...composed.anchors].map(([id, anchor]) => [id, anchor.top.clone().project(camera).y]));
     """)
     for width, height in ((1440, 900), (1024, 768), (768, 1024), (390, 844), (320, 568)):
         context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce', service_workers='block')
@@ -856,7 +857,38 @@ def check_scene_framing(browser, base):
             page.locator('.hero3d__button').click()
             page.wait_for_selector('[data-hero3d][data-state="ready"]', timeout=60000)
             bounds = page.evaluate('window.__sceneBounds')
-            assert bounds['left'] > -0.96 and bounds['right'] < 0.96 and bounds['top'] > -0.96 and bounds['bottom'] < 0.96, (width, height, bounds)
+            card = page.locator('[data-hero3d]').bounding_box()
+            canvas = page.locator('[data-hero3d] canvas').bounding_box()
+            panel = page.locator('.hero3d__panel').bounding_box()
+            visible = {
+                'left': canvas['x'] + (bounds['left'] + 1) * canvas['width'] / 2,
+                'right': canvas['x'] + (bounds['right'] + 1) * canvas['width'] / 2,
+                'top': canvas['y'] + (1 - bounds['bottom']) * canvas['height'] / 2,
+                'bottom': canvas['y'] + (1 - bounds['top']) * canvas['height'] / 2,
+            }
+            assert card['x'] <= visible['left'] < visible['right'] <= card['x'] + card['width'], (width, visible, card)
+            assert card['y'] <= visible['top'] < visible['bottom'] <= panel['y'], (width, visible, panel)
+            assert abs(panel['y'] + panel['height'] - card['y'] - card['height']) <= 1, (width, panel, card)
+            fraction = (visible['right'] - visible['left']) / card['width']
+            if width == 1440:
+                assert fraction >= 0.85, (width, fraction, visible, card)
+            if width >= 1024:
+                copy = page.locator('.hero__copy').bounding_box()
+                assert 0.55 <= card['width'] / (copy['width'] + card['width']) <= 0.57, (width, copy, card)
+                assert abs(card['height'] / card['width'] - 0.95) < 0.01, (width, card)
+                assert page.locator('h1').evaluate('el => el.offsetHeight / parseFloat(getComputedStyle(el).lineHeight)') < 2.1, width
+            for button in page.locator('.hero3d__module').all():
+                box = button.bounding_box()
+                assert box['width'] >= 44 and box['height'] >= 44, (width, box)
+                assert box['y'] + box['height'] <= panel['y'] + 1, (width, box, panel)
+                if width >= 768:
+                    top = page.evaluate('id => window.__labelTops[id]', button.get_attribute('data-module'))
+                    model_top = canvas['y'] + (1 - top) * canvas['height'] / 2
+                    assert box['y'] + box['height'] <= model_top + 1, (width, button.get_attribute('data-module'), box, model_top)
+            document_height = page.evaluate('document.documentElement.scrollHeight')
+            if width in HOME_HEIGHT_LIMITS:
+                assert document_height <= HOME_HEIGHT_LIMITS[width], (width, document_height)
+            print(f'Scene {width}x{height}: card={card["width"]:.1f}px meshes={fraction:.1%} home={document_height}px', flush=True)
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width
         finally:
             context.close()
