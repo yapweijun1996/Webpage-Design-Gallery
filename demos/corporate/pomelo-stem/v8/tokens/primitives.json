@@ -64,8 +64,8 @@
     "hero-outline": "1.5px", "foliage-blur": "28px", "home-fade-start": "45%", "story-phone-ratio": "2 / 1",
     "scene-card-ratio": "1 / 1.15",
     "scene-wide-ratio": "1 / 0.95",
-    "scene-panel-height": "22%",
-    "home-headline": "clamp(2rem, 3.8vw, 3.375rem)"
+    "scene-panel-height": "44px",
+    "home-headline": "clamp(2rem, 2.8vw, 2.25rem)"
   },
   "z": {"stage": "1", "fab": "20", "header": "10", "toast": "30", "toast-accent": "-1", "modal": "40", "loader": "50"},
   "motion": {

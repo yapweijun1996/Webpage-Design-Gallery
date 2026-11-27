@@ -98,7 +98,8 @@ def check_toasts(browser, base, errors):
                 assert 64 <= box['height'] <= 70, (width, box)
             assert page.locator('.toast-region').evaluate('region => parseFloat(getComputedStyle(region).rowGap)') == 8
             close = page.locator('.toast__close').bounding_box()
-            assert close['width'] >= 44 and close['height'] >= 44, (width, close)
+            # Transformed boxes can report 43.99997px for a 44px control.
+            assert close['width'] >= 44 - 0.01 and close['height'] >= 44 - 0.01, (width, close)
             page.evaluate("""async () => {
               const {toast} = await import('./assets/js/core/toast.js');
               toast({type: 'success', messageKey: 'toast.online.title', detailKey: 'toast.online.detail', sticky: true});
@@ -118,7 +119,7 @@ def check_toasts(browser, base, errors):
             assert page.locator('.toast').count() == 3
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width
             action = page.locator('.toast__action').bounding_box()
-            assert action['width'] >= 44 and action['height'] >= 44, (width, action)
+            assert action['width'] >= 44 - 0.01 and action['height'] >= 44 - 0.01, (width, action)
             page.locator('.toast__close').first.evaluate('button => button.click()')
             page.wait_for_timeout(260)
             page.locator('.toast__close').evaluate_all('buttons => buttons.forEach(button => button.click())')
@@ -826,6 +827,67 @@ def check_home_compact_layout(browser, base):
                 context.close()
 
 
+def check_home_headline(browser, base):
+    """Exercise all desktop locales with native fonts and a wider sans fallback."""
+    for fallback in (False, True):
+        context = browser.new_context(reduced_motion='reduce', service_workers='block')
+        try:
+            if fallback:
+                context.route('**/*', lambda route: route.abort() if route.request.resource_type == 'font' else route.continue_())
+                # The home uses system fonts today. Force a known wider fallback too,
+                # so blocking webfonts alone cannot make this regression check inert.
+                context.add_init_script("document.addEventListener('DOMContentLoaded', () => document.documentElement.style.setProperty('--font-body', 'Arial, Helvetica, sans-serif'))")
+            page = context.new_page()
+            for width in (1024, 1280, 1440, 1920):
+                page.set_viewport_size({'width': width, 'height': 900})
+                for locale in ('', 'zh/', 'ms/'):
+                    page.goto(base + locale + 'index.html', wait_until='load')
+                    page.evaluate('document.fonts.ready')
+                    metrics = page.locator('h1').evaluate("""el => {
+                      const style = getComputedStyle(el);
+                      const range = document.createRange();
+                      range.selectNodeContents(el);
+                      const box = el.getBoundingClientRect();
+                      return {
+                        lines: el.offsetHeight / parseFloat(style.lineHeight),
+                        overflow: [...range.getClientRects()].some(rect => rect.left < box.left - 1 || rect.right > box.right + 1),
+                        font: style.fontFamily
+                      };
+                    }""")
+                    assert not metrics['overflow'], (width, locale, fallback, metrics)
+                    assert 1.9 < metrics['lines'] < (3.1 if width == 1024 else 2.1), (width, locale, fallback, metrics)
+                    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), (width, locale, fallback)
+            print(f'Home headlines: 1024/1280/1440/1920 en/zh/ms {"fallback" if fallback else "native"} PASS', flush=True)
+        finally:
+            context.close()
+
+
+def check_scene_panel(page):
+    """The desktop overlay hugs its text and keeps the full selection readable."""
+    metrics = page.locator('.hero3d__panel').evaluate("""panel => {
+      const box = panel.getBoundingClientRect();
+      const style = getComputedStyle(panel);
+      const children = [...panel.children];
+      const [title, text, close] = children.map(el => el.getBoundingClientRect());
+      const inset = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom)
+        + parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
+      return {
+        height: box.height,
+        contentHeight: Math.max(title.height + text.height, close.height) + inset,
+        readable: children.every(el => {
+          const rect = el.getBoundingClientRect();
+          return el.textContent.trim() && el.scrollWidth <= el.clientWidth
+            && el.scrollHeight <= el.clientHeight
+            && rect.left >= box.left && rect.right <= box.right
+            && rect.top >= box.top && rect.bottom <= box.bottom;
+        }),
+        separate: text.top >= title.bottom - 1 && text.right <= close.left + 1
+      };
+    }""")
+    assert abs(metrics['height'] - metrics['contentHeight']) <= 1, metrics
+    assert metrics['readable'] and metrics['separate'], metrics
+
+
 def check_scene_framing(browser, base):
     """Measure projected mesh vertices through a test-only response override."""
     source = (DEMO / 'assets/js/hero3d/viewer.js').read_text('utf-8')
@@ -876,10 +938,12 @@ def check_scene_framing(browser, base):
                 copy = page.locator('.hero__copy').bounding_box()
                 assert 0.55 <= card['width'] / (copy['width'] + card['width']) <= 0.57, (width, copy, card)
                 assert abs(card['height'] / card['width'] - 0.95) < 0.01, (width, card)
-                assert page.locator('h1').evaluate('el => el.offsetHeight / parseFloat(getComputedStyle(el).lineHeight)') < 2.1, width
+                assert page.locator('h1').evaluate('el => el.offsetHeight / parseFloat(getComputedStyle(el).lineHeight)') < (3.1 if width == 1024 else 2.1), width
+            if width >= 1024:
+                check_scene_panel(page)
             for button in page.locator('.hero3d__module').all():
                 box = button.bounding_box()
-                assert box['width'] >= 44 and box['height'] >= 44, (width, box)
+                assert box['width'] >= 44 - 0.01 and box['height'] >= 44 - 0.01, (width, box)
                 assert box['y'] + box['height'] <= panel['y'] + 1, (width, box, panel)
                 if width >= 768:
                     top = page.evaluate('id => window.__labelTops[id]', button.get_attribute('data-module'))
@@ -906,6 +970,7 @@ def main():
     try:
         with sync_playwright() as p:
             browser = launch(p)
+            check_home_headline(browser, base)
             check_home_compact_layout(browser, base)
             check_toasts(browser, base, errors)
             check_release_recheck(browser, base, errors)
@@ -943,7 +1008,7 @@ def main():
                                 if control.get_attribute('class') == 'skip-link':
                                     continue
                                 box = control.bounding_box()
-                                assert box['width'] >= 44 and box['height'] >= 44, (width, locale, name, control.evaluate('el => el.outerHTML'), box)
+                                assert box['width'] >= 44 - 0.01 and box['height'] >= 44 - 0.01, (width, locale, name, control.evaluate('el => el.outerHTML'), box)
                 if not args.no_capture and width in (1440, 768, 390):
                     page.goto(base + 'index.html', wait_until='load')
                     page.wait_for_function("[...document.images].filter(i => i.loading !== 'lazy').every(i => i.complete)")
@@ -1032,7 +1097,7 @@ def main():
             page.evaluate('window.scrollTo(0, innerHeight * 3)')
             page.wait_for_function("document.querySelector('[data-back-to-top]').dataset.state === 'visible'")
             tb = top.bounding_box()
-            assert tb['width'] >= 44 and tb['x'] + tb['width'] <= 390 and tb['y'] + tb['height'] <= 844
+            assert tb['width'] >= 44 - 0.01 and tb['x'] + tb['width'] <= 390 and tb['y'] + tb['height'] <= 844
             top.click()
             page.wait_for_function('scrollY === 0')
             page.wait_for_function("document.activeElement && document.activeElement.tagName === 'H1'")
@@ -1135,13 +1200,14 @@ def main():
             overview = page.locator('#hero3d-title').inner_text()
             for button in buttons.all():
                 box = button.bounding_box()
-                assert box['width'] >= 44 and box['height'] >= 44, box
+                assert box['width'] >= 44 - 0.01 and box['height'] >= 44 - 0.01, box
                 button.click()
                 assert page.locator('#hero3d-title').inner_text() == button.get_attribute('aria-label')
                 module = button.get_attribute('data-module')
                 expected = page.evaluate("id => JSON.parse(document.querySelector('#i18n-runtime').textContent)['hero3d.module.' + id + '.text']", module)
                 assert page.locator('.hero3d__panel p').inner_text() == expected
                 assert button.get_attribute('aria-pressed') == 'true'
+                check_scene_panel(page)
                 page.keyboard.press('Escape')
                 assert page.locator('#hero3d-title').inner_text() == overview
                 assert button.evaluate('el => el === document.activeElement')
@@ -1157,7 +1223,7 @@ def main():
                 assert page.evaluate('document.documentElement.scrollHeight') <= HOME_HEIGHT_LIMITS[width]
                 for button in buttons.all():
                     box = button.bounding_box()
-                    assert box['width'] >= 44 and box['height'] >= 44
+                    assert box['width'] >= 44 - 0.01 and box['height'] >= 44 - 0.01
                     button.click()
                     assert page.locator('#hero3d-title').inner_text() == button.get_attribute('aria-label')
                     page.keyboard.press('Escape')

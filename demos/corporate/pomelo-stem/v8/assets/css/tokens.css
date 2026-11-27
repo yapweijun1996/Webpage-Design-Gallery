@@ -108,8 +108,8 @@
   --size-story-phone-ratio: 2 / 1;
   --size-scene-card-ratio: 1 / 1.15;
   --size-scene-wide-ratio: 1 / 0.95;
-  --size-scene-panel-height: 22%;
-  --size-home-headline: clamp(2rem, 3.8vw, 3.375rem);
+  --size-scene-panel-height: 44px;
+  --size-home-headline: clamp(2rem, 2.8vw, 2.25rem);
   --z-stage: 1;
   --z-fab: 20;
   --z-header: 10;
