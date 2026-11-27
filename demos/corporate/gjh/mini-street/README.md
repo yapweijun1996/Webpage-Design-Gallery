@@ -90,7 +90,7 @@ The earlier `06e505d627ee533b` run served generated files by request interceptio
 
 ## Experimental visitor candidate
 
-The optional `?visitorCandidate=1` preview loads a static Girl visitor with a raincoat, umbrella and shopping bag. The normal route retains the original visitor. If the candidate cannot load, the original visitor is restored. [Source and provenance](../../../../models/mini-street/README.md) describe the experimental asset and its limitations; it is not a motion-ready character.
+The optional `?visitorCandidate=1` preview loads the V18 static Girl visitor with a raincoat, umbrella and shopping bag. V18 adjusts the umbrella canopy and straight shaft alignment and refines the right-hand grip. The normal route retains the original visitor. If the candidate cannot load, the original visitor is restored. [Source and provenance](../../../../models/mini-street/README.md) describe the experimental asset and its limitations; it is not a motion-ready character.
 
 ### Visitor framing on short screens
 

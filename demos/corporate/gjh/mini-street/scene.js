@@ -172,7 +172,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
     canvas.dataset.visitorCandidate = "loading";
     const restoreVisitor = () => { canvas.dataset.visitorCandidate = "failed"; street.restoreVisitor(); invalidate(); };
     import("../v11/vendor/GLTFLoader.js").then(({ GLTFLoader }) => {
-      new GLTFLoader().load(new URL("./assets/visitor-candidate-v10.glb", import.meta.url).href,
+      new GLTFLoader().load(new URL("./assets/visitor-candidate-v18.glb", import.meta.url).href,
         ({ scene: model }) => {
           model.position.set(1.13, 0.025, 3.25);
           model.scale.setScalar(1.6);

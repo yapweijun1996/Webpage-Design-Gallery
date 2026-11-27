@@ -1,6 +1,6 @@
-# Mini Street visitor V10 source
+# Mini Street visitor sources
 
-This editable Blender file is the source for the static preview at `demos/corporate/gjh/mini-street/assets/visitor-candidate-v10.glb`. The model is an experimental posed visitor, not an animation-ready rig. The unmasked source body and the original posed pieces remain in the blend.
+`visitor-candidate-v10.blend` is the V10 source; `visitor-candidate-v18.blend` is the editable source for the V18 static preview at `demos/corporate/gjh/mini-street/assets/visitor-candidate-v18.glb`. The model is an experimental posed visitor, not an animation-ready rig. The unmasked source body and the original posed pieces remain in the blend.
 
 The visitor reuses Girl body, Bob hair and Boots from the owner's Blender-3D-Gallery `models/chibi-dressup` at commit `db842f2b7307c3855242e6c0049b82625e0c031e`. The raincoat, umbrella and shopping bag were adapted or built for this prototype. Gallery sources are at <https://github.com/yapweijun1996/Blender-3D-Gallery/tree/db842f2b7307c3855242e6c0049b82625e0c031e/models/chibi-dressup>. This repository's source inspection did not establish a separate asset license; confirm the underlying source rights before redistribution outside the project.
 
