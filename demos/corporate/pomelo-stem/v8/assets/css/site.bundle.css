@@ -657,6 +657,8 @@ body.is-loading { overflow: hidden; }
   box-shadow: var(--shadow-lg); background: var(--c-surface); color: var(--c-text);
   font-family: var(--font-body); line-height: var(--lineheight-body); text-align: center; overflow-wrap: anywhere;
 }
+/* The card only holds focus while loading; it is not interactive, so no focus ring. */
+.loader__card:focus, .loader__card:focus-visible { outline: none; }
 .loader__brand { display: grid; justify-items: center; gap: var(--space-2); min-width: 0; max-width: 100%; }
 .loader__mark { display: block; width: var(--space-8); height: var(--space-8); max-width: 100%; }
 .loader__tagline { margin: 0; font-size: var(--size-text-sm); color: var(--c-text-muted); }

@@ -601,7 +601,7 @@ def check_qa825(browser, base, errors):
         assert not page.locator('#main').evaluate('node => node.inert')
 
         # A failed module must leave the server-rendered note available in every locale.
-        page.route('**/assets/js/main.js', lambda route: route.abort())
+        page.route('**/assets/js/main.js*', lambda route: route.abort())
         for locale in ('', 'zh/', 'ms/'):
             page.goto(base + locale + 'contact.html', wait_until='load')
             assert page.locator('form button[type="submit"]').is_disabled()
