@@ -267,6 +267,27 @@
   #toolbar .lighting button { min-width: 44px; padding-inline: 8px; }
   #toolbar .lighting button span { display: none; }
   #toolbar .scene-camera-help { grid-column: 1 / -1; grid-row: 2; }
+  /* Compact destination controls leave the center of the street unobstructed. */
+  .stage[data-webgl]:not([data-visitor-focus]) .stops {
+    inset: auto auto 8px 8px;
+    display: grid;
+    grid-template-columns: repeat(3, 44px);
+    gap: 4px;
+    width: auto;
+    pointer-events: auto;
+  }
+  .stage[data-webgl]:not([data-visitor-focus]) .stop {
+    position: relative;
+    inset: auto;
+    translate: none;
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    padding: 0;
+    justify-content: center;
+  }
+  .stage[data-webgl]:not([data-visitor-focus]) .stop > span:not(.stop-icon),
+  .stage[data-webgl]:not([data-visitor-focus]) .stop::after { display: none; }
   /* Keep destinations in the accessibility tree and reveal them on focus. */
   .stage[data-visitor-focus] .stops { display: grid; }
   .stage[data-visitor-focus] .stops:not(:focus-within) {
