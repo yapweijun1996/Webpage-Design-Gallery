@@ -69,7 +69,6 @@
   "footer.explore": "浏览",
   "footer.company": "公司",
   "footer.version": "版本 {version}",
-
   "meta.index.title": "Pomelo STEM · Growing Smarter Solutions.",
   "meta.index.description": "为新加坡和马来西亚的中小企业提供网上商店、订单备货和实用的自动化工具。",
   "home.h1": "在一个[[安静]]的地方，把店打理好。",
@@ -120,7 +119,6 @@
   "who.multi.body": "自己的商店网站加上电商平台，库存要处处一致。",
   "close.title": "告诉我们，是什么在拖慢你的店。",
   "close.body": "一通简短的电话，就能知道我们帮不帮得上忙。",
-
   "meta.commerce.title": "商店演示 · Pomelo STEM",
   "meta.commerce.description": "试用一个示例商店：三件商品、一张订单和一次取货。",
   "commerce.h1": "像顾客一样，试一试这家店。",
@@ -157,7 +155,6 @@
   "ai.body": "Pomelo STEM 不内置自己的 AI。你通过 MCP 连接自己信任的助手，每份草稿都等你审阅。",
   "ai.mcp": "已通过 MCP 连接",
   "ai.photoAlt": "输入照片：亚麻布上的陶瓷马克杯。",
-
   "meta.services.title": "服务 · Pomelo STEM",
   "meta.services.description": "为新加坡和马来西亚成长中的企业提供网站、商店系统和自动化。",
   "services.h1": "为成长中的企业做网站、商店系统和自动化。",
@@ -199,7 +196,6 @@
   "faq.2.a": "我们不内置自己的 AI。你通过 MCP 连接你已经在用的助手，每个结果都由人审阅。",
   "faq.3.q": "可以从小规模开始吗？",
   "faq.3.a": "通常就是这样开始的。大多数项目从一家店或一个流程做起。",
-
   "meta.about.title": "关于我们 · Pomelo STEM",
   "meta.about.description": "Pomelo STEM 为什么和新马中小企业一起做实用的软件。",
   "about.h1": "我们和店主一起做，而不是替店主做。",
@@ -221,7 +217,6 @@
   "about.fact.langLabel": "语言",
   "about.fact.size": "中小企业",
   "about.fact.sizeLabel": "合作对象",
-
   "meta.contact.title": "联系我们 · Pomelo STEM",
   "meta.contact.description": "预约一通简短的电话，或留言告诉我们你的生意。",
   "contact.h1": "告诉我们，是什么在拖慢你的店。",
@@ -241,7 +236,6 @@
   "next.1": "我们会在一个工作日内读到你的留言。",
   "next.2": "我们会回复几个问题，或约一个通话时间。",
   "next.3": "通话时，我们一起定下一个小小的第一步。",
-
   "meta.redirect.title": "工作方式 · Pomelo STEM",
   "meta.redirect.description": "这个页面已移到「服务」。",
   "redirect.body": "这个页面已移到「服务」。",
@@ -254,5 +248,23 @@
   "hero3d.hint": "横向拖动可转动",
   "hero3d.load": "用 3D 探索",
   "hero3d.loading": "正在加载 3D 场景…",
-  "hero3d.failed": "3D 场景无法加载，仍显示照片。"
+  "hero3d.failed": "3D 场景无法加载，仍显示照片。",
+  "hero3d.module.bags.label": "订单",
+  "hero3d.module.bags.text": "中央的购物袋代表订单，其他环节都为它服务。",
+  "hero3d.reset": "查看完整网络",
+  "hero3d.overview.title": "一张订单，一个网络",
+  "hero3d.overview.text": "购物袋位于中央，业务的每个环节都与订单相连。",
+  "hero3d.module.shop.label": "门店",
+  "hero3d.module.shop.text": "顾客浏览和购买商品的店面。",
+  "hero3d.module.warehouse.label": "仓库",
+  "hero3d.module.warehouse.text": "货物在此存放、拣选，装箱后送上输送带。",
+  "hero3d.module.delivery.label": "配送",
+  "hero3d.module.delivery.text": "包裹由货车运送，或存放在自提柜中。",
+  "hero3d.module.payment.label": "支付",
+  "hero3d.module.payment.text": "每张订单支持刷卡与感应支付。",
+  "hero3d.module.analytics.label": "分析",
+  "hero3d.module.analytics.text": "销售趋势帮助做出下一步决定。",
+  "hero3d.module.automation.label": "自动化",
+  "hero3d.module.automation.text": "常规单据和标签无需人工即可生成。",
+  "hero3d.close": "关闭"
 }

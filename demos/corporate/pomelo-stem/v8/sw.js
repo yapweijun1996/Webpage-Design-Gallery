@@ -44,6 +44,7 @@ const PRECACHE = [
   "assets/js/core/unsaved.js",
   "assets/js/core/update.js",
   "assets/js/hero3d/layout.js",
+  "assets/js/hero3d/modules.js",
   "assets/js/hero3d/scene.js",
   "assets/js/hero3d/viewer.js",
   "assets/js/i18n-defaults.generated.js",

@@ -62,6 +62,7 @@
   --radius-lg: 20px;
   --radius-pill: 999px;
   --radius-toast: 16px;
+  --radius-circle: 50%;
   --font-display: Georgia, 'Times New Roman', 'Songti SC', 'Noto Serif CJK SC', serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -700,6 +701,34 @@ body::before {
 [data-hero3d][data-state="idle"] .hero3d__status { bottom: calc(var(--space-3) + var(--size-tap)); }
 [data-hero3d][data-state="ready"] .hero3d__hint { animation: pomelo-hint-out var(--motion-slow) var(--motion-ease-in) calc(10 * var(--motion-slow)) forwards; }
 @keyframes pomelo-hint-out { to { opacity: 0; } }
+/* Reserve the same box for the photo and loaded scene. */
+.hero .hero__media[data-hero3d] { overflow: visible; background: transparent; aspect-ratio: 1 / 1; }
+[data-hero3d] > img { border-radius: var(--radius-lg); object-fit: cover; }
+[data-hero3d] canvas { background: transparent; }
+[data-hero3d][data-state="ready"] > img { opacity: 0; }
+[data-hero3d]::before {
+  content: ""; position: absolute; inset: 25% -3% 25%; border-radius: var(--radius-circle); pointer-events: none;
+  background: radial-gradient(ellipse, transparent 55%, var(--c-glow) 58%, var(--c-accent) 59%, transparent 61%);
+  transform: rotate(-12deg); filter: drop-shadow(0 0 var(--space-4) var(--c-glow));
+}
+.hero3d__labels { position: absolute; inset: 0; pointer-events: none; z-index: var(--z-stage); }
+.hero3d__module {
+  position: absolute; top: 0; left: 0; display: flex; align-items: center; gap: var(--space-1);
+  min-width: var(--size-tap); min-height: var(--size-tap); padding: var(--space-1) var(--space-2);
+  border: var(--size-border) solid var(--c-accent); border-radius: var(--radius-pill);
+  background: var(--c-surface); color: var(--c-text); font-size: var(--size-text-xs); pointer-events: auto;
+}
+.hero3d__module[aria-pressed="true"] { background: var(--c-accent); color: var(--c-on-accent); }
+.hero3d__panel {
+  position: absolute; bottom: 0; inset-inline: 0; padding: var(--space-2) var(--space-3);
+  border: var(--size-border) solid var(--c-border-control); border-radius: var(--radius-md);
+  background: var(--c-surface); color: var(--c-text); z-index: var(--z-stage);
+}
+.hero3d__panel h2, .hero3d__panel p { font-size: var(--size-text-xs); line-height: var(--lineheight-snug); margin: 0; }
+.hero3d__panel h2 { font-family: var(--font-body); padding-inline-end: var(--space-9); }
+.hero3d__close { min-height: var(--size-tap); min-width: var(--size-tap); font-size: var(--size-text-xs); color: var(--c-accent); background: transparent; border: 0; padding-inline: var(--space-2); }
+.hero3d__hint { display: none; }
+@media (min-width: 768px) { .hero .hero__media[data-hero3d] { aspect-ratio: 4 / 5; } }
 
 /* components/lang-menu.css */
 /* One disclosure in the header; the same locale links also work without JS in the footer. */
