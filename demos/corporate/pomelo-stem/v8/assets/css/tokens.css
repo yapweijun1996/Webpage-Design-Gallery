@@ -38,6 +38,8 @@
   --p-red-100: #fae9e6;
   --p-red-900: #442622;
   --p-scrim: rgba(11, 22, 17, 0.56);
+  --p-mint-300: #a6e3b4;
+  --p-mint-500: #5fbf7c;
   --p-glow-light: rgba(29, 87, 55, 0.32);
   --p-glow-dark: rgba(143, 207, 164, 0.3);
   --p-glass-light: rgba(255, 255, 255, 0.6);
@@ -95,7 +97,7 @@
   --size-reveal: 16px;
   --size-zoom: 1.03;
   --size-hero-bar: 3px;
-  --size-stroke: 4px;
+  --size-stroke: 3px;
   --z-fab: 20;
   --z-header: 10;
   --z-toast: 30;
@@ -183,6 +185,8 @@
   --c-toast-error-icon: var(--p-red-700);
   --c-scrim: var(--p-scrim);
   --c-hero-top: var(--p-sage-100);
+  --c-btn-from: var(--p-forest-700);
+  --c-btn-to: var(--p-forest-800);
   --c-glow: var(--p-glow-light);
   --c-glass: var(--p-glass-light);
   --c-sweep: var(--p-sweep-light);
@@ -239,6 +243,8 @@
     --c-toast-error-icon: var(--p-red-200);
     --c-scrim: var(--p-scrim);
     --c-hero-top: var(--p-forest-900);
+    --c-btn-from: var(--p-mint-300);
+    --c-btn-to: var(--p-mint-500);
     --c-glow: var(--p-glow-dark);
     --c-glass: var(--p-glass-dark);
     --c-sweep: var(--p-sweep-dark);
@@ -295,6 +301,8 @@
   --c-toast-error-icon: var(--p-red-200);
   --c-scrim: var(--p-scrim);
   --c-hero-top: var(--p-forest-900);
+  --c-btn-from: var(--p-mint-300);
+  --c-btn-to: var(--p-mint-500);
   --c-glow: var(--p-glow-dark);
   --c-glass: var(--p-glass-dark);
   --c-sweep: var(--p-sweep-dark);

@@ -1,5 +1,5 @@
 // Scroll reveals for blocks that start below the fold. Content stays visible if this never runs.
-const TARGETS = '.section-head, .story-step, .card, .band__grid > li, .closing__inner, .service, .next-steps > *, .review-grid > *';
+const TARGETS = '.section-head, .story-step, .card, .band__grid > li, .closing__inner, .service, .next-steps > *, .review-grid > *, .process > li, .facts > div, .split__copy, .accordion, .contact__primary';
 
 export function init() {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');

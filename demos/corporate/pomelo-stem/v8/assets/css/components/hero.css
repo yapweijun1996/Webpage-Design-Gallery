@@ -18,7 +18,7 @@
 }
 :lang(zh-Hans) .accent-word__stroke { bottom: calc(-1 * var(--space-2)); }
 .button--primary:not(:disabled) {
-  background: linear-gradient(180deg, var(--c-accent), var(--c-accent-strong));
+  background: linear-gradient(180deg, var(--c-btn-from), var(--c-btn-to));
   box-shadow: var(--shadow-glow) var(--c-glow);
 }
 .icon-button, .update-button, .lang-menu__button {
@@ -29,3 +29,8 @@
 @media (hover: hover) and (pointer: fine) {
   .icon-button:hover, .update-button:hover { background: var(--c-accent-soft); }
 }
+/* Inner pages: same visual language on service icons, step badges and the philosophy quote. */
+.service__icon { background: linear-gradient(180deg, var(--c-accent-soft), var(--c-surface-muted)); border: var(--size-border) solid var(--c-border-subtle); }
+.next-steps__n::before { background: linear-gradient(180deg, var(--c-btn-from), var(--c-btn-to)); color: var(--c-on-accent); box-shadow: var(--shadow-glow) var(--c-glow); }
+.philosophy { border-left-color: var(--c-accent); }
+.section--muted { background: linear-gradient(180deg, var(--c-surface-muted), var(--c-bg)); }

@@ -27,10 +27,10 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .card, .media img { transition: transform var(--motion-slow) var(--motion-ease-out), box-shadow var(--motion-slow) var(--motion-ease-out); }
+  .card, .service, .facts div, .media img { transition: transform var(--motion-slow) var(--motion-ease-out), box-shadow var(--motion-slow) var(--motion-ease-out); }
 }
 @media (hover: hover) and (pointer: fine) {
-  .card:hover { transform: translateY(var(--size-lift)); box-shadow: var(--shadow-md); }
+  .card:hover, .service:hover, .facts div:hover { transform: translateY(var(--size-lift)); box-shadow: var(--shadow-md); }
   .story-step .media:hover img { transform: scale(var(--size-zoom)); }
 }
 @media (prefers-reduced-motion: no-preference) {
