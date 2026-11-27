@@ -1,6 +1,6 @@
 /* Base: reset, typography, focus. Values come from tokens.css only. */
 *, *::before, *::after { box-sizing: border-box; }
-html { scrollbar-gutter: stable; -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--size-header) + var(--space-4)); }
+html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--size-header) + var(--space-4)); }
 body {
   margin: 0;
   background: var(--c-bg);
