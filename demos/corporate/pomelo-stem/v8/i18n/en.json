@@ -266,5 +266,16 @@
   "hero3d.module.analytics.text": "Sales trends turn into the next decision.",
   "hero3d.module.automation.label": "Automation",
   "hero3d.module.automation.text": "Routine documents and labels are produced without manual steps.",
-  "hero3d.close": "Close"
+  "hero3d.close": "Close",
+  "home.trust.1": "Simple to start",
+  "home.trust.2": "Practical for daily use",
+  "home.trust.3": "Built for SG & MY",
+  "home.feat.1.title": "Online Shop",
+  "home.feat.1.text": "Show and sell your products",
+  "home.feat.2.title": "Order & Fulfilment",
+  "home.feat.2.text": "Prepare, pack and track orders",
+  "home.feat.3.title": "Automation",
+  "home.feat.3.text": "Save time with practical tools",
+  "home.feat.4.title": "Growth Insights",
+  "home.feat.4.text": "See performance and grow steadily"
 }

@@ -106,7 +106,9 @@
     "reveal": "16px",
     "zoom": "1.03",
     "hero-bar": "3px",
-    "stroke": "3px"
+    "stroke": "3px",
+    "hero-outline": "1.5px",
+    "foliage-blur": "18px"
   },
   "z": {
     "stage": "1",

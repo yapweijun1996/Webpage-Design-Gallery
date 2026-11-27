@@ -1,16 +1,19 @@
-<section class="hero">
+<section class="hero hero--home">
   <div class="container hero__grid">
     <div class="hero__copy">
       <p class="eyebrow"><span translate="no">{{t:site.brand}}</span> · <span translate="no">{{t:site.tagline}}</span></p>
       <h1 class="display-lg">{{t:home.h1}}</h1>
       <p class="lead">{{t:home.lead}}</p>
-      {{> cta-pair}}
+      {{> hero-cta}}
+      <ul class="hero__trust"><li>{{icon:check-circle}}{{t:home.trust.1}}</li><li>{{icon:check-circle}}{{t:home.trust.2}}</li><li>{{icon:check-circle}}{{t:home.trust.3}}</li></ul>
     </div>
     <figure class="hero__media media media--portrait" data-hero3d="{{root}}assets/3d/commerce-hub/" data-label="{{t:hero3d.label}}" data-hint="{{t:hero3d.hint}}" data-load="{{t:hero3d.load}}" data-loading="{{t:hero3d.loading}}" data-failed="{{t:hero3d.failed}}">
       {{img:a01-home-hero-merchant|home.heroAlt|(min-width: 1024px) 40vw, 100vw|eager}}
     </figure>
   </div>
 </section>
+
+<div class="container home-features"><ul class="home-features__grid"><li class="home-feature"><span class="home-feature__icon">{{icon:cart}}</span><div><h2>{{t:home.feat.1.title}}</h2><p>{{t:home.feat.1.text}}</p></div></li><li class="home-feature"><span class="home-feature__icon">{{icon:package}}</span><div><h2>{{t:home.feat.2.title}}</h2><p>{{t:home.feat.2.text}}</p></div></li><li class="home-feature"><span class="home-feature__icon">{{icon:cog}}</span><div><h2>{{t:home.feat.3.title}}</h2><p>{{t:home.feat.3.text}}</p></div></li><li class="home-feature"><span class="home-feature__icon">{{icon:chart-bars}}</span><div><h2>{{t:home.feat.4.title}}</h2><p>{{t:home.feat.4.text}}</p></div></li></ul></div>
 
 <section class="section story" aria-labelledby="story-title">
   <div class="container">
