@@ -930,6 +930,7 @@ def main():
                     assert page.locator('.hero [data-reveal]').count() == 0
                     page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
                     page.wait_for_function("document.querySelectorAll('[data-reveal=\"wait\"]').length < " + str(waiting))
+                    page.wait_for_function("[...document.querySelectorAll('[data-reveal=wait]')].every(el => el.getBoundingClientRect().bottom > 0)")
                     page.evaluate("window.scrollTo(0, 0)")
                     page.emulate_media(reduced_motion='reduce')
                     page.wait_for_function("document.querySelectorAll('[data-reveal]').length === 0")

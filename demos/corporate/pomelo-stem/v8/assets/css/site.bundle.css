@@ -657,7 +657,8 @@ body::before {
   fill: none; stroke: var(--c-accent); stroke-width: var(--size-stroke); stroke-linecap: round;
   vector-effect: non-scaling-stroke; pointer-events: none; overflow: visible;
 }
-:lang(zh-Hans) .accent-word__stroke { bottom: calc(-1 * var(--space-2)); }
+:lang(zh-Hans) .display-lg { line-height: var(--lineheight-snug); }
+:lang(zh-Hans) .accent-word__stroke { bottom: calc(-1 * var(--space-1)); }
 .button--primary:not(:disabled) {
   background: linear-gradient(180deg, var(--c-btn-from), var(--c-btn-to));
   box-shadow: var(--shadow-glow) var(--c-glow);
