@@ -2,6 +2,9 @@ const stage = document.querySelector("#stage");
 const canvas = document.querySelector("#view");
 const toolbar = document.querySelector("#toolbar");
 const status = document.querySelector("#scene-status");
+const sceneLoader = document.querySelector("#scene-loader");
+sceneLoader.hidden = false;
+stage.dataset.loading = "";
 const stops = [...document.querySelectorAll("[data-stop]")];
 const shopStop = stops.find((stop) => stop.dataset.stop === "shop");
 const dialog = document.querySelector("#stop-dialog");
@@ -379,6 +382,8 @@ function showShopFallback(canRetry = false) {
 }
 
 const showFallback = () => {
+  sceneLoader.hidden = true;
+  delete stage.dataset.loading;
   showShopFallback();
   delete stage.dataset.webgl;
   toolbar.hidden = true;
@@ -396,6 +401,7 @@ async function start() {
         else stops.find((stop) => stop.dataset.stop === name)?.click();
       },
       fail: showFallback,
+      onFirstFrame: () => { sceneLoader.hidden = true; delete stage.dataset.loading; },
       onZoomChange: (zoom, min, max) => {
         cameraGroup.querySelector('[data-camera="zoom-out"]').setAttribute("aria-disabled", String(zoom <= min));
         cameraGroup.querySelector('[data-camera="zoom-in"]').setAttribute("aria-disabled", String(zoom >= max));

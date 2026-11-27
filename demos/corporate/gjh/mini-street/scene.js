@@ -155,7 +155,7 @@ function wetRoad(scene) {
   };
 }
 
-export function createStreet({ canvas, stops, activate, fail, onZoomChange = () => {}, onViewChange = () => {}, startPaused = false }) {
+export function createStreet({ canvas, stops, activate, fail, onZoomChange = () => {}, onViewChange = () => {}, onFirstFrame = () => {}, startPaused = false }) {
   const attributes = { antialias: true, alpha: false, powerPreference: "low-power" };
   const context = canvas.getContext("webgl2", attributes);
   if (!context) throw new Error("WebGL 2 is unavailable.");
@@ -176,7 +176,17 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
         ({ scene: model }) => {
           model.position.set(1.13, 0.025, 3.25);
           model.scale.setScalar(1.6);
-          model.traverse((object) => { if (object.isMesh) object.layers.enable(REFLECTED); });
+          model.traverse((object) => {
+            if (!object.isMesh) return;
+            object.layers.enable(REFLECTED);
+            // The transparent canopy needs a little separation from dark shopfronts.
+            for (const material of [].concat(object.material)) {
+              if (material?.name?.includes("Canopy")) {
+                material.opacity = Math.max(material.opacity, 0.52);
+                material.emissive?.setRGB(0.08, 0.10, 0.12);
+              }
+            }
+          });
           world.add(model);
           canvas.dataset.visitorCandidate = "ready";
           invalidate();
@@ -213,6 +223,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
   let dirty = true;
   let frame = 0;
   let lastPaint = 0;
+  let firstFrameRendered = false;
   let rainTime = 0;
   let width = 1;
   let height = 1;
@@ -278,7 +289,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
     let eye;
     if (stop) {
       const focus = stopViews[stop];
-      const focusDistance = stop === "visitor" && shortLandscape.matches ? 3.9 : focus.distance;
+      const focusDistance = stop === "visitor" && shortLandscape.matches ? 3.2 : focus.distance;
       distance = Math.max(focusDistance, focus.width / horizontalSpan);
       closest = focus.closest;
       angle = focus.angle + azimuth * .52;
@@ -331,6 +342,7 @@ export function createStreet({ canvas, stops, activate, fail, onZoomChange = () 
       rainLines.material.uniforms.time.value = motion.matches ? 0 : rainTime;
       if (dirty || cameraMoving) updateView(now);
       renderer.render(world, camera);
+      if (!firstFrameRendered) { firstFrameRendered = true; onFirstFrame(); }
       lastPaint = now;
       dirty = false;
     }

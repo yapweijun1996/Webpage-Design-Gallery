@@ -86,6 +86,7 @@ export const miniMessages = [
   ["Close", "关闭", "Tutup"],
   ["The virtual drink machine could not load. Please try again.", "虚拟饮料售货机加载失败。请重试。", "Mesin minuman maya gagal dimuatkan. Sila cuba lagi."],
   ["The 3D shop could not load. The product display remains available.", "3D 商店加载失败。你仍可查看商品展示。", "Kedai 3D gagal dimuatkan. Paparan produk masih tersedia."],
+  ["Loading the 3D street…", "正在加载 3D 街景…", "Memuatkan jalan 3D…"],
   ["Loading the 3D shop…", "正在加载 3D 商店…", "Memuatkan kedai 3D…"],
   ["Cancel", "取消", "Batal"],
   ["Retry 3D shop", "重新加载 3D 商店", "Cuba muatkan kedai 3D semula"],

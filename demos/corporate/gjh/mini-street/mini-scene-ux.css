@@ -295,3 +295,19 @@
     width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);
   }
 }
+
+/* The scene loader is shown only while JavaScript is preparing the first frame. */
+.scene-loader:not([hidden]) {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;
+  color: #f8e7c5; background: #102b25; font-weight: 600;
+  pointer-events: none;
+}
+.stage[data-loading] .scene-status { visibility: hidden; }
+.scene-loader-spinner {
+  width: 42px; height: 42px; border: 3px solid rgba(248, 231, 197, .25);
+  border-top-color: #f3cf8f; border-radius: 50%;
+  animation: scene-loader-spin .9s linear infinite;
+}
+@keyframes scene-loader-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .scene-loader-spinner { animation: none; border-right-color: #f3cf8f; } }
