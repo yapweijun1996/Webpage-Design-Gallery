@@ -14,6 +14,7 @@ let currentBuild;
 let available = '';
 let lastCheck = 0;
 let busy = false;
+let applying = false;
 
 export function compare(a, b) {
   const pa = String(a).split('.').map(Number);
@@ -58,7 +59,7 @@ async function fetchRelease() {
 }
 
 export async function check({manual = false} = {}) {
-  if (busy || button.dataset.state === 'applying') return;
+  if (busy || applying) return;
   busy = true;
   lastCheck = Date.now();
   setState('checking', t('update.checking'));
@@ -98,27 +99,56 @@ function waitForWaiting(registration) {
 }
 
 export async function apply() {
-  if (button.dataset.state === 'applying') return;
-  if (hasUnsavedInput()) {
-    const ok = await confirm({title: t('update.unsavedTitle'), body: t('update.unsavedBody'), confirmLabel: t('update.apply')});
-    if (!ok) return;
-  }
+  if (applying) return;
+  applying = true;
+  if (!await canReload()) { applying = false; return; }
   setState('applying', t('update.applying'));
-  const fail = setTimeout(() => setState('error', t('update.error')), APPLY_TIMEOUT);
-  let reloaded = false;
-  const reload = () => { if (!reloaded) { reloaded = true; clearTimeout(fail); window.location.reload(); } };
+  let cancelled = false;
+  let reloading = false;
+  const fail = setTimeout(failAttempt, APPLY_TIMEOUT);
+  function cleanup() {
+    clearTimeout(fail);
+    navigator.serviceWorker?.removeEventListener('controllerchange', reload);
+  }
+  function failAttempt() {
+    if (cancelled) return;
+    cancelled = true;
+    cleanup();
+    applying = false;
+    setState('error', t('update.error'));
+  }
+  async function reload() {
+    if (cancelled || reloading) return;
+    reloading = true;
+    cleanup();
+    if (!await canReload()) {
+      cancelled = true;
+      applying = false;
+      available = available || current;
+      setState('available', t('update.available', {version: available}));
+      return;
+    }
+    if (!cancelled) window.location.reload();
+  }
   try {
     const registration = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration(root().href) : null;
-    if (!registration) { reload(); return; }
+    if (cancelled) return;
+    if (!registration) { await reload(); return; }
     await registration.update();
+    if (cancelled) return;
     const waiting = await waitForWaiting(registration);
-    if (!waiting) { reload(); return; }
+    if (cancelled) return;
+    if (!waiting) { await reload(); return; }
     navigator.serviceWorker.addEventListener('controllerchange', reload, {once: true});
     waiting.postMessage({type: 'SKIP_WAITING'});
   } catch (error) {
-    clearTimeout(fail);
-    setState('error', t('update.error'));
+    failAttempt();
   }
+}
+
+async function canReload() {
+  if (!hasUnsavedInput()) return true;
+  return confirm({title: t('update.unsavedTitle'), body: t('update.unsavedBody'), confirmLabel: t('update.apply')});
 }
 
 export function init() {

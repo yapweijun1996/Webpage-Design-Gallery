@@ -272,8 +272,10 @@ SW_GUARD = r"""(function () {
   if (!meta) return;
   var want = meta.content, key = 'pomelo-v8-heal';
   function hasUnsavedInput() {
-    if (document.querySelector('[data-dirty="true"]')) return true;
-    return Array.from(document.querySelectorAll('form input, form textarea, form select')).some(function (field) {
+    return Array.from(document.querySelectorAll('[data-dirty="true"], input, textarea, select')).some(function (field) {
+      var rule = field.closest('[data-unsaved]');
+      if (rule && rule.getAttribute('data-unsaved') === 'ignore') return false;
+      if (field.getAttribute('data-dirty') === 'true') return true;
       if (field.type === 'checkbox' || field.type === 'radio') return field.checked !== field.defaultChecked;
       if (field.tagName === 'SELECT') {
         var options = Array.from(field.options);
@@ -288,28 +290,71 @@ SW_GUARD = r"""(function () {
       return field.value !== field.defaultValue;
     });
   }
-  var channel = new MessageChannel();
-  channel.port1.onmessage = function (event) {
-    if (!event.data || event.data.build === want) return;
+  var active = false, reloaded = false;
+  function heal() {
+    if (active || reloaded) return;
     try {
       if (sessionStorage.getItem(key) === want) return;
-      sessionStorage.setItem(key, want);
+      var attemptsKey = key + '-attempts:' + want;
+      var count = Number(sessionStorage.getItem(attemptsKey) || 0);
+      if (count >= 2) return;
+      sessionStorage.setItem(attemptsKey, String(count + 1));
     } catch (error) { return; }
-    sw.addEventListener('controllerchange', function () {
+    active = true;
+    var finished = false, worker, verification;
+    var timer = setTimeout(function () { finish(false); }, 12000);
+    function finish(success) {
+      if (finished) return;
+      finished = true;
+      active = false;
+      clearTimeout(timer);
+      sw.removeEventListener('controllerchange', onControllerChange);
+      if (worker) worker.removeEventListener('statechange', onStateChange);
+      if (verification) verification.port1.close();
+      if (!success) {
+        if (navigator.onLine !== false) setTimeout(heal, 1000);
+        return;
+      }
+      try { sessionStorage.setItem(key, want); } catch (error) { /* attempt limit still bounds reloads */ }
       if (hasUnsavedInput()) return;
+      reloaded = true;
       location.reload();
-    }, {once: true});
-    function go(worker) { worker.postMessage({type: 'SKIP_WAITING'}); }
+    }
+    function onControllerChange() {
+      if (finished || !sw.controller) return;
+      verification = new MessageChannel();
+      verification.port1.onmessage = function (event) {
+        finish(Boolean(event.data && event.data.build === want));
+      };
+      sw.controller.postMessage({type: 'GET_BUILD'}, [verification.port2]);
+    }
+    function go(target) {
+      if (!finished) target.postMessage({type: 'SKIP_WAITING'});
+    }
+    function onStateChange() {
+      if (worker.state === 'installed') go(worker);
+      if (worker.state === 'redundant') finish(false);
+    }
+    sw.addEventListener('controllerchange', onControllerChange, {once: true});
     sw.getRegistration().then(function (registration) {
-      if (!registration) return;
-      return registration.update().catch(function () {}).then(function () {
+      if (finished) return;
+      if (!registration) { finish(false); return; }
+      return registration.update().then(function () {
+        if (finished) return;
         if (registration.waiting) return go(registration.waiting);
-        var worker = registration.installing;
-        if (worker) worker.addEventListener('statechange', function () {
-          if (worker.state === 'installed') go(worker);
-        });
+        worker = registration.installing;
+        if (!worker) { finish(false); return; }
+        worker.addEventListener('statechange', onStateChange);
+        onStateChange();
       });
-    }).catch(function () {});
+    }).catch(function () { finish(false); });
+  }
+  var channel = new MessageChannel();
+  channel.port1.onmessage = function (event) {
+    channel.port1.close();
+    if (!event.data || event.data.build === want) return;
+    window.addEventListener('online', heal);
+    heal();
   };
   sw.controller.postMessage({type: 'GET_BUILD'}, [channel.port2]);
 })();"""

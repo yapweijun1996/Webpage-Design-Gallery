@@ -186,6 +186,7 @@ def check_release_recheck(browser, base, errors):
             page.locator('[data-update]').click()
             page.locator('.dialog[role="alertdialog"]').wait_for()
             assert page.locator('.dialog__title').inner_text() == title, locale
+            assert page.locator('.dialog').evaluate("panel => { const body = document.getElementById(panel.getAttribute('aria-describedby')); return body?.tagName === 'P' && panel.contains(body) && body.textContent.trim().length > 0; }")
             page.keyboard.press('Escape')
             page.locator('.dialog').wait_for(state='detached')
             assert page.locator('[data-update]').get_attribute('data-state') == 'available'
@@ -233,6 +234,117 @@ def check_release_recheck(browser, base, errors):
         context.close()
 
 
+def check_release_safety(browser, base, errors):
+    """Exercise timeout cancellation, final consent and native no-JS submission."""
+    context = browser.new_context(viewport={'width': 390, 'height': 844}, service_workers='block')
+    context.add_init_script("""(() => {
+      const sw = new EventTarget();
+      sw.register = async () => ({});
+      sw.getRegistration = async () => ({
+        update: () => new Promise(resolve => { window.__finishUpdate = resolve; }),
+        waiting: {postMessage() { window.__skipWaiting = true; }}
+      });
+      Object.defineProperty(navigator, 'serviceWorker', {value: sw});
+      window.__updateSW = sw;
+      const schedule = window.setTimeout.bind(window);
+      window.setTimeout = (callback, delay, ...args) => {
+        const timer = schedule(callback, delay, ...args);
+        if (delay === 12000) window.__expireApply = () => { clearTimeout(timer); callback(...args); };
+        return timer;
+      };
+    })();""")
+    page = context.new_page()
+    page.on('pageerror', lambda error: errors.append(str(error)))
+    navigations = []
+    page.on('framenavigated', lambda frame: navigations.append(frame.url) if frame == page.main_frame else None)
+    try:
+        page.goto(base + 'contact.html', wait_until='load')
+        page.evaluate("async () => { const module = await import('./assets/js/core/update.js'); void module.apply(); }")
+        page.wait_for_function('typeof window.__finishUpdate === "function"')
+        page.evaluate('window.__finishUpdate()')
+        page.wait_for_function('window.__skipWaiting === true')
+        before = len(navigations)
+        page.evaluate("window.__expireApply(); window.__updateSW.dispatchEvent(new Event('controllerchange'))")
+        page.wait_for_timeout(150)
+        assert page.locator('[data-update]').get_attribute('data-state') == 'error'
+        assert page.locator('[data-update]').is_enabled()
+        assert len(navigations) == before, navigations
+
+        page.goto(base + 'contact.html', wait_until='load')
+        page.evaluate("async () => { const module = await import('./assets/js/core/update.js'); void module.apply(); }")
+        page.wait_for_function('typeof window.__finishUpdate === "function"')
+        page.locator('#f-name').fill('Keep this draft')
+        page.evaluate('window.__finishUpdate()')
+        page.wait_for_function('window.__skipWaiting === true')
+        before = len(navigations)
+        page.evaluate("window.__updateSW.dispatchEvent(new Event('controllerchange')); window.__updateSW.dispatchEvent(new Event('controllerchange'))")
+        page.locator('.dialog[role="alertdialog"]').wait_for()
+        assert page.locator('.dialog').count() == 1
+        page.keyboard.press('Escape')
+        page.locator('.dialog').wait_for(state='detached')
+        assert page.locator('#f-name').input_value() == 'Keep this draft'
+        assert page.locator('[data-update]').get_attribute('data-state') == 'available'
+        assert page.locator('[data-update]').is_enabled()
+        page.evaluate("window.__updateSW.dispatchEvent(new Event('controllerchange'))")
+        page.wait_for_timeout(100)
+        assert len(navigations) == before
+
+        # Consent can be retried, and even duplicate controller events reload only once.
+        page.evaluate('window.__finishUpdate = null')
+        page.locator('[data-update]').click()
+        page.locator('.dialog__actions button').last.click()
+        page.wait_for_function("document.querySelector('[data-update]').dataset.state === 'applying'")
+        page.wait_for_function('typeof window.__finishUpdate === "function"')
+        page.evaluate('window.__skipWaiting = false; window.__finishUpdate()')
+        page.wait_for_function('window.__skipWaiting === true')
+        page.evaluate("window.__updateSW.dispatchEvent(new Event('controllerchange')); window.__updateSW.dispatchEvent(new Event('controllerchange'))")
+        page.locator('.dialog__actions button').last.click()
+        page.wait_for_function('!window.__finishUpdate')
+        page.wait_for_timeout(100)
+        assert len(navigations) == before + 1, navigations
+
+        page.goto(base + 'commerce.html', wait_until='load')
+        page.locator('#prep-1').check()
+        assert page.evaluate("async () => (await import('./assets/js/core/unsaved.js')).hasUnsavedInput()")
+        page.reload(wait_until='load')
+        assert not page.locator('#prep-1').is_checked()
+        # Restored controls are exempt only when explicitly marked as persisted.
+        assert page.evaluate("""async () => {
+          const {hasUnsavedInput} = await import('./assets/js/core/unsaved.js');
+          const persisted = document.createElement('div');
+          persisted.dataset.unsaved = 'ignore';
+          const field = document.createElement('input');
+          persisted.append(field);
+          document.body.append(persisted);
+          field.value = 'Automatically restored';
+          if (hasUnsavedInput()) return false;
+          field.dataset.unsaved = 'track';
+          return hasUnsavedInput();
+        }""")
+    finally:
+        context.close()
+
+    context = browser.new_context(java_script_enabled=False, service_workers='block')
+    page = context.new_page()
+    try:
+        for locale in ('', 'zh/', 'ms/'):
+            url = base + locale + 'contact.html'
+            page.goto(url, wait_until='load')
+            assert page.locator('form button[type="submit"]').is_disabled()
+            page.locator('#f-name').fill('Private name')
+            page.locator('#f-message').fill('Private message')
+            page.locator('#f-name').press('Enter')
+            page.locator('form button[type="submit"]').scroll_into_view_if_needed()
+            box = page.locator('form button[type="submit"]').bounding_box()
+            page.mouse.click(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
+            page.wait_for_timeout(100)
+            assert page.url == url, page.url
+            assert page.locator('#f-name').input_value() == 'Private name'
+            assert page.locator('#f-message').input_value() == 'Private message'
+    finally:
+        context.close()
+
+
 def main():
     handler = functools.partial(Quiet, directory=str(ROOT))
     server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), handler)
@@ -244,6 +356,7 @@ def main():
             browser = launch(p)
             check_toasts(browser, base, errors)
             check_release_recheck(browser, base, errors)
+            check_release_safety(browser, base, errors)
             for width, height in ((1440, 900), (768, 1024), (390, 844), (375, 812), (320, 568)):
                 context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce', service_workers='block')
                 page = context.new_page()
@@ -304,9 +417,25 @@ def main():
             page.keyboard.press('Escape')
             dialog.wait_for(state='detached')
             # Mobile menu sheet.
+            page.evaluate("const probe = document.createElement('div'); probe.id = 'inert-probe'; probe.inert = true; document.body.append(probe)")
             page.locator('[data-menu-open]').click()
             assert page.locator('.dialog .dialog-nav a').count() == 5
+            page.locator('.dialog [data-theme-toggle]').click()
+            assert page.locator('[data-toast-region]').evaluate('node => !node.inert && !node.closest("[inert]")')
+            assert page.locator('[data-toast-live]').count() == 2
+            assert page.locator('[data-toast-live]').evaluate_all('nodes => nodes.every(node => !node.inert && !node.closest("[inert]"))')
+            assert page.locator('#main').evaluate('node => node.inert')
+            page.evaluate("async () => { const {toast} = await import('./assets/js/core/toast.js'); toast({key: 'dialog-focus', title: 'Focus check', sticky: true}); }")
+            for _ in range(14):
+                page.keyboard.press('Tab')
+                assert page.evaluate("document.querySelector('.dialog').contains(document.activeElement)")
+            page.locator('.toast[data-key="dialog-focus"] .toast__close').focus()
+            page.keyboard.press('Tab')
+            assert page.evaluate("document.querySelector('.dialog').contains(document.activeElement)")
             page.keyboard.press('Escape')
+            assert not page.locator('#main').evaluate('node => node.inert')
+            assert page.locator('#inert-probe').evaluate('node => node.inert')
+            assert page.locator('[data-toast-region], [data-toast-live]').evaluate_all('nodes => nodes.every(node => !node.inert)')
             # Language button: disclosure with keyboard support, page does not move.
             page.goto(base + 'services.html#faq')
             lang_button = page.locator('[data-lang-menu] button')

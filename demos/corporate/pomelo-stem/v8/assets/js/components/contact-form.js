@@ -1,5 +1,5 @@
 // Contact form: validates, marks itself dirty, and never sends (demo).
-import {toast} from '../core/toast.js';
+import {toast, toastDuration} from '../core/toast.js';
 
 export function init() {
   const form = document.querySelector('[data-contact-form]');
@@ -25,8 +25,9 @@ export function init() {
         if (empty && !firstInvalid) firstInvalid = field;
       }
       if (firstInvalid) { firstInvalid.focus(); return; }
-      toast({type: 'info', messageKey: 'toast.formNotSent.title', detailKey: 'toast.formNotSent.detail', duration: 6000});
+      toast({type: 'info', messageKey: 'toast.formNotSent.title', detailKey: 'toast.formNotSent.detail', duration: toastDuration('action')});
     });
+    form.querySelector('[type="submit"]').disabled = false;
   }
   const copy = document.querySelector('[data-copy]');
   if (copy) {

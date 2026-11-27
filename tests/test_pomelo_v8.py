@@ -186,12 +186,11 @@ class PomeloV8Test(unittest.TestCase):
 
     def test_self_heal_checks_unsaved_input_at_reload_time(self):
         guard = pomelo.SW_GUARD
-        self.assertIn("document.querySelector('[data-dirty=\"true\"]')", guard)
-        self.assertIn("form input, form textarea, form select", guard)
+        self.assertIn('[data-dirty="true"], input, textarea, select', guard)
         self.assertIn("field.value !== field.defaultValue", guard)
         self.assertIn("field.checked !== field.defaultChecked", guard)
         self.assertIn("option.defaultSelected", guard)
-        self.assertRegex(guard, r"'controllerchange', function \(\) \{\s*if \(hasUnsavedInput\(\)\) return;\s*location.reload\(\);")
+        self.assertRegex(guard, r"if \(hasUnsavedInput\(\)\) return;\s*reloaded = true;\s*location.reload\(\);")
         self.assertIn("key = 'pomelo-v8-heal'", guard)
         self.assertIn("sessionStorage.getItem(key) === want", guard)
         self.assertIn("sessionStorage.setItem(key, want)", guard)
@@ -199,7 +198,8 @@ class PomeloV8Test(unittest.TestCase):
     def test_manual_update_and_sw_guard_share_identical_unsaved_checks(self):
         module = (DEMO / "assets/js/core/unsaved.js").read_text("utf-8")
         update = (DEMO / "assets/js/core/update.js").read_text("utf-8")
-        checks = ("document.querySelector('[data-dirty=\"true\"]')", "form input, form textarea, form select",
+        checks = ('[data-dirty="true"], input, textarea, select', "field.closest('[data-unsaved]')",
+                  "rule.getAttribute('data-unsaved') === 'ignore'",
                   "field.type === 'checkbox' || field.type === 'radio'", "field.checked !== field.defaultChecked",
                   "field.tagName === 'SELECT'", "field.multiple", "option.selected !== option.defaultSelected",
                   "option.defaultSelected", "!option.disabled", "option.parentElement.tagName === 'OPTGROUP'",
@@ -211,7 +211,8 @@ class PomeloV8Test(unittest.TestCase):
         inline_function = re.search(r"function hasUnsavedInput\(\) \{.*?\n  \}", pomelo.SW_GUARD, re.S)[0]
         self.assertEqual(" ".join(module_function.split()), " ".join(inline_function.split()))
         self.assertIn("import {hasUnsavedInput} from './unsaved.js';", update)
-        self.assertRegex(update, r"if \(hasUnsavedInput\(\)\) \{\s*const ok = await confirm\(")
+        self.assertIn("if (!hasUnsavedInput()) return true;", update)
+        self.assertIn("return confirm({title: t('update.unsavedTitle'), body: t('update.unsavedBody'), confirmLabel: t('update.apply')});", update)
         self.assertNotIn("[data-dirty=", update)
         self.assertIn('"assets/js/core/unsaved.js"', pomelo.outputs()["sw.js"])
 
@@ -244,6 +245,24 @@ for (const version of ['8.2.1', '8.1.99', '7.99.99']) {
         self.assertRegex(contact, r"form.addEventListener\('input', .*?\{\s*form.dataset.dirty = 'true';")
         self.assertRegex(commerce, r"studio.addEventListener\('input',[\s\S]*?studio.dataset.dirty = 'true';")
         self.assertIn("root.dataset.dirty = 'true';", commerce)
+
+    @unittest.skipUnless(shutil.which("node"), "Node.js is required for the release safety contracts")
+    def test_release_safety_at_runtime(self):
+        result = subprocess.run([shutil.which("node"), "--test", "tests/pomelo_v8_release.test.mjs"],
+                                text=True, capture_output=True, timeout=20, cwd=ROOT)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_contact_submit_requires_javascript_and_uses_duration_token(self):
+        for locale in pomelo.LOCALES.values():
+            page = DEMO / locale["dir"] / "contact.html"
+            buttons = [attrs for tag, attrs, _ in pomelo.PageStructure(page.read_text("utf-8")).elements
+                       if tag == "button" and attrs.get("type") == "submit"]
+            self.assertEqual(len(buttons), 1)
+            self.assertIn("disabled", buttons[0])
+        source = (DEMO / "assets/js/components/contact-form.js").read_text("utf-8")
+        self.assertIn("form.querySelector('[type=\"submit\"]').disabled = false;", source)
+        self.assertIn("duration: toastDuration('action')", source)
+        self.assertNotIn("6000", source)
 
     def test_offline_images_keep_small_precache_and_runtime_fallback(self):
         outputs = pomelo.outputs()
