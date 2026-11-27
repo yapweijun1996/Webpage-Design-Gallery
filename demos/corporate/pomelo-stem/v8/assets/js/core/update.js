@@ -4,16 +4,17 @@ import {toast} from './toast.js';
 import {confirm} from './dialog.js';
 import {hasUnsavedInput} from './unsaved.js';
 import {show as showLoader} from './loader.js';
+import {claimReload, releaseReload, RELOAD_TIMEOUT} from './reload.js';
 
 const THROTTLE = 10 * 60 * 1000;
 const TIMEOUT = 8000;
 const APPLY_TIMEOUT = 12000;
-const RELOAD_TIMEOUT = 3000;
 let button;
 let status;
 let current;
 let currentBuild;
 let available = '';
+let availableBuild = '';
 let lastCheck = 0;
 let busy = false;
 let applying = false;
@@ -69,6 +70,7 @@ export async function check({manual = false} = {}) {
     const remote = await fetchRelease();
     if (isNewRelease(remote, {version: current, build: currentBuild})) {
       available = remote.version;
+      availableBuild = remote.build;
       setState('available', t('update.available', {version: available}));
       button.classList.remove('is-pulse');
       void button.offsetWidth;
@@ -103,6 +105,8 @@ function waitForWaiting(registration) {
 export async function apply() {
   if (applying) return;
   applying = true;
+  const retries = (window.__pomeloV8Reloads || []).slice();
+  const targetBuild = availableBuild || currentBuild;
   let loaderOptions;
   let loader;
   let cancelled = false;
@@ -115,9 +119,9 @@ export async function apply() {
     loader = null;
     handle?.close();
   }
-  function releaseReload() {
+  function releaseOwnReload() {
     clearTimeout(claimTimer);
-    if (reloadClaim && window.__pomeloV8Reloading === reloadClaim) delete window.__pomeloV8Reloading;
+    releaseReload(reloadClaim);
   }
   function cleanup() {
     clearTimeout(fail);
@@ -128,7 +132,7 @@ export async function apply() {
     cancelled = true;
     cleanup();
     applying = false;
-    releaseReload();
+    releaseOwnReload();
     setState('error', t('update.error'));
     try { hideLoader(); } catch (error) { /* Still restore the update control if closing fails. */ }
     button.focus();
@@ -138,6 +142,7 @@ export async function apply() {
   async function reload() {
     if (cancelled || reloading) return;
     reloading = true;
+    const controller = navigator.serviceWorker?.controller;
     try {
       cleanup();
       // Consent must be usable above the loader; restore it only if consent is accepted.
@@ -155,11 +160,9 @@ export async function apply() {
         if (!loader) loader = showLoader(loaderOptions);
         // Keep a watchdog in case navigation is blocked or reload throws.
         fail = setTimeout(failAttempt, APPLY_TIMEOUT);
-        const claim = window.__pomeloV8Reloading;
-        if (!(claim && Date.now() - claim.timestamp < RELOAD_TIMEOUT)) {
-          reloadClaim = {owner: 'update', timestamp: Date.now()};
-          window.__pomeloV8Reloading = reloadClaim;
-          claimTimer = setTimeout(releaseReload, RELOAD_TIMEOUT);
+        reloadClaim = claimReload('update', controller, targetBuild, retries);
+        if (reloadClaim) {
+          claimTimer = setTimeout(releaseOwnReload, RELOAD_TIMEOUT);
           window.location.reload();
         }
       }
