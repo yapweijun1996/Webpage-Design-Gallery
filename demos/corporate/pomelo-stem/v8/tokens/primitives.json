@@ -65,7 +65,8 @@
     "lg": "20px",
     "pill": "999px",
     "toast": "16px",
-    "circle": "50%"
+    "circle": "50%",
+    "photo": "28px"
   },
   "font": {
     "display": "Georgia, 'Times New Roman', 'Songti SC', 'Noto Serif CJK SC', serif",
