@@ -38,7 +38,11 @@ export function open({title, content, variant = 'modal', actions = [], onClose} 
   }
   const body = document.createElement('div');
   body.className = 'dialog__body';
-  if (content) body.append(content);
+  if (content) {
+    if (!content.id) content.id = `dialog-body-${counter}`;
+    panel.setAttribute('aria-describedby', content.id);
+    body.append(content);
+  }
   panel.append(head, body);
   if (actions.length) {
     const row = document.createElement('div');
@@ -49,13 +53,14 @@ export function open({title, content, variant = 'modal', actions = [], onClose} 
   backdrop.append(panel);
 
   const siblings = [...document.body.children]
-    .filter((node) => node.tagName !== 'SCRIPT')
+    .filter((node) => node.tagName !== 'SCRIPT' && !node.matches('[data-toast-region], [data-toast-live]'))
     .map((node) => [node, node.inert]);
   for (const [node] of siblings) node.inert = true;
   document.body.classList.add('is-locked');
   document.body.append(backdrop);
 
   function onKey(event) {
+    if (backdrop.inert) return;
     if (event.key === 'Escape') {
       event.stopPropagation();
       api.close(false);
@@ -66,10 +71,11 @@ export function open({title, content, variant = 'modal', actions = [], onClose} 
     if (!items.length) return;
     const first = items[0];
     const last = items[items.length - 1];
-    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    if (!panel.contains(document.activeElement)) { event.preventDefault(); (event.shiftKey ? last : first).focus(); }
+    else if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   }
-  backdrop.addEventListener('keydown', onKey);
+  document.addEventListener('keydown', onKey);
   backdrop.addEventListener('click', (event) => {
     if (event.target === backdrop && variant !== 'alertdialog') api.close(false);
   });
@@ -80,6 +86,7 @@ export function open({title, content, variant = 'modal', actions = [], onClose} 
     close(result) {
       if (closed) return;
       closed = true;
+      document.removeEventListener('keydown', onKey);
       backdrop.remove();
       for (const [node, inert] of siblings) node.inert = inert;
       document.body.classList.remove('is-locked');

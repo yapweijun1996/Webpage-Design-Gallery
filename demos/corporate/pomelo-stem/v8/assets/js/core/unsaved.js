@@ -1,7 +1,11 @@
 // Keep this check identical to the pre-module SW_GUARD in scripts/build_pomelo_v8.py.
+// Track controls inside and outside forms. Use data-unsaved="ignore" only for
+// automatically persisted and restored state; data-unsaved="track" overrides it.
 export function hasUnsavedInput() {
-  if (document.querySelector('[data-dirty="true"]')) return true;
-  return Array.from(document.querySelectorAll('form input, form textarea, form select')).some(function (field) {
+  return Array.from(document.querySelectorAll('[data-dirty="true"], input, textarea, select')).some(function (field) {
+    var rule = field.closest('[data-unsaved]');
+    if (rule && rule.getAttribute('data-unsaved') === 'ignore') return false;
+    if (field.getAttribute('data-dirty') === 'true') return true;
     if (field.type === 'checkbox' || field.type === 'radio') return field.checked !== field.defaultChecked;
     if (field.tagName === 'SELECT') {
       var options = Array.from(field.options);

@@ -29,10 +29,12 @@ function regions() {
   region.hidden = region.children.length === 0;
   live = document.createElement('div');
   live.className = 'visually-hidden';
+  live.setAttribute('data-toast-live', '');
   live.setAttribute('role', 'status');
   live.setAttribute('aria-live', 'polite');
   alert = document.createElement('div');
   alert.className = 'visually-hidden';
+  alert.setAttribute('data-toast-live', '');
   alert.setAttribute('role', 'alert');
   document.body.append(live, alert);
 }
