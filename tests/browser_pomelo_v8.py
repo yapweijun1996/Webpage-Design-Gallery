@@ -126,6 +126,44 @@ def check_toasts(browser, base, errors):
             page.evaluate('window.__clearanceActive = false')
             assert page.evaluate('window.__clearanceSamples') > 10, width
             assert not page.evaluate('window.__clearanceFailures'), (width, page.evaluate('window.__clearanceFailures'))
+            # A toast already on screen must clear the button throughout its scroll reveal.
+            page.evaluate('scrollTo(0, 0)')
+            page.wait_for_function("document.querySelector('[data-back-to-top]').dataset.state === 'hidden'")
+            page.wait_for_timeout(260)
+            page.evaluate("""async () => {
+              const {toast} = await import('./assets/js/core/toast.js');
+              toast({key: 'clearance', messageKey: 'toast.themeLight.title', detailKey: 'toast.themeLight.detail', sticky: true});
+            }""")
+            page.wait_for_timeout(260)
+            page.evaluate("""() => {
+              window.__clearanceActive = true;
+              window.__clearanceFailures = [];
+              window.__clearanceSamples = 0;
+              const sample = () => {
+                if (!window.__clearanceActive) return;
+                const button = document.querySelector('[data-back-to-top]');
+                const region = document.querySelector('[data-toast-region]');
+                const gap = parseFloat(getComputedStyle(region).rowGap);
+                const box = button.getBoundingClientRect();
+                if (button.dataset.state === 'visible') {
+                  for (const item of region.children) {
+                    const toast = item.getBoundingClientRect();
+                    window.__clearanceSamples += 1;
+                    if (toast.top - box.bottom < gap - 0.5 || box.top < 0 || box.bottom > innerHeight) {
+                      window.__clearanceFailures.push({toastTop: toast.top, buttonTop: box.top, buttonBottom: box.bottom, gap});
+                    }
+                  }
+                }
+                requestAnimationFrame(sample);
+              };
+              requestAnimationFrame(sample);
+            }""")
+            page.evaluate('scrollTo(0, innerHeight * 3)')
+            page.wait_for_function("document.querySelector('[data-back-to-top]').dataset.state === 'visible'")
+            page.wait_for_timeout(350)
+            page.evaluate('window.__clearanceActive = false')
+            assert page.evaluate('window.__clearanceSamples') > 0, width
+            assert not page.evaluate('window.__clearanceFailures'), (width, page.evaluate('window.__clearanceFailures'))
         finally:
             context.close()
 
@@ -746,6 +784,84 @@ def check_qa825(browser, base, errors):
         context.close()
 
 
+
+def check_home_compact_layout(browser, base):
+    """Keep localized phone pages below the requested margin in both themes."""
+    for width, height in ((1440, 900), (1024, 768), (768, 1024), (390, 844), (320, 568)):
+        for locale in ('', 'zh/', 'ms/'):
+            context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce', service_workers='block')
+            try:
+                page = context.new_page()
+                page.goto(base + locale + 'index.html', wait_until='load')
+                loaded_height = page.evaluate('document.documentElement.scrollHeight')
+                if width <= 390:
+                    limit = 5950 if width == 320 else 5800
+                    assert loaded_height <= limit, (width, locale, loaded_height, limit)
+                    print(f'Home height {width}x{height} {locale or "en"}: {loaded_height}px', flush=True)
+                page.evaluate('document.fonts.ready')
+                for theme in ('light', 'dark'):
+                    page.evaluate('theme => document.documentElement.dataset.theme = theme', theme)
+                    metrics = page.evaluate("""() => {
+                      const hero = document.querySelector('.hero--home');
+                      return {
+                        cards: [...document.querySelectorAll('.home-feature')].map(el => el.getBoundingClientRect().height),
+                        height: document.documentElement.scrollHeight,
+                        overflow: document.documentElement.scrollWidth > innerWidth,
+                        fade: getComputedStyle(hero).backgroundImage,
+                        mask: getComputedStyle(hero, '::after').maskImage
+                      };
+                    }""")
+                    assert max(metrics['cards']) - min(metrics['cards']) < 0.5, (width, locale, theme, metrics)
+                    assert not metrics['overflow'], (width, locale, theme)
+                    assert metrics['fade'].startswith('linear-gradient')
+                    assert metrics['mask'].startswith('linear-gradient')
+                    if width <= 390:
+                        assert metrics['height'] <= limit, (width, locale, theme, metrics['height'], limit)
+                    button = page.locator('.hero-cta .button--primary')
+                    assert button.evaluate('el => getComputedStyle(el).backgroundOrigin') == 'border-box'
+                    button.hover()
+                    assert button.evaluate('el => getComputedStyle(el).backgroundOrigin') == 'border-box'
+                    page.mouse.move(0, 0)
+            finally:
+                context.close()
+
+
+def check_scene_framing(browser, base):
+    """Measure projected mesh vertices through a test-only response override."""
+    source = (DEMO / 'assets/js/hero3d/viewer.js').read_text('utf-8')
+    render = 'renderer.render(scene, camera);'
+    assert source.count(render) == 1
+    source = source.replace(render, render + """
+      const bounds = {left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity};
+      composed.root.updateMatrixWorld(true);
+      composed.root.traverse(object => {
+        const pos = object.geometry?.attributes.position;
+        if (!pos) return;
+        for (let i = 0; i < pos.count; i++) {
+          const point = new THREE.Vector3().fromBufferAttribute(pos, i).applyMatrix4(object.matrixWorld).project(camera);
+          bounds.left = Math.min(bounds.left, point.x);
+          bounds.right = Math.max(bounds.right, point.x);
+          bounds.top = Math.min(bounds.top, point.y);
+          bounds.bottom = Math.max(bounds.bottom, point.y);
+        }
+      });
+      window.__sceneBounds = bounds;
+    """)
+    for width, height in ((1440, 900), (1024, 768), (768, 1024), (390, 844), (320, 568)):
+        context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce', service_workers='block')
+        try:
+            page = context.new_page()
+            page.route('**/hero3d/viewer.js', lambda route: route.fulfill(body=source, content_type='text/javascript'))
+            page.goto(base + 'index.html', wait_until='load')
+            page.locator('.hero3d__button').click()
+            page.wait_for_selector('[data-hero3d][data-state="ready"]', timeout=60000)
+            bounds = page.evaluate('window.__sceneBounds')
+            assert bounds['left'] > -0.96 and bounds['right'] < 0.96 and bounds['top'] > -0.96 and bounds['bottom'] < 0.96, (width, height, bounds)
+            assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width
+        finally:
+            context.close()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--no-capture', action='store_true', help='Run checks without rewriting gallery media')
@@ -758,6 +874,7 @@ def main():
     try:
         with sync_playwright() as p:
             browser = launch(p)
+            check_home_compact_layout(browser, base)
             check_toasts(browser, base, errors)
             check_release_recheck(browser, base, errors)
             check_page_loaders(browser, base, errors)
@@ -970,6 +1087,7 @@ def main():
             # Real scene (software GL): loads, draws a canvas over the photo and keeps the home page height.
             gl = p.chromium.launch(executable_path=os.environ.get('GALLERY_CHROME') or None, headless=True,
                                    args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+            check_scene_framing(gl, base)
             context = gl.new_context(viewport={'width': 1440, 'height': 900}, reduced_motion='no-preference', service_workers='block')
             page = context.new_page()
             errors = []

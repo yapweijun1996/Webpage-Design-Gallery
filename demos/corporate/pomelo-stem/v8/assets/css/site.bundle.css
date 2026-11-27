@@ -106,6 +106,7 @@
   --size-hero-outline: 1.5px;
   --size-foliage-blur: 28px;
   --size-home-fade-start: 45%;
+  --size-story-phone-ratio: 2 / 1;
   --z-stage: 1;
   --z-fab: 20;
   --z-header: 10;
@@ -1071,7 +1072,7 @@ body.is-loading { overflow: hidden; }
 .story-step h3 { font-family: var(--font-display); font-weight: var(--weight-regular); font-size: var(--size-display-sm); line-height: var(--lineheight-tight); }
 .closing { background: var(--c-accent-soft); }
 .closing__inner { display: grid; gap: var(--space-4); justify-items: start; }
-/* Phone spacing leaves room for full tap targets without changing content or image crops. */
+/* Phone spacing leaves room for full tap targets. */
 @media (max-width: 767px) {
   :root[data-page="index"] .section, :root[data-page="index"] .band { padding-block: var(--space-7); }
   :root[data-page="index"] .hero { padding-block: var(--space-5) var(--space-6); }
@@ -1170,7 +1171,7 @@ body.is-loading { overflow: hidden; }
   .story-step:nth-child(even) { grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); }
 }
 @media (max-width: 767px) {
-  .story-step > .media { aspect-ratio: 5 / 3; }
+  .story-step > .media { aspect-ratio: var(--size-story-phone-ratio); }
   .story-step__copy { gap: var(--space-2); }
   .story-step h3 { font-size: var(--size-text-xl); }
   .story-step__copy > p:not(.story-step__label) { font-size: var(--size-text-sm); }
@@ -1178,13 +1179,15 @@ body.is-loading { overflow: hidden; }
 }
 /* Keep the complete localized narrative within the phone height budget. */
 @media (max-width: 767px) {
-  :root[data-page="index"] .hero__copy { gap: var(--space-3); }
+  :root[data-page="index"] .hero { padding-block: var(--space-4) var(--space-5); }
+  :root[data-page="index"] .hero__copy { gap: var(--space-2); }
+  :root[data-page="index"] .home-feature { padding: var(--space-2); gap: var(--space-2); }
   :root[data-page="index"] .hero__grid { gap: var(--space-4); }
   :root[data-page="index"] .hero .lead { font-size: var(--size-text-md); }
   :root[data-page="index"] .section, :root[data-page="index"] .band { padding-block: var(--space-5); }
   :root[data-page="index"] .section-head { margin-bottom: var(--space-4); gap: var(--space-2); }
-  :root[data-page="index"] .story__steps { gap: var(--space-4); }
-  :root[data-page="index"] .story-step { gap: var(--space-3); }
+  :root[data-page="index"] .story__steps { gap: var(--space-3); }
+  :root[data-page="index"] .story-step { gap: var(--space-2); }
   :root[data-page="index"] .band__grid { gap: var(--space-4); }
   :root[data-page="index"] .band__grid li { grid-template-columns: var(--size-tap) minmax(0, 1fr); gap: var(--space-1) var(--space-3); }
   :root[data-page="index"] .band__icon { grid-row: span 2; }
