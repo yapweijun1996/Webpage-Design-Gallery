@@ -38,6 +38,12 @@
   --p-red-100: #fae9e6;
   --p-red-900: #442622;
   --p-scrim: rgba(11, 22, 17, 0.56);
+  --p-glow-light: rgba(29, 87, 55, 0.32);
+  --p-glow-dark: rgba(143, 207, 164, 0.3);
+  --p-glass-light: rgba(255, 255, 255, 0.6);
+  --p-glass-dark: rgba(238, 243, 236, 0.07);
+  --p-sweep-light: rgba(29, 87, 55, 0.08);
+  --p-sweep-dark: rgba(143, 207, 164, 0.13);
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -86,6 +92,10 @@
   --size-nudge: 8px;
   --size-nav-underline: 2px;
   --size-header-blur: 12px;
+  --size-reveal: 16px;
+  --size-zoom: 1.03;
+  --size-hero-bar: 3px;
+  --size-stroke: 4px;
   --z-fab: 20;
   --z-header: 10;
   --z-toast: 30;
@@ -99,6 +109,8 @@
   --motion-pulse: 400ms;
   --motion-ease-out: cubic-bezier(.2, .8, .2, 1);
   --motion-ease-in: cubic-bezier(.4, 0, 1, 1);
+  --motion-reveal: 560ms;
+  --motion-stagger: 80ms;
   --duration-toast-default: 3000ms;
   --duration-toast-theme: 2500ms;
   --duration-toast-action: 6000ms;
@@ -107,6 +119,7 @@
   --shadow-md: 0 8px 24px rgba(16, 36, 26, 0.10);
   --shadow-lg: 0 24px 60px rgba(16, 36, 26, 0.18);
   --shadow-toast: 0 6px 24px rgba(11, 22, 17, 0.14);
+  --shadow-glow: 0 6px 24px;
   --lineheight-tight: 1.12;
   --lineheight-snug: 1.3;
   --lineheight-body: 1.6;
@@ -169,6 +182,10 @@
   --c-toast-error-bg: var(--p-red-100);
   --c-toast-error-icon: var(--p-red-700);
   --c-scrim: var(--p-scrim);
+  --c-hero-top: var(--p-sage-100);
+  --c-glow: var(--p-glow-light);
+  --c-glass: var(--p-glass-light);
+  --c-sweep: var(--p-sweep-light);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -221,6 +238,10 @@
     --c-toast-error-bg: var(--p-red-900);
     --c-toast-error-icon: var(--p-red-200);
     --c-scrim: var(--p-scrim);
+    --c-hero-top: var(--p-forest-900);
+    --c-glow: var(--p-glow-dark);
+    --c-glass: var(--p-glass-dark);
+    --c-sweep: var(--p-sweep-dark);
   }
 }
 :root[data-theme="dark"] {
@@ -273,6 +294,10 @@
   --c-toast-error-bg: var(--p-red-900);
   --c-toast-error-icon: var(--p-red-200);
   --c-scrim: var(--p-scrim);
+  --c-hero-top: var(--p-forest-900);
+  --c-glow: var(--p-glow-dark);
+  --c-glass: var(--p-glass-dark);
+  --c-sweep: var(--p-sweep-dark);
 }
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -281,5 +306,7 @@
     --motion-slow: 0ms;
     --motion-spin: 0ms;
     --motion-pulse: 0ms;
+    --motion-reveal: 0ms;
+    --motion-stagger: 0ms;
   }
 }

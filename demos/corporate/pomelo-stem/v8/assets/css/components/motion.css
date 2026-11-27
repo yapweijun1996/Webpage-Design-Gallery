@@ -1,0 +1,39 @@
+/* Page motion: hero entrance, scroll reveals, hover lift. Transform and opacity only.
+   Every duration comes from --motion-* tokens, which are 0ms under prefers-reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__copy > *, .page-hero .container > * { animation: pomelo-rise var(--motion-reveal) var(--motion-ease-out) both; }
+  .hero__copy > :nth-child(2), .page-hero .container > :nth-child(2) { animation-delay: var(--motion-stagger); }
+  .hero__copy > :nth-child(3), .page-hero .container > :nth-child(3) { animation-delay: calc(2 * var(--motion-stagger)); }
+  .hero__copy > :nth-child(4), .page-hero .container > :nth-child(4) { animation-delay: calc(3 * var(--motion-stagger)); }
+  .hero__media img { animation: pomelo-settle calc(2 * var(--motion-reveal)) var(--motion-ease-out) both; }
+  .accent-word__stroke path {
+    stroke-dasharray: 1; animation: pomelo-draw calc(2 * var(--motion-reveal)) var(--motion-ease-out) calc(3 * var(--motion-stagger)) both;
+  }
+  .story-step[data-reveal="in"] .story-step__label::before { animation: pomelo-badge var(--motion-slow) var(--motion-ease-out) both; }
+}
+@keyframes pomelo-rise { from { opacity: 0; transform: translateY(var(--size-reveal)); } to { opacity: 1; transform: none; } }
+@keyframes pomelo-settle { from { transform: scale(var(--size-zoom)); } to { transform: none; } }
+@keyframes pomelo-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes pomelo-badge { from { transform: scale(0.6); } to { transform: none; } }
+
+/* Scroll reveal. motion.js sets data-reveal only on below-the-fold blocks, so content is visible without JS. */
+[data-reveal] {
+  transition: opacity var(--motion-reveal) var(--motion-ease-out), transform var(--motion-reveal) var(--motion-ease-out);
+  transition-delay: calc(var(--reveal-i, 0) * var(--motion-stagger));
+}
+[data-reveal="wait"] { opacity: 0; transform: translateY(var(--size-reveal)); }
+@media print {
+  [data-reveal="wait"] { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card, .media img { transition: transform var(--motion-slow) var(--motion-ease-out), box-shadow var(--motion-slow) var(--motion-ease-out); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .card:hover { transform: translateY(var(--size-lift)); box-shadow: var(--shadow-md); }
+  .story-step .media:hover img { transform: scale(var(--size-zoom)); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root), ::view-transition-new(root) { animation-duration: var(--motion-base); }
+}

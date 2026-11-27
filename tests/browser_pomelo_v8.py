@@ -916,6 +916,31 @@ def main():
             assert not posted
             context.close()
 
+            # Scroll motion: below-the-fold blocks reveal on scroll; reduced motion and no JS show everything.
+            for reduced in ('no-preference', 'reduce'):
+                context = browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion=reduced, service_workers='block')
+                page = context.new_page()
+                page.goto(base + 'index.html')
+                page.wait_for_function("document.querySelectorAll('.story-step').length > 0")
+                waiting = page.locator('[data-reveal="wait"]').count()
+                if reduced == 'reduce':
+                    assert waiting == 0, 'reduced motion must not hide anything'
+                else:
+                    assert waiting > 0, 'below-the-fold blocks should wait for scroll'
+                    assert page.locator('.hero [data-reveal]').count() == 0
+                    page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
+                    page.wait_for_function("document.querySelectorAll('[data-reveal=\"wait\"]').length < " + str(waiting))
+                    page.evaluate("window.scrollTo(0, 0)")
+                    page.emulate_media(reduced_motion='reduce')
+                    page.wait_for_function("document.querySelectorAll('[data-reveal]').length === 0")
+                context.close()
+            context = browser.new_context(viewport={'width': 390, 'height': 844}, java_script_enabled=False, service_workers='block')
+            page = context.new_page()
+            page.goto(base + 'index.html')
+            assert page.locator('[data-reveal]').count() == 0
+            assert page.locator('.story-step').first.evaluate("el => getComputedStyle(el).opacity") == '1'
+            context.close()
+
             # Service worker installs and serves the home page offline.
             context = browser.new_context(viewport={'width': 1440, 'height': 900})
             page = context.new_page()
