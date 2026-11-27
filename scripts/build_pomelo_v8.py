@@ -34,6 +34,16 @@ NAV_KEYS = {"index": "nav.home", "commerce": "nav.commerce", "services": "nav.se
             "about": "nav.about", "contact": "nav.contact"}
 RUNTIME_PREFIXES = ("loader.", "update.", "toast.", "dialog.", "theme.", "menu.", "lang.", "top.", "demo.", "form.", "order.empty", "pickup.status.")
 CSS_ORDER = ("tokens.css", "base.css", "layout.css")
+ACCENT_WORD = re.compile(r"\[\[(.+?)\]\]")
+ACCENT_STROKE = ('<svg class="accent-word__stroke" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
+                 '<path pathLength="1" d="M2 8 C 32 3, 74 3, 118 6"/></svg>')
+
+
+def accent_word(match):
+    """[[word]] in a heading string marks the one decorative accent word; the stroke is aria-hidden."""
+    return f'<span class="accent-word">{match[1]}{ACCENT_STROKE}</span>'
+
+
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 
 
@@ -239,7 +249,8 @@ def render(lang, page, ctx):
     def t(key):
         if key not in strings:
             raise ValueError(f"Missing i18n key {key} ({lang})")
-        return html.escape(fmt(strings[key], values), quote=True)
+        text = html.escape(fmt(strings[key], values), quote=True)
+        return ACCENT_WORD.sub(accent_word, text)
 
     nav = []
     for target in NAV:

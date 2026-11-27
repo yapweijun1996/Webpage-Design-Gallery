@@ -16,7 +16,8 @@
     "toast-tile-moon-bg": "forest-700", "toast-tile-moon-fg": "mist-50",
     "toast-success-bg": "sage-100", "toast-success-icon": "forest-700",
     "toast-warning-bg": "amber-100", "toast-warning-icon": "amber-800",
-    "toast-error-bg": "red-100", "toast-error-icon": "red-700", "scrim": "scrim"
+    "toast-error-bg": "red-100", "toast-error-icon": "red-700", "scrim": "scrim",
+    "hero-top": "sage-100", "glow": "glow-light", "glass": "glass-light", "sweep": "sweep-light"
   },
   "dark": {
     "bg": "night-900", "surface": "night-800", "surface-muted": "night-700", "surface-sunken": "night-600",
@@ -35,6 +36,7 @@
     "toast-tile-moon-bg": "forest-700", "toast-tile-moon-fg": "forest-300",
     "toast-success-bg": "night-700", "toast-success-icon": "forest-300",
     "toast-warning-bg": "amber-900", "toast-warning-icon": "amber-200",
-    "toast-error-bg": "red-900", "toast-error-icon": "red-200", "scrim": "scrim"
+    "toast-error-bg": "red-900", "toast-error-icon": "red-200", "scrim": "scrim",
+    "hero-top": "forest-900", "glow": "glow-dark", "glass": "glass-dark", "sweep": "sweep-dark"
   }
 }

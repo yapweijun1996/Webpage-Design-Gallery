@@ -13,8 +13,9 @@ import * as tabs from './components/tabs.js';
 import * as commerce from './components/commerce-demo.js';
 import * as contact from './components/contact-form.js';
 import * as review from './components/review.js';
+import * as motion from './components/motion.js';
 
-for (const module of [i18n, toast, theme, update, sw, langMenu, header, backToTop, demoNote, accordion, tabs, commerce, contact, review]) {
+for (const module of [i18n, toast, theme, update, sw, langMenu, header, backToTop, demoNote, accordion, tabs, commerce, contact, review, motion]) {
   module.init();
 }
 window.__pomeloV8PageReady?.();

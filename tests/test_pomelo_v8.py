@@ -903,10 +903,23 @@ console.log('Toast runtime contracts passed');
         self.assertNotIn("lang-switch.js", sw)
         self.assertIn("arrow-up", pomelo.icons())
 
+    def test_motion_is_token_driven_and_precached(self):
+        sw = (DEMO / "sw.js").read_text("utf-8")
+        self.assertIn('"assets/js/components/motion.js"', sw)
+        css = (DEMO / "assets/css/site.bundle.css").read_text("utf-8")
+        self.assertIn("@keyframes pomelo-rise", css)
+        self.assertIn("--motion-reveal: 0ms", css)
+        self.assertIn("--motion-stagger: 0ms", css)
+        # Content is visible unless motion.js marked it, so no-JS and print stay readable.
+        self.assertNotRegex(css, r"(?m)^\.(card|story-step|section-head)\s*\{[^}]*opacity:\s*0")
+        home = (DEMO / "index.html").read_text("utf-8")
+        self.assertEqual(home.count('class="accent-word"'), 1)
+        self.assertEqual(home.count('aria-hidden="true" focusable="false"><path pathLength="1"'), 1)
+
     def test_css_custom_properties_are_defined(self):
         css = (DEMO / "assets/css/site.bundle.css").read_text("utf-8")
         defined = set(re.findall(r"(--[\w-]+)\s*:", css))
-        runtime = {"--lang-menu-shift", "--back-to-top-lift"}
+        runtime = {"--lang-menu-shift", "--back-to-top-lift", "--reveal-i"}
         used = set(re.findall(r"var\((--[\w-]+)", css))
         self.assertEqual(used - defined - runtime, set())
 
