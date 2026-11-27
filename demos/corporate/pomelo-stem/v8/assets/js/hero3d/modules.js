@@ -17,7 +17,7 @@ export function createModuleUI(stage, places, focus, signal) {
   close.type = 'button';
   close.className = 'hero3d__close';
   const buttons = new Map();
-  const names = { shop: 'shopping-bag', warehouse: 'package', delivery: 'package', bags: 'shopping-bag', payment: 'check', analytics: 'sparkles', automation: 'refresh-cw' };
+  const names = { shop: 'cart', warehouse: 'package', delivery: 'package', bags: 'shopping-bag', payment: 'shield-check', analytics: 'chart-bars', automation: 'cog' };
   let selected = null;
   let returnTo;
   function show() {
@@ -30,14 +30,21 @@ export function createModuleUI(stage, places, focus, signal) {
   function select(id) {
     selected = id;
     if (id) returnTo = buttons.get(id);
+    panel.dataset.collapsed = 'false';
+    close.setAttribute('aria-expanded', 'true');
     show();
     focus(id);
   }
   function reset() {
+    const collapsed = panel.dataset.collapsed === 'true';
+    const wasSelected = selected;
     select(null);
+    panel.dataset.collapsed = String(wasSelected !== null || !collapsed);
+    close.setAttribute('aria-expanded', String(panel.dataset.collapsed !== 'true'));
     returnTo?.focus({ preventScroll: true });
   }
-  for (const { id } of places) {
+  const order = ['shop', 'warehouse', 'delivery', 'bags', 'payment', 'analytics', 'automation'];
+  for (const id of order.filter(id => places.some(place => place.id === id))) {
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'hero3d__module';
@@ -57,6 +64,7 @@ export function createModuleUI(stage, places, focus, signal) {
   }, { signal });
   panel.append(title, text, close);
   stage.append(layer, panel);
+  close.setAttribute('aria-expanded', 'true');
   show();
   return {
     panel, layer, select,

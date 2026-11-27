@@ -47,3 +47,5 @@
 .hero3d__close { min-height: var(--size-tap); min-width: var(--size-tap); font-size: var(--size-text-xs); color: var(--c-accent); background: transparent; border: 0; padding-inline: var(--space-2); }
 .hero3d__hint { display: none; }
 @media (min-width: 768px) { .hero .hero__media[data-hero3d] { aspect-ratio: 4 / 5; } }
+
+@media (max-width: 767px) { .hero3d__panel[data-collapsed="true"] p { display: none; } }

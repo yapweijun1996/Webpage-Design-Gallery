@@ -780,6 +780,12 @@ def main():
                         assert page.locator('.update-button__chip').inner_text() == 'v' + VERSION
                         assert page.locator('#page-loader').is_hidden()
                         assert page.locator('[data-update-loader]').count() == 0
+                        if name == 'index':
+                            assert page.locator('.hero__trust li').count() == 3
+                            assert page.locator('.home-feature').count() == 4
+                            assert page.locator('.story-step__badge').count() == 4
+                            for step in page.locator('.story-step').all():
+                                assert step.locator('.story-step__points li').count() == 3
                         if name == 'index' and width in HOME_HEIGHT_LIMITS:
                             home_height = page.evaluate('document.documentElement.scrollHeight')
                             assert home_height <= HOME_HEIGHT_LIMITS[width], (width, locale, home_height, HOME_HEIGHT_LIMITS[width])
@@ -973,6 +979,38 @@ def main():
             assert page.locator('[data-hero3d] canvas').count() == 1
             assert page.locator('[data-hero3d] canvas').get_attribute('aria-label')
             assert not errors, errors
+            # Each real label changes the live panel; keyboard selection and dismissal restore focus.
+            buttons = page.locator('.hero3d__module')
+            assert buttons.count() == 7
+            overview = page.locator('#hero3d-title').inner_text()
+            for button in buttons.all():
+                box = button.bounding_box()
+                assert box['width'] >= 44 and box['height'] >= 44, box
+                button.click()
+                assert page.locator('#hero3d-title').inner_text() == button.get_attribute('aria-label')
+                module = button.get_attribute('data-module')
+                expected = page.evaluate("id => JSON.parse(document.querySelector('#i18n-runtime').textContent)['hero3d.module.' + id + '.text']", module)
+                assert page.locator('.hero3d__panel p').inner_text() == expected
+                assert button.get_attribute('aria-pressed') == 'true'
+                page.keyboard.press('Escape')
+                assert page.locator('#hero3d-title').inner_text() == overview
+                assert button.evaluate('el => el === document.activeElement')
+            buttons.first.focus()
+            page.keyboard.press('Enter')
+            assert buttons.first.get_attribute('aria-pressed') == 'true'
+            page.locator('.hero3d__close').click()
+            assert page.locator('#hero3d-title').inner_text() == overview
+            for width in (390, 320):
+                page.set_viewport_size({'width': width, 'height': 844})
+                page.wait_for_timeout(650)
+                assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+                assert page.evaluate('document.documentElement.scrollHeight') <= HOME_HEIGHT_LIMITS[width]
+                for button in buttons.all():
+                    box = button.bounding_box()
+                    assert box['width'] >= 44 and box['height'] >= 44
+                    button.click()
+                    assert page.locator('#hero3d-title').inner_text() == button.get_attribute('aria-label')
+                    page.keyboard.press('Escape')
             context.close()
             # Reduced motion: nothing auto-loads; a real click on the button starts the scene and must reach the button.
             context = gl.new_context(viewport={'width': 1440, 'height': 900}, reduced_motion='reduce', service_workers='block')

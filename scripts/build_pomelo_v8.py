@@ -44,7 +44,7 @@ def accent_word(match):
     word = match[1]
     if word.endswith("|plain"):
         return f'<span class="accent-word accent-word--plain">{word[:-6]}</span>'
-    return f'<span class="accent-word">{word}{ACCENT_STROKE}</span>' 
+    return f'<span class="accent-word">{word}{ACCENT_STROKE}</span>'
 
 
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")

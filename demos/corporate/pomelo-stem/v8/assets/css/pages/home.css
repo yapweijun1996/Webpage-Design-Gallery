@@ -108,3 +108,27 @@
   .story-step__copy > p:not(.story-step__label) { font-size: var(--size-text-sm); }
   :root[data-page="index"] .section, :root[data-page="index"] .band { padding-block: var(--space-6); }
 }
+/* Keep the complete localized narrative within the phone height budget. */
+@media (max-width: 767px) {
+  :root[data-page="index"] .hero__copy { gap: var(--space-3); }
+  :root[data-page="index"] .hero__grid { gap: var(--space-4); }
+  :root[data-page="index"] .hero .lead { font-size: var(--size-text-md); }
+  :root[data-page="index"] .section, :root[data-page="index"] .band { padding-block: var(--space-5); }
+  :root[data-page="index"] .section-head { margin-bottom: var(--space-4); gap: var(--space-2); }
+  :root[data-page="index"] .story__steps { gap: var(--space-4); }
+  :root[data-page="index"] .story-step { gap: var(--space-3); }
+  :root[data-page="index"] .band__grid { gap: var(--space-4); }
+  :root[data-page="index"] .band__grid li { grid-template-columns: var(--size-tap) minmax(0, 1fr); gap: var(--space-1) var(--space-3); }
+  :root[data-page="index"] .band__icon { grid-row: span 2; }
+  :root[data-page="index"] .band__grid p { grid-column: 2; font-size: var(--size-text-sm); }
+  :root[data-page="index"] .card { padding: var(--space-4); gap: var(--space-2); }
+  :root[data-page="index"] .card p { font-size: var(--size-text-sm); }
+  :root[data-page="index"] .card-grid { gap: var(--space-2); margin-top: var(--space-4); }
+  :root[data-page="index"] .closing__inner { gap: var(--space-3); }
+  :root[data-page="index"] .closing .lead { font-size: var(--size-text-md); }
+  :root[data-page="index"] .site-footer { padding-block: var(--space-5); }
+  :root[data-page="index"] .site-footer__grid { gap: var(--space-4); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .hero-cta .button--primary:not(:disabled):hover { color: var(--p-forest-950); background: linear-gradient(110deg, var(--p-mint-300), var(--p-lime-400)); }
+}

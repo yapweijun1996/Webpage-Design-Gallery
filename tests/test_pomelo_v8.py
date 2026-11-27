@@ -496,6 +496,8 @@ for (const version of ['8.2.1', '8.1.99', '7.99.99']) {
                 self.assertGreater(background, 0.7)
             pairs = [("toast-focus", "toast-bg", 3), ("focus", "surface", 3),
                      ("text-muted", "surface-sunken", 4.5),
+                     ("home-muted", "home-bg", 4.5), ("home-accent", "home-bg", 4.5),
+                     ("home-accent-to", "home-bg", 4.5),
                      ("toast-text", "toast-bg", 4.5), ("toast-detail", "toast-bg", 4.5), ("toast-action-text", "toast-action-bg", 4.5),
                      ("toast-close-text", "toast-close-bg", 4.5), ("toast-close-text", "toast-close-hover", 4.5)]
             pairs += [(f"toast-{kind}-icon", f"toast-{kind}-bg", 3) for kind in ("info", "success", "warning", "error")]
@@ -930,6 +932,32 @@ console.log('Toast runtime contracts passed');
         # Only the home page carries the scene, and the photo stays inside it as the fallback.
         self.assertNotIn("data-hero3d", (DEMO / "about.html").read_text("utf-8"))
         self.assertIn("hero-3d.js", (DEMO / "sw.js").read_text("utf-8"))
+
+    def test_v841_localized_home_contract(self):
+        required = {"hero3d.overview.title", "hero3d.overview.text", "hero3d.close", "hero3d.reset"}
+        required |= {f"hero3d.module.{module}.{field}" for module in
+                     ("shop", "warehouse", "delivery", "bags", "payment", "analytics", "automation")
+                     for field in ("label", "text")}
+        required |= {f"home.trust.{i}" for i in range(1, 4)}
+        required |= {f"home.feat.{i}.{field}" for i in range(1, 5) for field in ("title", "text")}
+        required |= {f"story.{i}.pts.{j}" for i in range(1, 5) for j in range(1, 4)}
+        for locale, folder in (("en", ""), ("zh", "zh"), ("ms", "ms")):
+            table = json.loads((DEMO / f"i18n/{locale}.json").read_text("utf-8"))
+            self.assertTrue(required <= table.keys(), locale)
+            self.assertTrue(all(table[key].strip() for key in required), locale)
+            home = (DEMO / folder / "index.html").read_text("utf-8")
+            self.assertEqual(home.count('class="home-feature"'), 4)
+            self.assertEqual(home.count('class="story-step__label story-step__badge"'), 4)
+            self.assertEqual(home.count('class="story-step__points"'), 4)
+            self.assertEqual(home.count('class="accent-word accent-word--plain"'), 5)
+            self.assertIn('class="hero__trust"', home)
+            runtime = json.loads(re.search(r'<script[^>]*id="i18n-runtime"[^>]*>(.*?)</script>', home, re.S)[1])
+            for key in required:
+                if key.startswith("hero3d."):
+                    self.assertEqual(runtime[key], table[key])
+        self.assertIn("hero3d.", pomelo.RUNTIME_PREFIXES)
+        for name in ("calendar", "play", "cart", "package", "cog", "chart-bars"):
+            self.assertIn(name, pomelo.icons())
 
     def test_css_custom_properties_are_defined(self):
         css = (DEMO / "assets/css/site.bundle.css").read_text("utf-8")

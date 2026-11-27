@@ -118,6 +118,7 @@ export async function mount(stage, { base, signal }) {
     started = performance.now();
 
     const focusModule = (id) => {
+      if (!id) camera.position.copy(controls.target).addScaledVector(direction, 60);
       const place = places.find(item => item.id === id);
       const target = place ? new THREE.Vector3(place.x * 0.35, 0, place.z * 0.35) : new THREE.Vector3();
       tween = { start: performance.now(), from: controls.target.clone(), to: target,
