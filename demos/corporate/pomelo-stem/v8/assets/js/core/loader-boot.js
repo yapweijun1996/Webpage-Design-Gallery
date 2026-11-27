@@ -4,10 +4,12 @@
   let main;
   let busy;
   let loader;
+  let observer;
   function ready() {
     done = true;
     clearTimeout(delay);
     clearTimeout(safety);
+    observer?.disconnect();
     if (loader) loader.hidden = true;
     document.body?.classList.remove('is-loading');
     if (main) {
@@ -18,10 +20,17 @@
     document.removeEventListener('DOMContentLoaded', ready);
     window.removeEventListener('load', ready);
   }
-  const delay = setTimeout(() => {
+  function show() {
     if (done) return;
     loader = document.getElementById('page-loader');
-    if (!loader) return;
+    if (!loader) {
+      if (!observer) {
+        observer = new MutationObserver(show);
+        observer.observe(document.documentElement, {childList: true, subtree: true});
+      }
+      return;
+    }
+    observer?.disconnect();
     main = document.getElementById('main');
     if (main) {
       busy = main.getAttribute('aria-busy');
@@ -29,7 +38,8 @@
     }
     document.body.classList.add('is-loading');
     loader.hidden = false;
-  }, 400);
+  }
+  const delay = setTimeout(show, 400);
   const safety = setTimeout(ready, 8000);
   window.__pomeloV8PageReady = ready;
   document.addEventListener('DOMContentLoaded', ready, {once: true});

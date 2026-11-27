@@ -112,7 +112,7 @@ class PomeloV8Test(unittest.TestCase):
     def test_loader_is_progressive_localized_and_inlined_without_blocking_requests(self):
         boot = (DEMO / "assets/js/core/loader-boot.js").read_text("utf-8")
         css = (DEMO / "assets/css/components/loader.css").read_text("utf-8")
-        self.assertIn("}, 400)", boot)
+        self.assertIn("setTimeout(show, 400)", boot)
         self.assertIn("setTimeout(ready, 8000)", boot)
         self.assertIn("'pageshow', ready", boot)
         self.assertIn("'DOMContentLoaded', ready", boot)
@@ -152,6 +152,7 @@ class PomeloV8Test(unittest.TestCase):
                 critical = re.search(r"<style data-loader-critical>(.*?)</style>", head, re.S)[1]
                 self.assertLess(len(critical.encode()), 6000)
                 self.assertIn(".loader[hidden]", critical)
+                self.assertIn("scrollbar-gutter: stable", critical)
                 self.assertIn("animation: none", critical)
                 self.assertIn('--c-surface:', critical)
                 self.assertIn(':root[data-theme="dark"]', critical)
@@ -190,6 +191,17 @@ class PomeloV8Test(unittest.TestCase):
                 self.assertEqual(geometry(mark), geometry(original))
                 self.assertEqual({value for node in mark.iter() for key, value in node.attrib.items() if key in ("fill", "stroke")},
                                  {"var(--c-accent)", "var(--c-surface)"})
+
+    def test_loader_fallback_preserves_brand_geometry_and_theme_colors(self):
+        source = (DEMO / 'assets/js/core/loader.js').read_text('utf-8')
+        parts = json.loads(re.search(r'const parts = (\[.*?\n  \]);', source, re.S)[1])
+        mark = ElementTree.fromstring(pomelo.loader_brand_mark())
+        expected = [[node.tag.rsplit('}', 1)[-1], node.attrib] for node in mark.iter()
+                    if node.tag.rsplit('}', 1)[-1] in ('path', 'circle')]
+        self.assertEqual(parts, expected)
+        transform = next(node.get('transform') for node in mark.iter() if node.get('transform'))
+        self.assertIn(transform, source)
+        self.assertIn("document.createElementNS('http://www.w3.org/2000/svg', tag)", source)
 
     def test_every_toast_detail_has_a_conservative_character_budget(self):
         budgets = {"en": 48, "ms": 48, "zh": 24}
@@ -273,7 +285,8 @@ class PomeloV8Test(unittest.TestCase):
         self.assertIn("field.value !== field.defaultValue", guard)
         self.assertIn("field.checked !== field.defaultChecked", guard)
         self.assertIn("option.defaultSelected", guard)
-        self.assertRegex(guard, r"if \(hasUnsavedInput\(\)\) return;\s*if \(window\.__pomeloV8Reloading\) return;\s*window\.__pomeloV8Reloading = true;\s*reloaded = true;\s*location.reload\(\);")
+        self.assertLess(guard.index('if (hasUnsavedInput()) return;'), guard.index("owner: 'self-heal'"))
+        self.assertIn('claim && Date.now() - claim.timestamp < 3000', guard)
         self.assertIn("key = 'pomelo-v8-heal'", guard)
         self.assertIn("sessionStorage.getItem(key) === want", guard)
         self.assertIn("sessionStorage.setItem(key, want)", guard)

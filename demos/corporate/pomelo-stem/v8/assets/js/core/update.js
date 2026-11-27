@@ -8,6 +8,7 @@ import {show as showLoader} from './loader.js';
 const THROTTLE = 10 * 60 * 1000;
 const TIMEOUT = 8000;
 const APPLY_TIMEOUT = 12000;
+const RELOAD_TIMEOUT = 3000;
 let button;
 let status;
 let current;
@@ -102,18 +103,21 @@ function waitForWaiting(registration) {
 export async function apply() {
   if (applying) return;
   applying = true;
-  if (!await canReload()) { applying = false; return; }
-  setState('applying', t('update.applying'));
-  const loaderOptions = {title: t('loader.updateTitle', {version: available || current}),
-    detail: t('loader.updateDetail'), returnFocus: button};
-  let loader = showLoader(loaderOptions);
+  let loaderOptions;
+  let loader;
   let cancelled = false;
   let reloading = false;
-  let ownsReload = false;
-  let fail = setTimeout(failAttempt, APPLY_TIMEOUT);
+  let reloadClaim;
+  let claimTimer;
+  let fail;
   function hideLoader() {
-    loader?.close();
+    const handle = loader;
     loader = null;
+    handle?.close();
+  }
+  function releaseReload() {
+    clearTimeout(claimTimer);
+    if (reloadClaim && window.__pomeloV8Reloading === reloadClaim) delete window.__pomeloV8Reloading;
   }
   function cleanup() {
     clearTimeout(fail);
@@ -124,39 +128,52 @@ export async function apply() {
     cancelled = true;
     cleanup();
     applying = false;
-    if (ownsReload) window.__pomeloV8Reloading = false;
+    releaseReload();
     setState('error', t('update.error'));
-    hideLoader();
+    try { hideLoader(); } catch (error) { /* Still restore the update control if closing fails. */ }
+    button.focus();
     toast({key: 'update', type: 'error', messageKey: 'toast.updateError.title', detailKey: 'toast.updateError.detail',
       action: {label: t('update.retry'), onClick: apply}});
   }
   async function reload() {
     if (cancelled || reloading) return;
     reloading = true;
-    cleanup();
-    // Consent must be usable above the loader; restore it only if consent is accepted.
-    if (hasUnsavedInput()) hideLoader();
-    if (!await canReload()) {
-      cancelled = true;
-      applying = false;
-      available = available || current;
-      setState('available', t('update.available', {version: available}));
-      hideLoader();
-      button.focus();
-      return;
-    }
-    if (!cancelled) {
-      if (!loader) loader = showLoader(loaderOptions);
-      // Keep a watchdog in case navigation is blocked or reload throws.
-      fail = setTimeout(failAttempt, APPLY_TIMEOUT);
-      if (!window.__pomeloV8Reloading) {
-        window.__pomeloV8Reloading = true;
-        ownsReload = true;
-        try { window.location.reload(); } catch (error) { failAttempt(); }
+    try {
+      cleanup();
+      // Consent must be usable above the loader; restore it only if consent is accepted.
+      if (hasUnsavedInput()) hideLoader();
+      if (!await canReload()) {
+        hideLoader();
+        cancelled = true;
+        applying = false;
+        available = available || current;
+        setState('available', t('update.available', {version: available}));
+        button.focus();
+        return;
       }
+      if (!cancelled) {
+        if (!loader) loader = showLoader(loaderOptions);
+        // Keep a watchdog in case navigation is blocked or reload throws.
+        fail = setTimeout(failAttempt, APPLY_TIMEOUT);
+        const claim = window.__pomeloV8Reloading;
+        if (!(claim && Date.now() - claim.timestamp < RELOAD_TIMEOUT)) {
+          reloadClaim = {owner: 'update', timestamp: Date.now()};
+          window.__pomeloV8Reloading = reloadClaim;
+          claimTimer = setTimeout(releaseReload, RELOAD_TIMEOUT);
+          window.location.reload();
+        }
+      }
+    } catch (error) {
+      failAttempt();
     }
   }
   try {
+    if (!await canReload()) { applying = false; return; }
+    setState('applying', t('update.applying'));
+    fail = setTimeout(failAttempt, APPLY_TIMEOUT);
+    loaderOptions = {title: t('loader.updateTitle', {version: available || current}),
+      detail: t('loader.updateDetail'), returnFocus: button};
+    loader = showLoader(loaderOptions);
     const registration = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration(root().href) : null;
     if (cancelled) return;
     if (!registration) { await reload(); return; }

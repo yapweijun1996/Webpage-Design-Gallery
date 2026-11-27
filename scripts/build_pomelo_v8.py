@@ -92,6 +92,8 @@ def css_bundle(tokens):
 def loader_critical_css(tokens):
     """Inline the shared loader CSS and only its token dependency tree (including both themes)."""
     css = (V8 / "assets/css/components/loader.css").read_text(encoding="utf-8")
+    base = (V8 / "assets/css/base.css").read_text(encoding="utf-8")
+    css = re.search(r"html\s*\{[^}]*\}", base)[0] + "\n" + css
     needed = set(re.findall(r"var\((--[\w-]+)", css))
     declarations = re.findall(r"(--[\w-]+):\s*([^;]+);", tokens)
     while True:
@@ -345,10 +347,19 @@ SW_GUARD = r"""(function () {
       }
       try { sessionStorage.setItem(key, want); } catch (error) { /* attempt limit still bounds reloads */ }
       if (hasUnsavedInput()) return;
-      if (window.__pomeloV8Reloading) return;
-      window.__pomeloV8Reloading = true;
+      var claim = window.__pomeloV8Reloading;
+      if (claim && Date.now() - claim.timestamp < 3000) return;
+      var reloadClaim = {owner: 'self-heal', timestamp: Date.now()};
+      window.__pomeloV8Reloading = reloadClaim;
+      function releaseReload() {
+        if (window.__pomeloV8Reloading === reloadClaim) delete window.__pomeloV8Reloading;
+      }
+      var claimTimer = setTimeout(releaseReload, 3000);
       reloaded = true;
-      location.reload();
+      try { location.reload(); } catch (error) {
+        clearTimeout(claimTimer);
+        releaseReload();
+      }
     }
     function onControllerChange() {
       if (finished || !sw.controller) return;

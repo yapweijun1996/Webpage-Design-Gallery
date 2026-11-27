@@ -36,7 +36,10 @@ class Events {
 function clock() {
   const timers = new Map();
   let next = 0;
+  let now = 1000;
   return {
+    Date: class extends Date { static now() { return now; } },
+    advance(ms) { now += ms; },
     setTimeout(fn, delay) { timers.set(++next, {fn, delay}); return next; },
     clearTimeout(id) { timers.delete(id); },
     fire(delay) {
@@ -93,7 +96,10 @@ function domHarness() {
       this.classList = {add: name => classes.add(name), remove: name => classes.delete(name),
         contains: name => classes.has(name), toggle: (name, on) => on ? classes.add(name) : classes.delete(name)};
     }
-    setAttribute(name, value) { this.attributes[name] = value; }
+    setAttribute(name, value) {
+      this.attributes[name] = value;
+      if (name === 'class') this.className = value;
+    }
     getAttribute(name) { return this.attributes[name]; }
     cloneNode(deep) {
       const copy = new Element(this.tagName);
@@ -124,6 +130,10 @@ function domHarness() {
     }
   }
   document.createElement = tag => new Element(tag);
+  document.createElementNS = (ns, tag) => {
+    assert.equal(ns, 'http://www.w3.org/2000/svg');
+    return new Element(tag);
+  };
   document.body = new Element('body');
   const mark = new Element('svg');
   mark.className = 'loader__mark';
@@ -160,7 +170,11 @@ function updateHarness({registration = null, hasWorker = true, locale} = {}) {
     confirm(options) { state.confirms.push(options); return Promise.resolve(state.answer); },
   };
   const api = vm.runInNewContext('const mount = (() => {\n' + source('assets/js/core/dialog.js') + '\nreturn mount; })();\n' + source('assets/js/core/loader.js') +
-    '\nconst showLoader = show;\n' + source('assets/js/core/update.js') + '\ninit(); ({apply})', context);
+    `\nconst showLoader = (...args) => {
+      if (loaderState.showError) throw new Error('Loader show failed');
+      const handle = show(...args);
+      return {close() { handle.close(); if (loaderState.closeError) throw new Error('Loader close failed'); }};
+    };\n` + source('assets/js/core/update.js') + '\ninit(); ({apply})', {...context, loaderState: state});
   return {...timers, ...api, state, button, sw, document, Element,
     get loader() { return document.body.children.find(node => Object.hasOwn(node.attributes, 'data-update-loader')); }};
 }
@@ -357,7 +371,57 @@ test('worker errors and failed or blocked navigation clear the loader and permit
   assert.equal(h.state.reloads, 2);
 });
 
-function pageLoaderHarness({run = true, busy = null} = {}) {
+test('mixed-cache HTML without a loader mark uses the complete fallback and apply remains retryable', async () => {
+  const h = updateHarness({registration: waitingRegistration()});
+  const query = h.document.querySelector;
+  h.document.querySelector = selector => selector === '#page-loader .loader__mark' ? null : query(selector);
+  await h.apply();
+  const mark = h.loader.children[0].children[0].children[0];
+  assert.equal(mark.tagName, 'SVG');
+  assert.equal(mark.getAttribute('viewBox'), '0 0 1024 1024');
+  assert.equal(mark.getAttribute('aria-hidden'), 'true');
+  assert.equal(mark.getAttribute('focusable'), 'false');
+  assert.equal(mark.children[0].getAttribute('transform'), 'translate(512 505) scale(.985) translate(-469 -500)');
+  const parts = mark.children[0].children[0].children;
+  assert.equal(parts.filter(node => node.tagName === 'PATH').length, 10);
+  assert.equal(parts.filter(node => node.tagName === 'CIRCLE').length, 3);
+  h.fire(12000);
+  assert.equal(h.button.dataset.state, 'error');
+  assert.equal(h.button.disabled, false);
+  assert.equal(h.document.activeElement, h.button);
+  await h.apply();
+  h.sw.emit('controllerchange');
+  await flush();
+  assert.equal(h.state.reloads, 1);
+});
+
+test('loader show, re-show and close failures restore update state and focus, including worker events', async () => {
+  for (const stage of ['show', 're-show', 'close', 'failure-close']) {
+    const h = updateHarness({registration: waitingRegistration()});
+    h.state.showError = stage === 'show';
+    await h.apply();
+    if (stage !== 'show') {
+      h.state.dirty = true;
+      h.state.showError = stage === 're-show';
+      h.state.closeError = stage.endsWith('close');
+      if (stage === 'failure-close') h.fire(12000);
+      else h.sw.emit('controllerchange');
+      await flush();
+    }
+    assert.equal(h.button.dataset.state, 'error', stage);
+    assert.equal(h.button.disabled, false, stage);
+    assert.equal(h.loader, undefined, stage);
+    assert.equal(h.document.activeElement, h.button, stage);
+    assert.equal(h.state.toasts.at(-1).messageKey, 'toast.updateError.title', stage);
+    h.state.showError = h.state.closeError = h.state.dirty = false;
+    await h.apply();
+    h.sw.emit('controllerchange');
+    await flush();
+    assert.equal(h.state.reloads, 1, stage);
+  }
+});
+
+function pageLoaderHarness({run = true, busy = null, lateBody = false} = {}) {
   const {document, Element} = domHarness();
   const timers = clock();
   const window = new Events();
@@ -370,9 +434,20 @@ function pageLoaderHarness({run = true, busy = null} = {}) {
   document.body.append(main, loader);
   const opener = new Element('a');
   opener.focus();
-  document.getElementById = id => id === 'main' ? main : loader;
-  if (run) vm.runInNewContext(source('assets/js/core/loader-boot.js'), {...timers, window, document});
-  return {...timers, window, document, main, loader, opener};
+  const body = document.body;
+  let parsed = !lateBody;
+  if (lateBody) document.body = null;
+  document.getElementById = id => parsed ? (id === 'main' ? main : loader) : null;
+  let observer;
+  class MutationObserver {
+    constructor(callback) { this.callback = callback; observer = this; }
+    observe() { this.active = true; }
+    disconnect() { this.active = false; }
+  }
+  if (run) vm.runInNewContext(source('assets/js/core/loader-boot.js'), {...timers, window, document, MutationObserver});
+  return {...timers, window, document, main, loader, opener,
+    get observing() { return observer?.active || false; },
+    parseBody() { parsed = true; document.body = body; if (observer?.active) observer.callback(); }};
 }
 
 test('page loader never flashes when ready before 400ms or when JavaScript is disabled', () => {
@@ -410,6 +485,31 @@ test('delayed page loader shows without focus theft and ready, bfcache or safety
       assert.equal(h.main.getAttribute('aria-busy'), busy, finish);
       assert.equal(h.document.body.classList.contains('is-loading'), false, finish);
       assert.equal(h.document.activeElement, h.opener);
+    }
+  }
+});
+
+test('late body shows after the threshold and every ready path cancels markup observation', () => {
+  for (const finish of ['DOMContentLoaded', 'load', 'app', 'pageshow', 'pagehide', 'timeout']) {
+    for (const beforeBody of [false, true]) {
+      const h = pageLoaderHarness({lateBody: true, busy: 'false'});
+      h.fire(400);
+      assert.equal(h.observing, true);
+      if (!beforeBody) {
+        h.parseBody();
+        assert.equal(h.loader.hidden, false);
+        assert.equal(h.main.getAttribute('aria-busy'), 'true');
+        assert.equal(h.observing, false);
+      }
+      if (finish === 'timeout') h.fire(8000);
+      else if (finish === 'app') h.window.__pomeloV8PageReady();
+      else (finish === 'DOMContentLoaded' ? h.document : h.window).emit(finish);
+      if (beforeBody) h.parseBody();
+      assert.equal(h.loader.hidden, true, finish);
+      assert.equal(h.observing, false, finish);
+      assert.equal(h.main.getAttribute('aria-busy'), 'false', finish);
+      assert.equal(h.document.body.classList.contains('is-loading'), false, finish);
+      assert.equal(h.document.activeElement, h.opener, finish);
     }
   }
 });
@@ -458,7 +558,10 @@ function healHarness({storage = new Map(), offline = false, fail = false, dirty 
   window.MessageChannel = MessageChannel;
   const document = {querySelector: () => ({content: 'wanted'}),
     querySelectorAll: () => state.dirty ? [{closest: () => null, getAttribute: () => 'true'}] : []};
-  const location = {protocol: 'file:', reload() { state.reloads += 1; }};
+  const location = {protocol: 'file:', reload() {
+    if (state.reloadError) throw new Error('Navigation failed');
+    state.reloads += 1;
+  }};
   window.location = location;
   const context = vm.createContext({...timers, window, navigator, document, MessageChannel, location,
     sessionStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value)},
@@ -477,7 +580,7 @@ function manualAlongsideHeal(h) {
     return {content: selector.includes('root') ? './' : 'wanted'};
   };
   Object.assign(h.context, {URL, t: key => key, toast() {}, confirm: async () => false, showLoader: () => ({close() {}})});
-  return vm.runInContext(source('assets/js/core/unsaved.js') + '\n' + source('assets/js/core/update.js') + '\ninit(); ({apply})', h.context);
+  return vm.runInContext(source('assets/js/core/unsaved.js') + '\n' + source('assets/js/core/update.js') + '\ninit(); ({apply, button})', h.context);
 }
 
 test('self-heal and manual update coordinate one reload whichever path finishes first', async () => {
@@ -492,7 +595,8 @@ test('self-heal and manual update coordinate one reload whichever path finishes 
     await flush();
     if (manualFirst) h.state.reply();
     await flush();
-    assert.equal(h.window.__pomeloV8Reloading, true);
+    assert.equal(h.window.__pomeloV8Reloading.owner, manualFirst ? 'update' : 'self-heal');
+    assert.equal(typeof h.window.__pomeloV8Reloading.timestamp, 'number');
     assert.equal(h.state.reloads, 1);
     assert.equal(h.sw.count('controllerchange'), 0);
   }
@@ -508,6 +612,70 @@ test('both reload paths preserve input entered while their shared update is wait
   await flush();
   assert.equal(h.state.reloads, 0);
   assert.equal(h.window.__pomeloV8Reloading, undefined);
+});
+
+test('ignored or throwing self-heal navigation releases its claim so manual update reloads once', async () => {
+  for (const recovery of ['watchdog', 'stale', 'throw']) {
+    const h = healHarness();
+    await flush();
+    h.state.build = 'wanted';
+    h.state.reloadError = recovery === 'throw';
+    h.sw.emit('controllerchange');
+    assert.equal(h.state.reloads, recovery === 'throw' ? 0 : 1);
+    if (recovery === 'watchdog') h.fire(3000);
+    if (recovery === 'stale') h.advance(3000); // Timer delivery may be throttled.
+    else assert.equal(h.window.__pomeloV8Reloading, undefined, recovery);
+    h.state.reloadError = false;
+    const manual = manualAlongsideHeal(h);
+    const before = h.state.reloads;
+    await manual.apply();
+    h.sw.emit('controllerchange');
+    h.sw.emit('controllerchange');
+    await manual.apply();
+    await flush();
+    assert.equal(h.state.reloads - before, 1, recovery);
+    assert.equal(h.window.__pomeloV8Reloading.owner, 'update', recovery);
+    h.fire(3000);
+    assert.equal(h.window.__pomeloV8Reloading, undefined, recovery);
+  }
+});
+
+test('claim watchdogs and failure cleanup never release another owner', async () => {
+  const h = healHarness();
+  await flush();
+  h.state.build = 'wanted';
+  h.sw.emit('controllerchange');
+  const replacement = {owner: 'update', timestamp: 5000};
+  h.window.__pomeloV8Reloading = replacement;
+  h.fire(3000);
+  assert.equal(h.window.__pomeloV8Reloading, replacement);
+  delete h.window.__pomeloV8Reloading;
+  const manual = manualAlongsideHeal(h);
+  await manual.apply();
+  h.sw.emit('controllerchange');
+  await flush();
+  const next = {owner: 'self-heal', timestamp: 6000};
+  h.window.__pomeloV8Reloading = next;
+  h.fire(3000);
+  h.fire(12000);
+  assert.equal(h.window.__pomeloV8Reloading, next);
+  assert.equal(manual.button.dataset.state, 'error');
+  assert.equal(manual.button.disabled, false);
+});
+
+test('self-heal respects a fresh manual claim and can take over an expired one', async () => {
+  for (const stale of [false, true]) {
+    const h = healHarness();
+    await flush();
+    const claim = {owner: 'update', timestamp: h.Date.now()};
+    h.window.__pomeloV8Reloading = claim;
+    if (stale) h.advance(3000);
+    h.state.build = 'wanted';
+    h.sw.emit('controllerchange');
+    assert.equal(h.state.reloads, stale ? 1 : 0);
+    if (stale) assert.equal(h.window.__pomeloV8Reloading.owner, 'self-heal');
+    else assert.equal(h.window.__pomeloV8Reloading, claim);
+  }
 });
 
 test('failed offline heal retries online and marks success only after controller verification', async () => {
