@@ -43,7 +43,8 @@
 /* Home atmosphere: curved sweeps and soft leaves use no image downloads. */
 .hero--home, .story {
   position: relative; isolation: isolate;
-  background: radial-gradient(ellipse at 5% 30%, var(--c-sweep), transparent 55%),
+  background: linear-gradient(180deg, transparent var(--size-home-fade-start), var(--c-bg)),
+    radial-gradient(ellipse at 5% 30%, var(--c-sweep), transparent 55%),
     radial-gradient(ellipse at 100% 0%, var(--c-glow), transparent 65%),
     linear-gradient(140deg, var(--c-home-bg), var(--c-bg));
 }
@@ -51,11 +52,14 @@
   content: ""; position: absolute; inset: 0; z-index: var(--z-toast-accent); pointer-events: none;
   background: repeating-radial-gradient(ellipse at 120% 130%, transparent 0 18%, var(--c-sweep) 19%, transparent 20% 28%);
 }
+.hero--home::before, .story::before, .hero--home::after, .story::after {
+  mask-image: linear-gradient(180deg, var(--c-bg) var(--size-home-fade-start), transparent);
+}
 .hero--home::after, .story::after {
   content: ""; position: absolute; inset: 0; z-index: var(--z-toast-accent); pointer-events: none;
-  background: radial-gradient(ellipse at -4% 20%, var(--c-glow) 0 5%, transparent 12%),
-    radial-gradient(ellipse at 102% 60%, var(--c-accent) 0 2%, transparent 9%),
-    radial-gradient(ellipse at -2% 85%, var(--c-accent) 0 2%, transparent 8%);
+  background: radial-gradient(ellipse at -4% 20%, var(--c-foliage) 0 5%, transparent 12%),
+    radial-gradient(ellipse at 102% 60%, var(--c-foliage) 0 2%, transparent 9%),
+    radial-gradient(ellipse at -2% 85%, var(--c-foliage) 0 2%, transparent 8%);
   filter: blur(var(--size-foliage-blur));
 }
 .hero--home h1, .story h2, .story h3 { font-family: var(--font-body); font-weight: var(--weight-bold); }
@@ -67,13 +71,13 @@
 }
 .hero--home .accent-word__stroke { stroke: var(--c-home-accent); }
 .hero-cta .button { border-radius: var(--radius-pill); }
-.hero-cta .button--primary { background: linear-gradient(110deg, var(--p-lime-400), var(--p-mint-500)); color: var(--p-forest-950); }
+.hero-cta .button--primary { background: linear-gradient(110deg, var(--p-lime-400), var(--p-mint-500)) border-box; color: var(--p-forest-950); }
 .hero-cta .button--secondary { border: var(--size-hero-outline) solid var(--c-home-accent); color: var(--c-home-accent); background: transparent; }
 .hero__trust { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: var(--size-text-xs); color: var(--c-home-muted); }
 .hero__trust li { display: flex; gap: var(--space-1); align-items: center; }
 .hero__trust .icon { color: var(--c-accent); flex-shrink: 0; }
 .home-features { position: relative; margin-top: calc(-1 * var(--space-4)); z-index: var(--z-stage); }
-.home-features__grid { display: grid; gap: var(--space-2); }
+.home-features__grid { display: grid; gap: var(--space-2); grid-auto-rows: 1fr; align-items: stretch; }
 .home-feature {
   display: flex; gap: var(--space-3); align-items: center; padding: var(--space-3);
   background: var(--c-glass); border: var(--size-border) solid var(--c-border-control); border-radius: var(--radius-lg);
@@ -85,7 +89,17 @@
 @media (min-width: 768px) { .home-features__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1024px) { .home-features__grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 /* One order story: centred copy, consistent landscape photos, and compact supporting points. */
-.story { overflow: hidden; }
+.story {
+  overflow: hidden;
+  background-image: linear-gradient(180deg, var(--c-bg), transparent var(--size-home-fade-start)),
+    linear-gradient(180deg, transparent var(--size-home-fade-start), var(--c-bg)),
+    radial-gradient(ellipse at 5% 30%, var(--c-sweep), transparent 55%),
+    radial-gradient(ellipse at 100% 0%, var(--c-glow), transparent 65%),
+    linear-gradient(140deg, var(--c-home-bg), var(--c-bg));
+}
+.story::before, .story::after {
+  mask-image: linear-gradient(180deg, transparent, var(--c-bg) var(--size-home-fade-start), transparent);
+}
 .story .eyebrow { display: flex; align-items: center; gap: var(--space-4); color: var(--c-home-accent); }
 .story .eyebrow::after { content: ""; height: var(--size-border); width: var(--space-9); background: var(--c-home-accent); }
 .story .accent-word--plain { color: var(--c-home-accent); white-space: normal; }
@@ -130,5 +144,5 @@
   :root[data-page="index"] .site-footer__grid { gap: var(--space-4); }
 }
 @media (hover: hover) and (pointer: fine) {
-  .hero-cta .button--primary:not(:disabled):hover { color: var(--p-forest-950); background: linear-gradient(110deg, var(--p-mint-300), var(--p-lime-400)); }
+  .hero-cta .button--primary:not(:disabled):hover { color: var(--p-forest-950); background: linear-gradient(110deg, var(--p-mint-300), var(--p-lime-400)) border-box; }
 }
