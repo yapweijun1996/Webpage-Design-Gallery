@@ -75,14 +75,27 @@ export function createModuleUI(stage, places, focus, signal) {
     panel, layer, select,
     placeLabels(anchors, camera, height) {
       const width = stage.clientWidth;
-      const occupied = [];
+      const navigation = stage.querySelector('.hero3d__navigation');
+      const occupied = navigation ? [{x: width - navigation.offsetWidth, y: 0,
+        w: navigation.offsetWidth, h: navigation.offsetHeight}] : [];
       const labelBottom = Math.max(44, height - panel.offsetHeight - 8);
       for (const [id, button] of buttons) {
         const point = anchors.get(id).pin.clone().project(camera);
         const top = anchors.get(id).top.clone().project(camera);
         const w = button.offsetWidth, h = button.offsetHeight;
-        let x = Math.max(0, Math.min(width - w, (point.x + 1) * width / 2 - w / 2));
-        let y = Math.max(0, Math.min(height - h, (1 - top.y) * height / 2 - h));
+        const manual = stage.dataset.manualView === 'true';
+        const anchorX = (point.x + 1) * width / 2 - w / 2;
+        const anchorY = (1 - point.y) * height / 2 - h / 2;
+        let x = Math.max(0, Math.min(width - w, anchorX));
+        let y = Math.max(0, Math.min(manual ? labelBottom - h : height - h,
+          manual ? anchorY : (1 - top.y) * height / 2 - h));
+        if (manual && x === anchorX && y === anchorY &&
+            !(navigation && x + w > width - navigation.offsetWidth && y < navigation.offsetHeight)) {
+          // Visible anchors track exactly. Clipped anchors use the free edge positions below.
+          button.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
+          occupied.push({ x, y, w, h });
+          continue;
+        }
         // Resolve neighbours without removing any module from the keyboard order.
         for (const box of occupied) {
           if (x < box.x + box.w && x + w > box.x && y < box.y + h && y + h > box.y) {

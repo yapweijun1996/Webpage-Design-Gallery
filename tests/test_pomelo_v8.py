@@ -41,6 +41,7 @@ class PomeloV8Test(unittest.TestCase):
     def test_version_single_source(self):
         release = json.loads((DEMO / "release.json").read_text("utf-8"))
         info = json.loads((DEMO / "build-info.json").read_text("utf-8"))
+        self.assertEqual(release, {"version": "8.4.3", "build": "20261128.2"})
         self.assertEqual(release, info)
         self.assertRegex(release["version"], r"^\d+\.\d+\.\d+$")
         sw = (DEMO / "sw.js").read_text("utf-8")
@@ -934,7 +935,7 @@ console.log('Toast runtime contracts passed');
         self.assertIn("hero-3d.js", (DEMO / "sw.js").read_text("utf-8"))
 
     def test_v841_localized_home_contract(self):
-        required = {"hero3d.overview.title", "hero3d.overview.text", "hero3d.close", "hero3d.reset"}
+        required = {"hero3d.overview.title", "hero3d.overview.text", "hero3d.close", "hero3d.reset", "hero3d.zoomIn", "hero3d.zoomOut", "hero3d.wheelHint", "hero3d.hint"}
         required |= {f"hero3d.module.{module}.{field}" for module in
                      ("shop", "warehouse", "delivery", "bags", "payment", "analytics", "automation")
                      for field in ("label", "text")}

@@ -244,14 +244,14 @@
   "loader.tagline": "Penyelesaian pintar untuk terus berkembang.",
   "loader.updateTitle": "Mengemas kini ke v{version}",
   "loader.updateDetail": "Halaman ini akan dimuat semula sebentar lagi.",
-  "hero3d.label": "Pemandangan 3D interaktif kedai dalam talian yang bersambung: kedai, gudang, penghantaran, pembayaran, analitik dan automasi. Guna kekunci anak panah kiri dan kanan atau seret ke tepi untuk memusingkannya.",
-  "hero3d.hint": "Seret ke tepi untuk memusing",
+  "hero3d.label": "Pemandangan 3D interaktif kedai dalam talian yang bersambung: kedai, gudang, penghantaran, pembayaran, analitik dan automasi. Seret ke sisi untuk putar; Shift + seret untuk alih. Cubit untuk zum dan seret dua jari untuk alih. Guna + / − untuk zum dan 0 untuk set semula.",
+  "hero3d.hint": "Seret ke sisi untuk putar; Shift + seret untuk alih. Cubit untuk zum dan seret dua jari untuk alih. Guna + / − untuk zum dan 0 untuk set semula.",
   "hero3d.load": "Terokai dalam 3D",
   "hero3d.loading": "Memuatkan pemandangan 3D…",
   "hero3d.failed": "Pemandangan 3D tidak dapat dimuatkan. Foto kekal dipaparkan.",
   "hero3d.module.bags.label": "Pesanan",
   "hero3d.module.bags.text": "Beg di tengah mewakili pesanan yang disokong oleh semua bahagian lain.",
-  "hero3d.reset": "Lihat seluruh rangkaian",
+  "hero3d.reset": "Set semula paparan",
   "hero3d.overview.title": "Satu pesanan, satu rangkaian",
   "hero3d.overview.text": "Beg beli-belah berada di tengah; setiap bahagian perniagaan berhubung dengan pesanan.",
   "hero3d.module.shop.label": "Kedai",
@@ -289,5 +289,8 @@
   "story.3.pts.3": "Senarai persediaan",
   "story.4.pts.1": "Ambil gambar",
   "story.4.pts.2": "Draf AI",
-  "story.4.pts.3": "Anda terbitkan"
+  "story.4.pts.3": "Anda terbitkan",
+  "hero3d.zoomIn": "Zum masuk",
+  "hero3d.zoomOut": "Zum keluar",
+  "hero3d.wheelHint": "Ctrl + tatal untuk zum"
 }
