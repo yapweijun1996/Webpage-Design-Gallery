@@ -771,6 +771,26 @@ body::before {
   .hero3d__panel[data-collapsed="true"] p { display: none; }
 }
 
+/* Keep the view controls outside the model area and above the bottom panel. */
+.hero3d__navigation {
+  position: absolute; top: 0; inset-inline-end: 0; display: flex; gap: var(--space-1);
+  z-index: var(--z-stage);
+}
+.hero3d__navigation button {
+  display: grid; place-items: center; min-width: var(--size-tap); min-height: var(--size-tap);
+  padding: var(--space-1); border: var(--size-border) solid var(--c-border-control);
+  border-radius: var(--radius-pill); background: var(--c-glass); color: var(--c-text);
+  font-size: var(--size-text-lg); box-shadow: var(--shadow-sm);
+  -webkit-backdrop-filter: blur(var(--size-header-blur)); backdrop-filter: blur(var(--size-header-blur));
+}
+.hero3d__navigation button:disabled { opacity: 0.45; cursor: default; }
+.hero3d__hint--wheel:not([hidden]) {
+  display: block; bottom: auto; top: var(--size-tap);
+}
+@media (hover: hover) and (pointer: fine) {
+  .hero3d__navigation button:hover:enabled { background: var(--c-accent-soft); }
+}
+
 /* components/lang-menu.css */
 /* One disclosure in the header; the same locale links also work without JS in the footer. */
 .lang-menu { position: relative; }

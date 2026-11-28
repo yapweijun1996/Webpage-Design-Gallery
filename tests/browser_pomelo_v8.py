@@ -922,8 +922,8 @@ def check_scene_failure(browser, base):
         context.close()
 
 
-def check_scene_framing(browser, base):
-    """Measure projected mesh vertices through a test-only response override."""
+def scene_probe_source():
+    """Instrument only the test response; production exposes no debug API."""
     source = (DEMO / 'assets/js/hero3d/viewer.js').read_text('utf-8')
     render = 'renderer.render(scene, camera);'
     assert source.count(render) == 1
@@ -942,6 +942,13 @@ def check_scene_framing(browser, base):
         }
       });
       window.__sceneBounds = bounds;
+      window.__view = {zoom: camera.zoom, target: controls.target.toArray(), position: camera.position.toArray(),
+        frames: (window.__view?.frames || 0) + 1};
+      window.__anchors = Object.fromEntries([...composed.anchors].map(([id, anchor]) => {
+        const point = anchor.pin.clone().project(camera);
+        return [id, {x: (point.x + 1) * canvas.clientWidth / 2, y: (1 - point.y) * canvas.clientHeight / 2}];
+      }));
+      window.__disposeScene = dispose;
       const selectedBounds = {left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity};
       const selected = stage.dataset.selected;
       composed.root.traverse(object => {
@@ -963,6 +970,12 @@ def check_scene_framing(browser, base):
       window.__selectedBounds = selectedBounds;
       window.__labelTops = Object.fromEntries([...composed.anchors].map(([id, anchor]) => [id, anchor.top.clone().project(camera).y]));
     """)
+    return source
+
+
+def check_scene_framing(browser, base):
+    """Measure projected mesh vertices through a test-only response override."""
+    source = scene_probe_source()
     for width, height in ((1440, 900), (1024, 768), (768, 1024), (390, 844), (320, 568)):
         context = browser.new_context(viewport={'width': width, 'height': height}, reduced_motion='reduce', service_workers='block')
         try:
@@ -1029,6 +1042,202 @@ def check_scene_framing(browser, base):
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), width
         finally:
             context.close()
+
+
+def check_scene_navigation(browser, base):
+    """Real software-GL interaction; multi-touch is emulated through Chromium CDP."""
+    source = scene_probe_source()
+    for locale in ('en', 'zh', 'ms'):
+        table = json.loads((DEMO / f'i18n/{locale}.json').read_text('utf-8'))
+        assert table.keys() == json.loads((DEMO / 'i18n/en.json').read_text('utf-8')).keys()
+        assert all(table[f'hero3d.{key}'] for key in ('zoomIn', 'zoomOut', 'reset', 'wheelHint', 'hint'))
+    context = browser.new_context(viewport={'width': 1440, 'height': 900}, reduced_motion='reduce', service_workers='block')
+    try:
+        page = context.new_page()
+        failures = []
+        page.on('pageerror', lambda error: failures.append(str(error)))
+        page.route('**/hero3d/viewer.js', lambda route: route.fulfill(body=source, content_type='text/javascript'))
+        page.goto(base + 'index.html', wait_until='load')
+        page.locator('.hero3d__button').click()
+        page.wait_for_selector('[data-hero3d][data-state="ready"]', timeout=60000)
+        canvas = page.locator('[data-hero3d] canvas')
+        plus = page.locator('[data-view="zoomIn"]')
+        minus = page.locator('[data-view="zoomOut"]')
+        reset = page.locator('[data-view="reset"]')
+        initial = page.evaluate('window.__view')
+        card = page.locator('[data-hero3d]').bounding_box()
+        for button in (plus, minus, reset):
+            box = button.bounding_box()
+            assert box['width'] >= 44 and box['height'] >= 44, box
+        assert minus.is_disabled()
+        for _ in range(10):
+            if not plus.is_disabled():
+                previous = page.evaluate('__view.zoom')
+                plus.click()
+                page.wait_for_function('previous => __view.zoom > previous', arg=previous)
+        assert plus.is_disabled() and page.evaluate('__view.zoom') == 3
+        for _ in range(10):
+            if not minus.is_disabled():
+                previous = page.evaluate('__view.zoom')
+                minus.click()
+                page.wait_for_function('previous => __view.zoom < previous', arg=previous)
+        assert minus.is_disabled() and page.evaluate('__view.zoom') == 1
+        bounds = page.evaluate('__sceneBounds')
+        assert -1 <= bounds['left'] < bounds['right'] <= 1, bounds
+        assert -1 <= bounds['top'] < bounds['bottom'] <= 1, bounds
+        page.locator('.hero3d__module').first.click()
+        assert page.locator('[data-hero3d]').get_attribute('data-selected')
+        reset.click()
+        page.wait_for_function('__view.zoom === 1 && document.querySelector("[data-hero3d]").dataset.selected === ""')
+        assert page.evaluate('__view.target') == initial['target']
+        assert max(abs(a-b) for a,b in zip(page.evaluate('__view.position'), initial['position'])) < 1e-8
+        canvas.focus()
+        page.keyboard.press('+')
+        page.wait_for_function('__view.zoom > 1')
+        page.keyboard.press('-')
+        page.wait_for_function('__view.zoom === 1')
+        page.keyboard.press('+')
+        page.keyboard.press('0')
+        page.wait_for_function('__view.zoom === 1')
+        print('Scene navigation: zoom limits, reset/selection and keyboard PASS', flush=True)
+        # An ordinary wheel over an unfocused canvas belongs to the document.
+        canvas.evaluate('el => el.blur()')
+        box = canvas.bounding_box()
+        x, y = box['x'] + box['width'] * 0.48, box['y'] + box['height'] * 0.48
+        page.mouse.move(x, y)
+        scroll = page.evaluate('scrollY')
+        page.mouse.wheel(0, 150)
+        page.wait_for_function('before => scrollY > before', arg=scroll)
+        assert page.evaluate('__view.zoom') == 1
+        assert page.locator('.hero3d__hint--wheel').is_visible()
+        page.evaluate('scrollTo(0, 0)')
+        page.wait_for_timeout(200)
+        box = canvas.bounding_box()
+        x, y = box['x'] + box['width'] * 0.48, box['y'] + box['height'] * 0.48
+        page.mouse.move(x, y)
+        page.keyboard.down('Control')
+        scroll = page.evaluate('scrollY')
+        page.mouse.wheel(0, -160)
+        page.keyboard.up('Control')
+        page.wait_for_function('__view.zoom > 1')
+        assert abs(page.evaluate('scrollY') - scroll) < 1
+        reset.click()
+        canvas.focus()
+        page.keyboard.press('+')
+        page.wait_for_function('__view.zoom > 1')
+        before = page.evaluate('__view.target')
+        page.keyboard.press('Shift+ArrowRight')
+        page.wait_for_function('before => JSON.stringify(__view.target) !== JSON.stringify(before)', arg=before)
+        reset.click()
+        plus.click()
+        plus.click()
+        page.wait_for_timeout(100)
+        before = page.evaluate('__view.target')
+        box = canvas.bounding_box()
+        x, y = box['x'] + box['width'] * 0.48, box['y'] + box['height'] * 0.48
+        page.mouse.move(x, y)
+        page.keyboard.down('Shift')
+        page.mouse.down()
+        page.mouse.move(x + 60, y + 30, steps=6)
+        page.mouse.up()
+        page.keyboard.up('Shift')
+        page.wait_for_function('before => JSON.stringify(__view.target) !== JSON.stringify(before)', arg=before)
+        # Visible anchors stay attached after zoom/pan; clipped anchors remain at card edges.
+        checked = page.locator('.hero3d__module').evaluate_all("""buttons => {
+          const card = document.querySelector('[data-hero3d]').getBoundingClientRect();
+          const panel = document.querySelector('.hero3d__panel').getBoundingClientRect();
+          let checked = 0;
+          for (const button of buttons) {
+            const anchor = __anchors[button.dataset.module], box = button.getBoundingClientRect();
+            if (anchor.x < box.width / 2 || anchor.x > card.width - box.width / 2 ||
+                anchor.y < box.height / 2 || anchor.y > panel.top - card.top - 8 - box.height / 2) continue;
+            if (Math.abs(box.x + box.width / 2 - card.x - anchor.x) > 1 ||
+                Math.abs(box.y + box.height / 2 - card.y - anchor.y) > 1) throw Error('Detached label');
+            checked++;
+          }
+          return checked;
+        }""")
+        assert checked >= 2, checked
+        for _ in range(2):
+            page.mouse.move(x, y)
+            page.mouse.down(button='right')
+            page.mouse.move(x + 2500, y + 2500, steps=8)
+            page.mouse.up(button='right')
+            page.wait_for_timeout(100)
+        bounds = page.evaluate('__sceneBounds')
+        assert min(1, bounds['right']) > max(-1, bounds['left']), bounds
+        assert min(1, bounds['bottom']) > max(-1, bounds['top']), bounds
+        for low, high in (('left', 'right'), ('top', 'bottom')):
+            visible_fraction = (min(1, bounds[high]) - max(-1, bounds[low])) / (bounds[high] - bounds[low])
+            assert visible_fraction >= 0.34, (bounds, visible_fraction)
+        clamped = page.evaluate('__view.target')
+        page.mouse.move(x, y)
+        page.mouse.down(button='right')
+        page.mouse.move(x + 2500, y + 2500, steps=8)
+        page.mouse.up(button='right')
+        page.wait_for_timeout(100)
+        assert max(abs(a-b) for a,b in zip(clamped, page.evaluate('__view.target'))) < 0.001
+        reset.click()
+        page.wait_for_timeout(150)
+        frames = page.evaluate('__view.frames')
+        page.wait_for_timeout(300)
+        assert page.evaluate('__view.frames') == frames, 'Idle scene kept rendering'
+        page.evaluate("""() => {
+          Object.defineProperty(document, 'hidden', {value: true, configurable: true});
+          document.dispatchEvent(new Event('visibilitychange'));
+          document.querySelector('[data-hero3d] canvas').dispatchEvent(new KeyboardEvent('keydown', {key: '+'}));
+        }""")
+        page.wait_for_timeout(200)
+        assert page.evaluate('__view.frames') == frames, 'Hidden scene rendered'
+        page.evaluate("""() => {
+          Object.defineProperty(document, 'hidden', {value: false, configurable: true});
+          document.dispatchEvent(new Event('visibilitychange'));
+        }""")
+        page.wait_for_function('__view.zoom > 1')
+        page.evaluate('__disposeScene()')
+        assert page.locator('[data-view]').count() == 0 and canvas.count() == 0
+        assert not failures, failures
+    finally:
+        context.close()
+    # CDP uses real browser touch dispatch for native scrolling and emulated multi-touch.
+    context = browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True,
+                                  reduced_motion='reduce', service_workers='block')
+    try:
+        page = context.new_page()
+        page.route('**/hero3d/viewer.js', lambda route: route.fulfill(body=source, content_type='text/javascript'))
+        page.goto(base + 'index.html', wait_until='load')
+        page.locator('.hero3d__button').click()
+        page.wait_for_selector('[data-hero3d][data-state="ready"]', timeout=60000)
+        canvas = page.locator('[data-hero3d] canvas')
+        canvas.scroll_into_view_if_needed()
+        box = canvas.bounding_box()
+        x, y = box['x'] + box['width'] / 2, box['y'] + box['height'] * 0.6
+        client = context.new_cdp_session(page)
+        def touch(kind, points):
+            client.send('Input.dispatchTouchEvent', {'type': kind, 'touchPoints': [
+                {'x': px, 'y': py, 'id': i, 'radiusX': 2, 'radiusY': 2} for i, (px, py) in enumerate(points)]})
+        before, scroll = page.evaluate('__view'), page.evaluate('scrollY')
+        touch('touchStart', [(x, y)])
+        for dy in range(10, 121, 10):
+            touch('touchMove', [(x, y - dy)])
+            page.wait_for_timeout(20)
+        touch('touchEnd', [])
+        page.wait_for_timeout(350)
+        assert page.evaluate('scrollY') > scroll + 20
+        assert page.evaluate('__view.target') == before['target']
+        assert page.evaluate('__view.position') == before['position']
+        canvas.scroll_into_view_if_needed()
+        box = canvas.bounding_box()
+        x, y = box['x'] + box['width'] / 2, box['y'] + box['height'] / 2
+        touch('touchStart', [(x - 25, y), (x + 25, y)])
+        touch('touchMove', [(x - 55, y), (x + 55, y)])
+        touch('touchMove', [(x - 45, y - 15), (x + 65, y - 15)])
+        touch('touchEnd', [])
+        page.wait_for_function('__view.zoom > 1')
+        assert page.evaluate('__view.target') != before['target']
+        print('Scene navigation: buttons, keyboard, wheel, pan clamp, labels, idle/dispose PASS; touch scroll + CDP-emulated pinch/pan PASS', flush=True)
+    finally:
+        context.close()
 
 
 def main():
@@ -1259,6 +1468,7 @@ def main():
                                    args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
             check_scene_failure(gl, base)
             check_scene_framing(gl, base)
+            check_scene_navigation(gl, base)
             context = gl.new_context(viewport={'width': 1440, 'height': 900}, reduced_motion='no-preference', service_workers='block')
             page = context.new_page()
             errors = []

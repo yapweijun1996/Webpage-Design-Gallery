@@ -244,14 +244,14 @@
   "loader.tagline": "智慧方案，伴你成长。",
   "loader.updateTitle": "正在更新到 v{version}",
   "loader.updateDetail": "页面马上会重新加载。",
-  "hero3d.label": "可互动的 3D 场景：网店、仓库、配送、支付、数据分析和自动化相连。可用左右方向键或横向拖动来转动。",
-  "hero3d.hint": "横向拖动可转动",
+  "hero3d.label": "可互动的 3D 商务场景。横向拖动可旋转；按住 Shift 拖动可平移。双指捏合缩放、拖动平移。按 + / − 缩放，按 0 重置视图。",
+  "hero3d.hint": "横向拖动可旋转；按住 Shift 拖动可平移。双指捏合缩放、拖动平移。按 + / − 缩放，按 0 重置视图。",
   "hero3d.load": "用 3D 探索",
   "hero3d.loading": "正在加载 3D 场景…",
   "hero3d.failed": "3D 场景无法加载，仍显示照片。",
   "hero3d.module.bags.label": "订单",
   "hero3d.module.bags.text": "中央的购物袋代表订单，其他环节都为它服务。",
-  "hero3d.reset": "查看完整网络",
+  "hero3d.reset": "重置视图",
   "hero3d.overview.title": "一张订单，一个网络",
   "hero3d.overview.text": "购物袋位于中央，业务的每个环节都与订单相连。",
   "hero3d.module.shop.label": "门店",
@@ -289,5 +289,8 @@
   "story.3.pts.3": "备货清单",
   "story.4.pts.1": "拍摄照片",
   "story.4.pts.2": "AI 草稿",
-  "story.4.pts.3": "你来发布"
+  "story.4.pts.3": "你来发布",
+  "hero3d.zoomIn": "放大",
+  "hero3d.zoomOut": "缩小",
+  "hero3d.wheelHint": "按住 Ctrl 并滚动以缩放"
 }

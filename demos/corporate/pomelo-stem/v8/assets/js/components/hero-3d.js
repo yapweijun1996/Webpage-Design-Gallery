@@ -1,3 +1,4 @@
+import { t } from '../core/i18n.js';
 // Hero 3D scene: the photo stays as the poster and the no-JS / reduced-motion / slow-network fallback.
 // The viewer (three.js + 7 GLB modules, ~3 MB) loads only when the hero is visible, the page is idle and
 // the connection looks good enough. Otherwise a button lets the visitor ask for it.
@@ -47,6 +48,8 @@ export function init() {
       if (!viewer.webglAvailable()) throw new Error('WebGL unavailable');
       session = await viewer.mount(stage, { base, signal: controller.signal });
       status.textContent = '';
+      hint.textContent = stage.dataset.hint || '';
+      hint.classList.remove('hero3d__hint--wheel');
       hint.hidden = false;
       setState('ready');
       stage.querySelector('img')?.setAttribute('aria-hidden', 'true');
@@ -61,6 +64,11 @@ export function init() {
     }
   }
 
+  stage.addEventListener('hero3d:wheelhint', () => {
+    hint.textContent = t('hero3d.wheelHint');
+    hint.hidden = false;
+    hint.classList.add('hero3d__hint--wheel');
+  });
   stage.addEventListener('hero3d:lost', () => {
     controller?.abort();
     session?.dispose();

@@ -8,9 +8,11 @@ import { RoomEnvironment } from '../../vendor/three/RoomEnvironment.js';
 import { placements, VIEW_ELEVATION, VIEW_YAW } from './layout.js';
 import { animateParts, composeModules, createLinks, disposeTree, pickModule } from './scene.js';
 
+import { t } from '../core/i18n.js';
 import { createModuleUI } from './modules.js';
 
 const TURN_LIMIT = 0.45;
+const MIN_ZOOM = 1, MAX_ZOOM = 3;
 
 export function webglAvailable() {
   try {
@@ -23,6 +25,12 @@ export function webglAvailable() {
 
 /** Mounts the scene into `stage`. Resolves with { dispose } after the first frame is drawn. */
 export async function mount(stage, { base, signal }) {
+  // Own every session listener, including explicit disposal without an outer abort.
+  const listeners = new AbortController();
+  const outerSignal = signal;
+  signal = listeners.signal;
+  const abort = () => dispose();
+  outerSignal.addEventListener('abort', abort, { once: true });
   const places = placements();
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const yaw = VIEW_YAW * Math.PI / 180;
@@ -43,9 +51,7 @@ export async function mount(stage, { base, signal }) {
   let composed;
   const models = new Map();
   let frame = 0;
-  let drawn = 0;
   let onScreen = true;
-  let started = 0;
   let resizeObserver;
   let viewObserver;
   let environment;
@@ -54,10 +60,15 @@ export async function mount(stage, { base, signal }) {
   let ui;
   let tween;
   let selectedModule;
+  let framing = false;
+  let navigation;
 
   function dispose() {
     if (disposed) return;
     disposed = true;
+    listeners.abort();
+    outerSignal.removeEventListener('abort', abort);
+    navigation?.remove();
     cancelAnimationFrame(frame);
     renderer.setAnimationLoop(null);
     resizeObserver?.disconnect();
@@ -100,6 +111,7 @@ export async function mount(stage, { base, signal }) {
       minAzimuthAngle: yaw - TURN_LIMIT, maxAzimuthAngle: yaw + TURN_LIMIT,
       minPolarAngle: Math.PI / 2 - elevation, maxPolarAngle: Math.PI / 2 - elevation,
     });
+    controls.disconnect();
     canvas.style.touchAction = 'pan-y';
     camera.position.copy(direction).multiplyScalar(60);
 
@@ -126,7 +138,6 @@ export async function mount(stage, { base, signal }) {
     const links = createLinks();
     scene.add(composed.root, links.group);
     renderer.shadowMap.needsUpdate = true;
-    started = performance.now();
 
     function clampFocus() {
       const box = composed.bounds.get(selectedModule);
@@ -155,6 +166,8 @@ export async function mount(stage, { base, signal }) {
     }
     const focusModule = (id) => {
       selectedModule = id;
+      framing = Boolean(id);
+      stage.dataset.manualView = 'false';
       if (!id) camera.position.copy(controls.target).addScaledVector(direction, 60);
       const place = places.find(item => item.id === id);
       const target = place ? new THREE.Vector3(place.x * 0.35, 0, place.z * 0.35) : new THREE.Vector3();
@@ -168,6 +181,7 @@ export async function mount(stage, { base, signal }) {
         tween = null;
       }
       draw(performance.now());
+      invalidate();
     };
     ui = createModuleUI(stage, places, focusModule, signal);
     // The traced reference frame is narrower than the outer Shop/Delivery plinths.
@@ -212,12 +226,17 @@ export async function mount(stage, { base, signal }) {
       camera.updateProjectionMatrix();
       draw(performance.now());
     };
-    const animating = () => !reduced.matches && onScreen && !document.hidden;
+    let motionTime = 0, lastMotionFrame = 0;
+    const visible = () => onScreen && !document.hidden;
     function draw(now) {
-      if (disposed) return;
-      animateParts(composed.parts, reduced.matches ? 0 : (now - started) / 1000);
+      if (disposed || !visible()) return;
+      // Advance decorative motion only during requested frames; idle/offscreen time is paused.
+      if (!reduced.matches && lastMotionFrame) motionTime += Math.min(50, now - lastMotionFrame) / 1000;
+      lastMotionFrame = now;
+      animateParts(composed.parts, reduced.matches ? 0 : motionTime);
       if (tween) {
-        const k = Math.min(1, (now - tween.start) / 600), ease = k * k * (3 - 2 * k);
+        const k = reduced.matches ? 1 : Math.min(1, (now - tween.start) / 600);
+        const ease = k * k * (3 - 2 * k);
         const target = tween.from.clone().lerp(tween.to, ease);
         camera.position.add(target.clone().sub(controls.target));
         controls.target.copy(target);
@@ -227,27 +246,192 @@ export async function mount(stage, { base, signal }) {
       }
       controls.update();
       camera.updateMatrixWorld();
-      clampFocus();
+      if (framing) clampFocus();
       ui.placeLabels(composed.anchors, camera, canvas.clientHeight);
-      // Moving parts cast shadows: refresh the single shadow pass a few times a second, not every frame.
-      if (!reduced.matches && ++drawn % 6 === 0) renderer.shadowMap.needsUpdate = true;
+      updateNavigation();
+      renderer.shadowMap.needsUpdate = true;
       renderer.render(scene, camera);
     }
-    const invalidate = () => {
-      if (disposed || frame || animating()) return;
-      frame = requestAnimationFrame((now) => { frame = 0; draw(now); });
-    };
+    function invalidate() {
+      if (disposed || frame || !visible()) return;
+      frame = requestAnimationFrame(now => {
+        frame = 0;
+        draw(now);
+        if (tween && !reduced.matches) invalidate();
+      });
+    }
     const syncLoop = () => {
-      if (disposed) return;
-      renderer.setAnimationLoop(animating() ? () => draw(performance.now()) : null);
-      invalidate();
+      if (!visible()) { cancelAnimationFrame(frame); frame = 0; }
+      else invalidate();
     };
-    controls.addEventListener('change', invalidate);
+
+    navigation = document.createElement('div');
+    navigation.className = 'hero3d__navigation';
+    const viewButtons = new Map();
+    for (const [action, symbol] of [['zoomIn', '+'], ['zoomOut', '−'], ['reset', '↺']]) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.view = action;
+      button.textContent = symbol;
+      button.setAttribute('aria-label', t(`hero3d.${action}`));
+      button.title = t(`hero3d.${action}`);
+      button.addEventListener('click', () => {
+        if (action === 'reset') ui.select(null);
+        else zoomBy(action === 'zoomIn' ? 1.25 : 0.8);
+      }, { signal });
+      navigation.append(button);
+      viewButtons.set(action, button);
+    }
+    stage.append(navigation);
+    function updateNavigation() {
+      for (const [action, disabled] of [['zoomIn', camera.zoom >= MAX_ZOOM - 0.001], ['zoomOut', camera.zoom <= MIN_ZOOM + 0.001]]) {
+        const button = viewButtons.get(action);
+        button.disabled = disabled;
+        button.setAttribute('aria-disabled', String(disabled));
+      }
+    }
+    function shiftView(dx, dy) {
+      const shift = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
+        .multiplyScalar(dx * (camera.right - camera.left) / (2 * camera.zoom));
+      shift.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1),
+        dy * (camera.top - camera.bottom) / (2 * camera.zoom));
+      camera.position.add(shift);
+      controls.target.add(shift);
+      camera.updateMatrixWorld();
+    }
+    function clampPan() {
+      // Project module bounds rather than allocating per mesh vertex on each pointer move.
+      const points = [];
+      for (const box of composed.bounds.values()) {
+        for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y])
+          for (const z of [box.min.z, box.max.z]) points.push(new THREE.Vector3(x, y, z).project(camera));
+      }
+      const xs = points.map(p => p.x), ys = points.map(p => p.y);
+      const axisShift = values => {
+        const lo = Math.min(...values), hi = Math.max(...values), size = hi - lo;
+        // At 1x retain all bounds; at 3x retain at least 35% of each projected extent.
+        const fraction = 1 - (camera.zoom - 1) / 2 * 0.65;
+        const kept = Math.min(1.9, size * fraction);
+        return hi < -1 + kept ? hi + 1 - kept : lo > 1 - kept ? lo - 1 + kept : 0;
+      };
+      shiftView(axisShift(xs), axisShift(ys));
+    }
+    function manual() {
+      tween = null;
+      framing = false;
+      stage.dataset.manualView = 'true';
+    }
+    function zoomBy(factor, x, y) {
+      manual();
+      const box = canvas.getBoundingClientRect();
+      const point = new THREE.Vector3(x == null ? 0 : (x - box.left) / box.width * 2 - 1,
+        y == null ? 0 : 1 - (y - box.top) / box.height * 2, 0);
+      camera.updateMatrixWorld();
+      const before = point.clone().unproject(camera);
+      camera.zoom = THREE.MathUtils.clamp(camera.zoom * factor, MIN_ZOOM, MAX_ZOOM);
+      camera.updateProjectionMatrix();
+      const shift = before.sub(point.unproject(camera));
+      camera.position.add(shift);
+      controls.target.add(shift);
+      camera.updateMatrixWorld();
+      clampPan();
+      invalidate();
+    }
+    function panBy(dx, dy) {
+      manual();
+      shiftView(-2 * dx / canvas.clientWidth, 2 * dy / canvas.clientHeight);
+      clampPan();
+      invalidate();
+    }
+    function rotateBy(turn) {
+      manual();
+      const offset = camera.position.clone().sub(controls.target);
+      const spherical = new THREE.Spherical().setFromVector3(offset);
+      spherical.theta = THREE.MathUtils.clamp(spherical.theta + turn, yaw - TURN_LIMIT, yaw + TURN_LIMIT);
+      camera.position.copy(controls.target).add(offset.setFromSpherical(spherical));
+      controls.update();
+      camera.updateMatrixWorld();
+      clampPan();
+      invalidate();
+    }
+    const pressed = new Set();
+    let wheelHintShown = false;
+    canvas.addEventListener('wheel', event => {
+      if (!(event.ctrlKey || event.metaKey || pressed.size || document.activeElement === canvas)) {
+        if (!wheelHintShown) {
+          wheelHintShown = true;
+          stage.dispatchEvent(new CustomEvent('hero3d:wheelhint'));
+        }
+        return;
+      }
+      event.preventDefault();
+      const pixels = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? canvas.clientHeight : 1);
+      zoomBy(Math.exp(-THREE.MathUtils.clamp(pixels, -240, 240) * 0.003), event.clientX, event.clientY);
+    }, { passive: false, signal });
+    canvas.addEventListener('contextmenu', event => event.preventDefault(), { signal });
+    let drag;
+    let multiTouch = false;
+    let gesture;
+    const touchGeometry = touches => ({
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2,
+      distance: Math.hypot(touches[1].clientX - touches[0].clientX, touches[1].clientY - touches[0].clientY),
+    });
+    canvas.addEventListener('touchstart', event => {
+      if (event.touches.length < 2) return;
+      event.preventDefault();
+      multiTouch = true;
+      drag = null;
+      pointer = null;
+      gesture = touchGeometry(event.touches);
+    }, { passive: false, signal });
+    canvas.addEventListener('touchmove', event => {
+      if (!multiTouch || event.touches.length < 2) return;
+      event.preventDefault();
+      const next = touchGeometry(event.touches);
+      zoomBy(next.distance / Math.max(1, gesture.distance), gesture.x, gesture.y);
+      panBy(next.x - gesture.x, next.y - gesture.y);
+      gesture = next;
+    }, { passive: false, signal });
+    const endTouch = event => { if (!event.touches.length) { multiTouch = false; gesture = null; } };
+    canvas.addEventListener('touchend', endTouch, { signal });
+    canvas.addEventListener('touchcancel', endTouch, { signal });
+    canvas.addEventListener('pointerdown', event => {
+      pressed.add(event.pointerId);
+      if (multiTouch || !event.isPrimary) return;
+      drag = { id: event.pointerId, x: event.clientX, y: event.clientY, startX: event.clientX, startY: event.clientY,
+        touch: event.pointerType === 'touch', axis: null, pan: event.button !== 0 || event.shiftKey };
+      if (!drag.touch) {
+        event.preventDefault();
+        canvas.focus({ preventScroll: true });
+      }
+      canvas.setPointerCapture(event.pointerId);
+    }, { signal });
+    canvas.addEventListener('pointermove', event => {
+      if (!drag || drag.id !== event.pointerId || multiTouch) return;
+      if (drag.touch && !drag.axis) {
+        const dx = event.clientX - drag.startX, dy = event.clientY - drag.startY;
+        if (Math.hypot(dx, dy) < 6) return;
+        drag.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      }
+      if (!drag.touch || drag.axis === 'x') {
+        if (drag.pan && !drag.touch) panBy(event.clientX - drag.x, event.clientY - drag.y);
+        else rotateBy(-2 * (event.clientX - drag.x) / canvas.clientWidth);
+      }
+      drag.x = event.clientX; drag.y = event.clientY;
+    }, { signal });
+    const endPointer = event => {
+      pressed.delete(event.pointerId);
+      if (drag?.id === event.pointerId) drag = null;
+    };
+    canvas.addEventListener('pointerup', endPointer, { signal });
+    canvas.addEventListener('pointercancel', endPointer, { signal });
+    canvas.addEventListener('lostpointercapture', endPointer, { signal });
 
     const ray = new THREE.Raycaster();
     let pointer;
     canvas.addEventListener('pointerdown', event => {
-      if (event.isPrimary && event.button === 0) pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, dragged: false };
+      if (event.isPrimary && event.button === 0 && !event.shiftKey && !multiTouch) pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, dragged: false };
     }, { signal });
     canvas.addEventListener('pointermove', event => {
       if (pointer?.id === event.pointerId && Math.hypot(event.clientX - pointer.x, event.clientY - pointer.y) > 6) pointer.dragged = true;
@@ -266,15 +450,18 @@ export async function mount(stage, { base, signal }) {
     canvas.setAttribute('role', 'img');
     if (stage.dataset.label) canvas.setAttribute('aria-label', stage.dataset.label);
     canvas.addEventListener('keydown', (event) => {
-      const turn = { ArrowLeft: -0.1, ArrowRight: 0.1 }[event.key];
-      if (!turn) return;
+      if (['+', '=', '-', '_', '0', 'Home'].includes(event.key)) {
+        event.preventDefault();
+        if (event.key === '0' || event.key === 'Home') ui.select(null);
+        else zoomBy(event.key === '+' || event.key === '=' ? 1.25 : 0.8);
+        return;
+      }
+      const arrows = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+      const arrow = arrows[event.key];
+      if (!arrow) return;
       event.preventDefault();
-      const offset = camera.position.clone().sub(controls.target);
-      const spherical = new THREE.Spherical().setFromVector3(offset);
-      spherical.theta = Math.min(yaw + TURN_LIMIT, Math.max(yaw - TURN_LIMIT, spherical.theta + turn));
-      camera.position.copy(controls.target).add(offset.setFromSpherical(spherical));
-      controls.update();
-      invalidate();
+      if (event.shiftKey) panBy(arrow[0] * 24, arrow[1] * 24);
+      else if (arrow[0]) rotateBy(arrow[0] * 0.1);
     }, { signal });
     canvas.addEventListener('webglcontextlost', (event) => {
       event.preventDefault();

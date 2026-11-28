@@ -244,14 +244,14 @@
   "loader.tagline": "Growing Smarter Solutions.",
   "loader.updateTitle": "Updating to v{version}",
   "loader.updateDetail": "This page will reload in a moment.",
-  "hero3d.label": "Interactive 3D scene of a connected online shop: shop, warehouse, delivery, payment, analytics and automation. Use the left and right arrow keys or drag sideways to turn it.",
-  "hero3d.hint": "Drag sideways to turn",
+  "hero3d.label": "Interactive 3D scene of a connected online shop: shop, warehouse, delivery, payment, analytics and automation. Drag sideways to rotate; Shift + drag to move. Pinch to zoom and move with two fingers. Use + / − to zoom and 0 to reset.",
+  "hero3d.hint": "Drag sideways to rotate; Shift + drag to move. Pinch to zoom and move with two fingers. Use + / − to zoom and 0 to reset.",
   "hero3d.load": "Explore in 3D",
   "hero3d.loading": "Loading 3D scene…",
   "hero3d.failed": "The 3D scene could not load. The photo stays.",
   "hero3d.module.bags.label": "Orders",
   "hero3d.module.bags.text": "The shopping bags at the centre: the order every other part serves.",
-  "hero3d.reset": "Show whole network",
+  "hero3d.reset": "Reset view",
   "hero3d.overview.title": "One order, one network",
   "hero3d.overview.text": "Shopping bags sit at the centre; every part of the business connects to the order.",
   "hero3d.module.shop.label": "Shop",
@@ -289,5 +289,8 @@
   "story.3.pts.3": "Prep checklist",
   "story.4.pts.1": "Snap photo",
   "story.4.pts.2": "AI draft",
-  "story.4.pts.3": "You publish"
+  "story.4.pts.3": "You publish",
+  "hero3d.zoomIn": "Zoom in",
+  "hero3d.zoomOut": "Zoom out",
+  "hero3d.wheelHint": "Ctrl + scroll to zoom"
 }
