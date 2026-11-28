@@ -949,6 +949,21 @@ def check_scene_framing(browser, base):
                     top = page.evaluate('id => window.__labelTops[id]', button.get_attribute('data-module'))
                     model_top = canvas['y'] + (1 - top) * canvas['height'] / 2
                     assert box['y'] + box['height'] <= model_top + 1, (width, button.get_attribute('data-module'), box, model_top)
+            icons = page.locator('.hero3d__module svg').evaluate_all('icons => icons.map(icon => icon.innerHTML)')
+            assert len(set(icons)) == 7, icons
+            if width < 768:
+                for selected in [None, *page.locator('.hero3d__module').all()]:
+                    if selected:
+                        selected.click()
+                        assert selected.locator('span').is_visible()
+                    boxes = [button.bounding_box() for button in page.locator('.hero3d__module').all()]
+                    for i, a in enumerate(boxes):
+                        assert a['x'] >= card['x'] - 1 and a['y'] >= card['y'] - 1, (width, a, card)
+                        assert a['x'] + a['width'] <= card['x'] + card['width'] + 1, (width, a, card)
+                        assert a['y'] + a['height'] <= card['y'] + card['height'] + 1, (width, a, card)
+                        for b in boxes[i + 1:]:
+                            assert (a['x'] + a['width'] <= b['x'] or b['x'] + b['width'] <= a['x'] or
+                                    a['y'] + a['height'] <= b['y'] or b['y'] + b['height'] <= a['y']), (width, a, b)
             document_height = page.evaluate('document.documentElement.scrollHeight')
             if width in HOME_HEIGHT_LIMITS:
                 assert document_height <= HOME_HEIGHT_LIMITS[width], (width, document_height)

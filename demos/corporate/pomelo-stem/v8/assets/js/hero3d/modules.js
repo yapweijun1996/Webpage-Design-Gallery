@@ -17,7 +17,7 @@ export function createModuleUI(stage, places, focus, signal) {
   close.type = 'button';
   close.className = 'hero3d__close';
   const buttons = new Map();
-  const names = { shop: 'cart', warehouse: 'package', delivery: 'package', bags: 'shopping-bag', payment: 'shield-check', analytics: 'chart-bars', automation: 'cog' };
+  const names = { shop: 'cart', warehouse: 'warehouse', delivery: 'truck', bags: 'shopping-bag', payment: 'shield-check', analytics: 'chart-bars', automation: 'cog' };
   let selected = null;
   let returnTo;
   function show() {
@@ -54,6 +54,7 @@ export function createModuleUI(stage, places, focus, signal) {
     button.className = 'hero3d__module';
     button.dataset.module = id;
     button.setAttribute('aria-label', t(`hero3d.module.${id}.label`));
+    button.title = t(`hero3d.module.${id}.label`);
     button.setAttribute('aria-controls', 'hero3d-title');
     const label = document.createElement('span');
     label.textContent = t(`hero3d.module.${id}.label`);
@@ -80,7 +81,7 @@ export function createModuleUI(stage, places, focus, signal) {
         const point = anchors.get(id).pin.clone().project(camera);
         const top = anchors.get(id).top.clone().project(camera);
         const w = button.offsetWidth, h = button.offsetHeight;
-        const x = Math.max(0, Math.min(width - w, (point.x + 1) * width / 2 - w / 2));
+        let x = Math.max(0, Math.min(width - w, (point.x + 1) * width / 2 - w / 2));
         let y = Math.max(0, Math.min(height - h, (1 - top.y) * height / 2 - h));
         // Resolve neighbours without removing any module from the keyboard order.
         for (const box of occupied) {
@@ -89,6 +90,19 @@ export function createModuleUI(stage, places, focus, signal) {
           }
         }
         y = Math.min(labelBottom - h, y);
+        if (width < 768) {
+          // Search nearby free positions when selected text widens a mobile label.
+          const preferredX = x, preferredY = y;
+          const xs = [x, 0, width - w, ...occupied.flatMap(b => [b.x - w - 2, b.x + b.w + 2])];
+          const ys = [y, 0, labelBottom - h, ...occupied.flatMap(b => [b.y - h - 2, b.y + b.h + 2])];
+          let distance = Infinity;
+          for (const cx of xs) for (const cy of ys) {
+            if (cx < 0 || cx + w > width || cy < 0 || cy + h > labelBottom) continue;
+            if (occupied.some(b => cx < b.x + b.w + 1 && cx + w + 1 > b.x && cy < b.y + b.h + 1 && cy + h + 1 > b.y)) continue;
+            const score = (cx - preferredX) ** 2 + (cy - preferredY) ** 2;
+            if (score < distance) { distance = score; x = cx; y = cy; }
+          }
+        }
         button.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
         occupied.push({ x, y, w, h });
       }
