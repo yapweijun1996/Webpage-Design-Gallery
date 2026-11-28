@@ -1,6 +1,6 @@
 /* Pomelo STEM V8 service worker. Generated from src/sw.template.js; do not edit sw.js. */
-const BUILD = "20261127.9";
-const VERSION = "8.4.0";
+const BUILD = "20261127.10";
+const VERSION = "8.4.1";
 const PREFIX = 'pomelo-v8-';
 const CACHE = PREFIX + BUILD;
 const PRECACHE = [
@@ -44,6 +44,7 @@ const PRECACHE = [
   "assets/js/core/unsaved.js",
   "assets/js/core/update.js",
   "assets/js/hero3d/layout.js",
+  "assets/js/hero3d/modules.js",
   "assets/js/hero3d/scene.js",
   "assets/js/hero3d/viewer.js",
   "assets/js/i18n-defaults.generated.js",

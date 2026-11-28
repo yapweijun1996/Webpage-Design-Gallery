@@ -32,7 +32,7 @@ PAGES = ("index", "commerce", "services", "about", "contact")
 NAV = ("index", "commerce", "services", "about", "contact")
 NAV_KEYS = {"index": "nav.home", "commerce": "nav.commerce", "services": "nav.services",
             "about": "nav.about", "contact": "nav.contact"}
-RUNTIME_PREFIXES = ("loader.", "update.", "toast.", "dialog.", "theme.", "menu.", "lang.", "top.", "demo.", "form.", "order.empty", "pickup.status.")
+RUNTIME_PREFIXES = ("hero3d.", "loader.", "update.", "toast.", "dialog.", "theme.", "menu.", "lang.", "top.", "demo.", "form.", "order.empty", "pickup.status.")
 CSS_ORDER = ("tokens.css", "base.css", "layout.css")
 ACCENT_WORD = re.compile(r"\[\[(.+?)\]\]")
 ACCENT_STROKE = ('<svg class="accent-word__stroke" viewBox="0 0 120 12" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
@@ -41,7 +41,10 @@ ACCENT_STROKE = ('<svg class="accent-word__stroke" viewBox="0 0 120 12" preserve
 
 def accent_word(match):
     """[[word]] in a heading string marks the one decorative accent word; the stroke is aria-hidden."""
-    return f'<span class="accent-word">{match[1]}{ACCENT_STROKE}</span>'
+    word = match[1]
+    if word.endswith("|plain"):
+        return f'<span class="accent-word accent-word--plain">{word[:-6]}</span>'
+    return f'<span class="accent-word">{word}{ACCENT_STROKE}</span>'
 
 
 SEMVER = re.compile(r"(\d+)\.(\d+)\.(\d+)")

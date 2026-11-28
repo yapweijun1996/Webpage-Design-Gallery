@@ -41,10 +41,11 @@
     "mint-300": "#a6e3b4", "mint-500": "#5fbf7c",
     "glow-light": "rgba(29, 87, 55, 0.32)", "glow-dark": "rgba(143, 207, 164, 0.3)",
     "glass-light": "rgba(255, 255, 255, 0.6)", "glass-dark": "rgba(238, 243, 236, 0.07)",
-    "sweep-light": "rgba(29, 87, 55, 0.08)", "sweep-dark": "rgba(143, 207, 164, 0.13)"
+    "sweep-light": "rgba(29, 87, 55, 0.08)", "sweep-dark": "rgba(143, 207, 164, 0.13)",
+    "foliage-light": "rgba(29, 87, 55, 0.12)", "foliage-dark": "rgba(143, 207, 164, 0.2)"
   },
   "space": {"1": "0.25rem", "2": "0.5rem", "3": "0.75rem", "4": "1rem", "5": "1.5rem", "6": "2rem", "7": "3rem", "8": "4rem", "9": "6rem", "toast-block": "0.6875rem"},
-  "radius": {"sm": "6px", "md": "12px", "lg": "20px", "pill": "999px", "toast": "16px"},
+  "radius": {"sm": "6px", "md": "12px", "lg": "20px", "pill": "999px", "toast": "16px", "circle": "50%", "photo": "28px"},
   "font": {
     "display": "Georgia, 'Times New Roman', 'Songti SC', 'Noto Serif CJK SC', serif",
     "body": "system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif",
@@ -59,7 +60,12 @@
     "fab": "48px", "tap": "44px", "header": "64px", "container": "1200px", "measure": "64ch", "dialog": "560px", "toast": "360px",
     "toast-icon": "32px", "toast-close": "32px", "toast-glow-stop": "70%", "zero": "0px",
     "border": "1px", "focus": "3px", "lift": "-3px", "nudge": "8px", "nav-underline": "2px", "header-blur": "12px",
-    "reveal": "16px", "zoom": "1.03", "hero-bar": "3px", "stroke": "3px"
+    "reveal": "16px", "zoom": "1.03", "hero-bar": "3px", "stroke": "3px",
+    "hero-outline": "1.5px", "foliage-blur": "28px", "home-fade-start": "45%", "story-phone-ratio": "2 / 1",
+    "scene-card-ratio": "1 / 1.15",
+    "scene-wide-ratio": "1 / 0.95",
+    "scene-panel-height": "44px",
+    "home-headline": "clamp(2rem, 2.8vw, 2.25rem)"
   },
   "z": {"stage": "1", "fab": "20", "header": "10", "toast": "30", "toast-accent": "-1", "modal": "40", "loader": "50"},
   "motion": {

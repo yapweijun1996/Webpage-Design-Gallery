@@ -17,7 +17,8 @@
     "toast-success-bg": "sage-100", "toast-success-icon": "forest-700",
     "toast-warning-bg": "amber-100", "toast-warning-icon": "amber-800",
     "toast-error-bg": "red-100", "toast-error-icon": "red-700", "scrim": "scrim",
-    "hero-top": "sage-100", "btn-from": "forest-700", "btn-to": "forest-800", "glow": "glow-light", "glass": "glass-light", "sweep": "sweep-light"
+    "hero-top": "sage-100", "btn-from": "forest-700", "btn-to": "forest-800", "glow": "glow-light", "glass": "glass-light", "sweep": "sweep-light",
+    "home-bg": "sage-100", "home-accent": "forest-700", "home-accent-to": "forest-800", "home-muted": "ink-700", "foliage": "foliage-light"
   },
   "dark": {
     "bg": "night-900", "surface": "night-800", "surface-muted": "night-700", "surface-sunken": "night-600",
@@ -37,6 +38,7 @@
     "toast-success-bg": "night-700", "toast-success-icon": "forest-300",
     "toast-warning-bg": "amber-900", "toast-warning-icon": "amber-200",
     "toast-error-bg": "red-900", "toast-error-icon": "red-200", "scrim": "scrim",
-    "hero-top": "forest-900", "btn-from": "mint-300", "btn-to": "mint-500", "glow": "glow-dark", "glass": "glass-dark", "sweep": "sweep-dark"
+    "hero-top": "forest-900", "btn-from": "mint-300", "btn-to": "mint-500", "glow": "glow-dark", "glass": "glass-dark", "sweep": "sweep-dark",
+    "home-bg": "forest-800", "home-accent": "lime-400", "home-accent-to": "mint-300", "home-muted": "mist-200", "foliage": "foliage-dark"
   }
 }

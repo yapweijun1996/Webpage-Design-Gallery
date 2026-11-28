@@ -5,8 +5,10 @@ import * as THREE from '../../vendor/three/three.module.min.js';
 import { OrbitControls } from '../../vendor/three/OrbitControls.js';
 import { GLTFLoader } from '../../vendor/three/GLTFLoader.js';
 import { RoomEnvironment } from '../../vendor/three/RoomEnvironment.js';
-import { FRAME, placements, VIEW_ELEVATION, VIEW_YAW } from './layout.js';
-import { animateParts, composeModules, createLinks, disposeTree } from './scene.js';
+import { placements, VIEW_ELEVATION, VIEW_YAW } from './layout.js';
+import { animateParts, composeModules, createLinks, disposeTree, pickModule } from './scene.js';
+
+import { createModuleUI } from './modules.js';
 
 const TURN_LIMIT = 0.45;
 
@@ -48,6 +50,8 @@ export async function mount(stage, { base, signal }) {
   let environment;
   let light;
   let controls;
+  let ui;
+  let tween;
 
   function dispose() {
     if (disposed) return;
@@ -63,6 +67,7 @@ export async function mount(stage, { base, signal }) {
     renderer.dispose();
     renderer.forceContextLoss();
     canvas.remove();
+    ui?.dispose();
   }
   signal.addEventListener('abort', dispose, { once: true });
 
@@ -112,17 +117,61 @@ export async function mount(stage, { base, signal }) {
     renderer.shadowMap.needsUpdate = true;
     started = performance.now();
 
+    const focusModule = (id) => {
+      if (!id) camera.position.copy(controls.target).addScaledVector(direction, 60);
+      const place = places.find(item => item.id === id);
+      const target = place ? new THREE.Vector3(place.x * 0.35, 0, place.z * 0.35) : new THREE.Vector3();
+      tween = { start: performance.now(), from: controls.target.clone(), to: target,
+        zoomFrom: camera.zoom, zoomTo: id ? 1.16 : 1 };
+      if (reduced.matches) {
+        camera.position.add(target.clone().sub(controls.target));
+        controls.target.copy(target);
+        camera.zoom = tween.zoomTo;
+        camera.updateProjectionMatrix();
+        tween = null;
+      }
+      draw(performance.now());
+    };
+    ui = createModuleUI(stage, places, focusModule, signal);
+    // The traced reference frame is narrower than the outer Shop/Delivery plinths.
+    // Measure model bounds in the initial camera plane once, including mesh transforms.
+    const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize();
+    const up = direction.clone().cross(right);
+    const minimum = new THREE.Vector2(Infinity, Infinity);
+    const maximum = new THREE.Vector2(-Infinity, -Infinity);
+    const corner = new THREE.Vector3();
+    composed.root.updateMatrixWorld(true);
+    composed.root.traverse(object => {
+      const position = object.geometry?.attributes.position;
+      if (!position) return;
+      for (let i = 0; i < position.count; i += 1) {
+        corner.fromBufferAttribute(position, i).applyMatrix4(object.matrixWorld);
+        const x = corner.dot(right), y = corner.dot(up);
+        minimum.x = Math.min(minimum.x, x);
+        minimum.y = Math.min(minimum.y, y);
+        maximum.x = Math.max(maximum.x, x);
+        maximum.y = Math.max(maximum.y, y);
+      }
+    });
     const fit = () => {
       const width = stage.clientWidth;
       const height = stage.clientHeight;
       if (!width || !height) return;
       renderer.setSize(width, height, false);
+      canvas.style.height = `${height}px`;
       const aspect = width / height;
-      const half = Math.max(FRAME.height / 2, FRAME.width / 2 / aspect) / FRAME.pixelsPerUnit;
-      Object.assign(camera, { left: -half * aspect, right: half * aspect, top: half, bottom: -half });
-      controls.target.set(0, 0, 0);
+      // Fit the actual meshes to 94% of the width, with labels above and glass below.
+      // The full-card canvas lets the panel overlay the scene without an empty canvas band.
+      const labelRoom = ui.layer.querySelector('button').offsetHeight;
+      const bottomRoom = Math.max(ui.panel.offsetHeight + 8, height * 0.22);
+      const usable = Math.max(1, height - labelRoom - bottomRoom);
+      const half = Math.max((maximum.x - minimum.x) / (2 * aspect * 0.94),
+        (maximum.y - minimum.y) * height / (2 * usable));
+      const centerX = (minimum.x + maximum.x) / 2;
+      const centerY = (minimum.y + maximum.y) / 2 - (bottomRoom - labelRoom) * half / height;
+      Object.assign(camera, { left: centerX - half * aspect, right: centerX + half * aspect,
+        top: centerY + half, bottom: centerY - half });
       camera.position.copy(controls.target).addScaledVector(direction, 60);
-      camera.zoom = 1;
       camera.updateProjectionMatrix();
       draw(performance.now());
     };
@@ -130,7 +179,18 @@ export async function mount(stage, { base, signal }) {
     function draw(now) {
       if (disposed) return;
       animateParts(composed.parts, reduced.matches ? 0 : (now - started) / 1000);
+      if (tween) {
+        const k = Math.min(1, (now - tween.start) / 600), ease = k * k * (3 - 2 * k);
+        const target = tween.from.clone().lerp(tween.to, ease);
+        camera.position.add(target.clone().sub(controls.target));
+        controls.target.copy(target);
+        camera.zoom = tween.zoomFrom + (tween.zoomTo - tween.zoomFrom) * ease;
+        camera.updateProjectionMatrix();
+        if (k === 1) tween = null;
+      }
       controls.update();
+      camera.updateMatrixWorld();
+      ui.placeLabels(composed.anchors, camera, canvas.clientHeight);
       // Moving parts cast shadows: refresh the single shadow pass a few times a second, not every frame.
       if (!reduced.matches && ++drawn % 6 === 0) renderer.shadowMap.needsUpdate = true;
       renderer.render(scene, camera);
@@ -146,6 +206,24 @@ export async function mount(stage, { base, signal }) {
     };
     controls.addEventListener('change', invalidate);
 
+    const ray = new THREE.Raycaster();
+    let pointer;
+    canvas.addEventListener('pointerdown', event => {
+      if (event.isPrimary && event.button === 0) pointer = { id: event.pointerId, x: event.clientX, y: event.clientY, dragged: false };
+    }, { signal });
+    canvas.addEventListener('pointermove', event => {
+      if (pointer?.id === event.pointerId && Math.hypot(event.clientX - pointer.x, event.clientY - pointer.y) > 6) pointer.dragged = true;
+    }, { signal });
+    canvas.addEventListener('pointercancel', () => { pointer = null; }, { signal });
+    canvas.addEventListener('pointerup', event => {
+      const click = pointer?.id === event.pointerId && !pointer.dragged && Math.hypot(event.clientX - pointer.x, event.clientY - pointer.y) <= 6;
+      pointer = null;
+      if (!click) return;
+      const box = canvas.getBoundingClientRect();
+      ray.setFromCamera(new THREE.Vector2((event.clientX - box.left) / box.width * 2 - 1, 1 - (event.clientY - box.top) / box.height * 2), camera);
+      const id = pickModule(composed, places, ray);
+      if (id) ui.select(id);
+    }, { signal });
     canvas.tabIndex = 0;
     canvas.setAttribute('role', 'img');
     if (stage.dataset.label) canvas.setAttribute('aria-label', stage.dataset.label);
@@ -168,9 +246,10 @@ export async function mount(stage, { base, signal }) {
     reduced.addEventListener('change', syncLoop, { signal });
     viewObserver = new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting; syncLoop(); });
     viewObserver.observe(stage);
-    stage.append(canvas);
+    stage.insertBefore(canvas, ui.layer);
     resizeObserver = new ResizeObserver(fit);
     resizeObserver.observe(stage);
+    resizeObserver.observe(ui.panel);
     fit();
     syncLoop();
     return { dispose };

@@ -46,6 +46,8 @@
   --p-glass-dark: rgba(238, 243, 236, 0.07);
   --p-sweep-light: rgba(29, 87, 55, 0.08);
   --p-sweep-dark: rgba(143, 207, 164, 0.13);
+  --p-foliage-light: rgba(29, 87, 55, 0.12);
+  --p-foliage-dark: rgba(143, 207, 164, 0.2);
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -61,6 +63,8 @@
   --radius-lg: 20px;
   --radius-pill: 999px;
   --radius-toast: 16px;
+  --radius-circle: 50%;
+  --radius-photo: 28px;
   --font-display: Georgia, 'Times New Roman', 'Songti SC', 'Noto Serif CJK SC', serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -98,6 +102,14 @@
   --size-zoom: 1.03;
   --size-hero-bar: 3px;
   --size-stroke: 3px;
+  --size-hero-outline: 1.5px;
+  --size-foliage-blur: 28px;
+  --size-home-fade-start: 45%;
+  --size-story-phone-ratio: 2 / 1;
+  --size-scene-card-ratio: 1 / 1.15;
+  --size-scene-wide-ratio: 1 / 0.95;
+  --size-scene-panel-height: 44px;
+  --size-home-headline: clamp(2rem, 2.8vw, 2.25rem);
   --z-stage: 1;
   --z-fab: 20;
   --z-header: 10;
@@ -191,6 +203,11 @@
   --c-glow: var(--p-glow-light);
   --c-glass: var(--p-glass-light);
   --c-sweep: var(--p-sweep-light);
+  --c-home-bg: var(--p-sage-100);
+  --c-home-accent: var(--p-forest-700);
+  --c-home-accent-to: var(--p-forest-800);
+  --c-home-muted: var(--p-ink-700);
+  --c-foliage: var(--p-foliage-light);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -249,6 +266,11 @@
     --c-glow: var(--p-glow-dark);
     --c-glass: var(--p-glass-dark);
     --c-sweep: var(--p-sweep-dark);
+    --c-home-bg: var(--p-forest-800);
+    --c-home-accent: var(--p-lime-400);
+    --c-home-accent-to: var(--p-mint-300);
+    --c-home-muted: var(--p-mist-200);
+    --c-foliage: var(--p-foliage-dark);
   }
 }
 :root[data-theme="dark"] {
@@ -307,6 +329,11 @@
   --c-glow: var(--p-glow-dark);
   --c-glass: var(--p-glass-dark);
   --c-sweep: var(--p-sweep-dark);
+  --c-home-bg: var(--p-forest-800);
+  --c-home-accent: var(--p-lime-400);
+  --c-home-accent-to: var(--p-mint-300);
+  --c-home-muted: var(--p-mist-200);
+  --c-foliage: var(--p-foliage-dark);
 }
 @media (prefers-reduced-motion: reduce) {
   :root {

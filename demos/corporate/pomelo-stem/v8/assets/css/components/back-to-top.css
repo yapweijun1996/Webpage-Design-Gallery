@@ -6,16 +6,17 @@
   display: grid; place-items: center; width: var(--size-fab); height: var(--size-fab);
   border: var(--size-border) solid var(--c-border-subtle); border-radius: var(--radius-pill);
   background: var(--c-accent); color: var(--c-on-accent); box-shadow: var(--shadow-md); cursor: pointer;
-  opacity: 0; transform: translateY(var(--space-3)); pointer-events: none;
-  transition: opacity var(--motion-base) var(--motion-ease-out), transform var(--motion-base) var(--motion-ease-out);
+  /* Fade in place: a downward reveal transform would consume toast clearance. */
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--motion-base) var(--motion-ease-out);
 }
-.back-to-top[data-state="visible"] { opacity: 1; transform: none; pointer-events: auto; }
-body.is-locked .back-to-top { opacity: 0; transform: translateY(var(--space-3)); pointer-events: none; }
+.back-to-top[data-state="visible"] { opacity: 1; pointer-events: auto; }
+body.is-locked .back-to-top { opacity: 0; pointer-events: none; }
 @media (hover: hover) and (pointer: fine) {
   .back-to-top:hover { background: var(--c-accent-strong); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .back-to-top { transition: none; transform: none; }
+  .back-to-top { transition: none; }
 }
 @media print {
   .back-to-top { display: none; }
