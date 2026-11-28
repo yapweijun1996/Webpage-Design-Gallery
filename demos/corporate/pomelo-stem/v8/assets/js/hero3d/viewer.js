@@ -41,6 +41,7 @@ export async function mount(stage, { base, signal }) {
   const canvas = renderer.domElement;
   let disposed = false;
   let composed;
+  const models = new Map();
   let frame = 0;
   let drawn = 0;
   let onScreen = true;
@@ -63,6 +64,8 @@ export async function mount(stage, { base, signal }) {
     viewObserver?.disconnect();
     controls?.dispose();
     disposeTree(scene);
+    for (const model of models.values()) disposeTree(model);
+    models.clear();
     environment?.dispose();
     light?.shadow.dispose();
     renderer.dispose();
@@ -100,11 +103,17 @@ export async function mount(stage, { base, signal }) {
     camera.position.copy(direction).multiplyScalar(60);
 
     const loader = new GLTFLoader();
-    const models = new Map();
     await Promise.all(places.map(async ({ id }) => {
       const response = await fetch(`${base}${id}.glb`, { signal });
       if (!response.ok) throw new Error(`Commerce module ${id}: ${response.status}`);
-      const gltf = await loader.parseAsync(await response.arrayBuffer(), '');
+      const buffer = await response.arrayBuffer();
+      signal.throwIfAborted();
+      const gltf = await loader.parseAsync(buffer, '');
+      if (disposed || signal.aborted) {
+        disposeTree(gltf.scene);
+        signal.throwIfAborted();
+        return;
+      }
       models.set(id, gltf.scene);
     }));
     if (disposed) {

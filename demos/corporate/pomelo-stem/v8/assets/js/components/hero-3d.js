@@ -52,6 +52,7 @@ export function init() {
       stage.querySelector('img')?.setAttribute('aria-hidden', 'true');
     } catch (error) {
       if (controller.signal.aborted) return;
+      controller.abort();
       session?.dispose();
       started = false;
       status.textContent = stage.dataset.failed || '';

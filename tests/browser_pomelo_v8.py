@@ -888,6 +888,32 @@ def check_scene_panel(page):
     assert metrics['readable'] and metrics['separate'], metrics
 
 
+def check_scene_failure(browser, base):
+    """A rejected GLB cancels pending siblings; the next attempt uses a fresh signal."""
+    context = browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce', service_workers='block')
+    try:
+        page = context.new_page()
+        held, completed, failed = [], [], []
+        page.on('requestfinished', lambda request: completed.append(request.url) if '.glb' in request.url else None)
+        page.on('requestfailed', lambda request: failed.append(request.url) if '.glb' in request.url else None)
+        def reject_one(route):
+            held.append(route)
+            if len(held) == 7:
+                held[0].abort()
+        page.route('**/*.glb', reject_one)
+        page.goto(base + 'index.html', wait_until='load')
+        page.locator('.hero3d__button').click()
+        page.wait_for_function("document.querySelector('[data-hero3d]').dataset.state === 'idle'")
+        page.wait_for_timeout(300)
+        assert len(held) == 7 and len(failed) == 7 and not completed, (len(held), failed, completed)
+        page.unroute('**/*.glb', reject_one)
+        page.locator('.hero3d__button').click()
+        page.wait_for_selector('[data-hero3d][data-state="ready"]', timeout=60000)
+        assert len(completed) == 7, completed
+    finally:
+        context.close()
+
+
 def check_scene_framing(browser, base):
     """Measure projected mesh vertices through a test-only response override."""
     source = (DEMO / 'assets/js/hero3d/viewer.js').read_text('utf-8')
@@ -1223,6 +1249,7 @@ def main():
             # Real scene (software GL): loads, draws a canvas over the photo and keeps the home page height.
             gl = p.chromium.launch(executable_path=os.environ.get('GALLERY_CHROME') or None, headless=True,
                                    args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+            check_scene_failure(gl, base)
             check_scene_framing(gl, base)
             context = gl.new_context(viewport={'width': 1440, 'height': 900}, reduced_motion='no-preference', service_workers='block')
             page = context.new_page()
