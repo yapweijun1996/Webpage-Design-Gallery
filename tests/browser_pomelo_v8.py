@@ -888,6 +888,40 @@ def check_scene_panel(page):
     assert metrics['readable'] and metrics['separate'], metrics
 
 
+def check_scene_failure(browser, base):
+    """A rejected GLB cancels pending siblings; the next attempt uses a fresh signal."""
+    context = browser.new_context(viewport={'width': 390, 'height': 844}, reduced_motion='reduce', service_workers='block')
+    try:
+        page = context.new_page()
+        held, completed, failed = [], [], []
+        page.on('requestfinished', lambda request: completed.append(request.url) if '.glb' in request.url else None)
+        page.on('requestfailed', lambda request: failed.append(request.url) if '.glb' in request.url else None)
+        def reject_one(route):
+            held.append(route)
+            if len(held) == 7:
+                held[0].abort()
+        page.route('**/*.glb', reject_one)
+        page.goto(base + 'index.html', wait_until='load')
+        page.locator('.hero3d__button').click()
+        page.wait_for_function("document.querySelector('[data-hero3d]').dataset.state === 'idle'")
+        page.wait_for_timeout(300)
+        assert len(held) == 7 and len(failed) == 7 and not completed, (len(held), failed, completed)
+        page.unroute('**/*.glb', reject_one)
+        page.locator('.hero3d__button').click()
+        page.wait_for_selector('[data-hero3d][data-state="ready"]', timeout=60000)
+        assert len(completed) == 7, completed
+        messages = []
+        page.on('console', lambda message: messages.append(message.text) if message.type in ('warning', 'error') else None)
+        page.on('pageerror', lambda error: messages.append(str(error)))
+        page.locator('[data-hero3d] canvas').evaluate("canvas => canvas.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()")
+        page.wait_for_selector('[data-hero3d][data-state="idle"]')
+        page.wait_for_timeout(300)
+        assert not messages, messages
+
+    finally:
+        context.close()
+
+
 def check_scene_framing(browser, base):
     """Measure projected mesh vertices through a test-only response override."""
     source = (DEMO / 'assets/js/hero3d/viewer.js').read_text('utf-8')
@@ -908,6 +942,25 @@ def check_scene_framing(browser, base):
         }
       });
       window.__sceneBounds = bounds;
+      const selectedBounds = {left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity};
+      const selected = stage.dataset.selected;
+      composed.root.traverse(object => {
+        const pos = object.geometry?.attributes.position;
+        if (!pos) return;
+        const modules = object.geometry.getAttribute('module');
+        let node = object;
+        while (node && !node.userData.module) node = node.parent;
+        for (let i = 0; i < pos.count; i++) {
+          const id = modules ? places[modules.getX(i)].id : node?.userData.module;
+          if (id !== selected) continue;
+          const point = new THREE.Vector3().fromBufferAttribute(pos, i).applyMatrix4(object.matrixWorld).project(camera);
+          selectedBounds.left = Math.min(selectedBounds.left, point.x);
+          selectedBounds.right = Math.max(selectedBounds.right, point.x);
+          selectedBounds.top = Math.min(selectedBounds.top, point.y);
+          selectedBounds.bottom = Math.max(selectedBounds.bottom, point.y);
+        }
+      });
+      window.__selectedBounds = selectedBounds;
       window.__labelTops = Object.fromEntries([...composed.anchors].map(([id, anchor]) => [id, anchor.top.clone().project(camera).y]));
     """)
     for width, height in ((1440, 900), (1024, 768), (768, 1024), (390, 844), (320, 568)):
@@ -949,6 +1002,26 @@ def check_scene_framing(browser, base):
                     top = page.evaluate('id => window.__labelTops[id]', button.get_attribute('data-module'))
                     model_top = canvas['y'] + (1 - top) * canvas['height'] / 2
                     assert box['y'] + box['height'] <= model_top + 1, (width, button.get_attribute('data-module'), box, model_top)
+            icons = page.locator('.hero3d__module svg').evaluate_all('icons => icons.map(icon => icon.innerHTML)')
+            assert len(set(icons)) == 7, icons
+            if width < 768:
+                for selected in [None, *page.locator('.hero3d__module').all()]:
+                    if selected:
+                        selected.click()
+                        assert selected.locator('span').is_visible()
+                    boxes = [button.bounding_box() for button in page.locator('.hero3d__module').all()]
+                    for i, a in enumerate(boxes):
+                        assert a['x'] >= card['x'] - 1 and a['y'] >= card['y'] - 1, (width, a, card)
+                        assert a['x'] + a['width'] <= card['x'] + card['width'] + 1, (width, a, card)
+                        assert a['y'] + a['height'] <= card['y'] + card['height'] + 1, (width, a, card)
+                        for b in boxes[i + 1:]:
+                            assert (a['x'] + a['width'] <= b['x'] or b['x'] + b['width'] <= a['x'] or
+                                    a['y'] + a['height'] <= b['y'] or b['y'] + b['height'] <= a['y']), (width, a, b)
+            for button in page.locator('.hero3d__module').all():
+                button.click()
+                selected = page.evaluate('window.__selectedBounds')
+                assert -0.95 <= selected['left'] < selected['right'] <= 0.95, (width, selected)
+                assert -0.95 <= selected['top'] < selected['bottom'] <= 0.95, (width, selected)
             document_height = page.evaluate('document.documentElement.scrollHeight')
             if width in HOME_HEIGHT_LIMITS:
                 assert document_height <= HOME_HEIGHT_LIMITS[width], (width, document_height)
@@ -1184,6 +1257,7 @@ def main():
             # Real scene (software GL): loads, draws a canvas over the photo and keeps the home page height.
             gl = p.chromium.launch(executable_path=os.environ.get('GALLERY_CHROME') or None, headless=True,
                                    args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+            check_scene_failure(gl, base)
             check_scene_framing(gl, base)
             context = gl.new_context(viewport={'width': 1440, 'height': 900}, reduced_motion='no-preference', service_workers='block')
             page = context.new_page()

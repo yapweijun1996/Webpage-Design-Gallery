@@ -766,6 +766,8 @@ body::before {
 @media (max-width: 767px) {
   .hero3d__close span, .hero3d__module span { display: none; }
   .hero3d__module { width: var(--size-tap); justify-content: center; }
+  .hero3d__module[aria-pressed="true"] { width: auto; }
+  .hero3d__module[aria-pressed="true"] span { display: inline; }
   .hero3d__panel[data-collapsed="true"] p { display: none; }
 }
 
