@@ -69,7 +69,8 @@ export async function mount(stage, { base, signal }) {
     environment?.dispose();
     light?.shadow.dispose();
     renderer.dispose();
-    renderer.forceContextLoss();
+    const context = renderer.getContext();
+    if (!context.isContextLost() && context.getExtension('WEBGL_lose_context')) renderer.forceContextLoss();
     canvas.remove();
     ui?.dispose();
   }

@@ -910,6 +910,14 @@ def check_scene_failure(browser, base):
         page.locator('.hero3d__button').click()
         page.wait_for_selector('[data-hero3d][data-state="ready"]', timeout=60000)
         assert len(completed) == 7, completed
+        messages = []
+        page.on('console', lambda message: messages.append(message.text) if message.type in ('warning', 'error') else None)
+        page.on('pageerror', lambda error: messages.append(str(error)))
+        page.locator('[data-hero3d] canvas').evaluate("canvas => canvas.getContext('webgl2').getExtension('WEBGL_lose_context').loseContext()")
+        page.wait_for_selector('[data-hero3d][data-state="idle"]')
+        page.wait_for_timeout(300)
+        assert not messages, messages
+
     finally:
         context.close()
 
