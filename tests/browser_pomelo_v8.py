@@ -908,6 +908,25 @@ def check_scene_framing(browser, base):
         }
       });
       window.__sceneBounds = bounds;
+      const selectedBounds = {left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity};
+      const selected = stage.dataset.selected;
+      composed.root.traverse(object => {
+        const pos = object.geometry?.attributes.position;
+        if (!pos) return;
+        const modules = object.geometry.getAttribute('module');
+        let node = object;
+        while (node && !node.userData.module) node = node.parent;
+        for (let i = 0; i < pos.count; i++) {
+          const id = modules ? places[modules.getX(i)].id : node?.userData.module;
+          if (id !== selected) continue;
+          const point = new THREE.Vector3().fromBufferAttribute(pos, i).applyMatrix4(object.matrixWorld).project(camera);
+          selectedBounds.left = Math.min(selectedBounds.left, point.x);
+          selectedBounds.right = Math.max(selectedBounds.right, point.x);
+          selectedBounds.top = Math.min(selectedBounds.top, point.y);
+          selectedBounds.bottom = Math.max(selectedBounds.bottom, point.y);
+        }
+      });
+      window.__selectedBounds = selectedBounds;
       window.__labelTops = Object.fromEntries([...composed.anchors].map(([id, anchor]) => [id, anchor.top.clone().project(camera).y]));
     """)
     for width, height in ((1440, 900), (1024, 768), (768, 1024), (390, 844), (320, 568)):
@@ -964,6 +983,11 @@ def check_scene_framing(browser, base):
                         for b in boxes[i + 1:]:
                             assert (a['x'] + a['width'] <= b['x'] or b['x'] + b['width'] <= a['x'] or
                                     a['y'] + a['height'] <= b['y'] or b['y'] + b['height'] <= a['y']), (width, a, b)
+            for button in page.locator('.hero3d__module').all():
+                button.click()
+                selected = page.evaluate('window.__selectedBounds')
+                assert -0.95 <= selected['left'] < selected['right'] <= 0.95, (width, selected)
+                assert -0.95 <= selected['top'] < selected['bottom'] <= 0.95, (width, selected)
             document_height = page.evaluate('document.documentElement.scrollHeight')
             if width in HOME_HEIGHT_LIMITS:
                 assert document_height <= HOME_HEIGHT_LIMITS[width], (width, document_height)

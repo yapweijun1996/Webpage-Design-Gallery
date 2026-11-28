@@ -80,7 +80,7 @@ function labelAnchor(group) {
 }
 
 export function composeModules(places, models) {
-  const root = new THREE.Group(), groups = new Map(), parts = new Map(), anchors = new Map();
+  const root = new THREE.Group(), groups = new Map(), parts = new Map(), anchors = new Map(), bounds = new Map();
   const buckets = new Map(), owned = [];
   for (const place of places) {
     const group = new THREE.Group();
@@ -103,6 +103,7 @@ export function composeModules(places, models) {
     }
     group.updateMatrixWorld(true);
     anchors.set(place.id, labelAnchor(group));
+    bounds.set(place.id, new THREE.Box3().setFromObject(group));
     for (const node of [...group.children]) {
       if (MOVING.test(node.name)) {
         parts.set(`${place.id}:${node.name}`, { node, home: node.position.clone(), size: node.scale.x, height: node.scale.y });
@@ -137,7 +138,7 @@ export function composeModules(places, models) {
     root.add(mesh);
     owned.push(mesh);
   }
-  return { root, groups, parts, anchors };
+  return { root, groups, parts, anchors, bounds };
 }
 
 /** Thin glowing lines with one node each, as drawn in the anchor. Nothing travels along them. */

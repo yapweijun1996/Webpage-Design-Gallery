@@ -52,6 +52,7 @@ export async function mount(stage, { base, signal }) {
   let controls;
   let ui;
   let tween;
+  let selectedModule;
 
   function dispose() {
     if (disposed) return;
@@ -117,7 +118,33 @@ export async function mount(stage, { base, signal }) {
     renderer.shadowMap.needsUpdate = true;
     started = performance.now();
 
+    function clampFocus() {
+      const box = composed.bounds.get(selectedModule);
+      if (!box) return;
+      const points = [];
+      for (const x of [box.min.x, box.max.x]) for (const y of [box.min.y, box.max.y])
+        for (const z of [box.min.z, box.max.z]) points.push(new THREE.Vector3(x, y, z).project(camera));
+      const minX = Math.min(...points.map(p => p.x)), maxX = Math.max(...points.map(p => p.x));
+      const minY = Math.min(...points.map(p => p.y)), maxY = Math.max(...points.map(p => p.y));
+      // Keep a 3% inset on each edge, including the complete plinth.
+      const scale = Math.min(1, 1.88 / (maxX - minX), 1.88 / (maxY - minY));
+      if (scale < 1) {
+        camera.zoom *= scale;
+        camera.updateProjectionMatrix();
+        return clampFocus();
+      }
+      const dx = minX < -0.94 ? minX + 0.94 : maxX > 0.94 ? maxX - 0.94 : 0;
+      const dy = minY < -0.94 ? minY + 0.94 : maxY > 0.94 ? maxY - 0.94 : 0;
+      const shift = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0)
+        .multiplyScalar(dx * (camera.right - camera.left) / (2 * camera.zoom));
+      shift.addScaledVector(new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1),
+        dy * (camera.top - camera.bottom) / (2 * camera.zoom));
+      camera.position.add(shift);
+      controls.target.add(shift);
+      camera.updateMatrixWorld();
+    }
     const focusModule = (id) => {
+      selectedModule = id;
       if (!id) camera.position.copy(controls.target).addScaledVector(direction, 60);
       const place = places.find(item => item.id === id);
       const target = place ? new THREE.Vector3(place.x * 0.35, 0, place.z * 0.35) : new THREE.Vector3();
@@ -190,6 +217,7 @@ export async function mount(stage, { base, signal }) {
       }
       controls.update();
       camera.updateMatrixWorld();
+      clampFocus();
       ui.placeLabels(composed.anchors, camera, canvas.clientHeight);
       // Moving parts cast shadows: refresh the single shadow pass a few times a second, not every frame.
       if (!reduced.matches && ++drawn % 6 === 0) renderer.shadowMap.needsUpdate = true;
